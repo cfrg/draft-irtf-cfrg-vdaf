@@ -22,8 +22,8 @@
 #
 # Delete this comment when you are done.
 #
-title: "TODO - Your title"
-abbrev: "TODO - Abbreviation"
+title: "Verifiable Distributed Aggregation Functions"
+abbrev: "VDAF"
 docname: draft-todo-yourname-protocol-latest
 category: info
 
