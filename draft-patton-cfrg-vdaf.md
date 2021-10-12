@@ -239,21 +239,21 @@ elements of a finite field such that (1) the measurement can be efficiently
 secret shared and (2) the aggregate statistic can be computed by summing up the
 vectors.  -->
 
-Let `G(param)` denote the support of the output-recovery algorithm for a given
-aggregation parameter `param`. That is, set `G(param)` contains the set of all
-possible outputs of the output-recovery algorithm when the first input is
-`param` and the second is any input share.
+Let `G(agg_param)` denote the support of the output-recovery algorithm for a
+given aggregation parameter `agg_param`. That is, set `G(agg_param)` contains
+the set of all possible outputs of the output-recovery algorithm when the first
+input is `agg_param` and the second is any input share.
 
-Correctness requires that, for every `param`, the set `G(param)` forms an
-additive group. This allows the aggregation function to be computed by having
+Correctness requires that, for every `agg_param`, the set `G(agg_param)` forms
+an additive group. This allows the aggregation function to be computed by having
 each aggregator sum up its output shares locally, then collectively computing
-the output by summing up their aggregated output shares.  In particular, the
-aggregation function is computed by the following algorithm.  (let `Zero(param)`
-denote the identity element of `G(param)`):
+the output by summing up their aggregated output shares. In particular, the
+aggregation function is computed by the following algorithm. (let
+`Zero(agg_param)` denote the identity element of `G(agg_param)`):
 
 ~~~
-def run_daf(param, inputs: Set[bytes]):
-  output_shares = [ Zero(param) for _ in range(SHARES) ]
+def run_daf(agg_param, inputs: Set[bytes]):
+  output_shares = [ Zero(agg_param) for _ in range(SHARES) ]
 
   for input in inputs:
     # Each client runs the input-distribution algorithm.
@@ -261,7 +261,7 @@ def run_daf(param, inputs: Set[bytes]):
 
     # Each aggregator runs the output-recvoery algorithm.
     for j in range(SHARES):
-      output_shares[j] += daf_output(param, input_shares[j])
+      output_shares[j] += daf_output(agg_param, input_shares[j])
 
   # Aggregators compute the final output.
   return sum(output_shares)
@@ -378,14 +378,14 @@ Associated constants:
 * `ROUNDS: Unsigned` is the number of rounds of communication between the
   aggregators.
 
-Just as for DAF schemes, we require that for each aggregation parameter `param`,
-the set of output shares `G(param)` forms an additive group. The aggregation
-function is computed by running the VDAF as specified below (let `Zero(param)`
-denote the additive identity of `G(param)`):
+Just as for DAF schemes, we require that for each aggregation parameter
+`agg_param`, the set of output shares `G(agg_param)` forms an additive group.
+The aggregation function is computed by running the VDAF as specified below (let
+`Zero(agg_param)` denote the additive identity of `G(agg_param)`):
 
 ~~~
-def run_vdaf(param, inputs: Set[bytes]):
-  output_shares = [ Zero(param) for _ in range(SHARES) ]
+def run_vdaf(agg_param, inputs: Set[bytes]):
+  output_shares = [ Zero(agg_param) for _ in range(SHARES) ]
 
   (public_param, verify_param) = vdaf_setup()
 
@@ -400,7 +400,7 @@ def run_vdaf(param, inputs: Set[bytes]):
     outbound, states = [], []
     for j in range(SHARES):
       (state, msg) = vdaf_start(
-          verify_param, param, nonce, input_shares[j])
+          verify_param, agg_param, nonce, input_shares[j])
       outbound.append(msg); states.append(state)
     inbound = outbound
 
