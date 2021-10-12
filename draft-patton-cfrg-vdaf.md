@@ -585,8 +585,6 @@ Figure out how this looks in the normal text format."}
 
 ~~~
 def vdaf_start(k_query_init, _, nonce, r_input_share):
-  if not state.ready(): raise ERR_STATE
-
   (j, input_share, proof_share,
    k_blind, k_hint) = decode_share(input_share)
   if j > 0: # helper
@@ -603,15 +601,16 @@ def vdaf_start(k_query_init, _, nonce, r_input_share):
       input_share, proof_share, query_rand, joint_rand)
   verifier_length = len(verifier_share)
 
-  state = ready(k_joint_rand, input_share, verifier_length)
+  state = encode_state(k_joint_rand, input_share, verifier_length)
   output = encode_verifier_share(k_joint_rand, verifier_share)
   return (state, output)
 ~~~
 {: #prio3-vdaf-start title="Verify-start algorithm for prio3."}
 
+`ROUNDS` is 1 for Prio3, and so no `vdaf_next` definition is provided.
+
 ~~~
 def vdaf_finish(state: State, r_verifier_shares):
-  if not state.waiting(): raise ERR_STATE
   if len(r_verifier_shares) != s: raise ERR_DECODE
 
   k_joint_rand = zeros(KEY_SIZE)
@@ -634,7 +633,7 @@ def vdaf_finish(state: State, r_verifier_shares):
 Auxiliary functions:
 
 * `expand(seed, length: U32) -> output: Vec[Field]`
-* `ready`
+* `encode_state`
 * `encode_helper_share`
 * `encode_leader_share`
 * `decode_share` raises `ERR_DECODE`
