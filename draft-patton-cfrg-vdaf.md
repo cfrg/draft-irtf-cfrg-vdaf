@@ -127,9 +127,52 @@ input.
 
 # Introduction
 
-TODO Introduction
+The scalability of the Internet makes it an ideal platform for measurement of
+large-scale phenomena, whether public health trends or the behavior of computer
+systems at scale. There is some overlap, however, between information that is
+valuable to measure and information that users consider private.
 
-VDAFs from the literature:
+For example, consider an application that provides health information to users.
+The operator of an application might want to know which parts of their
+application are used most often, as a way to guide future development of the
+application.  A particular user's pattern of usage, though, could reveal
+sensitive things about them.
+
+In many situations, the measurement collector is only interested in aggregate
+statistics, e.g., which portions of an application are most used or what
+fraction of people have exprienced a given disease.  Thus systems that provide
+aggregregate statistics while protecting individual measurements can deliver the
+value of the measurements while protecting users' privacy.
+
+Most prior approaches to this problem fall under the rubric of "differential
+privacy".  Roughly speaking, these techniques work by adding random noise
+individual measurements in such a way that the overall effect of the noise on
+aggregate statistics is predictable. Thus the noise can be removed from the
+aggregated measurements to get a good approximation of the actual aggregate
+statistics.
+
+In this document, we describe Verifiable Distributed Aggregation Functions
+(VDAFs) as a general class of protocol between a client, one or more
+aggregators, and a measurement collector that provide the following properties:
+
+* Accuracy: The collector learns exact aggregate statistics about the
+  measurements submitted by clients
+
+* Privacy: The individual measurements submitted by clients are not revealed to
+  any of the other participants.
+
+* Correctness: The aggregators can verify that the individual submitted
+  measurements meet certain correctness criteria.
+
+In place of the statistical privacy guarantees of earlier approaches, the
+privacy properties of VDAFs are based on non-collusion among aggregators.
+And because VDAFs deal with individual measurements that are secret-shared, but
+not combined with noise, they produce exactly the same outputs as one would
+obtain computing on raw measurements.  The cost of these benefits is the need
+for multiple parties to participate in the protocol, and the need to assure that
+these parties do not collude to undermine the protocol's privacy guarantees.
+
+Some examples of VDAFs from the literature:
 
 * Prio [CGB17] defines the composition of a linear secret sharing scheme and an
   affine-aggregatable encoding of a statistic.
@@ -143,7 +186,7 @@ VDAFs from the literature:
 * Prio+ [AGJOP21] has the client upload XOR shares and then has the servers
   convert them to additive shares over a number of rounds.
 
-This document is structured as follows.
+The remainder of this document is structured as follows:s
 
 * {{daf}} defines Distributed Aggregation Functions (DAFs), which distribute the
   computation of an aggregation function among a set of aggregators in order to
@@ -163,7 +206,6 @@ This document is structured as follows.
 
 * {{coins}} defines a procedure for negotiating shared randomness used by the
   verifiers.
-
 
 # Conventions and Definitions
 
