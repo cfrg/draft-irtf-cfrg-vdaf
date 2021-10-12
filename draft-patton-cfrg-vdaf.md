@@ -176,6 +176,37 @@ is usually handled by raising an exception.
 
 # Distributed Aggregation Functions {#daf}
 
+<!--
+
+RLB: We need to elaborate the operational model a bit more here.  Maybe in a
+protocol overview section.  It seems like the major roles / steps are:
+
+* Roles: 
+  * Submitter - Knows raw metrics
+  * Aggregator - Trusted not to collued
+  * Collector - Receives aggregate at the end of the protocol (may ==
+    Aggregator)
+* Measurement process (covering both DAF and VDAF):
+  0. Raw measurement - Submitter has a measurement to submit
+  1. Sharding - Submitter computes input shares from raw measurement value
+  2. Validation - Aggregators determine that the input shares are valid
+  3. Aggregation - Aggregators compute agregate shares from input shares
+  4. Unsharding - Aggregators / Collector commpute aggregate output from
+     aggregate shares
+
+Matching the below to this framework, I see a few issues:
+
+a. The diagram indicates that the output shares are sent to aggregators
+b. The meaning of the `param` input is unclear.  Is that the working aggregate?
+c. You're missing the unsharding stage entirely
+
+The latter point is important, because the sharding and aggregation algorithms
+need to be compatible.  You kind of cover it in {{aggregatability}}, but that
+should be core part of the description -- a DAF is useless unless it can be
+unsharded.
+
+-->
+
 ~~~~
 client
   | input
@@ -308,6 +339,19 @@ aggregator 1       aggregator 2             aggregator SHARES
 {: #vdaf-flow title="Execution of a VDAF. The === line represents a broadcast
 channel."}
 
+<!--
+RLB: As above, this diagram makes it look like the aggregators only get the outputs.
+-->
+
+<!--
+RLB: The way you've split these things out, the definition of VDAF is really
+just the definition fo the validation stage of the overall process.  I would
+suggest defining DAF and VDAF as each having all the required parts, just with
+DAF having a null / trivial validation stage.  This is because the relevant
+algorithms (sharding, validation, aggregation, unsharding) all need to be
+compatible with one another, so you need to define them together.
+-->
+
 The main limitation of DAF schemes is that, because each aggregator only holds a
 piece of the distributed input, there is no way for them to check that the
 output is valid. A VDAF is an extension of a DAF in which the aggregators verify
@@ -332,6 +376,8 @@ Syntactically, a VDAF is made up of the following algorithms:
   verification parameter used by the aggregators (`verify_param`). The
   parameters are generated once and reused across multiple VDAF evaluations. The
   verification parameter MUST NOT be revealed to the clients.
+
+<!-- RLB: Who holds the private key?  One aggregator?  All aggregators? -->
 
 * `vdaf_input(public_param, input) -> input_shares: Vec[Vec[bytes]]` is the
   input-distribution algorithm run by the client. It consumes the public
@@ -514,6 +560,9 @@ Associated constants:
 * `KEY_SIZE`
 
 ## Construction
+
+<!-- RLB: This section should be less code-centric.  At the very least, you
+should provide some prose that describes what the code is doing. -->
 
 ~~~
 def vdaf_setup():
