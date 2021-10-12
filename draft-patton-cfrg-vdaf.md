@@ -145,9 +145,9 @@ aggregregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.
 
 Most prior approaches to this problem fall under the rubric of "differential
-privacy".  Roughly speaking, these techniques work by adding random noise
-individual measurements in such a way that the overall effect of the noise on
-aggregate statistics is predictable. Thus the noise can be removed from the
+privacy" [Vad16].  Roughly speaking, these techniques work by adding random
+noise individual measurements in such a way that the overall effect of the noise
+on aggregate statistics is predictable. Thus the noise can be removed from the
 aggregated measurements to get a good approximation of the actual aggregate
 statistics.
 
