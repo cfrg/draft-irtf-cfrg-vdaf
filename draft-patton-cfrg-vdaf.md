@@ -593,7 +593,7 @@ def vdaf_start(k_query_init, _, nonce, r_input_share):
 
   k_joint_rand_share = get_key(k_blind, byte(j) + input_share)
   k_joint_rand = k_hint ^ k_joint_rand_share
-  k_query_rand = get_key(k_query_init, nonce)
+  k_query_rand = get_key(k_query_init, byte(255) + nonce)
 
   joint_rand = expand(k_joint_rand, JOINT_RAND_LEN)
   query_rand = expand(k_query_rand, QUERY_RAND_LEN)
