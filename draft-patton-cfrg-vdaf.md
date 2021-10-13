@@ -149,14 +149,18 @@ privacy" [Vad16].  Roughly speaking, these techniques work by adding random
 noise individual measurements in such a way that the overall effect of the noise
 on aggregate statistics is predictable. Thus the noise can be removed from the
 aggregated measurements to get a good approximation of the actual aggregate
-statistics.
+statistics.  [CP: This is a pretty good description of systems like RAPPOR, but
+I think it would be useful to speak about DP more broadly. Roughly speaking,
+differentially private data aggregation systems guarantee that the degree to
+which an individual user influences the aggregate output is small.]
 
 In this document, we describe Verifiable Distributed Aggregation Functions
 (VDAFs) as a general class of protocol between a client, one or more
 aggregators, and a measurement collector that provide the following properties:
 
 * Accuracy: The collector learns exact aggregate statistics about the
-  measurements submitted by clients
+  measurements submitted by clients. [CP: Another way to separate VDAFs from DP
+  systems is that we don't have to enforce a privacy budget.]
 
 * Privacy: The individual measurements submitted by clients are not revealed to
   any of the other participants.
@@ -186,7 +190,7 @@ Some examples of VDAFs from the literature:
 * Prio+ [AGJOP21] has the client upload XOR shares and then has the servers
   convert them to additive shares over a number of rounds.
 
-The remainder of this document is structured as follows:s
+The remainder of this document is structured as follows:
 
 * {{daf}} defines Distributed Aggregation Functions (DAFs), which distribute the
   computation of an aggregation function among a set of aggregators in order to
