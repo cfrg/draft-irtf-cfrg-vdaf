@@ -57,7 +57,7 @@ informative:
     target: https://ia.cr/2021/576
     date: 2021
 
-  BBDGGI19:
+  BBCGGI19:
     title: "Zero-Knowledge Proofs on Secret-Shared Data via Fully Linear PCPs"
     author:
       - ins: D. Boneh
@@ -68,7 +68,7 @@ informative:
     seriesinfo: CRYPTO 2019
     date: 2019
 
-  BBDGGI21:
+  BBCGGI21:
     title: "Lightweight Techniques for Private Heavy Hitters"
     author:
       - ins: D. Boneh
@@ -87,6 +87,16 @@ informative:
     seriesinfo: NSDI 2017
     date: 2017
 
+  EPK14:
+    title: "RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response"
+    author:
+      - ins: Ú. Erlingsson
+      - ins: V. Pihur
+      - ins: A. Korolova
+    seriesinfo: CCS 2014
+    date: 2014
+    target: "https://dl.acm.org/doi/10.1145/2660267.2660348"
+
   GI14:
     title: "Distributed Point Functions and Their Applications"
     author:
@@ -101,6 +111,21 @@ informative:
     target: "https://link.springer.com/chapter/10.1007/3-540-45748-8_24"
     author:
       - ins: J. Douceur
+
+  Dwo06:
+    title: "Differential Privacy"
+    date: 2006
+    seriesinfo: "ICALP 2006"
+    target: "https://link.springer.com/chapter/10.1007/11787006_1"
+
+  PPM:
+    title: "Privacy Preserving Measurement"
+    date: 2021
+    author:
+      - ins: T. Geoghagen
+      - ins: C. Patton
+      - ins: E. Rescorla
+      - ins: C. Wood
 
   PAPER:
     title: "TODO"
@@ -119,15 +144,15 @@ family of multi-party protocols for computing aggregate statistics over user
 measurements. These protocols are designed to ensure that, as long as at least
 one aggregation server executes the protocol honestly, individual measurements
 are never seen by any server in the clear. At the same time, VDAFs allow the
-servers to detect if a misconfigured or malicious client submitted a malformed
-input.
+servers to detect if a malicious (or merely misconfigured) client submitted an
+input that would result in the output getting garbled.
 
 
 --- middle
 
 # Introduction
 
-The scalability of the Internet makes it an ideal platform for measurement of
+The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
 systems at scale. There is some overlap, however, between information that is
 valuable to measure and information that users consider private.
@@ -140,76 +165,86 @@ sensitive things about them.
 
 In many situations, the measurement collector is only interested in aggregate
 statistics, e.g., which portions of an application are most used or what
-fraction of people have exprienced a given disease.  Thus systems that provide
-aggregregate statistics while protecting individual measurements can deliver the
+fraction of people have experienced a given disease.  Thus systems that provide
+aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.
 
 Most prior approaches to this problem fall under the rubric of "differential
-privacy" [Vad16].  Roughly speaking, these techniques work by adding random
-noise individual measurements in such a way that the overall effect of the noise
-on aggregate statistics is predictable. Thus the noise can be removed from the
-aggregated measurements to get a good approximation of the actual aggregate
-statistics.  [CP: This is a pretty good description of systems like RAPPOR, but
-I think it would be useful to speak about DP more broadly. Roughly speaking,
-differentially private data aggregation systems guarantee that the degree to
-which an individual user influences the aggregate output is small.]
+privacy (DP)" [Dwo06]. Roughly speaking, a data aggregation system that is
+differentially private ensures that the degree to which any individual
+measurement influences the value of the aggregated output can be controlled.
+For example, in systems like RAPPOR [EPK14], each user samples noise from a
+well-known distribution and adds it to their input before submitting to the
+aggregation server. The aggregation server then adds up the noisy inputs, and
+because it knows the distribution of the noise, it can accurately estimate the
+true output from the sum, and with reasonable precision.
 
+Systems like RAPPOR are practical and provide a useful privacy property. On its
+own, however, DP falls short of the strongest privacy property one could hope
+for. Specifically, depending on the "amount" of noise a client adds to its
+input, it may be possible for a curious aggregator to make a reasonable guess of
+the input's true value. Indeed, the amount of noise needs to be carefully
+controlled, since the more noise that is added to inputs, the less reliable will
+be the estimate of the output. Thus systems employing DP techniques alone must
+strike a delicate balance between privacy and utility.
+
+The ideal goal for a privacy-preserving measurement system is that of secure
+multi-party computation: No participant in the protocol should learn anything
+about an individual input beyond what it can deduce from the final output.
 In this document, we describe Verifiable Distributed Aggregation Functions
-(VDAFs) as a general class of protocol between a client, one or more
-aggregators, and a measurement collector that provide the following properties:
+(VDAFs) as a general class of protocols that achieve this goal by distributing
+trust among a number of non-colluding aggregation servers. Privacy is achieved
+so long as one of the servers executes the protocol honestly. At the same time,
+VDAFs are "verifiable" in the sense that malformed inputs that would otherwise
+garble the output of the computation can be detected and removed from the set of
+inputs. The cost of these benefits is the need for multiple servers to
+participate in the protocol, and the need to ensure they do not collude to
+undermine the VDAF's privacy guarantees.
 
-* Accuracy: The collector learns exact aggregate statistics about the
-  measurements submitted by clients. [CP: Another way to separate VDAFs from DP
-  systems is that we don't have to enforce a privacy budget.]
+The VDAF abstraction, presented in {{vdaf}}, is based on a variety of
+multi-party protocols for privacy-preserving measurement that have been proposed
+in the literature in recent years. These protocols vary in their operational and
+security considerations in (often) subtle ways. Thus the primary goal of this
+document is to specify these considerations and provide a unified abstraction
+that gives cryptographers design criteria for new constructions. This document's
+considerations are derived from the concurrent effort to standardize a protocol
+for privacy-preserving measurement in [PPM].
 
-* Privacy: The individual measurements submitted by clients are not revealed to
-  any of the other participants.
+This document also specifies two concrete VDAF schemes, each based on a protocol
+from the literature.
 
-* Correctness: The aggregators can verify that the individual submitted
-  measurements meet certain correctness criteria.
+* Prio [CGB17] is a scheme proposed by Corrigan-Gibbs and Boneh in 2017 that
+  allows for the privacy-preserving computation of a variety aggregate
+  statistics. Each input is split into a sequence of additive input shares and
+  distributed among the aggregation servers. Each server then adds up its inputs
+  shares locally. Finally, the output is obtained by combining locally
+  aggregated shares. Prio also specifies a multi-party computation for verifying
+  the validity of the input shares, where validity is defined by an arithmetic
+  circuit.
 
-In place of the statistical privacy guarantees of earlier approaches, the
-privacy properties of VDAFs are based on non-collusion among aggregators.
-And because VDAFs deal with individual measurements that are secret-shared, but
-not combined with noise, they produce exactly the same outputs as one would
-obtain computing on raw measurements.  The cost of these benefits is the need
-for multiple parties to participate in the protocol, and the need to assure that
-these parties do not collude to undermine the protocol's privacy guarantees.
+  In {{prio3}} we describe `prio3`, a VDAF that permits the same uses cases as
+  the original Prio protocol, but which is based on cryptographic techniques
+  introduced later in [BBCGGI19] that result in significant performance gains.
 
-Some examples of VDAFs from the literature:
+* More recently, Boneh et al. [BBCGGI21] described a protocol for solving the
+  `t`-heavy-hitters problem in a privacy-preserving manner. Each client holds a
+  bit-string of length `n`, and the goal of the aggregation servers is to
+  compute the set of inputs that occur at least `t` times. The core primitive
+  used in their protocol is a generalization of a Distributed Point Function
+  (DPF) [GI14] that allows the servers to "query" their DPF shares on any
+  bit-string of length shorter than or equal to `n`. As a result of this query,
+  each of the servers has an additive share of a bit indicating whether the
+  string is a prefix of the client's input. The protocol also specifies a
+  multi-party computation for verifying that at most one string among a set of
+  candidates is a prefix of the client's input.
 
-* Prio [CGB17] defines the composition of a linear secret sharing scheme and an
-  affine-aggregatable encoding of a statistic.
+  In {{hits}} we describe a VDAF called `hits` that captures this functionality.
 
-* A special case of zero-knowledge proofs over distributed data [BBDGGI19] in
-  which the client speaks once.
-
-* The composition of an incremental distributed point function and the
-  secure-sketching protocol for subset histograms defined in [BBDGGI21].
-
-* Prio+ [AGJOP21] has the client upload XOR shares and then has the servers
-  convert them to additive shares over a number of rounds.
-
-The remainder of this document is structured as follows:
-
-* {{daf}} defines Distributed Aggregation Functions (DAFs), which distribute the
-  computation of an aggregation function among a set of aggregators in order to
-  keep the inputs private.
-
-* {{vdaf}} defines Verifiable Distributed Aggregation Functions (VDAFs), an
-  extension of DAFs that additionally allow the aggregators to detect malformed
-  inputs.
-
-* {{prio3}} specifies a VDAF suitable for the use cases of the original Prio
-  system [CGB17].
-
-* {{hits}} specifies a VDAF for an "Incremental Distributed Point Function
-  (IDPF)" for which the aggregators verify the output at each level of the tree.
-  This corresponds to the protocol for the subset-histogram problem described by
-  [BBCGGI21].
-
-* {{coins}} defines a procedure for negotiating shared randomness used by the
-  verifiers.
+The remainder of this document is structured as follows. {{overview}} gives a
+brief overview of VDAFs and the environment in which they are expected to run;
+{{vdaf}} specifies the syntax for VDAFs; {{prio3}} describes `prio3`; {{hits}}
+describes `hits`; and {{security}} enumerates the security considerations for
+VDAFs.
 
 # Conventions and Definitions
 
@@ -220,101 +255,13 @@ without a type hint implicitly have type `Bytes`, an arbitrary byte string. A
 fatal error in a program (e.g., failure to parse one of the function parameters)
 is usually handled by raising an exception.
 
-# Distributed Aggregation Functions {#daf}
+# Overview {#overview}
 
-~~~~
-client
-  | input
-  v
-+-----------------------------------------------------------+
-| daf_input()                                               |
-+-----------------------------------------------------------+
-  | input_shares[1]  | input_shares[2]   ...  | input_shares[SHARES]
-  v                  v                        v
-+---------------+  +---------------+        +---------------+
-| daf_output()  |  | daf_output()  |        | daf_output()  |
-+---------------+  +---------------+        +---------------+
-  | output_shares[1] | output_shares[2]  ...  | output_shares[SHARES]
-  v                  v                        v
-aggregator 1       aggregator 2             aggregator SHARES
-~~~~
-{: #daf-flow title="Execution of a DAF."}
-
-A DAF is a multi-party protocol for executing an aggregation function over a set
-of user inputs. By distributing the input across multiple aggregators, the
-protocol ensures that individual inputs are never seen in the clear.
-Syntactically, a DAF is made up of two algorithms:
-
-* `daf_input(input) -> input_shares: Vec[bytes]` is the randomized
-  input-distribution algorithm. It is run by the client in order to split its
-  input into `SHARES` input shares (i.e., `len(input_shares) == SHARES`). Each
-  input share is sent to one of the aggregators.
-
-* `daf_output(param, input_share) -> output_share` is the deterministic
-  output-recovery algorithm. It is run be each aggregator in order to map an
-  input share to an output share. This mapping has a parameter `param`, which
-  can be used to "query" the input share multiple times with multiple
-  parameters, getting a different output share each time. `param` is called the
-  aggregation parameter.
-
-Execution of a DAF is illustrated in {{daf-flow}}. The client runs the
-input-distribution algorithm and sends an input share to each one of the
-aggregators. Next, the aggregators select an aggregation parameter for querying
-the input shares, and each runs the output-recover algorithm to obtain their
-share of the output. DAF schemes are designed to ensure that no proper subset of
-the aggregators can discern any information about the input or output given
-their view of the protocol. (See {{security-considerations}}.)
-
-Associated constants:
-
-* `SHARES: Unsigned` is the number of aggregators for which the DAF is defined.
-
-## Aggregability
-
-<!--- An example of a DAF is a "Distributed Point Function" {{GI14}} protocol
-for computing a "point function". A point function evaluates to zero on every
-input except for one, called the "point". The input-distribution algorithm takes
-in the point and the non-zero value and returns a set of input shares.
-Aggregators can evaluate their shares at specific points and combine their
-shares to get the results.
-
-Another, slightly simpler example of a DAF is the combination of a linear secret
-sharing scheme with an "AFfine-aggregatable Encoding (AFE)" described in the
-original Prio paper [CGB17]. An AFE represents a measurement as a as a vector of
-elements of a finite field such that (1) the measurement can be efficiently
-secret shared and (2) the aggregate statistic can be computed by summing up the
-vectors.  -->
-
-Let `G(agg_param)` denote the support of the output-recovery algorithm for a
-given aggregation parameter `agg_param`. That is, set `G(agg_param)` contains
-the set of all possible outputs of the output-recovery algorithm when the first
-input is `agg_param` and the second is any input share.
-
-Correctness requires that, for every `agg_param`, the set `G(agg_param)` forms
-an additive group. This allows the aggregation function to be computed by having
-each aggregator sum up its output shares locally, then collectively computing
-the output by summing up their aggregated output shares. In particular, the
-aggregation function is computed by the following algorithm. (let
-`Zero(agg_param)` denote the identity element of `G(agg_param)`):
-
-~~~
-def run_daf(agg_param, inputs: Set[bytes]):
-  output_shares = [ Zero(agg_param) for _ in range(SHARES) ]
-
-  for input in inputs:
-    # Each client runs the input-distribution algorithm.
-    input_shares = daf_input(input)
-
-    # Each aggregator runs the output-recvoery algorithm.
-    for j in range(SHARES):
-      output_shares[j] += daf_output(agg_param, input_shares[j])
-
-  # Aggregators compute the final output.
-  return sum(output_shares)
-~~~
-{: #run-daf title="Definition of the aggregation function computed by a DAF."}
+TODO
 
 # Verifiable Distributed Aggregation Functions {#vdaf}
+
+TODO: Clean this up after changing the skeleton.
 
 ~~~~
 client
@@ -362,7 +309,7 @@ their shares to the other aggregators. Doing so requires the aggregators to
 interact with one another, which they do over a broadcast channel.
 
 Execution of a VDAF is illustrated in {{vdaf-flow}}. It begins just as before
-(see {{daf-flow}}) by having the client run the input-distribution algorithm and
+(XXX) by having the client run the input-distribution algorithm and
 send an input share to each of the aggregators. The aggregators then proceed in
 a constant number of rounds, where in each round, each aggregator produces a
 single outbound message. The outbound messages are written to a broadcast
@@ -471,7 +418,23 @@ nonce for each VDAF evaluation and a secure broadcast channel for executing each
 round of the protocol. In practice, this environment is "simulated" by the PPM
 protocol.
 
-# [Working name] prio3 {#prio3}
+## VDAFs in the Literature
+
+TODO
+
+* Prio [CGB17] defines the composition of a linear secret sharing scheme and an
+  affine-aggregatable encoding of a statistic.
+
+* A special case of zero-knowledge proofs over distributed data [BBCGGI19] in
+  which the client speaks once.
+
+* The composition of an incremental distributed point function and the
+  secure-sketching protocol for subset histograms defined in [BBCGGI21].
+
+* Prio+ [AGJOP21] has the client upload XOR shares and then has the servers
+  convert them to additive shares over a number of rounds.
+
+# prio3 {#prio3}
 
 NOTE This is WIP.
 
@@ -481,13 +444,13 @@ planned for [PAPER].
 The etymology of the term "prio3" is that it descends from the original Prio
 construction [CGB17], which was deployed in Firefox's origin telemetry project
 (i.e., "prio1"). It generalizes the more recent deployment in the ENPA system
-(i.e., "prio2") and is based on techniques described in [BBDGGI19].
+(i.e., "prio2") and is based on techniques described in [BBCGGI19].
 
 ## Dependencies
 
 ### Fully Linear, Probabilistically Checkable Proof
 
-NOTE [BBDGGI19] call this a 1.5-round, public-coin, interactive oracle proof
+NOTE [BBCGGI19] call this a 1.5-round, public-coin, interactive oracle proof
 system.
 
 All raise `ERR_INPUT`:
@@ -706,14 +669,7 @@ TODO
   corresponding to a counter for one of the candidate prefixes.
 
 
-# Negotiating Verification Parameters {#coins}
-
-TODO The setup algorithm often involves generating and distributing randomness
-used by the aggregators for verification. This section will describer a generic
-protocol for securely accomplishing this task.
-
-
-# Security Considerations
+# Security Considerations {#security}
 
 TODO There will be a companion paper [PAPER] that will formalize the syntax and
 security of VDAFs and analyze some of the constructions specified here. Here we
