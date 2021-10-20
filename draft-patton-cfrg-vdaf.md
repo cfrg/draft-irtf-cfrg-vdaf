@@ -177,13 +177,13 @@ For example, in systems like RAPPOR [EPK14], each user samples noise from a
 well-known distribution and adds it to their input before submitting to the
 aggregation server. The aggregation server then adds up the noisy inputs, and
 because it knows the distribution of the noise, it can accurately estimate the
-true output from the sum, and with reasonable precision.
+true sum with reasonable precision.
 
-Systems like RAPPOR are practical and provide a useful privacy property. On its
-own, however, DP falls short of the strongest privacy property one could hope
-for. Specifically, depending on the "amount" of noise a client adds to its
+Systems like RAPPOR are practical and provide a useful privacy property (DP). On
+its own, however, DP falls short of the strongest privacy property one could
+hope for. Specifically, depending on the "amount" of noise a client adds to its
 input, it may be possible for a curious aggregator to make a reasonable guess of
-the input's true value. Indeed, the amount of noise needs to be carefully
+the input's true value. Indeed, the amount of noise added needs to be carefully
 controlled, since the more noise that is added to inputs, the less reliable will
 be the estimate of the output. Thus systems employing DP techniques alone must
 strike a delicate balance between privacy and utility.
@@ -194,11 +194,11 @@ about an individual input beyond what it can deduce from the final output.
 In this document, we describe Verifiable Distributed Aggregation Functions
 (VDAFs) as a general class of protocols that achieve this goal by distributing
 trust among a number of non-colluding aggregation servers. Privacy is achieved
-so long as one of the servers executes the protocol honestly. At the same time,
-VDAFs are "verifiable" in the sense that malformed inputs that would otherwise
-garble the output of the computation can be detected and removed from the set of
-inputs. The cost of these benefits is the need for multiple servers to
-participate in the protocol, and the need to ensure they do not collude to
+as long as a subset of the servers executes the protocol honestly. At the same
+time, VDAFs are "verifiable" in the sense that malformed inputs that would
+otherwise garble the output of the computation can be detected and removed from
+the set of inputs. The cost of these benefits is the need for multiple servers
+to participate in the protocol, and the need to ensure they do not collude to
 undermine the VDAF's privacy guarantees.
 
 The VDAF abstraction, presented in {{vdaf}}, is based on a variety of
@@ -217,30 +217,30 @@ from the literature.
   allows for the privacy-preserving computation of a variety aggregate
   statistics. Each input is split into a sequence of additive input shares and
   distributed among the aggregation servers. Each server then adds up its inputs
-  shares locally. Finally, the output is obtained by combining locally
-  aggregated shares. Prio also specifies a multi-party computation for verifying
-  the validity of the input shares, where validity is defined by an arithmetic
-  circuit.
+  shares locally. Finally, the output is obtained by combining the servers'
+  local output shares. Prio also specifies a multi-party computation for
+  verifying the validity of the input shares, where validity is defined by an
+  arithmetic circuit evaluated over the input.
 
   In {{prio3}} we describe `prio3`, a VDAF that permits the same uses cases as
   the original Prio protocol, but which is based on cryptographic techniques
   introduced later in [BBCGGI19] that result in significant performance gains.
 
 * More recently, Boneh et al. [BBCGGI21] described a protocol for solving the
-  `t`-heavy-hitters problem in a privacy-preserving manner. Each client holds a
-  bit-string of length `n`, and the goal of the aggregation servers is to
-  compute the set of inputs that occur at least `t` times. The core primitive
-  used in their protocol is a generalization of a Distributed Point Function
-  (DPF) [GI14] that allows the servers to "query" their DPF shares on any
-  bit-string of length shorter than or equal to `n`. As a result of this query,
-  each of the servers has an additive share of a bit indicating whether the
-  string is a prefix of the client's input. The protocol also specifies a
-  multi-party computation for verifying that at most one string among a set of
-  candidates is a prefix of the client's input.
+  `t`-heavy-hitters problem in a privacy-preserving manner. In this setting,
+  each client holds a bit-string of length `n`, and the goal of the aggregation
+  servers is to compute the set of inputs that occur at least `t` times. The
+  core primitive used in their protocol is a generalization of a Distributed
+  Point Function (DPF) [GI14] that allows the servers to "query" their DPF
+  shares on any bit-string of length shorter than or equal to `n`. As a result
+  of this query, each of the servers has an additive share of a bit indicating
+  whether the string is a prefix of the client's input. The protocol also
+  specifies a multi-party computation for verifying that at most one string
+  among a set of candidates is a prefix of the client's input.
 
   In {{hits}} we describe a VDAF called `hits` that captures this functionality.
 
-The remainder of this document is structured as follows. {{overview}} gives a
+The remainder of this document is organized as follows. {{overview}} gives a
 brief overview of VDAFs and the environment in which they are expected to run;
 {{vdaf}} specifies the syntax for VDAFs; {{prio3}} describes `prio3`; {{hits}}
 describes `hits`; and {{security}} enumerates the security considerations for
@@ -259,28 +259,45 @@ is usually handled by raising an exception.
 
 TODO
 
-# Verifiable Distributed Aggregation Functions {#vdaf}
+# Definition {#vdaf}
 
-TODO: Clean this up after changing the skeleton.
+A concrete VDAF specifies the algorithms involved in evaluating the VDAF on a
+single input and the algorithms involved in aggregating the outputs of multiple
+evaluations. This section specifies the interfaces of these algorithms as they
+would be exposed to applications.
+
+In addition to these algorithms, a concrete VDAF specifies the following
+constants:
+
+* `SHARES: Unsigned` is the number of aggregators for which the VDAF is defined.
+* `ROUNDS: Unsigned` is the number of rounds of communication executed by the
+  aggregators during VDAF evaluation.
+
+The VDAF also specifies the following associated types:
+
+* `EvalState` is the state of an aggregator VDAF evaluation of a single input.
+* `AggState` is the aggregation state used across VDAF evaluations.
+
+## Input-Evaluation Phase
 
 ~~~~
 client
   | input
   v
 +-----------------------------------------------------------+
-| vdaf_input()                                              |
+| eval_input()                                              |
 +-----------------------------------------------------------+
   | input_shares[1]  | input_shares[2]   ...  | input_shares[SHARES]
   v                  v                        v
 +---------------+  +---------------+        +---------------+
-| vdaf_start()  |  | vdaf_start()  |        | vdaf_start()  |
+| eval_start()  |  | eval_start()  |        | eval_start()  |
 +---------------+  +---------------+        +---------------+
   |                  |                   ...  |
   =============================================
   |                  |                        |
   v                  v                        v
 +---------------+  +---------------+        +---------------+
-| vdaf_next()   |  | vdaf_next()   |        | vdaf_next()   |
+| eval_next()   |  | eval_next()   |        | eval_next()   |
 +---------------+  +---------------+        +---------------+
   |                  |                   ...  |
   =============================================
@@ -292,132 +309,137 @@ client
   |                  |                        |
   v                  v                        v
 +---------------+  +---------------+        +---------------+
-| vdaf_finish() |  | vdaf_finish() |        | vdaf_finish() |
+| eval_finish() |  | eval_finish() |        | eval_finish() |
 +---------------+  +---------------+        +---------------+
   | output_shares[1] | output_shares[2]  ...  | output_shares[SHARES]
   v                  v                        v
 aggregator 1       aggregator 2             aggregator SHARES
 ~~~~
-{: #vdaf-flow title="Execution of a VDAF. The === line represents a broadcast
-channel."}
+{: #eval-flow title="Evaluation of a VDAF on a single input. The aggregators
+communicate over a broadcast channel illustrated by the === line. At the end of
+the protocol, each aggregator has recovered a share of the output."}
 
-The main limitation of DAF schemes is that, because each aggregator only holds a
-piece of the distributed input, there is no way for them to check that the
-output is valid. A VDAF is an extension of a DAF in which the aggregators verify
-that the output is valid before recovering their output shares, without leaking
-their shares to the other aggregators. Doing so requires the aggregators to
-interact with one another, which they do over a broadcast channel.
+The evaluation phase of the VDAF is illustrated in {{eval-flow}}. It begins by
+having the client split its input into a sequence of input shares and sending
+each input share to one of the aggregators. The aggregators then interact with
+one another over a number of rounds, where in each round, each aggregator
+produces a single outbound message. The outbound messages are broadcast to all
+of the aggregators at the beginning of each round. Eventually, each aggregator
+recovers a share of the output. Evaluation of the VDAF involves the following
+algorithms:
 
-Execution of a VDAF is illustrated in {{vdaf-flow}}. It begins just as before
-(XXX) by having the client run the input-distribution algorithm and
-send an input share to each of the aggregators. The aggregators then proceed in
-a constant number of rounds, where in each round, each aggregator produces a
-single outbound message. The outbound messages are written to a broadcast
-channel, which transmits all of the messages to each aggregator in the next
-round. Eventually, each aggregator decides if the input shares are valid based
-on its view of the protocol. If so, it returns an output share. Otherwise it
-returns an indication of invalidity.
+* `eval_setup() -> (public_param, verify_params: Vec[Bytes])` is the randomized
+  setup algorithm used to generate the public parameter used by the clients
+  (`public_param`) and the verification parameters used by the aggregators
+  (`verify_params`, note that `len(input_shares) == SHARES`). The parameters are
+  generated once and reused across multiple VDAF evaluations. The verification
+  parameter MUST NOT be revealed to the clients.
 
-Syntactically, a VDAF is made up of the following algorithms:
-
-* `vdaf_setup() -> (public_param, verify_param)` is the setup algorithm used to
-  generate the public parameter used by the client (`public_param`) and the
-  verification parameter used by the aggregators (`verify_param`). The
-  parameters are generated once and reused across multiple VDAF evaluations. The
-  verification parameter MUST NOT be revealed to the clients.
-
-* `vdaf_input(public_param, input) -> input_shares: Vec[Vec[bytes]]` is the
+* `eval_input(public_param, input) -> input_shares: Vec[Bytes]` is the
   input-distribution algorithm run by the client. It consumes the public
-  parameter and input produces a sequence of input shares, one for each
-  aggregator (i.e., `len(input_shares) == SHARES`).
+  parameter and input measurement and produces a sequence of input shares, one
+  for each aggregator (i.e., `len(input_shares) == SHARES`).
 
-* `vdaf_start(verify_param, agg_param, nonce, input_share) -> (state: State,
+* `eval_start(verify_param, agg_param, nonce, input_share) -> (state: EvalState,
   outbound_message)` is the verify-start algorithm and is run by each
-  aggregator. Its inputs are the verification parameter (`verify_param`), the
-  aggregation parameter (`agg_param`), the nonce provided by the environment
-  (`nonce`; see {{run-vdaf}}), and one of the input shares generated by the
-  client (`input_share`). Its outputs include the aggregator's initial state
-  (`state`) and the outbound message it sends in the first round
+  aggregator. Its inputs are the aggregator's verification parameter
+  (`verify_param`), the aggregation parameter (`agg_param`), the nonce provided
+  by the environment (`nonce`, see {{run-vdaf}}), and one of the input shares
+  generated by the client (`input_share`). Its outputs include the aggregator's
+  initial state (`state`) and its round-`1` verification message
   (`outbound_message`).
 
-    [NOTE The nonce is provided by the environment, i.e., is generated by the
-    PPM wrapper protocol. We need to change the spec to make this 16 bytes to
-    avoid collisions.]
+* `eval_next(state: EvalState, inbound_messages: Vec[Bytes]) -> (new_state:
+  EvalState, outbound_message)` is the verify-next algorithm. For each round `i
+  >= 2` it consumes the round-`(i-1)` messages (note that `len(inbound_messages)
+  == SHARES`) and produces the aggregator's round-`i` message. This algorithm is
+  undefined if `ROUNDS < 2`.
 
-* `vdaf_next(state: State, inbound_messages: Vec[bytes]) -> (new_state: State,
-  outbound_message)` is the verify-next algorithm. For each round `i >= 2` it
-  consumes the `(i-1)`-th round of inbound messages (note that
-  `len(inbound_messages) == SHARES`) and produces the aggregator's `i`-th
-  outbound message. This algorithm is undefined if `ROUNDS == 1`.
+* `eval_finish(state: EvalState, inbound_messages: Vec[Bytes]) -> output_share`
+  is the verify-finish algorithm. It consumes the round-`ROUNDS` verification
+  messages (note that `len(inbound_messages) == SHARES`) and produces the
+  aggregator's output share. Raises an exception if a valid output share could
+  not be recovered.
 
-* `vdaf_finish(state: State, inbound_messages: Vec[bytes]) -> output_share` is
-  the verify-finish algorithm. It consumes the last round of inbound messages
-  (note that `len(inbound_messages) == SHARES`) and produces the aggregator's
-  output share.
+## Output-Aggregation Phase
 
-    [TODO For heavy hitters, is the aggregation parameter rquired by the
-    verify-start algorithm, or can it be passed in to the verify-finish
-    algorithm here? If the latter is possible, then there would be no need to
-    wait for the collect request to start validating inputs.]
+Aggregation of VDAF outputs happens concurrently with the evaluation of the VDAF
+on individual inputs. Once an aggregator has recovered a valid output share, it
+adds it into its long-running aggregation state locally. Once all of the inputs
+have been processed, the aggregators combine their aggregate shares into the
+final aggregate. This process involves the following algorithms:
 
-Associated types:
+* `agg_start() -> AggState` is the deterministic aggregation-state
+  initialization algorithm. It is run by each aggregator before processing any
+  client input shares.
 
-* `State` is the state of an aggregator during executing of the VDAF. The type
-  is defined by the VDAF itself.
+* `agg_next(state: AggState, output_share) -> new_state: AggState` is the
+  deterministic aggregation-state update algorithm. It is run immediately after
+  the aggregator recovers a valid output share `output_share`.
 
-Associated constants:
+* `agg_finish(states: Vec[AggStates]) -> agg` combines the aggregation state
+  of each aggregator (note that `len(states) == SHARES`) into the final
+  aggregate `agg`.
 
-* `SHARES: Unsigned` is the number of aggregators for which the VDAF is defined.
-* `ROUNDS: Unsigned` is the number of rounds of communication between the
-  aggregators.
+## Execution Model {#execution}
 
-Just as for DAF schemes, we require that for each aggregation parameter
-`agg_param`, the set of output shares `G(agg_param)` forms an additive group.
-The aggregation function is computed by running the VDAF as specified below (let
-`Zero(agg_param)` denote the additive identity of `G(agg_param)`):
+Executing a VDAF involves the concurrent evaluation of the VDAF on individual
+inputs and aggregation of the outputs of each evaluation. This is captured by
+the following algorithm:
 
 ~~~
-def run_vdaf(agg_param, inputs: Set[bytes]):
-  output_shares = [ Zero(agg_param) for _ in range(SHARES) ]
+def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
+  # Distribute long-lived evaluation parameters.
+  (public_param, verify_params) = eval_setup()
 
-  (public_param, verify_param) = vdaf_setup()
+  # Each aggregator initializes its aggregation state.
+  agg = [ agg_start() for j in range(SHARES) ]
 
-  for input in inputs:
+  for (nonce, input) in zip(nonces, inputs):
     # Each client runs the input-distribution algorithm.
-    input_shares = vdaf_input(public_param, input)
-
-    # The environment generates the next nonce.
-    nonce = nonce_gen()
+    input_shares = eval_input(public_param, input)
 
     # Aggregators recover their output shares.
-    outbound, states = [], []
+    outbound, eval = [], []
     for j in range(SHARES):
-      (state, msg) = vdaf_start(
-          verify_param, agg_param, nonce, input_shares[j])
-      outbound.append(msg); states.append(state)
+      (state, msg) = eval_start(
+          verify_params[j], agg_param, nonce, input_shares[j])
+      outbound.append(msg); eval.append(state)
     inbound = outbound
 
     for i in range(ROUNDS-1):
       for j in range(SHARES):
-        (states[j], outbound[j]) = vdaf_next(states[j], inbound)
+        (eval[j], outbound[j]) = eval_next(eval[j], inbound)
       inbound = outbound
 
     for j in range(SHARES):
-      output_share[j] += vdaf_finish(states[j], inbound)
+      output_share = eval_finish(eval[j], inbound)
+      agg[j] = agg_next(agg[j], output_share)
 
   # Aggregators compute the final output.
-  return sum(output_shares)
+  return agg_finish(agg)
 ~~~
-{: #run-vdaf title="Execution of a VDAF. The environment provides secure
-point-to-point connections, a broadcast channel, and a unique nonce for each
-VDAF evaluation."}
+{: #run-vdaf title="Execution of a VDAF."}
 
-NOTE Algorithm `run_vdaf` specifies the environment in which the VDAF is
-expected to be evaluated. In particular, it provides generation of a unique
-nonce for each VDAF evaluation and a secure broadcast channel for executing each
-round of the protocol. In practice, this environment is "simulated" by the PPM
-protocol.
+The inputs to this algorithm are the aggregation parameter `agg_param`, a set of
+nonces `nonces`, and a set of inputs `inputs`. The aggregation parameter is
+chosen by the aggregators prior to executing the VDAF and the inputs are chosen
+by the clients. This document does not specify how the nonces are chosen, but
+some of our security considerations require that the nonces be unique for each
+VDAF evaluation. See {{security}} for details.
 
+Another important question this document leaves out of scope is how a VDAF is to
+be executed by aggregators distributed over a real network. Algorithm `run_vdaf`
+prescribes the protocol's execution in a "benign" environment in which there is
+no adversary and messages are passed among the protocol participants over secure
+point-to-point channels. In reality, these channels need to be instantiated by
+some "wrapper protocol" that implements suitable cryptographic functionalities.
+Moreover, some fraction of the aggregators (or clients) may be malicious and
+diverge from their prescribed behaviors. {{security}} describes the execution of
+the VDAF in various adversarial environments what properties the wrapper
+protocol needs to provide.
+
+<!--
 ## VDAFs in the Literature
 
 TODO
@@ -433,6 +455,7 @@ TODO
 
 * Prio+ [AGJOP21] has the client upload XOR shares and then has the servers
   convert them to additive shares over a number of rounds.
+-->
 
 # prio3 {#prio3}
 
