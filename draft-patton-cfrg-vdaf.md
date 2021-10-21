@@ -1,27 +1,4 @@
 ---
-# Internet-Draft Markdown Template
-#
-# Rename this file from draft-todo-yourname-protocol.md to get started.
-# Draft name format is draft-<yourname>-<workgroup>-<name>.md
-#
-# Set the "title" field below at the same time.  The "abbrev" field should be
-# updated too.  "abbrev" can be deleted if your title is short.
-#
-# You can edit the contents of the document as the same time.
-# Initial setup only needs the filename and title.
-# If you change title or name later, you can run the "Rewrite README" action.
-#
-# Do not include "-latest" in the file name.
-# The tools use "draft-<name>-latest" to find the draft name *inside* the draft,
-# such as the "docname" field below, and replace it with a draft number.
-# The "docname" field below can be left alone: it will be updated for you.
-#
-# This template uses kramdown-rfc2629: https://github.com/cabo/kramdown-rfc2629
-# You can replace the entire file if you prefer a different format.
-# Change the file extension to match the format (.xml for XML, etc...)
-#
-# Delete this comment when you are done.
-#
 title: "Verifiable Distributed Aggregation Functions"
 abbrev: "VDAF"
 docname: draft-patton-cfrg-vdaf-latest
@@ -147,7 +124,6 @@ are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious (or merely misconfigured) client submitted an
 input that would result in the output getting garbled.
 
-
 --- middle
 
 # Introduction
@@ -188,7 +164,7 @@ controlled, since the more noise that is added to inputs, the less reliable will
 be the estimate of the output. Thus systems employing DP techniques alone must
 strike a delicate balance between privacy and utility.
 
-The ideal goal for a privacy-preserving measurement system is that of secure
+The ideal goal for a privacy-preserving measurement system similar that of secure
 multi-party computation: No participant in the protocol should learn anything
 about an individual input beyond what it can deduce from the final output.
 In this document, we describe Verifiable Distributed Aggregation Functions
@@ -204,11 +180,10 @@ undermine the VDAF's privacy guarantees.
 The VDAF abstraction, presented in {{vdaf}}, is based on a variety of
 multi-party protocols for privacy-preserving measurement that have been proposed
 in the literature in recent years. These protocols vary in their operational and
-security considerations in (often) subtle ways. Thus the primary goal of this
-document is to specify these considerations and provide a unified abstraction
-that gives cryptographers design criteria for new constructions. This document's
-considerations are derived from the concurrent effort to standardize a protocol
-for privacy-preserving measurement in [PPM].
+security considerations, sometimes in subtle ways.  Thus the primary goal of
+this document is to provide a unified abstraction that provides applications
+with a uniform interface for accessing privacy-preserving measurement schemes,
+while providing cryptographers with design criteria for new constructions.
 
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
@@ -265,7 +240,72 @@ Some common functionalities:
 
 # Overview {#overview}
 
-TODO
+In a private measurement system, we distinguish three types of actors: Clients,
+Aggregators, and Collectors.  The overal flow of the measurement process is as
+follows:
+
+* Clients are configured with public parameters for a set of aggregators
+* To submit an individual measurement, a client shards the measurement into
+  "input shares" and sends one input share to each aggregator
+* The aggregators accept these submissions and group individual measurements
+  into batches over which the desired aggregate statistics will be computed.
+  For each batch, the aggregators:
+  * Validate that the individual measurements in the batch meet the requirements
+    of the system
+  * Combine the input shares into "output shares" of the desired aggregate.
+* According to the needs of the particular VDAF, aggregators may need to
+  exchange information among themselves as part of the validation and
+  aggregation process.
+* The aggregators submit their output shares to a collector, who combines
+  them to obtain the aggregate measurement result over the batch
+
+~~~
+                      +--------------+
+               +----->| Aggregator 1 |------+
+               |      +--------------+      |
+               |             ^              |
+               |             |              |
+               |             V              |
+               |      +--------------+      |
+               | +--->| Aggregator 2 |----+ |
+               | |    +--------------+    | |
++--------+-----+ |           ^            | +---->+-----------+
+| Client |-------+           |            +------>| Collector |--> Aggregate
++--------+-----+                            +---->+-----------+
+               |            ...             |
+               |                            |
+               |             |              |
+               |             V              |
+               |      +--------------+      |
+               +----->| Aggregator N |------+
+                      +--------------+
+
+          Input shares                Output Shares
+~~~
+{: #overall-flow title="Overall data flow in a private measurement system"}
+
+Aggregators are a new class of actor relative to traditional measurement systems
+where clients submit measurements to a server.  They are critical for both the
+privacy properties of the system and the correctness of the measurements
+obtained.  The privacy properties of the system are assured by non-collusion
+among aggregators, and aggregators are the entities that perform validation of
+client inputs.  Thus clients trust aggregators not to collude and collectors
+trust aggregators to properly verify client inputs.
+
+Within the bounds of the non-collusion requirements of a given VDAF instance, it
+is possible for the same entity to play more than one role.  For example,
+the collector could also act as a collector, effectively using the other
+aggregators to augment a basic client-server protocol.  It is even possible to
+have a fully democratic system, where each participant acts as client,
+aggregator, and collector -- allowing a group of participants to agree on an
+aggregate over a set of measurements without any participant learning anything
+about other participants' measurements. 
+
+In this document, we describe the computations performed by the actors in this
+system.  It is up to applications to arrange for the required information to be
+delivered to the proper actors in the proper sequence.  In general, we assume
+that all communications are confidential and mutually authenticated, with the
+exception that clients submitting measurements may be anonymous.
 
 # Definition {#vdaf}
 
