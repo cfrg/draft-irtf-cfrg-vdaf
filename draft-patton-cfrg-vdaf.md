@@ -299,7 +299,7 @@ aggregators to augment a basic client-server protocol.  It is even possible to
 have a fully democratic system, where each participant acts as client,
 aggregator, and collector -- allowing a group of participants to agree on an
 aggregate over a set of measurements without any participant learning anything
-about other participants' measurements. 
+about other participants' measurements.
 
 In this document, we describe the computations performed by the actors in this
 system.  It is up to applications to arrange for the required information to be
