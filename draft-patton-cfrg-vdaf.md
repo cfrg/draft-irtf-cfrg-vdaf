@@ -259,6 +259,24 @@ is usually handled by raising an exception.
 
 TODO
 
+## VDAFs in the Literature
+
+The VDAF primitive is intended to unify into one abstraction the core
+cryptographic functionalities of a wide variety of privacy-preserving protocols
+in the literature. This section enumerates these protocols.
+
+## Prio
+
+While not the first protocol in this class of protocols, Prio [CGB17] is the
+protocol that inspired this standardization effort.
+
+TODO
+
+## Privacy-preserving Heavy Hitters
+
+TODO [BBCGGI21]
+
+
 # Definition {#vdaf}
 
 A concrete VDAF specifies the algorithms involved in evaluating the VDAF on a
