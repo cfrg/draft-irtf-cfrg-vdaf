@@ -25,7 +25,7 @@ of "output lengths" `m` that determines the length of the output at each round.
    in the input `m` and the public key and outputs a sequence of input shares
    (`len(x) == s`).
 
- * `eval_next(sk, n, p, x, y, i) -> y`. Subsumes the old verify-start,
+ * `eval_next(sk, n, p, x, y, i) -> out`. Subsumes the old verify-start,
    verify-next, and verify-finish algorithms of the current syntax. Inputs are:
 
       1. `k` The aggregator's secret key
@@ -54,7 +54,7 @@ def run(p, nonces, inputs):
     out = [ 0 for j in range(s) ] # Aggregators' output shares
     for i in range(r+1):
       for j in range(s):
-        out[j] = eval_next(sk[j], n, p, x[j], y)
+        out[j] = eval_next(sk[j], n, p, x[j], y, i)
       y = sum(out) # Input of next round is sum of this round.
 
     # Aggregate output shares.
