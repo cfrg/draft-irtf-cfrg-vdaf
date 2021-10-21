@@ -255,6 +255,14 @@ without a type hint implicitly have type `Bytes`, an arbitrary byte string. A
 fatal error in a program (e.g., failure to parse one of the function parameters)
 is usually handled by raising an exception.
 
+Some common functionalities:
+
+* `zeros(len: Unsigned) -> output: Bytes` returns an array of bytes of length
+  `len` (i.e., it is required that `len(output) == len`).
+
+* `gen_rand(len: Unsigned) -> output: Bytes` returns an array of `len` random
+  bytes (i.e., it is required that `len(output) == len`).
+
 # Overview {#overview}
 
 TODO
@@ -464,55 +472,83 @@ NOTE This is WIP.
 NOTE This protocol has not undergone significant security analysis. This is
 planned for [PAPER].
 
-The etymology of the term "prio3" is that it descends from the original Prio
+The etymology of the term `prio3` is that it descends from the original Prio
 construction [CGB17], which was deployed in Firefox's origin telemetry project
 (i.e., "prio1"). It generalizes the more recent deployment in the ENPA system
 (i.e., "prio2") and is based on techniques described in [BBCGGI19].
 
 ## Dependencies
 
-### Fully Linear, Probabilistically Checkable Proof
+This section describes the cryptographic dependencies of `prio3`.
 
-NOTE [BBCGGI19] call this a 1.5-round, public-coin, interactive oracle proof
-system.
+### Probabilistically Checkable Proofs {#pcp}
 
-All raise `ERR_INPUT`:
+A Probabilistically Checkable Proof (PCP) is comprised of the following
+algorithms:
 
-* `pcp_prove(input: Vec[Field], prove_rand: Vec[Field], joint_rand: Vec[Field]) ->
-  proof: Vec[Field]` is the proof-generation algorithm.
+* `pcp_prove(input: Vec[Field], prove_rand: Vec[Field], joint_rand: Vec[Field])
+  -> proof: Vec[Field]` is the deterministic proof-generation algorithm run by
+  the prover. Its inputs are the encoded input, the prover randomness
+  `prove_rand`, and the joint randomness `joint_rand`. The former is used only
+  by the prover and the latter is used by both the prover and verifier.
+
 * `pcp_query(input: Vec[Field], proof: Vec[Field], query_rand: Vec[Field],
   joint_rand: Vec[Field]) -> verifier: Vec[Field]` is the query-generation
-  algorithm.
-* `pcp_decide(verifier: Vec[Field]) -> decision: Boolean` is the decision algorithm.
+  algorithm run by the verifier. This is is used to "query" the input and proof.
+  The result of the query is called the verifier message. In addition to the
+  input and proof, this algorithm takes as input the query randomness
+  `query_rand` and the joint randomness `joint_rand`. The former is used only by
+  the verifier and the latter is the same randomness used by the prover.
 
-Associated types
+* `pcp_decide(verifier: Vec[Field]) -> decision: Boolean` is the deterministic
+  decision algorithm run by the verifier. It takes as input the verifier message
+  and outputs a boolean indicating if the input from which it was generated is
+  valid.
 
-* `Field`
-  Associated functions:
+Our application requires that the PCP is "fully linear" in the sense defined in
+[BBCGGI19]. As a practical matter, what this property implies is that the
+query-generation algorithm can be run by each aggregator locally on its share of
+the input and proof. The outputs can then be combined into the input to the
+decision algorithm to decide if the input is valid.
 
-  * `vec_rand(len: U32) -> output: Vec[Field]` require that `len == len(output)`
-  * `vec_zeros(len: U32) -> output: Vec[Field]` require that `len ==
-    len(output)` and each element of `output` is zero.
-  * `encode_vec`
-  * `decode_vec` raises `ERR_DECODE`
+Note that [BBCGGI19] defines a much larger class of proof systems; what is
+called a PCP here is called a 1.5-round, public-coin, interactive oracle proof
+system in the paper.
+
+PCPs define the following constants:
+
+* `JOINT_RAND_LEN` is the length of the joint randomness in number of field
+  elements.
+* `PROVE_RAND_LEN` is the length of the prover randomness.
+* `QUERY_RAND_LEN` is the length of the query randomness.
+* `INPUT_LEN` is the length of the input.
+* `PROOF_LEN` is the length of the proof.
+* `VERIFIER_LEN` is the length of the verifier message.
+
+PCPs also have an associated type that defines the underlying finite field:
+
+* `Field` is an element of a finite field. Associated functions:
+
+  * `vec_zeros(len: Unsigned) -> output: Vec[Field]` returns a length-`len`
+    vector of zeros.
+  * `encode_vec(data: Vec[Field]) -> encoded_data: Bytes` represents the input
+    `data` as a byte string `encoded_data`.
+  * `decode_vec(encoded_data: Bytes) -> data: Vec[Field]` reverse `encoded_vec`,
+    returning the vector of field elements encoded by `encoded_data`. Raises an
+    exception if the input does not encode a valid vector of field elements.
 
   Associated constants:
 
-  * `ENCODED_SIZE`
+  * `ENCODED_SIZE` is the size of each field element in bytes. [XXX Is this
+    needed?]
 
-Associated constants:
-
-* `JOINT_RAND_LEN`
-* `PROVE_RAND_LEN`
-* `QUERY_RAND_LEN`
-
-Execution semantics:
+Execution of a PCP is as follows:
 
 ~~~
-def run_pcp(input: Vec[Field]):
-  joint_rand = vec_rand(JOINT_RAND_LEN)
-  prove_rand = vec_rand(PROVE_RAND_LEN)
-  query_rand = vec_rand(QUERY_RAND_LEN)
+def run_pcp(input, joint_rand, prove_rand, query_rand: Vec[Field]):
+  assert(len(joint_rand, JOINT_RAND_LEN))
+  assert(len(prove_rand, PROVE_RAND_LEN))
+  assert(len(query_rand, QUERY_RAND_LEN))
 
   # Prover generates the proof.
   proof = pcp_prove(input, prove_rand, joint_rand)
@@ -525,38 +561,77 @@ def run_pcp(input: Vec[Field]):
 ~~~
 {: #run-pcp title="Execution of a fully linear PCP."}
 
-
 ### Key Derivation
 
-[TODO Separate this syntax from what people usually think of as a KDF.] A
-key-derivation scheme consists of the following algorithms:
+A key-derivation scheme consists of the following algorithms:
 
-* `get_key(init_key, input) -> key` require `len(init_key) == KEY_SIZE` and
-  `len(key) == KEY_SIZE`.
-* `get_key_stream(key) -> state: KeyStream` require that `len(key) == KEY_SIZE`.
-* `key_stream_next(state: KeyStream, length: U32) -> (new_state: KeyStream,
-  output)` require that `length == len(output)`
+* `get_key(init_key, input) -> key` derives a fresh key `key` from an initial
+  `key` require `len(init_key) == KEY_SIZE` and auxiliary input `input`. It is
+  required that `len(key) == KEY_SIZE` and `len(init_key) == KEY_SIZE`
+
+* `get_key_stream(key) -> state: KeyStream` returns a key stream generator that
+  is used to generate an arbitrary length stream of pseudorandom bytes. It is
+  required that `len(key) == KEY_SIZE`.
+
+* `key_stream_next(state: KeyStream, len: Unsigned) -> (new_state: KeyStream,
+  output)` returns the next `len` bytes of the key stream and updates the key
+  stream state. It is required that that `len(output) == len`.
+
+[NOTE This closely resembles what people usually think of as an
+extract-then-expand KDF, but differs somewhat in its syntax and, also, its
+required security properties. Can we get the same functionality from something
+that's more commonplace? HKDF doesn't fit the bill, unfortunately, because keys
+can only be expanded to a fairly short length. Our application requires a rather
+long key stream.]
 
 Associated types:
 
-* `KeyStream`
+* `KeyStream` represents the state of the key stream generator.
 
 Associated constants:
 
-* `KEY_SIZE`
+* `KEY_SIZE` is the size of keys for the key-derivation scheme.
+
+### Aggregable Encoding
+
+The VDAF requires a method for encoding raw measurements as vectors of field
+elements and decoding input shares into aggregable output shares. (Note that
+this corresponds roughly to the notion of Affine-aggregatable encodings (AFEs)
+from [CGB17].)
+
+* `encode_input(measurement: Bytes) -> input: Vec[Field]` encodes a raw
+  measurement as a vector of field elements. The type `Field` MUST be the same
+  as the field type associated with the PCP (see {{pcp}}). An error raised if
+  the measurement cannot be represented as an input.
+
+* `decode_output(input: Vec[Field]) -> output: Vec[Field]` maps an encoded input
+  to an aggregable output. It is required that `len(output) <= len(input)`.
+
+## Helper Functions
+
+TODO
+
+* `expand(seed, length: U32) -> output: Vec[Field]`
+* `encode_state`
+* `encode_helper_share`
+* `encode_leader_share`
+* `decode_share` raises `ERR_DECODE`
+* `encode_verifier_share`
+* `decode_verifier_share` raises `ERR_DECODE`
 
 ## Construction
 
 ~~~
-def vdaf_setup():
-  k_query_init = get_rand(KEY_SIZE)
-  return (bytes(), k_query_init)
+def eval_setup():
+  k_query_init = gen_rand(KEY_SIZE)
+  verify_param = [ (j, k_query_init) for j in range(SHARES) ]
+  return (None, verify_param)
 ~~~
-{: #prio3-vdaf-setup title="The setup algorithm for prio3."}
+{: #prio3-eval-setup title="The setup algorithm for prio3."}
 
 ~~~
-def vdaf_input(_, r_input):
-  input = decode_vec(r_input)
+def eval_input(_, measurement):
+  input = encode_input(measurement)
   k_joint_rand = zeros(SEED_SIZE)
 
   # Generate input shares.
@@ -565,9 +640,9 @@ def vdaf_input(_, r_input):
   k_helper_blinds = []
   k_helper_hints = []
   for j in range(SHARES-1):
-    k_blind = get_rand(KEY_SIZE)
-    k_share = get_rand(KEY_SIZE)
-    helper_input_share = expand(k_share, len(leader_input_share))
+    k_blind = gen_rand(KEY_SIZE)
+    k_share = gen_rand(KEY_SIZE)
+    helper_input_share = expand(k_share, INPUT_LEN)
     leader_input_share -= helper_input_share
     k_hint = get_key(k_blind,
         byte(j+1) + encode_vec(helper_input_share))
@@ -575,7 +650,7 @@ def vdaf_input(_, r_input):
     k_helper_input_shares.append(k_share)
     k_helper_blinds.append(k_blind)
     k_helper_hints.append(k_hint)
-  k_leader_blind = get_rand(KEY_SIZE)
+  k_leader_blind = gen_rand(KEY_SIZE)
   k_leader_hint = get_key(k_leader_blind,
       byte(0) + encode_vec(leader_input_share))
   k_joint_rand ^= k_leader_hint
@@ -587,41 +662,41 @@ def vdaf_input(_, r_input):
 
   # Generate the proof shares.
   joint_rand = expand(k_joint_rand, JOINT_RAND_LEN)
-  prove_rand = expand(get_rand(KEY_SIZE), PROVE_RAND_LEN)
+  prove_rand = expand(gen_rand(KEY_SIZE), PROVE_RAND_LEN)
   leader_proof_share = pcp_prove(input, prove_rand, joint_rand)
   k_helper_proof_shares = []
   for j in range(SHARES-1):
-    k_share = get_rand(KEY_SIZE)
+    k_share = gen_rand(KEY_SIZE)
     k_helper_proof_shares.append(k_share)
-    helper_proof_share = expand(k_share, len(leader_proof_share))
+    helper_proof_share = expand(k_share, PROOF_LEN)
     leader_proof_share -= helper_proof_share
 
   output = []
-  output.append(encode_leader_share(0,
+  output.append(encode_leader_share(
     leader_input_share,
     leader_proof_share,
     k_leader_blind,
     k_leader_hint,
   ))
   for j in range(SHARES-1):
-    output.append(encode_helper_share(j,
-      (k_helper_input_share[j], len(leader_input_share)),
-      (k_helper_proof_share[j], len(leader_proof_share)),
+    output.append(encode_helper_share(
+      k_helper_input_share[j],
+      k_helper_proof_share[j],
       k_helper_blinds[j],
       k_helper_hints[j],
     ))
   return output
 ~~~
-{: #prio3-vdaf-input title="Input distribution algorithm for prio3. TODO
-Figure out how this looks in the normal text format."}
+{: #prio3-eval-input title="Input-distribution algorithm for prio3."}
 
 ~~~
-def vdaf_start(k_query_init, _, nonce, r_input_share):
-  (j, input_share, proof_share,
+def eval_start(verify_param, _, nonce, r_input_share):
+  (j, k_query_init) = verify_param
+  (input_share, proof_share,
    k_blind, k_hint) = decode_share(input_share)
   if j > 0: # helper
-    input_share = expand(*input_share)
-    proof_share = expand(*proof_share)
+    input_share = expand(input_share)
+    proof_share = expand(proof_share)
 
   k_joint_rand_share = get_key(k_blind, byte(j) + input_share)
   k_joint_rand = k_hint ^ k_joint_rand_share
@@ -631,27 +706,24 @@ def vdaf_start(k_query_init, _, nonce, r_input_share):
   query_rand = expand(k_query_rand, QUERY_RAND_LEN)
   verifier_share = pcp_query(
       input_share, proof_share, query_rand, joint_rand)
-  verifier_length = len(verifier_share)
 
-  state = encode_state(k_joint_rand, input_share, verifier_length)
+  state = encode_state(k_joint_rand, decode_output(input_share))
   output = encode_verifier_share(k_joint_rand, verifier_share)
   return (state, output)
 ~~~
-{: #prio3-vdaf-start title="Verify-start algorithm for prio3."}
+{: #prio3-eval-start title="Verify-start algorithm for prio3."}
 
-`ROUNDS` is 1 for Prio3, and so no `vdaf_next` definition is provided.
+`ROUNDS` is 1 for Prio3, and so no `eval_next` definition is provided.
 
 ~~~
-def vdaf_finish(state: State, r_verifier_shares):
+def eval_finish(state: State, r_verifier_shares):
   if len(r_verifier_shares) != s: raise ERR_DECODE
 
   k_joint_rand = zeros(KEY_SIZE)
-  verifier = vec_zeros(state.verifier_len)
+  verifier = vec_zeros(VERIFIER_LEN)
   for r_share in r_verifier_shares:
     (k_joint_rand_share,
      verifier_share) = decode_verifier_share(r_share)
-    if len(verifier_share) != state.verifier_length:
-      raise ERR_DECODE
 
     k_joint_rand ^= k_joint_rand_share
     verifer += verifier_share
@@ -660,20 +732,9 @@ def vdaf_finish(state: State, r_verifier_shares):
   if not pcp_decide(verifier): raise ERR_INVALID
   return state.input_share
 ~~~
-{: #prio3-vdaf-finish title="Verify-finish algorithm for prio3."}
+{: #prio3-eval-finish title="Verify-finish algorithm for prio3."}
 
 Auxiliary functions:
-
-* `expand(seed, length: U32) -> output: Vec[Field]`
-* `encode_state`
-* `encode_helper_share`
-* `encode_leader_share`
-* `decode_share` raises `ERR_DECODE`
-* `encode_verifier_share`
-* `decode_verifier_share` raises `ERR_DECODE`
-* `get_rand(length: U32) -> output` require that `length == len(output)`
-* `zeros(length: U32) -> output` require that `lengh == len(output)` and that
-  each element of `output` is zero.
 
 NOTE `JOINT_RAND_LEN` may be `0`, in which case the joint randomness computation
 is not necessary. Should we bake this option into the spec?
