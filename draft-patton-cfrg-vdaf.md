@@ -5,8 +5,8 @@ docname: draft-patton-cfrg-vdaf-latest
 category: info
 
 ipr: trust200902
-area: TODO
-workgroup: TODO Working Group
+area: IRTF
+workgroup: CFRG
 keyword: Internet-Draft
 
 stand_alone: yes
@@ -99,6 +99,16 @@ informative:
     seriesinfo: "ICALP 2006"
     target: "https://link.springer.com/chapter/10.1007/11787006_1"
 
+  OriginTelemetry:
+    title: "Origin Telemetry"
+    date: 2020
+    target: https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
+
+  ENPA:
+    title: "Exposure Notification Privacy-preserving Analytics (ENPA) White Paper"
+    date: 2021
+    target: https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ENPA_White_Paper.pdf
+
   PPM:
     title: "Privacy Preserving Measurement"
     date: 2021
@@ -141,14 +151,14 @@ input that would result in the aggregate getting garbled.
 
 The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
-systems at scale. There is some overlap, however, between information that is
-valuable to measure and information that users consider private.
+systems at scale. There is substantial overlap, however, between information
+that is valuable to measure and information that users consider private.
 
 For example, consider an application that provides health information to users.
 The operator of an application might want to know which parts of their
 application are used most often, as a way to guide future development of the
-application.  A particular user's pattern of usage, though, could reveal
-sensitive things about them.
+application.  Specific users' patterns of usage, though, could reveal sensitive
+things about them, such as which users are researching a given health condition.
 
 In many situations, the measurement collector is only interested in aggregate
 statistics, e.g., which portions of an application are most used or what
@@ -181,7 +191,7 @@ about an individual input beyond what it can deduce from the aggregate. In this
 document, we describe Verifiable Distributed Aggregation Functions (VDAFs) as a
 general class of protocols that achieve this goal.
 
-VDAF schemes achieves their privacy goal by distributing the computation of the
+VDAF schemes achieve their privacy goal by distributing the computation of the
 aggregate among a number of non-colluding aggregation servers. As long as a
 subset of the servers executes the protocol honestly, VDAFs guarantee that no
 input is ever visible in the clear. At the same time, VDAFs are "verifiable" in
@@ -191,15 +201,17 @@ computation can be detected and removed from the set of inputs.
 The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
 undermine the VDAF's privacy guarantees. However, recent implementation
-experience has shown that deployment of these schemes is practical.
+experience has shown that deployment of these schemes is practical.  The Prio
+system (essentially a VDAF) has been deployed in systems supporting hundreds of
+millions of users: The Mozilla Origin Telemetry project [OriginTelemetry] and
+the Exposure Notification Private Analytics collaboration among the Internet
+Security Research Group, Google, Apple, and others [ENPA].
 
-> TODO Decide what to say about ENPA or Mozilla's Origin Telemetry.
-
-The VDAF abstraction, presented in {{vdaf}}, is based on a variety of
-multi-party protocols for privacy-preserving measurement proposed in the
-literature. These protocols vary in their operational and security
-considerations, sometimes in subtle, but consequential, ways. This document
-therefore has two important goals:
+The VDAF abstraction laid out in {{vdaf}} represents a class of multi-party
+protocols for privacy-preserving measurement proposed in the literature. These
+protocols vary in their operational and security considerations, sometimes in
+subtle, but consequential, ways. This document therefore has two important
+goals:
 
  1. Specify the operational and security considerations for this class of
     protocols, including:
@@ -604,10 +616,6 @@ TODO
 
 # prio3 {#prio3}
 
-NOTE This is WIP.
-
-NOTE This protocol has not undergone significant security analysis.
-
 The etymology of the term `prio3` is that it descends from the original Prio
 construction [CGB17], which was deployed in Firefox's origin telemetry project
 (i.e., "prio1"). It generalizes the more recent deployment in the ENPA system
@@ -713,12 +721,12 @@ A key-derivation scheme consists of the following algorithms:
   output)` returns the next `len` bytes of the key stream and updates the key
   stream state. It is required that that `len(output) == len`.
 
-[NOTE This closely resembles what people usually think of as an
+[[ NOTE: This closely resembles what people usually think of as an
 extract-then-expand KDF, but differs somewhat in its syntax and, also, its
 required security properties. Can we get the same functionality from something
 that's more commonplace? HKDF doesn't fit the bill, unfortunately, because keys
 can only be expanded to a fairly short length. Our application requires a rather
-long key stream.]
+long key stream. ]]
 
 Associated types:
 
@@ -870,10 +878,8 @@ def eval_finish(state: State, r_verifier_shares):
 ~~~
 {: #prio3-eval-finish title="Verify-finish algorithm for prio3."}
 
-Auxiliary functions:
-
-NOTE `JOINT_RAND_LEN` may be `0`, in which case the joint randomness computation
-is not necessary. Should we bake this option into the spec?
+[[ NOTE: `JOINT_RAND_LEN` may be `0`, in which case the joint randomness
+computation is not necessary. Should we bake this option into the spec? ]]
 
 
 # [Working name] hits {#hits}
