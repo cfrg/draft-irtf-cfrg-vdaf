@@ -310,130 +310,189 @@ exception that clients submitting measurements may be anonymous.
 # Definition {#vdaf}
 
 A concrete VDAF specifies the algorithms involved in evaluating the VDAF on a
-single input and the algorithms involved in aggregating the outputs of multiple
-evaluations. This section specifies the interfaces of these algorithms as they
-would be exposed to applications.
+single input and the algorithms involved in aggregating the outputs across
+multiple evaluations into the final aggregate. This section specifies the
+interfaces of these algorithms as they would be exposed to applications.
 
-In addition to these algorithms, a concrete VDAF specifies the following
-constants:
+A concrete VDAF scheme specifies implementations of these algorithm. In
+addition, a VDAF specifies the following constants:
 
-* `SHARES: Unsigned` is the number of aggregators for which the VDAF is defined.
-* `ROUNDS: Unsigned` is the number of rounds of communication executed by the
-  aggregators during VDAF evaluation.
+* `SHARES: Unsigned` is the number of Aggregators for which the VDAF is defined.
+* `ROUNDS: Unsigned` is the number of rounds of communication among the
+  Aggregators before they recover output shares from a single set of input
+  shares.
 
-The VDAF also specifies the following associated types:
+A concrete VDAF also specifies the following associated types:
 
-* `EvalState` is the state of an aggregator VDAF evaluation of a single input.
-* `AggState` is the aggregation state used across VDAF evaluations.
+* `EvalState` is the state of an Aggregator during evaluation of a single Client input.
+* `AggState` is the state of an Aggregator carried across multiple evaluations.
 
-## Input-Evaluation Phase
+## Input Evaluation
 
 ~~~~
-client
-  | input
-  v
-+-----------------------------------------------------------+
-| eval_input()                                              |
-+-----------------------------------------------------------+
-  | input_shares[1]  | input_shares[2]   ...  | input_shares[SHARES]
-  v                  v                        v
-+---------------+  +---------------+        +---------------+
-| eval_start()  |  | eval_start()  |        | eval_start()  |
-+---------------+  +---------------+        +---------------+
-  |                  |                   ...  |
-  =============================================
-  |                  |                        |
-  v                  v                        v
-+---------------+  +---------------+        +---------------+
-| eval_next()   |  | eval_next()   |        | eval_next()   |
-+---------------+  +---------------+        +---------------+
-  |                  |                   ...  |
-  =============================================
-  |                  |                        |
-  v                  v                        v
-  .                  .                        .
-  .                  .                        .
-  .                  .                        .
-  |                  |                        |
-  v                  v                        v
-+---------------+  +---------------+        +---------------+
-| eval_finish() |  | eval_finish() |        | eval_finish() |
-+---------------+  +---------------+        +---------------+
-  | output_shares[1] | output_shares[2]  ...  | output_shares[SHARES]
-  v                  v                        v
-aggregator 1       aggregator 2             aggregator SHARES
+    Client
+      | input
+      v
+    +---------------------------------------------+
+    | eval_input                                  |
+    +---------------------------------------------+
+      |              |              ...  |
+      v              v                   v
+    +-----------+  +-----------+       +-----------+
+    | eval_init |  | eval_init |       | eval_init |
+    +-----------+  +------------+      +-----------+
+      |              |              ...  |
+      v              v                   v
+    +-----------+  +-----------+       +-----------+
+    | eval_next |  | eval_next |       | eval_next |
+    +-----------+  +-----------+       +-----------+
+      |              |              ...  |
+      ====================================
+      |              |                   |
+      v              v                   v
+      .              .                   .
+      .              .                   .
+      .              .                   .
+      |              |                   |
+      v              v                   v
+    +-----------+  +-----------+       +-----------+
+    | eval_next |  | eval_next |       | eval_next |
+    +-----------+  +-----------+       +-----------+
+      |               |             ...  |
+      v               v                  v
+    Aggregator 0   Aggregator 1        Aggregator SHARES-1
 ~~~~
-{: #eval-flow title="Evaluation of a VDAF on a single input. The aggregators
-communicate over a broadcast channel illustrated by the === line. At the end of
-the protocol, each aggregator has recovered a share of the output."}
+{: #eval-flow title="Evaluation of the VDAF on a single input. The Aggregators
+communicate over a broadcast channel, illustrated by the === line. At the end of
+the protocol, each Aggregator has recovered a share of the output."}
 
-The evaluation phase of the VDAF is illustrated in {{eval-flow}}. It begins by
-having the client split its input into a sequence of input shares and sending
-each input share to one of the aggregators. The aggregators then interact with
-one another over a number of rounds, where in each round, each aggregator
-produces a single outbound message. The outbound messages are broadcast to all
-of the aggregators at the beginning of each round. Eventually, each aggregator
-recovers a share of the output. Evaluation of the VDAF involves the following
-algorithms:
+Input evaluation involves a Client and the Aggregators. The process, illustrated
+in {{eval-flow}}, begins by having the Client split its input into a sequence of
+input shares and sending each input share to one of the Aggregators. The
+Aggregators then interact with one another over `ROUND` rounds, where in
+each round, each Aggregator produces a single outbound message. The outbound
+messages are broadcast to all of the aggregators at the beginning of each round.
+Eventually, each aggregator recovers a share of the output.
+
+Input evaluation involves the following algorithms:
 
 * `eval_setup() -> (public_param, verify_params: Vec[Bytes])` is the randomized
-  setup algorithm used to generate the public parameter used by the clients
-  (`public_param`) and the verification parameters used by the aggregators
+  setup algorithm used to generate the public parameter used by the Clients
+  (`public_param`) and the verification parameters used by the Aggregators
   (`verify_params`, note that `len(input_shares) == SHARES`). The parameters are
   generated once and reused across multiple VDAF evaluations. The verification
-  parameter MUST NOT be revealed to the clients.
+  parameters are secret and MUST NOT be revealed to the Clients, Collector or
+  other Aggregators.
+
+  > TODO Decide how to express arrays of fixed length with Python hints and
+  > replace `Vec[Bytes]` with a suitable expression.
 
 * `eval_input(public_param, input) -> input_shares: Vec[Bytes]` is the
-  input-distribution algorithm run by the client. It consumes the public
-  parameter and input measurement and produces a sequence of input shares, one
-  for each aggregator (i.e., `len(input_shares) == SHARES`).
+  randomized input-distribution algorithm run by each Client. It consumes the
+  public parameter and input measurement and produces a sequence of input
+  shares, one for each Aggregator (i.e., `len(input_shares) == SHARES`).
 
-* `eval_start(verify_param, agg_param, nonce, input_share) -> (state: EvalState,
-  outbound_message)` is the verify-start algorithm and is run by each
-  aggregator. Its inputs are the aggregator's verification parameter
-  (`verify_param`), the aggregation parameter (`agg_param`), the nonce provided
-  by the environment (`nonce`, see {{run-vdaf}}), and one of the input shares
-  generated by the client (`input_share`). Its outputs include the aggregator's
-  initial state (`state`) and its round-`1` verification message
-  (`outbound_message`).
+* `eval_init(verify_param, agg_param, nonce, input_share) -> (eval_state:
+  EvalState)` is the deterministic evaluation-state initialization algorithm run
+  by each Aggregator to begin evaluation. Its inputs are the aggregator's
+  verification parameter (`verify_param`), the aggregation parameter
+  (`agg_param`), the nonce provided by the environment (`nonce`, see
+  {{run-vdaf}}), and one of the input shares generated by the client
+  (`input_share`). Its outputs is the Aggregator's initial evaluation state.
 
-* `eval_next(state: EvalState, inbound_messages: Vec[Bytes]) -> (new_state:
-  EvalState, outbound_message)` is the verify-next algorithm. For each round `i
-  >= 2` it consumes the round-`(i-1)` messages (note that `len(inbound_messages)
-  == SHARES`) and produces the aggregator's round-`i` message. This algorithm is
-  undefined if `ROUNDS < 2`.
+* `EvalState.next(inbound: Vec[Bytes]) -> outbound` is the deterministic
+  evaluation-state update algorithm run by each Aggregator. It updates the
+  Aggregator's evaluation state (an instance of `EvalState`) and returns either
+  its outbound message for the current round or, if this is the last round, its
+  output share. An exception is raised if a valid output share could not be
+  recovered. The input of this algorithm is the sequence of inbound messages
+  from the previous round (i.e., `len(inbound) == SHARES`) or, if this is the
+  first round, an empty vector.
 
-* `eval_finish(state: EvalState, inbound_messages: Vec[Bytes]) -> output_share`
-  is the verify-finish algorithm. It consumes the round-`ROUNDS` verification
-  messages (note that `len(inbound_messages) == SHARES`) and produces the
-  aggregator's output share. Raises an exception if a valid output share could
-  not be recovered.
+Note that it is valid for a VDAF to specify `ROUNDS == 0`, in which case each
+Aggregator runs the evaluation-state update algorithm once and immediately
+recovers its output share without interacting with the other Aggregators.
+However, most, if not all, constructions require some amount of interaction in
+order to ensure validity of the output shares (while still maintaining privacy).
 
-## Output-Aggregation Phase
+## Output Aggregation
 
-Aggregation of VDAF outputs happens concurrently with the evaluation of the VDAF
-on individual inputs. Once an aggregator has recovered a valid output share, it
-adds it into its long-running aggregation state locally. Once all of the inputs
-have been processed, the aggregators combine their aggregate shares into the
-final aggregate. This process involves the following algorithms:
+~~~~
+    Aggregator 0    Aggregator 1        Aggregator SHARES-1
+      |               |                   |
+      v               v                   v
+    +-----------+   +-----------+       +-----------+
+    | agg_init  |   | agg_init  |   ... | agg_init  |
+    +-----------+   +-----------+       +-----------+
+      |               |                   |
+      v               |                   |
+    +-----------+     |                   |
+--->| agg_next  |     |                   |
+    +-----------+     v                   |
+      |             +-----------+         |
+------------------->| agg_next  |         |
+      |             +-----------+         v
+      |               |                 +-----------+
+--------------------------------------->| agg_next  |
+      |               |                 +-----------+
+      |               |                   |
+      v               v                   v
+      .               .                   .
+      .               .                   .
+      .               .                   .
+      |               |                   |
+      v               |                   |
+    +-----------+     |                   |
+--->| agg_next  |     |                   |
+    +-----------+     v                   |
+      |             +-----------+         |
+------------------->| agg_next  |         |
+      |             +-----------+         v
+      |               |                 +-----------+
+--------------------------------------->| agg_next  |
+      |               |                 +-----------+
+      |               |                   |
+      v               v                   v
+    +-----------------------------------------------+
+    | agg_output                                    |
+    +-----------------------------------------------+
+      |
+      v
+    Collector
+~~~~
+{: #agg-flow title="Aggregation of output shares. Each set of wires
+entering from the left represent output shares recovered by the aggregators
+by evaluating the VDAF on a set of input shares."}
 
-* `agg_start() -> AggState` is the deterministic aggregation-state
-  initialization algorithm. It is run by each aggregator before processing any
-  client input shares.
+Output aggregation involves the Aggregators and the Collector. This process,
+illustrated in {{agg-flow}} runs concurrently with the input evaluation process.
+Once an aggregator has recovered a valid output share, it adds it into its
+long-running aggregation state locally; and once all of the inputs have been
+processed, each Aggregator sends its aggregate share to the Collector, who
+combines them to recover the final aggregate. This process involves the
+following algorithms:
 
-* `agg_next(state: AggState, output_share) -> new_state: AggState` is the
-  deterministic aggregation-state update algorithm. It is run immediately after
-  the aggregator recovers a valid output share `output_share`.
+* `agg_init() -> AggState` is the deterministic aggregation-state initialization
+  algorithm. It is run by each Aggregator before processing any Client input.
 
-* `agg_finish(states: Vec[AggStates]) -> agg` combines the aggregation state
-  of each aggregator (note that `len(states) == SHARES`) into the final
-  aggregate `agg`.
+* `AggState.next(output_share)` is the deterministic aggregation-state update
+  algorithm. It is run by an Aggregator immediately after it recovers a valid
+  output share `output_share`.
 
-## Execution Model {#execution}
+* `agg_output(agg_states: Vec[AggStates]) -> agg` is the deterministic combines
+  the aggregation state of each aggregator (note that `len(states) == SHARES`)
+  into the final aggregate `agg`.
+
+> TODO Maybe `AggState.next` (and maybe `agg_output`, too) should be randomized
+> in order to allow the Aggregators (or the Collector) to add noise for
+> differential privacy. (See the security considerations of [PPM].) Or is this
+> out-of-scope of this document?
+
+## Execution of a VDAF {#execution}
 
 Executing a VDAF involves the concurrent evaluation of the VDAF on individual
-inputs and aggregation of the outputs of each evaluation. This is captured by
-the following algorithm:
+inputs and aggregation of the recovered output shares. This is captured by the
+following algorithm:
 
 ~~~
 def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
@@ -441,40 +500,41 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
   (public_param, verify_params) = eval_setup()
 
   # Each aggregator initializes its aggregation state.
-  agg = [ agg_start() for j in range(SHARES) ]
+  agg_states = [ agg_init() for j in range(SHARES) ]
 
   for (nonce, input) in zip(nonces, inputs):
-    # Each client runs the input-distribution algorithm.
+    # Each client splits its input into shares.
     input_shares = eval_input(public_param, input)
 
-    # Aggregators recover their output shares.
-    outbound, eval = [], []
+    # Each aggregator initializes its evaluation state.
+    eval_states = []
     for j in range(SHARES):
-      (state, msg) = eval_start(
-          verify_params[j], agg_param, nonce, input_shares[j])
-      outbound.append(msg); eval.append(state)
-    inbound = outbound
+      eval_states.append(eval_init(
+          verify_params[j], agg_param, nonce, input_shares[j]))
 
-    for i in range(ROUNDS-1):
+    # Aggregators recover their output shares.
+    inbound = []
+    for i in range(ROUNDS+1):
+      outbound = []
       for j in range(SHARES):
-        (eval[j], outbound[j]) = eval_next(eval[j], inbound)
+        outbound.append(eval_states[j].next(inbound))
       inbound = outbound
 
+    # Each aggregator updates its aggregation state.
     for j in range(SHARES):
-      output_share = eval_finish(eval[j], inbound)
-      agg[j] = agg_next(agg[j], output_share)
+      agg_states[j].next(outbound[j])
 
-  # Aggregators compute the final output.
-  return agg_finish(agg)
+  # Collector computes the final aggregate.
+  return agg_output(agg_states)
 ~~~
 {: #run-vdaf title="Execution of a VDAF."}
 
-The inputs to this algorithm are the aggregation parameter `agg_param`, a set of
-nonces `nonces`, and a set of inputs `inputs`. The aggregation parameter is
-chosen by the aggregators prior to executing the VDAF and the inputs are chosen
-by the clients. This document does not specify how the nonces are chosen, but
-some of our security considerations require that the nonces be unique for each
-VDAF evaluation. See {{security}} for details.
+The inputs to this algorithm are the aggregation parameter `agg_param`, a list
+of nonces `nonces`, and a list of Client inputs `inputs`. The aggregation
+parameter is chosen by the aggregators prior to executing the VDAF. This
+document does not specify how the nonces are chosen, but some of our security
+considerations require that the nonces be unique for each VDAF evaluation. See
+{{security}} for details.
 
 Another important question this document leaves out of scope is how a VDAF is to
 be executed by aggregators distributed over a real network. Algorithm `run_vdaf`
@@ -484,8 +544,8 @@ point-to-point channels. In reality, these channels need to be instantiated by
 some "wrapper protocol" that implements suitable cryptographic functionalities.
 Moreover, some fraction of the aggregators (or clients) may be malicious and
 diverge from their prescribed behaviors. {{security}} describes the execution of
-the VDAF in various adversarial environments what properties the wrapper
-protocol needs to provide.
+the VDAF in various adversarial environments and what properties the wrapper
+protocol needs to provide in each.
 
 <!--
 ## VDAFs in the Literature
