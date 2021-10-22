@@ -18,7 +18,7 @@ author:
     name: Christopher Patton
     organization: Cloudflare
     email: cpatton@cloudflare.com
- - 
+ -
     name: Richard L. Barnes
     organization: Cisco
     email: rlb@ipv.sx
@@ -282,10 +282,10 @@ follows:
 * To submit an individual measurement, a Client shards the measurement into
   "input shares" and sends one input share to each Aggregator.
 * The aggregators verify the validity of the input shares, producing a set of
-  output shares.  
+  output shares.
     * Output shares are in one-to-one correspondence with the input shares.
     * Just as each Aggregator receives one input share of each input, at the end
-      of the validation process, each aggregator holds one output share. 
+      of the validation process, each aggregator holds one output share.
     * In most VDAFs, aggregators will need to exchange information among
       themselves as part of the validation process.
 * Each aggregator combine the output shares across inputs in the batch to
