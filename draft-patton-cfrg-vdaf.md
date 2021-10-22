@@ -1040,6 +1040,7 @@ class EvalState:
 
       if k_joint_rand != state.k_joint_rand: raise ERR_INVALID
       if not flp_decide(verifier): raise ERR_INVALID
+      self.step = "done"
       return state.output_share
 
     else: raise ERR_INVALID_STATE
