@@ -122,7 +122,7 @@ measurements. These protocols are designed to ensure that, as long as at least
 one aggregation server executes the protocol honestly, individual measurements
 are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious (or merely misconfigured) client submitted an
-input that would result in the output getting garbled.
+input that would result in the aggregate getting garbled.
 
 --- middle
 
@@ -152,38 +152,59 @@ measurement influences the value of the aggregated output can be controlled.
 For example, in systems like RAPPOR [EPK14], each user samples noise from a
 well-known distribution and adds it to their input before submitting to the
 aggregation server. The aggregation server then adds up the noisy inputs, and
-because it knows the distribution of the noise, it can accurately estimate the
-true sum with reasonable precision.
+because it knows the distribution from whence the noise was sampled, it can
+accurately estimate the true sum with reasonable precision.
 
-Systems like RAPPOR are practical and provide a useful privacy property (DP). On
-its own, however, DP falls short of the strongest privacy property one could
-hope for. Specifically, depending on the "amount" of noise a client adds to its
-input, it may be possible for a curious aggregator to make a reasonable guess of
-the input's true value. Indeed, the amount of noise added needs to be carefully
-controlled, since the more noise that is added to inputs, the less reliable will
-be the estimate of the output. Thus systems employing DP techniques alone must
-strike a delicate balance between privacy and utility.
+Systems like RAPPOR are easy to deploy and provide a useful privacy property
+(DP). On its own, however, DP falls short of the strongest privacy property one
+could hope for. Specifically, depending on the "amount" of noise a client adds
+to its input, it may be possible for a curious aggregator to make a reasonable
+guess of the input's true value. Indeed, the amount of noise needs to be
+carefully controlled, since the more noise that is added to inputs, the less
+reliable will be the estimate of the output. Thus systems employing DP
+techniques alone must strike a delicate balance between privacy and utility.
 
-The ideal goal for a privacy-preserving measurement system similar that of secure
+The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation: No participant in the protocol should learn anything
-about an individual input beyond what it can deduce from the final output.
-In this document, we describe Verifiable Distributed Aggregation Functions
-(VDAFs) as a general class of protocols that achieve this goal by distributing
-trust among a number of non-colluding aggregation servers. Privacy is achieved
-as long as a subset of the servers executes the protocol honestly. At the same
-time, VDAFs are "verifiable" in the sense that malformed inputs that would
-otherwise garble the output of the computation can be detected and removed from
-the set of inputs. The cost of these benefits is the need for multiple servers
+about an individual input beyond what it can deduce from the aggregate. In this
+document, we describe Verifiable Distributed Aggregation Functions (VDAFs) as a
+general class of protocols that achieve this goal.
+
+VDAF schemes achieves their privacy goal by distributing the computation of the
+aggregate among a number of non-colluding aggregation servers. As long as a
+subset of the servers executes the protocol honestly, VDAFs guarantee that no
+input is ever visible in the clear. At the same time, VDAFs are "verifiable" in
+the sense that malformed inputs that would otherwise garble the output of the
+computation can be detected and removed from the set of inputs.
+
+The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
-undermine the VDAF's privacy guarantees.
+undermine the VDAF's privacy guarantees. However, recent implementation
+experience has shown that deployment of these schemes is practical.
+
+> TODO Decide what to say about ENPA or Mozilla's Origin Telemetry.
 
 The VDAF abstraction, presented in {{vdaf}}, is based on a variety of
-multi-party protocols for privacy-preserving measurement that have been proposed
-in the literature in recent years. These protocols vary in their operational and
-security considerations, sometimes in subtle ways.  Thus the primary goal of
-this document is to provide a unified abstraction that provides applications
-with a uniform interface for accessing privacy-preserving measurement schemes,
-while providing cryptographers with design criteria for new constructions.
+multi-party protocols for privacy-preserving measurement proposed in the
+literature. These protocols vary in their operational and security
+considerations, sometimes in subtle, but consequential, ways. This document
+therefore has two important goals:
+
+ 1. Specify the operational and security considerations for this class of
+    protocols, including:
+
+    1. Which communication patterns are feasible, i.e., how much interaction
+       between the client and aggregation servers is feasible, how and how much
+       the aggregation servers ineteract amongst themselves, and so on;
+    1. What are the capabilities of a malicious coalition of servers attempting
+       divulge information about client inputs; and
+    1. What conditions are necessary to ensure that a malicious coalition of
+       clients cannot corrupt the computation.
+
+ 1. Define an abstraction boundary that provides applications, like [PPM], with
+    a simple, uniform interface for accessing privacy-preserving measurement
+    schemes, while also providing cryptographers with design criteria for new
+    constructions.
 
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
@@ -216,19 +237,18 @@ from the literature.
   In {{hits}} we describe a VDAF called `hits` that captures this functionality.
 
 The remainder of this document is organized as follows. {{overview}} gives a
-brief overview of VDAFs and the environment in which they are expected to run;
-{{vdaf}} specifies the syntax for VDAFs; {{prio3}} describes `prio3`; {{hits}}
-describes `hits`; and {{security}} enumerates the security considerations for
-VDAFs.
+brief overview of VDAFs; {{vdaf}} defines the syntax for VDAFs; {{prio3}}
+describes `prio3`; {{hits}} describes `hits`; and {{security}} enumerates the
+security considerations for VDAFs.
 
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
 
-Algorithms are written in Python 3. Unless noted otherwise, function parameters
-without a type hint implicitly have type `Bytes`, an arbitrary byte string. A
-fatal error in a program (e.g., failure to parse one of the function parameters)
-is usually handled by raising an exception.
+Algorithms are written in Python 3. Function parameters without a type hint
+implicitly have type `Bytes`, an arbitrary byte string. A fatal error in a
+program (e.g., failure to parse one of the function parameters) is usually
+handled by raising an exception.
 
 Some common functionalities:
 
@@ -409,11 +429,24 @@ Input evaluation involves the following algorithms:
   from the previous round (i.e., `len(inbound) == SHARES`) or, if this is the
   first round, an empty vector.
 
-Note that it is valid for a VDAF to specify `ROUNDS == 0`, in which case each
-Aggregator runs the evaluation-state update algorithm once and immediately
+The evaluation-state update accomplishes two tasks that are essential to most
+schemes: recovery of output shares from the input shares, and a multi-party
+computation carried out by the Aggregators to ensure that their output shares
+are valid. The VDAF abstraction boundary is drawn so that an Aggregator only
+recovers an output shares if the output share is deemed valid (at least, based
+on the Aggregator's view of the protocol). Another way to draw this boundary
+woulds be to have the Aggregators recover output shares first, then verify that
+they are valid. The problem is that this allows the possibility of misusing the
+API by, say, aggregating an invalid output share. Moreover, in some protocols, like
+Prio+ [AGJOP21] it is necessary for the Aggregators to interact in order to
+recover output shares at all.
+
+Note that it is possible for a VDAF to specify `ROUNDS == 0`, in which case
+each Aggregator runs the evaluation-state update algorithm once and immediately
 recovers its output share without interacting with the other Aggregators.
-However, most, if not all, constructions require some amount of interaction in
-order to ensure validity of the output shares (while still maintaining privacy).
+However, most, if not all, constructions will require some amount of interaction
+in order to ensure validity of the output shares (while also maintaining
+privacy).
 
 ## Output Aggregation
 
