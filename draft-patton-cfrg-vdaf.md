@@ -16,7 +16,7 @@ pi: [toc, sortrefs, symrefs]
 author:
  -
     name: Christopher Patton
-    organization: Cloudflare
+    organization: Cloudflare, Inc.
     email: cpatton@cloudflare.com
  -
     name: Richard L. Barnes
