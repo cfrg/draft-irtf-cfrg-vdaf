@@ -281,6 +281,9 @@ Some common functionalities:
 * `gen_rand(len: Unsigned) -> output: Bytes` returns an array of `len` random
   bytes (i.e., it is required that `len(output) == len`).
 
+* `byte(int: Unsigned) -> Byte` returns the representation of `int` as a byte.
+  Raises an error if `int > 255`.
+
 # Overview {#overview}
 
 In a private measurement system, we distinguish three types of actors: Clients,
@@ -644,6 +647,9 @@ of generality as `prio1`.
 
 > NOTE This construction has not undergone significant security analysis.
 
+> NOTE An implementation of this VDAF can be found
+> [here](https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/prio3.rs).
+
 ## Overview {#prio3-overview}
 
 The way `prio3` ensures privacy is quite simple: the Client shards its encoded
@@ -814,8 +820,8 @@ that this corresponds roughly to the notion of Affine-aggregatable encodings
 * `encode_input(measurement: Bytes) -> input: Vec[Field]` encodes a raw
   measurement as a vector of field elements. The type `Field` MUST be the same
   as the field type associated with the FLP (see {{flp}}). Additionally, the
-  returned `input` MUST be valid as defined by the FLP. An error raised if the
-  measurement cannot be represented as a valid input.
+  returned `input` MUST be valid as defined by the FLP. An error is raised if
+  the measurement cannot be represented as a valid input.
 
 * `decode_output(input: Vec[Field]) -> output: Vec[Field]` maps an encoded input
   to an aggregable output. It is required that `len(output) <= len(input)`.
@@ -826,13 +832,54 @@ which are not needed after the proof has been checked.
 
 ## Construction {#prio3-construction}
 
+This VDAF involves a single round of communication (`ROUND == 1`). It is defined
+for at least two aggregators, but at most 255 (`2 <= SHARES <= 255`).
+
+### Input Evaluation
+
+#### Setup
+
+The setup algorithm generates a symmetric key shared by all of the aggregators.
+The key is used to derive unique joint randomness for the FLP query-generation
+algorithm run by the aggregators during input evaluation.
+
 ~~~
 def eval_setup():
   k_query_init = gen_rand(KEY_SIZE)
-  verify_param = [ (j, k_query_init) for j in range(SHARES) ]
+  verify_param = [ (byte(j), k_query_init) for j in range(SHARES) ]
   return (None, verify_param)
 ~~~
 {: #prio3-eval-setup title="The setup algorithm for prio3."}
+
+#### Client
+
+Recall that the syntax for FLP systems calls for "joint randomness" shared by
+the prover (i.e., the Client) and the verifier (i.e., the Aggregators). VDAFs
+have no such notion, of course. Instead, the Client will derive the joint
+randomness from its input in a way that allows the Aggregators to reconstruct
+the joint randomness from their input shares. (Note that this idea is adapted
+from Section 6.2.3 of [BBCGGI19].)
+
+The input-distribution algorithm involves the following steps:
+
+1. Encode the Client's raw measurement as an input for the FLP
+1. Shard the input into a sequence of input shares.
+1. Derive the joint randomness from the input shares.
+1. Run the FLP proof-generation algorithm using prover randomness generated
+   locally.
+1. Shard the proof into a sequence of input shares.
+
+The input and proof shares of one Aggregator -- below we call it the "leader" --
+are vectors of field elements. For shares of the other aggregators -- below we
+call them the "helpers" -- as constant-sized symmetric keys. This is
+accomplished by mapping the key to a key stream and expanding the key stream
+into a pseudorandom vector of field elements. In addition to the key-derivation
+scheme described in {{prio3-deps}}, this requires a helper function, called
+`expand`, defined in {{prio3-helper-functions}}.
+
+This algorithm also makes use of a pair of helper functions for encoding the
+leader share and helper share. These are called `encode_leader_share` and
+`encode_helper_share` respectively.
 
 ~~~
 def eval_input(_, measurement):
@@ -894,6 +941,8 @@ def eval_input(_, measurement):
 ~~~
 {: #prio3-eval-input title="Input-distribution algorithm for prio3."}
 
+#### Aggregator
+
 ~~~
 def eval_start(verify_param, _, nonce, r_input_share):
   (j, k_query_init) = verify_param
@@ -918,8 +967,6 @@ def eval_start(verify_param, _, nonce, r_input_share):
 ~~~
 {: #prio3-eval-start title="Verify-start algorithm for prio3."}
 
-`ROUNDS` is 1 for Prio3, and so no `eval_next` definition is provided.
-
 ~~~
 def eval_finish(state: State, r_verifier_shares):
   if len(r_verifier_shares) != s: raise ERR_DECODE
@@ -942,7 +989,7 @@ def eval_finish(state: State, r_verifier_shares):
 > NOTE: `JOINT_RAND_LEN` may be `0`, in which case the joint randomness
 > computation is not necessary. Should we bake this option into the spec?
 
-### Helper Functions
+### Helper Functions {#prio3-helper-functions}
 
 TODO
 
