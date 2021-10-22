@@ -128,6 +128,16 @@ input that would result in the aggregate getting garbled.
 
 # Introduction
 
+> TODO Clean up references
+
+> TODO Harmonize author comment convention
+
+> TODO Finish prio3 (sans concrete PCP)
+
+> TODO Finish hits (sans concrete IDPF)
+
+> TODO Finish security considerations
+
 The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
 systems at scale. There is some overlap, however, between information that is
@@ -266,18 +276,36 @@ follows:
 
 * Clients are configured with public parameters for a set of Aggregators.
 * To submit an individual measurement, a Client shards the measurement into
-  "input shares" and sends one input share to each Aggregator
+  "input shares" and sends one input share to each Aggregator.
 * The Aggregators accept these submissions and group individual measurements
   into batches over which the desired aggregate statistics will be computed.
+
+    > CP I don't think the notion of "batch" is central to VDAFs. I think our
+    > overview would be cleaner if we just said that there is a set of inptus
+    > over which we want to compute some aggregate statistic.
+
   For each batch, the Aggregators:
   * Validate that the individual measurements in the batch meet the requirements
     of the system.
   * Combine the input shares into "output shares" of the desired aggregate.
+
+      > CP This isn't quite right. It's more accurate to say: The Aggregators
+      > want to compute some function of the input -- call it the "aggregation
+      > function" -- and we want that each Aggregator only holds a share of the
+      > input and only gets a share of the output. (To be clear: Outputs from
+      > multiple evaluations of this function care combined to get the final
+      > aggregate.)
+
 * According to the needs of the particular VDAF, Aggregators may need to
   exchange information among themselves as part of the validation and
   aggregation process.
-* The Aggregators submit their output shares to a collector, who combines
-  them to obtain the aggregate result over the inputs.
+
+    > CP What does this mean? To my read, this statement imply that, depending
+    > on the VDAF, interaction may not be necessary in order to verify output
+    > share validity.
+
+* The Aggregators submit their output shares to the Collector, who combines them
+  to obtain the aggregate result over the batch.
 
 ~~~
                  +--------------+
@@ -302,22 +330,27 @@ follows:
 
           Input shares                Output Shares
 ~~~
-{: #overall-flow title="Overall data flow in a private measurement system"}
+{: #overall-flow title="Overall data flow of a VDAF"}
+
+> CP Note that I changed this caption to talk specifically about VDAFs rather
+> than generally about private measurement systems. Systems like RAPPOR have a
+> different data flow.
 
 Aggregators are a new class of actor relative to traditional measurement systems
-where clients submit measurements to a server.  They are critical for both the
-privacy properties of the system and the correctness of the measurements
-obtained.  The privacy properties of the system are assured by non-collusion
-among aggregators, and aggregators are the entities that perform validation of
-client inputs.  Thus clients trust aggregators not to collude and collectors
-trust aggregators to properly verify client inputs.
+where clients submit measurements to a single server.  They are critical for
+both the privacy properties of the system and the correctness of the
+measurements obtained.  The privacy properties of the system are assured by
+non-collusion among aggregators, and aggregators are the entities that perform
+validation of client inputs.  Thus clients trust aggregators not to collude and
+collectors trust aggregators to properly verify client inputs.
 
-Within the bounds of the non-collusion requirements of a given VDAF instance, it
-is possible for the same entity to play more than one role.  For example,
-the collector could also act as a collector, effectively using the other
-aggregators to augment a basic client-server protocol.  It is even possible to
-have a fully democratic system, where each participant acts as client,
-aggregator, and collector -- allowing a group of participants to agree on an
+Within the bounds of the non-collusion requirements of a given VDAF instance --
+privacy requires that a subset of the Aggregators (typically just one) is honest
+-- it is possible for the same entity to play more than one role.  For example,
+the Collector could also act as an Aggregator, effectively using the other
+Aggregators to augment a basic client-server protocol.  It is even possible to
+have a fully democratic system, where each participant acts as Client,
+Aggregator, and Collector -- allowing a group of participants to agree on an
 aggregate over a set of measurements without any participant learning anything
 about other participants' measurements.
 
@@ -325,7 +358,7 @@ In this document, we describe the computations performed by the actors in this
 system.  It is up to applications to arrange for the required information to be
 delivered to the proper actors in the proper sequence.  In general, we assume
 that all communications are confidential and mutually authenticated, with the
-exception that clients submitting measurements may be anonymous.
+exception that Clients submitting measurements may be anonymous.
 
 # Definition of VDAFs {#vdaf}
 
