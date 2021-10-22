@@ -1018,17 +1018,17 @@ class EvalState:
     self.k_joint_rand_sahre = k_joint_rand_share
     self.verifier_share = verifier_share
     self.output_share = output_share
-    self.state = "ready"
+    self.step = "ready"
 
   def next(self, inbound: Vec[Bytes]):
-    if self.state == "ready" and len(inbound) == 0:
-      self.state = "waiting"
+    if self.step == "ready" and len(inbound) == 0:
+      self.step = "waiting"
       return encode_verifier_share(
         self.k_joint_rand_share,
         self.verifier_share,
       )
 
-    elif self.state == "waiting" and len(inbound) == SHARES:
+    elif self.step == "waiting" and len(inbound) == SHARES:
       k_joint_rand = zeros(KEY_SIZE)
       verifier = vec_zeros(VERIFIER_LEN)
       for r_share in r_verifier_shares:
@@ -1096,15 +1096,7 @@ def agg_output(agg_states: Vec[AggState]):
 
 # hits {#hits}
 
-TODO
-
-* Input is a bit string of a specific length.
-* Input shares are IDPF shares and the correlated randomness for each level of
-  the tree.
-* Aggregation parameter is a set of candidate prefixes, all having the same
-  length.
-* Output shares are secret shares of a vector of field elements, each
-  corresponding to a counter for one of the candidate prefixes.
+> WIP This section needs work.
 
 ## Dependencies
 
