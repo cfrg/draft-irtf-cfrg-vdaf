@@ -618,6 +618,11 @@ TODO
 
 # prio3 {#prio3}
 
+> NOTE This construction has not undergone significant security analysis.
+
+> NOTE An implementation of this VDAF can be found
+> [here](https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/prio3.rs).
+
 This section describes a VDAF suitable for the following data aggregation task.
 Each Client measurement is encoded as a vector over a finite field, and the
 aggregate is computed by summing the vectors element-wise. Validity is defined
@@ -644,11 +649,6 @@ deployed in the [ENPA] system, and like the VDAF described here, the ENPA system
 was built from techniques introduced by [BBCGGI19]. However, was specialized for
 a particular measurement type. The goal of `prio3` is to provide the same level
 of generality as `prio1`.
-
-> NOTE This construction has not undergone significant security analysis.
-
-> NOTE An implementation of this VDAF can be found
-> [here](https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/prio3.rs).
 
 ## Overview {#prio3-overview}
 
