@@ -17,7 +17,7 @@ author:
  -
     name: Christopher Patton
     organization: Cloudflare
-    email: chrispatton+ietf@gmail.com
+    email: cpatton@cloudflare.com
 
 normative:
 
