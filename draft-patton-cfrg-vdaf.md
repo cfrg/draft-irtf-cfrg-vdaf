@@ -18,6 +18,10 @@ author:
     name: Christopher Patton
     organization: Cloudflare
     email: cpatton@cloudflare.com
+ - 
+    name: Richard L. Barnes
+    organization: Cisco
+    email: rlb@ipv.sx
 
 normative:
 
