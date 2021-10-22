@@ -108,9 +108,6 @@ informative:
       - ins: E. Rescorla
       - ins: C. Wood
 
-  PAPER:
-    title: "TODO"
-
   Vad16:
     title: "The Complexity of Differential Privacy"
     date: 2016
@@ -609,8 +606,7 @@ TODO
 
 NOTE This is WIP.
 
-NOTE This protocol has not undergone significant security analysis. This is
-planned for [PAPER].
+NOTE This protocol has not undergone significant security analysis.
 
 The etymology of the term `prio3` is that it descends from the original Prio
 construction [CGB17], which was deployed in Firefox's origin telemetry project
@@ -895,22 +891,45 @@ TODO
 
 # Security Considerations {#security}
 
-TODO There will be a companion paper [PAPER] that will formalize the syntax and
-security of VDAFs and analyze some of the constructions specified here. Here we
-will say at a high level what completeness, soundness, and privacy (i.e.,
-zero-knowledge) are.
+[[ NOTE: This is a brief outline of the security considerations.  This section will be
+filled out more as the draft matures and security analyses are completed. ]]
 
-Things that are out of scope:
+A VDAF is the core of a private measurement system, but needs to be realized
+within an application.  The application will need to assure a few security
+properties, for example:
 
-* Sybil attacks [Dou02]
+* Securely provisioning clients with information about aggregators
+* Configuring secure communications:
+  * Confidential and authentic channels among aggregators, and
+    between the aggregators and the collector
+  * Confidential and aggregator-authenticated channels between clients and
+    aggregators
+* Enforcing the non-collusion properties required of the specific VDAF in use
 
-* Differential privacy [Vad16]
+In such an environment, a VDAF provides the high-level privacy property
+described above: The collector learns only the aggregate measurement, and
+nothing about individual measurements aside from what can be inferred from the
+aggregate.  The aggregators learn neither individual measurements nor the
+aggregate measurement.  The collector is assured that the aggregate statistic
+accurately reflects the inputs as long as the aggregators correctly executed
+their role in the VDAF.
 
-* VDAF is expected to be run in the ideal environment specified in {{run-vdaf}}.
-  In particular, standard network attackers that can drop messages or inject
-  messages at will are out-of-scope. Such attackers are considered in the
-  PPM protocol, which is designed to "simulate" the environment expected by the
-  VDAF.
+The verification component of a VDAF bounds the degree to which malicious
+clients can corrupt aggregate measurements by submitting malformed inputs.
+Different VDAFs allow different checks to be done on the correctness of the
+input.  These controls, however, are addressed at the level of individual
+measurements, and do not prevent a malicious client from submitting multiple
+valid inputs that would collectively result in an incorrect aggregate (a flavor
+of Sybil attack [Dou02]).
+Applications can guard against these risks by adding additional controls on
+measurement submission, such as client authentication and rate limits.  
+
+VDAFs do not inherently provide differential privacy [Vad16].  The VDAF approach
+to private measurement can be viewed as complementary to differential privacy,
+relying on non-collusion instead of statistical noise to protect the privacy of
+hte inputs.  It is possible that a future VDAF could incorporate differential
+privacy features, e.g., by injecting noise at the input stage and removing it
+during aggregation.
 
 
 # IANA Considerations
