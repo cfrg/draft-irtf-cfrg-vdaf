@@ -195,9 +195,9 @@ therefore has two important goals:
 
     1. Which communication patterns are feasible, i.e., how much interaction
        between the client and aggregation servers is feasible, how and how much
-       the aggregation servers ineteract amongst themselves, and so on;
+       the aggregation servers ineteract amongst themselves, and so on.
     1. What are the capabilities of a malicious coalition of servers attempting
-       divulge information about client inputs; and
+       divulge information about client inputs.
     1. What conditions are necessary to ensure that a malicious coalition of
        clients cannot corrupt the computation.
 
@@ -211,7 +211,7 @@ from the literature.
 
 * Prio [CGB17] is a scheme proposed by Corrigan-Gibbs and Boneh in 2017 that
   allows for the privacy-preserving computation of a variety aggregate
-  statistics. Each input is split into a sequence of additive input shares and
+  statistics. The input is sharded into a sequence of additive input shares and
   distributed among the aggregation servers. Each server then adds up its inputs
   shares locally. Finally, the output is obtained by combining the servers'
   local output shares. Prio also specifies a multi-party computation for
@@ -261,44 +261,44 @@ Some common functionalities:
 # Overview {#overview}
 
 In a private measurement system, we distinguish three types of actors: Clients,
-Aggregators, and Collectors.  The overal flow of the measurement process is as
+Aggregators, and Collectors.  The overall flow of the measurement process is as
 follows:
 
-* Clients are configured with public parameters for a set of aggregators
-* To submit an individual measurement, a client shards the measurement into
-  "input shares" and sends one input share to each aggregator
-* The aggregators accept these submissions and group individual measurements
+* Clients are configured with public parameters for a set of Aggregators.
+* To submit an individual measurement, a Client shards the measurement into
+  "input shares" and sends one input share to each Aggregator
+* The Aggregators accept these submissions and group individual measurements
   into batches over which the desired aggregate statistics will be computed.
-  For each batch, the aggregators:
+  For each batch, the Aggregators:
   * Validate that the individual measurements in the batch meet the requirements
-    of the system
+    of the system.
   * Combine the input shares into "output shares" of the desired aggregate.
-* According to the needs of the particular VDAF, aggregators may need to
+* According to the needs of the particular VDAF, Aggregators may need to
   exchange information among themselves as part of the validation and
   aggregation process.
-* The aggregators submit their output shares to a collector, who combines
-  them to obtain the aggregate measurement result over the batch
+* The Aggregators submit their output shares to a collector, who combines
+  them to obtain the aggregate result over the inputs.
 
 ~~~
-                      +--------------+
-               +----->| Aggregator 1 |------+
-               |      +--------------+      |
-               |             ^              |
-               |             |              |
-               |             V              |
-               |      +--------------+      |
-               | +--->| Aggregator 2 |----+ |
-               | |    +--------------+    | |
-+--------+-----+ |           ^            | +---->+-----------+
-| Client |-------+           |            +------>| Collector |--> Aggregate
-+--------+-----+                            +---->+-----------+
-               |            ...             |
-               |                            |
-               |             |              |
-               |             V              |
-               |      +--------------+      |
-               +----->| Aggregator N |------+
-                      +--------------+
+                 +--------------+
+           +---->| Aggregator 0 |----+
+           |     +--------------+    |
+           |             ^           |
+           |             |           |
+           |             V           |
+           |     +--------------+    |
+           | +-->| Aggregator 1 |--+ |
+           | |   +--------------+  | |
++--------+-+ |           ^         | +->+-----------+
+| Client |---+           |         +--->| Collector |--> Aggregate
++--------+-+                         +->+-----------+
+           |            ...          |
+           |                         |
+           |             |           |
+           |             V           |
+           |    +----------------+   |
+           +--->| Aggregator N-1 |---+
+                +----------------+
 
           Input shares                Output Shares
 ~~~
@@ -327,7 +327,7 @@ delivered to the proper actors in the proper sequence.  In general, we assume
 that all communications are confidential and mutually authenticated, with the
 exception that clients submitting measurements may be anonymous.
 
-# Definition {#vdaf}
+# Definition of VDAFs {#vdaf}
 
 A concrete VDAF specifies the algorithms involved in evaluating the VDAF on a
 single input and the algorithms involved in aggregating the outputs across
@@ -351,35 +351,33 @@ A concrete VDAF also specifies the following associated types:
 
 ~~~~
     Client
-      | input
-      v
+      |
+      V
     +---------------------------------------------+
     | eval_input                                  |
     +---------------------------------------------+
       |              |              ...  |
-      v              v                   v
+      V              V                   V
     +-----------+  +-----------+       +-----------+
     | eval_init |  | eval_init |       | eval_init |
     +-----------+  +------------+      +-----------+
       |              |              ...  |
-      v              v                   v
+      V              V                   V
     +-----------+  +-----------+       +-----------+
     | eval_next |  | eval_next |       | eval_next |
     +-----------+  +-----------+       +-----------+
       |              |              ...  |
       ====================================
       |              |                   |
-      v              v                   v
-      .              .                   .
-      .              .                   .
-      .              .                   .
+      V              V                   V
+     ...            ...                 ...
       |              |                   |
-      v              v                   v
+      V              V                   V
     +-----------+  +-----------+       +-----------+
     | eval_next |  | eval_next |       | eval_next |
     +-----------+  +-----------+       +-----------+
-      |               |             ...  |
-      v               v                  v
+      |              |              ...  |
+      V              V                   V
     Aggregator 0   Aggregator 1        Aggregator SHARES-1
 ~~~~
 {: #eval-flow title="Evaluation of the VDAF on a single input. The Aggregators
@@ -387,7 +385,7 @@ communicate over a broadcast channel, illustrated by the === line. At the end of
 the protocol, each Aggregator has recovered a share of the output."}
 
 Input evaluation involves a Client and the Aggregators. The process, illustrated
-in {{eval-flow}}, begins by having the Client split its input into a sequence of
+in {{eval-flow}}, begins by having the Client shard its input into a sequence of
 input shares and sending each input share to one of the Aggregators. The
 Aggregators then interact with one another over `ROUND` rounds, where in
 each round, each Aggregator produces a single outbound message. The outbound
@@ -453,12 +451,26 @@ privacy).
 ~~~~
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
       |               |                   |
-      v               v                   v
+      V               V                   V
     +-----------+   +-----------+       +-----------+
     | agg_init  |   | agg_init  |   ... | agg_init  |
     +-----------+   +-----------+       +-----------+
       |               |                   |
-      v               |                   |
+      V               |                   |
+    +-----------+     |                   |
+--->| agg_next  |     |                   |
+    +-----------+     V                   |
+      |             +-----------+         |
+------------------->| agg_next  |         |
+      |             +-----------+         V
+      |               |                 +-----------+
+--------------------------------------->| agg_next  |
+      |               |                 +-----------+
+      |               |                   |
+      V               V                   V
+     ...             ...                 ...
+      |               |                   |
+      V               |                   |
     +-----------+     |                   |
 --->| agg_next  |     |                   |
     +-----------+     v                   |
@@ -469,28 +481,12 @@ privacy).
 --------------------------------------->| agg_next  |
       |               |                 +-----------+
       |               |                   |
-      v               v                   v
-      .               .                   .
-      .               .                   .
-      .               .                   .
-      |               |                   |
-      v               |                   |
-    +-----------+     |                   |
---->| agg_next  |     |                   |
-    +-----------+     v                   |
-      |             +-----------+         |
-------------------->| agg_next  |         |
-      |             +-----------+         v
-      |               |                 +-----------+
---------------------------------------->| agg_next  |
-      |               |                 +-----------+
-      |               |                   |
-      v               v                   v
+      V               V                   V
     +-----------------------------------------------+
     | agg_output                                    |
     +-----------------------------------------------+
       |
-      v
+      V
     Collector
 ~~~~
 {: #agg-flow title="Aggregation of output shares. Each set of wires
@@ -536,7 +532,7 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
   agg_states = [ agg_init() for j in range(SHARES) ]
 
   for (nonce, input) in zip(nonces, inputs):
-    # Each client splits its input into shares.
+    # Each client shards its input into shares.
     input_shares = eval_input(public_param, input)
 
     # Each aggregator initializes its evaluation state.
@@ -557,7 +553,7 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
     for j in range(SHARES):
       agg_states[j].next(outbound[j])
 
-  # Collector computes the final aggregate.
+  # Collector unshards the aggregate.
   return agg_output(agg_states)
 ~~~
 {: #run-vdaf title="Execution of a VDAF."}
