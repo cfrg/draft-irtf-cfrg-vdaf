@@ -530,9 +530,9 @@ following algorithms:
   algorithm. It is run by an Aggregator immediately after it recovers a valid
   output share `output_share`.
 
-* `agg_output(agg_states: Vec[AggStates]) -> agg` is the deterministic combines
-  the aggregation state of each aggregator (note that `len(states) == SHARES`)
-  into the final aggregate `agg`.
+* `agg_output(agg_states: Vec[AggStates]) -> agg` is run by the Collector in
+  order to compute the final aggregate from the Aggregators' aggregation states.
+  (Note that `len(states) == SHARES`.) This algorithm is deterministic.
 
 > OPEN ISSUE Maybe `AggState.next` (and maybe `agg_output`, too) should be
 > randomized in order to allow the Aggregators (or the Collector) to add noise
@@ -718,6 +718,8 @@ A concrete FLP defines the following constants:
 * `PROVE_RAND_LEN: Unsigned` is the length of the prover randomness.
 * `QUERY_RAND_LEN: Unsigned` is the length of the query randomness.
 * `INPUT_LEN: Unsigned` is the length of the input.
+* `OUTPUT_LEN: Unsigned` is the length of the aggregable output. (See
+  {{prio3-aggregable}}.)
 * `PROOF_LEN: Unsigned` is the length of the proof.
 * `VERIFIER_LEN: Unsigned` is the length of the verifier message.
 
@@ -810,7 +812,7 @@ Associated constants:
 
 * `KEY_SIZE` is the size of keys for the key-derivation scheme.
 
-### Aggregable Encoding
+### Aggregable Encoding {#prio3-aggregable}
 
 Finally, The VDAF requires a method for encoding raw measurements as vectors of
 field elements and decoding input shares into aggregable output shares. (Note
@@ -824,7 +826,8 @@ that this corresponds roughly to the notion of Affine-aggregatable encodings
   the measurement cannot be represented as a valid input.
 
 * `decode_output(input: Vec[Field]) -> output: Vec[Field]` maps an encoded input
-  to an aggregable output. It is required that `len(output) <= len(input)`.
+  to an aggregable output. The length of the output MUST be `OUTPUT_LEN` as
+  specified by the FLP.
 
 Note that the decoding step is useful because, for some FLPs, the encoded input
 includes redundant field elements that are useful for checking the proof, but
@@ -1045,6 +1048,34 @@ class EvalState:
 
 > NOTE `JOINT_RAND_LEN` may be `0`, in which case the joint randomness
 > computation is not necessary. Should we bake this option into the spec?
+
+### Output Aggregation
+
+#### Aggregator
+
+~~~
+def agg_init():
+  return AggState()
+
+class AggState:
+  def __init__():
+    self.share = vec_zeros(OUTPUT_LEN)
+
+  def next(self, output_share: Vec[Field]):
+    self.share += output_share
+~~~
+{: #prio3-agg-state title="Aggregation state for prio3."}
+
+#### Collector
+
+~~~
+def agg_output(agg_states: Vec[AggState]):
+  agg = vec_zeros(OUTPUT_LEN)
+  for agg_state in agg_states:
+    agg += agg_state.share
+  return agg
+~~~
+{: #prio3-agg-output title="Computation of the aggregate for prio3."}
 
 ### Helper Functions {#prio3-helper-functions}
 
