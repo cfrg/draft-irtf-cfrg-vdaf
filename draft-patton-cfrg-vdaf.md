@@ -1106,6 +1106,161 @@ TODO
 * Output shares are secret shares of a vector of field elements, each
   corresponding to a counter for one of the candidate prefixes.
 
+## Dependencies
+
+[TODO Clarify which of these can be assumed and which need to be explicitly
+defined]
+
+### Descriptions of finite fields
+
+We assume a structure for describing IDPF output groups, named `ValueType`.
+For verifiable heavy hitters, we need an IDPF that at each level has two field
+elements as outputs, and so the value type would be pairs of field elements.
+The IDPF key generation and evaluation functions will allow a different `ValueType`
+parameter per bit in the IDPF domain, which allows us to use different types at
+the output layer, required for extractability. See [BBCGGI21, Section 4.3] for
+details. We assume a function `get_value_type(n: Unsigned) -> ValueType` that
+returns the type for bit index `n`. We use `ValueType` to refer to a description
+of a given group, and`Value` to refer to an actual element of the group.
+
+### Incremental Distributed Point Functions (IDPFs)
+
+An IDPF is defined over a domain of size `2**d`. The client can specify an
+index `alpha` and values `beta`, one for each level `l` in `[d]`. The key
+generation generates two IDPF keys that individually hide `alpha` and `beta`.
+When locally evaluated at any point `x` in `2**l` at level `l`, the IDPF
+returns shares of `beta[l]`, if `x` is the `l`-bit prefix of `alpha`, and
+shares of zero otherwise. If elements of `beta` are tuples, the additive
+sharing is done element-wise.
+
+- `idpf_gen(alpha: Unsigned, beta: Vec[Value]) -> (idpf_key1: Bytes, `
+`idpf_key2: Bytes)`:
+Takes as input the index and values for the IDPF. Returns two serialized IDPF
+keys, one for each helper server.
+- `idpf_eval_next(state: State, dpf_key: Bytes, x: Unsigned) `
+`-> (new_state: State, value: Value)`:
+Evaluates the given key at index `x`, at the next prefix length that hasn't
+been evaluated yet for `state`, returning a secret-shared value.
+
+### Malicious sketching for IDPFs
+
+~~~
+def verify_sketch_round_1(idpf_output: Vec[Value], correlation_share, \
+    verify_rand: Bytes, level: Unsigned):
+  # Expand common randomness and compute verification message
+  r = expand_rand(verify_rand, level, len(idpf_output))
+  r_squared = [v*v for v in r]
+  ver_msg_1 = inner_product(
+    [value[0] for value in idpf_output,
+    r
+  )
+  ver_msg_2 = inner_product(
+    [value[0] for value in idpf_output,
+    r_squared
+  )
+  ver_msg_3 = inner_product(
+    [value[1] for value in idpf_output],
+    r
+  )
+  outbound_message = {
+    ver_msg_1: ver_msg_1 + correlation_share.a
+    ver_msg_2: ver_msg_2 + correlation_share.b
+    ver_msg_3: ver_msg_3 + correlation_share.c
+  }
+  state = {
+    ver_msg_1: ver_msg_1,
+    ver_msg_2: ver_msg_2,
+    ver_msg_3: ver_msg_3,
+
+  return (state, outbound_message)
+~~~
+
+~~~
+def verify_sketch_round_2(state, inbound_message, correlation_share):
+  ver_msg_1 = state.ver_msg_1 + inbound_message.ver_msg_1
+  ver_msg_2 = state.ver_msg_2 + inbound_message.ver_msg_2
+  ver_msg_3 = state.ver_msg_3 + inbound_message.ver_msg_3
+  verification = ver_msg_1**2 - ver_msg_2 - ver_msg_3 + \
+    correlation_share.A * ver_msg_1 + correlation_share.B
+  if verification == 0:
+    return True
+  else:
+    return False
+~~~
+
+## Construction
+
+~~~
+def vdaf_setup(n: Unsigned):
+  public_param = {
+    n: n
+  }
+  return (public_param, None)
+~~~
+
+~~~
+def vdaf_input(public_param, input):
+  assert(log2(input) < public_param.n)
+  beta = []
+  correlation_shares_0 = [], correlation_shares_1 = []
+  for l in range(public_param.n):
+    # Construct values of the form (1, k), where k is a random field element.
+    _, field = get_value_type(l)
+    k = get_random_element(field)
+    beta += [(1, k)]
+    # Create secret shares of correlations to aid the servers' computation
+    a, b, c = get_random_element(field), get_random_element(field), \
+      get_random_element(field)
+    A = -2*a+k
+    B = a*a + b - a * k + c
+    correlation_shares_0 += [{
+      a: get_random_element(field),
+      b: get_random_element(field),
+      c: get_random_element(field),
+      A: get_random_element(field),
+      B: get_random_element(field),
+    }]
+    correlation_shares_1 += [{
+      a: a - correlation_shares_0[l]
+      b: b - correlation_shares_0[l]
+      c: c - correlation_shares_0[l]
+      A: A - correlation_shares_0[l]
+      B: B - correlation_shares_0[l]
+    }]
+  key_0, key_1 = idpf_gen(input, beta)
+  return ((key_0, correlation_shares_0), (key_1, correlation_shares_1))
+~~~
+
+~~~
+def vdaf_start(verify_param, public_param, nonce, input_share):
+  key, correlation_share = input_share
+
+  # Expand left and right children of the DPF tree.
+  state_left, value_left = idpf_eval_next(None, key, 0)
+  state_right, value_right = idpf_eval_next(None, key, 1)
+  idpf_states = [state_left, state_right]
+  idpf_output = [value_left, value_right]
+  prefixes = [0, 1]
+
+  verification_state, outbound_message = verify_sketch_round_1(idpf_output, \
+    correlation_share[0], nonce, 0)
+
+  state = {
+    key: key,
+    correlation_share: correlation_share,
+    idpf_states: idpf_states,
+    level: 0,
+    prefixes: prefixes
+    verification_round: 1
+    verification_state: verification_state,
+  }
+  return (state, outbound_message)
+~~~
+
+~~~
+def vdaf_next(state, inbound_messages):
+  TODO.
+~~~
 
 # Security Considerations {#security}
 
