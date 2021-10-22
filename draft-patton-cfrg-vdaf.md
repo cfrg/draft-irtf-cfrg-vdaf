@@ -362,11 +362,6 @@ addition, a VDAF specifies the following constants:
   Aggregators before they recover output shares from a single set of input
   shares.
 
-A concrete VDAF also specifies the following associated types:
-
-* `EvalState` is the state of an Aggregator during evaluation of a single Client input.
-* `AggState` is the state of an Aggregator carried across multiple evaluations.
-
 ## Input Evaluation
 
 ~~~~
@@ -532,10 +527,10 @@ following algorithms:
   the aggregation state of each aggregator (note that `len(states) == SHARES`)
   into the final aggregate `agg`.
 
-> TODO Maybe `AggState.next` (and maybe `agg_output`, too) should be randomized
-> in order to allow the Aggregators (or the Collector) to add noise for
-> differential privacy. (See the security considerations of [PPM].) Or is this
-> out-of-scope of this document?
+> OPEN ISSUE Maybe `AggState.next` (and maybe `agg_output`, too) should be
+> randomized in order to allow the Aggregators (or the Collector) to add noise
+> for differential privacy. (See the security considerations of [PPM].) Or is
+> this out-of-scope of this document?
 
 ## Execution of a VDAF {#execution}
 
@@ -615,6 +610,8 @@ TODO
 -->
 
 # prio3 {#prio3}
+
+> NOTE This construction has not undergone significant security analysis.
 
 The etymology of the term `prio3` is that it descends from the original Prio
 construction [CGB17], which was deployed in Firefox's origin telemetry project
