@@ -966,7 +966,7 @@ measurements, and do not prevent a malicious client from submitting multiple
 valid inputs that would collectively result in an incorrect aggregate (a flavor
 of Sybil attack [Dou02]).
 Applications can guard against these risks by adding additional controls on
-measurement submission, such as client authentication and rate limits.  
+measurement submission, such as client authentication and rate limits.
 
 VDAFs do not inherently provide differential privacy [Vad16].  The VDAF approach
 to private measurement can be viewed as complementary to differential privacy,
