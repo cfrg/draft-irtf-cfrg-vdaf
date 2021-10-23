@@ -616,7 +616,7 @@ TODO
   convert them to additive shares over a number of rounds.
 -->
 
-# Preliminaries
+# Preliminaries {#prelim}
 
 This section describes the cryptographic primitives that are common to the VDAFs
 specified in this document.
@@ -744,13 +744,10 @@ aggregators. Combining the results yields the result of evaluation the circuit
 `C` on input `x`, without leaking the value of `x` itself.
 
 `prio3` can be viewed as a transformation of a particular class of FLP systems
-into a VDAF. In {{prio3-deps}} we describe the building blocks used in this
-transform, including the syntax for FLPs. The construction is given in
+into a VDAF. The next section describes FLPs. The construction is given in
 {{prio3-construction}}.
 
-## Dependencies {#prio3-deps}
-
-### Fully Linear Proof (FLP) Systems {#flp}
+## Fully Linear Proof (FLP) Systems {#flp}
 
 Conceptually, an FLP system is a two-party protocol executed by a prover and a
 verifier. In actual use, however, the prover's computation is carried out by the
@@ -896,7 +893,7 @@ are vectors of field elements. For shares of the other aggregators -- below we
 call them the "helpers" -- as constant-sized symmetric keys. This is
 accomplished by mapping the key to a key stream and expanding the key stream
 into a pseudorandom vector of field elements. In addition to the key-derivation
-scheme described in {{prio3-deps}}, this requires a helper function, called
+scheme described in {{prelim}}, this requires a helper function, called
 `expand`, defined in {{prio3-helper-functions}}.
 
 This algorithm also makes use of a pair of helper functions for encoding the
@@ -1142,9 +1139,7 @@ The name `hits` is an anagram of "hist", which is short for "histogram". It is a
 nod toward the "subset histogram" problem formulated by [BBCGGI21] and for which
 the `hits` VDAF is a solution.
 
-## Dependencies
-
-### Incremental Distributed Point Functions (IDPFs)
+## Incremental Distributed Point Functions (IDPFs)
 
 An IDPF is defined over a domain of size `2^DIM`, where `DIM` is constant
 defined by the IDPF. The Client specifies an index `alpha` and values `beta`,
