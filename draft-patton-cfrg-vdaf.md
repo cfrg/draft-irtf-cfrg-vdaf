@@ -1020,9 +1020,9 @@ class EvalState:
         k_joint_rand ^= k_joint_rand_share
         verifer += verifier_share
 
-      if k_joint_rand != state.k_joint_rand: raise ERR_INVALID
+      if k_joint_rand != self.k_joint_rand: raise ERR_INVALID
       if not flp_decide(verifier): raise ERR_INVALID
-      return state.output_share
+      return self.output_share
 
     else: raise ERR_INVALID_STATE
 ~~~
