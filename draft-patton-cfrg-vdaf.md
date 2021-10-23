@@ -1166,6 +1166,15 @@ An IDPF is comprised of the following algorithms (let type `Value[l]` denote
   value corresponding to index `x`. The value of `l` MUST be in `[1, DIM]` and
   the value of `x` MUST be in range `[2^(l-1), 2^l)`.
 
+A concrete IDPF specifies a single associated constant:
+
+* `DIM: Unsigned` is the length of each Client input.
+
+A concrete IDPF also specifies the following associated types:
+
+* `Field[l]` for each level `1 <= l <= DIM`. Each defines the same methods and
+  associated constants as `Field` in {{prio3}}.
+
 Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
 the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
 Section 4.3.
@@ -1174,14 +1183,12 @@ Section 4.3.
 > for the inner nodes and the leaf nodes. Would the loss of generality would be
 > acceptable?
 
-In summary, a concrete IDPF specifies a single associated constant:
-
-* `DIM: Unsigned` is the length of each Client input.
-
-A concrete IDPF also specifies the following associated types:
-
-* `Field[l]` for each level `1 <= l <= DIM`. Each defines the same methods and
-  associated constants as `Field` in {{prio3}}.
+Finally, an implementation note. The stateless for IPDFs specified here is
+stateless, in the sense that there is not state carried between IPDF
+evaluations. This is to align the IDPF syntax with the VDAF abstraction
+boundary, which does not include shared evaluation state across evaluations. In
+practice, of course, it will often be beneficial to expose a stateful API for
+IDPFs and carry the state across evaluations.
 
 ## Construction {#hits-construction}
 
