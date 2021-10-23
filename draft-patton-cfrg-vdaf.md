@@ -979,31 +979,28 @@ class EvalState:
     (j, k_query_init) = verify_param
 
     if j == 0: # leader
-      (input_share, proof_share,
+      (self.input_share, self.proof_share,
        k_blind, k_hint) = decode_leader_share(r_input_share)
     else:
       (k_input_share, k_proof_share,
        k_blind, k_hint) = decode_helper_share(r_input_share)
-      input_share = expand(input_share, INPUT_LEN)
-      proof_share = expand(proof_share, PROOF_LEN)
+      self.input_share = expand(k_input_share, INPUT_LEN)
+      self.proof_share = expand(k_proof_share, PROOF_LEN)
 
-    k_joint_rand_share = get_key(k_blind, byte(j) + input_share)
-    k_joint_rand = k_hint ^ k_joint_rand_share
-    k_query_rand = get_key(k_query_init, byte(255) + nonce)
-
-    joint_rand = expand(k_joint_rand, JOINT_RAND_LEN)
-    query_rand = expand(k_query_rand, QUERY_RAND_LEN)
-    verifier_share = flp_query(
-        input_share, proof_share, query_rand, joint_rand)
-
-    self.k_joint_rand = k_joint_rand
-    self.k_joint_rand_sahre = k_joint_rand_share
-    self.verifier_share = verifier_share
-    self.output_share = flp_truncate(input_share)
+    self.k_joint_rand_share = get_key(
+      k_blind, byte(j) + self.input_share)
+    self.k_joint_rand = k_hint ^ self.k_joint_rand_share
+    self.k_query_rand = get_key(k_query_init, byte(255) + nonce)
     self.step = "ready"
 
   def next(self, inbound: Vec[Bytes]):
     if self.step == "ready" and len(inbound) == 0:
+      joint_rand = Field.expand(self.k_joint_rand, JOINT_RAND_LEN)
+      query_rand = Field.expand(self.k_query_rand, QUERY_RAND_LEN)
+      verifier_share = flp_query(
+        self.input_share, self.proof_share, query_rand, joint_rand)
+
+      self.output_share = flp_truncate(input_share)
       self.step = "waiting"
       return encode_verifier_share(
         self.k_joint_rand_share,
@@ -1013,7 +1010,7 @@ class EvalState:
     elif self.step == "waiting" and len(inbound) == SHARES:
       k_joint_rand = zeros(KEY_SIZE)
       verifier = vec_zeros(VERIFIER_LEN)
-      for r_share in r_verifier_shares:
+      for r_share in inbound:
         (k_joint_rand_share,
          verifier_share) = decode_verifier_share(r_share)
 
@@ -1221,7 +1218,7 @@ follows. Function `encode_input_share` is defined in {{hits-helper-functions}}.
 
 ~~~
 def eval_input(_, alpha):
-  if alpha < 2^DIM: raise ERR_INVALID_INPUT
+  if alpha < 2**DIM: raise ERR_INVALID_INPUT
 
   # Prepare IDPF values.
   beta = []
