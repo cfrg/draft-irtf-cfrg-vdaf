@@ -616,6 +616,78 @@ TODO
   convert them to additive shares over a number of rounds.
 -->
 
+# Preliminaries
+
+This section describes the cryptographic primitives that are common to the VDAFs
+specified in this document.
+
+## Key Derivation
+
+A key-derivation scheme defines a methods for deriving symmetric keys and a
+method for expanding a symmetric into an arbitrary length key stream are
+required. This scheme consists of the following algorithms:
+
+* `get_key(init_key, aux_input) -> key` derives a fresh key `key` from an
+  initial `init_key` and auxiliary input `aux_input`. The length of `init_key`
+  and `key` MUST be equal to `KEY_SIZE`.
+
+* `key_stream_init(key) -> state: KeyStream` returns a key stream generator that
+  is used to generate an arbitrary length stream of pseudorandom bytes. The
+  length of `key` MUST be `KEY_SIZE`.
+
+* `KeyStream.next(len: Unsigned) -> (new_state: KeyStream, output)` returns the
+  next `len` bytes of the key stream and updates the key stream generator state.
+  The length of the output MUST be `len`.
+
+> TODO This functionality closely resembles what people usually think of as an
+> extract-then-expand KDF, but differs somewhat in its syntax and, also, its
+> required security properties. Can we get the same functionality from something
+> that's more commonplace? HKDF doesn't fit the bill, unfortunately, because
+> keys can only be expanded to a fairly short length. Our application requires a
+> rather long key stream.
+
+Associated types:
+
+* `KeyStream` represents the state of the key stream generator.
+
+Associated constants:
+
+* `KEY_SIZE` is the size of keys for the key-derivation scheme.
+
+## Finite Fields {#field}
+
+In this document we only consider finite fields of the form `GF(p)` for prime
+`p`. Finite field elements are represented by a type `Field` that defines binary
+operators for addition and multiplication in the field. The type also defines
+the following associated functions:
+
+  * `Field.zeros(len: Unsigned) -> output: Vec[Field]` returns a vector of
+    zeros. The length of `output` MUST be `len`.
+
+  * `Field.rand_vec(len: Unsigned) -> output: Vec[Field]` returns a vector of
+    random field elements. The length of `output` MUST be `len`.
+
+    > NOTE In reality this would be achieved by generating a random key and
+    > expanding it into a sequence of field elements using a key derivation
+    > scheme. This should probably be made explicit.
+
+  * `Field.encode_vec(data: Vec[Field]) -> encoded_data: Bytes` represents the
+    input `data` as a byte string `encoded_data`.
+
+  * `Field.decode_vec(encoded_data: Bytes) -> data: Vec[Field]` reverse
+    `encoded_vec`, returning the vector of field elements encoded by
+    `encoded_data`. Raises an exception if the input does not encode a valid
+    vector of field elements.
+
+### Deriving a Vector
+
+> TODO Specify the following function in terms of a key-derivation scheme. It'll
+> use `key_stream_init` to create a `KeyStream` object and read from it multiple
+> times.
+
+* `expand(Field, key: Bytes, len: Unsigned) -> output: Vec[Field]` expands a key
+  into a pseudorandom sequence of field elements.
+
 # prio3 {#prio3}
 
 > NOTE This construction has not undergone significant security analysis.
@@ -691,7 +763,7 @@ algorithms:
   the prover. Its inputs are the encoded input, the "prover randomness"
   `prove_rand`, and the "joint randomness" `joint_rand`. The proof randomness is
   used only by the prover; the joint randomness is shared by both the prover and
-  verifier.
+  verifier. Type `Field` is a finite field as defined in {{field}}.
 
 * `flp_query(input: Vec[Field], proof: Vec[Field], query_rand: Vec[Field],
   joint_rand: Vec[Field]) -> verifier: Vec[Field]` is the query-generation
@@ -717,26 +789,6 @@ A concrete FLP defines the following constants:
 * `OUTPUT_LEN: Unsigned` is the length of the aggregable output.
 * `PROOF_LEN: Unsigned` is the length of the proof.
 * `VERIFIER_LEN: Unsigned` is the length of the verifier message.
-
-PLP systems also have an associated type that defines a finite field field
-`GF(p)` for prime `p`:
-
-* `Field` is an element of a finite field. Associated functions:
-
-  * `Field.zeros(len: Unsigned) -> output: Vec[Field]` returns a vector of
-    zeros. The length of `output` MUST be `len`.
-  * `Field.rand_vec(len: Unsigned) -> output: Vec[Field]` returns a vector of
-    random field elements. The length of `output` MUST be `len`.
-  * `encode_vec(data: Vec[Field]) -> encoded_data: Bytes` represents the input
-    `data` as a byte string `encoded_data`.
-  * `decode_vec(encoded_data: Bytes) -> data: Vec[Field]` reverse `encoded_vec`,
-    returning the vector of field elements encoded by `encoded_data`. Raises an
-    exception if the input does not encode a valid vector of field elements.
-
-  Associated constants of `Field`:
-
-  * `ENCODED_SIZE: Unsigned` is the size of each field element in bytes.
-  * `MODULUS: Unsigned` equal to `p`, the field's prime modulus.
 
 Our application requires that the FLP is "fully linear" in the sense defined in
 [BBCGGI19]. As a practical matter, what this property implies is that the
@@ -799,39 +851,6 @@ the length of the aggregated output:
 
 Note that, taken together, these two functionalities correspond roughly to the
 notion of Affine-aggregatable encodings (AFEs) from [CGB17].)
-
-### Key Derivation
-
-In addition to the core FLP system functionality, the `prio3` VDAF requires a
-way to derive symmetric keys and to expand keys into an arbitrary length key
-stream. A key-derivation scheme consists of the following algorithms:
-
-* `get_key(init_key, aux_input) -> key` derives a fresh key `key` from an
-  initial `init_key` and auxiliary input `aux_input`. The length of `init_key`
-  and `key` MUST be equal to `KEY_SIZE`.
-
-* `get_key_stream(key) -> state: KeyStream` returns a key stream generator that
-  is used to generate an arbitrary length stream of pseudorandom bytes. The
-  length of `key` MUST be `KEY_SIZE`.
-
-* `KeyStream.next(len: Unsigned) -> (new_state: KeyStream, output)` returns the
-  next `len` bytes of the key stream and updates the key stream generator state.
-  The length of the output MUST be `len`.
-
-> TODO This functionality closely resembles what people usually think of as an
-> extract-then-expand KDF, but differs somewhat in its syntax and, also, its
-> required security properties. Can we get the same functionality from something
-> that's more commonplace? HKDF doesn't fit the bill, unfortunately, because
-> keys can only be expanded to a fairly short length. Our application requires a
-> rather long key stream.
-
-Associated types:
-
-* `KeyStream` represents the state of the key stream generator.
-
-Associated constants:
-
-* `KEY_SIZE` is the size of keys for the key-derivation scheme.
 
 ## Construction {#prio3-construction}
 
@@ -897,7 +916,7 @@ def eval_input(_, measurement):
   for j in range(SHARES-1):
     k_blind = gen_rand(KEY_SIZE)
     k_share = gen_rand(KEY_SIZE)
-    helper_input_share = expand(k_share, INPUT_LEN)
+    helper_input_share = expand(Field, k_share, INPUT_LEN)
     leader_input_share -= helper_input_share
     k_hint = get_key(k_blind,
         byte(j+1) + encode_vec(helper_input_share))
@@ -916,14 +935,14 @@ def eval_input(_, measurement):
   k_leader_hint ^= k_joint_rand
 
   # Generate the proof shares.
-  joint_rand = expand(k_joint_rand, JOINT_RAND_LEN)
-  prove_rand = expand(gen_rand(KEY_SIZE), PROVE_RAND_LEN)
+  joint_rand = expand(Field, k_joint_rand, JOINT_RAND_LEN)
+  prove_rand = expand(Field, gen_rand(KEY_SIZE), PROVE_RAND_LEN)
   leader_proof_share = flp_prove(input, prove_rand, joint_rand)
   k_helper_proof_shares = []
   for j in range(SHARES-1):
     k_share = gen_rand(KEY_SIZE)
     k_helper_proof_shares.append(k_share)
-    helper_proof_share = expand(k_share, PROOF_LEN)
+    helper_proof_share = expand(Field, k_share, PROOF_LEN)
     leader_proof_share -= helper_proof_share
 
   output = []
@@ -984,8 +1003,8 @@ class EvalState:
     else:
       (k_input_share, k_proof_share,
        k_blind, k_hint) = decode_helper_share(r_input_share)
-      self.input_share = expand(k_input_share, INPUT_LEN)
-      self.proof_share = expand(k_proof_share, PROOF_LEN)
+      self.input_share = expand(Field, k_input_share, INPUT_LEN)
+      self.proof_share = expand(Field, k_proof_share, PROOF_LEN)
 
     self.k_joint_rand_share = get_key(
       k_blind, byte(j) + self.input_share)
@@ -995,8 +1014,8 @@ class EvalState:
 
   def next(self, inbound: Vec[Bytes]):
     if self.step == "ready" and len(inbound) == 0:
-      joint_rand = Field.expand(self.k_joint_rand, JOINT_RAND_LEN)
-      query_rand = Field.expand(self.k_query_rand, QUERY_RAND_LEN)
+      joint_rand = expand(Field, self.k_joint_rand, JOINT_RAND_LEN)
+      query_rand = expand(Field, self.k_query_rand, QUERY_RAND_LEN)
       verifier_share = flp_query(
         self.input_share, self.proof_share, query_rand, joint_rand)
 
@@ -1057,9 +1076,6 @@ def agg_output(agg_states: Vec[AggState]):
 
 > TODO Specify the following functionalities.
 
-* `expand(key, len: Unsigned) -> vec: Vec[Field]` maps a key of length
-  `KEY_SIZE` to a length-`len` vector of field elements. This is constructed
-  from the key-derivation scheme.
 * `encode_leader_share(input_share: Vec[Field], proof_share: Vec[Field], blind,
   hint) -> encoded: Bytes` encodes a leader share as a byte string.
 * `encode_helper_share(input_share, proof_sahre, blind, hint) -> encoded: Bytes`
@@ -1286,7 +1302,7 @@ class EvalState:
         auth_share.append(value[1])
 
       # Prepare first sketch verification message.
-      r = Field[l].expand(self.k_verify_rand, len(data_share))
+      r = expand(Field[l], self.k_verify_rand, len(data_share))
       verifier_share_1 = [
          a_share + inner_product(data_share, r),
          b_share + inner_product(data_share, r * r),
