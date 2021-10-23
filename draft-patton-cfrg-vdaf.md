@@ -143,10 +143,6 @@ input that would result in the aggregate getting garbled.
 
 > TODO Harmonize author comment convention
 
-> TODO Finish prio3 (sans concrete PCP)
-
-> TODO Finish hits (sans concrete IDPF)
-
 > TODO Finish security considerations
 
 The ubiquity of the Internet makes it an ideal platform for measurement of
@@ -601,8 +597,6 @@ protocol needs to provide in each.
 <!--
 ## VDAFs in the Literature
 
-TODO
-
 * Prio [CGB17] defines the composition of a linear secret sharing scheme and an
   affine-aggregatable encoding of a statistic.
 
@@ -679,7 +673,7 @@ the following associated functions:
     `encoded_data`. Raises an exception if the input does not encode a valid
     vector of field elements.
 
-### Deriving a Vector
+### Deriving a Pseudorandom Vector
 
 > TODO Specify the following function in terms of a key-derivation scheme. It'll
 > use `key_stream_init` to create a `KeyStream` object and read from it multiple
@@ -687,6 +681,13 @@ the following associated functions:
 
 * `expand(Field, key: Bytes, len: Unsigned) -> output: Vec[Field]` expands a key
   into a pseudorandom sequence of field elements.
+
+### Inner product of Vectors
+
+> TODO Specify
+
+* `inner_product(left: Vec[Field], right: Vec[Field]) -> Field` computes the
+  inner product of `left` and `right`.
 
 # prio3 {#prio3}
 
@@ -1084,13 +1085,6 @@ def agg_output(agg_states: Vec[AggState]):
 * `decode_verifier_share` decodes a verifier share.
 
 # hits {#hits}
-
-> TODO Move `Field` interface and `expand` definition to a common preliminaries
-> section.
-
-> TODO Add `inner_product` function to `Field` interface.
-
-> TODO Move key derivation to common dependency section.
 
 This section specifies `hits`, a VDAF for the following task. Each Client holds
 a `DIM`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
