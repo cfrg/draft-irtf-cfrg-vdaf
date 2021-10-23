@@ -723,8 +723,10 @@ PLP systems also have an associated type that defines a finite field field
 
 * `Field` is an element of a finite field. Associated functions:
 
-  * `vec_zeros(len: Unsigned) -> output: Vec[Field]` returns a length-`len`
-    vector of zeros.
+  * `Field.zeros(len: Unsigned) -> output: Vec[Field]` returns a vector of
+    zeros. The length of `output` MUST be `len`.
+  * `Field.rand_vec(len: Unsigned) -> output: Vec[Field]` returns a vector of
+    random field elements. The length of `output` MUST be `len`.
   * `encode_vec(data: Vec[Field]) -> encoded_data: Bytes` represents the input
     `data` as a byte string `encoded_data`.
   * `decode_vec(encoded_data: Bytes) -> data: Vec[Field]` reverse `encoded_vec`,
@@ -833,8 +835,8 @@ Associated constants:
 
 ## Construction {#prio3-construction}
 
-This VDAF involves a single round of communication (`ROUND == 1`). It is defined
-for at least two aggregators, but at most 255 (`2 <= SHARES <= 255`).
+This VDAF involves a single round of communication (`ROUNDS == 1`). It is defined
+for at least two Aggregators, but at most 255 (`2 <= SHARES <= 255`).
 
 ### Input Evaluation
 
@@ -884,7 +886,7 @@ leader share and helper share. These are called `encode_leader_share` and
 
 ~~~
 def eval_input(_, measurement):
-  input = encode_input(measurement)
+  input = flp_input(measurement)
   k_joint_rand = zeros(SEED_SIZE)
 
   # Generate input shares.
@@ -997,7 +999,7 @@ class EvalState:
     self.k_joint_rand = k_joint_rand
     self.k_joint_rand_sahre = k_joint_rand_share
     self.verifier_share = verifier_share
-    self.output_share = output_share
+    self.output_share = flp_truncate(input_share)
     self.step = "ready"
 
   def next(self, inbound: Vec[Bytes]):
@@ -1072,6 +1074,13 @@ def agg_output(agg_states: Vec[AggState]):
 * `decode_verifier_share` decodes a verifier share.
 
 # hits {#hits}
+
+> TODO Move `Field` interface and `expand` definition to a common preliminaries
+> section.
+
+> TODO Add `inner_product` function to `Field` interface.
+
+> TODO Move key derivation to common dependency section.
 
 This section specifies `hits`, a VDAF for the following task. Each Client holds
 a `DIM`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
@@ -1152,8 +1161,8 @@ An IDPF is comprised of the following algorithms (let type `Value[l]` denote
 
 * `IDPFKey.eval(l: Unsigned, x: Unsigned) -> value: Value[l])` is deterministic,
   stateless key-evaluation algorithm run by each Aggregator. It returns the
-  value corresponding to index `x`. The value of `x` MUST be in range `[2^(l-1),
-  2^l)`.
+  value corresponding to index `x`. The value of `l` MUST be in `[1, DIM]` and
+  the value of `x` MUST be in range `[2^(l-1), 2^l)`.
 
 Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
 the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
@@ -1172,145 +1181,150 @@ A concrete IDPF also specifies the following associated types:
 * `Field[l]` for each level `1 <= l <= DIM`. Each defines the same methods and
   associated constants as `Field` in {{prio3}}.
 
-### Secure Sketching
+## Construction {#hits-construction}
 
-This section specifies the secure sketching protocol of [BBCGGI21]. It is run by
-the Aggregators to verify that they recover shares of a one-hot vector. The
-protocol requires two rounds of communication. The computation preformed by each
-aggregator is identical.
-
-The first message is computed as follows. Let `l` be the level, i.e., `1 <= l <=
-DIM`.
-
-~~~
-def verify_sketch_round_1(
-    output_share: Vec[Value[l]], correlation_share, \
-    k_verify_rand, level: Unsigned):
-  # Expand common randomness and compute verification message
-  r = expand_rand(verify_rand, level, len(idpf_output))
-  r_squared = [v*v for v in r]
-  ver_msg_1 = inner_product(
-    [value[0] for value in idpf_output,
-    r
-  )
-  ver_msg_2 = inner_product(
-    [value[0] for value in idpf_output,
-    r_squared
-  )
-  ver_msg_3 = inner_product(
-    [value[1] for value in idpf_output],
-    r
-  )
-  outbound_message = {
-    ver_msg_1: ver_msg_1 + correlation_share.a
-    ver_msg_2: ver_msg_2 + correlation_share.b
-    ver_msg_3: ver_msg_3 + correlation_share.c
-  }
-  state = {
-    ver_msg_1: ver_msg_1,
-    ver_msg_2: ver_msg_2,
-    ver_msg_3: ver_msg_3,
-
-  return (state, outbound_message)
-~~~
-
-~~~
-def verify_sketch_round_2(state, inbound_message, correlation_share):
-  ver_msg_1 = state.ver_msg_1 + inbound_message.ver_msg_1
-  ver_msg_2 = state.ver_msg_2 + inbound_message.ver_msg_2
-  ver_msg_3 = state.ver_msg_3 + inbound_message.ver_msg_3
-  verification = ver_msg_1**2 - ver_msg_2 - ver_msg_3 + \
-    correlation_share.A * ver_msg_1 + correlation_share.B
-  if verification == 0:
-    return True
-  else:
-    return False
-~~~
-
-## Construction
-
-
-
+The VDAF involves two rounds of communication (`ROUNDS == 2`) and is defined for
+two Aggregators (`SHARES == 2`).
 
 ### Input Evaluation
 
 #### Setup
 
+The verification parameter is a symmetric key shared by both Aggregators. This
+VDAF has no public parameter.
+
 ~~~
-def _setup(n: Unsigned):
-  public_param = {
-    n: n
-  }
-  return (public_param, None)
+def eval_setup():
+  k_verify_init = gen_rand(KEY_SIZE)
+  return (None, [k_verify_init, k_verify_init])
 ~~~
+{: #hits-eval-setup title="The setup algorithm for hits."}
 
 #### Client
 
+The client's input is an IDPF index, denoted `alpha`. The values are pairs of
+field elements `(1, k)` where `k` is chosen at random. This random vazlue is
+used as part of the secure sketching protocol of [BBCGGI21]. After evaluating
+their IDPF key shares on the set of candidate prefixes, the sketching protocol
+is used by the Aggregators to verify that they hold shares of a one-hot vector.
+In addition, for each level of the tree, the prover generates random elements
+`a`, `b`, and `c` and computes
+
 ~~~
-def vdaf_input(public_param, input):
-  assert(log2(input) < public_param.n)
+    A = -2*a + k
+    B = a*a + b - k*a + c
+~~~
+
+and sends additive shares of `a`, `b`, `c`, `A` and `B` to the Aggregators.
+Putting everything together, the input-distribution algorithm is defined as
+follows. Function `encode_input_share` is defined in {{hits-helper-functions}}.
+
+~~~
+def eval_input(_, alpha):
+  if alpha < 2^DIM: raise ERR_INVALID_INPUT
+
+  # Prepare IDPF values.
   beta = []
-  correlation_shares_0 = [], correlation_shares_1 = []
-  for l in range(public_param.n):
-    # Construct values of the form (1, k), where k is a random field element.
-    _, field = get_value_type(l)
-    k = get_random_element(field)
+  correlation_shares_0, correlation_shares_1 = [], []
+  for l in range(DIM):
+    (k, a, b, c) = Field[l].rand_vec(4)
+
+    # Construct values of the form (1, k), where k
+    # is a random field element.
     beta += [(1, k)]
-    # Create secret shares of correlations to aid the servers' computation
-    a, b, c = get_random_element(field), get_random_element(field), \
-      get_random_element(field)
+
+    # Create secret shares of correlations to aid
+    # the Aggregators' computation.
     A = -2*a+k
     B = a*a + b - a * k + c
-    correlation_shares_0 += [{
-      a: get_random_element(field),
-      b: get_random_element(field),
-      c: get_random_element(field),
-      A: get_random_element(field),
-      B: get_random_element(field),
-    }]
-    correlation_shares_1 += [{
-      a: a - correlation_shares_0[l]
-      b: b - correlation_shares_0[l]
-      c: c - correlation_shares_0[l]
-      A: A - correlation_shares_0[l]
-      B: B - correlation_shares_0[l]
-    }]
-  key_0, key_1 = idpf_gen(input, beta)
-  return ((key_0, correlation_shares_0), (key_1, correlation_shares_1))
+    correlation_share = Field[l].rand_vec(5)
+    correlation_shares_1.append(correlation_share)
+    correlation_shares_0.append(
+      [a, b, c, A, B] - correlation_share)
+
+  # Generate IDPF shares.
+  (key_0, key_1) = idpf_gen(input, beta)
+
+  output = [
+    encode_input_share(key_0, correlation_shares_0),
+    encode_input_share(key_1, correlation_shares_1),
+  ]
+
+  return output
 ~~~
+{: #hits-eval-input title="The input-distribution algorithm for hits."}
+
+> TODO It would be more efficient to represent the correlation shares using PRG
+> seeds as suggested in [BBCGGI21].
 
 #### Aggregator
 
-~~~
-def vdaf_start(verify_param, public_param, nonce, input_share):
-  key, correlation_share = input_share
-
-  # Expand left and right children of the DPF tree.
-  state_left, value_left = idpf_eval_next(None, key, 0)
-  state_right, value_right = idpf_eval_next(None, key, 1)
-  idpf_states = [state_left, state_right]
-  idpf_output = [value_left, value_right]
-  prefixes = [0, 1]
-
-  verification_state, outbound_message = verify_sketch_round_1(idpf_output, \
-    correlation_share[0], nonce, 0)
-
-  state = {
-    key: key,
-    correlation_share: correlation_share,
-    idpf_states: idpf_states,
-    level: 0,
-    prefixes: prefixes
-    verification_round: 1
-    verification_state: verification_state,
-  }
-  return (state, outbound_message)
-~~~
+The aggregation parameter encodes a sequence of candidate prefixes. When an
+Aggregator receives input share from the Client, it begins by evaluating its
+IDPF share on candidate prefixes, recovering a pair of vectors of field
+elements `data_share` and `auth_share`. The Aggregators use `auth_share` and the
+correlation shares provided by the Client to verify that their `data_share`
+vectors are additive shares of a one-hot vector.
 
 ~~~
-def vdaf_next(state, inbound_messages):
-  TODO.
+class EvalState:
+  def __init__(k_verify_init, agg_param, nonce, input_share):
+    (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
+    (self.idpf_key,
+     self.correlation_shares) = decode_input_share(input_share)
+    self.k_verify_rand = get_key(k_verify_init, nonce)
+    self.step = "ready"
+
+  def next(self, inbound: Vec[Bytes]):
+    l = self.l
+    (a_share, b_share, c_share,
+     A_share, B_share) = correlation_shares[l-1]
+
+    if self.step == "ready" and len(inbound) == 0:
+      # Evaluation IPPF on candidate prefixes.
+      data_share, auth_share = [], []
+      for x in self.candiate_prefixes:
+        value = kdpf_key.eval(l, x)
+        data_share.append(value[0])
+        auth_share.append(value[1])
+
+      # Prepare first sketch verification message.
+      r = Field[l].expand(self.k_verify_rand, len(data_share))
+      verifier_share_1 = [
+         a_share + inner_product(data_share, r),
+         b_share + inner_product(data_share, r * r),
+         c_share + inner_product(auth_share, r),
+      ]
+
+      self.output_share = data_share
+      self.step = "sketch round 1"
+      return verifier_share_1
+
+    elif self.step == "sketch round 1" and len(inbound) == 2:
+      verifier_1 = Field[l].deocde_vec(inbound[0]) + \
+                   Field[l].deocde_vec(inbound[1])
+
+      verifier_share_2 = [
+        (verifier_1[0] * verifier_1[0] \
+         - verifier_1[1] \
+         - verifier_1[2]) / 2 \
+        + A_share * verifer_1[0] \
+        + B_share
+      ]
+
+      self.step = "sketch round 2"
+      return Field[l].encode_vec(verifier_share_2)
+
+    elif self.step == "sketch round 2" and len(inbound) == 2:
+      verifier_2 = Field[l].decode_vec(inbound[0]) + \
+                   Field[l].decode_vec(inbound[1])
+
+      if verifier_2 != 0: raise ERR_INVALID
+      return self.output_share
+
+    else: raise ERR_INVALID_STATE
 ~~~
+{: #hits-eval-state title="Evaluation state for hits."}
 
 ### Output Aggregation
 
@@ -1323,6 +1337,21 @@ def vdaf_next(state, inbound_messages):
 #### Collector
 
 > TODO
+
+### Helper Functions {#hits-helper-functions}
+
+> TODO Specify the following functionalities:
+
+* `encode_input_share` is used to encode an input share, consisting of an IDPF
+  key share and correlation shares.
+
+* `decode_input_share` is used to decode an input share.
+
+* `decode_indexes(encoded: Bytes) -> (l: Unsigned, indexes: Vec[Unsigned])`
+  decodes a sequence of indexes, i.e., candidate indexes for IDFP evaluation.
+  The value of `l` MUST be in range `[1, DIM]` and `indexes[i]` MUST be in range
+  `[2^(l-1), 2^l)` for all `i`. An error is raised if `encoded` cannot be
+  decoded.
 
 # Security Considerations {#security}
 
