@@ -814,6 +814,9 @@ Associated constants:
 
 ### Aggregable Encoding {#prio3-aggregable}
 
+> TODO Given their dependency on FLP, it likely makes sense to move these
+> functionalities there.
+
 Finally, The VDAF requires a method for encoding raw measurements as vectors of
 field elements and decoding input shares into aggregable output shares. (Note
 that this corresponds roughly to the notion of Affine-aggregatable encodings
@@ -1075,43 +1078,103 @@ def agg_output(agg_states: Vec[AggState]):
 
 # hits {#hits}
 
-> WIP This section needs work.
+This section specifies `hits`, a VDAF for the following task. Each Client holds
+a `DIM`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
+<= DIM`. We will refer to the latter as the set of "candidate prefixes". The
+Aggregators' goal is to count how many inputs are prefixed by each candidate
+prefix.
+
+This functionality is the core component of the privacy-preserving
+`t`-heavy-hitters protocol of [BBCGGI21]. At a high level, the protocol works as
+follows.
+
+1. Each Clients runs the input-distribution algorithm on its `n`-bit string and
+   sends an input share to each Aggregator.
+2. The Aggregators agree on an initial set of candidate prefixes, say `0` and
+   `1`.
+3. The Aggregators evaluate the VDAF on each set of input shares and aggregate
+   the recovered output shares. The aggregation parameter is the set of
+   candidate prefixes.
+4. The Aggregators send their aggregate shares to the Collector, who combines
+   them to recover the counts of each candidate prefix.
+5. Let `H` denote the set of prefixes that occurred at least `t` times. If the
+   prefixes all have length `DIM`, then `H` is the set of `t`-heavy-hitters.
+   Otherwise compute the next set of candidate prefixes as follows. For each `p`
+   in `H`, add add `p || 0` and `p || 1` to the set. Repeat step 3 with the new
+   set of candidate prefixes.
+
+`hits` is constructed from an "Incremental Distributed Point Function (IDPF)", a
+primitive described by [BBCGGI21] that generalizes the notion of a Distributed
+Point Function (DPF) [GI14]. Briefly, a DPF is used to distribute the
+computation of a "point function", a function that evaluates to zero on every
+input except at a programmable "point". The computation is distributed in such a
+way that no one party knows either the point or what it evaluates to. In
+contrast, an IDPF represents a path on a full binary tree from the root to one
+of the leaves. It is evaluated on an "index" representing a unique node of the
+tree. If the node is on the path, then function evaluates to to a non-zero
+value; otherwise it evaluates to zero. This structure allows an IDPF to provide
+the functionality required for the above protocol, while at the same time
+ensuring a significant degree of privacy.
+
+Our VDAF composes an IDPF with the "secure sketching" protocol of [BBCGGI21].
+This protocol ensures that evaluating a set of input shares on a unique set of
+candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
+is zero everywhere except for one element, which is equal to one.
+
+The name `hits` is an anagram of "hist", which is short for "histogram". It is a
+nod toward the "subset histogram" problem formulated by [BBCGGI21] and for which
+the `hits` VDAF is a solution.
 
 ## Dependencies
 
-[TODO Clarify which of these can be assumed and which need to be explicitly
-defined]
-
-### Descriptions of finite fields
-
-We assume a structure for describing IDPF output groups, named `ValueType`.
-For verifiable heavy hitters, we need an IDPF that at each level has two field
-elements as outputs, and so the value type would be pairs of field elements.
-The IDPF key generation and evaluation functions will allow a different `ValueType`
-parameter per bit in the IDPF domain, which allows us to use different types at
-the output layer, required for extractability. See [BBCGGI21, Section 4.3] for
-details. We assume a function `get_value_type(n: Unsigned) -> ValueType` that
-returns the type for bit index `n`. We use `ValueType` to refer to a description
-of a given group, and`Value` to refer to an actual element of the group.
-
 ### Incremental Distributed Point Functions (IDPFs)
 
-An IDPF is defined over a domain of size `2**d`. The client can specify an
-index `alpha` and values `beta`, one for each level `l` in `[d]`. The key
-generation generates two IDPF keys that individually hide `alpha` and `beta`.
-When locally evaluated at any point `x` in `2**l` at level `l`, the IDPF
-returns shares of `beta[l]`, if `x` is the `l`-bit prefix of `alpha`, and
-shares of zero otherwise. If elements of `beta` are tuples, the additive
-sharing is done element-wise.
+An IDPF is defined over a domain of size `2^DIM`, where `DIM` is constant
+defined by the IDPF. The Client specifies an index `alpha` and values `beta`,
+one for each "level" `1 <= l <= DIM`. The key generation generates two IDPF
+keys, one for each Aggregator. When evaluated at index `0 <= x < 2^l`, each
+IDPF share returns an additive share of `beta[l]` if `x` is the `l`-bit prefix
+of `alpha` and shares of zero otherwise.
 
-- `idpf_gen(alpha: Unsigned, beta: Vec[Value]) -> (idpf_key1: Bytes, `
-`idpf_key2: Bytes)`:
-Takes as input the index and values for the IDPF. Returns two serialized IDPF
-keys, one for each helper server.
-- `idpf_eval_next(state: State, dpf_key: Bytes, x: Unsigned) `
-`-> (new_state: State, value: Value)`:
-Evaluates the given key at index `x`, at the next prefix length that hasn't
-been evaluated yet for `state`, returning a secret-shared value.
+> CP What does it mean for `x` to be the `l`-bit prefix of `alpha`? We need to
+> be a bit more precise here.
+
+> CP Why isn't the domain size actually `2^(DIM+1)`, i.e., the number of nodes
+> in a binary tree of height `DIM` (excluding the root)?
+
+Each `beta[l]` is a pair of elements of a finite field. Each level MAY have
+different field parameters. Thus a concrete IDPF specifies associated types
+`Field[1]`, `Field[2]`, ..., and `Field[DIM]` defining, respectively, the field
+parameters at level 1, level 2, ..., and level `DIM`.
+
+An IDPF is comprised of the following algorithms (let type `Value[l]` denote
+`(Field[l], Field[l])` for each level `l`):
+
+* `idpf_gen(alpha: Unsigned, beta: (Value[1], ..., Value[DIM])) -> key:
+  (IDPFKey, IDPFKey)` is the randomized key-generation algorithm run by the
+  client. Its inputs are the index `alpha` (it is required that `0 <= alpha <
+  2^DIM`) and the values `beta`. The output is a pair of IDPF key shares.
+
+* `IDPFKey.eval(l: Unsigned, x: Unsigned) -> value: Value[l])` is deterministic,
+  stateless key-evaluation algorithm run by each Aggregator. It returns the
+  value corresponding to index `x`. It is required that if `2^(l-1) <= x < 2^l`.
+
+Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
+the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
+Section 4.3.
+
+> CP This definition would be a lot simpler if we just needed to define a field
+> for the inner nodes and the leaf nodes. Would the loss of generality would be
+> acceptable?
+
+In summary, a concrete IDPF specifies a single associated constant:
+
+* `DIM: Unsigned` is the length of each Client input.
+
+A concrete IDPF also specifies the following associated types:
+
+* `Field[l]` for each level `1 <= l <= DIM`. Each defines the same methods and
+  associated constants as `Field` in {{prio3}}.
 
 ### Malicious sketching for IDPFs
 
