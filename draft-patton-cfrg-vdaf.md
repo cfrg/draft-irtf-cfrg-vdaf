@@ -275,14 +275,14 @@ handled by raising an exception.
 
 Some common functionalities:
 
-* `zeros(len: Unsigned) -> output: Bytes` returns an array of bytes of length
-  `len` (i.e., it is required that `len(output) == len`).
+* `zeros(len: Unsigned) -> output: Bytes` returns an array of zero bytes.
+  The length of `output` MUST be `len`.
 
-* `gen_rand(len: Unsigned) -> output: Bytes` returns an array of `len` random
-  bytes (i.e., it is required that `len(output) == len`).
+* `gen_rand(len: Unsigned) -> output: Bytes` returns an array of random bytes.
+  The length of `output` MUST be `len`.
 
 * `byte(int: Unsigned) -> Byte` returns the representation of `int` as a byte.
-  Raises an error if `int > 255`.
+  The value of `int` MUST be in range `[0,256)`.
 
 # Overview {#overview}
 
@@ -633,8 +633,6 @@ is deemed invalid. A number of useful measurement types can be defined this way:
 * Simples statistics, like sum, average, and standard deviation.
 * Estimation of quantiles, via a histogram.
 * Linear regression.
-* Frequency estimates for arbitrary inputs, via count-min sketch or counting
-  Bloom filter.
 
 This VDAF does not have an aggregation parameter, hence the input shares are
 identical to the output shares. See {{hits}} for an example of a VDAF that makes
@@ -649,8 +647,6 @@ deployed in the [ENPA] system, and like the VDAF described here, the ENPA system
 was built from techniques introduced by [BBCGGI19]. However, was specialized for
 a particular measurement type. The goal of `prio3` is to provide the same level
 of generality as `prio1`.
-
-## Overview {#prio3-overview}
 
 The way `prio3` ensures privacy is quite simple: the Client shards its encoded
 input vector `x` into a number of additive secret shares, one for each
@@ -718,8 +714,7 @@ A concrete FLP defines the following constants:
 * `PROVE_RAND_LEN: Unsigned` is the length of the prover randomness.
 * `QUERY_RAND_LEN: Unsigned` is the length of the query randomness.
 * `INPUT_LEN: Unsigned` is the length of the input.
-* `OUTPUT_LEN: Unsigned` is the length of the aggregable output. (See
-  {{prio3-aggregable}}.)
+* `OUTPUT_LEN: Unsigned` is the length of the aggregable output.
 * `PROOF_LEN: Unsigned` is the length of the proof.
 * `VERIFIER_LEN: Unsigned` is the length of the verifier message.
 
@@ -779,6 +774,30 @@ overwhelming probability. In addition, the proof system is designed so that the
 verifier message leaks nothing about the input (in an information theoretic
 sense). See Definition 3.9 from [BBCGGI19] for details.
 
+An FLP is typically constructed from an arithmetic circuit, which defines
+validity. However, in the remainder we do not explicitly mention this circuit
+and allow validity to be defined by the set of inputs recognized by the FLP.
+
+Finally, the FLP requires a method for encoding raw measurements as vectors of
+field elements:
+
+* `flp_encode(measurement: Bytes) -> input: Vec[Field]` encodes a raw
+  measurement as a vector of field elements. The returned `input` MUST be of
+  length `INPUT_LEN`. An error is raised if the measurement cannot be
+  represented as a valid input.
+
+In addition, for some FLPs, the encoded input includes redundant field elements
+that are useful for checking the proof, but which are not needed after the proof
+has been checked. Thus the FLP defines an algorithm for truncating the input to
+the length of the aggregated output:
+
+* `flp_truncate(input: Vec[Field]) -> output: Vec[Field]` maps an encoded input
+  to an aggregable output. The length of the input MUST be `INPUT_LEN` and the
+  length of the output MUST be `OUTPUT_LEN`.
+
+Note that, taken together, these two functionalities correspond roughly to the
+notion of Affine-aggregatable encodings (AFEs) from [CGB17].)
+
 ### Key Derivation
 
 In addition to the core FLP system functionality, the `prio3` VDAF requires a
@@ -786,16 +805,16 @@ way to derive symmetric keys and to expand keys into an arbitrary length key
 stream. A key-derivation scheme consists of the following algorithms:
 
 * `get_key(init_key, aux_input) -> key` derives a fresh key `key` from an
-  initial `init_key` and auxiliary input `aux_input`. It is required that
-  `len(init_key) == KEY_SIZE` `len(key) == KEY_SIZE`.
+  initial `init_key` and auxiliary input `aux_input`. The length of `init_key`
+  and `key` MUST be equal to `KEY_SIZE`.
 
 * `get_key_stream(key) -> state: KeyStream` returns a key stream generator that
-  is used to generate an arbitrary length stream of pseudorandom bytes. It is
-  required that `len(key) == KEY_SIZE`.
+  is used to generate an arbitrary length stream of pseudorandom bytes. The
+  length of `key` MUST be `KEY_SIZE`.
 
 * `KeyStream.next(len: Unsigned) -> (new_state: KeyStream, output)` returns the
   next `len` bytes of the key stream and updates the key stream generator state.
-  It is required that that `len(output) == len`.
+  The length of the output MUST be `len`.
 
 > TODO This functionality closely resembles what people usually think of as an
 > extract-then-expand KDF, but differs somewhat in its syntax and, also, its
@@ -811,30 +830,6 @@ Associated types:
 Associated constants:
 
 * `KEY_SIZE` is the size of keys for the key-derivation scheme.
-
-### Aggregable Encoding {#prio3-aggregable}
-
-> TODO Given their dependency on FLP, it likely makes sense to move these
-> functionalities there.
-
-Finally, The VDAF requires a method for encoding raw measurements as vectors of
-field elements and decoding input shares into aggregable output shares. (Note
-that this corresponds roughly to the notion of Affine-aggregatable encodings
-(AFEs) from [CGB17].) This involves two algorithms:
-
-* `encode_input(measurement: Bytes) -> input: Vec[Field]` encodes a raw
-  measurement as a vector of field elements. The type `Field` MUST be the same
-  as the field type associated with the FLP (see {{flp}}). Additionally, the
-  returned `input` MUST be valid as defined by the FLP. An error is raised if
-  the measurement cannot be represented as a valid input.
-
-* `decode_output(input: Vec[Field]) -> output: Vec[Field]` maps an encoded input
-  to an aggregable output. The length of the output MUST be `OUTPUT_LEN` as
-  specified by the FLP.
-
-Note that the decoding step is useful because, for some FLPs, the encoded input
-includes redundant field elements that are useful for checking the proof, but
-which are not needed after the proof has been checked.
 
 ## Construction {#prio3-construction}
 
@@ -1152,12 +1147,13 @@ An IDPF is comprised of the following algorithms (let type `Value[l]` denote
 
 * `idpf_gen(alpha: Unsigned, beta: (Value[1], ..., Value[DIM])) -> key:
   (IDPFKey, IDPFKey)` is the randomized key-generation algorithm run by the
-  client. Its inputs are the index `alpha` (it is required that `0 <= alpha <
-  2^DIM`) and the values `beta`. The output is a pair of IDPF key shares.
+  client. Its inputs are the index `alpha` and the values `beta`. The value of
+  `alpha` MUST be in range `[0, 2^DIM)`.
 
 * `IDPFKey.eval(l: Unsigned, x: Unsigned) -> value: Value[l])` is deterministic,
   stateless key-evaluation algorithm run by each Aggregator. It returns the
-  value corresponding to index `x`. It is required that if `2^(l-1) <= x < 2^l`.
+  value corresponding to index `x`. The value of `x` MUST be in range `[2^(l-1),
+  2^l)`.
 
 Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
 the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
@@ -1176,11 +1172,20 @@ A concrete IDPF also specifies the following associated types:
 * `Field[l]` for each level `1 <= l <= DIM`. Each defines the same methods and
   associated constants as `Field` in {{prio3}}.
 
-### Malicious sketching for IDPFs
+### Secure Sketching
+
+This section specifies the secure sketching protocol of [BBCGGI21]. It is run by
+the Aggregators to verify that they recover shares of a one-hot vector. The
+protocol requires two rounds of communication. The computation preformed by each
+aggregator is identical.
+
+The first message is computed as follows. Let `l` be the level, i.e., `1 <= l <=
+DIM`.
 
 ~~~
-def verify_sketch_round_1(idpf_output: Vec[Value], correlation_share, \
-    verify_rand: Bytes, level: Unsigned):
+def verify_sketch_round_1(
+    output_share: Vec[Value[l]], correlation_share, \
+    k_verify_rand, level: Unsigned):
   # Expand common randomness and compute verification message
   r = expand_rand(verify_rand, level, len(idpf_output))
   r_squared = [v*v for v in r]
@@ -1224,13 +1229,22 @@ def verify_sketch_round_2(state, inbound_message, correlation_share):
 
 ## Construction
 
+
+
+
+### Input Evaluation
+
+#### Setup
+
 ~~~
-def vdaf_setup(n: Unsigned):
+def _setup(n: Unsigned):
   public_param = {
     n: n
   }
   return (public_param, None)
 ~~~
+
+#### Client
 
 ~~~
 def vdaf_input(public_param, input):
@@ -1265,6 +1279,8 @@ def vdaf_input(public_param, input):
   return ((key_0, correlation_shares_0), (key_1, correlation_shares_1))
 ~~~
 
+#### Aggregator
+
 ~~~
 def vdaf_start(verify_param, public_param, nonce, input_share):
   key, correlation_share = input_share
@@ -1295,6 +1311,18 @@ def vdaf_start(verify_param, public_param, nonce, input_share):
 def vdaf_next(state, inbound_messages):
   TODO.
 ~~~
+
+### Output Aggregation
+
+> TODO
+
+#### Aggregator
+
+> TODO
+
+#### Collector
+
+> TODO
 
 # Security Considerations {#security}
 
