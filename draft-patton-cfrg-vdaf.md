@@ -1410,4 +1410,5 @@ This document has no IANA actions.
 {:numbered="false"}
 
 Thanks to Henry Corrigan-Gibbs and Christopher Wood for useful feedback on the
-syntax of VDAF schemes.
+syntax of VDAF schemes. Thanks to Phillipp Schoppmann for helping with the
+specification of `hits`.
