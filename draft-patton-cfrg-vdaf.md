@@ -564,7 +564,6 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
     for i in range(ROUNDS+1):
       outbound = []
       for j in range(SHARES):
-        # PS: Should this be [...].next(inbound[j])?
         outbound.append(eval_states[j].next(inbound))
       # PS: Where do the outbound messages actually get sent over the network?
       inbound = outbound
