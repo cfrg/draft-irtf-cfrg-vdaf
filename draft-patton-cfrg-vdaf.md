@@ -565,7 +565,8 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
       outbound = []
       for j in range(SHARES):
         outbound.append(eval_states[j].next(inbound))
-      # PS: Where do the outbound messages actually get sent over the network?
+      # This is where we would send messages over the network in a distributed
+      # implementation
       inbound = outbound
 
     # Each aggregator updates its aggregation state.
@@ -1205,7 +1206,7 @@ VDAF has no public parameter.
 ~~~
 def eval_setup():
   k_verify_init = gen_rand(KEY_SIZE)
-  return (None, [k_verify_init, k_verify_init])
+  return (None, [(0, k_verify_init), (1, k_verify_init)])
 ~~~
 {: #hits-eval-setup title="The setup algorithm for hits."}
 
@@ -1277,10 +1278,11 @@ vectors are additive shares of a one-hot vector.
 
 ~~~
 class EvalState:
-  def __init__(k_verify_init, agg_param, nonce, input_share):
+  def __init__(verify_param, agg_param, nonce, input_share):
     (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
     (self.idpf_key,
      self.correlation_shares) = decode_input_share(input_share)
+    (self.party_id, k_verify_init) = verify_param
     self.k_verify_rand = get_key(k_verify_init, nonce)
     self.step = "ready"
 
@@ -1316,10 +1318,10 @@ class EvalState:
       verifier_share_2 = [
         (verifier_1[0] * verifier_1[0] \
          - verifier_1[1] \
-         - verifier_1[2]) / 2 \
+         - verifier_1[2]) * self.party_id \
         + A_share * verifer_1[0] \
         + B_share
-      ] # PS: Why the division by 2?
+      ]
 
       self.step = "sketch round 2"
       return Field[l].encode_vec(verifier_share_2)
