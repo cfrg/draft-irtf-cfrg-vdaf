@@ -528,7 +528,7 @@ following algorithms:
 
 * `agg_output(agg_states: Vec[AggStates]) -> agg` is run by the Collector in
   order to compute the final aggregate from the Aggregators' aggregation states.
-  (Note that `len(states) == SHARES`.) This algorithm is deterministic.
+  (Note that `len(agg_states) == SHARES`.) This algorithm is deterministic.
 
 > OPEN ISSUE Maybe `AggState.next` (and maybe `agg_output`, too) should be
 > randomized in order to allow the Aggregators (or the Collector) to add noise
@@ -565,6 +565,8 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
       outbound = []
       for j in range(SHARES):
         outbound.append(eval_states[j].next(inbound))
+      # This is where we would send messages over the network in a distributed
+      # implementation
       inbound = outbound
 
     # Each aggregator updates its aggregation state.
@@ -1135,6 +1137,9 @@ the `hits` VDAF is a solution.
 
 ## Incremental Distributed Point Functions (IDPFs)
 
+> NOTE An implementation of IDPFs can be found
+> [here](https://github.com/google/distributed_point_functions/).
+
 An IDPF is defined over a domain of size `2^DIM`, where `DIM` is constant
 defined by the IDPF. The Client specifies an index `alpha` and values `beta`,
 one for each "level" `1 <= l <= DIM`. The key generation generates two IDPF
@@ -1179,12 +1184,8 @@ Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
 the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
 Section 4.3.
 
-> CP This definition would be a lot simpler if we just needed to define a field
-> for the inner nodes and the leaf nodes. Would the loss of generality would be
-> acceptable?
-
-Finally, an implementation note. The stateless for IPDFs specified here is
-stateless, in the sense that there is not state carried between IPDF
+Finally, an implementation note. The interface for IPDFs specified here is
+stateless, in the sense that there is no state carried between IPDF
 evaluations. This is to align the IDPF syntax with the VDAF abstraction
 boundary, which does not include shared evaluation state across evaluations. In
 practice, of course, it will often be beneficial to expose a stateful API for
@@ -1205,7 +1206,7 @@ VDAF has no public parameter.
 ~~~
 def eval_setup():
   k_verify_init = gen_rand(KEY_SIZE)
-  return (None, [k_verify_init, k_verify_init])
+  return (None, [(0, k_verify_init), (1, k_verify_init)])
 ~~~
 {: #hits-eval-setup title="The setup algorithm for hits."}
 
@@ -1277,10 +1278,11 @@ vectors are additive shares of a one-hot vector.
 
 ~~~
 class EvalState:
-  def __init__(k_verify_init, agg_param, nonce, input_share):
+  def __init__(verify_param, agg_param, nonce, input_share):
     (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
     (self.idpf_key,
      self.correlation_shares) = decode_input_share(input_share)
+    (self.party_id, k_verify_init) = verify_param
     self.k_verify_rand = get_key(k_verify_init, nonce)
     self.step = "ready"
 
@@ -1316,7 +1318,7 @@ class EvalState:
       verifier_share_2 = [
         (verifier_1[0] * verifier_1[0] \
          - verifier_1[1] \
-         - verifier_1[2]) / 2 \
+         - verifier_1[2]) * self.party_id \
         + A_share * verifer_1[0] \
         + B_share
       ]
@@ -1337,15 +1339,33 @@ class EvalState:
 
 ### Output Aggregation
 
-> TODO
-
 #### Aggregator
 
-> TODO
+~~~
+class AggState:
+  def __init__(agg_state):
+    (_ candidate_prefixes) = decode_indexes(agg_param)
+    self.share = vec_zeros(len(candidate_prefixes))
+
+  def next(self, output_share: Vec[Field]):
+    if len(output_share) != len(self.share):
+      raise ERR_INVALID_INPUT
+    self.share += output_share
+~~~
 
 #### Collector
 
-> TODO
+~~~
+def agg_output(agg_states: Vec[AggState]):
+  if len(agg_states) == 0:
+    raise ERR_INVALID_INPUT
+  agg = vec_zeros(len(agg_states[0].share))
+  for agg_state in agg_states:
+    if len(agg_state.share) != len(agg):
+      raise ERR_INVALID_INPUT
+    agg += agg_state.share
+  return agg
+~~~
 
 ### Helper Functions {#hits-helper-functions}
 
