@@ -379,6 +379,13 @@ Sharding and preparation are done once per measurement input.  Aggregation and
 unsharding are done over a batch of inputs (more precisely, over the validated
 output shares for those inputs).
 
+Note that the preparation step performs two functions: Verification and
+conversion.  Verification ensures that the measurement inputs will not lead to a
+garbled aggregate result.  Conversion translates input shares into output shares
+that are compatible with the aggregation function.  For example, in Prio+, the
+input shares are XOR shares of the secret, and output shares are additive shares
+that are compatible with computing sums of measurements.
+
 A concrete VDAF scheme specifies implementations of these algorithms. In
 addition, a VDAF specifies the following constants:
 
