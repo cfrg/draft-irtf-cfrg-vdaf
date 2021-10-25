@@ -22,6 +22,10 @@ author:
     name: Richard L. Barnes
     organization: Cisco
     email: rlb@ipv.sx
+ -
+    name: Phillipp Schoppmann
+    organization: Google
+    email: schoppmann@google.com
 
 normative:
 
