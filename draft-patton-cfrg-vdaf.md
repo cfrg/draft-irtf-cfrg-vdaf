@@ -1463,43 +1463,52 @@ def aggregate_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
 > will be filled out more as the draft matures and security analyses are
 > completed.
 
-A VDAF is the core of a private measurement system, but needs to be realized
-within an application.  The application will need to assure a few security
-properties, for example:
+Multi-party protocols for privacy-preserving measurement have two essential
+security gaols:
 
-* Securely provisioning clients with information about aggregators
-* Configuring secure communications:
-  * Confidential and authentic channels among aggregators, and
-    between the aggregators and the collector
-  * Confidential and aggregator-authenticated channels between clients and
-    aggregators
-* Enforcing the non-collusion properties required of the specific VDAF in use
+1. Privacy: An attacker that controls the network, the Collector, and a subset
+   of Clients and Aggregators learns nothing about the measurements of honest
+   Clients beyond what it can deduce from the aggregate result.
+
+1. Robustness: An attacker that controls the network and a subset of Clients
+   cannot cause the Collector to compute anything other than the aggregation
+   function over the measurements of honest Clients.
+
+(Note that it is also possible to consider a stronger form of robustness, where
+the attacker also controls a subset of Aggregators. See [BBCGGI19], Section
+6.3.) A VDAF is the core cryptographic primitive of a protocol that achieves
+these goals.  It is not sufficient on its own, however.  The application will
+need to assure a few security properties, for example:
+
+* Securely distributing the public and verification parameters
+* Establishing secure channels:
+  * Confidential and authentic channels among Aggregators, and between the
+    Aggregators and the Collector; and
+  * Confidential and Aggregator-authenticated channels between Clients and
+    Aggregators.
+* Enforcing the non-collusion properties required of the specific VDAF in use.
 
 In such an environment, a VDAF provides the high-level privacy property
 described above: The collector learns only the aggregate measurement, and
 nothing about individual measurements aside from what can be inferred from the
-aggregate.  The aggregators learn neither individual measurements nor the
-aggregate measurement.  The collector is assured that the aggregate statistic
-accurately reflects the inputs as long as the aggregators correctly executed
+aggregate result.  The aggregators learn neither individual measurements nor the
+aggregate result.  The collector is assured that the aggregate statistic
+accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.
 
-The verification component of a VDAF bounds the degree to which malicious
-clients can corrupt aggregate measurements by submitting malformed inputs.
-Different VDAFs allow different checks to be done on the correctness of the
-input.  These controls, however, are addressed at the level of individual
-measurements, and do not prevent a malicious client from submitting multiple
-valid inputs that would collectively result in an incorrect aggregate (a flavor
-of Sybil attack [Dou02]).  Applications can guard against these risks by adding
-additional controls on measurement submission, such as client authentication and
-rate limits.
+One way that VDAFs fall short is in preventing Sybil attacks [Duo02]. In this
+attack, the adversary observes a subset of input shares transmitted by a Client
+it is interested in. It allows the input shares to be processed, but corrupts
+and picks bogus inputs for the remaining Clients.  Applications can guard
+against these risks by adding additional controls on measurement submission,
+such as client authentication and rate limits.
 
-VDAFs do not inherently provide differential privacy [Vad16].  The VDAF approach
+VDAFs do not inherently provide differential privacy [Dwo06].  The VDAF approach
 to private measurement can be viewed as complementary to differential privacy,
 relying on non-collusion instead of statistical noise to protect the privacy of
-hte inputs.  It is possible that a future VDAF could incorporate differential
+the inputs.  It is possible that a future VDAF could incorporate differential
 privacy features, e.g., by injecting noise before the sharding stage and
 removing it after unsharding.
-
 
 # IANA Considerations
 
