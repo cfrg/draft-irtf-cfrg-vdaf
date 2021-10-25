@@ -39,8 +39,8 @@ informative:
       - ins: E. Jaffe
       - ins: R. Ostrovsky
       - ins: A. Polychroniadou
-    target: https://ia.cr/2021/576
     date: 2021
+    target: https://ia.cr/2021/576
 
   BBCGGI19:
     title: "Zero-Knowledge Proofs on Secret-Shared Data via Fully Linear PCPs"
@@ -50,8 +50,9 @@ informative:
       - ins: H. Corrigan-Gibbs
       - ins: N. Gilboa
       - ins: Y. Ishai
-    seriesinfo: CRYPTO 2019
     date: 2019
+    seriesinfo: CRYPTO 2019
+    target: https://ia.cr/2019/188
 
   BBCGGI21:
     title: "Lightweight Techniques for Private Heavy Hitters"
@@ -61,16 +62,34 @@ informative:
       - ins: H. Corrigan-Gibbs
       - ins: N. Gilboa
       - ins: Y. Ishai
-    seriesinfo: IEEE S&P 2021
     date: 2021
+    seriesinfo: IEEE S&P 2021
+    target: https://ia.cr/2021/017
 
   CGB17:
     title: "Prio: Private, Robust, and Scalable Computation of Aggregate Statistics"
     author:
       - ins: H. Corrigan-Gibbs
       - ins: D. Boneh
-    seriesinfo: NSDI 2017
     date: 2017
+    seriesinfo: NSDI 2017
+    target: https://dl.acm.org/doi/10.5555/3154630.3154652
+
+  Dou02:
+    title: "The Sybil Attack"
+    author:
+      - ins: J. Douceur
+    date: 2002
+    seriesinfo: IPTPS 2002
+    target: https://doi.org/10.1007/3-540-45748-8_24
+
+  Dwo06:
+    title: "Differential Privacy"
+    author:
+      - ins: C. Dwork
+    date: 2006
+    seriesinfo: ICALP 2006
+    target: https://link.springer.com/chapter/10.1007/11787006_1
 
   EPK14:
     title: "RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response"
@@ -78,40 +97,28 @@ informative:
       - ins: Ú. Erlingsson
       - ins: V. Pihur
       - ins: A. Korolova
-    seriesinfo: CCS 2014
     date: 2014
-    target: "https://dl.acm.org/doi/10.1145/2660267.2660348"
+    seriesinfo: CCS 2014
+    target: https://dl.acm.org/doi/10.1145/2660267.2660348
+
+  ENPA:
+    title: "Exposure Notification Privacy-preserving Analytics (ENPA) White Paper"
+    date: 2021
+    target: https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ENPA_White_Paper.pdf
 
   GI14:
     title: "Distributed Point Functions and Their Applications"
     author:
       - ins: N. Gilboa
       - ins: Y. Ishai
-    seriesinfo: EUROCRYPT 2014
     date: 2014
-
-  Dou02:
-    title: "The Sybil Attack"
-    date: 2002
-    target: "https://link.springer.com/chapter/10.1007/3-540-45748-8_24"
-    author:
-      - ins: J. Douceur
-
-  Dwo06:
-    title: "Differential Privacy"
-    date: 2006
-    seriesinfo: "ICALP 2006"
-    target: "https://link.springer.com/chapter/10.1007/11787006_1"
+    seriesinfo: EUROCRYPT 2014
+    target: https://link.springer.com/chapter/10.1007/978-3-642-55220-5_35
 
   OriginTelemetry:
     title: "Origin Telemetry"
     date: 2020
     target: https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
-
-  ENPA:
-    title: "Exposure Notification Privacy-preserving Analytics (ENPA) White Paper"
-    date: 2021
-    target: https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ENPA_White_Paper.pdf
 
   PPM:
     title: "Privacy Preserving Measurement"
@@ -121,13 +128,14 @@ informative:
       - ins: C. Patton
       - ins: E. Rescorla
       - ins: C. Wood
+    target: XXX
 
   Vad16:
     title: "The Complexity of Differential Privacy"
-    date: 2016
-    target: "https://privacytools.seas.harvard.edu/files/privacytools/files/complexityprivacy_1.pdf"
     author:
       - ins: S. Vadhan
+    date: 2016
+    target: https://link.springer.com/chapter/10.1007/978-3-319-57048-8_7
 
 --- abstract
 
@@ -142,12 +150,6 @@ input that would result in the aggregate getting garbled.
 --- middle
 
 # Introduction
-
-> XXX Clean up references
-
-> XXX Harmonize author comment convention
-
-> XXX Finish security considerations
 
 The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
@@ -1465,5 +1467,4 @@ This document has no IANA actions.
 {:numbered="false"}
 
 Thanks to Henry Corrigan-Gibbs and Christopher Wood for useful feedback on the
-syntax of VDAF schemes. Thanks to Phillipp Schoppmann for helping with the
-specification of `hits`.
+syntax of VDAF schemes.
