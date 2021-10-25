@@ -588,6 +588,9 @@ recover the following output:
       |
       V
     agg_result
+
+    Collector
+    =========
 ~~~~
 {: #unshard-flow title="Computation of the final aggregate result from aggregate
 shares."}
