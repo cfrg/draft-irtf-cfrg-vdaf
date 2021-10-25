@@ -120,16 +120,6 @@ informative:
     date: 2020
     target: https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
 
-  PPM:
-    title: "Privacy Preserving Measurement"
-    date: 2021
-    author:
-      - ins: T. Geoghagen
-      - ins: C. Patton
-      - ins: E. Rescorla
-      - ins: C. Wood
-    target: XXX
-
   Vad16:
     title: "The Complexity of Differential Privacy"
     author:
@@ -216,9 +206,9 @@ protocols for privacy-preserving measurement proposed in the literature. These
 protocols vary in their operational and security considerations, sometimes in
 subtle but consequential ways. This document therefore has two important goals:
 
- 1. Providing applications like [PPM] with a simple, uniform interface for
-    accessing privacy-preserving measurement schemes, and documenting relevant
-    operational and security bounds for that interface:
+ 1. Providing applications like {{?I-D.draft-gpew-priv-ppm}} with a simple,
+    uniform interface for accessing privacy-preserving measurement schemes, and
+    documenting relevant operational and security bounds for that interface:
 
     1. General patterns of communications among the various actors involved in
        the system (clients, aggregators, and measurement collectors);
@@ -599,8 +589,8 @@ shares."}
 
 > QUESTION Maybe the aggregation algorithms should be randomized in order to
 > allow the Aggregators (or the Collector) to add noise for differential
-> privacy. (See the security considerations of [PPM].) Or is this out-of-scope
-> of this document?
+> privacy. (See the security considerations of {{?I-D.draft-gpew-priv-ppm}}.) Or
+> is this out-of-scope of this document?
 
 ## Execution of a VDAF {#execution}
 
