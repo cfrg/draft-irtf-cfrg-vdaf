@@ -1343,7 +1343,6 @@ class EvalState:
 
 ~~~
 class AggState:
-  # TODO: Should the number of prefixes be a constant instead?
   def __init__(agg_state):
     (_ candidate_prefixes) = decode_indexes(agg_param)
     self.share = vec_zeros(len(candidate_prefixes))
