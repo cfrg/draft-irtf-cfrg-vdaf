@@ -1184,15 +1184,6 @@ Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
 the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
 Section 4.3.
 
-> CP This definition would be a lot simpler if we just needed to define a field
-> for the inner nodes and the leaf nodes. Would the loss of generality would be
-> acceptable?
-
-> PS Having just two fields, one for inner nodes and one for leaf nodes, would
-> be enough to capture the heavy hitters use case. Not sure if this makes the
-> definition simpler though, because instead of `Field[l]` we then have to
-> write something like `l < DIM ? InnerField : LeafField`.
-
 Finally, an implementation note. The interface for IPDFs specified here is
 stateless, in the sense that there is no state carried between IPDF
 evaluations. This is to align the IDPF syntax with the VDAF abstraction
@@ -1218,8 +1209,6 @@ def eval_setup():
   return (None, [k_verify_init, k_verify_init])
 ~~~
 {: #hits-eval-setup title="The setup algorithm for hits."}
-
-> PS why are we returning `k_verify_init` twice?
 
 #### Client
 
@@ -1322,10 +1311,6 @@ class EvalState:
       return verifier_share_1
 
     elif self.step == "sketch round 1" and len(inbound) == 2:
-      # PS: Does this assume that `inbound` contains the shares of both
-      # parties? I would prefer to save the local share as
-      # `self.verifier_share` and only refer to the other aggregator's share
-      # as `inbound`.
       verifier_1 = Field[l].deocde_vec(inbound[0]) + \
                    Field[l].deocde_vec(inbound[1])
 
@@ -1335,7 +1320,7 @@ class EvalState:
          - verifier_1[2]) / 2 \
         + A_share * verifer_1[0] \
         + B_share
-      ]
+      ] # PS: Why the division by 2?
 
       self.step = "sketch round 2"
       return Field[l].encode_vec(verifier_share_2)
@@ -1358,8 +1343,9 @@ class EvalState:
 ~~~
 class AggState:
   # TODO: Should the number of prefixes be a constant instead?
-  def __init__(num_prefixes):
-    self.share = vec_zeros(num_prefixes)
+  def __init__(agg_state):
+    (_ candidate_prefixes) = decode_indexes(agg_param)
+    self.share = vec_zeros(len(candidate_prefixes))
 
   def next(self, output_share: Vec[Field]):
     if len(output_share) != len(self.share):
