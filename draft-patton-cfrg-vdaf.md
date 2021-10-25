@@ -275,10 +275,11 @@ security considerations for VDAFs.
 
 {::boilerplate bcp14-tagged}
 
-Algorithms are written in Python 3. Function parameters without a type hint
-implicitly have type `Bytes`, an arbitrary byte string. A fatal error in a
-program (e.g., failure to parse one of the function parameters) is usually
-handled by raising an exception.
+Algorithms in this document are written in Python 3. Type hints are used to
+define input and output types. Function parameters without type hints implicitly
+have type `Bytes`, an arbitrary byte string. A fatal error in a program (e.g.,
+failure to parse one of the function parameters) is usually handled by raising
+an exception.
 
 Some common functionalities:
 
@@ -342,13 +343,13 @@ where clients submit measurements to a single server.  They are critical for
 both the privacy properties of the system and the correctness of the
 measurements obtained.  The privacy properties of the system are assured by
 non-collusion among aggregators, and aggregators are the entities that perform
-validation of client inputs.  Thus clients trust aggregators not to collude and
-collectors trust aggregators to properly verify client inputs.
+validation of client inputs.  Thus clients trust Aggregators not to collude
+(typically it is required that at least one Aggregator is honest), and
+Collectors trust Aggregators to properly verify Client inputs.
 
-Within the bounds of the non-collusion requirements of a given VDAF instance --
-privacy requires that a subset of the Aggregators (typically just one) is honest
--- it is possible for the same entity to play more than one role.  For example,
-the Collector could also act as an Aggregator, effectively using the other
+Within the bounds of the non-collusion requirements of a given VDAF instance, it
+is possible for the same entity to play more than one role.  For example, the
+Collector could also act as an Aggregator, effectively using the other
 Aggregators to augment a basic client-server protocol.
 
 In this document, we describe the computations performed by the actors in this
