@@ -1474,21 +1474,21 @@ Different VDAFs allow different checks to be done on the correctness of the
 input.  These controls, however, are addressed at the level of individual
 measurements, and do not prevent a malicious client from submitting multiple
 valid inputs that would collectively result in an incorrect aggregate (a flavor
-of Sybil attack [Dou02]).
-Applications can guard against these risks by adding additional controls on
-measurement submission, such as client authentication and rate limits.
+of Sybil attack [Dou02]).  Applications can guard against these risks by adding
+additional controls on measurement submission, such as client authentication and
+rate limits.
 
 VDAFs do not inherently provide differential privacy [Vad16].  The VDAF approach
 to private measurement can be viewed as complementary to differential privacy,
 relying on non-collusion instead of statistical noise to protect the privacy of
 hte inputs.  It is possible that a future VDAF could incorporate differential
-privacy features, e.g., by injecting noise at the input stage and removing it
-during aggregation.
+privacy features, e.g., by injecting noise before the sharding stage and
+removing it after unsharding.
 
 
 # IANA Considerations
 
-This document has no IANA actions.
+This document makes no request of IANA.
 
 
 --- back
