@@ -890,7 +890,7 @@ proof system is designed so that the verifier message leaks nothing about the
 input (in an information theoretic sense). See Definition 3.9 from [BBCGGI19]
 for details.
 
-An FLP is typically constructed from an arithmetic circuit, which defines
+An FLP is typically constructed from an arithmetic circuit that in turn defines
 validity. However, in the remainder we do not explicitly mention this circuit
 and allow validity to be defined by the set of inputs recognized by the FLP when
 run as described above.
@@ -1491,7 +1491,7 @@ aggregate result.  The collector is assured that the aggregate statistic
 accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.
 
-One way that VDAFs fall short is in preventing Sybil attacks [Duo02]. In this
+One way that VDAFs fall short is in preventing Sybil attacks [Dou02]. In this
 attack, the adversary observes a subset of input shares transmitted by a Client
 it is interested in. It allows the input shares to be processed, but corrupts
 and picks bogus inputs for the remaining Clients.  Applications can guard
