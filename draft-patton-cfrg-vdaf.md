@@ -1019,21 +1019,21 @@ def measurement_to_input_shares(_, measurement):
     helper_proof_share = expand(Field, k_share, PROOF_LEN)
     leader_proof_share -= helper_proof_share
 
-  output = []
-  output.append(encode_leader_share(
+  input_shares = []
+  input_shares.append(encode_leader_share(
     leader_input_share,
     leader_proof_share,
     k_leader_blind,
     k_leader_hint,
   ))
   for j in range(SHARES-1):
-    output.append(encode_helper_share(
+    input_shares.append(encode_helper_share(
       k_helper_input_share[j],
       k_helper_proof_share[j],
       k_helper_blinds[j],
       k_helper_hints[j],
     ))
-  return output
+  return input_shares
 ~~~
 {: #prio3-eval-input title="Input-distribution algorithm for prio3."}
 
@@ -1329,12 +1329,12 @@ def measurement_to_input_shares(_, alpha):
   # Generate IDPF shares.
   (key_0, key_1) = idpf_gen(input, beta)
 
-  output = [
+  input_shares = [
     encode_input_share(key_0, correlation_shares_0),
     encode_input_share(key_1, correlation_shares_1),
   ]
 
-  return output
+  return input_shares
 ~~~
 {: #hits-mes2inp title="The input-distribution algorithm for hits."}
 
