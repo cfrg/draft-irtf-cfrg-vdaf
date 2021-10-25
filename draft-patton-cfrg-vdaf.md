@@ -1137,6 +1137,9 @@ the `hits` VDAF is a solution.
 
 ## Incremental Distributed Point Functions (IDPFs)
 
+> NOTE An implementation of IDPFs can be found
+> [here](https://github.com/google/distributed_point_functions/).
+
 An IDPF is defined over a domain of size `2^DIM`, where `DIM` is constant
 defined by the IDPF. The Client specifies an index `alpha` and values `beta`,
 one for each "level" `1 <= l <= DIM`. The key generation generates two IDPF
