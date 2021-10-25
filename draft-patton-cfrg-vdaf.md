@@ -528,7 +528,7 @@ following algorithms:
 
 * `agg_output(agg_states: Vec[AggStates]) -> agg` is run by the Collector in
   order to compute the final aggregate from the Aggregators' aggregation states.
-  (Note that `len(states) == SHARES`.) This algorithm is deterministic.
+  (Note that `len(agg_states) == SHARES`.) This algorithm is deterministic.
 
 > OPEN ISSUE Maybe `AggState.next` (and maybe `agg_output`, too) should be
 > randomized in order to allow the Aggregators (or the Collector) to add noise
@@ -1353,15 +1353,33 @@ class EvalState:
 
 ### Output Aggregation
 
-> TODO
-
 #### Aggregator
 
-> TODO
+~~~
+class AggState:
+  # TODO: Should the number of prefixes be a constant instead?
+  def __init__(num_prefixes):
+    self.share = vec_zeros(num_prefixes)
+
+  def next(self, output_share: Vec[Field]):
+    if len(output_share) != len(self.share):
+      raise ERR_INVALID_INPUT
+    self.share += output_share
+~~~
 
 #### Collector
 
-> TODO
+~~~
+def agg_output(agg_states: Vec[AggState]):
+  if len(agg_states) == 0:
+    raise ERR_INVALID_INPUT
+  agg = vec_zeros(len(agg_states[0].share))
+  for agg_state in agg_states:
+    if len(agg_state.share) != len(agg):
+      raise ERR_INVALID_INPUT
+    agg += agg_state.share
+  return agg
+~~~
 
 ### Helper Functions {#hits-helper-functions}
 
