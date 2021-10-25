@@ -139,11 +139,11 @@ input that would result in the aggregate getting garbled.
 
 # Introduction
 
-> TODO Clean up references
+> XXX Clean up references
 
-> TODO Harmonize author comment convention
+> XXX Harmonize author comment convention
 
-> TODO Finish security considerations
+> XXX Finish security considerations
 
 The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
@@ -363,8 +363,6 @@ addition, a VDAF specifies the following constants:
 
 ## Input Evaluation
 
-> TODO separate lists for (1) setup (2) client and (3) aggregator.
-
 ~~~~
     Client
       |
@@ -480,8 +478,6 @@ privacy).
 
 ## Output Aggregation
 
-> Split function lists into Aggregator operations and Collector operations.
-
 ~~~~
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
       |               |                   |
@@ -535,6 +531,8 @@ processed, each Aggregator sends its aggregate share to the Collector, who
 combines them to recover the final aggregate.
 
 ### Aggregator
+
+> XXX Add agg parameter to constructor and update prio3 accordingly.
 
 Each Aggregator's state is captured by the `AggState` object, which consists of
 the following methods:
