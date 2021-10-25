@@ -285,8 +285,6 @@ Some common functionalities:
 
 # Overview
 
-> XXX agg param
-
 In a VDAF-based private measurement system, we distinguish three types of
 actors: Clients, Aggregators, and Collectors.  The overall flow of the
 measurement process is as follows:
@@ -442,6 +440,10 @@ produces a single output based on its input share.  In subsequent rounds, each
 aggregator is given the outputs from all aggregators in the previous round.
 After the final round, either all aggregators hold an output share (if the
 output shares are valid) or all aggregators report an error (if they are not).
+
+This process involves a value called the "aggregation parameter" used to map the
+input shares to output shares. The Aggregators need to agree on this parameter
+before they can begin preparing inputs for aggregation.
 
 ~~~~
     Aggregator 0   Aggregator 1        Aggregator SHARES-1
@@ -1154,8 +1156,8 @@ def aggregate_shares_to_result(_, agg_shares: Vec[Bytes]):
 > [here](https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/hits.rs).
 
 This section specifies `hits`, a VDAF for the following task. Each Client holds
-a `DIM`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
-<= DIM`. We will refer to the latter as the set of "candidate prefixes". The
+a `BITS`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
+<= BITS`. We will refer to the latter as the set of "candidate prefixes". The
 Aggregators' goal is to count how many inputs are prefixed by each candidate
 prefix.
 
@@ -1173,7 +1175,7 @@ follows.
 4. The Aggregators send their aggregate shares to the Collector, who combines
    them to recover the counts of each candidate prefix.
 5. Let `H` denote the set of prefixes that occurred at least `t` times. If the
-   prefixes all have length `DIM`, then `H` is the set of `t`-heavy-hitters.
+   prefixes all have length `BITS`, then `H` is the set of `t`-heavy-hitters.
    Otherwise compute the next set of candidate prefixes as follows. For each `p`
    in `H`, add add `p || 0` and `p || 1` to the set. Repeat step 3 with the new
    set of candidate prefixes.
@@ -1206,9 +1208,9 @@ the `hits` is a solution.
 > NOTE An implementation of IDPFs can be found
 > [here](https://github.com/google/distributed_point_functions/).
 
-An IDPF is defined over a domain of size `2^DIM`, where `DIM` is constant
+An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
 defined by the IDPF. The Client specifies an index `alpha` and values `beta`,
-one for each "level" `1 <= l <= DIM`. The key generation generates two IDPF
+one for each "level" `1 <= l <= BITS`. The key generation generates two IDPF
 keys, one for each Aggregator. When evaluated at index `0 <= x < 2^l`, each
 IDPF share returns an additive share of `beta[l]` if `x` is the `l`-bit prefix
 of `alpha` and shares of zero otherwise.
@@ -1216,34 +1218,34 @@ of `alpha` and shares of zero otherwise.
 > CP What does it mean for `x` to be the `l`-bit prefix of `alpha`? We need to
 > be a bit more precise here.
 
-> CP Why isn't the domain size actually `2^(DIM+1)`, i.e., the number of nodes
-> in a binary tree of height `DIM` (excluding the root)?
+> CP Why isn't the domain size actually `2^(BITS+1)`, i.e., the number of nodes
+> in a binary tree of height `BITS` (excluding the root)?
 
 Each `beta[l]` is a pair of elements of a finite field. Each level MAY have
 different field parameters. Thus a concrete IDPF specifies associated types
-`Field[1]`, `Field[2]`, ..., and `Field[DIM]` defining, respectively, the field
-parameters at level 1, level 2, ..., and level `DIM`.
+`Field[1]`, `Field[2]`, ..., and `Field[BITS]` defining, respectively, the field
+parameters at level 1, level 2, ..., and level `BITS`.
 
 An IDPF is comprised of the following algorithms (let type `Value[l]` denote
 `(Field[l], Field[l])` for each level `l`):
 
-* `idpf_gen(alpha: Unsigned, beta: (Value[1], ..., Value[DIM])) -> key:
+* `idpf_gen(alpha: Unsigned, beta: (Value[1], ..., Value[BITS])) -> key:
   (IDPFKey, IDPFKey)` is the randomized key-generation algorithm run by the
   client. Its inputs are the index `alpha` and the values `beta`. The value of
-  `alpha` MUST be in range `[0, 2^DIM)`.
+  `alpha` MUST be in range `[0, 2^BITS)`.
 
 * `IDPFKey.eval(l: Unsigned, x: Unsigned) -> value: Value[l])` is deterministic,
   stateless key-evaluation algorithm run by each Aggregator. It returns the
-  value corresponding to index `x`. The value of `l` MUST be in `[1, DIM]` and
+  value corresponding to index `x`. The value of `l` MUST be in `[1, BITS]` and
   the value of `x` MUST be in range `[2^(l-1), 2^l)`.
 
 A concrete IDPF specifies a single associated constant:
 
-* `DIM: Unsigned` is the length of each Client input.
+* `BITS: Unsigned` is the length of each Client input.
 
 A concrete IDPF also specifies the following associated types:
 
-* `Field[l]` for each level `1 <= l <= DIM`. Each defines the same methods and
+* `Field[l]` for each level `1 <= l <= BITS`. Each defines the same methods and
   associated constants as `Field` in {{prio3}}.
 
 Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
@@ -1295,12 +1297,12 @@ follows. Function `encode_input_share` is defined in {{hits-helper-functions}}.
 
 ~~~
 def measurement_to_input_shares(_, alpha):
-  if alpha < 2**DIM: raise ERR_INVALID_INPUT
+  if alpha < 2**BITS: raise ERR_INVALID_INPUT
 
   # Prepare IDPF values.
   beta = []
   correlation_shares_0, correlation_shares_1 = [], []
-  for l in range(1,DIM+1):
+  for l in range(1,BITS+1):
     (k, a, b, c) = Field[l].rand_vec(4)
 
     # Construct values of the form (1, k), where k
@@ -1443,7 +1445,7 @@ def aggregate_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
 
 * `decode_indexes(encoded: Bytes) -> (l: Unsigned, indexes: Vec[Unsigned])`
   decodes a sequence of indexes, i.e., candidate indexes for IDFP evaluation.
-  The value of `l` MUST be in range `[1, DIM]` and `indexes[i]` MUST be in range
+  The value of `l` MUST be in range `[1, BITS]` and `indexes[i]` MUST be in range
   `[2^(l-1), 2^l)` for all `i`. An error is raised if `encoded` cannot be
   decoded.
 
