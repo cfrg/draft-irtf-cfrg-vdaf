@@ -1183,8 +1183,13 @@ Section 4.3.
 > for the inner nodes and the leaf nodes. Would the loss of generality would be
 > acceptable?
 
-Finally, an implementation note. The stateless for IPDFs specified here is
-stateless, in the sense that there is not state carried between IPDF
+> PS Having just two fields, one for inner nodes and one for leaf nodes, would
+> be enough to capture the heavy hitters use case. Not sure if this makes the
+> definition simpler though, because instead of `Field[l]` we then have to
+> write something like `l < DIM ? InnerField : LeafField`.
+
+Finally, an implementation note. The interface for IPDFs specified here is
+stateless, in the sense that there is no state carried between IPDF
 evaluations. This is to align the IDPF syntax with the VDAF abstraction
 boundary, which does not include shared evaluation state across evaluations. In
 practice, of course, it will often be beneficial to expose a stateful API for
@@ -1208,6 +1213,8 @@ def eval_setup():
   return (None, [k_verify_init, k_verify_init])
 ~~~
 {: #hits-eval-setup title="The setup algorithm for hits."}
+
+> PS why are we returning `k_verify_init` twice?
 
 #### Client
 
