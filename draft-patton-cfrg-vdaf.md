@@ -904,8 +904,7 @@ Note that [BBCGGI19] defines a much larger class of fully linear proof systems;
 what is called a FLP here is called a 1.5-round, public-coin, interactive oracle
 proof system in their paper.
 
-
-### Encoding the Input and Recovering the Output {#flp-encode}
+### Encoding the Input {#flp-encode}
 
 The type of measurement being aggregated is defined by the FLP. Hence, the FLP
 also specifies a method of encoding raw measurements as a vector of field
@@ -933,23 +932,21 @@ notion of Affine-aggregatable encodings (AFEs) from [CGB17].
 This VDAF involves a single round of communication (`ROUNDS == 1`). It is defined
 for at least two Aggregators, but no more than 255. (`2 <= SHARES <= 255`).
 
-### Input Evaluation
-
-#### Setup
+### Setup
 
 The setup algorithm generates a symmetric key shared by all of the aggregators.
 The key is used to derive unique joint randomness for the FLP query-generation
 algorithm run by the aggregators during input evaluation.
 
 ~~~
-def eval_setup():
+def vdaf_setup():
   k_query_init = gen_rand(KEY_SIZE)
   verify_param = [ (j, k_query_init) for j in range(SHARES) ]
   return (None, verify_param)
 ~~~
 {: #prio3-eval-setup title="The setup algorithm for prio3."}
 
-#### Client
+### Sharding
 
 Recall from {{flp}} that the syntax for FLP systems calls for "joint randomness"
 shared by the prover (i.e., the Client) and the verifier (i.e., the
@@ -980,7 +977,7 @@ leader share and helper share. These are called `encode_leader_share` and
 {{prio3-helper-functions}}.
 
 ~~~
-def eval_input(_, measurement):
+def measurement_to_input_shares(_, measurement):
   input = flp_encode(measurement)
   k_joint_rand = zeros(SEED_SIZE)
 
@@ -1040,7 +1037,7 @@ def eval_input(_, measurement):
 ~~~
 {: #prio3-eval-input title="Input-distribution algorithm for prio3."}
 
-#### Aggregator
+### Preparation
 
 This section describes the process of recovering output shares from the input
 shares. The high-level idea is that each of the Aggregators runs the FLP
@@ -1071,7 +1068,7 @@ functions, `encode_verifer_share` and `decode_verifier_share`, both of which are
 defined in {{prio3-helper-functions}}.
 
 ~~~
-class EvalState:
+class PrepState:
   def __init__(verify_param, _, nonce, r_input_share):
     (j, k_query_init) = verify_param
 
@@ -1116,39 +1113,36 @@ class EvalState:
 
       if k_joint_rand != self.k_joint_rand: raise ERR_INVALID
       if not flp_decide(verifier): raise ERR_INVALID
-      return self.output_share
+      return Field.encode_vec(self.output_share)
 
     else: raise ERR_INVALID_STATE
 ~~~
-{: #prio3-eval-state title="Evaluation state for prio3."}
+{: #prio3-prep-state title="Preparation state for prio3."}
 
 > NOTE `JOINT_RAND_LEN` may be `0`, in which case the joint randomness
 > computation is not necessary. Should we bake this option into the spec?
 
-### Output Aggregation
-
-#### Aggregator
+### Aggregation
 
 ~~~
-class AggState:
-  def __init__():
-    self.share = vec_zeros(OUTPUT_LEN)
-
-  def next(self, output_share: Vec[Field]):
-    self.share += output_share
+def output_to_aggregate_shares(_, output_shares: Vec[Bytes]):
+  agg_share = vec_zeros(OUTPUT_LEN)
+  for output_share in output_shares:
+    agg_share += Field.decode_vec(output_share)
+  return Field.encode_vec(agg_share)
 ~~~
-{: #prio3-agg-state title="Aggregation state for prio3."}
+{: #prio3-out2agg title="Aggregation algorithm for prio3."}
 
-#### Collector
+### Unsharding
 
 ~~~
-def agg_output(agg_states: Vec[AggState]):
+def aggregate_shares_to_result(_, agg_shares: Vec[Bytes]):
   agg = vec_zeros(OUTPUT_LEN)
-  for agg_state in agg_states:
-    agg += agg_state.share
-  return agg
+  for agg_share in agg_shares:
+    agg += Field.decode_vec(agg_share)
+  return Field.encode_vec(agg)
 ~~~
-{: #prio3-agg-output title="Computation of the aggregate for prio3."}
+{: #prio3-agg-output title="Computation of the aggregate result for prio3."}
 
 ### Helper Functions {#prio3-helper-functions}
 
@@ -1278,15 +1272,13 @@ state across evaluations.
 The VDAF involves two rounds of communication (`ROUNDS == 2`) and is defined for
 two Aggregators (`SHARES == 2`).
 
-### Input Evaluation
-
-#### Setup
+### Setup
 
 The verification parameter is a symmetric key shared by both Aggregators. This
 VDAF has no public parameter.
 
 ~~~
-def eval_setup():
+def vdaf_setup():
   k_verify_init = gen_rand(KEY_SIZE)
   return (None, [(0, k_verify_init), (1, k_verify_init)])
 ~~~
@@ -1312,7 +1304,7 @@ Putting everything together, the input-distribution algorithm is defined as
 follows. Function `encode_input_share` is defined in {{hits-helper-functions}}.
 
 ~~~
-def eval_input(_, alpha):
+def measurement_to_input_shares(_, alpha):
   if alpha < 2**DIM: raise ERR_INVALID_INPUT
 
   # Prepare IDPF values.
@@ -1344,12 +1336,12 @@ def eval_input(_, alpha):
 
   return output
 ~~~
-{: #hits-eval-input title="The input-distribution algorithm for hits."}
+{: #hits-mes2inp title="The input-distribution algorithm for hits."}
 
 > TODO It would be more efficient to represent the correlation shares using PRG
 > seeds as suggested in [BBCGGI21].
 
-#### Aggregator
+### Preparation
 
 The aggregation parameter encodes a sequence of candidate prefixes. When an
 Aggregator receives an input share from the Client, it begins by evaluating its
@@ -1359,7 +1351,7 @@ correlation shares provided by the Client to verify that their `data_share`
 vectors are additive shares of a one-hot vector.
 
 ~~~
-class EvalState:
+class PrepState:
   def __init__(verify_param, agg_param, nonce, input_share):
     (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
     (self.idpf_key,
@@ -1413,41 +1405,42 @@ class EvalState:
                    Field[l].decode_vec(inbound[1])
 
       if verifier_2 != 0: raise ERR_INVALID
-      return self.output_share
+      return Field[l].encode_vec(self.output_share)
 
     else: raise ERR_INVALID_STATE
 ~~~
-{: #hits-eval-state title="Evaluation state for hits."}
+{: #hits-prep-state title="Preparation state for hits."}
 
-### Output Aggregation
-
-#### Aggregator
+### Aggregation
 
 ~~~
-class AggState:
-  def __init__(agg_state):
-    (_ candidate_prefixes) = decode_indexes(agg_param)
-    self.share = vec_zeros(len(candidate_prefixes))
-
-  def next(self, output_share: Vec[Field]):
-    if len(output_share) != len(self.share):
-      raise ERR_INVALID_INPUT
-    self.share += output_share
-~~~
-
-#### Collector
-
-~~~
-def agg_output(agg_states: Vec[AggState]):
-  if len(agg_states) == 0:
+def output_to_aggregate_shares(agg_param, output_shares: Vec[Bytes]):
+  (l, candidate_prefixes) = decode_indexes(agg_param)
+  if len(output_shares) != len(candidate_prefixes):
     raise ERR_INVALID_INPUT
-  agg = vec_zeros(len(agg_states[0].share))
-  for agg_state in agg_states:
-    if len(agg_state.share) != len(agg):
-      raise ERR_INVALID_INPUT
-    agg += agg_state.share
-  return agg
+
+  agg_share = Field[l].vec_zeros(len(candidate_prefixes))
+  for output_share in output_shares:
+    agg_share += Field[l].decode_vec(output_share)
+
+  return Field[l].encode_vec(agg_share)
 ~~~
+{: #hits-out2agg title="Aggregation algorithm for hits."}
+
+### Unsharding
+
+~~~
+def aggregate_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
+  (l, _) = decode_indexes(agg_param)
+  if len(agg_shares) != 2:
+    raise ERR_INVALID_INPUT
+
+  agg = Field[l].decode_vec(agg_shares[0]) + \
+        Field[l].decode_vec(agg_shares[1]J)
+
+  return Field[l].encode_vec(agg)
+~~~
+{: #hits-agg-output title="Computation of the aggregate result for hits."}
 
 ### Helper Functions {#hits-helper-functions}
 
