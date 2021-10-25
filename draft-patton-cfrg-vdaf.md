@@ -1466,8 +1466,8 @@ security gaols:
    Clients beyond what it can deduce from the aggregate result.
 
 1. Robustness: An attacker that controls the network and a subset of Clients
-   cannot cause the Collector to compute anything other than the aggregation
-   function over the measurements of honest Clients.
+   cannot cause the Collector to compute anything other than the aggregate of
+   the measurements of honest Clients.
 
 (Note that it is also possible to consider a stronger form of robustness, where
 the attacker also controls a subset of Aggregators. See [BBCGGI19], Section
