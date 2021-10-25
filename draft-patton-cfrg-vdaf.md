@@ -171,21 +171,21 @@ value of the measurements while protecting users' privacy.
 Most prior approaches to this problem fall under the rubric of "differential
 privacy (DP)" [Dwo06]. Roughly speaking, a data aggregation system that is
 differentially private ensures that the degree to which any individual
-measurement influences the value of the aggregated output can be controlled.
-For example, in systems like RAPPOR [EPK14], each user samples noise from a
-well-known distribution and adds it to their input before submitting to the
-aggregation server. The aggregation server then adds up the noisy inputs, and
-because it knows the distribution from whence the noise was sampled, it can
-accurately estimate the true sum with reasonable precision.
+measurement influences the value of the aggregated output can be precisely
+controlled. For example, in systems like RAPPOR [EPK14], each user samples
+noise from a well-known distribution and adds it to their input before
+submitting to the aggregation server. The aggregation server then adds up the
+noisy inputs, and because it knows the distribution from whence the noise was
+sampled, it can estimate the true sum with reasonable precision.
 
-Systems like RAPPOR are easy to deploy and provide a useful privacy property
-(DP). On its own, however, DP falls short of the strongest privacy property one
-could hope for. Specifically, depending on the amount of noise a client adds
-to its input, it may be possible for a curious aggregator to make a reasonable
-guess of the input's true value. Indeed, the amount of noise needs to be
-carefully controlled, since the more noise that is added to inputs, the less
-reliable the estimated output will be. Thus systems employing DP techniques
-alone must strike a delicate balance between privacy and utility.
+Differentially private systems like RAPPOR are easy to deploy and provide a
+useful guarantee. On its own, however, DP falls short of the strongest privacy
+property one could hope for. Specifically, depending on the "amount" of noise a
+client adds to its input, it may be possible for a curious aggregator to make a
+reasonable guess of the input's true value. Indeed, the more noise the clients
+add, the less reliable will be the server's estimate of the output. Thus systems
+employing DP techniques alone must strike a delicate balance between privacy and
+utility.
 
 The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation: No participant in the protocol should learn anything
@@ -204,11 +204,12 @@ from the set of inputs.
 The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
 undermine the VDAF's privacy guarantees.  Recent implementation experience has
-shown that practical challenges of coordinating multiple servers can be overcom.
-The Prio system (essentially a VDAF) has been deployed in systems supporting
-hundreds of millions of users: The Mozilla Origin Telemetry project
-[OriginTelemetry] and the Exposure Notification Private Analytics collaboration
-among the Internet Security Research Group, Google, Apple, and others [ENPA].
+shown that practical challenges of coordinating multiple servers can be
+overcome.  The Prio system [CGB17] (essentially a VDAF) has been deployed in
+systems supporting hundreds of millions of users: The Mozilla Origin Telemetry
+project [OriginTelemetry] and the Exposure Notification Private Analytics
+collaboration among the Internet Security Research Group (ISRG), Google, Apple,
+and others [ENPA].
 
 The VDAF abstraction laid out in {{vdaf}} represents a class of multi-party
 protocols for privacy-preserving measurement proposed in the literature. These
@@ -217,49 +218,55 @@ subtle but consequential ways. This document therefore has two important goals:
 
  1. Providing applications like [PPM] with a simple, uniform interface for
     accessing privacy-preserving measurement schemes, and documenting relevant
-    operational and security bounds on that interface:
+    operational and security bounds for that interface:
 
     1. General patterns of communications among the various actors involved in
-       the system (clients, aggregators, and measurement collectors) 
+       the system (clients, aggregators, and measurement collectors);
     1. Capabilities of a malicious coalition of servers attempting divulge
-       information about client inputs.
-    1. Conditions are necessary to ensure that malicious clients cannot corrupt
-       the computation.
+       information about client inputs; and
+    1. Conditions that are necessary to ensure that malicious clients cannot
+       corrupt the computation.
 
  1. Providing cryptographers with design criteria that allow new constructions
-    to be easily used by applications 
+    to be easily used by applications.
 
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
 
-* Prio [CGB17] is a scheme proposed by Corrigan-Gibbs and Boneh in 2017 that
-  allows for the privacy-preserving computation of a variety of aggregate
-  statistics. The input is sharded into a sequence of additive input shares and
-  distributed among the aggregation servers. Each server then adds up its inputs
-  shares locally. Finally, the output is obtained by combining the servers'
-  local output shares. Prio also specifies a multi-party computation for
-  verifying the validity of the input shares, where validity is defined by an
-  arithmetic circuit evaluated over the input.
+* The aforementioned Prio system [CGB17] allows for the privacy-preserving
+  computation of a variety aggregate statistics. The basic idea underlying Prio
+  is fairly simple:
+  1. Each client shards its input into a sequence of additive shares and
+     distributes the shares among the aggregation servers.
+  1. Next, each server adds up its shares locally, resulting in an additive
+     share of the aggregate.
+  1. Finally, the aggregators combine their additive shares to obtain the final
+     aggregate.
+
+  The difficult part of this system is ensuring that the servers hold shares of
+  a valid input, e.g., the input is an integer in a specific range. Thus Prio
+  specifies a multi-party protocol for accomplishing this task.
 
   In {{prio3}} we describe `prio3`, a VDAF that follows the same overall
   framework as the original Prio protocol, but incorporates techniques
   introduced in [BBCGGI19] that result in significant performance gains.
 
 * More recently, Boneh et al. [BBCGGI21] described a protocol for solving the
-  `t`-heavy-hitters problem in a privacy-preserving manner. In this setting,
-  each client holds a bit-string of length `n`, and the goal of the aggregation
-  servers is to compute the set of inputs that occur at least `t` times. The
-  core primitive used in their protocol is a generalization of a Distributed
-  Point Function (DPF) [GI14] that allows the servers to "query" their DPF
-  shares on any bit-string of length shorter than or equal to `n`. As a result
-  of this query, each of the servers has an additive share of a bit indicating
-  whether the string is a prefix of the client's input. The protocol also
-  specifies a multi-party computation for verifying that at most one string
-  among a set of candidates is a prefix of the client's input.
+  `t`-heavy-hitters problem in a privacy-preserving manner. Here each client
+  holds a bit-string of length `n`, and the goal of the aggregation servers is
+  to compute the set of inputs that occur at least `t` times. The core primitive
+  used in their protocol is a generalization of a Distributed Point Function
+  (DPF) [GI14] that allows the servers to "query" their DPF shares on any
+  bit-string of length shorter than or equal to `n`. As a result of this query,
+  each of the servers has an additive share of a bit indicating whether the
+  string is a prefix of the client's input. The protocol also specifies a
+  multi-party computation for verifying that at most one string among a set of
+  candidates is a prefix of the client's input.
 
-  In {{hits}} we describe a VDAF called `hits` that captures this functionality.
+  In {{hits}} we describe a VDAF called `hits` that implements this
+  functionality.
 
-The remainder of this document is organized as follows. {{overview}} gives a
+The remainder of this document is organized as follows: {{overview}} gives a
 brief overview of VDAFs; {{vdaf}} defines the syntax for VDAFs; {{prio3}}
 describes `prio3`; {{hits}} describes `hits`; and {{security}} enumerates the
 security considerations for VDAFs.
