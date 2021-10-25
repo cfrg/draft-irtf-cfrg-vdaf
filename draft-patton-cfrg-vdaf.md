@@ -433,7 +433,7 @@ aggregator.
       V              V                   V
     Aggregator 0   Aggregator 1        Aggregator SHARES-1
 ~~~~
-{: #eval-flow title="The Client divides its measurement input into input shares
+{: #shard-flow title="The Client divides its measurement input into input shares
 and distributes them to the Aggregators."}
 
 ## Preparation
@@ -475,7 +475,7 @@ aggregators report an error (if it was not).
       V              V                   V
     out_share_0    out_share_1         out_share_[SHARES-1]
 ~~~~
-{: #eval-flow title="VDAF preparation process on the input shares for a single
+{: #prep-flow title="VDAF preparation process on the input shares for a single
 input. The === lines indicate the sharing of one round's outputs as the inputs
 to the next round. At the end of the protocol, each aggregator holds an output
 share or an error."}
@@ -584,7 +584,7 @@ recover the following output:
       V
     agg_result
 ~~~~
-{: #agg-flow title="Computation of the final aggregate result from aggregate
+{: #unshard-flow title="Computation of the final aggregate result from aggregate
 shares."}
 
 > QUESTION Maybe the aggregation algorithms should be
