@@ -292,24 +292,24 @@ Some common functionalities:
 * `byte(int: Unsigned) -> Byte` returns the representation of `int` as a byte.
   The value of `int` MUST be in range `[0,256)`.
 
-# Overview {#overview}
+# Overview
 
-In a private measurement system, we distinguish three types of actors: Clients,
-Aggregators, and Collectors.  The overall flow of the measurement process is as
-follows:
+In a VDAF-based private measurement system, we distinguish three types of
+actors: Clients, Aggregators, and Collectors.  The overall flow of the
+measurement process is as follows:
 
-* Clients are configured with public parameters for a set of Aggregators.
-* To submit an individual measurement, a Client shards the measurement into
+* Clients are configured with public parameters for a set of aggregators.
+* To submit an individual measurement, a client shards the measurement into
   "input shares" and sends one input share to each Aggregator.
 * The aggregators verify the validity of the input shares, producing a set of
-  output shares.
+  "output shares".
     * Output shares are in one-to-one correspondence with the input shares.
     * Just as each Aggregator receives one input share of each input, at the end
       of the validation process, each aggregator holds one output share.
     * In most VDAFs, aggregators will need to exchange information among
       themselves as part of the validation process.
 * Each aggregator combine the output shares across inputs in the batch to
-  compute shares of the desired aggregate.
+  compute "aggregate shares", i.e., shares of the desired aggregate result.
 * The aggregators submit their aggregate shares to the collector, who combines
   them to obtain the aggregate result over the batch.
 
