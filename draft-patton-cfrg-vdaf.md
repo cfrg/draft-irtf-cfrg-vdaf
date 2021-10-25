@@ -754,7 +754,7 @@ the following associated functions:
 
 ### Inner product of Vectors
 
-> TODO Specify
+> TODO Specify the following:
 
 * `inner_product(left: Vec[Field], right: Vec[Field]) -> Field` computes the
   inner product of `left` and `right`.
@@ -1475,7 +1475,7 @@ the attacker also controls a subset of Aggregators. See [BBCGGI19], Section
 these goals.  It is not sufficient on its own, however.  The application will
 need to assure a few security properties, for example:
 
-* Securely distributing the public and verification parameters
+* Securely distributing the long-lived parameters.
 * Establishing secure channels:
   * Confidential and authentic channels among Aggregators, and between the
     Aggregators and the Collector; and
@@ -1491,12 +1491,12 @@ aggregate result.  The collector is assured that the aggregate statistic
 accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.
 
-One way that VDAFs fall short is in preventing Sybil attacks [Dou02]. In this
-attack, the adversary observes a subset of input shares transmitted by a Client
-it is interested in. It allows the input shares to be processed, but corrupts
-and picks bogus inputs for the remaining Clients.  Applications can guard
-against these risks by adding additional controls on measurement submission,
-such as client authentication and rate limits.
+On their own, VDAFs do not mitigate Sybil attacks [Dou02]. In this attack, the
+adversary observes a subset of input shares transmitted by a Client it is
+interested in. It allows the input shares to be processed, but corrupts and
+picks bogus inputs for the remaining Clients.  Applications can guard against
+these risks by adding additional controls on measurement submission, such as
+client authentication and rate limits.
 
 VDAFs do not inherently provide differential privacy [Dwo06].  The VDAF approach
 to private measurement can be viewed as complementary to differential privacy,
