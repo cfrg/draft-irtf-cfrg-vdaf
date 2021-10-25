@@ -144,8 +144,8 @@ family of multi-party protocols for computing aggregate statistics over user
 measurements. These protocols are designed to ensure that, as long as at least
 one aggregation server executes the protocol honestly, individual measurements
 are never seen by any server in the clear. At the same time, VDAFs allow the
-servers to detect if a malicious (or merely misconfigured) client submitted an
-input that would result in the aggregate getting garbled.
+servers to detect if a malicious or misconfigured client submitted an
+input that would result in an incorrect aggregate result.
 
 --- middle
 
@@ -180,12 +180,12 @@ accurately estimate the true sum with reasonable precision.
 
 Systems like RAPPOR are easy to deploy and provide a useful privacy property
 (DP). On its own, however, DP falls short of the strongest privacy property one
-could hope for. Specifically, depending on the "amount" of noise a client adds
+could hope for. Specifically, depending on the amount of noise a client adds
 to its input, it may be possible for a curious aggregator to make a reasonable
 guess of the input's true value. Indeed, the amount of noise needs to be
 carefully controlled, since the more noise that is added to inputs, the less
-reliable will be the estimate of the output. Thus systems employing DP
-techniques alone must strike a delicate balance between privacy and utility.
+reliable the estimated output will be. Thus systems employing DP techniques
+alone must strike a delicate balance between privacy and utility.
 
 The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation: No participant in the protocol should learn anything
@@ -196,46 +196,44 @@ general class of protocols that achieve this goal.
 VDAF schemes achieve their privacy goal by distributing the computation of the
 aggregate among a number of non-colluding aggregation servers. As long as a
 subset of the servers executes the protocol honestly, VDAFs guarantee that no
-input is ever visible in the clear. At the same time, VDAFs are "verifiable" in
-the sense that malformed inputs that would otherwise garble the output of the
-computation can be detected and removed from the set of inputs.
+input is ever accessible to any party besides the client that submitted it. At
+the same time, VDAFs are "verifiable" in the sense that malformed inputs that
+would otherwise garble the output of the computation can be detected and removed
+from the set of inputs.
 
 The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
-undermine the VDAF's privacy guarantees. However, recent implementation
-experience has shown that deployment of these schemes is practical.  The Prio
-system (essentially a VDAF) has been deployed in systems supporting hundreds of
-millions of users: The Mozilla Origin Telemetry project [OriginTelemetry] and
-the Exposure Notification Private Analytics collaboration among the Internet
-Security Research Group, Google, Apple, and others [ENPA].
+undermine the VDAF's privacy guarantees.  Recent implementation experience has
+shown that practical challenges of coordinating multiple servers can be overcom.
+The Prio system (essentially a VDAF) has been deployed in systems supporting
+hundreds of millions of users: The Mozilla Origin Telemetry project
+[OriginTelemetry] and the Exposure Notification Private Analytics collaboration
+among the Internet Security Research Group, Google, Apple, and others [ENPA].
 
 The VDAF abstraction laid out in {{vdaf}} represents a class of multi-party
 protocols for privacy-preserving measurement proposed in the literature. These
 protocols vary in their operational and security considerations, sometimes in
-subtle, but consequential, ways. This document therefore has two important
-goals:
+subtle but consequential ways. This document therefore has two important goals:
 
- 1. Specify the operational and security considerations for this class of
-    protocols, including:
+ 1. Providing applications like [PPM] with a simple, uniform interface for
+    accessing privacy-preserving measurement schemes, and documenting relevant
+    operational and security bounds on that interface:
 
-    1. Which communication patterns are feasible, i.e., how much interaction
-       between the client and aggregation servers is feasible, how and how much
-       the aggregation servers ineteract amongst themselves, and so on.
-    1. What are the capabilities of a malicious coalition of servers attempting
-       divulge information about client inputs.
-    1. What conditions are necessary to ensure that a malicious coalition of
-       clients cannot corrupt the computation.
+    1. General patterns of communications among the various actors involved in
+       the system (clients, aggregators, and measurement collectors) 
+    1. Capabilities of a malicious coalition of servers attempting divulge
+       information about client inputs.
+    1. Conditions are necessary to ensure that malicious clients cannot corrupt
+       the computation.
 
- 1. Define an abstraction boundary that provides applications, like [PPM], with
-    a simple, uniform interface for accessing privacy-preserving measurement
-    schemes, while also providing cryptographers with design criteria for new
-    constructions.
+ 1. Providing cryptographers with design criteria that allow new constructions
+    to be easily used by applications 
 
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
 
 * Prio [CGB17] is a scheme proposed by Corrigan-Gibbs and Boneh in 2017 that
-  allows for the privacy-preserving computation of a variety aggregate
+  allows for the privacy-preserving computation of a variety of aggregate
   statistics. The input is sharded into a sequence of additive input shares and
   distributed among the aggregation servers. Each server then adds up its inputs
   shares locally. Finally, the output is obtained by combining the servers'
@@ -243,9 +241,9 @@ from the literature.
   verifying the validity of the input shares, where validity is defined by an
   arithmetic circuit evaluated over the input.
 
-  In {{prio3}} we describe `prio3`, a VDAF that permits the same uses cases as
-  the original Prio protocol, but which is based on cryptographic techniques
-  introduced later in [BBCGGI19] that result in significant performance gains.
+  In {{prio3}} we describe `prio3`, a VDAF that follows the same overall
+  framework as the original Prio protocol, but incorporates techniques
+  introduced in [BBCGGI19] that result in significant performance gains.
 
 * More recently, Boneh et al. [BBCGGI21] described a protocol for solving the
   `t`-heavy-hitters problem in a privacy-preserving manner. In this setting,
