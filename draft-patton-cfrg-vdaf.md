@@ -417,6 +417,9 @@ aggregator.
 
 ~~~~
     Client
+    ======
+
+    measurement
       |
       V
     +----------------------------------------------+
@@ -611,9 +614,9 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], input_batch: Vec[Bytes]):
     input_shares = measurement_to_input_shares(public_param, input)
 
     # Each aggregator initializes its preparation state.
-    val_states = []
+    prep_states = []
     for j in range(SHARES):
-      val_states.append(validation_init(
+      prep_states.append(validation_init(
           verify_params[j], agg_param, nonce, input_shares[j]))
 
     # Aggregators recover their output shares.
@@ -621,7 +624,7 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], input_batch: Vec[Bytes]):
     for i in range(ROUNDS+1):
       outbound = []
       for j in range(SHARES):
-        outbound.append(val_states[j].next(inbound))
+        outbound.append(prep_states[j].next(inbound))
       # This is where we would send messages over the network
       # in a distributed VDAF computation.
       inbound = outbound
@@ -632,14 +635,14 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], input_batch: Vec[Bytes]):
 
   # Each aggregator aggregates its output shares into an
   # aggregate share.
-  aggregate_shares = []
+  agg_shares = []
   for j in range(SHARES):
     my_output_shares = [out[j] for out in output_shares]
     my_agg_share = output_to_aggregate_shares(my_output_shares)
-    aggregate_shares.append(my_agg_share)
+    agg_shares.append(my_agg_share)
 
   # Collector unshards the aggregate.
-  return aggregate_shares_to_result(aggregate_shares)
+  return aggregate_shares_to_result(agg_shares)
 ~~~
 {: #run-vdaf title="Execution of a VDAF."}
 
