@@ -564,7 +564,9 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], inputs: Vec[Bytes]):
     for i in range(ROUNDS+1):
       outbound = []
       for j in range(SHARES):
+        # PS: Should this be [...].next(inbound[j])?
         outbound.append(eval_states[j].next(inbound))
+      # PS: Where do the outbound messages actually get sent over the network?
       inbound = outbound
 
     # Each aggregator updates its aggregation state.
@@ -1317,6 +1319,10 @@ class EvalState:
       return verifier_share_1
 
     elif self.step == "sketch round 1" and len(inbound) == 2:
+      # PS: Does this assume that `inbound` contains the shares of both
+      # parties? I would prefer to save the local share as
+      # `self.verifier_share` and only refer to the other aggregator's share
+      # as `inbound`.
       verifier_1 = Field[l].deocde_vec(inbound[0]) + \
                    Field[l].deocde_vec(inbound[1])
 
