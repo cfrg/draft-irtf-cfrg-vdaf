@@ -619,7 +619,7 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], input_batch: Vec[Bytes]):
     # Each aggregator initializes its preparation state.
     prep_states = []
     for j in range(SHARES):
-      prep_states.append(validation_init(
+      prep_states.append(prep_init(
           verify_params[j], agg_param, nonce, input_shares[j]))
 
     # Aggregators recover their output shares.
