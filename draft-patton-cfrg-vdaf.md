@@ -619,7 +619,7 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], input_batch: Vec[Bytes]):
     # Each aggregator initializes its preparation state.
     prep_states = []
     for j in range(SHARES):
-      prep_states.append(prep_init(
+      prep_states.append(PrepState(
           verify_params[j], agg_param, nonce, input_shares[j]))
 
     # Aggregators recover their output shares.
@@ -1347,6 +1347,9 @@ IDPF share on each candidate prefixe, recovering a pair of vectors of field
 elements `data_share` and `auth_share`, The Aggregators use `auth_share` and the
 correlation shares provided by the Client to verify that their `data_share`
 vectors are additive shares of a one-hot vector.
+
+> CP Consider adding aggregation parameter as input to `k_verify_rand`
+> derivation.
 
 ~~~
 class PrepState:
