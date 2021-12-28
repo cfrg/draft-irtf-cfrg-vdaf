@@ -534,9 +534,9 @@ Once an aggregator holds validated output shares for a batch of measurements
 the desired aggregate result.  This algorithm is performed locally at each
 Aggregator, without communication with the other Aggregators.
 
-* `output_to_aggregate_shares(agg_param, output_shares)` is the deterministic
-  aggregation algorithm.  It is run by each Aggregator over the output shares it
-  has computed over a batch of measurement inputs.
+* `output_to_aggregate_shares(agg_param, output_shares) -> agg_share` is the
+  deterministic aggregation algorithm. It is run by each Aggregator over the
+  output shares it has computed over a batch of measurement inputs.
 
 ~~~~
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
@@ -640,12 +640,12 @@ def run_vdaf(agg_param, nonces: Vec[Bytes], input_batch: Vec[Bytes]):
   # aggregate share.
   agg_shares = []
   for j in range(SHARES):
-    my_output_shares = [out[j] for out in output_shares]
-    my_agg_share = output_to_aggregate_shares(my_output_shares)
-    agg_shares.append(my_agg_share)
+    output_shares_j = [out[j] for out in output_shares]
+    agg_share_j = output_to_aggregate_shares(agg_param, output_shares_j)
+    agg_shares.append(agg_share_j)
 
   # Collector unshards the aggregate.
-  return aggregate_shares_to_result(agg_shares)
+  return aggregate_shares_to_result(agg_param, agg_shares)
 ~~~
 {: #run-vdaf title="Execution of a VDAF."}
 
@@ -1258,8 +1258,8 @@ Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
 the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
 Section 4.3.
 
-Finally, an implementation note. The interface for IPDFs specified here is
-stateless, in the sense that there is no state carried between IPDF evaluations.
+Finally, an implementation note. The interface for IDPFs specified here is
+stateless, in the sense that there is no state carried between IDPF evaluations.
 This is to align the IDPF syntax with the VDAF abstraction boundary, which does
 not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
