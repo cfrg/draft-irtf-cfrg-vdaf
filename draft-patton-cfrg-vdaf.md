@@ -241,25 +241,25 @@ from the literature.
   framework as the original Prio protocol, but incorporates techniques
   introduced in [BBCGGI19] that result in significant performance gains.
 
-* More recently, Boneh et al. [BBCGGI21] described a protocol for solving the
-  `t`-heavy-hitters problem in a privacy-preserving manner. Here each client
-  holds a bit-string of length `n`, and the goal of the aggregation servers is
-  to compute the set of inputs that occur at least `t` times. The core primitive
-  used in their protocol is a generalization of a Distributed Point Function
-  (DPF) [GI14] that allows the servers to "query" their DPF shares on any
-  bit-string of length shorter than or equal to `n`. As a result of this query,
-  each of the servers has an additive share of a bit indicating whether the
-  string is a prefix of the client's input. The protocol also specifies a
-  multi-party computation for verifying that at most one string among a set of
-  candidates is a prefix of the client's input.
+* More recently, Boneh et al. [BBCGGI21] described a protocol called Poplar for
+  solving the `t`-heavy-hitters problem in a privacy-preserving manner. Here
+  each client holds a bit-string of length `n`, and the goal of the aggregation
+  servers is to compute the set of inputs that occur at least `t` times. The
+  core primitive used in their protocol is a generalization of a Distributed
+  Point Function (DPF) [GI14] that allows the servers to "query" their DPF
+  shares on any bit-string of length shorter than or equal to `n`. As a result
+  of this query, each of the servers has an additive share of a bit indicating
+  whether the string is a prefix of the client's input. The protocol also
+  specifies a multi-party computation for verifying that at most one string
+  among a set of candidates is a prefix of the client's input.
 
-  In {{hits}} we describe a VDAF called `hits` that implements this
+  In {{poplar1}} we describe a VDAF called `poplar1` that implements this
   functionality.
 
 The remainder of this document is organized as follows: {{overview}} gives a
 brief overview of VDAFs; {{vdaf}} defines the syntax for VDAFs; {{prelim}}
-defines various functionalities that are common to our constructions; {{hits}}
-describes the `hits` construction; {{prio3}} describes the `prio3` construction;
+defines various functionalities that are common to our constructions; {{poplar1}}
+describes the `poplar1` construction; {{prio3}} describes the `prio3` construction;
 and {{security}} enumerates the security considerations for VDAFs.
 
 # Conventions and Definitions
@@ -375,7 +375,7 @@ compatible with the aggregation function.  Verification ensures that aggregating
 the recovered output shares will not lead to a garbled aggregate result.
 
 <!--
-For some VDAFs, like `prio3` ({{prio3}}) or `hits` ({{hits}}), the output shares
+For some VDAFs, like `prio3` ({{prio3}}) or `poplar1` ({{poplar1}}), the output shares
 are recovered first, then validated. For other protocols, like Prio+ [AGJOP21],
 there is no explicit verification step.
 -->
@@ -781,7 +781,7 @@ invalid.  A number of useful measurement types can be defined this way:
 * Linear regression.
 
 This VDAF does not have an aggregation parameter. Instead, the output share is
-derived from an input share by applying a fixed map. See {{hits}} for an
+derived from an input share by applying a fixed map. See {{poplar1}} for an
 example of a VDAF that makes meaningful use of the aggregation parameter.
 
 While the construction is derived from the original Prio system [CGB17], `prio3`
@@ -1156,20 +1156,19 @@ def aggregate_shares_to_result(_, agg_shares: Vec[Bytes]):
   hint and verifier share as a byte string.
 * `decode_verifier_share` decodes a verifier share.
 
-# hits {#hits}
+# poplar1 {#poplar1}
 
 > NOTE An implementation of this VDAF can be found
-> [here](https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/hits.rs).
+> [here](https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/poplar1.rs).
 
-This section specifies `hits`, a VDAF for the following task. Each Client holds
+This section specifies `poplar1`, a VDAF for the following task. Each Client holds
 a `BITS`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
 <= BITS`. We will refer to the latter as the set of "candidate prefixes". The
 Aggregators' goal is to count how many inputs are prefixed by each candidate
 prefix.
 
-This functionality is the core component of the privacy-preserving
-`t`-heavy-hitters protocol of [BBCGGI21]. At a high level, the protocol works as
-follows.
+This functionality is the core component of Poplar [BBCGGI21]. At a high level,
+the protocol works as follows.
 
 1. Each Clients runs the input-distribution algorithm on its `n`-bit string and
    sends an input share to each Aggregator.
@@ -1186,7 +1185,7 @@ follows.
    in `H`, add add `p || 0` and `p || 1` to the set. Repeat step 3 with the new
    set of candidate prefixes.
 
-`hits` is constructed from an "Incremental Distributed Point Function (IDPF)", a
+`poplar1` is constructed from an "Incremental Distributed Point Function (IDPF)", a
 primitive described by [BBCGGI21] that generalizes the notion of a Distributed
 Point Function (DPF) [GI14]. Briefly, a DPF is used to distribute the
 computation of a "point function", a function that evaluates to zero on every
@@ -1205,9 +1204,9 @@ This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
 is zero everywhere except for one element, which is equal to one.
 
-The name `hits` is an anagram of "hist", which is short for "histogram". It is a
+The name `poplar1` is an anagram of "hist", which is short for "histogram". It is a
 nod toward the "subset histogram" problem formulated by [BBCGGI21] and for which
-the `hits` is a solution.
+the `poplar1` is a solution.
 
 ## Incremental Distributed Point Functions (IDPFs)
 
@@ -1265,7 +1264,7 @@ not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
 state across evaluations.
 
-## Construction {#hits-construction}
+## Construction {#poplar1-construction}
 
 The VDAF involves two rounds of communication (`ROUNDS == 2`) and is defined for
 two Aggregators (`SHARES == 2`).
@@ -1280,7 +1279,7 @@ def vdaf_setup():
   k_verify_init = gen_rand(KEY_SIZE)
   return (None, [(0, k_verify_init), (1, k_verify_init)])
 ~~~
-{: #hits-eval-setup title="The setup algorithm for hits."}
+{: #poplar1-eval-setup title="The setup algorithm for poplar1."}
 
 #### Client
 
@@ -1299,7 +1298,7 @@ In addition, for each level of the tree, the prover generates random elements
 
 and sends additive shares of `a`, `b`, `c`, `A` and `B` to the Aggregators.
 Putting everything together, the input-distribution algorithm is defined as
-follows. Function `encode_input_share` is defined in {{hits-helper-functions}}.
+follows. Function `encode_input_share` is defined in {{poplar1-helper-functions}}.
 
 ~~~
 def measurement_to_input_shares(_, alpha):
@@ -1334,7 +1333,7 @@ def measurement_to_input_shares(_, alpha):
 
   return input_shares
 ~~~
-{: #hits-mes2inp title="The input-distribution algorithm for hits."}
+{: #poplar1-mes2inp title="The input-distribution algorithm for poplar1."}
 
 > TODO It would be more efficient to represent the correlation shares using PRG
 > seeds as suggested in [BBCGGI21].
@@ -1410,7 +1409,7 @@ class PrepState:
 
     else: raise ERR_INVALID_STATE
 ~~~
-{: #hits-prep-state title="Preparation state for hits."}
+{: #poplar1-prep-state title="Preparation state for poplar1."}
 
 ### Aggregation
 
@@ -1426,7 +1425,7 @@ def output_to_aggregate_shares(agg_param, output_shares: Vec[Bytes]):
 
   return Field[l].encode_vec(agg_share)
 ~~~
-{: #hits-out2agg title="Aggregation algorithm for hits."}
+{: #poplar1-out2agg title="Aggregation algorithm for poplar1."}
 
 ### Unsharding
 
@@ -1441,9 +1440,9 @@ def aggregate_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
 
   return Field[l].encode_vec(agg)
 ~~~
-{: #hits-agg-output title="Computation of the aggregate result for hits."}
+{: #poplar1-agg-output title="Computation of the aggregate result for poplar1."}
 
-### Helper Functions {#hits-helper-functions}
+### Helper Functions {#poplar1-helper-functions}
 
 > TODO Specify the following functionalities:
 
