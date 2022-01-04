@@ -1343,7 +1343,7 @@ def measurement_to_input_shares(_, alpha):
 
 The aggregation parameter encodes a sequence of candidate prefixes. When an
 Aggregator receives an input share from the Client, it begins by evaluating its
-IDPF share on each candidate prefixe, recovering a pair of vectors of field
+IDPF share on each candidate prefix, recovering a pair of vectors of field
 elements `data_share` and `auth_share`, The Aggregators use `auth_share` and the
 correlation shares provided by the Client to verify that their `data_share`
 vectors are additive shares of a one-hot vector.
@@ -1367,7 +1367,7 @@ class PrepState:
      A_share, B_share) = correlation_shares[l-1]
 
     if self.step == "ready" and len(inbound) == 0:
-      # Evaluation IPPF on candidate prefixes.
+      # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
       for x in self.candiate_prefixes:
         value = kdpf_key.eval(l, x)
