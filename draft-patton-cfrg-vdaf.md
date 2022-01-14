@@ -435,6 +435,13 @@ aggregator.
 {: #shard-flow title="The Client divides its measurement input into input shares
 and distributes them to the Aggregators."}
 
+> CP The `public_param` is intended to allow for protocols that require the
+> Client to use a public key for sharding its measurement. When rotating the
+> `verify_param` for such a scheme, it would be necessary to also update the
+> `public_param` with which the clients are configured. For PPM it would be nice
+> if we could rotate the `verify_param` without also having to update the
+> clients. We should consider dropping this at some point.
+
 ## Preparation
 
 To recover and verify the validity of output shares, the Aggregators interact
