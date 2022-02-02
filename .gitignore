@@ -14,3 +14,5 @@ draft-patton-cfrg-vdaf.xml
 lib
 report.xml
 venv/
+sagelib
+*.sage.py
