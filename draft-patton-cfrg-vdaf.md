@@ -761,6 +761,10 @@ parameters:
 * `ENCODED_SIZE: Unsigned` is the number of bytes used to encode a field element
   as a byte string.
 
+* `EXPANDED_SIZE: Unsigned` is the number of pseudorandom bytes that are sampled
+  when per field element when expanding a seed into a sequence of field elements
+  (see {{prg}}).
+
 A concrete `Field` also implements the following class methods:
 
 * `Field.zeros(length: Unsigned) -> output: Vec[Field]` returns a vector of
@@ -852,7 +856,9 @@ A concrete `Prg` implements the following class method:
 
 Each `Prg` has two derived class methods. The first is used to derive a fresh
 seed from an existing one. The second is used to compute a sequence of
-pseudorandom field elements froma pseudorandom byte string.
+pseudorandom field elements froma pseudorandom byte string. This method used is
+based on the `hash_to_field` algorithm described in
+{{!I-D.draft-irtf-cfrg-hash-to-curve}}.
 
 ~~~
 # Derive a new seed.
@@ -864,8 +870,16 @@ def expand_into_vec(Prg, Field,
                     seed: Bytes,
                     info: Bytes,
                     length: Unsigned) -> Vec[Field]:
-    # TODO Specify a method for mapping a pseudorandom byte string
-    # to a sequence of field elemetns.
+    L = Field.EXPANDED_SIZE
+    len_in_bytes = length * L
+    uniform_bytes = Prg.expand(seed, info, len_in_bytes)
+
+    vec = []
+    for i in range(0, uniform_bytes, L):
+        tv = uniform_bytes[i:i+L]
+        x = OS2IP(tv)
+        vec.append(Field(x))
+    return vec
 ~~~
 {: #prg-derived-methods title="Derived class methods for PRGs."}
 
