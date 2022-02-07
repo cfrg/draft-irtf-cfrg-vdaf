@@ -763,6 +763,10 @@ parameters:
 * `ENCODED_SIZE: Unsigned` is the number of bytes used to encode a field element
   as a byte string.
 
+* `EXPANDED_PAD_SIZE: Unsigned` is the number of additional pseudorandom
+  bytes to generate when generating a sequence of field elements. (See
+  {{prg}}.) This value MUST be larger than or equal to `ENCODED_SIZE`.
+
 A concrete `Field` also implements the following class methods:
 
 * `Field.zeros(length: Unsigned) -> output: Vec[Field]` returns a vector of
@@ -858,6 +862,10 @@ Each `Prg` has two derived class methods. The first is used to derive a fresh
 seed from an existing one. The second is used to compute a sequence of
 pseudorandom field elements.
 
+> CP The algorithm for the `expand_int_vec` method was ported from Google's DPF
+> implementation. See
+> https://github.com/google/distributed_point_functions/blob/master/dpf/int_mod_n.h#L155.
+
 ~~~
 # Derive a new seed.
 def derive(Prg, seed: bytes, info: bytes) -> bytes:
@@ -868,8 +876,21 @@ def expand_into_vec(Prg, Field,
                     seed: Bytes,
                     info: Bytes,
                     length: Unsigned) -> Vec[Field]:
-    # TODO Specify a method for mapping a pseudorandom byte string
-    # to a sequence of field elemetns.
+    L = Field.ENCODED_SIZE
+    P = Field.EXPANDED_PAD_SIZE
+    len_in_bytes = length * L + P
+    uniform_bytes = Prg.expand(seed, info, len_in_bytes)
+
+    vec = []
+    r = OS2IP(uniform_bytes[:P])
+    for i in range(P, len(uniform_bytes), L):
+        vec.append(Field(r))
+        r /= Field.MODULUS
+        if L < P:
+            r <<= L * 8
+            r &= ((1 << P) - 1)
+        r |= O2SIP(uniform_bytes[i:i+L])
+    return vec
 ~~~
 {: #prg-derived-methods title="Derived class methods for PRGs."}
 
