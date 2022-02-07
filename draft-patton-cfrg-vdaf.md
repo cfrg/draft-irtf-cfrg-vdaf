@@ -283,6 +283,10 @@ Some common functionalities:
 * `byte(int: Unsigned) -> Byte` returns the representation of `int` as a byte.
   The value of `int` MUST be in range `[0,256)`.
 
+* `I2OSP` and `OS2IP` from {{!RFC8017}}, which are used, respectively, to
+  convert a byte string to a non-negative integer and to convert a non-negative
+  integer to a byte string.
+
 # Overview
 
 In a VDAF-based private measurement system, we distinguish three types of
@@ -709,82 +713,106 @@ protocol needs to provide in each.
 
 # Preliminaries {#prelim}
 
-This section describes the cryptographic primitives that are common to the VDAFs
-specified in this document.
+This section describes the primitives that are common to the VDAFs specified in
+this document.
 
 ## Finite Fields {#field}
 
-In this document we only consider finite fields of the form `GF(p)` for prime
-`p`. Finite field elements are represented by a type `Field` that defines binary
-operators for addition and multiplication in the field. The type also defines
-the following associated functions:
+Both `prio3` and `poplar1` use finite fields with characteristic 1, i.e., the
+field `GF(p)` for some prime `p`. Finite field elements are represented by a
+class `Field` with the following associated parameters:
 
-  * `Field.zeros(len: Unsigned) -> output: Vec[Field]` returns a vector of
-    zeros. The length of `output` MUST be `len`.
+* `ENCODED_SIZE: Unsigned` is the number of bytes used to encode a field element
+  as a byte string.
 
-  * `Field.rand_vec(len: Unsigned) -> output: Vec[Field]` returns a vector of
-    random field elements. The length of `output` MUST be `len`.
+A concrete `Field` also implements the following class methods:
 
-    > NOTE In reality this would be achieved by generating a random key and
-    > expanding it into a sequence of field elements using a key derivation
-    > scheme. This should probably be made explicit.
+* `Field.zeros(length: Unsigned) -> output: Vec[Field]` returns a vector of
+  zeros. The length of `output` MUST be `length`.
 
-  * `Field.encode_vec(data: Vec[Field]) -> encoded_data: Bytes` represents the
-    input `data` as a byte string `encoded_data`.
+* `Field.rand_vec(length: Unsigned) -> output: Vec[Field]` returns a vector of
+  random field elements. The length of `output` MUST be `length`.
 
-  * `Field.decode_vec(encoded_data: Bytes) -> data: Vec[Field]` reverse
-    `encoded_vec`, returning the vector of field elements encoded by
-    `encoded_data`. Raises an exception if the input does not encode a valid
-    vector of field elements.
+A field element is an instance of a concrete `Field`. The concrete class defines
+the usual arithmetic operations on field elements. In addition, it defines the
+following instance method for converting a field element to an unsigned integer:
 
-### Deriving a Pseudorandom Vector
+* `elem.as_int() -> Unsigned` returns the integer representation of
+  field element `elem`.
 
-> TODO Specify the following function in terms of a key-derivation scheme. It'll
-> use `key_stream_init` to create a `KeyStream` object and read from it multiple
-> times.
+Likewise, each concrete `Field` implements a constructor for coverting an
+unsigned integer into a field element:
 
-* `expand(Field, key: Bytes, len: Unsigned) -> output: Vec[Field]` expands a key
-  into a pseudorandom sequence of field elements.
+* `Field(integer: Unsigned)` returns `integer` represented as a field element.
+
+Finally, each concerete `Field` has two derived class methods, one for encoding
+a vector of field elements as a byte string and another for decoding a vector of
+field elements.
+
+~~~
+# Encode `vec` as a byte string, e.g.:
+# `encoded = Field.encode_vec(vec)`
+def encode_vec(Field, vec: Vec[Field]) -> Bytes:
+    encoded = Bytes()
+    for x in vec:
+        encoded += I2OSP(x.as_int(), Field.ENCODED_SIZE)
+    return encoded
+
+# Decode `encoded` as a vector of `Field` elements, e.g.:
+# `vec = Field.decode_vec(encoded)`
+def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
+    L = Field.ENCODED_SIZE
+    if len(encoded) % L != 0:
+        raise ERR_DECODE
+
+    vec = []
+    for i in range(0, len(encoded), L):
+        encoded_x = encoded[i:i+L]
+        x = Field(OS2IP(encoded_x))
+        vec.append(x)
+    return vec
+~~~
+{: #field-derived-methods title="Derived class methods for finite fields."}
 
 ### Inner product of Vectors
 
-> TODO Specify the following:
+The following method is defined for computing the inner product of two vectors:
 
-* `inner_product(left: Vec[Field], right: Vec[Field]) -> Field` computes the
-  inner product of `left` and `right`.
+```
+def inner_product(left: Vec[Field], right: Vec[Field]) -> Field:
+    result = Field(0)
+    for (x, y) in zip(left, right):
+        result += x * y
+    return result
+```
 
-## Key Derivation
+### Parameters
 
-A key-derivation scheme defines a method for deriving symmetric keys and a
-method for expanding a symmetric into an arbitrary length key stream are
-required. This scheme consists of the following algorithms:
+> TODO: Pick field parameters and specify them here. See issue#22.
 
-* `get_key(init_key, aux_input) -> key` derives a fresh key `key` from an
-  initial key `init_key` and auxiliary input `aux_input`. The length of `init_key`
-  and `key` MUST be equal to `KEY_SIZE`.
+## Pseudorandom Generators {#prg}
 
-* `key_stream_init(key) -> state: KeyStream` returns a key stream generator that
-  is used to generate an arbitrary length stream of pseudorandom bytes. The
-  length of `key` MUST be `KEY_SIZE`.
+A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
+into a long string of pseudorandom bits. A PRG suitable for this document
+implements the interface specified in this section. Concrete constructions are
+described in {{prg-constructions}}.
 
-* `KeyStream.next(len: Unsigned) -> (new_state: KeyStream, output)` returns the
-  next `len` bytes of the key stream and updates the key stream generator state.
-  The length of the output MUST be `len`.
+PRGs are defined by a class `Prg` with a single parameter:
 
-> TODO This functionality closely resembles what people usually think of as an
-> extract-then-expand KDF, but differs somewhat in its syntax and, also, its
-> required security properties. Can we get the same functionality from something
-> that's more commonplace? HKDF doesn't fit the bill, unfortunately, because
-> keys can only be expanded to a fairly short length. Our application requires a
-> rather long key stream.
+* `SEED_SIZE: Unsigned` is the size of the input seed.
 
-Associated types:
+A concrete `Prg` implements the following class method:
 
-* `KeyStream` represents the state of the key stream generator.
+* `Prg.expand(seed: Bytes, info: Bytes, length: Unsigned) -> Bytes` derives a
+  byte string from the given seed and info string. The length of the output MUST
+  be `length`.
 
-Associated constants:
+> TODO Specify a generic method for mapping the PRG output to a sequence of
+> field elements.
 
-* `KEY_SIZE` is the size of keys for the key-derivation scheme.
+### Constructions {#prg-constructions}
+
+> TODO
 
 # prio3 {#prio3}
 
@@ -962,7 +990,7 @@ algorithm run by the aggregators during preparation.
 
 ~~~
 def vdaf_setup():
-  k_query_init = gen_rand(KEY_SIZE)
+  k_query_init = gen_rand(SEED_SIZE)
   verify_param = [ (j, k_query_init) for j in range(SHARES) ]
   return (None, verify_param)
 ~~~
@@ -1009,8 +1037,8 @@ def measurement_to_input_shares(_, measurement):
   k_helper_blinds = []
   k_helper_hints = []
   for j in range(SHARES-1):
-    k_blind = gen_rand(KEY_SIZE)
-    k_share = gen_rand(KEY_SIZE)
+    k_blind = gen_rand(SEED_SIZE)
+    k_share = gen_rand(SEED_SIZE)
     helper_input_share = expand(Field, k_share, INPUT_LEN)
     leader_input_share -= helper_input_share
     k_hint = get_key(k_blind,
@@ -1019,7 +1047,7 @@ def measurement_to_input_shares(_, measurement):
     k_helper_input_shares.append(k_share)
     k_helper_blinds.append(k_blind)
     k_helper_hints.append(k_hint)
-  k_leader_blind = gen_rand(KEY_SIZE)
+  k_leader_blind = gen_rand(SEED_SIZE)
   k_leader_hint = get_key(k_leader_blind,
       byte(0) + Field.encode_vec(leader_input_share))
   k_joint_rand ^= k_leader_hint
@@ -1031,12 +1059,12 @@ def measurement_to_input_shares(_, measurement):
 
   # Generate the proof shares.
   joint_rand = expand(Field, k_joint_rand, JOINT_RAND_LEN)
-  prove_rand = expand(Field, gen_rand(KEY_SIZE), PROVE_RAND_LEN)
+  prove_rand = expand(Field, gen_rand(SEED_SIZE), PROVE_RAND_LEN)
   proof = flp_prove(input, prove_rand, joint_rand)
   leader_proof_share = proof
   k_helper_proof_shares = []
   for j in range(SHARES-1):
-    k_share = gen_rand(KEY_SIZE)
+    k_share = gen_rand(SEED_SIZE)
     k_helper_proof_shares.append(k_share)
     helper_proof_share = expand(Field, k_share, PROOF_LEN)
     leader_proof_share -= helper_proof_share
@@ -1135,7 +1163,7 @@ def prep_shares_to_prep(_, inbound: Vec[Bytes]):
   if len(inbound) != SHARES:
     raise ERR_INVALID_INPUT
 
-  k_joint_rand = zeros(KEY_SIZE)
+  k_joint_rand = zeros(SEED_SIZE)
   verifier = Field.zeros(VERIFIER_LEN)
   for r_share in inbound:
     (k_joint_rand_share,
@@ -1307,7 +1335,7 @@ VDAF has no public parameter.
 
 ~~~
 def vdaf_setup():
-  k_verify_init = gen_rand(KEY_SIZE)
+  k_verify_init = gen_rand(SEED_SIZE)
   return (None, [(0, k_verify_init), (1, k_verify_init)])
 ~~~
 {: #poplar1-eval-setup title="The setup algorithm for poplar1."}
@@ -1567,3 +1595,5 @@ This document makes no request of IANA.
 
 Thanks to Henry Corrigan-Gibbs, Mariana Raykova, and Christopher Wood for useful
 feedback on the syntax of VDAF schemes.
+
+
