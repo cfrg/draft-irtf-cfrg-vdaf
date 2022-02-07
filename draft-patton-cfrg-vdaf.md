@@ -906,7 +906,44 @@ def expand_into_vec(Prg, Field,
 
 ### Constructions {#prg-constructions}
 
-> TODO
+#### PrgAes128
+
+> OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be more
+> performant (https://eprint.iacr.org/2019/074.pdf). See
+> https://github.com/cjpatton/vdaf/issues/32 for details.
+
+Our first construction, `PrgBlockCipher(Aes128)`, converts a blockcipher, namely
+AES-128, into a PRG. Seed expansion involves two steps. In the first step, CMAC
+{{!RFC4493}} is applied to the seed and info string to get a fresh key. In the
+second step, the fresh key is used in CTR-mode to produce a key stream for
+generating the output. A fixed initialization vector (IV) is used.
+
+~~~
+class PrgAes128:
+
+    SEED_SIZE: Unsigned = 16
+
+    def __init__(self, seed, info):
+        self.length_consumed = 0
+
+        # Use CMAC as a pseuodorandom function to derive a key.
+        self.key = AES128-CMAC(seed, info)
+
+    def next(self, length):
+        self.length_consumed += length
+
+        # CTR-mode encryption of the all-zero string of the desired
+        # length and using a fixed, all-zero IV.
+        #
+        # TODO Make this implementation more efficient. In particular,
+        # don't regenerate the already consumed stream.
+        stream = AES128-CTR(key, zeros(16), zeros(self.length_consumed))
+        return stream[-length:]
+~~~
+{: #prg-aes128 title="Definition of PRG PrgBlockCipher(Aes128)."}
+
+> CP: We might be able to get away with skipping the initial CMAC for some fixed
+> value of info, e.g., info == "".
 
 # prio3 {#prio3}
 
