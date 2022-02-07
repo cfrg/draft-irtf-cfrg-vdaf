@@ -850,8 +850,24 @@ A concrete `Prg` implements the following class method:
   byte string from the given seed and info string. The length of the output MUST
   be `length`.
 
-> TODO Specify a generic method for mapping the PRG output to a sequence of
-> field elements.
+Each `Prg` has two derived class methods. The first is used to derive a fresh
+seed from an existing one. The second is used to compute a sequence of
+pseudorandom field elements froma pseudorandom byte string.
+
+~~~
+# Derive a new seed.
+def derive(Prg, seed: bytes, info: bytes) -> bytes:
+    return Prg.expand(seed, info, Prg.SEED_SIZE)
+
+# Expand a seed into a vector of Field elements.
+def expand_into_vec(Prg, Field,
+                    seed: Bytes,
+                    info: Bytes,
+                    length: Unsigned) -> Vec[Field]:
+    # TODO Specify a method for mapping a pseudorandom byte string
+    # to a sequence of field elemetns.
+~~~
+{: #prg-derived-methods title="Derived class methods for PRGs."}
 
 ### Constructions {#prg-constructions}
 
