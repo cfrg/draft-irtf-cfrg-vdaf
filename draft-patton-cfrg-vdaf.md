@@ -712,39 +712,6 @@ protocol needs to provide in each.
 This section describes the cryptographic primitives that are common to the VDAFs
 specified in this document.
 
-## Key Derivation
-
-A key-derivation scheme defines a method for deriving symmetric keys and a
-method for expanding a symmetric into an arbitrary length key stream are
-required. This scheme consists of the following algorithms:
-
-* `get_key(init_key, aux_input) -> key` derives a fresh key `key` from an
-  initial key `init_key` and auxiliary input `aux_input`. The length of `init_key`
-  and `key` MUST be equal to `KEY_SIZE`.
-
-* `key_stream_init(key) -> state: KeyStream` returns a key stream generator that
-  is used to generate an arbitrary length stream of pseudorandom bytes. The
-  length of `key` MUST be `KEY_SIZE`.
-
-* `KeyStream.next(len: Unsigned) -> (new_state: KeyStream, output)` returns the
-  next `len` bytes of the key stream and updates the key stream generator state.
-  The length of the output MUST be `len`.
-
-> TODO This functionality closely resembles what people usually think of as an
-> extract-then-expand KDF, but differs somewhat in its syntax and, also, its
-> required security properties. Can we get the same functionality from something
-> that's more commonplace? HKDF doesn't fit the bill, unfortunately, because
-> keys can only be expanded to a fairly short length. Our application requires a
-> rather long key stream.
-
-Associated types:
-
-* `KeyStream` represents the state of the key stream generator.
-
-Associated constants:
-
-* `KEY_SIZE` is the size of keys for the key-derivation scheme.
-
 ## Finite Fields {#field}
 
 In this document we only consider finite fields of the form `GF(p)` for prime
@@ -785,6 +752,39 @@ the following associated functions:
 
 * `inner_product(left: Vec[Field], right: Vec[Field]) -> Field` computes the
   inner product of `left` and `right`.
+
+## Key Derivation
+
+A key-derivation scheme defines a method for deriving symmetric keys and a
+method for expanding a symmetric into an arbitrary length key stream are
+required. This scheme consists of the following algorithms:
+
+* `get_key(init_key, aux_input) -> key` derives a fresh key `key` from an
+  initial key `init_key` and auxiliary input `aux_input`. The length of `init_key`
+  and `key` MUST be equal to `KEY_SIZE`.
+
+* `key_stream_init(key) -> state: KeyStream` returns a key stream generator that
+  is used to generate an arbitrary length stream of pseudorandom bytes. The
+  length of `key` MUST be `KEY_SIZE`.
+
+* `KeyStream.next(len: Unsigned) -> (new_state: KeyStream, output)` returns the
+  next `len` bytes of the key stream and updates the key stream generator state.
+  The length of the output MUST be `len`.
+
+> TODO This functionality closely resembles what people usually think of as an
+> extract-then-expand KDF, but differs somewhat in its syntax and, also, its
+> required security properties. Can we get the same functionality from something
+> that's more commonplace? HKDF doesn't fit the bill, unfortunately, because
+> keys can only be expanded to a fairly short length. Our application requires a
+> rather long key stream.
+
+Associated types:
+
+* `KeyStream` represents the state of the key stream generator.
+
+Associated constants:
+
+* `KEY_SIZE` is the size of keys for the key-derivation scheme.
 
 # prio3 {#prio3}
 
