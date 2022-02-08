@@ -284,8 +284,8 @@ Some common functionalities:
   The value of `int` MUST be in range `[0,256)`.
 
 * `I2OSP` and `OS2IP` from {{!RFC8017}}, which are used, respectively, to
-  convert a byte string to a non-negative integer and to convert a non-negative
-  integer to a byte string.
+  convert a non-negative integer to a byte string and convert a byte string to a
+  non-negative integer.
 
 # Overview
 
