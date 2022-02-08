@@ -6,6 +6,7 @@ import struct
 import os
 
 # Primitive types
+Bool = bool
 Bytes = bytes
 Unsigned = int
 Vec = List

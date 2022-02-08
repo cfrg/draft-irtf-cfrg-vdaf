@@ -30,6 +30,9 @@ class Vdaf:
     # The aggregation parameter type.
     AggParam = None
 
+    # The state of an aggregator during the Prepare computation.
+    Prep = None
+
     # The output share type.
     OutShare = None
 
@@ -38,17 +41,6 @@ class Vdaf:
 
     # The aggregate result type.
     AggResult = None
-
-    # The state of an aggregator during the Prepare computation.
-    class Prep:
-
-        # Consume the inbound message from the previous round (or `None` if
-        # this is the first round) and return the aggregator's share of the
-        # next round (or the aggregator's output share if this is the last
-        # round).
-        def next(self,
-                 inbound: Optional[Bytes]) -> Union[Bytes, Vdaf.OutShare]:
-            raise Error("not implemented")
 
     # Generate and return the public parameter used by the clients and the
     # verification parameter used by each aggregator.
@@ -74,6 +66,16 @@ class Vdaf:
                   agg_param: AggParam,
                   nonce: Bytes,
                   input_share: Bytes) -> Prep:
+        raise Error("not implemented")
+
+    # Consume the inbound message from the previous round (or `None` if this is
+    # the first round) and return the aggregator's share of the next round (or
+    # the aggregator's output share if this is the last round).
+    @classmethod
+    def prep_next(cls,
+                  prep: Prep,
+                  inbound: Optional[Bytes],
+                  ) -> Union[Tuple[Prep, Bytes], Vdaf.OutShare]:
         raise Error("not implemented")
 
     # Unshard the Prepare message shares from the previous round of the Prapare
@@ -133,7 +135,10 @@ def run_vdaf(Vdaf,
         for i in range(Vdaf.ROUNDS+1):
             outbound = []
             for j in range(Vdaf.SHARES):
-                outbound.append(prep_states[j].next(inbound))
+                out = Vdaf.prep_next(prep_states[j], inbound)
+                if i < Vdaf.ROUNDS:
+                    (prep_states[j], out) = out
+                outbound.append(out)
             # This is where we would send messages over the network in a
             # distributed VDAF computation.
             if i < Vdaf.ROUNDS:
@@ -175,26 +180,10 @@ class VdafTest(Vdaf):
     # Operational parameters
     input_range = range(5)
 
-    class Prep(Vdaf.Prep):
-        def __init__(self, Field, input_range, encoded_input_share):
-            self.Field = Field
+    class Prep:
+        def __init__(self, input_range, encoded_input_share):
             self.input_range = input_range
             self.encoded_input_share = encoded_input_share
-
-        def next(self, inbound):
-            if inbound is None:
-                # Our prepare-message share is just our input share. This is
-                # trivially insecure since the recipient can now reconstruct
-                # the input.
-                return self.encoded_input_share
-
-            # The unsharded prepare message is the plaintext measurement.
-            # Check that it is in the specified range.
-            measurement = self.Field.decode_vec(inbound)[0].as_unsigned()
-            if measurement not in self.input_range:
-                raise ERR_VERIFY
-
-            return self.Field.decode_vec(self.encoded_input_share)
 
     @classmethod
     def setup(cls):
@@ -213,7 +202,23 @@ class VdafTest(Vdaf):
 
     @classmethod
     def prep_init(cls, _verify_param, _agg_param, _nonce, input_share):
-        return VdafTest.Prep(cls.Field, cls.input_range, input_share)
+        return VdafTest.Prep(cls.input_range, input_share)
+
+    @classmethod
+    def prep_next(cls, prep, inbound):
+        if inbound is None:
+            # Our prepare-message share is just our input share. This is
+            # trivially insecure since the recipient can now reconstruct
+            # the input.
+            return (prep, prep.encoded_input_share)
+
+        # The unsharded prepare message is the plaintext measurement.
+        # Check that it is in the specified range.
+        measurement = cls.Field.decode_vec(inbound)[0].as_unsigned()
+        if measurement not in prep.input_range:
+            raise ERR_VERIFY
+
+        return cls.Field.decode_vec(prep.encoded_input_share)
 
     @classmethod
     def prep_shares_to_prep(cls, _agg_param, prep_shares):

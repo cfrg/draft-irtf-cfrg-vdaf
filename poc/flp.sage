@@ -1,7 +1,7 @@
 # Fully linear proof (FLP) systems.
 
 from copy import deepcopy
-from sagelib.common import ERR_ENCODE, Error, Unsigned, Vec
+from sagelib.common import ERR_ENCODE, Bool, Error, Unsigned, Vec
 
 import sagelib.field as field
 
@@ -58,7 +58,7 @@ class Flp:
 
     # Decide if a verifier message was generated from a valid input.
     @classmethod
-    def decide(cls, verifier: Vec[Field]) -> bool:
+    def decide(cls, verifier: Vec[Field]) -> Bool:
         raise Error("not implemented")
 
     #  Map an input to an aggregatable output.
