@@ -283,6 +283,9 @@ Some common functionalities:
 * `byte(int: Unsigned) -> Bytes` returns the representation of `int` as a byte
   string. The value of `int` MUST be in range `[0,256)`.
 
+* `xor(left: Bytes, right: Bytes) -> Bytes` returns the bitwise XOR of `left`
+  and `right`. An exception is raised if the inputs are not the same length.
+
 * `I2OSP` and `OS2IP` from {{!RFC8017}}, which are used, respectively, to
   convert a non-negative integer to a byte string and convert a byte string to a
   non-negative integer.
@@ -803,17 +806,28 @@ def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
 ~~~
 {: #field-derived-methods title="Derived class methods for finite fields."}
 
-### Inner product of Vectors
+### Helper Functions
 
-The following method is defined for computing the inner product of two vectors:
+The following auxiliary functions on vectors of field elements are used in the
+remainder of this document. Note that an exception is raised by each function if
+the operands are not the same length.
 
-```
+~~~
+# Compute the inner product of the operands.
 def inner_product(left: Vec[Field], right: Vec[Field]) -> Field:
-    result = Field(0)
-    for (x, y) in zip(left, right):
-        result += x * y
-    return result
-```
+    return reduce(lambda x, y: x + y,
+                  map(lambda x: x[0] * x[1],
+                      zip(left, right)))
+
+# Subtract the right operand from the left and return the result.
+def vec_sub(left, right):
+    return list(map(lambda x: x[0] - x[1], zip(left, right)))
+
+# Add the right operand to the left and return the result.
+def vec_add(left, right):
+    return list(map(lambda x: x[0] + x[1], zip(left, right)))
+~~~
+{: #field-helper-functions title="Common functions for finite fields."}
 
 ### Parameters
 
