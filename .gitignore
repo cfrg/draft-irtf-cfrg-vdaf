@@ -16,3 +16,4 @@ report.xml
 venv/
 sagelib
 *.sage.py
+*.bak
