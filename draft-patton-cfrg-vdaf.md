@@ -526,7 +526,7 @@ before they can begin preparing inputs for aggregation.
       |              |                   |
       V              V                   V
     +-----------+  +-----------+       +-----------+
-    | prep next |  | prep next |       | prep next |
+    | prep_next |  | prep_next |       | prep_next |
     +-----------+  +-----------+       +-----------+
       |              |              ...  |
       V              V                   V
