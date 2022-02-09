@@ -852,7 +852,8 @@ Each Client measurement is encoded as a vector over a finite field, and the
 aggregate is computed by summing the vectors element-wise. Validity is defined
 by an arithmetic circuit `C` that takes as input a vector of field elements `x`:
 if `C(x) == 0`, then we say that `x` is valid; otherwise, we say that `x` is
-invalid.  A number of useful measurement types can be defined this way:
+invalid. We call `C` the "validity circuit". A number of useful measurement
+types can be defined this way:
 
 * Simples statistics, like sum, average, and standard deviation;
 * Estimation of quantiles, via a histogram; and
@@ -891,11 +892,14 @@ describe FLPs in detail below. Briefly, the Client generates a "proof" of its
 input's validity and distributes additive shares of the proof among the
 Aggregators. Each Aggregator then performs a computation on its input share and
 proof share locally and sends the result to the other Aggregators. Combining the
-exchanged messages allows each Aggregator to decide if it holds a share of a valid input.
+exchanged messages allows each Aggregator to decide if it holds a share of a
+valid input.
 
 `prio3` can be viewed as a transformation of a particular class of FLP systems
-into a VDAF. The next section specified the syntax of suitable FLPs in detail.
-The transformation is given in {{prio3-construction}}.
+into a VDAF. The next section specified the syntax of suitable FLPs in detail;
+the transformation is given in {{prio3-construction}}. Finally, a concrete,
+general-purpose FLP suitable for any validity circuit is specified in section
+{{flp-construction}}.
 
 ## Fully Linear Proof (FLP) Systems {#flp}
 
@@ -908,9 +912,7 @@ As usual, we will describe the interface implemented by a concrete FLP in terms
 of an abstraction base class `Flp` that specifies the set of methods and
 parameters a concrete FLP must provide.
 
-The parameters define by an FLP are listed in {{flp-param}}.
-
-First, a concrete FLP defines the following constants:
+The parameters provided by a concrete FLP are listed in {{flp-param}}.
 
 | Parameter        | Description              |
 |:-----------------|:-------------------------|
@@ -1679,6 +1681,10 @@ def agg_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
   The value of `l` MUST be in range `[1, BITS]` and `indexes[i]` MUST be in range
   `[2^(l-1), 2^l)` for all `i`. An error is raised if `encoded` cannot be
   decoded.
+
+# A General-Purpose FLP {#flp-construction}
+
+> TODO
 
 # Security Considerations {#security}
 
