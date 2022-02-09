@@ -138,6 +138,12 @@ class FlpTest(Flp):
 class FlpTestField128(FlpTest):
     Field = field.Field128
 
+    @classmethod
+    def with_joint_rand_len(cls, joint_rand_len):
+        new_cls = deepcopy(cls)
+        new_cls.JOINT_RAND_LEN = joint_rand_len
+        return new_cls
+
 
 def test_flp(Flp, inp, expected_decision):
     assert run_flp(Flp, inp, 1) == expected_decision
