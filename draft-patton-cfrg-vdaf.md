@@ -274,14 +274,14 @@ an exception.
 
 Some common functionalities:
 
-* `zeros(len: Unsigned) -> output: Bytes` returns an array of zero bytes.
-  The length of `output` MUST be `len`.
+* `zeros(len: Unsigned) -> Bytes` returns an array of zero bytes. The length of
+  `output` MUST be `len`.
 
-* `gen_rand(len: Unsigned) -> output: Bytes` returns an array of random bytes.
-  The length of `output` MUST be `len`.
+* `gen_rand(len: Unsigned) -> Bytes` returns an array of random bytes. The
+  length of `output` MUST be `len`.
 
-* `byte(int: Unsigned) -> Byte` returns the representation of `int` as a byte.
-  The value of `int` MUST be in range `[0,256)`.
+* `byte(int: Unsigned) -> Bytes` returns the representation of `int` as a byte
+  string. The value of `int` MUST be in range `[0,256)`.
 
 * `I2OSP` and `OS2IP` from {{!RFC8017}}, which are used, respectively, to
   convert a non-negative integer to a byte string and convert a byte string to a
