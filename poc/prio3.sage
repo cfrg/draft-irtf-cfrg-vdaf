@@ -36,8 +36,7 @@ class Prio3(Vdaf):
         verify_param = [(j, k_query_init) for j in range(Prio3.SHARES)]
         return (None, verify_param)
 
-    # TODO If joint rand len is 0, then don't generate blind or hint. See
-    # https://github.com/cjpatton/vdaf/issues/15.
+    # NOTE This is used to generate {{prio3-evalk-input}}.
     @classmethod
     def measurement_to_input_shares(Prio3, _public_param, measurement):
         inp = Prio3.Flp.encode(measurement)
@@ -136,15 +135,17 @@ class Prio3(Vdaf):
             b"query rand",
             Prio3.Flp.QUERY_RAND_LEN
         )
-        encoded = Prio3.Flp.Field.encode_vec(input_share)
-        k_joint_rand_share = Prio3.Prg.derive(k_blind, byte(j) + encoded)
-        k_joint_rand = xor(k_hint, k_joint_rand_share)
-        joint_rand = Prio3.Prg.expand_into_vec(
-            Prio3.Flp.Field,
-            k_joint_rand,
-            b"joint rand",
-            Prio3.Flp.JOINT_RAND_LEN
-        )
+        joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            encoded = Prio3.Flp.Field.encode_vec(input_share)
+            k_joint_rand_share = Prio3.Prg.derive(k_blind, byte(j) + encoded)
+            k_joint_rand = xor(k_hint, k_joint_rand_share)
+            joint_rand = Prio3.Prg.expand_into_vec(
+                Prio3.Flp.Field,
+                k_joint_rand,
+                b"joint rand",
+                Prio3.Flp.JOINT_RAND_LEN
+            )
         verifier_share = Prio3.Flp.query(input_share,
                                          proof_share,
                                          query_rand,
@@ -180,8 +181,10 @@ class Prio3(Vdaf):
                 Prio3.decode_prepare_message(encoded)
 
             verifier = vec_add(verifier, verifier_share)
-            k_joint_rand_check = xor(k_joint_rand_check,
-                                     k_joint_rand_share)
+
+            if Prio3.Flp.JOINT_RAND_LEN > 0:
+                k_joint_rand_check = xor(k_joint_rand_check,
+                                         k_joint_rand_share)
 
         return Prio3.encode_prepare_message(verifier, k_joint_rand_check)
 
@@ -208,8 +211,9 @@ class Prio3(Vdaf):
         encoded = Bytes()
         encoded += Prio3.Flp.Field.encode_vec(input_share)
         encoded += Prio3.Flp.Field.encode_vec(proof_share)
-        encoded += k_blind
-        encoded += k_hint
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            encoded += k_blind
+            encoded += k_hint
         return encoded
 
     @classmethod
@@ -221,8 +225,10 @@ class Prio3(Vdaf):
         encoded_proof_share, encoded = encoded[:l], encoded[l:]
         proof_share = Prio3.Flp.Field.decode_vec(encoded_proof_share)
         l = Prio3.Prg.SEED_SIZE
-        k_blind, encoded = encoded[:l], encoded[l:]
-        k_hint, encoded = encoded[:l], encoded[l:]
+        k_blind, k_hint = None, None
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            k_blind, encoded = encoded[:l], encoded[l:]
+            k_hint, encoded = encoded[:l], encoded[l:]
         if len(encoded) != 0:
             raise ERR_DECODE
         return (input_share, proof_share, k_blind, k_hint)
@@ -236,8 +242,9 @@ class Prio3(Vdaf):
         encoded = Bytes()
         encoded += k_input_share
         encoded += k_proof_share
-        encoded += k_blind
-        encoded += k_hint
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            encoded += k_blind
+            encoded += k_hint
         return encoded
 
     @classmethod
@@ -245,16 +252,18 @@ class Prio3(Vdaf):
         l = Prio3.Prg.SEED_SIZE
         k_input_share, encoded = encoded[:l], encoded[l:]
         input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
-                                              k_input_share,
-                                              b"input share",
-                                              Prio3.Flp.INPUT_LEN)
+                                                k_input_share,
+                                                b"input share",
+                                                Prio3.Flp.INPUT_LEN)
         k_proof_share, encoded = encoded[:l], encoded[l:]
         proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
-                                              k_proof_share,
-                                              b"proof share",
-                                              Prio3.Flp.PROOF_LEN)
-        k_blind, encoded = encoded[:l], encoded[l:]
-        k_hint, encoded = encoded[:l], encoded[l:]
+                                                k_proof_share,
+                                                b"proof share",
+                                                Prio3.Flp.PROOF_LEN)
+        k_blind, k_hint = None, None
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            k_blind, encoded = encoded[:l], encoded[l:]
+            k_hint, encoded = encoded[:l], encoded[l:]
         if len(encoded) != 0:
             raise ERR_DECODE
         return (input_share, proof_share, k_blind, k_hint)
@@ -263,7 +272,8 @@ class Prio3(Vdaf):
     def encode_prepare_message(Prio3, verifier, k_joint_rand):
         encoded = Bytes()
         encoded += Prio3.Flp.Field.encode_vec(verifier)
-        encoded += k_joint_rand
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            encoded += k_joint_rand
         return encoded
 
     @classmethod
@@ -271,13 +281,14 @@ class Prio3(Vdaf):
         l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.VERIFIER_LEN
         encoded_verifier, encoded = encoded[:l], encoded[l:]
         verifier = Prio3.Flp.Field.decode_vec(encoded_verifier)
-        l = Prio3.Prg.SEED_SIZE
-        k_joint_rand, encoded = encoded[:l], encoded[l:]
+        k_joint_rand = None
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            l = Prio3.Prg.SEED_SIZE
+            k_joint_rand, encoded = encoded[:l], encoded[l:]
         if len(encoded) != 0:
             raise ERR_DECODE
         return (verifier, k_joint_rand)
 
-    # Construct an inherited class with the specified number of shares.
     @classmethod
     def with_shares(cls, num_shares: Unsigned):
         if num_shares < 2 or num_shares > 254:
@@ -286,18 +297,30 @@ class Prio3(Vdaf):
         new_cls.SHARES = num_shares
         return new_cls
 
+    @classmethod
+    def with_flp(cls, Flp):
+        new_cls = deepcopy(cls)
+        new_cls.Flp = Flp
+        return new_cls
+
 
 ##
 # TESTS
 #
 
 class Prio3TestField128PrgAes128(Prio3):
-    Flp = flp.FlpTestField128
     Prg = prg.PrgAes128
 
 
 if __name__ == "__main__":
-    test_vdaf(Prio3TestField128PrgAes128.with_shares(2),
-              None,
-              [1, 2, 3, 4, 4],
-              [14])
+    cls = Prio3TestField128PrgAes128 \
+        .with_flp(flp.FlpTestField128) \
+        .with_shares(2)
+    test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])
+
+    # If JOINT_RAND_LEN == 0, then Fiat-Shamir isn't needed and we can skip
+    # generating the joint randomness.
+    cls = Prio3TestField128PrgAes128 \
+        .with_flp(flp.FlpTestField128.with_joint_rand_len(0)) \
+        .with_shares(2)
+    test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])

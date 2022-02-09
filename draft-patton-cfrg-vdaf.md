@@ -1031,7 +1031,7 @@ aggregation, and unsharding are desribed in the remaining subsections.
 | `PublicParam` | `None`                   |
 | `VerifyParam` | `Tuple[Unsigned, Bytes]` |
 | `AggParam`    | `None`                   |
-| `Prep`        | `Tuple[Vec[Flp.Field], Bytes, Bytes]` |
+| `Prep`        | `Tuple[Vec[Flp.Field], Optional[Bytes], Bytes]` |
 | `OutShare`    | `Vec[Flp.Field]`         |
 | `AggShare`    | `Vec[Flp.Field]`         |
 | `AggResult`   | `Vec[Unsigned]`          |
@@ -1109,7 +1109,8 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
         k_helper_hints.append(k_hint)
     k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
     encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
-    k_leader_hint = Prio3.Prg.derive(k_leader_blind, byte(0) + encoded)
+    k_leader_hint = Prio3.Prg.derive(k_leader_blind,
+                                     byte(0) + encoded)
     k_joint_rand = xor(k_joint_rand, k_leader_hint)
 
     # Finish joint randomness hints.
@@ -1210,15 +1211,18 @@ def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
         b"query rand",
         Prio3.Flp.QUERY_RAND_LEN
     )
-    encoded = Prio3.Flp.Field.encode_vec(input_share)
-    k_joint_rand_share = Prio3.Prg.derive(k_blind, byte(j) + encoded)
-    k_joint_rand = xor(k_hint, k_joint_rand_share)
-    joint_rand = Prio3.Prg.expand_into_vec(
-        Prio3.Flp.Field,
-        k_joint_rand,
-        b"joint rand",
-        Prio3.Flp.JOINT_RAND_LEN
-    )
+    joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded = Prio3.Flp.Field.encode_vec(input_share)
+        k_joint_rand_share = Prio3.Prg.derive(k_blind,
+                                              byte(j) + encoded)
+        k_joint_rand = xor(k_hint, k_joint_rand_share)
+        joint_rand = Prio3.Prg.expand_into_vec(
+            Prio3.Flp.Field,
+            k_joint_rand,
+            b"joint rand",
+            Prio3.Flp.JOINT_RAND_LEN
+        )
     verifier_share = Prio3.Flp.query(input_share,
                                      proof_share,
                                      query_rand,
@@ -1252,15 +1256,14 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
             Prio3.decode_prepare_message(encoded)
 
         verifier = vec_add(verifier, verifier_share)
-        k_joint_rand_check = xor(k_joint_rand_check,
-                                 k_joint_rand_share)
+
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            k_joint_rand_check = xor(k_joint_rand_check,
+                                     k_joint_rand_share)
 
     return Prio3.encode_prepare_message(verifier, k_joint_rand_check)
 ~~~
 {: #prio3-prep-state title="Preparation state for prio3."}
-
-> NOTE `JOINT_RAND_LEN` may be `0`, in which case the joint randomness
-> computation is not necessary. Should we bake this option into the spec?
 
 ### Aggregation
 
@@ -1295,8 +1298,9 @@ def encode_leader_share(Prio3,
     encoded = Bytes()
     encoded += Prio3.Flp.Field.encode_vec(input_share)
     encoded += Prio3.Flp.Field.encode_vec(proof_share)
-    encoded += k_blind
-    encoded += k_hint
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded += k_blind
+        encoded += k_hint
     return encoded
 
 def decode_leader_share(Prio3, encoded):
@@ -1307,8 +1311,10 @@ def decode_leader_share(Prio3, encoded):
     encoded_proof_share, encoded = encoded[:l], encoded[l:]
     proof_share = Prio3.Flp.Field.decode_vec(encoded_proof_share)
     l = Prio3.Prg.SEED_SIZE
-    k_blind, encoded = encoded[:l], encoded[l:]
-    k_hint, encoded = encoded[:l], encoded[l:]
+    k_blind, k_hint = None, None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        k_blind, encoded = encoded[:l], encoded[l:]
+        k_hint, encoded = encoded[:l], encoded[l:]
     if len(encoded) != 0:
         raise ERR_DECODE
     return (input_share, proof_share, k_blind, k_hint)
@@ -1321,8 +1327,9 @@ def encode_helper_share(Prio3,
     encoded = Bytes()
     encoded += k_input_share
     encoded += k_proof_share
-    encoded += k_blind
-    encoded += k_hint
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded += k_blind
+        encoded += k_hint
     return encoded
 
 def decode_helper_share(Prio3, encoded):
@@ -1337,8 +1344,10 @@ def decode_helper_share(Prio3, encoded):
                                             k_proof_share,
                                             b"proof share",
                                             Prio3.Flp.PROOF_LEN)
-    k_blind, encoded = encoded[:l], encoded[l:]
-    k_hint, encoded = encoded[:l], encoded[l:]
+    k_blind, k_hint = None, None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        k_blind, encoded = encoded[:l], encoded[l:]
+        k_hint, encoded = encoded[:l], encoded[l:]
     if len(encoded) != 0:
         raise ERR_DECODE
     return (input_share, proof_share, k_blind, k_hint)
@@ -1346,15 +1355,18 @@ def decode_helper_share(Prio3, encoded):
 def encode_prepare_message(Prio3, verifier, k_joint_rand):
     encoded = Bytes()
     encoded += Prio3.Flp.Field.encode_vec(verifier)
-    encoded += k_joint_rand
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded += k_joint_rand
     return encoded
 
 def decode_prepare_message(Prio3, encoded):
     l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.VERIFIER_LEN
     encoded_verifier, encoded = encoded[:l], encoded[l:]
     verifier = Prio3.Flp.Field.decode_vec(encoded_verifier)
-    l = Prio3.Prg.SEED_SIZE
-    k_joint_rand, encoded = encoded[:l], encoded[l:]
+    k_joint_rand = None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        l = Prio3.Prg.SEED_SIZE
+        k_joint_rand, encoded = encoded[:l], encoded[l:]
     if len(encoded) != 0:
         raise ERR_DECODE
     return (verifier, k_joint_rand)
