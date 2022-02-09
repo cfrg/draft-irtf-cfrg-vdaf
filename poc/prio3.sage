@@ -66,9 +66,8 @@ class Prio3(Vdaf):
             k_helper_blinds.append(k_blind)
             k_helper_hints.append(k_hint)
         k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
-        k_leader_hint = Prio3.Prg.derive(
-                k_leader_blind,
-                byte(0) + Prio3.Flp.Field.encode_vec(leader_input_share))
+        encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
+        k_leader_hint = Prio3.Prg.derive(k_leader_blind, byte(0) + encoded)
         k_joint_rand = xor(k_joint_rand, k_leader_hint)
 
         # Finish joint randomness hints.
