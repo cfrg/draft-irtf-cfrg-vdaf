@@ -751,9 +751,9 @@ this document.
 
 ## Finite Fields {#field}
 
-Both `prio3` and `poplar1` use finite fields with characteristic 1, i.e., the
-field `GF(p)` for some prime `p`. Finite field elements are represented by a
-class `Field` with the following associated parameters:
+Both `prio3` and `poplar1` use finite fields of prime order. Finite field
+elements are represented by a class `Field` with the following associated
+parameters:
 
 * `ENCODED_SIZE: Unsigned` is the number of bytes used to encode a field element
   as a byte string.
