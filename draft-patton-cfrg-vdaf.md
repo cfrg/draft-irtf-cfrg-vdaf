@@ -764,7 +764,7 @@ parameters:
   as a byte string.
 
 * `EXPANDED_SIZE: Unsigned` is the number of pseudorandom bytes that are sampled
-  when per field element when expanding a seed into a sequence of field elements
+  per field element when expanding a seed into a sequence of field elements
   (see {{prg}}).
 
   > CP It might be helpful to specify valid ranges for `EXPANDED_SIZE`. Perhaps
