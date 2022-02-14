@@ -856,7 +856,7 @@ A concrete `Prg` implements the following class method:
 
 Each `Prg` has two derived class methods. The first is used to derive a fresh
 seed from an existing one. The second is used to compute a sequence of
-pseudorandom field elements froma pseudorandom byte string.
+pseudorandom field elements.
 
 ~~~
 # Derive a new seed.
