@@ -758,6 +758,8 @@ Both `prio3` and `poplar1` use finite fields of prime order. Finite field
 elements are represented by a class `Field` with the following associated
 parameters:
 
+* `MODULUS: Unsigned` is the prime modulus that defines the field.
+
 * `ENCODED_SIZE: Unsigned` is the number of bytes used to encode a field element
   as a byte string.
 
@@ -780,6 +782,8 @@ Likewise, each concrete `Field` implements a constructor for converting an
 unsigned integer into a field element:
 
 * `Field(integer: Unsigned)` returns `integer` represented as a field element.
+  If `integer >= Field.MODULUS`, then `integer` is first reduced mdoulo
+  `Field.MODULUS`.
 
 Finally, each concrete `Field` has two derived class methods, one for encoding
 a vector of field elements as a byte string and another for decoding a vector of
