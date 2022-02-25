@@ -8,12 +8,11 @@ from sagelib.common import ERR_DECODE, I2OSP, OS2IP, Bytes, Unsigned, Vec
 # The base class for finite fields.
 class Field:
 
+    # The prime modulus that defines arithmetic in the field.
+    MODULUS: Unsigned
+
     # Number of bytes used to encode each field element.
     ENCODED_SIZE: Unsigned
-
-    # Number of bytes to use for converting a random byte string into a field
-    # element. (See `prg.Prg`.)
-    EXPANDED_SIZE: Unsigned
 
     def __init__(self, val):
         self.val = self.gf(val)
@@ -81,23 +80,29 @@ class Field:
 
 # The finite field GF(2^32 * 4294967295 + 1).
 class Field64(Field):
-    gf = GF(2^32 * 4294967295 + 1)
+    MODULUS = 2^32 * 4294967295 + 1
     ENCODED_SIZE = 8
-    EXPANDED_SIZE = 16  # ENCODED_SIZE + 8
+
+    # Operational parameters
+    gf = GF(MODULUS)
 
 
 # The finite field GF(2^64 * 4294966555 + 1).
 class Field96(Field):
-    gf = GF(2^64 * 4294966555 + 1)
+    MODULUS = 2^64 * 4294966555 + 1
     ENCODED_SIZE = 12
-    EXPANDED_SIZE = 20  # ENCODED_SIZE + 8
+
+    # Operational parameters
+    gf = GF(MODULUS)
 
 
 # The finite field GF(2^64 * 4611686018427387751 + 1).
 class Field128(Field):
-    gf = GF(2^64 * 4611686018427387751 + 1)
+    MODULUS = 2^64 * 4611686018427387751 + 1
     ENCODED_SIZE = 16
-    EXPANDED_SIZE = 24  # ENCODED_SIZE + 8
+
+    # Operational parameters
+    gf = GF(MODULUS)
 
 
 ##

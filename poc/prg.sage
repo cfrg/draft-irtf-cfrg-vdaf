@@ -5,7 +5,7 @@ from Crypto.Cipher import AES
 from Crypto.Hash import CMAC
 from Crypto.Util import Counter
 from Crypto.Util.number import bytes_to_long
-from sagelib.common import OS2IP, Bytes, Error, Unsigned, zeros
+from sagelib.common import OS2IP, Bytes, Error, Unsigned, zeros, gen_rand
 
 
 # The base class for PRGs.
@@ -13,56 +13,57 @@ class Prg:
     # Size of the seed.
     SEED_SIZE: Unsigned
 
-    # Expand the input `seed` into the number of bytes requested.
-    @classmethod
-    def expand(cls, seed: Bytes, info: Bytes, length: Unsigned) -> Bytes:
+    # Construct a new instnace of this PRG from the given seed and info string.
+    def __init__(self, seed: Bytes, info: Bytes) -> Prg:
         raise Error("not implemented")
 
-    # Derive a fresh seed from an existing one.
-    @classmethod
-    def derive(cls, seed: Bytes, info: Bytes) -> Bytes:
-        return cls.expand(seed, info, cls.SEED_SIZE)
+    # Output the next `length` bytes of the PRG stream.
+    def next(self, length: Unsigned) -> Bytes:
+        raise Error("not implemented")
 
-    # Expand the input `seed` into vector of `length` field elements. This
-    # algorithm is based on "hash_to_field" in draft-irtf-cfrg-hash-to-curve13.
-    #
-    # TODO Overwrite this with whatever algorithm is chosen in
-    # https://github.com/cjpatton/vdaf/issues/13.
+    # Derive a new seed.
     @classmethod
-    def expand_into_vec(cls,
+    def derive(Prg, seed: Bytes, info: Bytes) -> bytes:
+        prg = Prg(seed, info)
+        return prg.next(Prg.SEED_SIZE)
+
+    # Expand the input `seed` into vector of `length` field elements.
+    @classmethod
+    def expand_into_vec(Prg,
                         Field,
                         seed: Bytes,
                         info: Bytes,
                         length: Unsigned):
-        L = Field.EXPANDED_SIZE
-        len_in_Bytes = length * L
-        uniform_Bytes = cls.expand(seed, info, len_in_Bytes)
-
+        prg = Prg(seed, info)
         vec = []
-        for i in range(0, len(uniform_Bytes), L):
-            tv = uniform_Bytes[i:i+L]
-            x = OS2IP(tv)
-            vec.append(Field(x))
+        while len(vec) < length:
+            x = OS2IP(prg.next(Field.ENCODED_SIZE))
+            if x < Field.MODULUS:
+                vec.append(Field(x))
         return vec
 
-
-# A pseudorandom generator based on AES128. CMAC {{!RFC4493}} is used to derive
-# a key, which is used in CTR-mode for deriving the output.
-#
-# TODO A more conventional alternative to CMAC would be HMAC.
 class PrgAes128(Prg):
     # Associated parameters
     SEED_SIZE = 16
 
-    @classmethod
-    def expand(cls, seed, info, length):
-        hasher = CMAC.new(seed, ciphermod=AES)
-        key = hasher.update(info).digest()
-        counter = Counter.new(128, initial_value=bytes_to_long(zeros(16)))
-        cipher = AES.new(key, AES.MODE_CTR, counter=counter)
-        cipher_stream = cipher.encrypt(zeros(length))
-        return cipher_stream
+    def __init__(self, seed, info):
+        self.length_consumed = 0
 
+        # Use CMAC as a pseuodorandom function to derive a key.
+        hasher = CMAC.new(seed, ciphermod=AES)
+        self.key = hasher.update(info).digest()
+
+    def next(self, length: Unsigned) -> Bytes:
+        block = int(self.length_consumed / 16)
+        offset = self.length_consumed % 16
+        self.length_consumed += length
+
+        # CTR-mode encryption of the all-zero string of the desired
+        # length and using a fixed, all-zero IV.
+        counter = Counter.new(128, initial_value=block)
+        cipher = AES.new(self.key, AES.MODE_CTR, counter=counter)
+        stream = cipher.encrypt(zeros(offset + length))
+        return stream[-length:]
 
 ##
 # TESTS
@@ -70,11 +71,24 @@ class PrgAes128(Prg):
 
 def test_prg(Prg, F, expanded_len):
     info = b"info string"
-    seed = Bytes([i for i in range(Prg.SEED_SIZE)])
-    expanded_data = Prg.expand(seed, info, expanded_len)
+    seed = gen_rand(Prg.SEED_SIZE)
+
+    # Test next
+    expanded_data = Prg(seed, info).next(expanded_len)
     assert len(expanded_data) == expanded_len
+
+    want = Prg(seed, info).next(700)
+    got = b""
+    prg = Prg(seed, info)
+    for i in range(0, 700, 7):
+        got += prg.next(7)
+    assert got == want
+
+    # Test derive
     derived_seed = Prg.derive(seed, info)
     assert len(derived_seed) == Prg.SEED_SIZE
+
+    # Test expand_into_vec
     expanded_vec = Prg.expand_into_vec(F, seed, info, expanded_len)
     assert len(expanded_vec) == expanded_len
 

@@ -856,8 +856,6 @@ FFT-friendly fields also define the following parameter:
 
 ## Pseudorandom Generators {#prg}
 
-> CP TODO Update the reference implementation to match.
-
 A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
 into a long string of pseudorandom bits. A PRG suitable for this document
 implements the interface specified in this section. Concrete constructions are
@@ -887,7 +885,7 @@ pseudorandom field elements. For each method, the seed MUST be of length
 
 ~~~
 # Derive a new seed.
-def derive(Prg, seed: bytes, info: bytes) -> bytes:
+def derive(Prg, seed: Bytes, info: Bytes) -> bytes:
     prg = Prg(seed, info)
     return prg.next(Prg.SEED_SIZE)
 
