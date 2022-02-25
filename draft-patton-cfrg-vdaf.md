@@ -2176,7 +2176,7 @@ This document makes no request of IANA.
 # Acknowledgments
 {:numbered="false"}
 
-Thanks to Henry Corrigan-Gibbs, Mariana Raykova, and Christopher Wood for useful
-feedback on the syntax of VDAF schemes.
+Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Mariana Raykova, and
+Christopher Wood for useful feedback on and contributions to the spec.
 
 
