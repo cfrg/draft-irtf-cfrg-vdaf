@@ -856,37 +856,53 @@ FFT-friendly fields also define the following parameter:
 
 ## Pseudorandom Generators {#prg}
 
+> CP TODO Update the reference implementation to match.
+
 A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
 into a long string of pseudorandom bits. A PRG suitable for this document
 implements the interface specified in this section. Concrete constructions are
 described in {{prg-constructions}}.
 
-PRGs are defined by a class `Prg` with a single parameter:
+PRGs are defined by a class `Prg` with the follwing associated parameter:
 
 * `SEED_SIZE: Unsigned` is the size of the input seed.
 
 A concrete `Prg` implements the following class method:
 
-* `Prg.expand(seed: Bytes, info: Bytes, length: Unsigned) -> Bytes` derives a
-  byte string from the given seed and info string. The length of the output MUST
-  be `length`.
+* `Prg(seed: Bytes, info: Bytes, length: Unsigned)` constructs an instance of
+  `Prg` from the given seed and info string. The seed MUST be of length
+  `SEED_SIZE` and MUST be generated securely (i.e., it is either the output of
+  `gen_rand` or a previous invocation of the PRG). The info string is used for
+  domain separation.
+
+* `prg.next(length: Unsigned)` returns the next `length` bytes of output of the
+  PRG. If the seed was securely generated, the output can be treated as
+  pseudorandom.
 
 Each `Prg` has two derived class methods. The first is used to derive a fresh
 seed from an existing one. The second is used to compute a sequence of
-pseudorandom field elements.
+pseudorandom field elements. For each method, the seed MUST be of length
+`SEED_SIZE` and MUST be generated securely (i.e., it is either the output of
+`gen_rand` or a previous invocation of the PRG).
 
 ~~~
 # Derive a new seed.
 def derive(Prg, seed: bytes, info: bytes) -> bytes:
-    return Prg.expand(seed, info, Prg.SEED_SIZE)
+    prg = Prg(seed, info)
+    return prg.next(Prg.SEED_SIZE)
 
 # Expand a seed into a vector of Field elements.
 def expand_into_vec(Prg, Field,
                     seed: Bytes,
                     info: Bytes,
                     length: Unsigned) -> Vec[Field]:
-    # TODO Specify a method for mapping a pseudorandom byte string
-    # to a sequence of field elemetns.
+    prg = Prg(seed, info)
+    vec = []
+    while len(vec) < length:
+        x = OS2IP(prg.next(Field.ENCODED_SIZE))
+        if x < Field.MODULUS:
+            vec.append(Field(x))
+    return vec
 ~~~
 {: #prg-derived-methods title="Derived class methods for PRGs."}
 
@@ -1645,7 +1661,7 @@ class PrepState:
         auth_share.append(value[1])
 
       # Prepare first sketch verification message.
-      r = expand(Field[l], self.k_verify_rand, len(data_share))
+      r = Prg.expand_into_vec(Field[l], self.k_verify_rand, len(data_share))
       verifier_share_1 = [
          a_share + inner_product(data_share, r),
          b_share + inner_product(data_share, r * r),
