@@ -34,7 +34,7 @@ class Valid:
     INPUT_LEN: Unsigned
 
     # Length of the random input of the validity circuit.
-    RAND_LEN: Unsigned
+    JOINT_RAND_LEN: Unsigned
 
     # Length of the aggregateable output for this type.
     OUTPUT_LEN: Unsigned
@@ -186,7 +186,7 @@ class FlpGeneric(Flp):
         new_cls.Measurement = Valid.Measurement
         new_cls.PROVE_RAND_LEN = Valid.prove_rand_len()
         new_cls.QUERY_RAND_LEN = Valid.query_rand_len()
-        new_cls.JOINT_RAND_LEN = Valid.RAND_LEN
+        new_cls.JOINT_RAND_LEN = Valid.JOINT_RAND_LEN
         new_cls.INPUT_LEN = Valid.INPUT_LEN
         new_cls.OUTPUT_LEN = Valid.OUTPUT_LEN
         new_cls.PROOF_LEN = Valid.proof_len()
@@ -368,7 +368,7 @@ class PolyEval(Gadget):
 def check_valid_eval(Valid, inp, joint_rand):
     if len(inp) != Valid.INPUT_LEN:
         raise ERR_INPUT
-    if len(joint_rand) != Valid.RAND_LEN:
+    if len(joint_rand) != Valid.JOINT_RAND_LEN:
         raise ERR_INPUT
 
 class Count(Valid):
@@ -380,7 +380,7 @@ class Count(Valid):
     GADGETS = [Mul()]
     GADGET_CALLS = [1]
     INPUT_LEN = 1
-    RAND_LEN = 1
+    JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
 
     def eval(self, inp, joint_rand, _num_shares):
@@ -409,7 +409,7 @@ class Sum(Valid):
     GADGETS = [PolyEval([0, -1, 1])]
     GADGET_CALLS = None # Set by Sum.with_bits()
     INPUT_LEN = None    # Set by Sum.with_bits()
-    RAND_LEN = 1
+    JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
 
     def eval(self, inp, joint_rand, _num_shares):
@@ -464,7 +464,7 @@ class Histogram(Valid):
     GADGETS = [PolyEval([0, -1, 1])]
     GADGET_CALLS = None # Set by `Histogram.with_buckets()`
     INPUT_LEN = None # Set by `Histogram.with_buckets()`
-    RAND_LEN = 2
+    JOINT_RAND_LEN = 2
     OUTPUT_LEN = None # Set by `Histogram.with_buckets()`
 
     def eval(self, inp, joint_rand, num_shares):
@@ -488,18 +488,12 @@ class Histogram(Valid):
 
     @classmethod
     def encode(Histogram, measurement):
-        encoded = [Histogram.Field(0) for _ in range(len(Histogram.buckets)+1)]
-        done = False
-        for i in range(len(Histogram.buckets)):
-            if ((i == 0) or \
-                (i > 0 and measurement > Histogram.buckets[i-1])) and \
-                measurement <= Histogram.buckets[i]:
+        boundaries = Histogram.buckets + [Infinity]
+        encoded = [Histogram.Field(0) for _ in range(len(boundaries))]
+        for i in range(len(boundaries)):
+            if measurement <= boundaries[i]:
                 encoded[i] = Histogram.Field(1)
-                done = True
-                break
-        if not done:
-            encoded[-1] = Histogram.Field(1)
-        return encoded
+                return encoded
 
     @classmethod
     def truncate(Histogram, inp):

@@ -852,7 +852,23 @@ FFT-friendly fields also define the following parameter:
 
 ### Parameters
 
-> TODO: Pick field parameters and specify them here. See issue#22.
+The tables below define finite fields used in the remainder of this document.
+
+| Parameter       | Value   |
+|:----------------|:--------|
+| MODULUS         | 2^32 * 4294967295 + 1 |
+| ENCODED_SIZE    | 8 |
+| Generotor       | 7^4294967295 |
+| GEN_ORDER       | 2^32 |
+{: #field64 title="Field64, an FFT-friendly field."}
+
+| Parameter       | Value   |
+|:----------------|:--------|
+| MODULUS         | 2^64 * 4611686018427387751 + 1 |
+| ENCODED_SIZE    | 16 |
+| Generotor       | 3^4611686018427387751 |
+| GEN_ORDER       | 2^64 |
+{: #field128 title="Field128, an FFT-friendly field."}
 
 ## Pseudorandom Generators {#prg}
 
@@ -939,9 +955,6 @@ class PrgAes128:
 ~~~
 {: #prg-aes128 title="Definition of PRG PrgBlockCipher(Aes128)."}
 
-> CP: We might be able to get away with skipping the initial CMAC for some fixed
-> value of info, e.g., info == "".
-
 # prio3 {#prio3}
 
 > NOTE This construction has not undergone significant security analysis.\
@@ -996,9 +1009,10 @@ valid input.
 
 `prio3` can be viewed as a transformation of a particular class of FLP systems
 into a VDAF. The next section specified the syntax of suitable FLPs in detail;
-the transformation is given in {{prio3-construction}}. Finally, a concrete,
-general-purpose FLP suitable for any validity circuit is specified in section
-{{flp-generic}}.
+the transformation is given in {{prio3-construction}}. A general-purpose FLP
+suitable for any validity circuit is specified in section {{flp-generic}}.
+Finally, a variety of concrete instantiations of `prio3` are specified in
+{{prio3-instantiations}}.
 
 ## Fully Linear Proof (FLP) Systems {#flp}
 
@@ -1606,12 +1620,12 @@ proof. (See the discussion in {{BBCGGI19}}, Section 5.2 for details). A much
 shorter proof can be constructed for the following randomized circuit:
 
 ~~~
-C(inp, r) = r * Poly(inp[0]) + ... + r^N * Poly(inp[N-1])
+C(inp, r) = r * Range2(inp[0]) + ... + r^N * Range2(inp[N-1])
 ~~~
 
 (Note that this is a special case of {{BBCGGI19}}, Theorem 5.2.) Here `inp` is
 the length-`N` input and `r` is a random field element. The gadget circuit
-`Poly` is the "range-check" polynomial described above, i.e., `Poly(x) = x^2 -
+`Poly` is the "range-check" polynomial described above, i.e., `Range2(x) = x^2 -
 x`. The idea is that, if `inp` is valid (i.e., each `inp[j]` is in `[0,2)`),
 then the circuit will evaluate to 0 regardless of the value of `r`; but if
 `inp[j]` is not in `[0,2)` for some `j`, the output will be non-zero with high
@@ -1624,8 +1638,8 @@ allowed, where `Mul` and `Poly` are the gadgets defined above (the input has
 length `N+1`):
 
 ~~~
-C(inp, r) = r * Poly(inp[0]) + ... + r^N * Poly(inp[N-1]) + \
-            2^0 * inp[0]     + ... + 2^(N-1) * inp[N-1]   - \
+C(inp, r) = r * Range2(inp[0]) + ... + r^N * Range2(inp[N-1]) + \
+            2^0 * inp[0]       + ... + 2^(N-1) * inp[N-1]     - \
             Mul(inp[N], inp[N])
 ~~~
 
@@ -1654,7 +1668,7 @@ A concrete `Valid` defines the following parameters:
 | `GADGET_CALLS` | Number of times each gadget is called |
 | `INPUT_LEN`    | Length of the input                   |
 | `OUTPUT_LEN`   | Length of the aggregatable output     |
-| `RAND_LEN`     | Length of the random input            |
+| `JOINT_RAND_LEN` | Length of the random input          |
 | `Measurement`  | The type of measurement               |
 | `Field`        | An FFT-friendly finite field as defined in {{field-fft-friendly}} |
 {: title="Validity circuit parameters."}
@@ -1671,10 +1685,10 @@ A concrete `Valid` provides the following methods for encoding a measurement as
 an input vector and truncating an input vector to the length of an aggregatable
 output:
 
-* `Circuit.encode(measurement: Measurement) -> Vec[Field]` returns a vector of
+* `Valid.encode(measurement: Measurement) -> Vec[Field]` returns a vector of
   length `INPUT_LEN` representing a measurement.
 
-* `Circuit.truncate(input: Vec[Field]) -> Vec[Field]` returns a vector of length
+* `Valid.truncate(input: Vec[Field]) -> Vec[Field]` returns a vector of length
   `OUTPUT_LEN` representing an aggregatable output.
 
 Finally, the following class methods are derived for each concrete `Valid`:
@@ -1731,7 +1745,7 @@ In the remainder, we let `[n]` denote the set `{1, ..., n}` for positive integer
 |:-----------------|:--------------------|
 | `PROVE_RAND_LEN` | `Valid.prove_rand_len()` (see {{flp-generic-valid}}) |
 | `QUERY_RAND_LEN` | `Valid.query_rand_len()` (see {{flp-generic-valid}}) |
-| `JOINT_RAND_LEN` | `Valid.RAND_LEN`    |
+| `JOINT_RAND_LEN` | `Valid.JOINT_RAND_LEN` |
 | `INPUT_LEN`      | `Valid.INPUT_LEN`   |
 | `OUTPUT_LEN`     | `Valid.OUTPUT_LEN`  |
 | `PROOF_LEN`      | `Valid.proof_len()` (see {{flp-generic-valid}}) |
@@ -1830,12 +1844,183 @@ follows:
 
 #### Encoding
 
-The FLP encoding and truncation methods invoke `Circuit.encode` and
-`Circuit.truncate` in the natural way.
+The FLP encoding and truncation methods invoke `Valid.encode` and
+`Valid.truncate` in the natural way.
 
-## Instantiations
+## Instantiations {#prio3-instantiations}
 
-> TODO Specify some concrete instantiations of Prio3.
+> CP TODO Clean up this section.
+
+This section specifies a variety of concrete instantations of prio3. Each uses
+`FlpGeneric` as the FLP ({{flp-generic}}) and is determined by an implementation
+of `Valid` ({{flp-generic-valid}}) and an implementation of `Prg` ({{prg}}).
+
+> NOTE Reference implemnetations of each of these VDAFs can be found in
+> https://github.com/cjpatton/vdaf/blob/main/poc/vdaf_prio3.sage.
+
+### Prio3Aes128Count
+
+A simple counter type. Each measurement is either one or zoro and the aggregate
+result is the sum of the measurements.
+
+This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG. Its
+validity circuit, denoted `Count`, uses `Field64` ({{field64}}) as its finite
+field. Its gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
+
+~~~
+def Mul(x: Field64, y: Field64):
+    return x * y
+~~~
+
+The validity circuit is defined as
+
+~~~
+def Count(inp: Vec[Field128]):
+    return Mul(inp[0], inp[0]) - inp[0]
+~~~
+
+The measurement is encoded as a singleton vector in the natural way. The
+parameters for this circuit are summarized below.
+
+<br>
+
+| Parameter        | Value                        |
+|:-----------------|:-----------------------------|
+| `GADGETS`        | `[Mul]`                      |
+| `GADGET_CALLS`   | `[1]`                        |
+| `INPUT_LEN`      | `1`                          |
+| `OUTPUT_LEN`     | `1`                          |
+| `JOINT_RAND_LEN` | `0`                          |
+| `Measurement`    | `Unsigned`, in range `[0,2)` |
+| `Field`          | `Field64` ({{field64}})      |
+{: title="Parameters of validity circuit Count."}
+
+### Prio3Aes128Sum {#prio3-sum}
+
+The sum type. Each measurement is an integer in range `[0, 2^bits)`, where
+`bits` is an associated parameter.
+
+This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG.
+Its validity circuit, denoted `Sum`, uses `Field128` ({{field128}}) as its
+finite field. The measurement is encoded as a length-`bits` vector of field
+elements, where the `l`th element of the vector represents the `l`th bit of the
+summand. The truncation algorithm reverse this process:
+
+~~~
+def encode(Sum, measurement: Unsigned):
+    if measurement >= 2^Sum.INPUT_LEN:
+        raise ERR_INPUT
+
+    encoded = []
+    for l in range(Sum.INPUT_LEN):
+        encoded.append(Sum.Field((measurement >> l) & 1))
+    return encoded
+
+def truncate(Sum, inp: Vec[Field128]):
+    decoded = Field128(0)
+    for (l, b) in enumerate(inp):
+        w = Field128(1 << l)
+        decoded += w * b
+    return [decoded]
+~~~
+
+The validity circuit checks that the input comprised of ones and zeros. Its
+gadget, denoted `Range2`, is the degree-2, arity-1 gadget defined as
+
+~~~
+def Range2(x: Field128):
+    return x^2 - x
+~~~
+
+Finally, the validity circuit is defined as
+
+~~~
+def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
+    out = Field128(0)
+    r = joint_rand[0]
+    for x in inp:
+        out += r * Range2(x)
+        r *= joint_rand[0]
+    return out
+~~~
+
+<br>
+
+| Parameter        | Value                        |
+|:-----------------|:-----------------------------|
+| `GADGETS`        | `[Range2]`                   |
+| `GADGET_CALLS`   | `[bits]`                     |
+| `INPUT_LEN`      | `bits`                       |
+| `OUTPUT_LEN`     | `1`                          |
+| `JOINT_RAND_LEN` | `1`                          |
+| `Measurement`    | `Unsigned`, in range `[0, 2^bits)` |
+| `Field`          | `Field128` ({{field128}})      |
+{: title="Parameters of validity circuit Sum."}
+
+### Prio3Aes128Histogram
+
+The basic histogram type. Each measurement is an arbitrary integer and the
+aggregate result is a histogram representation of the distribution of
+measurements. The histogram buckets are determined by an associated parameter
+`buckets`, a vector of monotonically increasing integers.
+
+This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG.
+Its validity circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its
+finite field. The measurement is encoded as a one-hot vector representing the
+bucket into which the measurement falls:
+
+~~~
+def encode(Histogram, measurement: Integer):
+    boundaries = buckets + [Infinity]
+    encoded = [Field128(0) for _ in range(len(boundaries))]
+    for i in range(len(boundaries)):
+        if measurement <= boundaries[i]:
+            encoded[i] = Field128(1)
+            return encoded
+
+def truncate(Histogram, inp: Vec[Field128]):
+    return inp
+~~~
+
+The validity circuit uses `Range2` (see {{prio3-sum}}) as its single gadget. It
+checks for one-hotness as follows:
+
+~~~
+def Histogram(inp: Vec[Field128],
+              joint_rand: Vec[Field128],
+              num_shares: Unsigned):
+    # Check that each bucket is one or zero.
+    range_check = Field128(0)
+    r = joint_rand[0]
+    for x in inp:
+        range_check += r * Range2(x)
+        r *= joint_rand[0]
+
+    # Check that the buckets sum to 1.
+    sum_check = -Field128(1) * Field128(num_shares).inv()
+    for b in inp:
+        sum_check += b
+
+    out = joint_rand[1]   * range_check + \
+          joint_rand[1]^2 * sum_check
+    return out
+~~~
+
+Note that this circuit depends on the number of shares into which the input is
+sharded.
+
+<br>
+
+| Parameter        | Value                     |
+|:-----------------|:--------------------------|
+| `GADGETS`        | `[Range2]`                |
+| `GADGET_CALLS`   | `[buckets + 1]`           |
+| `INPUT_LEN`      | `buckets + 1`             |
+| `OUTPUT_LEN`     | `buckets + 1`             |
+| `JOINT_RAND_LEN` | `2`                       |
+| `Measurement`    | `Integer`                 |
+| `Field`          | `Field128` ({{field128}}) |
+{: title="Parameters of validity circuit Histogram."}
 
 # poplar1 {#poplar1}
 
@@ -2217,5 +2402,3 @@ This document makes no request of IANA.
 
 Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Mariana Raykova, and
 Christopher Wood for useful feedback on and contributions to the spec.
-
-

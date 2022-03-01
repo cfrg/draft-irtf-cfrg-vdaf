@@ -100,7 +100,7 @@ class Field64(Field):
 
     @classmethod
     def gen(cls):
-        return cls(1753635133440165772)
+        return cls(7)^4294967295
 
 
 # The finite field GF(2^64 * 4294966555 + 1).
@@ -114,7 +114,7 @@ class Field96(Field):
 
     @classmethod
     def gen(cls):
-        return cls(34233996298771126927060021012)
+        return cls(3)^4294966555
 
 
 # The finite field GF(2^64 * 4611686018427387751 + 1).
@@ -128,7 +128,7 @@ class Field128(Field):
 
     @classmethod
     def gen(cls):
-        return cls(31797354429379572309620216906993098145)
+        return cls(3)^4611686018427387751
 
 
 ##
