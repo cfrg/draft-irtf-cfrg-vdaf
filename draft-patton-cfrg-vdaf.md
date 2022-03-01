@@ -934,9 +934,6 @@ class PrgAes128:
 
         # CTR-mode encryption of the all-zero string of the desired
         # length and using a fixed, all-zero IV.
-        #
-        # TODO Make this implementation more efficient. In particular,
-        # don't regenerate the already consumed stream.
         stream = AES128-CTR(key, zeros(16), zeros(self.length_consumed))
         return stream[-length:]
 ~~~
@@ -1988,28 +1985,29 @@ output:
 Finally, the following class methods are derived for each concrete `Valid`:
 
 ~~~
+# Length of the prover randomness.
 def prove_rand_len(Valid):
-    return sum(map(lambda G: G.ARITY, Valid.GADGETS))
+    return sum(map(lambda g: g.ARITY, Valid.GADGETS))
 
+# Length of the query randomness.
 def query_rand_len(Valid):
-    return len(Cicuit.GADGETS)
+    return len(Valid.GADGETS)
 
+# Length of the proof.
 def proof_len(Valid):
     length = 0
-    for (calls, G) in zip(Valid.GADGET_CALLS, Valid.GADGETS):
-        padded_calls = next_power_of_2(1 + calls)
-        length += G.ARITY + G.DEGREE * (padded_calls - 1) + 1
+    for (g, g_calls) in zip(Valid.GADGETS, Valid.GADGET_CALLS):
+        P = next_power_of_2(1 + g_calls)
+        length += g.ARITY + g.DEGREE * (P - 1) + 1
     return length
 
+# Length of the verifier message.
 def verifier_len(Valid):
     length = 1
-    for G in Valid.GADGETS:
-        length += G.ARITY + 1
+    for g in Valid.GADGETS:
+        length += g.ARITY + 1
     return length
 ~~~
-
-> TODO These methods were written by hand. Re-generate them from the reference
-> implementantion.
 
 ## Construction {#flp-generic-construction}
 

@@ -7,6 +7,7 @@ from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, Bytes, \
                            xor, zeros
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.flp as flp
+import sagelib.flp_generic as flp_generic
 import sagelib.prg as prg
 
 
@@ -298,29 +299,43 @@ class Prio3(Vdaf):
         return new_cls
 
     @classmethod
+    def with_prg(cls, Prg):
+        new_cls = deepcopy(cls)
+        new_cls.Prg = Prg
+        return new_cls
+
+    @classmethod
     def with_flp(cls, Flp):
         new_cls = deepcopy(cls)
         new_cls.Flp = Flp
         return new_cls
 
+##
+# INSTANTIATIONS
+#
+
+Prio3Aes128Count = Prio3 \
+    .with_prg(prg.PrgAes128) \
+    .with_flp(flp_generic.FlpGeneric.with_valid(flp_generic.Count))
 
 ##
 # TESTS
 #
 
-class Prio3TestField128PrgAes128(Prio3):
-    Prg = prg.PrgAes128
-
-
 if __name__ == "__main__":
-    cls = Prio3TestField128PrgAes128 \
+    cls = Prio3 \
+        .with_prg(prg.PrgAes128) \
         .with_flp(flp.FlpTestField128) \
         .with_shares(2)
     test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])
 
     # If JOINT_RAND_LEN == 0, then Fiat-Shamir isn't needed and we can skip
     # generating the joint randomness.
-    cls = Prio3TestField128PrgAes128 \
+    cls = Prio3 \
+        .with_prg(prg.PrgAes128) \
         .with_flp(flp.FlpTestField128.with_joint_rand_len(0)) \
         .with_shares(2)
     test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])
+
+    cls = Prio3Aes128Count.with_shares(2)
+    test_vdaf(cls, None, [0, 1, 1, 0, 1], [3])
