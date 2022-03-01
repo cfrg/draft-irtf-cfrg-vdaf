@@ -1,7 +1,7 @@
 # Fully linear proof (FLP) systems.
 
 from copy import deepcopy
-from sagelib.common import ERR_ENCODE, Bool, Error, Unsigned, Vec
+from sagelib.common import ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec
 
 import sagelib.field as field
 
@@ -35,36 +35,36 @@ class Flp:
 
     # Encode a measurement as an input.
     @classmethod
-    def encode(cls, measurement: Measurement) -> Vec[Field]:
-        raise Error("not implemented")
+    def encode(Flp, measurement: Measurement) -> Vec[Field]:
+        raise Error("encode() not implemented")
 
     # Generate a proof of an input's validity.
     @classmethod
-    def prove(cls,
+    def prove(Flp,
               inp: Vec[Field],
               prove_rand: Vec[Field],
               joint_rand: Vec[Field]) -> Vec[Field]:
-        raise Error("not implemented")
+        raise Error("prove() not implemented")
 
     # Generate a verifier message for an input and proof.
     @classmethod
-    def query(cls,
+    def query(Flp,
               inp: Vec[Field],
               proof: Vec[Field],
               query_rand: Vec[Field],
               joint_rand: Vec[Field],
               num_shares: Unsigned) -> Vec[Field]:
-        raise Error("not implemented")
+        raise Error("query() not implemented")
 
     # Decide if a verifier message was generated from a valid input.
     @classmethod
-    def decide(cls, verifier: Vec[Field]) -> Bool:
-        raise Error("not implemented")
+    def decide(Flp, verifier: Vec[Field]) -> Bool:
+        raise Error("decide() not implemented")
 
     #  Map an input to an aggregatable output.
     @classmethod
-    def truncate(cls, inp: Vec[Field]) -> Vec[Field]:
-        raise Error("not implemented")
+    def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
+        raise Error("truncate() not implemented")
 
 
 # Run the FLP on an input.
@@ -88,6 +88,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 ##
 # TESTS
 #
+
 
 # An insecure FLP used only for testing.
 class FlpTest(Flp):
@@ -145,12 +146,8 @@ class FlpTestField128(FlpTest):
         return new_cls
 
 
-def test_flp(Flp, inp, expected_decision):
-    assert run_flp(Flp, inp, 1) == expected_decision
-
-
 if __name__ == "__main__":
     cls = FlpTestField128
-    test_flp(cls, cls.encode(0), True)
-    test_flp(cls, cls.encode(4), True)
-    test_flp(cls, [field.Field128(1337)], False)
+    assert run_flp(cls, cls.encode(0), 1) == True
+    assert run_flp(cls, cls.encode(4), 1) == True
+    assert run_flp(cls, [field.Field128(1337)], 1) == False
