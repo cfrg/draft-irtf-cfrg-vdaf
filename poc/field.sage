@@ -173,6 +173,7 @@ def poly_interp(Field, xs, ys):
     p = R.lagrange_polynomial([(x.val, y.val) for (x, y) in zip(xs, ys)])
     return poly_strip(Field, list(map(lambda x: Field(x), p.coefficients())))
 
+
 ##
 # TESTS
 #

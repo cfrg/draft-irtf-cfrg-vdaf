@@ -1,9 +1,9 @@
 # Fully linear proof (FLP) systems.
 
 from copy import deepcopy
-from sagelib.common import ERR_ABORT, ERR_VERIFY, Bool, Error, Unsigned, \
-                           Vec, next_power_of_2
-from sagelib.field import poly_eval, poly_interp, poly_mul
+from sagelib.common import ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, \
+                           Unsigned, Vec, next_power_of_2
+from sagelib.field import poly_eval, poly_interp, poly_mul, poly_strip
 from sagelib.flp import Flp, run_flp
 import sagelib.field as field
 
@@ -17,13 +17,11 @@ class Gadget:
     DEGREE: Unsigned
 
     # Evaluate the gadget on a sequence of field elements.
-    @classmethod
-    def eval(Gadget, Field, inp):
+    def eval(self, Field, inp):
         raise Error("eval() not implemented")
 
     # Evaluate the gadget on a sequence of polynomials over a fieldo.
-    @classmethod
-    def eval_poly(Gadget, Field, inp_poly):
+    def eval_poly(self, Field, inp_poly):
         raise Error("eval_poly() not implemented")
 
 # A validity circuit.
@@ -95,13 +93,13 @@ class Valid:
 
 class ProveGadget:
 
-    def __init__(self, Gadget, Field, wire_seeds, num_calls):
-        self.inner = Gadget
-        self.ARITY = Gadget.ARITY
-        self.DEGREE = Gadget.DEGREE
+    def __init__(self, Field, wire_seeds, g, g_calls):
+        self.inner = g
+        self.ARITY = g.ARITY
+        self.DEGREE = g.DEGREE
         self.wire = []
-        P = next_power_of_2(1 + num_calls)
-        for j in range(Gadget.ARITY):
+        P = next_power_of_2(1 + g_calls)
+        for j in range(g.ARITY):
             self.wire.append(Field.zeros(P))
             self.wire[j][0] = wire_seeds[j]
         self.k = 0
@@ -123,7 +121,7 @@ def prove_wrapped(Valid, prove_rand):
     wrapped_gadgets = []
     for (g, g_calls) in zip(Valid.GADGETS, Valid.GADGET_CALLS):
         wire_seeds, prove_rand = prove_rand[:g.ARITY], prove_rand[g.ARITY:]
-        wrapped = ProveGadget(g, Valid.Field, wire_seeds, g_calls)
+        wrapped = ProveGadget(Valid.Field, wire_seeds, g, g_calls)
         wrapped_gadgets.append(wrapped)
     assert len(prove_rand) == 0
     valid = Valid()
@@ -134,14 +132,14 @@ def prove_wrapped(Valid, prove_rand):
 
 class QueryGadget:
 
-    def __init__(self, Gadget, Field, wire_seeds, gadget_poly, num_calls):
-        self.inner = Gadget
-        self.ARITY = Gadget.ARITY
-        self.DEGREE = Gadget.DEGREE
+    def __init__(self, Field, wire_seeds, gadget_poly, g, g_calls):
+        self.inner = g
+        self.ARITY = g.ARITY
+        self.DEGREE = g.DEGREE
         self.wire = []
         self.gadget_poly = gadget_poly
-        P = next_power_of_2(1 + num_calls)
-        for j in range(Gadget.ARITY):
+        P = next_power_of_2(1 + g_calls)
+        for j in range(g.ARITY):
             self.wire.append(Field.zeros(P))
             self.wire[j][0] = wire_seeds[j]
         self.alpha = Field.gen() ^ (Field.GEN_ORDER / P)
@@ -164,10 +162,10 @@ def query_wrapped(Valid, proof):
         gadget_poly_len = g.ARITY + g.DEGREE * (P - 1) + 1
         wire_seeds, proof = proof[:g.ARITY], proof[g.ARITY:]
         gadget_poly, proof = proof[:gadget_poly_len], proof[gadget_poly_len:]
-        wrapped = QueryGadget(g,
-                              Valid.Field,
+        wrapped = QueryGadget(Valid.Field,
                               wire_seeds,
                               gadget_poly,
+                              g,
                               g_calls)
         wrapped_gadgets.append(wrapped)
     assert len(proof) == 0
@@ -186,10 +184,13 @@ class FlpGeneric(Flp):
         new_cls.Valid = Valid
         new_cls.Field = Valid.Field
         new_cls.Measurement = Valid.Measurement
-        new_cls.JOINT_RAND_LEN = Valid.RAND_LEN
         new_cls.PROVE_RAND_LEN = Valid.prove_rand_len()
         new_cls.QUERY_RAND_LEN = Valid.query_rand_len()
+        new_cls.JOINT_RAND_LEN = Valid.RAND_LEN
+        new_cls.INPUT_LEN = Valid.INPUT_LEN
+        new_cls.OUTPUT_LEN = Valid.OUTPUT_LEN
         new_cls.PROOF_LEN = Valid.proof_len()
+        new_cls.VERIFIER_LEN = Valid.verifier_len()
         return new_cls
 
     @classmethod
@@ -311,15 +312,53 @@ class Mul(Gadget):
     ARITY = 2
     DEGREE = 2
 
-    @classmethod
-    def eval(Gadget, Field, inp):
-        check_gadget_eval(Gadget, inp)
+    def eval(self, Field, inp):
+        check_gadget_eval(self, inp)
         return inp[0] * inp[1]
 
-    @classmethod
-    def eval_poly(Gadget, Field, inp_poly):
-        check_gadget_eval_poly(Gadget, inp_poly)
+    def eval_poly(self, Field, inp_poly):
+        check_gadget_eval_poly(self, inp_poly)
         return poly_mul(Field, inp_poly[0], inp_poly[1])
+
+
+class PolyEval(Gadget):
+    # Operational parameters
+    p = None
+
+    ARITY = 1
+    DEGREE = None # Set by constructor
+
+    def eval(self, Field, inp):
+        check_gadget_eval(PolyEval, inp)
+        p = list(map(lambda coeff: Field(coeff), self.p))
+        return poly_eval(Field, p, inp[0])
+
+    def eval_poly(self, Field, inp_poly):
+        check_gadget_eval_poly(PolyEval, inp_poly)
+        p = list(map(lambda coeff: Field(coeff), self.p))
+        out = [Field(0) for _ in range(self.DEGREE * len(inp_poly[0]))]
+        out[0] = p[0]
+        x = inp_poly[0]
+        for i in range(1, len(p)):
+            for j in range(len(x)):
+                out[j] += p[i] * x[j]
+            x = poly_mul(Field, x, inp_poly[0])
+        return poly_strip(Field, out)
+
+    # Instantiate this gadget with the given polynomial. Note that this
+    # determines the field that may be used with this gadget.
+    def __init__(self, p: Vec[int]):
+        # Strip leading zeros.
+        for i in reversed(range(len(p))):
+            if p[i] != 0:
+                p = p[:i+1]
+                break
+
+        if len(p) < 1:
+            raise Error("invalid polynomial: zero length")
+
+        self.p = p
+        self.DEGREE = len(p) - 1
 
 
 ##
@@ -333,19 +372,20 @@ def check_valid_eval(Valid, inp, joint_rand):
         raise ERR_INPUT
 
 class Count(Valid):
+    # Associated types
     Field = field.Field64
     Measurement = Unsigned
 
-    GADGETS = [Mul]
-    GADGET_CALLS = [2]
+    # Associated parameters
+    GADGETS = [Mul()]
+    GADGET_CALLS = [1]
     INPUT_LEN = 1
     RAND_LEN = 1
     OUTPUT_LEN = 1
 
     def eval(self, inp, joint_rand, _num_shares):
-        check_valid_eval(Count, inp, joint_rand)
-        Mul = Count.GADGETS[0]
-        return Mul.eval(self.Field, [inp[0], inp[0]]) - inp[0]
+        check_valid_eval(self, inp, joint_rand)
+        return self.GADGETS[0].eval(self.Field, [inp[0], inp[0]]) - inp[0]
 
     @classmethod
     def encode(Count, measurement):
@@ -360,22 +400,138 @@ class Count(Valid):
         return inp
 
 
+class Sum(Valid):
+    # Associated types
+    Field = field.Field128
+    Measurement = Unsigned
+
+    # Associated parametrs
+    GADGETS = [PolyEval([0, -1, 1])]
+    GADGET_CALLS = None # Set by Sum.with_bits()
+    INPUT_LEN = None    # Set by Sum.with_bits()
+    RAND_LEN = 1
+    OUTPUT_LEN = 1
+
+    def eval(self, inp, joint_rand, _num_shares):
+        check_valid_eval(self, inp, joint_rand)
+        out = self.Field(0)
+        r = joint_rand[0]
+        for b in inp:
+            out += r * self.GADGETS[0].eval(self.Field, [b])
+            r *= joint_rand[0]
+        return out
+
+    @classmethod
+    def encode(Sum, measurement):
+        if 0 > measurement or measurement >= 2^Sum.INPUT_LEN:
+            raise ERR_INPUT
+
+        encoded = []
+        for l in range(Sum.INPUT_LEN):
+            encoded.append(Sum.Field((measurement >> l) & 1))
+        return encoded
+
+    @classmethod
+    def truncate(Sum, inp):
+        decoded = Sum.Field(0)
+        for (l, b) in enumerate(inp):
+            w = Sum.Field(1 << l)
+            decoded += w * b
+        return [decoded]
+
+    # Instantiate an instace of the `Sum` circuit for inputs in range `[0,
+    # 2^bits)`.
+    @classmethod
+    def with_bits(cls, bits):
+        if 2^bits >= cls.Field.MODULUS:
+            raise Error("bit size exceeds field modulus")
+
+        new_cls = deepcopy(cls)
+        new_cls.GADGET_CALLS = [bits]
+        new_cls.INPUT_LEN = bits
+        return new_cls
+
+
+class Histogram(Valid):
+    # Operational parameters
+    buckets = None # Set by 'Histogram.with_buckets()`
+
+    # Associated types
+    Field = field.Field128
+    Measurement = Unsigned
+
+    # Associated parametrs
+    GADGETS = [PolyEval([0, -1, 1])]
+    GADGET_CALLS = None # Set by `Histogram.with_buckets()`
+    INPUT_LEN = None # Set by `Histogram.with_buckets()`
+    RAND_LEN = 2
+    OUTPUT_LEN = None # Set by `Histogram.with_buckets()`
+
+    def eval(self, inp, joint_rand, num_shares):
+        check_valid_eval(self, inp, joint_rand)
+
+        # Check that each bucket is one or zero.
+        range_check = self.Field(0)
+        r = joint_rand[0]
+        for b in inp:
+            range_check += r * self.GADGETS[0].eval(self.Field, [b])
+            r *= joint_rand[0]
+
+        # Check that the buckets sum to 1.
+        sum_check = -self.Field(1) * self.Field(num_shares).inv()
+        for b in inp:
+            sum_check += b
+
+        out = joint_rand[1]   * range_check + \
+              joint_rand[1]^2 * sum_check
+        return out
+
+    @classmethod
+    def encode(Histogram, measurement):
+        encoded = [Histogram.Field(0) for _ in range(len(Histogram.buckets)+1)]
+        done = False
+        for i in range(len(Histogram.buckets)):
+            if ((i == 0) or \
+                (i > 0 and measurement > Histogram.buckets[i-1])) and \
+                measurement <= Histogram.buckets[i]:
+                encoded[i] = Histogram.Field(1)
+                done = True
+                break
+        if not done:
+            encoded[-1] = Histogram.Field(1)
+        return encoded
+
+    @classmethod
+    def truncate(Histogram, inp):
+        return inp
+
+    # Instantiate an instace of the `Histogram` circuit with the given buckets.
+    @classmethod
+    def with_buckets(cls, buckets):
+        new_cls = deepcopy(cls)
+        new_cls.buckets = buckets
+        new_cls.GADGET_CALLS = [len(buckets) + 1]
+        new_cls.INPUT_LEN = len(buckets) + 1
+        new_cls.OUTPUT_LEN = len(buckets) + 1
+        return new_cls
+
+
 ##
 # TESTS
 #
 
 
 # Test for equivalence of `Gadget.eval()` and `Gadget.eval_poly()`.
-def test_gadget(Gadget, Field, test_length):
+def test_gadget(g, Field, test_length):
     inp_poly = []
     inp = []
     eval_at = Field.rand_vec(1)[0]
-    for _ in range(Gadget.ARITY):
+    for _ in range(g.ARITY):
         inp_poly.append(Field.rand_vec(test_length))
         inp.append(poly_eval(Field, inp_poly[-1], eval_at))
-    out_poly = Gadget.eval_poly(Field, inp_poly)
+    out_poly = g.eval_poly(Field, inp_poly)
 
-    want = Gadget.eval(Field, inp)
+    want = g.eval(Field, inp)
     got = poly_eval(Field, out_poly, eval_at)
     assert got == want
 
@@ -385,6 +541,9 @@ def test_flp_generic(cls, test_cases):
         test_gadget(g, cls.Field, next_power_of_2(g_calls + 1))
 
     for (i, (inp, expected_decision)) in enumerate(test_cases):
+        assert len(inp) == cls.INPUT_LEN
+        assert len(cls.truncate(inp)) == cls.OUTPUT_LEN
+
         # Evaluate validity circuit.
         joint_rand = cls.Field.rand_vec(cls.JOINT_RAND_LEN)
         v = cls.Valid().eval(inp, joint_rand, 1)
@@ -402,5 +561,23 @@ if __name__ == "__main__":
     test_flp_generic(cls, [
         (cls.encode(0), True),
         (cls.encode(1), True),
-        ([field.Field64(1337)], False),
+        ([cls.Field(1337)], False),
+    ])
+
+    test_gadget(PolyEval([0, -23, 1, 3]), field.Field128, 10)
+
+    cls = FlpGeneric.with_valid(Sum.with_bits(10))
+    test_flp_generic(cls, [
+        (cls.encode(0), True),
+        (cls.encode(100), True),
+        (cls.encode(2^10 - 1), True),
+        (cls.Field.rand_vec(10), False),
+    ])
+
+    cls = FlpGeneric.with_valid(Histogram.with_buckets([0, 10, 20]))
+    test_flp_generic(cls, [
+        (cls.encode(0), True),
+        (cls.encode(13), True),
+        (cls.encode(2^10 - 1), True),
+        (cls.Field.rand_vec(4), False),
     ])

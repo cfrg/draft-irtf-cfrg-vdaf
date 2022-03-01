@@ -244,7 +244,9 @@ def test_vdaf(Vdaf, agg_param, measurements, expected_agg_result):
     # The nonces need not be random, but merely non-repeating.
     nonces = [gen_rand(16) for _ in range(len(measurements))]
     agg_result = run_vdaf(Vdaf, agg_param, nonces, measurements)
-    assert agg_result == expected_agg_result
+    if agg_result != expected_agg_result:
+        print("vdaf test failed ({}): unexpected result: got {}; want {}".format(
+            measurements, agg_result, expected_agg_result))
 
 
 if __name__ == "__main__":

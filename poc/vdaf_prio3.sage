@@ -314,9 +314,32 @@ class Prio3(Vdaf):
 # INSTANTIATIONS
 #
 
-Prio3Aes128Count = Prio3 \
-    .with_prg(prg.PrgAes128) \
-    .with_flp(flp_generic.FlpGeneric.with_valid(flp_generic.Count))
+class Prio3Aes128Count(Prio3):
+    Prg = prg.PrgAes128
+    Flp = flp_generic.FlpGeneric.with_valid(flp_generic.Count)
+
+class Prio3Aes128Sum(Prio3):
+    Prg = prg.PrgAes128
+    Flp = None # Set by `Prio3Aes128Sum.with_bits()`
+
+    @classmethod
+    def with_bits(cls, bits: Unsigned):
+        new_cls = deepcopy(cls)
+        new_cls.Flp = flp_generic.FlpGeneric \
+            .with_valid(flp_generic.Sum.with_bits(bits))
+        return new_cls
+
+class Prio3Aes128Histogram(Prio3):
+    Prg = prg.PrgAes128
+    Flp = None # Set by `Prio3Aes128Sum.with_bits()`
+
+    @classmethod
+    def with_buckets(cls, buckets: Vec[Unsigned]):
+        new_cls = deepcopy(cls)
+        new_cls.Flp = flp_generic.FlpGeneric \
+            .with_valid(flp_generic.Histogram.with_buckets(buckets))
+        return new_cls
+
 
 ##
 # TESTS
@@ -339,3 +362,15 @@ if __name__ == "__main__":
 
     cls = Prio3Aes128Count.with_shares(2)
     test_vdaf(cls, None, [0, 1, 1, 0, 1], [3])
+
+    cls = Prio3Aes128Sum.with_shares(5).with_bits(10)
+    test_vdaf(cls, None, [0, 147, 1, 0, 11, 0], [159])
+
+    cls = Prio3Aes128Histogram.with_shares(3).with_buckets([1, 10, 20])
+    test_vdaf(cls, None, [0], [1, 0, 0, 0])
+    test_vdaf(cls, None, [5], [0, 1, 0, 0])
+    test_vdaf(cls, None, [10], [0, 1, 0, 0])
+    test_vdaf(cls, None, [15], [0, 0, 1, 0])
+    test_vdaf(cls, None, [20], [0, 0, 1, 0])
+    test_vdaf(cls, None, [21], [0, 0, 0, 1])
+    test_vdaf(cls, None, [0, 1, 5, 10, 15, 20, 21, 21], [2, 2, 2, 2])
