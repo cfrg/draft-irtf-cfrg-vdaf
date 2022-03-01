@@ -5,6 +5,14 @@ from typing import List, TypeVar
 import struct
 import os
 
+
+# Document version, reved with each new draft.
+#
+# NOTE The CFRG has not yet adopted this spec. Version "vdaf-00" will match
+# draft-irtf-cfrg-vdaf-00.
+VERSION = b"vdaf-00"
+
+
 # Primitive types
 Bool = bool
 Bytes = bytes
