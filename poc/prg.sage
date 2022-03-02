@@ -68,7 +68,7 @@ class PrgAes128(Prg):
 
         # CTR-mode encryption of the all-zero string of the desired
         # length and using a fixed, all-zero IV.
-        counter = Counter.new(128, initial_value=block)
+        counter = Counter.new(int(128), initial_value=block)
         cipher = AES.new(self.key, AES.MODE_CTR, counter=counter)
         stream = cipher.encrypt(zeros(offset + length))
         return stream[-length:]
