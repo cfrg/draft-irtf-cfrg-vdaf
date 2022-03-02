@@ -1,10 +1,18 @@
 # Pseudorandom number generators (PRGs).
 
 from __future__ import annotations
-from Crypto.Cipher import AES
-from Crypto.Hash import CMAC
-from Crypto.Util import Counter
-from Crypto.Util.number import bytes_to_long
+try:
+    # Default: use PyCryptodome installed in its drop-in replacement mode.
+    from Crypto.Cipher import AES
+    from Crypto.Hash import CMAC
+    from Crypto.Util import Counter
+    from Crypto.Util.number import bytes_to_long
+except ImportError:
+    # Fallback: use PyCryptodome installed independently.
+    from Cryptodome.Cipher import AES
+    from Cryptodome.Hash import CMAC
+    from Cryptodome.Util import Counter
+    from Cryptodome.Util.number import bytes_to_long
 from sagelib.common import OS2IP, Bytes, Error, Unsigned, zeros, gen_rand
 
 
