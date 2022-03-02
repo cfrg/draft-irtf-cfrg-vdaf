@@ -6,6 +6,9 @@ import struct
 import os
 
 
+# If set, then a fixed source of randomness is used for `gen_rand()`.
+TEST_VECTOR = True
+
 # Document version, reved with each new draft.
 #
 # NOTE The CFRG has not yet adopted this spec. Version "vdaf-00" will match
@@ -46,6 +49,8 @@ def zeros(length):
 
 # Return the requested number of random bytes.
 def gen_rand(length):
+    if TEST_VECTOR:
+        return bytes([0x01] * length)
     return os.urandom(length)
 
 

@@ -2,9 +2,9 @@
 
 from copy import deepcopy
 from typing import Tuple
-from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, VERSION, Bytes, \
-                           Unsigned, Vec, byte, gen_rand, vec_add, vec_sub, \
-                           xor, zeros
+from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, VERSION, \
+                           TEST_VECTOR, Bytes, Unsigned, Vec, byte, \
+                           gen_rand, vec_add, vec_sub, xor, zeros
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.flp as flp
 import sagelib.flp_generic as flp_generic
@@ -314,6 +314,14 @@ class Prio3(Vdaf):
         new_cls.Flp = Flp
         return new_cls
 
+    @classmethod
+    def test_vector_verify_params(cls, verify_params):
+        test_vec = []
+        for verify_param in verify_params:
+            (j, k_query_init) = verify_param
+            test_vec.append((j, k_query_init.hex()))
+        return test_vec
+
 ##
 # INSTANTIATIONS
 #
@@ -380,15 +388,18 @@ if __name__ == "__main__":
 
     cls = Prio3Aes128Count.with_shares(2)
     test_vdaf(cls, None, [0, 1, 1, 0, 1], [3])
+    test_vdaf(cls, None, [1], [1], print_test_vector=TEST_VECTOR)
 
-    cls = Prio3Aes128Sum.with_shares(5).with_bits(10)
+    cls = Prio3Aes128Sum.with_shares(2).with_bits(8)
     test_vdaf(cls, None, [0, 147, 1, 0, 11, 0], [159])
+    test_vdaf(cls, None, [100], [100], print_test_vector=TEST_VECTOR)
 
-    cls = Prio3Aes128Histogram.with_shares(3).with_buckets([1, 10, 20])
+    cls = Prio3Aes128Histogram.with_shares(2).with_buckets([1, 10, 100])
     test_vdaf(cls, None, [0], [1, 0, 0, 0])
     test_vdaf(cls, None, [5], [0, 1, 0, 0])
     test_vdaf(cls, None, [10], [0, 1, 0, 0])
     test_vdaf(cls, None, [15], [0, 0, 1, 0])
-    test_vdaf(cls, None, [20], [0, 0, 1, 0])
-    test_vdaf(cls, None, [21], [0, 0, 0, 1])
-    test_vdaf(cls, None, [0, 1, 5, 10, 15, 20, 21, 21], [2, 2, 2, 2])
+    test_vdaf(cls, None, [100], [0, 0, 1, 0])
+    test_vdaf(cls, None, [101], [0, 0, 0, 1])
+    test_vdaf(cls, None, [0, 1, 5, 10, 15, 100, 101, 101], [2, 2, 2, 2])
+    test_vdaf(cls, None, [50], [0, 0, 1, 0], print_test_vector=TEST_VECTOR)
