@@ -17,9 +17,6 @@ class Prio3(Vdaf):
     Flp = flp.Flp
     Prg = prg.Prg
 
-    # Parameters provided by a concrete instance of `Prio3`
-    SUITE: Bytes
-
     # Parameters required by `Vdaf`
     ROUNDS = 1
     SHARES = None  # provided by instantiation (a number between `[0, 255)`)
@@ -42,7 +39,7 @@ class Prio3(Vdaf):
     # NOTE This is used to generate {{prio3-eval-input}}.
     @classmethod
     def measurement_to_input_shares(Prio3, _public_param, measurement):
-        dst = VERSION + b" Prio3" + Prio3.SUITE + b" "
+        dst = VERSION + b" prio3"
         inp = Prio3.Flp.encode(measurement)
         k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
@@ -57,7 +54,7 @@ class Prio3(Vdaf):
             helper_input_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_share,
-                dst + b"input share",
+                dst,
                 Prio3.Flp.INPUT_LEN
             )
             leader_input_share = vec_sub(leader_input_share,
@@ -82,13 +79,13 @@ class Prio3(Vdaf):
         prove_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             gen_rand(Prio3.Prg.SEED_SIZE),
-            dst + b"prove rand",
+            dst,
             Prio3.Flp.PROVE_RAND_LEN
         )
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_joint_rand,
-            dst + b"joint rand",
+            dst,
             Prio3.Flp.JOINT_RAND_LEN
         )
         proof = Prio3.Flp.prove(inp, prove_rand, joint_rand)
@@ -100,7 +97,7 @@ class Prio3(Vdaf):
             helper_proof_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_share,
-                dst + b"proof share",
+                dst,
                 Prio3.Flp.PROOF_LEN
             )
             leader_proof_share = vec_sub(leader_proof_share,
@@ -124,7 +121,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
-        dst = VERSION + b" Prio3" + Prio3.SUITE + b" "
+        dst = VERSION + b" prio3"
         (j, k_query_init) = verify_param
 
         (input_share, proof_share, k_blind, k_hint) = \
@@ -137,7 +134,7 @@ class Prio3(Vdaf):
         query_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_query_rand,
-            dst + b"query rand",
+            dst,
             Prio3.Flp.QUERY_RAND_LEN
         )
         joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
@@ -148,7 +145,7 @@ class Prio3(Vdaf):
             joint_rand = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_joint_rand,
-                dst + b"joint rand",
+                dst,
                 Prio3.Flp.JOINT_RAND_LEN
             )
         verifier_share = Prio3.Flp.query(input_share,
@@ -258,12 +255,12 @@ class Prio3(Vdaf):
         k_input_share, encoded = encoded[:l], encoded[l:]
         input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                 k_input_share,
-                                                dst + b"input share",
+                                                dst,
                                                 Prio3.Flp.INPUT_LEN)
         k_proof_share, encoded = encoded[:l], encoded[l:]
         proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                 k_proof_share,
-                                                dst + b"proof share",
+                                                dst,
                                                 Prio3.Flp.PROOF_LEN)
         k_blind, k_hint = None, None
         if Prio3.Flp.JOINT_RAND_LEN > 0:
@@ -327,17 +324,11 @@ class Prio3(Vdaf):
 #
 
 class Prio3Aes128Count(Prio3):
-    # Associated parameters required by `Prio3`
-    SUITE = b"Aes128Count"
-
     # Generic types required by `Prio3`
     Prg = prg.PrgAes128
     Flp = flp_generic.FlpGeneric.with_valid(flp_generic.Count)
 
 class Prio3Aes128Sum(Prio3):
-    # Associated parameters required by `Prio3`
-    SUITE = b"Aes128Sum"
-
     # Generic types required by `Prio3`
     Prg = prg.PrgAes128
     Flp = None # Set by `Prio3Aes128Sum.with_bits()`
@@ -350,9 +341,6 @@ class Prio3Aes128Sum(Prio3):
         return new_cls
 
 class Prio3Aes128Histogram(Prio3):
-    # Associated parameters required by `Prio3`
-    SUITE = b"Aes128Histogram"
-
     # Generic types required by `Prio3`
     Prg = prg.PrgAes128
     Flp = None # Set by `Prio3Aes128Sum.with_bits()`
@@ -374,7 +362,6 @@ if __name__ == "__main__":
         .with_prg(prg.PrgAes128) \
         .with_flp(flp.FlpTestField128) \
         .with_shares(2)
-    cls.SUITE = b"test"
     test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])
 
     # If JOINT_RAND_LEN == 0, then Fiat-Shamir isn't needed and we can skip
@@ -383,7 +370,6 @@ if __name__ == "__main__":
         .with_prg(prg.PrgAes128) \
         .with_flp(flp.FlpTestField128.with_joint_rand_len(0)) \
         .with_shares(2)
-    cls.SUITE = b"test"
     test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])
 
     cls = Prio3Aes128Count.with_shares(2)

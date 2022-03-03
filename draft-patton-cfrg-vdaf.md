@@ -1198,7 +1198,7 @@ leader share and helper share. These are called `encode_leader_share` and
 
 ~~~
 def measurement_to_input_shares(Prio3, _public_param, measurement):
-    dst = b"vdaf-00 Prio3" + Prio3.SUITE + b" "
+    dst = b"vdaf-00 prio3"
     inp = Prio3.Flp.encode(measurement)
     k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
@@ -1213,7 +1213,7 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
         helper_input_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            dst + b"input share",
+            dst,
             Prio3.Flp.INPUT_LEN
         )
         leader_input_share = vec_sub(leader_input_share,
@@ -1239,13 +1239,13 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
     prove_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         gen_rand(Prio3.Prg.SEED_SIZE),
-        dst + b"prove rand",
+        dst,
         Prio3.Flp.PROVE_RAND_LEN
     )
     joint_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_joint_rand,
-        dst + b"joint rand",
+        dst,
         Prio3.Flp.JOINT_RAND_LEN
     )
     proof = Prio3.Flp.prove(inp, prove_rand, joint_rand)
@@ -1257,7 +1257,7 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
         helper_proof_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            dst + b"proof share",
+            dst,
             Prio3.Flp.PROOF_LEN
         )
         leader_proof_share = vec_sub(leader_proof_share,
@@ -1313,7 +1313,7 @@ make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 
 ~~~
 def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
-    dst = b"vdaf-00 Prio3" + Prio3.SUITE + b" "
+    dst = b"vdaf-00 prio3"
     (j, k_query_init) = verify_param
 
     (input_share, proof_share, k_blind, k_hint) = \
@@ -1326,7 +1326,7 @@ def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_query_rand,
-        dst + b"query rand",
+        dst,
         Prio3.Flp.QUERY_RAND_LEN
     )
     joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
@@ -1338,7 +1338,7 @@ def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_joint_rand,
-            dst + b"joint rand",
+            dst,
             Prio3.Flp.JOINT_RAND_LEN
         )
     verifier_share = Prio3.Flp.query(input_share,
@@ -1455,12 +1455,12 @@ def decode_helper_share(Prio3, dst, encoded):
     k_input_share, encoded = encoded[:l], encoded[l:]
     input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                             k_input_share,
-                                            dst + b"input share",
+                                            dst,
                                             Prio3.Flp.INPUT_LEN)
     k_proof_share, encoded = encoded[:l], encoded[l:]
     proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                             k_proof_share,
-                                            dst + b"proof share",
+                                            dst,
                                             Prio3.Flp.PROOF_LEN)
     k_blind, k_hint = None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
