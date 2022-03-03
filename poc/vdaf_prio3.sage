@@ -119,6 +119,9 @@ class Prio3(Vdaf):
             ))
         return input_shares
 
+    # TODO We could shave off a couple of blockcipher calls if, instead of
+    # deriving `k_query_rand`, we use `k_query_init` to derive the query
+    # randomness directly.
     @classmethod
     def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
         dst = VERSION + b" prio3"
