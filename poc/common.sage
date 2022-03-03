@@ -7,7 +7,7 @@ import os
 
 
 # If set, then a fixed source of randomness is used for `gen_rand()`.
-TEST_VECTOR = True
+TEST_VECTOR = False
 
 # Document version, reved with each new draft.
 #

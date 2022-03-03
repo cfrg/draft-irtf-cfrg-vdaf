@@ -19,6 +19,7 @@ class Field:
     GEN_ORDER: Unsigned
 
     def __init__(self, val):
+        assert int(val) < self.MODULUS
         self.val = self.gf(val)
 
     @classmethod
