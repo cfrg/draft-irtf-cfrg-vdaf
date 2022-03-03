@@ -54,7 +54,7 @@ class Prio3(Vdaf):
             helper_input_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_share,
-                dst,
+                dst + byte(j+1),
                 Prio3.Flp.INPUT_LEN
             )
             leader_input_share = vec_sub(leader_input_share,
@@ -97,7 +97,7 @@ class Prio3(Vdaf):
             helper_proof_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_share,
-                dst,
+                dst + byte(j+1),
                 Prio3.Flp.PROOF_LEN
             )
             leader_proof_share = vec_sub(leader_proof_share,
@@ -129,7 +129,7 @@ class Prio3(Vdaf):
 
         (input_share, proof_share, k_blind, k_hint) = \
             Prio3.decode_leader_share(input_share) if j == 0 else \
-            Prio3.decode_helper_share(dst, input_share)
+            Prio3.decode_helper_share(dst, j, input_share)
 
         out_share = Prio3.Flp.truncate(input_share)
 
@@ -253,17 +253,17 @@ class Prio3(Vdaf):
         return encoded
 
     @classmethod
-    def decode_helper_share(Prio3, dst, encoded):
+    def decode_helper_share(Prio3, dst, j, encoded):
         l = Prio3.Prg.SEED_SIZE
         k_input_share, encoded = encoded[:l], encoded[l:]
         input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                 k_input_share,
-                                                dst,
+                                                dst + byte(j),
                                                 Prio3.Flp.INPUT_LEN)
         k_proof_share, encoded = encoded[:l], encoded[l:]
         proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                 k_proof_share,
-                                                dst,
+                                                dst + byte(j),
                                                 Prio3.Flp.PROOF_LEN)
         k_blind, k_hint = None, None
         if Prio3.Flp.JOINT_RAND_LEN > 0:

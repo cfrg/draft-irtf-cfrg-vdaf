@@ -195,7 +195,7 @@ def run_vdaf(Vdaf,
 
     if print_test_vector:
         print("---- {} -----------------------------".format(Vdaf))
-        print(json.dumps(test_vector, indent=2))
+        print(json.dumps(test_vector, indent=4))
         print()
     return agg_result
 

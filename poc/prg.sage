@@ -128,5 +128,5 @@ if __name__ == "__main__":
                 cls.expand_into_vec(Field128, seed, info, length)).hex()
 
         print("--- {} ({}) ----------------------------".format(cls, Field128))
-        print(json.dumps(test_vector, indent=2))
+        print(json.dumps(test_vector, indent=4))
         print()
