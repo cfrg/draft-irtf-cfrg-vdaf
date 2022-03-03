@@ -60,14 +60,14 @@ class Prio3(Vdaf):
             leader_input_share = vec_sub(leader_input_share,
                                          helper_input_share)
             encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
-            k_hint = Prio3.Prg.derive(k_blind, byte(j+1) + encoded)
+            k_hint = Prio3.Prg.derive_seed(k_blind, byte(j+1) + encoded)
             k_joint_rand = xor(k_joint_rand, k_hint)
             k_helper_input_shares.append(k_share)
             k_helper_blinds.append(k_blind)
             k_helper_hints.append(k_hint)
         k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
         encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
-        k_leader_hint = Prio3.Prg.derive(k_leader_blind, byte(0) + encoded)
+        k_leader_hint = Prio3.Prg.derive_seed(k_leader_blind, byte(0) + encoded)
         k_joint_rand = xor(k_joint_rand, k_leader_hint)
 
         # Finish joint randomness hints.
@@ -133,7 +133,7 @@ class Prio3(Vdaf):
 
         out_share = Prio3.Flp.truncate(input_share)
 
-        k_query_rand = Prio3.Prg.derive(k_query_init, byte(255) + nonce)
+        k_query_rand = Prio3.Prg.derive_seed(k_query_init, byte(255) + nonce)
         query_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_query_rand,
@@ -143,7 +143,7 @@ class Prio3(Vdaf):
         joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             encoded = Prio3.Flp.Field.encode_vec(input_share)
-            k_joint_rand_share = Prio3.Prg.derive(k_blind, byte(j) + encoded)
+            k_joint_rand_share = Prio3.Prg.derive_seed(k_blind, byte(j) + encoded)
             k_joint_rand = xor(k_hint, k_joint_rand_share)
             joint_rand = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,

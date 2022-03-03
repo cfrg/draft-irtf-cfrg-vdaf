@@ -864,10 +864,10 @@ The tables below define finite fields used in the remainder of this document.
 
 | Parameter       | Value   |
 |:----------------|:--------|
-| MODULUS         | 2^64 * 4611686018427387751 + 1 |
+| MODULUS         | 2^66 * 4611686018427387897 + 1 |
 | ENCODED_SIZE    | 16 |
-| Generotor       | 3^4611686018427387751 |
-| GEN_ORDER       | 2^64 |
+| Generotor       | 7^4611686018427387897 |
+| GEN_ORDER       | 2^66 |
 {: #field128 title="Field128, an FFT-friendly field."}
 
 ## Pseudorandom Generators {#prg}
@@ -901,7 +901,7 @@ pseudorandom field elements. For each method, the seed MUST be of length
 
 ~~~
 # Derive a new seed.
-def derive(Prg, seed: Bytes, info: Bytes) -> bytes:
+def derive_seed(Prg, seed: Bytes, info: Bytes) -> bytes:
     prg = Prg(seed, info)
     return prg.next(Prg.SEED_SIZE)
 
@@ -910,10 +910,12 @@ def expand_into_vec(Prg, Field,
                     seed: Bytes,
                     info: Bytes,
                     length: Unsigned) -> Vec[Field]:
+    m = next_power_of_2(Field.MODULUS) - 1
     prg = Prg(seed, info)
     vec = []
     while len(vec) < length:
         x = OS2IP(prg.next(Field.ENCODED_SIZE))
+        x &= m
         if x < Field.MODULUS:
             vec.append(Field(x))
     return vec
@@ -1219,15 +1221,15 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
         leader_input_share = vec_sub(leader_input_share,
                                      helper_input_share)
         encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
-        k_hint = Prio3.Prg.derive(k_blind, byte(j+1) + encoded)
+        k_hint = Prio3.Prg.derive_seed(k_blind, byte(j+1) + encoded)
         k_joint_rand = xor(k_joint_rand, k_hint)
         k_helper_input_shares.append(k_share)
         k_helper_blinds.append(k_blind)
         k_helper_hints.append(k_hint)
     k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
     encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
-    k_leader_hint = Prio3.Prg.derive(k_leader_blind,
-                                     byte(0) + encoded)
+    k_leader_hint = Prio3.Prg.derive_seed(k_leader_blind,
+                                          byte(0) + encoded)
     k_joint_rand = xor(k_joint_rand, k_leader_hint)
 
     # Finish joint randomness hints.
@@ -1322,7 +1324,7 @@ def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
 
     out_share = Prio3.Flp.truncate(input_share)
 
-    k_query_rand = Prio3.Prg.derive(k_query_init, byte(255) + nonce)
+    k_query_rand = Prio3.Prg.derive_seed(k_query_init, byte(255) + nonce)
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_query_rand,
@@ -1332,8 +1334,8 @@ def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
     joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded = Prio3.Flp.Field.encode_vec(input_share)
-        k_joint_rand_share = Prio3.Prg.derive(k_blind,
-                                              byte(j) + encoded)
+        k_joint_rand_share = Prio3.Prg.derive_seed(k_blind,
+                                                   byte(j) + encoded)
         k_joint_rand = xor(k_hint, k_joint_rand_share)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,

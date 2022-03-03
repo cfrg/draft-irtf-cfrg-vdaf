@@ -119,8 +119,8 @@ class Field96(Field):
 
 # The finite field GF(2^64 * 4611686018427387751 + 1).
 class Field128(Field):
-    MODULUS = 2^64 * 4611686018427387751 + 1
-    GEN_ORDER = 2^64
+    MODULUS = 2^66 * 4611686018427387897 + 1
+    GEN_ORDER = 2^66
     ENCODED_SIZE = 16
 
     # Operational parameters
@@ -128,7 +128,7 @@ class Field128(Field):
 
     @classmethod
     def gen(cls):
-        return cls(3)^4611686018427387751
+        return cls(7)^(4611686018427387897)
 
 
 ##
