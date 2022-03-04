@@ -36,7 +36,6 @@ class Prio3(Vdaf):
         verify_param = [(j, k_query_init) for j in range(Prio3.SHARES)]
         return (None, verify_param)
 
-    # NOTE This is used to generate {{prio3-eval-input}}.
     @classmethod
     def measurement_to_input_shares(Prio3, _public_param, measurement):
         dst = VERSION + b" prio3"

@@ -159,10 +159,10 @@ aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.
 
 Most prior approaches to this problem fall under the rubric of "differential
-privacy (DP)" [Dwo06]. Roughly speaking, a data aggregation system that is
+privacy (DP)" {{Dwo06}}. Roughly speaking, a data aggregation system that is
 differentially private ensures that the degree to which any individual
-measurement influences the value of the aggregated output can be precisely
-controlled. For example, in systems like RAPPOR [EPK14], each user samples
+measurement influences the value of the aggregate result can be precisely
+controlled. For example, in systems like RAPPOR {{EPK14}}, each user samples
 noise from a well-known distribution and adds it to their input before
 submitting to the aggregation server. The aggregation server then adds up the
 noisy inputs, and because it knows the distribution from whence the noise was
@@ -195,11 +195,11 @@ The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
 undermine the VDAF's privacy guarantees.  Recent implementation experience has
 shown that practical challenges of coordinating multiple servers can be
-overcome.  The Prio system [CGB17] (essentially a VDAF) has been deployed in
+overcome.  The Prio system {{CGB17}} (essentially a VDAF) has been deployed in
 systems supporting hundreds of millions of users: The Mozilla Origin Telemetry
-project [OriginTelemetry] and the Exposure Notification Private Analytics
+project {{OriginTelemetry}} and the Exposure Notification Private Analytics
 collaboration among the Internet Security Research Group (ISRG), Google, Apple,
-and others [ENPA].
+and others {{ENPA}}.
 
 The VDAF abstraction laid out in {{vdaf}} represents a class of multi-party
 protocols for privacy-preserving measurement proposed in the literature. These
@@ -211,8 +211,8 @@ subtle but consequential ways. This document therefore has two important goals:
     documenting relevant operational and security bounds for that interface:
 
     1. General patterns of communications among the various actors involved in
-       the system (clients, aggregators, and measurement collectors);
-    1. Capabilities of a malicious coalition of servers attempting divulge
+       the system (clients, aggregation servers, and measurement collectors);
+    1. Capabilities of a malicious coalition of servers attempting to divulge
        information about client inputs; and
     1. Conditions that are necessary to ensure that malicious clients cannot
        corrupt the computation.
@@ -223,43 +223,43 @@ subtle but consequential ways. This document therefore has two important goals:
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
 
-* The aforementioned Prio system [CGB17] allows for the privacy-preserving
+* The aforementioned Prio system {{CGB17}} allows for the privacy-preserving
   computation of a variety aggregate statistics. The basic idea underlying Prio
   is fairly simple:
   1. Each client shards its input into a sequence of additive shares and
      distributes the shares among the aggregation servers.
   1. Next, each server adds up its shares locally, resulting in an additive
      share of the aggregate.
-  1. Finally, the aggregators combine their additive shares to obtain the final
-     aggregate.
+  1. Finally, the aggregation servers combine their additive shares to obtain
+     the final aggregate.
 
   The difficult part of this system is ensuring that the servers hold shares of
   a valid input, e.g., the input is an integer in a specific range. Thus Prio
   specifies a multi-party protocol for accomplishing this task.
 
-  In {{prio3}} we describe `prio3`, a VDAF that follows the same overall
-  framework as the original Prio protocol, but incorporates techniques
-  introduced in [BBCGGI19] that result in significant performance gains.
+  In {{prio3}} we describe Prio3, a VDAF that follows the same overall framework
+  as the original Prio protocol, but incorporates techniques introduced in
+  {{BBCGGI19}} that result in significant performance gains.
 
-* More recently, Boneh et al. [BBCGGI21] described a protocol called Poplar for
-  solving the `t`-heavy-hitters problem in a privacy-preserving manner. Here
+* More recently, Boneh et al. {{BBCGGI21}} described a protocol called Poplar
+  for solving the `t`-heavy-hitters problem in a privacy-preserving manner. Here
   each client holds a bit-string of length `n`, and the goal of the aggregation
   servers is to compute the set of inputs that occur at least `t` times. The
   core primitive used in their protocol is a generalization of a Distributed
-  Point Function (DPF) [GI14] that allows the servers to "query" their DPF
+  Point Function (DPF) {{GI14}} that allows the servers to "query" their DPF
   shares on any bit-string of length shorter than or equal to `n`. As a result
   of this query, each of the servers has an additive share of a bit indicating
   whether the string is a prefix of the client's input. The protocol also
   specifies a multi-party computation for verifying that at most one string
   among a set of candidates is a prefix of the client's input.
 
-  In {{poplar1}} we describe a VDAF called `poplar1` that implements this
+  In {{poplar1}} we describe a VDAF called Poplar1 that implements this
   functionality.
 
 The remainder of this document is organized as follows: {{overview}} gives a
 brief overview of VDAFs; {{vdaf}} defines the syntax for VDAFs; {{prelim}}
 defines various functionalities that are common to our constructions; {{poplar1}}
-describes the `poplar1` construction; {{prio3}} describes the `prio3` construction;
+describes the Poplar1 construction; {{prio3}} describes the Prio3 construction;
 and {{security}} enumerates the security considerations for VDAFs.
 
 # Conventions and Definitions
@@ -267,10 +267,9 @@ and {{security}} enumerates the security considerations for VDAFs.
 {::boilerplate bcp14-tagged}
 
 Algorithms in this document are written in Python 3. Type hints are used to
-define input and output types. Function parameters without type hints implicitly
-have type `Bytes`, an arbitrary byte string. A fatal error in a program (e.g.,
-failure to parse one of the function parameters) is usually handled by raising
-an exception.
+define input and output types. A fatal error in a program (e.g., failure to
+parse one of the function parameters) is usually handled by raising an
+exception.
 
 Some common functionalities:
 
@@ -294,25 +293,6 @@ Some common functionalities:
   greater than or equal to `n` that is also a power of two.
 
 # Overview
-
-In a VDAF-based private measurement system, we distinguish three types of
-actors: Clients, Aggregators, and Collectors.  The overall flow of the
-measurement process is as follows:
-
-* Clients are configured with public parameters for a set of aggregators.
-* To submit an individual measurement, a client shards the measurement into
-  "input shares" and sends one input share to each Aggregator.
-* The aggregators verify the validity of the input shares, producing a set of
-  "output shares".
-    * Output shares are in one-to-one correspondence with the input shares.
-    * Just as each Aggregator receives one input share of each input, at the end
-      of the validation process, each aggregator holds one output share.
-    * In most VDAFs, aggregators will need to exchange information among
-      themselves as part of the validation process.
-* Each aggregator combine the output shares across inputs in the batch to
-  compute "aggregate shares", i.e., shares of the desired aggregate result.
-* The aggregators submit their aggregate shares to the collector, who combines
-  them to obtain the aggregate result over the batch.
 
 ~~~
                  +--------------+
@@ -339,11 +319,31 @@ measurement process is as follows:
 ~~~
 {: #overall-flow title="Overall data flow of a VDAF"}
 
+In a VDAF-based private measurement system, we distinguish three types of
+actors: Clients, Aggregators, and Collectors.  The overall flow of the
+measurement process is as follows:
+
+* Clients are configured with public parameters for a set of Aggregators.
+* To submit an individual measurement, the Client shards the measurement into
+  "input shares" and sends one input share to each Aggregator.
+* The Aggregators verify the validity of the input shares, producing a set of
+  "output shares".
+    * Output shares are in one-to-one correspondence with the input shares.
+    * Just as each Aggregator receives one input share of each input, at the end
+      of the validation process, each aggregator holds one output share.
+    * In most VDAFs, Aggregators will need to exchange information among
+      themselves as part of the validation process.
+* Each Aggregator combines the output shares across inputs in the batch to
+  compute the "aggregate share" for that batch, i.e., its share of the desired
+  aggregate result.
+* The Aggregators submit their aggregate shares to the Collector, who combines
+  them to obtain the aggregate result over the batch.
+
 Aggregators are a new class of actor relative to traditional measurement systems
 where clients submit measurements to a single server.  They are critical for
 both the privacy properties of the system and the correctness of the
 measurements obtained.  The privacy properties of the system are assured by
-non-collusion among aggregators, and aggregators are the entities that perform
+non-collusion among Aggregators, and Aggregators are the entities that perform
 validation of client inputs.  Thus clients trust Aggregators not to collude
 (typically it is required that at least one Aggregator is honest), and
 Collectors trust Aggregators to properly verify Client inputs.
@@ -367,7 +367,7 @@ these algorithms as they would be exposed to applications.
 
 The overall execution of a VDAF comprises the following steps:
 
-* Setup - Generating shared parameters for the aggregators
+* Setup - Generating shared parameters for the Aggregators
 * Sharding - Computing input shares from an individual measurement
 * Preparation - Conversion and verification of input shares to output shares
   compatible with the aggregation function being computed
@@ -385,7 +385,7 @@ compatible with the aggregation function.  Verification ensures that aggregating
 the recovered output shares will not lead to a garbled aggregate result.
 
 <!--
-For some VDAFs, like `prio3` ({{prio3}}) or `poplar1` ({{poplar1}}), the output shares
+For some VDAFs, like Prio3 ({{prio3}}) or Poplar1 ({{poplar1}}), the output shares
 are recovered first, then validated. For other protocols, like Prio+ [AGJOP21],
 there is no explicit verification step.
 -->
@@ -427,10 +427,9 @@ generated by the following algorithm:
 
 ## Sharding {#sec-vdaf-shard}
 
-In order to protect the privacy of its measurements, a VDAF client splits its
+In order to protect the privacy of its measurements, a VDAF Client splits its
 measurements into "input shares".  The `measurement_to_input_shares` method is
-executed by the client to produce these shares.  One share is sent to each
-aggregator.
+used for this purpose.
 
 * `Vdaf.measurement_to_input_shares(public_param: PublicParam, input:
   Measurement) -> Vec[Bytes]` is the randomized input-distribution algorithm run
@@ -463,22 +462,22 @@ and distributes them to the Aggregators."}
 > `verify_param` for such a scheme, it would be necessary to also update the
 > `public_param` with which the clients are configured. For PPM it would be nice
 > if we could rotate the `verify_param` without also having to update the
-> clients. We should consider dropping this at some point.
+> clients. We should consider dropping this at some point. See
+> https://github.com/cjpatton/vdaf/issues/19.
 
 ## Preparation {#sec-vdaf-prepare}
 
 To recover and verify output shares, the Aggregators interact with one another
 over `ROUNDS` rounds. Prior to each round, each Aggregator constructs an
-outbound message. Next, the sequence of outbound messages produced by the
-Aggregators is combined into a single message, called a "preparation message".
-(Each of the outbound messages are called "preparation-message shares".)
-Finally, the preparation message is distributed to the Aggregators to begin the
-next round.
+outbound message. Next, the sequence of outbound messages is combined into a
+single message, called a "preparation message". (Each of the outbound messages
+are called "preparation-message shares".) Finally, the preparation message is
+distributed to the Aggregators to begin the next round.
 
-An aggregator begins the first round with its input share and it begins each
-subsequent round with the previous preparation message. The aggregator's output
-in the last round is its output share and its output in each of the preceding
-rounds is a preparation-message share.
+An Aggregator begins the first round with its input share and it begins each
+subsequent round with the previous preparation message. Its output in the last
+round is its output share and its output in each of the preceding rounds is a
+preparation-message share.
 
 This process involves a value called the "aggregation parameter" used to map the
 input shares to output shares. The Aggregators need to agree on this parameter
@@ -528,10 +527,10 @@ class methods:
 * `Vdaf.prep_init(verify_param: VerifyParam, agg_param: AggParam, nonce: Bytes,
   input_share: Bytes) -> Prep` is the deterministic preparation-state
   initialization algorithm run by each Aggregator to begin processing its input
-  share into an output share. Its inputs are the aggregator's verification
-  parameter (`verify_param`), the aggregation parameter (`agg_param`), the nonce
-  provided by the environment (`nonce`, see {{run-vdaf}}), and one of the input
-  shares generated by the client (`input_share`). Its output is the Aggregator's
+  share into an output share. Its inputs are its verification parameter
+  (`verify_param`), the aggregation parameter (`agg_param`), the nonce provided
+  by the environment (`nonce`, see {{run-vdaf}}), and one of the input shares
+  generated by the client (`input_share`). Its output is the Aggregator's
   initial preparation state.
 
 * `Vdaf.prep_next(prep: Prep, inbound: Optional[Bytes]) -> Union[Tuple[Prep,
@@ -544,9 +543,10 @@ class methods:
   `None`.
 
 * `Vdaf.prep_shares_to_prep(agg_param: AggParam, prep_shares: Vec[Bytes]) ->
-  Bytes` is the deterministic preparation-message preprocessing algorithm. It
+  Bytes` is the deterministic preparation-message pre-processing algorithm. It
   combines the preparation-message shares generated by the Aggregators in the
-  previous round into the preparation message consumed by each in the next round.
+  previous round into the preparation message consumed by each in the next
+  round.
 
 In effect, each Aggregator moves through a linear state machine with `ROUNDS+1`
 states.  The Aggregator enters the first state on using the initialization
@@ -558,20 +558,19 @@ defines the state of the Aggregator after each round.
 > syntax. Given that Python 3 is used as our pseudocode, it's easier to specify
 > the preparation state using a class.
 
-The preparation-state update accomplishes two tasks that are essential to most
-schemes: recovery of output shares from the input shares, and a multi-party
-computation carried out by the Aggregators to ensure that their output shares
-are valid. The VDAF abstraction boundary is drawn so that an Aggregator only
-recovers an output share if it is deemed valid (at least, based on the
-Aggregator's view of the protocol). Another way to draw this boundary would be
-to have the Aggregators recover output shares first, then verify that they are
-valid. However, this would allow the possibility of misusing the API by, say,
-aggregating an invalid output share. Moreover, in protocols like Prio+
-{{AGJOP21}} based on oblivious transfer, it is necessary for the Aggregators to
-interact in order to recover output shares at all.
+The preparation-state update accomplishes two tasks: recovery of output shares
+from the input shares and enusring that the recovered output shares are valid.
+The abstraction boundary is drawn so that an Aggregator only recovers an output
+share if it is deemed valid (at least, based on the Aggregator's view of the
+protocol). Another way to draw this boundary would be to have the Aggregators
+recover output shares first, then verify that they are valid. However, this
+would allow the possibility of misusing the API by, say, aggregating an invalid
+output share. Moreover, in protocols like Prio+ {{AGJOP21}} based on oblivious
+transfer, it is necessary for the Aggregators to interact in order to recover
+aggregatable output shares at all.
 
-Note that it is possible for a VDAF to specify `ROUNDS == 0`, in which case
-each Aggregator runs the preparation-state update algorithm once and immediately
+Note that it is possible for a VDAF to specify `ROUNDS == 0`, in which case each
+Aggregator runs the preparation-state update algorithm once and immediately
 recovers its output share without interacting with the other Aggregators.
 However, most, if not all, constructions will require some amount of interaction
 in order to ensure validity of the output shares (while also maintaining
@@ -582,9 +581,9 @@ privacy).
 
 ## Aggregation {#sec-vdaf-aggregate}
 
-Once an Aggregator holds validated output shares for a batch of measurements
-(where batches are defined by the application), it combines them into a share of
-the desired aggregate result.  This algorithm is performed locally at each
+Once an Aggregator holds output shares for a batch of measurements (where
+batches are defined by the application), it combines them into a share of the
+desired aggregate result.  This algorithm is performed locally at each
 Aggregator, without communication with the other Aggregators.
 
 * `Vdaf.out_shares_to_agg_share(agg_param: AggParam, output_shares:
@@ -624,10 +623,10 @@ After the Aggregators have aggregated a sufficient number of output shares, each
 sends its aggregate share to the Collector, who runs the following algorithm to
 recover the following output:
 
-* `Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares:
-  Vec[AggShare]) -> AggResult` is run by the Collector in order to compute the
-  aggregate result from the Aggregators' shares. The length of `agg_shares` MUST
-  be `SHARES`. This algorithm is deterministic.
+* `Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[AggShare]) ->
+  AggResult` is run by the Collector in order to compute the aggregate result
+  from the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
+  This algorithm is deterministic.
 
 ~~~~
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
@@ -670,6 +669,7 @@ def run_vdaf(Vdaf,
 
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
+
         # Each Client shards its input into shares.
         input_shares = Vdaf.measurement_to_input_shares(public_param,
                                                         measurement)
@@ -692,17 +692,17 @@ def run_vdaf(Vdaf,
                 if i < Vdaf.ROUNDS:
                     (prep_states[j], out) = out
                 outbound.append(out)
-            # This is where we would send messages over the network
-            # in a distributed VDAF computation.
+            # This is where we would send messages over the
+            # network in a distributed VDAF computation.
             if i < Vdaf.ROUNDS:
                 inbound = Vdaf.prep_shares_to_prep(agg_param,
                                                    outbound)
 
-        # The final outputs of prepare phase are the output shares.
+        # The final outputs of prepare phasre are the output shares.
         out_shares.append(outbound)
 
-    # Each Aggregator aggregates its output shares into an aggregate
-    # share.
+    # Each Aggregator aggregates its output shares into an
+    # aggregate share.
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
@@ -711,16 +711,16 @@ def run_vdaf(Vdaf,
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate.
-    return Vdaf.agg_shares_to_result(agg_param, agg_shares)
+    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares)
+    return agg_result
 ~~~
 {: #run-vdaf title="Execution of a VDAF."}
 
 The inputs to this algorithm are the aggregation parameter `agg_param`, a list
 of nonces `nonces`, and a batch of Client inputs `input_batch`. The aggregation
 parameter is chosen by the Aggregators prior to executing the VDAF. This
-document does not specify how the nonces are chosen, but some of our security
-considerations require that the nonces be unique for each VDAF evaluation. See
-{{security}} for details.
+document does not specify how the nonces are chosen, but security requires that
+the nonces be unique for each measurement. See {{security}} for details.
 
 Another important question this document leaves out of scope is how a VDAF is to
 be executed by Aggregators distributed over a real network. Algorithm `run_vdaf`
@@ -757,7 +757,7 @@ this document.
 
 ## Finite Fields {#field}
 
-Both `prio3` and `poplar1` use finite fields of prime order. Finite field
+Both Prio3 and Poplar1 use finite fields of prime order. Finite field
 elements are represented by a class `Field` with the following associated
 parameters:
 
@@ -793,27 +793,27 @@ a vector of field elements as a byte string and another for decoding a vector of
 field elements.
 
 ~~~
-def encode_vec(Field, vec: Vec[Field]) -> Bytes:
+def encode_vec(cls, data: Vec[Field]) -> Bytes:
     encoded = Bytes()
-    for x in vec:
-        encoded += I2OSP(x.as_unsigned(), Field.ENCODED_SIZE)
+    for x in data:
+        encoded += I2OSP(x.as_unsigned(), cls.ENCODED_SIZE)
     return encoded
 
-def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
-    L = Field.ENCODED_SIZE
-    if len(encoded) % L != 0:
+def decode_vec(cls, encoded: Bytes) -> Vec[Field]:
+    L = cls.ENCODED_SIZE
+    if len(encoded) % cls.ENCODED_SIZE != 0:
         raise ERR_DECODE
 
     vec = []
     for i in range(0, len(encoded), L):
         encoded_x = encoded[i:i+L]
-        x = Field(OS2IP(encoded_x))
+        x = cls(OS2IP(encoded_x))
         vec.append(x)
     return vec
 ~~~
 {: #field-derived-methods title="Derived class methods for finite fields."}
 
-### Helper Functions
+### Auxliliary Functions
 
 The following auxiliary functions on vectors of field elements are used in the
 remainder of this document. Note that an exception is raised by each function if
@@ -825,11 +825,11 @@ def inner_product(left: Vec[Field], right: Vec[Field]) -> Field:
     return sum(map(lambda x: x[0] * x[1], zip(left, right)))
 
 # Subtract the right operand from the left and return the result.
-def vec_sub(left, right):
+def vec_sub(left: Vec[Field], right: Vec[Field]):
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
 # Add the right operand to the left and return the result.
-def vec_add(left, right):
+def vec_add(left: Vec[Field], right: Vec[Field]):
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
 ~~~
 {: #field-helper-functions title="Common functions for finite fields."}
@@ -840,7 +840,7 @@ Some VDAFs require fields that are suitable for efficient computation of the
 discrete Fourier transform. (One example is prio3 ({{prio3}}) when instantiated
 with the generic FLP of {{flp-generic-construction}}.) Specifically, a field is
 said to be "FFT-friendly" if, in addition to satisfying the interface described
-in {{field}}, implements the following method:
+in {{field}}, it implements the following method:
 
 * `Field.gen() -> Field` returns the generator of a large subgroup of the
   multiplicative group.
@@ -879,19 +879,17 @@ described in {{prg-constructions}}.
 
 PRGs are defined by a class `Prg` with the follwing associated parameter:
 
-* `SEED_SIZE: Unsigned` is the size of the input seed.
+* `SEED_SIZE: Unsigned` is the size (in bytes) of a seed.
 
 A concrete `Prg` implements the following class method:
 
-* `Prg(seed: Bytes, info: Bytes, length: Unsigned)` constructs an instance of
-  `Prg` from the given seed and info string. The seed MUST be of length
-  `SEED_SIZE` and MUST be generated securely (i.e., it is either the output of
-  `gen_rand` or a previous invocation of the PRG). The info string is used for
-  domain separation.
+* `Prg(seed: Bytes, info: Bytes)` constructs an instance of `Prg` from the given
+  seed and info string. The seed MUST be of length `SEED_SIZE` and MUST be
+  generated securely (i.e., it is either the output of `gen_rand` or a previous
+  invocation of the PRG). The info string is used for domain separation.
 
-* `prg.next(length: Unsigned)` returns the next `length` bytes of output of the
-  PRG. If the seed was securely generated, the output can be treated as
-  pseudorandom.
+* `prg.next(length: Unsigned)` returns the next `length` bytes of output of PRG.
+  If the seed was securely generated, the output can be treated as pseudorandom.
 
 Each `Prg` has two derived class methods. The first is used to derive a fresh
 seed from an existing one. The second is used to compute a sequence of
@@ -906,10 +904,11 @@ def derive_seed(Prg, seed: Bytes, info: Bytes) -> bytes:
     return prg.next(Prg.SEED_SIZE)
 
 # Expand a seed into a vector of Field elements.
-def expand_into_vec(Prg, Field,
+def expand_into_vec(Prg,
+                    Field,
                     seed: Bytes,
                     info: Bytes,
-                    length: Unsigned) -> Vec[Field]:
+                    length: Unsigned):
     m = next_power_of_2(Field.MODULUS) - 1
     prg = Prg(seed, info)
     vec = []
@@ -930,8 +929,8 @@ def expand_into_vec(Prg, Field,
 > performant (https://eprint.iacr.org/2019/074.pdf). See
 > https://github.com/cjpatton/vdaf/issues/32 for details.
 
-Our first construction, `PrgBlockCipher(Aes128)`, converts a blockcipher, namely
-AES-128, into a PRG. Seed expansion involves two steps. In the first step, CMAC
+Our first construction, `PrgAes128`, converts a blockcipher, namely AES-128,
+into a PRG. Seed expansion involves two steps. In the first step, CMAC
 {{!RFC4493}} is applied to the seed and info string to get a fresh key. In the
 second step, the fresh key is used in CTR-mode to produce a key stream for
 generating the output. A fixed initialization vector (IV) is used.
@@ -957,75 +956,73 @@ class PrgAes128:
 ~~~
 {: #prg-aes128 title="Definition of PRG PrgBlockCipher(Aes128)."}
 
-# prio3 {#prio3}
+# Prio3 {#prio3}
 
-> NOTE This construction has not undergone significant security analysis.\
+> NOTE This construction has not undergone significant security analysis.
 
-This section describes a VDAF suitable for the following data aggregation task.
-Each Client measurement is encoded as a vector over a finite field, and the
-aggregate is computed by summing the vectors element-wise. Validity is defined
-by an arithmetic circuit `C` that takes as input a vector of field elements `x`:
-if `C(x) == 0`, then we say that `x` is valid; otherwise, we say that `x` is
-invalid. We call `C` the "validity circuit". A number of useful measurement
-types can be defined this way:
+This section describes "Prio3", a VDAF for Prio {{CGB17}}. Prio is suitable for
+a wide variety of aggregation functions, including (but not limited to) sum,
+mean, standard deviation, estimation of quantiles (e.g., median), and linear
+regression. In fact, the scheme described in this section is compatible with any
+aggregation function that has the following structure:
 
-* Simples statistics, like sum, average, and standard deviation;
-* Estimation of quantiles, via a histogram; and
-* Linear regression.
+* Each measurement is encoded as a vector over some finite field.
+* Input validity is determined by an arithmetic circuit evaluated over the
+  encoded input. (An "arithmetic circuit" is a function comprised of arithmetic
+  operations in the field.) The circuit's output is a single field element: if
+  zero, then the input is said to be "valid"; otherwise, if the output is
+  non-zero, then the input is said to "invalid".
+* The aggregate result is obtained by summing up the encoded input vectors and
+  computing some function of the sum.
+
+At a high level, Prio3 distributes this computation as follows. Each Client
+first shards its measurment by first encoding it, then splitting the vector into
+secret shares and sending a share to each Aggregator. Next, in the preparation
+phase, the Aggregators carry out a multi-party computation to determine if their
+shares correspond to a valid input (as determined by the arithmetic circuit).
+This computation involves a "proof" of validity genarated by the Client. Next,
+each Aggregator sums up its input shares locally. Finally, the Collector sums up
+the aggregate shares and computes the aggregate result.
 
 This VDAF does not have an aggregation parameter. Instead, the output share is
-derived from an input share by applying a fixed map. See {{poplar1}} for an
+derived from the input share by applying a fixed map. See {{poplar1}} for an
 example of a VDAF that makes meaningful use of the aggregation parameter.
 
-While the construction is derived from the original Prio system {{CGB17}},
-`prio3` takes advantage of optimizations described later in {{BBCGGI19}} that
-improve communication complexity significantly. The etymology of the term
-`prio3` is that it descends from the original Prio construction. A second
-iteration was deployed in the {{ENPA}} system, and like the VDAF described here,
-the ENPA system was built from techniques introduced by {{BBCGGI19}}. However,
-that system was specialized for a particular measurement type. The goal of
-`prio3` is to provide the same level of generality as the original system.
+As the name implies, "Prio3" is a descendant of the original Prio construction.
+A second iteration was deployed in the {{ENPA}} system, and like the VDAF
+described here, the ENPA system was built from techniques introduced in
+{{BBCGGI19}} that significiantly improve communication cost. That system was
+specialized for a particular aggregation function; the goal of Prio3 is to
+provide the same level of generality as the original construction.
 
-The way `prio3` ensures privacy is quite simple: the Client shards its encoded
-input vector `x` into a number of additive secret shares, one for each
-Aggregator. Each Aggregator sums up its vector shares locally, and once enough
-shares have been aggregated, sends its share of the result to the Collector, who
-recovers the aggregate result by adding up the vectors.
+The core component of Prio3 is a "Fully Linear Proof (FLP)" system. Introduced
+by {{BBCGGI19}}, the FLP encapsulates the functionality required for encoding
+and validating inputs. Prio3 can be thought of as a transformation of a
+particular class of FLPs into a VDAF.
 
-The main problem that needs to be solved is to verify that the additive shares
-generated by the Client add up to a valid input `x`, i.e., that `C(x)=0`. The
-solution devised by {{BBCGGI19}} uses what they call a zero-knowledge proof
-system on distributed data. Viewing the Client as the prover and the Aggregators
-as the (distributed) verifier, the goal is to devise a protocol by which the
-Client convinces the Aggregators that they hold secret shares of a valid input,
-without revealing the input itself.
-
-The core tool for accomplishing this task is a refinement of Probabilistically
-Checkable Proof (PCP) systems called a Fully Linear Proof (FLP) system.  We
-describe FLPs in detail below. Briefly, the Client generates a "proof" of its
-input's validity and distributes additive shares of the proof among the
-Aggregators. Each Aggregator then performs a computation on its input share and
-proof share locally and sends the result to the other Aggregators. Combining the
-exchanged messages allows each Aggregator to decide if it holds a share of a
-valid input.
-
-`prio3` can be viewed as a transformation of a particular class of FLP systems
-into a VDAF. The next section specified the syntax of suitable FLPs in detail;
-the transformation is given in {{prio3-construction}}. A general-purpose FLP
-suitable for any validity circuit is specified in section {{flp-generic}}.
-Finally, a variety of concrete instantiations of `prio3` are specified in
+The remainder of this section is structured as follows. The syntax for FLPs is
+described in {{flp}}. The generic transformation of an FLP into Prio3 is
+specified in {{prio3-construction}}. Next, a concrete FLP suitable for any
+validity circuit is specified in {{flp-generic}}. Finally, instantiations of
+Prio3 for variouts types of measurements are specified in
 {{prio3-instantiations}}.
+
+XXX Point to test vectors.
 
 ## Fully Linear Proof (FLP) Systems {#flp}
 
-Conceptually, an FLP system is a two-party protocol executed by a prover and a
+Conceptually, an FLP is a two-party protocol executed by a prover and a
 verifier. In actual use, however, the prover's computation is carried out by the
-Client, and the verifier's computation is distributed among the Aggregators.
-(More on this in {{prio3-construction}}.)
+Client, and the verifier's computation is distributed among the Aggregators. The
+Client generates a "proof" of its input's validity and distributes shares of the
+proof to the Aggregators. Each Aggregator then performs some a computation on
+its input share and proof share locally and sends the result to the other
+Aggregators. Combining the exchanged messages allows each Aggregator to decide
+if it holds a share of a valid input. (See {{prio3-construction}} for details.)
 
 As usual, we will describe the interface implemented by a concrete FLP in terms
-of an abstraction base class `Flp` that specifies the set of methods and
-parameters a concrete FLP must provide.
+of an abstract base class `Flp` that specifies the set of methods and parameters
+a concrete FLP must provide.
 
 The parameters provided by a concrete FLP are listed in {{flp-param}}.
 
@@ -1037,42 +1034,42 @@ The parameters provided by a concrete FLP are listed in {{flp-param}}.
 | `INPUT_LEN`      | Length of the encoded measurement ({{flp-encode}}) |
 | `OUTPUT_LEN`     | Length of the aggregatable output ({{flp-encode}}) |
 | `PROOF_LEN`      | Length of the proof       |
-| `VERIFIER_LEN`   | Length of the verifier message generated by queering the input and proof |
-| `Measurement`    | Type of each measurement  |
+| `VERIFIER_LEN`   | Length of the verifier message generated by querying the input and proof |
+| `Measurement`    | Type of the measurement   |
 | `Field`          | As defined in ({{field}}) |
-{: #flp-param title="Constants and types defined by each concrete FLP."}
+{: #flp-param title="Constants and types defined by a concrete FLP."}
 
 An FLP specifies the following algorithms for generating and verifying proofs of
-validity for encoded inputs (encoding is described below in {{flp-encode}}):
+validity (encoding is described below in {{flp-encode}}):
 
 * `Flp.prove(input: Vec[Field], prove_rand: Vec[Field], joint_rand: Vec[Field])
   -> Vec[Field]` is the deterministic proof-generation algorithm run by the
   prover. Its inputs are the encoded input, the "prover randomness"
   `prove_rand`, and the "joint randomness" `joint_rand`. The proof randomness is
   used only by the prover, but the joint randomness is shared by both the prover
-  and verifier. Type `Field` is a finite field as defined in {{field}}.
+  and verifier.
 
 * `Flp.query(input: Vec[Field], proof: Vec[Field], query_rand: Vec[Field],
-  joint_rand: Vec[Field]) -> Vec[Field]` is the query-generation
-  algorithm run by the verifier. This is is used to "query" the input and proof.
-  The result of the query (i.e., the output of this function) is called the
-  "verifier message". In addition to the input and proof, this algorithm takes
-  as input the query randomness `query_rand` and the joint randomness
-  `joint_rand`. The former is used only by the verifier, but the latter is the
-  same randomness used by the prover.
+  joint_rand: Vec[Field]) -> Vec[Field]` is the query-generation algorithm run
+  by the verifier. This is used to "query" the input and proof. The result of
+  the query (i.e., the output of this function) is called the "verifier
+  message". In addition to the input and proof, this algorithm takes as input
+  the query randomness `query_rand` and the joint randomness `joint_rand`. The
+  former is used only by the verifier.
 
 * `Flp.decide(verifier: Vec[Field]) -> Bool` is the deterministic decision
   algorithm run by the verifier. It takes as input the verifier message and
-  outputs a boolean indicating if the input from whence it was generated is
+  outputs a boolean indicating if the input from which it was generated is
   valid.
 
 Our application requires that the FLP is "fully linear" in the sense defined in
-{{BBCGGI19}}. This property amounts essentially to a syntactic restriction on
-the proof system. As a practical matter, what this property implies is that the
-query-generation algorithm can be run by each Aggregator locally on its share of
-the input and proof, and the results can be combined to recover the verifier
-message. In the remainder, the result generated by an aggregator will be
-referred to as its "verifier share".
+{{BBCGGI19}} As a practical matter, what this property implies is that, when run
+on a share of the input and proof, the query-generation algorithm outputs a
+share of the verifier message. Furthermore, the "zero-knowledge" property of the
+FLP system ensures that the verifier message reveals nothing about the input's
+validity. Therefore, to decide if an input is valid, the Aggregators will run
+the query-generation algorithm locally, exchange verifier shares, combine
+them to recover the verifier message, and run the decision algorithm.
 
 An FLP is executed by the prover and verifier as follows:
 
@@ -1086,8 +1083,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     proof = Flp.prove(inp, prove_rand, joint_rand)
 
     # Verifier queries the input and proof.
-    verifier = Flp.query(
-        inp, proof, query_rand, joint_rand, num_shares)
+    verifier = Flp.query(inp, proof, query_rand, joint_rand, num_shares)
 
     # Verifier decides if the input is valid.
     return Flp.decide(verifier)
@@ -1097,10 +1093,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 The proof system is constructed so that, if `input` is a valid input, then
 `run_flp(Flp,. input)` always returns `True`. On the other hand, if `input` is
 invalid, then as long as `joint_rand` and `query_rand` are generated uniform
-randomly, the output is `False` with overwhelming probability. In addition, the
-proof system is designed so that the verifier message leaks nothing about the
-input (in an information theoretic sense). See Definition 3.9 from {{BBCGGI19}}
-for details.
+randomly, the output is `False` with overwhelming probability.
 
 We remark that {{BBCGGI19}} defines a much larger class of fully linear proof
 systems than we consider here. In particular, what is called an "FLP" here is
@@ -1114,24 +1107,21 @@ elements:
 
 * `Flp.encode(measurement: Measurement) -> Vec[Field]` encodes a raw measurement
   as a vector of field elements. The return value MUST be of length `INPUT_LEN`.
-  An error is raised if the measurement cannot be represented as a valid input.
 
-In addition, for some FLPs, the encoded input includes redundant field elements
-that are useful for checking the proof, but which are not needed after the proof
-has been checked. Thus the FLP defines an algorithm for truncating the input to
-the length of the aggregated output:
+For some FLPs, the encoded input also includes redundant field elements that are
+useful for checking the proof, but which are not needed after the proof has been
+checked. An example is the "integer sum" data type from {{CGB17}} in which an
+integer in range `[0, 2^k)` is encoded as a vector of `k` field elements (this
+type is also defined in {{prio3-instantiations}}). After consuming this vector,
+all that is needed is the integer it represeents. Thus the FLP defines an
+algorithm for truncating the input to the length of the aggregated output:
 
 * `Flp.truncate(input: Vec[Field]) -> Vec[Field]` maps an encoded input to an
   aggregatable output. The length of the input MUST be `INPUT_LEN` and the length
   of the output MUST be `OUTPUT_LEN`.
 
-The need for the truncation method arises from the observation that some FLPs
-encode redundancy into the input that is used for proof generation; and once the
-proof is checked, the redundancy can be removed before aggregating. An example
-is the "integer sum" data type from {{CGB17}} in which an integer in range `[0,
-2^k)` is encoded as a vector of `k` field elements. Taken together, these two
-functionalities correspond roughly to the notion of Affine-aggregatable
-encodings (AFEs) from {{CGB17}}.
+We remark that, taken together, these two functionalities correspond roughly to
+the notion of "Affine-aggregatable encodings (AFEs)" from {{CGB17}}.
 
 ## Construction {#prio3-construction}
 
@@ -1158,10 +1148,10 @@ aggregation, and unsharding are described in the remaining subsections.
 ### Setup
 
 The setup algorithm generates a symmetric key shared by all of the Aggregators.
-The key is used to derive unique joint randomness for the FLP query-generation
-algorithm run by the aggregators during preparation. An Aggregator's
-verification parameter also includes its "ID", a a unique integer in `[0,
-SHARES)`
+The key is used to derive query randomness for the FLP query-generation
+algorithm run by the Aggregators during preparation. An Aggregator's
+verification parameter also includes its "ID", a unique integer in `[0,
+SHARES)`.
 
 ~~~
 def setup(Prio3):
@@ -1173,30 +1163,29 @@ def setup(Prio3):
 
 ### Sharding
 
-Recall from {{flp}} that the syntax for FLP systems calls for "joint randomness"
-shared by the prover (i.e., the Client) and the verifier (i.e., the
-Aggregators). VDAFs have no such notion. Instead, the Client derives the joint
-randomness from its input in a way that allows the Aggregators to reconstruct it
-from their input shares. (This idea comes from Section 6.2.3 of {{BBCGGI19}}.)
+Recall from {{flp}} that the FLP syntax calls for "joint randomness" shared by
+the prover (i.e., the Client) and the verifier (i.e., the Aggregators). VDAFs
+have no such notion. Instead, the Client derives the joint randomness from its
+input in a way that allows the Aggregators to reconstruct it from their input
+shares. (This idea is based on the Fiat-Shamir heuristic and is described in
+Section 6.2.3 of {{BBCGGI19}}.)
 
 The input-distribution algorithm involves the following steps:
 
 1. Encode the Client's raw measurement as an input for the FLP
 1. Shard the input into a sequence of input shares
 1. Derive the joint randomness from the input shares
-1. Run the FLP proof-generation algorithm using the joint randomness and prover
-   randomness generated locally
-1. Shard the proof into a sequence of input shares
+1. Run the FLP proof-generation algorithm using the derived joint randomness
+1. Shard the proof into a sequence of proof shares
 
-The input and proof shares of one Aggregator (below we call it the "leader") are
-vectors of field elements. The shares of the other aggregators (below we call
-them the "helpers") are represented instead by PRG seeds, which are expanded
-into vectors of field elements of the required length. (See {{prg}}.)
+The algorithm is specified below. Notice that only one set input and proof shares
+(called the "leader" shares below) are vectors of field elements. The other
+shares (called the "helper" shares) are represented instead by PRG seeds, which
+are expanded into vectors of field elements.
 
-This algorithm also makes use of a pair of helper functions for encoding the
-leader share and helper share. These are called `encode_leader_share` and
-`encode_helper_share` respectively and they are described in
-{{prio3-helper-functions}}.
+The code refers to a pair of auxiliary functions for encoding the shares. These
+are called `encode_leader_share` and `encode_helper_share` respectively and they
+are described in {{prio3-helper-functions}}.
 
 ~~~
 def measurement_to_input_shares(Prio3, _public_param, measurement):
@@ -1221,7 +1210,8 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
         leader_input_share = vec_sub(leader_input_share,
                                      helper_input_share)
         encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
-        k_hint = Prio3.Prg.derive_seed(k_blind, byte(j+1) + encoded)
+        k_hint = Prio3.Prg.derive_seed(k_blind,
+                                       byte(j+1) + encoded)
         k_joint_rand = xor(k_joint_rand, k_hint)
         k_helper_input_shares.append(k_share)
         k_helper_blinds.append(k_blind)
@@ -1241,7 +1231,7 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
     prove_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         gen_rand(Prio3.Prg.SEED_SIZE),
-        dst + byte(j+1),
+        dst,
         Prio3.Flp.PROVE_RAND_LEN
     )
     joint_rand = Prio3.Prg.expand_into_vec(
@@ -1259,7 +1249,7 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
         helper_proof_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            dst,
+            dst + byte(j+1),
             Prio3.Flp.PROOF_LEN
         )
         leader_proof_share = vec_sub(leader_proof_share,
@@ -1286,26 +1276,26 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
 ### Preparation
 
 This section describes the process of recovering output shares from the input
-shares. The high-level idea is that each Aggregators first queries its input and
+shares. The high-level idea is that each Aggregator first queries its input and
 proof share locally, then exchanges its verifier share with the other
 Aggregators. The verifier shares are then combined into the verifier message,
-which is used by each Aggregator locally to decide whether to accept.
+which is used to decide whether to accept.
 
 In addition, the Aggregators must ensure that they have all used the same joint
 randomness for the query-generation algorithm. The joint randomness is generated
 by a PRG seed. Each Aggregator derives an XOR secret share of this seed from its
-input share and the "blind" generated by the client. This means that, before it
-can run the query-generation algorithm, it must first gather the XOR secret
-shares derived by the other Aggregators.
+input share and the "blind" generated by the client. Thus, before running the
+query-generation algorithm, it must first gather the XOR secret shares derived
+by the other Aggregators.
 
-So that the Aggregators can avoid an extra round of communication, the Client
-sends each Aggregator a "hint" equal to the XOR of the other Aggregators' shares
-of the joint randomness key. This leaves open the possibility that the
-Client cheated by, say, forcing the Aggregators to use joint randomness that
-biases the proof check procedure some way in its favor. To mitigate this, the
-Aggregators also check that they have all computed the same joint randomness key
-before accepting their output shares. To do so, they exchange their XOR shares
-of the PRG seed along with their verifier shares.
+In order to avoid extra round of communication, the Client sends each Aggregator
+a "hint" equal to the XOR of the other Aggregators' shares of the joint
+randomness seed. This leaves open the possibility that the Client cheated by,
+say, forcing the Aggregators to use joint randomness that biases the proof check
+procedure some way in its favor. To mitigate this, the Aggregators also check
+that they have all computed the same joint randomness seed before accepting
+their output shares. To do so, they exchange their XOR shares of the PRG seed
+along with their verifier shares.
 
 > NOTE This optimization somewhat diverges from Section 6.2.3 of {{BBCGGI19}}.
 > Security analysis is needed.
@@ -1315,7 +1305,7 @@ make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 
 ~~~
 def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
-    dst = b"vdaf-00 prio3"
+    dst = b"draft-00 prio3"
     (j, k_query_init) = verify_param
 
     (input_share, proof_share, k_blind, k_hint) = \
@@ -1324,7 +1314,8 @@ def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
 
     out_share = Prio3.Flp.truncate(input_share)
 
-    k_query_rand = Prio3.Prg.derive_seed(k_query_init, byte(255) + nonce)
+    k_query_rand = Prio3.Prg.derive_seed(k_query_init,
+                                         byte(255) + nonce)
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_query_rand,
@@ -1381,11 +1372,15 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
             k_joint_rand_check = xor(k_joint_rand_check,
                                      k_joint_rand_share)
 
-    return Prio3.encode_prepare_message(verifier, k_joint_rand_check)
+    return Prio3.encode_prepare_message(verifier,
+                                        k_joint_rand_check)
 ~~~
 {: #prio3-prep-state title="Preparation state for prio3."}
 
 ### Aggregation
+
+Aggregating a set of output shares is simply a matter of adding up the vectors
+element-wise.
 
 ~~~
 def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
@@ -1398,6 +1393,9 @@ def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
 
 ### Unsharding
 
+To unshard a set of aggregate shares, the Collector first adds up the vectors
+element-wise. It then converts each element of the vector into an integer.
+
 ~~~
 def agg_shares_to_result(Prio3, _agg_param, agg_shares):
     agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
@@ -1407,7 +1405,7 @@ def agg_shares_to_result(Prio3, _agg_param, agg_shares):
 ~~~
 {: #prio3-agg-output title="Computation of the aggregate result for prio3."}
 
-### Helper Functions {#prio3-helper-functions}
+### Auxiliary Functions {#prio3-helper-functions}
 
 ~~~
 def encode_leader_share(Prio3,
@@ -1452,7 +1450,7 @@ def encode_helper_share(Prio3,
         encoded += k_hint
     return encoded
 
-def decode_helper_share(Prio3, dst, encoded):
+def decode_helper_share(Prio3, dst, j, encoded):
     l = Prio3.Prg.SEED_SIZE
     k_input_share, encoded = encoded[:l], encoded[l:]
     input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
@@ -1495,17 +1493,17 @@ def decode_prepare_message(Prio3, encoded):
 
 ## A General-Purpose FLP {#flp-generic}
 
-This section describes an FLP based on the fully linear proof system described
-in {{BBCGGI19}}, Section 4.2. We begin in {{flp-generic-overview} with an
-overview of their proof system and the extensions to their proof system made
-here. The construction is specified in {{flp-generic-construction}}.
+This section describes an FLP based on the construction from in {{BBCGGI19}},
+Section 4.2. We begin in {{flp-generic-overview}} with an overview of their proof
+system and the extensions to their proof system made here. The construction is
+specified in {{flp-generic-construction}}.
 
 > OPEN ISSUE We're not yet sure if specifying this general-purpose FLP is
 > desirable. It might be preferable to specify specialized FLPs for each data
 > type that we want to standardize, for two reasons. First, clear and concise
 > specifications are likely easier to write for specialized FLPs rather than the
-> general one. Second, we may end up tailoring each FLP to the data type in a
-> way that improves performance, but breaks compatibility with the
+> general one. Second, we may end up tailoring each FLP to the measurement type
+> in a way that improves performance, but breaks compatibility with the
 > general-purpose FLP.
 >
 > In any case, we can't make this decision until we know which data types to
@@ -1514,8 +1512,8 @@ here. The construction is specified in {{flp-generic-construction}}.
 > https://github.com/cjpatton/vdaf/tree/main/poc.
 
 > OPEN ISSUE Chris Wood points out that the this section reads more like a paper
-> more than a standard. Eventually we'll want to work this into something that
-> is readily consumable by the CFRG.
+> than a standard. Eventually we'll want to work this into something that is
+> readily consumable by the CFRG.
 
 ### Overview {#flp-generic-overview}
 
@@ -1523,7 +1521,7 @@ In the proof system of {{BBCGGI19}}, validity is defined via an arithmetic
 circuit evaluated over the input: If the circuit output is zero, then the input
 is deemed valid; otherwise, if the circuit output is non-zero, then the input is
 deemed invalid. Thus the goal of the proof system is merely to allow the
-verifier to evaluate the validity circuit over the input. Four application
+verifier to evaluate the validity circuit over the input. For our application
 ({{prio3}}), this computation is distributed among multiple Aggregators, each of
 which has only a share of the input.
 
@@ -1533,7 +1531,7 @@ the circuit does not contain a multiplication gate whose operands are both
 non-constant. Then to decide if an input `x` is valid, each Aggregator could
 evaluate `C` on its share of `x` locally, broadcast the output share to its
 peers, then combine the output shares locally to recover `C(x)`. This is true
-because for any `SHARES`-way secret sharing of `x`:
+because for any `SHARES`-way secret sharing of `x` it holds that
 
 ~~~
 C(x_shares[0] + ... + x_shares[SHARES-1]) =
@@ -1543,9 +1541,9 @@ C(x_shares[0] + ... + x_shares[SHARES-1]) =
 (Note that, for this equality to hold, it may be necessary to scale any
 constants in the circuit by `SHARES`.) However this is not the case if `C` is
 not-affine (i.e., it contains at least one multiplication gate whose operands
-are non-constant). In the proof system of {{BBCGGI19}}, the proof allows the
-(distributed) verifier to compute the non-affine operations using only linear
-operations on (its share of) the input and proof.
+are non-constant). In the proof system of {{BBCGGI19}}, the proof is designed to
+allow the (distributed) verifier to compute the non-affine operations using only
+linear operations on (its share of) the input and proof.
 
 To make this work, the proof system is restricted to validity circuits that
 exhibit a special structure. Specifically, an arithmetic circuit with "G-gates"
@@ -1564,7 +1562,7 @@ C(x) = (x[0] - 1) * x[0] = x[0]^2 - x[0]
 
 This polynomial recognizes `L` because `x[0]^2 = x[0]` is only true if `x[0] ==
 0` or `x[0] == 1`. Notice that the polynomial involves a non-affine operation,
-`x[0]^2`. In order to apply {{BBCGGI19}}, Theorem 4.3, the circuit would be
+`x[0]^2`. In order to apply {{BBCGGI19}}, Theorem 4.3, the circuit needs to be
 rewritten in terms of a gadget that subsumes this non-affine operation. For
 example, the gadget might be multiplication:
 
@@ -1572,7 +1570,7 @@ example, the gadget might be multiplication:
 Mul(left, right) = left * right
 ~~~
 
-The validity circuit can be rewritten in terms of `Mul` like so:
+The validity circuit can then be rewritten in terms of `Mul` like so:
 
 ~~~
 C(x[0]) = Mul(x[0], x[0]) - x[0]
@@ -1580,9 +1578,7 @@ C(x[0]) = Mul(x[0], x[0]) - x[0]
 
 The proof system of {{BBCGGI19}} allows the verifier to evaluate each instance
 of the gadget (i.e., `Mul(x[0], x[0])` in our example) using a linear function
-of the input and proof.
-
-The validity proof for input `x` is constructed roughly as follows. Let `C` be
+of the input and proof. The proof is constructed roughly as follows. Let `C` be
 the validity circuit and suppose the gadget is arity-`L` (i.e., it has `L` input
 wires.). Let `wire[j-1,k-1]` denote the value of the `j`th wire of the `k`th
 call to the gadget during the evaluation of `C(x)`. Suppose there are `M` such
@@ -1596,15 +1592,15 @@ at `alpha[k-1]`, produces the output of the `k`th call to the gadget. Let us
 call this the "gadget polynomial". Polynomial evaluation is linear, which means
 that, in the distributed setting, the Client can disseminate additive shares of
 the gadget polynomial that the Aggregators then use to compute additive shares
-of each gadget output. This allows each Aggregator to compute its share of
-`C(x)` locally.
+of each gadget output, allowing each Aggregator to compute its share of `C(x)`
+locally.
 
 There is one more wrinkle, however: It is still possible for a malicious prover
 to produce a gadget polynomial that would result in `C(x)` being computed
-incorrectly. To prevent this, the verifier (or the Aggregators in the
-distributed setting) performs a probabilistic test to check that the gadget
-polynomial is well-formed. This test and the procedure for constructing the
-gadget polynomial are described in detail in {{flp-generic-construction}}.
+incorrectly, potentially resulting in an invalid input being accepted. To
+prevent this, the verifier performs a probabilistic test to check that the
+gadget polynomial is well-formed. This test, and the procedure for constructing
+the gadget polynomial, are described in detail in {{flp-generic-construction}}.
 
 #### Extensions {#flp-generic-overview-extensions}
 
@@ -1612,9 +1608,9 @@ The FLP described in the next section extends the proof system {{BBCGGI19}},
 Section 4.2 in three ways.
 
 First, the validity circuit in our construction includes an additional, random
-input (this is the "joint randomness" derived from the input shares in prio3;
-see {{prio3}}). This allows for circuit optimizations that trade a small
-soundness error for a shorter proof. For example, consider a circuit that
+input (this is the "joint randomness" derived from the input shares in Prio3;
+see {{prio3-construction}}). This allows for circuit optimizations that trade a
+small soundness error for a shorter proof. For example, consider a circuit that
 recognizes the set of length-`N` vectors for which each element is either one or
 zero. A deterministic circuit could be constructed for this language, but it
 would involve a large number of multiplications that would result in a large
@@ -1633,11 +1629,10 @@ then the circuit will evaluate to 0 regardless of the value of `r`; but if
 `inp[j]` is not in `[0,2)` for some `j`, the output will be non-zero with high
 probability.
 
-The second extension implemented by our FLP is to allow the validity circuit to
-contain multiple gadget types. (Note that this generalization was first
-suggested in {{BBCGGI19}}, Remark 4.5.) For example, the following circuit is
-allowed, where `Mul` and `Poly` are the gadgets defined above (the input has
-length `N+1`):
+The second extension implemented by our FLP allows the validity circuit to
+contain multiple gadget types. (This generalization was suggested in
+{{BBCGGI19}}, Remark 4.5.) For example, the following circuit is allowed, where
+`Mul` and `Range2` are the gadgets defined above (the input has length `N+1`):
 
 ~~~
 C(inp, r) = r * Range2(inp[0]) + ... + r^N * Range2(inp[N-1]) + \
@@ -1645,16 +1640,11 @@ C(inp, r) = r * Range2(inp[0]) + ... + r^N * Range2(inp[N-1]) + \
             Mul(inp[N], inp[N])
 ~~~
 
-(This circuit checks two things. First, the first line checks that `inp[:N]` is
-a vector of zeros and ones. Second, the second and third lines check that
-`inp[N]` is a perfect square, and that its square root is equal to the `N`-bit
-integer encoded by `inp[:N]`.)
-
 Finally, {{BBCGGI19}}, Theorem 4.3 makes no restrictions on the choice of the
 fixed points `alpha[0], ..., alpha[M-1]`, other than to require that the points
-are all distinct. In this document, the fixed points are chosen so that the
-gadget polynomial can be constructed efficiently using the Cooley-Tukey FFT
-("Fast Fourier Transform") algorithm. Note that this requires the field to be
+are distinct. In this document, the fixed points are chosen so that the gadget
+polynomial can be constructed efficiently using the Cooley-Tukey FFT ("Fast
+Fourier Transform") algorithm. Note that this requires the field to be
 "FFT-friendly" as defined in {{field-fft-friendly}}.
 
 ### Validity Circuits {#flp-generic-valid}
@@ -1675,13 +1665,14 @@ A concrete `Valid` defines the following parameters:
 | `Field`        | An FFT-friendly finite field as defined in {{field-fft-friendly}} |
 {: title="Validity circuit parameters."}
 
-Each gadget `G` in `GADGETS` defines a parameter `DEGREE` that specifies the
+Each gadget `G` in `GADGETS` defines a constant `DEGREE` that specifies the
 circuit's "arithmetic degree". This is defined to be the degree of the
-polynomial that computes it the circuit. For example, the `Mul` circuit in
+polynomial that computes it. For example, the `Mul` circuit in
 {{flp-generic-overview}} is defined by the polynomial `Mul(x) = x * x`, which
-has degree `2`. Hence, the arithmetic degree of this gadget is `2`. Each gadget
-also defines a parameter `ARITY` that specifies the circuit's arity (i.e., the
-number of input wires).
+has degree `2`. Hence, the arithmetic degree of this gadget is `2`.
+
+Each gadget also defines a parameter `ARITY` that specifies the circuit's arity
+(i.e., the number of input wires).
 
 A concrete `Valid` provides the following methods for encoding a measurement as
 an input vector and truncating an input vector to the length of an aggregatable
@@ -1719,12 +1710,16 @@ def verifier_len(Valid):
         length += g.ARITY + 1
     return length
 ~~~
+{: title="Derived methods for validity circuits."}
 
 ### Construction {#flp-generic-construction}
 
 This section specifies `FlpGeneric`, an implementation of the `Flp` interface
 ({{flp}}). It has as a generic parameter a validity circuit `Valid` implementing
 the interface defined in {{flp-generic-valid}}.
+
+> NOTE A reference implemenation can be found in
+> https://github.com/cjpatton/vdaf/blob/main/poc/flp_generic.sage.
 
 The FLP parameters for `FlpGeneric` are defined in {{flp-generic-param}}. The
 required methods for generating the proof, generating the verifier, and deciding
@@ -1764,8 +1759,8 @@ follows:
 1. For each `i` in `[H]` create an empty table `wire_i`.
 
 1. Partition the prover randomness `prove_rand` into subvectors `seed_1, ...,
-   seed_H` where `len(s_i) == L_i` for all `i` in `[H]`. Let us call these the
-   "wire seeds" of each gadget.
+   seed_H` where `len(seed_i) == L_i` for all `i` in `[H]`. Let us call these
+   the "wire seeds" of each gadget.
 
 1. Evaluate `Valid` on input of `inp` and `joint_rand`, recording the inputs of
    each gadget in the corresponding table. Specifically, for every `i` in `[H]`,
@@ -1778,8 +1773,7 @@ follows:
 
     * Let `w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]]`.
 
-    * Let `padded_w = w + padding`, where `padding` is the all-zero vector of
-      length `P_i - len(w)`.
+    * Let `padded_w = w + Field.zeros(P_i - len(w))`.
 
     * Let `poly_wire_i[j-1]` be the lowest degree polynomial for which
       `poly_wire_i[j-1](alpha_i^k) == padded_w[k]` for all `k` in `[P_i]`.
@@ -1788,7 +1782,7 @@ follows:
 
     * Let `poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-1])`. That
       is, evaluate the circuit `G_i` on the wire polynomials for the `i`th
-      gadget. (Arithmetic is in the ring of polynomials over `Validity.Field`.)
+      gadget. (Arithmetic is in the ring of polynomials over `Field`.)
 
 The proof is the vector `proof = seed_1 + coeff_1 + ... + seed_H + coeff_H`,
 where `coeff_i` is the vector of coefficients of `poly_gadget_i` for each `i` in
@@ -1813,8 +1807,8 @@ is generated as follows:
 
 1. Compute the wire polynomials just as in the prover's step (4.).
 
-1. Compute the tests for well-formedness of the gadget polynomials. For every
-   `i` in `[H]`:
+1. Compute the tests for well-formedness of the gadget polynomials. That is, for
+   every `i` in `[H]`:
 
     * Let `t = query_rand[i]`. Check if `t^(P_i) == 1`: If so, then raise
       ERR_ABORT and halt. (This prevents the verifier from inadvertently leaking
@@ -1851,33 +1845,33 @@ The FLP encoding and truncation methods invoke `Valid.encode` and
 
 ## Instantiations {#prio3-instantiations}
 
-> CP TODO Clean up this section.
+This section specifies instantiations of Prio3 for various measurment types.
+Each uses `FlpGeneric` as the FLP ({{flp-generic}}) and is determined by a
+validity circuit ({{flp-generic-valid}}) and a PRG ({{prg}}).
 
-This section specifies a variety of concrete instantations of prio3. Each uses
-`FlpGeneric` as the FLP ({{flp-generic}}) and is determined by an implementation
-of `Valid` ({{flp-generic-valid}}) and an implementation of `Prg` ({{prg}}).
+XXX Point to test vectors
 
 > NOTE Reference implemnetations of each of these VDAFs can be found in
 > https://github.com/cjpatton/vdaf/blob/main/poc/vdaf_prio3.sage.
 
 ### Prio3Aes128Count
 
-A simple counter type. Each measurement is either one or zoro and the aggregate
-result is the sum of the measurements.
+Our first instance of Prio3 is for a simple counter: Each measurement is either
+one or zoro and the aggregate result is the sum of the measurements.
 
-This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG. Its
+This instance uses `PrgAes128` (see {{prg-constructions}}) as its PRG. Its
 validity circuit, denoted `Count`, uses `Field64` ({{field64}}) as its finite
 field. Its gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
 ~~~
-def Mul(x: Field64, y: Field64):
+def Mul(x, y):
     return x * y
 ~~~
 
 The validity circuit is defined as
 
 ~~~
-def Count(inp: Vec[Field128]):
+def Count(inp: Vec[Field64]):
     return Mul(inp[0], inp[0]) - inp[0]
 ~~~
 
@@ -1899,18 +1893,19 @@ parameters for this circuit are summarized below.
 
 ### Prio3Aes128Sum {#prio3-sum}
 
-The sum type. Each measurement is an integer in range `[0, 2^bits)`, where
-`bits` is an associated parameter.
+The next instance of Prio3 supports summing of integers in a pre-determined
+range. Each measurement is an integer in range `[0, 2^bits)`, where `bits` is an
+associated parameter.
 
 This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG.
 Its validity circuit, denoted `Sum`, uses `Field128` ({{field128}}) as its
 finite field. The measurement is encoded as a length-`bits` vector of field
 elements, where the `l`th element of the vector represents the `l`th bit of the
-summand. The truncation algorithm reverse this process:
+summand:
 
 ~~~
-def encode(Sum, measurement: Unsigned):
-    if measurement >= 2^Sum.INPUT_LEN:
+def encode(Sum, measurement: Integer):
+    if 0 > measurement or measurement >= 2^Sum.INPUT_LEN:
         raise ERR_INPUT
 
     encoded = []
@@ -1918,10 +1913,10 @@ def encode(Sum, measurement: Unsigned):
         encoded.append(Sum.Field((measurement >> l) & 1))
     return encoded
 
-def truncate(Sum, inp: Vec[Field128]):
-    decoded = Field128(0)
+def truncate(Sum, inp):
+    decoded = Sum.Field(0)
     for (l, b) in enumerate(inp):
-        w = Field128(1 << l)
+        w = Sum.Field(1 << l)
         decoded += w * b
     return [decoded]
 ~~~
@@ -1930,11 +1925,11 @@ The validity circuit checks that the input comprised of ones and zeros. Its
 gadget, denoted `Range2`, is the degree-2, arity-1 gadget defined as
 
 ~~~
-def Range2(x: Field128):
+def Range2(x):
     return x^2 - x
 ~~~
 
-Finally, the validity circuit is defined as
+The validity circuit is defined as
 
 ~~~
 def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
@@ -1961,15 +1956,16 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
 
 ### Prio3Aes128Histogram
 
-The basic histogram type. Each measurement is an arbitrary integer and the
-aggregate result is a histogram representation of the distribution of
-measurements. The histogram buckets are determined by an associated parameter
-`buckets`, a vector of monotonically increasing integers.
+This instance of Prio3 allows for estimating the distribution of the
+measurements by computing a simple histogram. Each measurement is an arbitrary
+integer and the aggregate result counts the number of measurements that fall in
+a set of fixed buckets.
 
 This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG.
 Its validity circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its
 finite field. The measurement is encoded as a one-hot vector representing the
-bucket into which the measurement falls:
+bucket into which the measurement falls (let `bucket` denote a sequence of
+monotonically increasing integers):
 
 ~~~
 def encode(Histogram, measurement: Integer):
@@ -1985,7 +1981,7 @@ def truncate(Histogram, inp: Vec[Field128]):
 ~~~
 
 The validity circuit uses `Range2` (see {{prio3-sum}}) as its single gadget. It
-checks for one-hotness as follows:
+checks for one-hotness in two steps, as follows:
 
 ~~~
 def Histogram(inp: Vec[Field128],
@@ -2009,7 +2005,7 @@ def Histogram(inp: Vec[Field128],
 ~~~
 
 Note that this circuit depends on the number of shares into which the input is
-sharded.
+sharded. This is provided to the FLP by Prio3.
 
 <br>
 
@@ -2024,12 +2020,16 @@ sharded.
 | `Field`          | `Field128` ({{field128}}) |
 {: title="Parameters of validity circuit Histogram."}
 
-# poplar1 {#poplar1}
+# Poplar1 {#poplar1}
 
-> NOTE An implementation of this VDAF can be found
-> [here](https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/poplar1.rs).
+> NOTE The spec for Poplar1 is still a work-in-progress. A partial
+> implementation can be found at
+> https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/poplar1.rs.
+> The verification logic is nearly complete, however as of this draft the code
+> is missing the IDPF. An implementation of the IDPF can be found at
+> https://github.com/google/distributed_point_functions/.
 
-This section specifies `poplar1`, a VDAF for the following task. Each Client holds
+This section specifies Poplar1, a VDAF for the following task. Each Client holds
 a `BITS`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
 <= BITS`. We will refer to the latter as the set of "candidate prefixes". The
 Aggregators' goal is to count how many inputs are prefixed by each candidate
@@ -2053,7 +2053,7 @@ the protocol works as follows.
    in `H`, add add `p || 0` and `p || 1` to the set. Repeat step 3 with the new
    set of candidate prefixes.
 
-`poplar1` is constructed from an "Incremental Distributed Point Function (IDPF)", a
+Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)", a
 primitive described by [BBCGGI21] that generalizes the notion of a Distributed
 Point Function (DPF) [GI14]. Briefly, a DPF is used to distribute the
 computation of a "point function", a function that evaluates to zero on every
@@ -2072,14 +2072,11 @@ This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
 is zero everywhere except for one element, which is equal to one.
 
-The name `poplar1` is an anagram of "hist", which is short for "histogram". It is a
+The name Poplar1 is an anagram of "hist", which is short for "histogram". It is a
 nod toward the "subset histogram" problem formulated by [BBCGGI21] and for which
-the `poplar1` is a solution.
+the Poplar1 is a solution.
 
 ## Incremental Distributed Point Functions (IDPFs)
-
-> NOTE An implementation of IDPFs can be found
-> [here](https://github.com/google/distributed_point_functions/).
 
 An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
 defined by the IDPF. The Client specifies an index `alpha` and values `beta`,
@@ -2337,8 +2334,7 @@ def agg_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
 > will be filled out more as the draft matures and security analyses are
 > completed.
 
-Multi-party protocols for privacy-preserving measurement have two essential
-security goals:
+VDAFs have two essential security goals:
 
 1. Privacy: An attacker that controls the network, the Collector, and a subset
    of Clients and Aggregators learns nothing about the measurements of honest
@@ -2348,18 +2344,24 @@ security goals:
    cannot cause the Collector to compute anything other than the aggregate of
    the measurements of honest Clients.
 
-Note that it is also possible to consider a stronger form of robustness, where
-the attacker also controls a subset of Aggregators (see [BBCGGI19], Section
-6.3). In that case, it is important to ensure that the verifier randomness
-shared between aggregators (`verify_params`, see [Setup](#setup)) is never
-revealed to Clients. To satisfy this stronger notion of robustness, it is
-RECOMMENDED that the Aggregators generate `verify_params` only after a set of
-Client inputs has been collected for verification, and re-generate them for
-each such set of inputs.
+Note that, to achieve robustness, it is important to ensure that the
+verification parameters distributed to the Aggregators (`verify_params`, see
+{{setup}}) is never revealed to the Clients.
+
+It is also possible to consider a stronger form of robustness, where the
+attacker also controls a subset of Aggregators (see {{BBCGGI19}}, Section 6.3).
+To satisfy this stronger notion of robustness, it is necessary to prevent the
+attacker from sharing the verification parameters with the Clients. It is
+therefore RECOMMENDED that the Aggregators generate `verify_params` only after a
+set of Client inputs has been collected for verification, and re-generate them
+for each such set of inputs.
+
+In order to achieve robustness, the Aggreagtors MUST ensure that the nonces used
+to process the measurements in a batch are all unique.
 
 A VDAF is the core cryptographic primitive of a protocol that achieves
 the above privacy and robustness goals. It is not sufficient on its own,
-however.  The application will need to assure a few security properties,
+however. The application will need to assure a few security properties,
 for example:
 
 * Securely distributing the long-lived parameters.
@@ -2371,21 +2373,21 @@ for example:
 * Enforcing the non-collusion properties required of the specific VDAF in use.
 
 In such an environment, a VDAF provides the high-level privacy property
-described above: The collector learns only the aggregate measurement, and
+described above: The Collector learns only the aggregate measurement, and
 nothing about individual measurements aside from what can be inferred from the
-aggregate result.  The aggregators learn neither individual measurements nor the
-aggregate result.  The collector is assured that the aggregate statistic
+aggregate result.  The Aggregators learn neither individual measurements nor the
+aggregate result.  The Aollector is assured that the aggregate statistic
 accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.
 
-On their own, VDAFs do not mitigate Sybil attacks [Dou02]. In this attack, the
+On their own, VDAFs do not mitigate Sybil attacks {{Dou02}}. In this attack, the
 adversary observes a subset of input shares transmitted by a Client it is
 interested in. It allows the input shares to be processed, but corrupts and
 picks bogus inputs for the remaining Clients.  Applications can guard against
 these risks by adding additional controls on measurement submission, such as
 client authentication and rate limits.
 
-VDAFs do not inherently provide differential privacy [Dwo06].  The VDAF approach
+VDAFs do not inherently provide differential privacy {{Dwo06}}.  The VDAF approach
 to private measurement can be viewed as complementary to differential privacy,
 relying on non-collusion instead of statistical noise to protect the privacy of
 the inputs.  It is possible that a future VDAF could incorporate differential
