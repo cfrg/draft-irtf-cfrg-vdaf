@@ -118,7 +118,7 @@ class Field96(Field):
         return cls(3)^4294966555
 
 
-# The finite field GF(2^64 * 4611686018427387751 + 1).
+# The finite field GF(2^66 * 4611686018427387897 + 1).
 class Field128(Field):
     MODULUS = 2^66 * 4611686018427387897 + 1
     GEN_ORDER = 2^66

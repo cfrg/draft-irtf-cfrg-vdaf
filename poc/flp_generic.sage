@@ -267,7 +267,7 @@ class FlpGeneric(Flp):
         if len(verifier) != FlpGeneric.Valid.verifier_len():
             raise ERR_INPUT
 
-        # Check the toutput of the vaidity circuit.
+        # Check the output of the validity circuit.
         v, verifier = verifier[0], verifier[1:]
         if v != FlpGeneric.Field(0):
             return False
