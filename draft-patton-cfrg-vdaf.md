@@ -1005,9 +1005,7 @@ described in {{flp}}. The generic transformation of an FLP into Prio3 is
 specified in {{prio3-construction}}. Next, a concrete FLP suitable for any
 validity circuit is specified in {{flp-generic}}. Finally, instantiations of
 Prio3 for variouts types of measurements are specified in
-{{prio3-instantiations}}.
-
-XXX Point to test vectors.
+{{prio3-instantiations}}. Test vectors can be found in {{test-vectors}}.
 
 ## Fully Linear Proof (FLP) Systems {#flp}
 
@@ -1847,9 +1845,8 @@ The FLP encoding and truncation methods invoke `Valid.encode` and
 
 This section specifies instantiations of Prio3 for various measurment types.
 Each uses `FlpGeneric` as the FLP ({{flp-generic}}) and is determined by a
-validity circuit ({{flp-generic-valid}}) and a PRG ({{prg}}).
-
-XXX Point to test vectors
+validity circuit ({{flp-generic-valid}}) and a PRG ({{prg}}). Test vectors for
+each can be found in {{test-vectors}}.
 
 > NOTE Reference implemnetations of each of these VDAFs can be found in
 > https://github.com/cjpatton/vdaf/blob/main/poc/vdaf_prio3.sage.
@@ -2406,3 +2403,166 @@ This document makes no request of IANA.
 
 Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Mariana Raykova, and
 Christopher Wood for useful feedback on and contributions to the spec.
+
+# Test Vectors {#test-vectors}
+{:numbered="false"}
+
+Test vectors cover the generation input shares and the conversio of input shares
+into output shares. Vectors speciy the public and verification parameters, the
+measurement, the aggregation parameter, the expected input shares, the prepare
+messages, and the expected output shares.
+
+Test vectors are encoded in JSON. Input shares and prepare messages are
+represented as hexadecimal streams. To make the tests deterministic,
+`gen_rand()` was replaced with a function that returns the reuqested number of
+`0x01` octests.
+
+## Prio3Aes128Count
+{:numbered="false"}
+
+For this test, the value of `SHARES` is `2`.
+
+~~~
+{
+    "public_param": null,
+    "verify_params": [
+        [
+            0,
+            "01010101010101010101010101010101"
+        ],
+        [
+            1,
+            "01010101010101010101010101010101"
+        ]
+    ],
+    "agg_param": null,
+    "prep": [
+        {
+            "measurement": 1,
+            "nonce": "01010101010101010101010101010101",
+            "input_shares": [
+                "05ac22db75e9b262e9642de9ec1ec37990625f92bf426c52e12c88d7c6e53ed673a3a8a3c7944170e09a52b96573259d",
+                "0101010101010101010101010101010101010101010101010101010101010101"
+            ],
+            "prep_shares": [
+                [
+                    "48771012eeda70a056cf2fd53022cf7b2edf45090eaa765c2b6cefb7a4abc524",
+                    "b788efec11258f61fa53dd238a164da076bfd3f2e4bd966634b24bb64c2fa160"
+                ]
+            ],
+            "out_shares": [
+                [
+                    408739992155304546
+                ],
+                [
+                    18038004077259279776
+                ]
+            ]
+        }
+    ]
+}
+~~~
+
+## Prio3Aes128Sum
+{:numbered="false"}
+
+For this test:
+
+* The value of `SHARES` is `2`.
+* The value of `bits` is `8`.
+
+~~~
+{
+    "public_param": null,
+    "verify_params": [
+        [
+            0,
+            "01010101010101010101010101010101"
+        ],
+        [
+            1,
+            "01010101010101010101010101010101"
+        ]
+    ],
+    "agg_param": null,
+    "prep": [
+        {
+            "measurement": 100,
+            "nonce": "01010101010101010101010101010101",
+            "input_shares": [
+                "05ac22dc75e9b243140aab68977b81a3958c5e79d27edaa00c6b33842dc57724c50207f8c00abf4aaa8ac6a09b5c684d0e59db99532526f582b7524f30d800486ec480e493439573ec2eff20748556c94d7e446de9717ff49ddcfa6fd0ad0a1a9d6de6270bd7ea53092a7e8205b312344bae6f4b6b9456d87695dba9c28514a4e9642deaec1ec35b90625f93bf426c52069601a28cc673c1f0dc7109dee4ca90e0ff309abc86571f3509a1bb33b9e896edd08f984ca3e301e945a8fa1665e19311ae9976f0e8ec34714740fc23cd88500902c8557088fa5acbde164aa52a6e118dff362e6b0b5f784a9c7260312d3b2a1f1a54d8233e4c56bcf5c2f5484fa1460af85fc46fdcdba9bbad76589159c4d6c49c786a160d9dbbd18100c52fe81ba838a57b45d13c764ff9efa7b451235a51384935e831635714ee447bbc02473cb26d536e274c701416619abb2c743ced75c9928483c926ae3ab0f0e3328c79338dd2a496c9468fe9e470aee30b94150f7356e7b19c668175df4f978736e7d3a7c710aa38a446ed62022bcb5ff783d05b428d5a16cdeae0b98268e9ded44a1f7fc734a9baafae0f029dfe79a7c176d58baf68cef928b502b5e59e4fb1925c690745ea06264fa20fa47217120d4343b9a360cad2b5424760e6df18c1214937928e1ef17005cb32815a105f471dff2bbced99f2708ddd70e28bcab86e71dde3d891ea9156b271ab9d025fabcceba3b24c673774e4f474e869c32e818f80c387c1e2197f6612c627287cd9e0a193e70a64ad4546dc0573de3c8b99a0002e67707f58974b8c40bb09f974938b96e14f901084b455f1f4ee3ec4f3b7ce02d42fe0cac452e35b4ff8e5d38e5e99c132b88d122e8ae2b6b97a62206e6f39ba74de00cbb69501010101010101010101010101010101dfed32c071cc6899645ab72c36bd3670",
+                "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010b9e7430cc7a71a356d6bd09d36d1fdb"
+            ],
+            "prep_shares": [
+                [
+                    "2bcc0144c56fcf120a7aab22d57cde99fd2ee2301be4c59983d5e68e79f04cd8978b2c4598eafab7b1e8b0af8ba4bda20b9e7430cc7a71a356d6bd09d36d1fdb",
+                    "d433febb3a9030d1f58554dd2a8321682eff019a7a26e88471ed622fbd956e5e0af1c04b5573400ed13ae90b325aed4edfed32c071cc6899645ab72c36bd3670"
+                ]
+            ],
+            "out_shares": [
+                [
+                    178602842237398423407215704739732627917
+                ],
+                [
+                    161679524683540039539650068628168138392
+                ]
+            ]
+        }
+    ]
+}
+~~~
+
+## Prio3Aes128Histogram
+{:numbered="false"}
+
+For this test:
+
+* The value of `SHARES` is `2`.
+* The value of `buckets` is `[1, 10, 100]`.
+
+~~~
+{
+    "public_param": null,
+    "verify_params": [
+        [
+            0,
+            "01010101010101010101010101010101"
+        ],
+        [
+            1,
+            "01010101010101010101010101010101"
+        ]
+    ],
+    "agg_param": null,
+    "prep": [
+        {
+            "measurement": 50,
+            "nonce": "01010101010101010101010101010101",
+            "input_shares": [
+                "05ac22dc75e9b243140aab68977b81a3958c5e79d27edaa00c6b33842dc57724c50207f8c00abf4aaa8ac6a09b5c684d0e59db99532526f582b7524f30d80048e9642deaec1ec35b90625f93bf426c52f7ee6bcda3008ff165f5a4dda4bf3382726b89e1455450fb07187cc5b1f4e5b8076d88ca6a52fc73893f179286ed2293f2ba224171991de5cad6ec008bfb16d0990681811a5d149cad81d5177733e8dbabf41f2912442107c7600326e510c0d4a17daddb4577dda42dc84334e51821bb48542744f26726abec63e901571c2841a53f4e93c9bac99d39f87c3773f8173d93465cd2d31f7513516566b9d3aa7a4088d9fb35185b7d6233a9306f40f834c5c3dea78561a999332ab95825a559a131bad2b5cd6a32ed918564d534513aac896d2da35f81b74c226d75f832957209f6df24dc1c9ddf93d4e28a0b30df4a873401010101010101010101010101010101688dfdc50bd6d3a9ecf1613c58b7ced1",
+                "0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101014a3951bdbf7a4564e422499e59351ba7"
+            ],
+            "prep_shares": [
+                [
+                    "03faf09f79624d05e3a1e17bf1e5117ea6eec816dbd047641506a0c1b1e817fa1ebb27507cea09b00b47e0615ba82ff64a3951bdbf7a4564e422499e59351ba7",
+                    "fc050f60869db2de1c5e1e840e1aee830a99091f9a820099b6b9591984046f48b6b6d58ddb1675ef43101aa8773f3025688dfdc50bd6d3a9ecf1613c58b7ced1"
+                ]
+            ],
+            "out_shares": [
+                [
+                    7539922107207114695252505926366364067,
+                    198783809130402957557687312006462666532,
+                    261868461448231140209796284667530078285,
+                    19075760356742656327154126012204712008
+                ],
+                [
+                    332742444813731348251613267441534402142,
+                    141498557790535505389178461361438099677,
+                    78413905472707322737069488700370687925,
+                    321206606564195806619711647355696054201
+                ]
+            ]
+        }
+    ]
+}
+~~~
