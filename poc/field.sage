@@ -46,7 +46,7 @@ class Field:
     @classmethod
     def decode_vec(cls, encoded: Bytes) -> Vec[Field]:
         L = cls.ENCODED_SIZE
-        if len(encoded) % cls.ENCODED_SIZE != 0:
+        if len(encoded) % L != 0:
             raise ERR_DECODE
 
         vec = []

@@ -801,7 +801,7 @@ def encode_vec(Field, data: Vec[Field]) -> Bytes:
 
 def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
     L = Field.ENCODED_SIZE
-    if len(encoded) % Field.ENCODED_SIZE != 0:
+    if len(encoded) % L != 0:
         raise ERR_DECODE
 
     vec = []
@@ -1303,7 +1303,7 @@ make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 
 ~~~
 def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
-    dst = b"draft-00 prio3"
+    dst = b"vdaf-00 prio3"
     (j, k_query_init) = verify_param
 
     (input_share, proof_share, k_blind, k_hint) = \
