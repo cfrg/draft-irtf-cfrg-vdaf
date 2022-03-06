@@ -1,4 +1,4 @@
-# Fully linear proof (FLP) systems.
+# A generic FLP based on {{BBCGGI19}}, Theorem 4.3.
 
 from copy import deepcopy
 from sagelib.common import ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, \
@@ -126,7 +126,6 @@ def prove_wrapped(Valid, prove_rand):
     assert len(prove_rand) == 0
     valid = Valid()
     valid.GADGETS = wrapped_gadgets
-    valid.GADGET_CALLS = Valid.GADGET_CALLS
     return valid
 
 
@@ -171,7 +170,6 @@ def query_wrapped(Valid, proof):
     assert len(proof) == 0
     valid = Valid()
     valid.GADGETS = wrapped_gadgets
-    valid.GADGET_CALLS = Valid.GADGET_CALLS
     return valid
 
 
