@@ -1773,6 +1773,10 @@ follows:
 
     * Let `padded_w = w + Field.zeros(P_i - len(w))`.
 
+    > NOTE We pad `w` to the nearest power of 2 so that we can use FFT for
+    > interpolating the wire polynomials. Perhaps there is some clever math for
+    > picking `wire_inp` in a way that avoids having to pad.
+
     * Let `poly_wire_i[j-1]` be the lowest degree polynomial for which
       `poly_wire_i[j-1](alpha_i^k) == padded_w[k]` for all `k` in `[P_i]`.
 

@@ -204,6 +204,11 @@ class FlpGeneric(Flp):
             P = len(g.wire[0])
 
             # Compute the wire polynomials for this gadget.
+            #
+            # NOTE We pad the wire inputs to the nearest power of 2 so that we
+            # can use FFT for interpolating the wire polynomials. Perhaps there
+            # is some clever math for picking `wire_inp` in a way that avoids
+            # having to pad.
             alpha = FlpGeneric.Field.gen()^(FlpGeneric.Field.GEN_ORDER / P)
             wire_inp = [alpha^k for k in range(P)]
             wire_polys = []
