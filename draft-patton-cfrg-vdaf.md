@@ -875,7 +875,7 @@ The tables below define finite fields used in the remainder of this document.
 A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
 into a long string of pseudorandom bits. A PRG suitable for this document
 implements the interface specified in this section. Concrete constructions are
-described in {{prg-constructions}}.
+described in the subsections that folllow.
 
 PRGs are defined by a class `Prg` with the following associated parameter:
 
@@ -921,9 +921,7 @@ def expand_into_vec(Prg,
 ~~~
 {: #prg-derived-methods title="Derived class methods for PRGs."}
 
-### Constructions {#prg-constructions}
-
-#### PrgAes128
+### PrgAes128 {#prg-aes128}
 
 > OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be more
 > performant (https://eprint.iacr.org/2019/074.pdf). See
@@ -954,7 +952,7 @@ class PrgAes128:
         stream = AES128-CTR(key, zeros(16), zeros(self.length_consumed))
         return stream[-length:]
 ~~~
-{: #prg-aes128 title="Definition of PRG PrgBlockCipher(Aes128)."}
+{: title="Definition of PRG PrgAes128."}
 
 # Prio3 {#prio3}
 
@@ -1860,9 +1858,9 @@ each can be found in {{test-vectors}}.
 Our first instance of Prio3 is for a simple counter: Each measurement is either
 one or zero and the aggregate result is the sum of the measurements.
 
-This instance uses `PrgAes128` (see {{prg-constructions}}) as its PRG. Its
-validity circuit, denoted `Count`, uses `Field64` ({{field64}}) as its finite
-field. Its gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
+This instance uses `PrgAes128` ({{prg-aes128}}) as its PRG. Its validity
+circuit, denoted `Count`, uses `Field64` ({{field64}}) as its finite field. Its
+gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
 ~~~
 def Mul(x, y):
@@ -1898,7 +1896,7 @@ The next instance of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in range `[0, 2^bits)`, where `bits` is an
 associated parameter.
 
-This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG.
+This instance of prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG.
 Its validity circuit, denoted `Sum`, uses `Field128` ({{field128}}) as its
 finite field. The measurement is encoded as a length-`bits` vector of field
 elements, where the `l`th element of the vector represents the `l`th bit of the
@@ -1962,8 +1960,8 @@ measurements by computing a simple histogram. Each measurement is an arbitrary
 integer and the aggregate result counts the number of measurements that fall in
 a set of fixed buckets.
 
-This instance of prio3 uses `PrgAes128` (see {{prg-constructions}}) as its PRG.
-Its validity circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its
+This instance of prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG. Its
+validity circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its
 finite field. The measurement is encoded as a one-hot vector representing the
 bucket into which the measurement falls (let `bucket` denote a sequence of
 monotonically increasing integers):
