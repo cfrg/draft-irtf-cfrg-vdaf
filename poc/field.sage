@@ -129,7 +129,7 @@ class Field128(Field):
 
     @classmethod
     def gen(cls):
-        return cls(7)^(4611686018427387897)
+        return cls(7)^4611686018427387897
 
 
 ##
