@@ -246,8 +246,8 @@ class FlpGeneric(Flp):
             # Check if `t` is a degenerate point and abort if so.
             #
             # A degenerate point is one that was used as an input for
-            # constructing the gadget polynomial. Using such a point would laak
-            # an output of the gadget to a distributed verifier.
+            # constructing the gadget polynomial. Using such a point would leak
+            # an output of the gadget to the verifier.
             if t^P == FlpGeneric.Field(1):
                 raise ERR_ABORT
 
