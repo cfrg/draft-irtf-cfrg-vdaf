@@ -258,9 +258,10 @@ from the literature.
 
 The remainder of this document is organized as follows: {{overview}} gives a
 brief overview of VDAFs; {{vdaf}} defines the syntax for VDAFs; {{prelim}}
-defines various functionalities that are common to our constructions; {{poplar1}}
-describes the Poplar1 construction; {{prio3}} describes the Prio3 construction;
-and {{security}} enumerates the security considerations for VDAFs.
+defines various functionalities that are common to our constructions; {{prio3}}
+describes the Prio3 construction; {{poplar1}} describes the Poplar1
+construction; and {{security}} enumerates the security considerations for
+VDAFs.
 
 # Conventions and Definitions
 
@@ -392,7 +393,7 @@ there is no explicit verification step.
 
 The remainder of this section defines the VDAF interface in terms of an abstract
 base class `Vdaf`. This class defines the set of methods and attributes a
-concrete VDAF must provide. The attributes are listed in [{vdaf-param}}; the
+concrete VDAF must provide. The attributes are listed in {{vdaf-param}}; the
 methods are defined in the subsections that follow.
 
 
@@ -1087,7 +1088,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 {: #run-flp title="Execution of an FLP."}
 
 The proof system is constructed so that, if `input` is a valid input, then
-`run_flp(Flp,. input)` always returns `True`. On the other hand, if `input` is
+`run_flp(Flp, input)` always returns `True`. On the other hand, if `input` is
 invalid, then as long as `joint_rand` and `query_rand` are generated uniform
 randomly, the output is `False` with overwhelming probability.
 
@@ -2074,9 +2075,9 @@ is zero everywhere except for one element, which is equal to one.
 ## Incremental Distributed Point Functions (IDPFs)
 
 An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
-defined by the IDPF. The Client specifies an index `alpha` and values `beta`,
-one for each "level" `1 <= l <= BITS`. The key generation generates two IDPF
-keys, one for each Aggregator. When evaluated at index `0 <= x < 2^l`, each
+defined by the IDPF. The Client specifies an index `alpha` and a pair of values
+`beta`, one for each "level" `1 <= l <= BITS`. The key generation generates two
+IDPF keys, one for each Aggregator. When evaluated at index `0 <= x < 2^l`, each
 IDPF share returns an additive share of `beta[l]` if `x` is the `l`-bit prefix
 of `alpha` and shares of zero otherwise.
 
@@ -2184,7 +2185,7 @@ def measurement_to_input_shares(_, alpha):
       [a, b, c, A, B] - correlation_share)
 
   # Generate IDPF shares.
-  (key_0, key_1) = idpf_gen(input, beta)
+  (key_0, key_1) = idpf_gen(alpha, beta)
 
   input_shares = [
     encode_input_share(key_0, correlation_shares_0),
@@ -2195,8 +2196,8 @@ def measurement_to_input_shares(_, alpha):
 ~~~
 {: #poplar1-mes2inp title="The input-distribution algorithm for poplar1."}
 
-> TODO It would be more efficient to represent the correlation shares using PRG
-> seeds as suggested in [BBCGGI21].
+> TODO It would be more efficient to represent the shares of `a`, `b`, and `c`
+> using PRG seeds as suggested in [BBCGGI21].
 
 ### Preparation
 
@@ -2229,7 +2230,7 @@ class PrepState:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
       for x in self.candidate_prefixes:
-        value = kdpf_key.eval(l, x)
+        value = self.idpf_key.eval(l, x)
         data_share.append(value[0])
         auth_share.append(value[1])
 
@@ -2405,10 +2406,10 @@ Christopher Wood for useful feedback on and contributions to the spec.
 # Test Vectors {#test-vectors}
 {:numbered="false"}
 
-Test vectors cover the generation input shares and the conversion of input shares
-into output shares. Vectors specify the public and verification parameters, the
-measurement, the aggregation parameter, the expected input shares, the prepare
-messages, and the expected output shares.
+Test vectors cover the generation of input shares and the conversion of input
+shares into output shares. Vectors specify the public and verification
+parameters, the measurement, the aggregation parameter, the expected input
+shares, the prepare messages, and the expected output shares.
 
 Test vectors are encoded in JSON. Input shares and prepare messages are
 represented as hexadecimal streams. To make the tests deterministic,
