@@ -2400,8 +2400,9 @@ This document makes no request of IANA.
 # Acknowledgments
 {:numbered="false"}
 
-Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Mariana Raykova, and
-Christopher Wood for useful feedback on and contributions to the spec.
+Thanks to David Cook, Henry Corrigan-Gibbs, Armando Faz-Hernández, Mariana
+Raykova, and Christopher Wood for useful feedback on and contributions to the
+spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}
