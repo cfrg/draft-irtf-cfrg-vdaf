@@ -838,7 +838,7 @@ def vec_add(left: Vec[Field], right: Vec[Field]):
 ### FFT-Friendly Fields {#field-fft-friendly}
 
 Some VDAFs require fields that are suitable for efficient computation of the
-discrete Fourier transform. (One example is prio3 ({{prio3}}) when instantiated
+discrete Fourier transform. (One example is Prio3 ({{prio3}}) when instantiated
 with the generic FLP of {{flp-generic-construction}}.) Specifically, a field is
 said to be "FFT-friendly" if, in addition to satisfying the interface described
 in {{field}}, it implements the following method:
@@ -1140,7 +1140,7 @@ aggregation, and unsharding are described in the remaining subsections.
 | `OutShare`    | `Vec[Flp.Field]`         |
 | `AggShare`    | `Vec[Flp.Field]`         |
 | `AggResult`   | `Vec[Unsigned]`          |
-{: #prio3-param title="Associated parameters for the prio3 VDAF."}
+{: #prio3-param title="Associated parameters for the Prio3 VDAF."}
 
 ### Setup
 
@@ -1156,7 +1156,7 @@ def setup(Prio3):
     verify_param = [(j, k_query_init) for j in range(Prio3.SHARES)]
     return (None, verify_param)
 ~~~
-{: #prio3-eval-setup title="The setup algorithm for prio3."}
+{: #prio3-eval-setup title="The setup algorithm for Prio3."}
 
 ### Sharding
 
@@ -1268,7 +1268,7 @@ def measurement_to_input_shares(Prio3, _public_param, measurement):
         ))
     return input_shares
 ~~~
-{: #prio3-eval-input title="Input-distribution algorithm for prio3."}
+{: #prio3-eval-input title="Input-distribution algorithm for Prio3."}
 
 ### Preparation
 
@@ -1372,7 +1372,7 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
     return Prio3.encode_prepare_message(verifier,
                                         k_joint_rand_check)
 ~~~
-{: #prio3-prep-state title="Preparation state for prio3."}
+{: #prio3-prep-state title="Preparation state for Prio3."}
 
 ### Aggregation
 
@@ -1386,7 +1386,7 @@ def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
         agg_share = vec_add(agg_share, out_share)
     return agg_share
 ~~~
-{: #prio3-out2agg title="Aggregation algorithm for prio3."}
+{: #prio3-out2agg title="Aggregation algorithm for Prio3."}
 
 ### Unsharding
 
@@ -1400,7 +1400,7 @@ def agg_shares_to_result(Prio3, _agg_param, agg_shares):
         agg = vec_add(agg, agg_share)
     return list(map(lambda x: x.as_unsigned(), agg))
 ~~~
-{: #prio3-agg-output title="Computation of the aggregate result for prio3."}
+{: #prio3-agg-output title="Computation of the aggregate result for Prio3."}
 
 ### Auxiliary Functions {#prio3-helper-functions}
 
@@ -1486,7 +1486,7 @@ def decode_prepare_message(Prio3, encoded):
         raise ERR_DECODE
     return (verifier, k_joint_rand)
 ~~~
-{: #prio3-helpers title="Helper functions required for prio3."}
+{: #prio3-helpers title="Helper functions required for Prio3."}
 
 ## A General-Purpose FLP {#flp-generic}
 
@@ -1897,7 +1897,7 @@ The next instance of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in range `[0, 2^bits)`, where `bits` is an
 associated parameter.
 
-This instance of prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG.
+This instance of Prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG.
 Its validity circuit, denoted `Sum`, uses `Field128` ({{field128}}) as its
 finite field. The measurement is encoded as a length-`bits` vector of field
 elements, where the `l`th element of the vector represents the `l`th bit of the
@@ -1961,7 +1961,7 @@ measurements by computing a simple histogram. Each measurement is an arbitrary
 integer and the aggregate result counts the number of measurements that fall in
 a set of fixed buckets.
 
-This instance of prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG. Its
+This instance of Prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG. Its
 validity circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its
 finite field. The measurement is encoded as a one-hot vector representing the
 bucket into which the measurement falls (let `bucket` denote a sequence of
