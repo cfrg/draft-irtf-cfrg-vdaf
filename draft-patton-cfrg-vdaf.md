@@ -15,13 +15,13 @@ pi: [toc, sortrefs, symrefs]
 
 author:
  -
-    name: Christopher Patton
-    organization: Cloudflare, Inc.
-    email: cpatton@cloudflare.com
- -
     name: Richard L. Barnes
     organization: Cisco
     email: rlb@ipv.sx
+ -
+    name: Christopher Patton
+    organization: Cloudflare, Inc.
+    email: chrispatton+ietf@gmail.com
  -
     name: Phillipp Schoppmann
     organization: Google
