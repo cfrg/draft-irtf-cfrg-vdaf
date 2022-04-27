@@ -2,16 +2,16 @@
 
 This is the working area for the individual Internet-Draft, "Verifiable Distributed Aggregation Functions".
 
-* [Editor's Copy](https://cjpatton.github.io/vdaf/#go.draft-patton-cfrg-vdaf.html)
-* [Datatracker Page](https://datatracker.ietf.org/doc/draft-patton-cfrg-vdaf)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-patton-cfrg-vdaf)
-* [Compare Editor's Copy to Individual Draft](https://cjpatton.github.io/vdaf/#go.draft-patton-cfrg-vdaf.diff)
+* [Editor's Copy](https://cfrg.github.io/draft-irtf-cfrg-vdaf/#go.draft-patton-cfrg-vdaf.html)
+* [Datatracker Page](https://datatracker.ietf.org/doc/draft-irtf-cfrg-vdaf)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf)
+* [Compare Editor's Copy to Individual Draft](https://cfrg.github.io/draft-irtf-cfrg-vdaf/#go.draft-irtf-cfrg-vdaf.diff)
 
 
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/cjpatton/vdaf/blob/main/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.
