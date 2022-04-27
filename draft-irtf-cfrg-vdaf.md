@@ -464,7 +464,7 @@ and distributes them to the Aggregators."}
 > `public_param` with which the clients are configured. For PPM it would be nice
 > if we could rotate the `verify_param` without also having to update the
 > clients. We should consider dropping this at some point. See
-> https://github.com/cjpatton/vdaf/issues/19.
+> https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19.
 
 ## Preparation {#sec-vdaf-prepare}
 
@@ -926,7 +926,7 @@ def expand_into_vec(Prg,
 
 > OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be more
 > performant (https://eprint.iacr.org/2019/074.pdf). See
-> https://github.com/cjpatton/vdaf/issues/32 for details.
+> https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/32 for details.
 
 Our first construction, `PrgAes128`, converts a blockcipher, namely AES-128,
 into a PRG. Seed expansion involves two steps. In the first step, CMAC
@@ -1506,7 +1506,7 @@ specified in {{flp-generic-construction}}.
 > In any case, we can't make this decision until we know which data types to
 > standardize, so for now, we'll stick with the general-purpose construction.
 > The reference implementation can be found at
-> https://github.com/cjpatton/vdaf/tree/main/poc.
+> https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc.
 
 > OPEN ISSUE Chris Wood points out that the this section reads more like a paper
 > than a standard. Eventually we'll want to work this into something that is
@@ -1716,7 +1716,7 @@ This section specifies `FlpGeneric`, an implementation of the `Flp` interface
 the interface defined in {{flp-generic-valid}}.
 
 > NOTE A reference implementation can be found in
-> https://github.com/cjpatton/vdaf/blob/main/poc/flp_generic.sage.
+> https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/flp_generic.sage.
 
 The FLP parameters for `FlpGeneric` are defined in {{flp-generic-param}}. The
 required methods for generating the proof, generating the verifier, and deciding
@@ -1852,7 +1852,7 @@ validity circuit ({{flp-generic-valid}}) and a PRG ({{prg}}). Test vectors for
 each can be found in {{test-vectors}}.
 
 > NOTE Reference implementations of each of these VDAFs can be found in
-> https://github.com/cjpatton/vdaf/blob/main/poc/vdaf_prio3.sage.
+> https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/vdaf_prio3.sage.
 
 ### Prio3Aes128Count
 
