@@ -1,7 +1,7 @@
 ---
 title: "Verifiable Distributed Aggregation Functions"
 abbrev: "VDAF"
-docname: draft-patton-cfrg-vdaf-latest
+docname: draft-irtf-cfrg-vdaf-latest
 category: info
 
 ipr: trust200902
