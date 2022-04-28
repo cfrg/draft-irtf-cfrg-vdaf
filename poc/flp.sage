@@ -16,10 +16,10 @@ class Flp:
     JOINT_RAND_LEN: Unsigned
 
     # Length of the randomness consumed by the prover.
-    JOINT_RAND_LEN: Unsigned
+    PROVE_RAND_LEN: Unsigned
 
     # Length of the randomness consumed by the verifier.
-    JOINT_RAND_LEN: Unsigned
+    QUERY_RAND_LEN: Unsigned
 
     # Length of the encoded input.
     INPUT_LEN: Unsigned
