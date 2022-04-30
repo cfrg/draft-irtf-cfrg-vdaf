@@ -94,7 +94,7 @@ class Vdaf:
     @classmethod
     def out_shares_to_agg_share(Vdaf,
                                 agg_param: AggParam,
-                                out_shares: Vec[Prep.OutShare]) -> AggShare:
+                                out_shares: Vec[OutShare]) -> AggShare:
         raise Error("not implemented")
 
     # Unshard the aggregate shares and compute the aggregate result. This is
