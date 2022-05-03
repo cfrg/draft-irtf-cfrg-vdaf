@@ -200,7 +200,7 @@ class FlpGeneric(Flp):
 
         # Construct the proof.
         proof = []
-        for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
+        for g in valid.GADGETS:
             P = len(g.wire[0])
 
             # Compute the wire polynomials for this gadget.
