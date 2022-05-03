@@ -221,8 +221,8 @@ subtle but consequential ways. This document therefore has two important goals:
  1. Providing cryptographers with design criteria that allow new constructions
     to be easily used by applications.
 
-This document also specifies two concrete VDAF schemes, each based on a protocol
-from the literature.
+This document also specifies two concrete VDAF schemes, each based on a
+protocol from the literature.
 
 * The aforementioned Prio system {{CGB17}} allows for the privacy-preserving
   computation of a variety aggregate statistics. The basic idea underlying Prio
@@ -257,12 +257,28 @@ from the literature.
   In {{poplar1}} we describe a VDAF called Poplar1 that implements this
   functionality.
 
+Finally, perhaps the most complex aspect of schemes like Prio3 and Poplar1 is
+the process by which the client-generated measurements are prepared for
+aggregation. Because these constructions are based on secret sharing, the
+servers will be required to exchange some amount of information in order to
+verify the measurement is valid and can be aggregated. Depending on the
+construction, this process may require multiple round trips over the network.
+
+There are applications in which this verification step may not be necessary,
+e.g., when the client's software is run a trusted execution environment. To
+support these applications, this document also defines Distributed Aggregation
+Functions (DAFs) as a simpler class of protocols that aim to provide the same
+privacy guarantee as VDAFs but fall short of being verifiable.
+
+> OPEN ISSUE Decide if we should give one or two example DAFs. There are natural
+> variants of Prio3 and Poplar1 that might be worth describing.
+
 The remainder of this document is organized as follows: {{overview}} gives a
-brief overview of VDAFs; {{vdaf}} defines the syntax for VDAFs; {{prelim}}
-defines various functionalities that are common to our constructions; {{prio3}}
-describes the Prio3 construction; {{poplar1}} describes the Poplar1
-construction; and {{security}} enumerates the security considerations for
-VDAFs.
+brief overview of DAFs and VDAFs; {{daf}} defines the syntax for DAFs; {{vdaf}}
+defines the syntax for VDAFs; {{prelim}} defines various functionalities that
+are common to our constructions; {{prio3}} describes the Prio3 construction;
+{{poplar1}} describes the Poplar1 construction; and {{security}} enumerates the
+security considerations for VDAFs.
 
 # Conventions and Definitions
 
@@ -321,8 +337,8 @@ Some common functionalities:
 ~~~
 {: #overall-flow title="Overall data flow of a VDAF"}
 
-In a VDAF-based private measurement system, we distinguish three types of
-actors: Clients, Aggregators, and Collectors.  The overall flow of the
+In a DAF- or VDAF-based private measurement system, we distinguish three types
+of actors: Clients, Aggregators, and Collectors.  The overall flow of the
 measurement process is as follows:
 
 * Clients are configured with public parameters for a set of Aggregators.
@@ -333,8 +349,8 @@ measurement process is as follows:
     * Output shares are in one-to-one correspondence with the input shares.
     * Just as each Aggregator receives one input share of each input, at the end
       of the validation process, each aggregator holds one output share.
-    * In most VDAFs, Aggregators will need to exchange information among
-      themselves as part of the validation process.
+    * In VDAFs, Aggregators will need to exchange information among themselves
+      as part of the validation process.
 * Each Aggregator combines the output shares across inputs in the batch to
   compute the "aggregate share" for that batch, i.e., its share of the desired
   aggregate result.
@@ -343,23 +359,27 @@ measurement process is as follows:
 
 Aggregators are a new class of actor relative to traditional measurement systems
 where clients submit measurements to a single server.  They are critical for
-both the privacy properties of the system and the correctness of the
-measurements obtained.  The privacy properties of the system are assured by
-non-collusion among Aggregators, and Aggregators are the entities that perform
-validation of client inputs.  Thus clients trust Aggregators not to collude
-(typically it is required that at least one Aggregator is honest), and
-Collectors trust Aggregators to properly verify Client inputs.
+both the privacy properties of the system and, in the case of VDAFs, the
+correctness of the measurements obtained.  The privacy properties of the system
+are assured by non-collusion among Aggregators, and Aggregators are the entities
+that perform validation of Client measurements.  Thus clients trust Aggregators
+not to collude (typically it is required that at least one Aggregator is
+honest), and Collectors trust Aggregators to correctly run the protocol.
 
-Within the bounds of the non-collusion requirements of a given VDAF instance, it
-is possible for the same entity to play more than one role.  For example, the
+Within the bounds of the non-collusion requirements of a given (V)DAF instance,
+it is possible for the same entity to play more than one role.  For example, the
 Collector could also act as an Aggregator, effectively using the other
-Aggregators to augment a basic client-server protocol.
+Aggregator(s) to augment a basic client-server protocol.
 
 In this document, we describe the computations performed by the actors in this
 system.  It is up to applications to arrange for the required information to be
 delivered to the proper actors in the proper sequence.  In general, we assume
 that all communications are confidential and mutually authenticated, with the
 exception that Clients submitting measurements may be anonymous.
+
+# Definition of DAFs {#daf}
+
+> TODO Issue#20
 
 # Definition of VDAFs {#vdaf}
 
