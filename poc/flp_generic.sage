@@ -238,9 +238,7 @@ class FlpGeneric(Flp):
 
         # Construct the verifier message.
         verifier = [v]
-        for (g, g_calls, t) in zip(valid.GADGETS,
-                                   valid.GADGET_CALLS,
-                                   query_rand):
+        for (g, t) in zip(valid.GADGETS, query_rand):
             P = len(g.wire[0])
 
             # Check if `t` is a degenerate point and abort if so.
