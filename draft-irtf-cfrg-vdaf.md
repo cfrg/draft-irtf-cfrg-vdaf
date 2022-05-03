@@ -211,9 +211,10 @@ subtle but consequential ways. This document therefore has two important goals:
     documenting relevant operational and security bounds for that interface:
 
     1. General patterns of communications among the various actors involved in
-       the system (clients, aggregation servers, and measurement collectors);
+       the system (clients, aggregation servers, and the collector of the
+       aggregate result);
     1. Capabilities of a malicious coalition of servers attempting to divulge
-       information about client inputs; and
+       information about client measurements; and
     1. Conditions that are necessary to ensure that malicious clients cannot
        corrupt the computation.
 
@@ -226,12 +227,12 @@ from the literature.
 * The aforementioned Prio system {{CGB17}} allows for the privacy-preserving
   computation of a variety aggregate statistics. The basic idea underlying Prio
   is fairly simple:
-  1. Each client shards its input into a sequence of additive shares and
+  1. Each client shards its measurement into a sequence of additive shares and
      distributes the shares among the aggregation servers.
   1. Next, each server adds up its shares locally, resulting in an additive
      share of the aggregate.
-  1. Finally, the aggregation servers combine their additive shares to obtain
-     the final aggregate.
+  1. Finally, the aggregation servers send their aggregate shares to the data
+     collector, who combines them to obtain the aggregate result.
 
   The difficult part of this system is ensuring that the servers hold shares of
   a valid input, e.g., the input is an integer in a specific range. Thus Prio
@@ -245,13 +246,13 @@ from the literature.
   for solving the `t`-heavy-hitters problem in a privacy-preserving manner. Here
   each client holds a bit-string of length `n`, and the goal of the aggregation
   servers is to compute the set of inputs that occur at least `t` times. The
-  core primitive used in their protocol is a generalization of a Distributed
-  Point Function (DPF) {{GI14}} that allows the servers to "query" their DPF
-  shares on any bit-string of length shorter than or equal to `n`. As a result
-  of this query, each of the servers has an additive share of a bit indicating
-  whether the string is a prefix of the client's input. The protocol also
-  specifies a multi-party computation for verifying that at most one string
-  among a set of candidates is a prefix of the client's input.
+  core primitive used in their protocol is a specialized Distributed Point
+  Function (DPF) {{GI14}} that allows the servers to "query" their DPF shares on
+  any bit-string of length shorter than or equal to `n`. As a result of this
+  query, each of the servers has an additive share of a bit indicating whether
+  the string is a prefix of the client's input. The protocol also specifies a
+  multi-party computation for verifying that at most one string among a set of
+  candidates is a prefix of the client's input.
 
   In {{poplar1}} we describe a VDAF called Poplar1 that implements this
   functionality.
