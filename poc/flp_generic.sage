@@ -158,7 +158,7 @@ def query_wrapped(Valid, proof):
     wrapped_gadgets = []
     for (g, g_calls) in zip(Valid.GADGETS, Valid.GADGET_CALLS):
         P = next_power_of_2(1 + g_calls)
-        gadget_poly_len = g.ARITY + g.DEGREE * (P - 1) + 1
+        gadget_poly_len = g.DEGREE * (P - 1) + 1
         wire_seeds, proof = proof[:g.ARITY], proof[g.ARITY:]
         gadget_poly, proof = proof[:gadget_poly_len], proof[gadget_poly_len:]
         wrapped = QueryGadget(Valid.Field,
