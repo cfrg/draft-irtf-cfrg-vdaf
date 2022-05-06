@@ -2401,8 +2401,8 @@ This document makes no request of IANA.
 {:numbered="false"}
 
 Thanks to David Cook, Henry Corrigan-Gibbs, Armando Faz-Hernández, Mariana
-Raykova, and Christopher Wood for useful feedback on and contributions to the
-spec.
+Raykova, Jacob Rothstein, and Christopher Wood for useful feedback on and
+contributions to the spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}

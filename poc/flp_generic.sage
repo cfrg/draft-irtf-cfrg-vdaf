@@ -515,6 +515,37 @@ class Histogram(Valid):
 # TESTS
 #
 
+class TestMultiGadget(Valid):
+    # Associated types
+    Field = field.Field64
+    Measurement = Unsigned
+
+    # Associated parameters
+    GADGETS = [Mul(), Mul()]
+    GADGET_CALLS = [1, 2]
+    INPUT_LEN = 1
+    JOINT_RAND_LEN = 0
+    OUTPUT_LEN = 1
+
+    def eval(self, inp, joint_rand, _num_shares):
+        check_valid_eval(self, inp, joint_rand)
+        # Not a very useful circuit, obviously. We just wnat to do something.
+        x = self.GADGETS[0].eval(self.Field, [inp[0], inp[0]])
+        y = self.GADGETS[1].eval(self.Field, [inp[0], x])
+        z = self.GADGETS[1].eval(self.Field, [x, y])
+        return z
+
+    @classmethod
+    def encode(Count, measurement):
+        if measurement not in [0, 1]:
+            raise ERR_INPUT
+        return [Count.Field(measurement)]
+
+    @classmethod
+    def truncate(Count, inp):
+        if len(inp) != 1:
+            raise ERR_INPUT
+        return inp
 
 # Test for equivalence of `Gadget.eval()` and `Gadget.eval_poly()`.
 def test_gadget(g, Field, test_length):
@@ -543,13 +574,14 @@ def test_flp_generic(cls, test_cases):
         joint_rand = cls.Field.rand_vec(cls.JOINT_RAND_LEN)
         v = cls.Valid().eval(inp, joint_rand, 1)
         if (v == cls.Field(0)) != expected_decision:
-            print("test {} failed: validity circuit returned {}".format(i, v))
+            print("{}: test {} failed: validity circuit returned {}".format(
+                cls.Valid.__name__, i, v))
 
         # Run the FLP.
         decision = run_flp(cls, inp, 1)
         if decision != expected_decision:
-            print("test {} failed: proof evaluation resulted in {}; want {}".format(
-                i, decision, expected_decision))
+            print("{}: test {} failed: proof evaluation resulted in {}; want {}".format(
+                cls.Valid.__name__, i, decision, expected_decision))
 
 if __name__ == "__main__":
     cls = FlpGeneric.with_valid(Count)
@@ -575,4 +607,9 @@ if __name__ == "__main__":
         (cls.encode(13), True),
         (cls.encode(2^10 - 1), True),
         (cls.Field.rand_vec(4), False),
+    ])
+
+    cls = FlpGeneric.with_valid(TestMultiGadget)
+    test_flp_generic(cls, [
+        (cls.encode(0), True),
     ])
