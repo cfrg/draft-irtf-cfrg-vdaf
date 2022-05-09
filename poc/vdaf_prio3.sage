@@ -22,6 +22,7 @@ class Prio3(Vdaf):
     SHARES = None  # provided by instantiation (a number between `[0, 255)`)
 
     # Types required by `Vdaf`
+    VerifyParam = Tuple[Unsigned, Bytes]
     Measurement = Flp.Measurement
     OutShare = Vec[Flp.Field]
     AggShare = Vec[Flp.Field]
