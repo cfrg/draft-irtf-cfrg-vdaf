@@ -611,11 +611,10 @@ Overall execution of a VDAF comprises the following stages:
 * Unsharding - Combining a sequence of aggregate shares into an aggregate
   result
 
-Note that the Preparation stage now performs two important functions:
-Verification and conversion. Conversion translates input shares into output
-shares that are compatible with the aggregation function. Verification ensures
-that aggregating the recovered output shares will not lead to a garbled
-aggregate result.
+In contrast to DAFs, the Preparation stage for VDAFs now performs an additional
+important task: verification of the validity of the recovered output shares.
+This process ensures that aggregating the output shares will not lead to a
+garbled aggregate result.
 
 <!-- For some VDAFs, like Prio3 ({{prio3}}) or Poplar1 ({{poplar1}}), the output
 shares are recovered first, then validated. For other protocols, like Prio+
