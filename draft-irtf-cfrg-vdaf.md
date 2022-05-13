@@ -206,7 +206,7 @@ protocols for privacy-preserving measurement proposed in the literature. These
 protocols vary in their operational and security considerations, sometimes in
 subtle but consequential ways. This document therefore has two important goals:
 
- 1. Providing applications like {{?I-D.draft-gpew-priv-ppm}} with a simple,
+ 1. Providing applications like {{?DAP=I-D.draft-ietf-ppm-dap}} with a simple,
     uniform interface for accessing privacy-preserving measurement schemes, and
     documenting relevant operational and security bounds for that interface:
 
@@ -221,8 +221,8 @@ subtle but consequential ways. This document therefore has two important goals:
  1. Providing cryptographers with design criteria that allow new constructions
     to be easily used by applications.
 
-This document also specifies two concrete VDAF schemes, each based on a
-protocol from the literature.
+This document also specifies two concrete VDAF schemes, each based on a protocol
+from the literature.
 
 * The aforementioned Prio system {{CGB17}} allows for the privacy-preserving
   computation of a variety aggregate statistics. The basic idea underlying Prio
@@ -542,8 +542,8 @@ shares."}
 
 > QUESTION Maybe the aggregation algorithms should be randomized in order to
 > allow the Aggregators (or the Collector) to add noise for differential
-> privacy. (See the security considerations of {{?I-D.draft-gpew-priv-ppm}}.) Or
-> is this out-of-scope of this document? See
+> privacy. (See the security considerations of {{?DAP=I-D.draft-ietf-ppm-dap}}.)
+> Or is this out-of-scope of this document? See
 > https://github.com/ietf-wg-ppm/ppm-specification/issues/19.
 
 ## Execution of a DAF {#daf-execution}
@@ -583,7 +583,7 @@ the DAF: An aggregation parameter and a sequence of measurements. The procedure
 prescribes how a DAF is executed in a "benign" environment in which there is no
 adversary and the messages are passed among the protocol participants over
 secure point-to-point channels. In reality, these channels need to be
-instantiated by some "wrapper protocol", such as {{I-D.draft-gpew-priv-ppm}},
+instantiated by some "wrapper protocol", such as {{?DAP=I-D.draft-ietf-ppm-dap}},
 that realizes these channels using suitable cryptographic mechanisms. Moreover,
 some fraction of the Aggregators (or Clients) may be malicious and diverge from
 their prescribed behaviors. {{security}} describes the execution of the DAF in
@@ -671,7 +671,7 @@ The data flow for this stage is the same as illustrated in {{shard-flow}}.
 > OPEN ISSUE The `public_param` is intended to allow for protocols that require
 > the Client to use a public key for sharding its measurement. When rotating the
 > `verify_param` for such a scheme, it would be necessary to also update the
-> `public_param` with which the clients are configured. For PPM it would be nice
+> `public_param` with which the clients are configured. For DAP it would be nice
 > if we could rotate the `verify_param` without also having to update the
 > clients. We should consider dropping this at some point. See
 > https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19.
