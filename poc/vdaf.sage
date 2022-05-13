@@ -125,7 +125,7 @@ def run_vdaf(Vdaf,
             "out_shares": [],
         }
 
-        # Each Client shards its input into shares.
+        # Each Client shards its measurement into input shares.
         input_shares = Vdaf.measurement_to_input_shares(measurement)
         for input_share in input_shares:
             prep_test_vector["input_shares"].append(input_share.hex())
@@ -148,12 +148,13 @@ def run_vdaf(Vdaf,
                 if i < Vdaf.ROUNDS:
                     (prep_states[j], out) = out
                 outbound.append(out)
-            # This is where we would send messages over the network in a
-            # distributed VDAF computation.
+            # This is where we would send messages over the
+            # network in a distributed VDAF computation.
             if i < Vdaf.ROUNDS:
                 for prep_share in outbound:
                     prep_test_vector["prep_shares"][i].append(prep_share.hex())
-                inbound = Vdaf.prep_shares_to_prep(agg_param, outbound)
+                inbound = Vdaf.prep_shares_to_prep(agg_param,
+                                                   outbound)
 
         # The final outputs of prepare phasre are the output shares.
         for out_share in outbound:
@@ -162,11 +163,13 @@ def run_vdaf(Vdaf,
         test_vector["prep"].append(prep_test_vector)
         out_shares.append(outbound)
 
-    # Each Aggregator aggregates its output shares into an aggregate share.
+    # Each Aggregator aggregates its output shares into an
+    # aggregate share.
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = Vdaf.out_shares_to_agg_share(agg_param, out_shares_j)
+        agg_share_j = Vdaf.out_shares_to_agg_share(agg_param,
+                                                   out_shares_j)
         agg_shares.append(agg_share_j)
         test_vector["agg_shares"].append(
             list(map(lambda x: x.as_unsigned(), agg_share_j)))
