@@ -1069,9 +1069,6 @@ class PrgAes128:
 
 # Prio3 {#prio3}
 
-> TODO Update this section in light of removing the public parameter and
-> replacing the verification parameter.
-
 > NOTE This construction has not undergone significant security analysis.
 
 This section describes "Prio3", a VDAF for Prio {{CGB17}}. Prio is suitable for
@@ -1245,33 +1242,16 @@ aggregation, and unsharding are described in the remaining subsections.
 
 | Parameter     | Value                    |
 |:--------------|:-------------------------|
+| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`      |
 | `ROUNDS`      | `1`                      |
 | `SHARES`      | in `[2, 255)`            |
 | `Measurement` | `Flp.Measurement`        |
-| `PublicParam` | `None`                   |
-| `VerifyParam` | `Tuple[Unsigned, Bytes]` |
 | `AggParam`    | `None`                   |
 | `Prep`        | `Tuple[Vec[Flp.Field], Optional[Bytes], Bytes]` |
 | `OutShare`    | `Vec[Flp.Field]`         |
 | `AggShare`    | `Vec[Flp.Field]`         |
 | `AggResult`   | `Vec[Unsigned]`          |
 {: #prio3-param title="Associated parameters for the Prio3 VDAF."}
-
-### Setup
-
-The setup algorithm generates a symmetric key shared by all of the Aggregators.
-The key is used to derive query randomness for the FLP query-generation
-algorithm run by the Aggregators during preparation. An Aggregator's
-verification parameter also includes its "ID", a unique integer in `[0,
-SHARES)`.
-
-~~~
-def setup(Prio3):
-    k_query_init = gen_rand(Prio3.Prg.SEED_SIZE)
-    verify_param = [(j, k_query_init) for j in range(Prio3.SHARES)]
-    return (None, verify_param)
-~~~
-{: #prio3-eval-setup title="The setup algorithm for Prio3."}
 
 ### Sharding
 
@@ -1300,7 +1280,7 @@ are called `encode_leader_share` and `encode_helper_share` respectively and they
 are described in {{prio3-helper-functions}}.
 
 ~~~
-def measurement_to_input_shares(Prio3, _public_param, measurement):
+def measurement_to_input_shares(Prio3, measurement):
     # Domain separation tag for PRG info string
     dst = b"vdaf-00 prio3"
     inp = Prio3.Flp.encode(measurement)
@@ -1417,19 +1397,17 @@ The algorithms required for preparation are defined as follows. These algorithms
 make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 
 ~~~
-def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
+def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
     # Domain separation tag for PRG info string
     dst = b"vdaf-00 prio3"
-    (j, k_query_init) = verify_param
 
     (input_share, proof_share, k_blind, k_hint) = \
-        Prio3.decode_leader_share(input_share) if j == 0 else \
-        Prio3.decode_helper_share(dst, j, input_share)
+        Prio3.decode_leader_share(input_share) if agg_id == 0 else \
+        Prio3.decode_helper_share(dst, agg_id, input_share)
 
     out_share = Prio3.Flp.truncate(input_share)
 
-    k_query_rand = Prio3.Prg.derive_seed(k_query_init,
-                                         byte(255) + nonce)
+    k_query_rand = Prio3.Prg.derive_seed(verify_key, byte(255) + nonce)
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_query_rand,
@@ -1439,8 +1417,8 @@ def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
     joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded = Prio3.Flp.Field.encode_vec(input_share)
-        k_joint_rand_share = Prio3.Prg.derive_seed(k_blind,
-                                                   byte(j) + encoded)
+        k_joint_rand_share = Prio3.Prg.derive_seed(
+            k_blind, byte(agg_id) + encoded)
         k_joint_rand = xor(k_hint, k_joint_rand_share)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
@@ -1564,17 +1542,17 @@ def encode_helper_share(Prio3,
         encoded += k_hint
     return encoded
 
-def decode_helper_share(Prio3, dst, j, encoded):
+def decode_helper_share(Prio3, dst, agg_id, encoded):
     l = Prio3.Prg.SEED_SIZE
     k_input_share, encoded = encoded[:l], encoded[l:]
     input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                             k_input_share,
-                                            dst + byte(j),
+                                            dst + byte(agg_id),
                                             Prio3.Flp.INPUT_LEN)
     k_proof_share, encoded = encoded[:l], encoded[l:]
     proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                             k_proof_share,
-                                            dst + byte(j),
+                                            dst + byte(agg_id),
                                             Prio3.Flp.PROOF_LEN)
     k_blind, k_hint = None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
