@@ -2540,6 +2540,8 @@ contributions to the spec.
 # Test Vectors {#test-vectors}
 {:numbered="false"}
 
+> TODO Re-generate test vectors
+
 Test vectors cover the generation of input shares and the conversion of input
 shares into output shares. Vectors specify the public and verification
 parameters, the measurement, the aggregation parameter, the expected input

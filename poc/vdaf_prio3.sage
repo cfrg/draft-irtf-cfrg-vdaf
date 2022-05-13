@@ -18,11 +18,11 @@ class Prio3(Vdaf):
     Prg = prg.Prg
 
     # Parameters required by `Vdaf`
+    VERIFY_KEY_SIZE = None # Set by the PRG
     ROUNDS = 1
-    SHARES = None  # provided by instantiation (a number between `[0, 255)`)
+    SHARES = None  # A number between `[0, 255)` set later
 
     # Types required by `Vdaf`
-    VerifyParam = Tuple[Unsigned, Bytes]
     Measurement = Flp.Measurement
     OutShare = Vec[Flp.Field]
     AggShare = Vec[Flp.Field]
@@ -32,13 +32,7 @@ class Prio3(Vdaf):
                  Bytes]           # outbound message
 
     @classmethod
-    def setup(Prio3):
-        k_query_init = gen_rand(Prio3.Prg.SEED_SIZE)
-        verify_param = [(j, k_query_init) for j in range(Prio3.SHARES)]
-        return (None, verify_param)
-
-    @classmethod
-    def measurement_to_input_shares(Prio3, _public_param, measurement):
+    def measurement_to_input_shares(Prio3, measurement):
         dst = VERSION + b" prio3"
         inp = Prio3.Flp.encode(measurement)
         k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
@@ -120,20 +114,19 @@ class Prio3(Vdaf):
         return input_shares
 
     # TODO We could shave off a couple of blockcipher calls if, instead of
-    # deriving `k_query_rand`, we use `k_query_init` to derive the query
+    # deriving `k_query_rand`, we use `verify_key` to derive the query
     # randomness directly.
     @classmethod
-    def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
+    def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
         dst = VERSION + b" prio3"
-        (j, k_query_init) = verify_param
 
         (input_share, proof_share, k_blind, k_hint) = \
-            Prio3.decode_leader_share(input_share) if j == 0 else \
-            Prio3.decode_helper_share(dst, j, input_share)
+            Prio3.decode_leader_share(input_share) if agg_id == 0 else \
+            Prio3.decode_helper_share(dst, agg_id, input_share)
 
         out_share = Prio3.Flp.truncate(input_share)
 
-        k_query_rand = Prio3.Prg.derive_seed(k_query_init, byte(255) + nonce)
+        k_query_rand = Prio3.Prg.derive_seed(verify_key, byte(255) + nonce)
         query_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_query_rand,
@@ -143,7 +136,8 @@ class Prio3(Vdaf):
         joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             encoded = Prio3.Flp.Field.encode_vec(input_share)
-            k_joint_rand_share = Prio3.Prg.derive_seed(k_blind, byte(j) + encoded)
+            k_joint_rand_share = Prio3.Prg.derive_seed(
+                k_blind, byte(agg_id) + encoded)
             k_joint_rand = xor(k_hint, k_joint_rand_share)
             joint_rand = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
@@ -253,17 +247,17 @@ class Prio3(Vdaf):
         return encoded
 
     @classmethod
-    def decode_helper_share(Prio3, dst, j, encoded):
+    def decode_helper_share(Prio3, dst, agg_id, encoded):
         l = Prio3.Prg.SEED_SIZE
         k_input_share, encoded = encoded[:l], encoded[l:]
         input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                 k_input_share,
-                                                dst + byte(j),
+                                                dst + byte(agg_id),
                                                 Prio3.Flp.INPUT_LEN)
         k_proof_share, encoded = encoded[:l], encoded[l:]
         proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                 k_proof_share,
-                                                dst + byte(j),
+                                                dst + byte(agg_id),
                                                 Prio3.Flp.PROOF_LEN)
         k_blind, k_hint = None, None
         if Prio3.Flp.JOINT_RAND_LEN > 0:
@@ -306,6 +300,7 @@ class Prio3(Vdaf):
     def with_prg(cls, Prg):
         new_cls = deepcopy(cls)
         new_cls.Prg = Prg
+        new_cls.VERIFY_KEY_SIZE = Prg.SEED_SIZE
         return new_cls
 
     @classmethod
@@ -314,13 +309,6 @@ class Prio3(Vdaf):
         new_cls.Flp = Flp
         return new_cls
 
-    @classmethod
-    def test_vector_verify_params(cls, verify_params):
-        test_vec = []
-        for verify_param in verify_params:
-            (j, k_query_init) = verify_param
-            test_vec.append((j, k_query_init.hex()))
-        return test_vec
 
 ##
 # INSTANTIATIONS
@@ -331,14 +319,16 @@ class Prio3Aes128Count(Prio3):
     Prg = prg.PrgAes128
     Flp = flp_generic.FlpGeneric.with_valid(flp_generic.Count)
 
+    # Associated types.
+    VERIFY_KEY_SIZE = prg.PrgAes128.SEED_SIZE
+
 class Prio3Aes128Sum(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgAes128
-    Flp = None # Set by `Prio3Aes128Sum.with_bits()`
 
     @classmethod
     def with_bits(cls, bits: Unsigned):
-        new_cls = deepcopy(cls)
+        new_cls = deepcopy(cls).with_prg(prg.PrgAes128)
         new_cls.Flp = flp_generic.FlpGeneric \
             .with_valid(flp_generic.Sum.with_bits(bits))
         return new_cls
@@ -346,11 +336,10 @@ class Prio3Aes128Sum(Prio3):
 class Prio3Aes128Histogram(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgAes128
-    Flp = None # Set by `Prio3Aes128Sum.with_bits()`
 
     @classmethod
     def with_buckets(cls, buckets: Vec[Unsigned]):
-        new_cls = deepcopy(cls)
+        new_cls = deepcopy(cls).with_prg(prg.PrgAes128)
         new_cls.Flp = flp_generic.FlpGeneric \
             .with_valid(flp_generic.Histogram.with_buckets(buckets))
         return new_cls

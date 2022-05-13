@@ -11,6 +11,9 @@ import json
 # A VDAF.
 class Vdaf:
 
+    # Length of the verification key shared by the Aggregators.
+    VERIFY_KEY_SIZE = None
+
     # The number of Aggregators.
     SHARES: Unsigned = None
 
@@ -19,14 +22,6 @@ class Vdaf:
 
     # The meeasurement type.
     Measurement = None
-
-    # Type of the public parameter used by a Client to produce its input
-    # shares.
-    PublicParam = None
-
-    # The type of the verification parameter used by an Aggregator during the
-    # Prepare computation.
-    VerifyParam = None
 
     # The aggregation parameter type.
     AggParam = None
@@ -43,27 +38,22 @@ class Vdaf:
     # The aggregate result type.
     AggResult = None
 
-    # Generate and return the public parameter used by the clients and the
-    # verification parameter used by each aggregator.
-    @classmethod
-    def setup(Vdaf) -> Tuple[PublicParam, Vec[VerifyParam]]:
-        raise Error("not implemented")
-
     # Shard a measurement into a sequence of input shares. This method is run
     # by the client.
     @classmethod
     def measurement_to_input_shares(Vdaf,
-                                    public_param: PublicParam,
                                     measurement: Measurement) -> Vec[Bytes]:
         raise Error("not implemented")
 
-    # Initialize the Prpare state for the given input share. This method is
-    # run by an aggregator. Along with the input share, the inputs include the
-    # aggregator's verificaiton parameter and the aggregation parameter and
-    # nonce agreed upon by all of the aggregators.
+    # Initialize the Prepare state for the given input share. This method is run
+    # by an Aggregator. Along with the input share, the inputs include the
+    # verification key shared by all of the Aggregators, the Aggregator's ID (a
+    # unique integer in range `[0, SHARES)`, and the aggregation parameter and
+    # nonce agreed upon by all of the Aggregators.
     @classmethod
     def prep_init(Vdaf,
-                  verify_param: VerifyParam,
+                  verify_key: Bytes,
+                  agg_id: Unsigned,
                   agg_param: AggParam,
                   nonce: Bytes,
                   input_share: Bytes) -> Prep:
@@ -105,12 +95,6 @@ class Vdaf:
                              agg_shares: Vec[AggShare]) -> AggResult:
         raise Error("not implemented")
 
-    # Returns a printable version of the verification parameters. This is used
-    # for test vector generation.
-    @classmethod
-    def test_vector_verify_params(Vdaf, verify_params: Vec[VerifyParam]):
-        raise Error("not implemented")
-
 
 # Run the VDAF on a list of measurements.
 #
@@ -120,12 +104,11 @@ def run_vdaf(Vdaf,
              nonces: Vec[Bytes],
              measurements: Vec[Vdaf.Measurement],
              print_test_vector=False):
-    # Distribute long-lived parameters.
-    (public_param, verify_params) = Vdaf.setup()
+    # Generate the long-lived verification key.
+    verify_key = gen_rand(Vdaf.VERIFY_KEY_SIZE)
 
     test_vector = {
-        "public_param": public_param,
-        "verify_params": Vdaf.test_vector_verify_params(verify_params),
+        "verify_key": verify_key.hex(),
         "agg_param": agg_param,
         "prep": [],
         "agg_shares": [],
@@ -143,15 +126,14 @@ def run_vdaf(Vdaf,
         }
 
         # Each Client shards its input into shares.
-        input_shares = Vdaf.measurement_to_input_shares(public_param,
-                                                        measurement)
+        input_shares = Vdaf.measurement_to_input_shares(measurement)
         for input_share in input_shares:
             prep_test_vector["input_shares"].append(input_share.hex())
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
         for j in range(Vdaf.SHARES):
-            state = Vdaf.prep_init(verify_params[j],
+            state = Vdaf.prep_init(verify_key, j,
                                    agg_param,
                                    nonce,
                                    input_shares[j])
@@ -210,6 +192,7 @@ class VdafTest(Vdaf):
     Field = field.Field128
 
     # Associated parameters
+    VERIFY_KEY_SIZE = 0
     SHARES = 2
     ROUNDS = 1
 
@@ -232,7 +215,7 @@ class VdafTest(Vdaf):
         return (None, [None for _ in range(cls.SHARES)])
 
     @classmethod
-    def measurement_to_input_shares(cls, _public_param, measurement):
+    def measurement_to_input_shares(cls, measurement):
         helper_shares = cls.Field.rand_vec(cls.SHARES-1)
         leader_share = cls.Field(measurement)
         for helper_share in helper_shares:
@@ -243,7 +226,7 @@ class VdafTest(Vdaf):
         return input_shares
 
     @classmethod
-    def prep_init(cls, _verify_param, _agg_param, _nonce, input_share):
+    def prep_init(cls, _verify_key, _agg_id, _agg_param, _nonce, input_share):
         return VdafTest.Prep(cls.input_range, input_share)
 
     @classmethod
@@ -276,10 +259,6 @@ class VdafTest(Vdaf):
     @classmethod
     def agg_shares_to_result(cls, _agg_param, agg_shares):
         return [reduce(lambda x, y: [x[0] + y[0]], agg_shares)[0].as_unsigned()]
-
-    @classmethod
-    def test_vector_verify_params(cls, verify_params: Vec[VerifyParam]):
-        pass
 
 
 def test_vdaf(cls,
