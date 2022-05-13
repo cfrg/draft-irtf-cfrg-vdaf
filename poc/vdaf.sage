@@ -17,7 +17,8 @@ class Vdaf:
     # The number of Aggregators.
     SHARES: Unsigned = None
 
-    # The number of rounds of communication during the Prepare phase.
+    # The number of rounds of communication during the Prepare phase. This is an
+    # integer greater than 0.
     ROUNDS: Unsigned = None
 
     # The meeasurement type.
@@ -49,23 +50,24 @@ class Vdaf:
     # by an Aggregator. Along with the input share, the inputs include the
     # verification key shared by all of the Aggregators, the Aggregator's ID (a
     # unique integer in range `[0, SHARES)`, and the aggregation parameter and
-    # nonce agreed upon by all of the Aggregators.
+    # nonce agreed upon by all of the Aggregators. The outputs include the
+    # Prepare state and the Aggregator's first Prepare-message share.
     @classmethod
     def prep_init(Vdaf,
                   verify_key: Bytes,
                   agg_id: Unsigned,
                   agg_param: AggParam,
                   nonce: Bytes,
-                  input_share: Bytes) -> Prep:
+                  input_share: Bytes) -> (Prep, Bytes):
         raise Error('not implemented')
 
-    # Consume the inbound message from the previous round (or `None` if this is
-    # the first round) and return the aggregator's share of the next round (or
-    # the aggregator's output share if this is the last round).
+    # Consume the inbound Prepare message from the previous round and return the
+    # Aggregator's share of the next round (or the Aggregator's output share if
+    # this is the last round).
     @classmethod
     def prep_next(Vdaf,
                   prep: Prep,
-                  inbound: Optional[Bytes],
+                  inbound: Bytes,
                   ) -> Union[Tuple[Prep, Bytes], Vdaf.OutShare]:
         raise Error('not implemented')
 
@@ -130,38 +132,38 @@ def run_vdaf(Vdaf,
         for input_share in input_shares:
             prep_test_vector['input_shares'].append(input_share.hex())
 
-        # Each Aggregator initializes its preparation state.
+        # Aggregators interact over the network in order
+        # to recover their output shares.
         prep_states = []
+        shares = []
         for j in range(Vdaf.SHARES):
-            state = Vdaf.prep_init(verify_key, j,
-                                   agg_param,
-                                   nonce,
-                                   input_shares[j])
+            (state, out) = Vdaf.prep_init(verify_key, j,
+                                          agg_param,
+                                          nonce,
+                                          input_shares[j])
             prep_states.append(state)
+            shares.append(out)
 
-        # Aggregators recover their output shares.
-        inbound = None
-        for i in range(Vdaf.ROUNDS+1):
-            outbound = []
+        for i in range(Vdaf.ROUNDS):
+            for prep_share in shares:
+                prep_test_vector["prep_shares"][i].append(prep_share.hex())
+
+            # Preparation-message shares are exchanged over
+            # the network.
+            prep_msg = Vdaf.prep_shares_to_prep(agg_param, shares)
+            shares = []
             for j in range(Vdaf.SHARES):
-                out = Vdaf.prep_next(prep_states[j], inbound)
-                if i < Vdaf.ROUNDS:
+                out = Vdaf.prep_next(prep_states[j], prep_msg)
+                if i < Vdaf.ROUNDS-1:
                     (prep_states[j], out) = out
-                outbound.append(out)
-            # This is where we would send messages over the
-            # network in a distributed VDAF computation.
-            if i < Vdaf.ROUNDS:
-                for prep_share in outbound:
-                    prep_test_vector['prep_shares'][i].append(prep_share.hex())
-                inbound = Vdaf.prep_shares_to_prep(agg_param,
-                                                   outbound)
+                shares.append(out)
 
-        # The final outputs of prepare phasre are the output shares.
-        for out_share in outbound:
+        # The final outputs of Prepare phase are the output shares.
+        for out_share in shares:
             prep_test_vector['out_shares'].append(
                 list(map(lambda x: x.as_unsigned(), out_share)))
         test_vector['prep'].append(prep_test_vector)
-        out_shares.append(outbound)
+        out_shares.append(shares)
 
     # Each Aggregator aggregates its output shares into an
     # aggregate share.
@@ -197,7 +199,7 @@ class VdafTest(Vdaf):
     # Associated parameters
     VERIFY_KEY_SIZE = 0
     SHARES = 2
-    ROUNDS = 1
+    ROUNDS = 3
 
     # Associated types
     AggShare = Vec[Field]
@@ -209,9 +211,10 @@ class VdafTest(Vdaf):
     input_range = range(5)
 
     class Prep:
-        def __init__(self, input_range, encoded_input_share):
+        def __init__(self, input_range, input_share):
+            self.round = 1
             self.input_range = input_range
-            self.encoded_input_share = encoded_input_share
+            self.input_share = input_share
 
     @classmethod
     def setup(cls):
@@ -230,23 +233,23 @@ class VdafTest(Vdaf):
 
     @classmethod
     def prep_init(cls, _verify_key, _agg_id, _agg_param, _nonce, input_share):
-        return VdafTest.Prep(cls.input_range, input_share)
+        # for this dummy VDAF, every Prepare-message share is just the input
+        # share. This is trivially insecure.
+        return (VdafTest.Prep(cls.input_range, input_share), input_share)
 
     @classmethod
     def prep_next(cls, prep, inbound):
-        if inbound is None:
-            # Our prepare-message share is just our input share. This is
-            # trivially insecure since the recipient can now reconstruct
-            # the input.
-            return (prep, prep.encoded_input_share)
-
         # The unsharded prepare message is the plaintext measurement.
         # Check that it is in the specified range.
         measurement = cls.Field.decode_vec(inbound)[0].as_unsigned()
         if measurement not in prep.input_range:
             raise ERR_VERIFY
 
-        return cls.Field.decode_vec(prep.encoded_input_share)
+        if prep.round == cls.ROUNDS:
+            return cls.Field.decode_vec(prep.input_share)
+
+        prep.round += 1
+        return (prep, prep.input_share)
 
     @classmethod
     def prep_shares_to_prep(cls, _agg_param, prep_shares):

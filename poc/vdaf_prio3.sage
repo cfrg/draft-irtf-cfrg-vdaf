@@ -28,8 +28,7 @@ class Prio3(Vdaf):
     AggShare = Vec[Flp.Field]
     AggResult = Vec[Unsigned]
     Prep = Tuple[Vec[Flp.Field],  # output share
-                 Bytes,           # k_joint_rand
-                 Bytes]           # outbound message
+                 Bytes]           # k_joint_rand
 
     @classmethod
     def measurement_to_input_shares(Prio3, measurement):
@@ -153,14 +152,11 @@ class Prio3(Vdaf):
 
         prep_msg = Prio3.encode_prep_share(verifier_share,
                                            k_joint_rand_share)
-        return (out_share, k_joint_rand, prep_msg)
+        return ((out_share, k_joint_rand), prep_msg)
 
     @classmethod
-    def prep_next(Prio3, prep, inbound):
-        (out_share, k_joint_rand, prep_msg) = prep
-
-        if inbound is None:
-            return (prep, prep_msg)
+    def prep_next(Prio3, prep_state, inbound):
+        (out_share, k_joint_rand) = prep_state
 
         k_joint_rand_check = Prio3.decode_prep_msg(inbound)
         if k_joint_rand_check != k_joint_rand:
