@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 14 November 2022                               Cloudflare, Inc.
+Expires: 17 November 2022                               Cloudflare, Inc.
                                                            P. Schoppmann
                                                                   Google
-                                                             13 May 2022
+                                                             16 May 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 November 2022.
+   This Internet-Draft will expire on 17 November 2022.
 
 Copyright Notice
 
@@ -2656,17 +2656,17 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
        the aggregate of the measurements of honest Clients.
 
    Note that, to achieve robustness, it is important to ensure that the
-   verification parameters distributed to the Aggregators
-   (verify_params, see Section 8.2.1) is never revealed to the Clients.
+   verification key distributed to the Aggregators (verify_key, see
+   Section 8.2.1) is never revealed to the Clients.
 
    It is also possible to consider a stronger form of robustness, where
    the attacker also controls a subset of Aggregators (see [BBCGGI19],
    Section 6.3).  To satisfy this stronger notion of robustness, it is
-   necessary to prevent the attacker from sharing the verification
-   parameters with the Clients.  It is therefore RECOMMENDED that the
-   Aggregators generate verify_params only after a set of Client inputs
-   has been collected for verification, and re-generate them for each
-   such set of inputs.
+   necessary to prevent the attacker from sharing the verification key
+   with the Clients.  It is therefore RECOMMENDED that the Aggregators
+   generate verify_key only after a set of Client inputs has been
+   collected for verification, and re-generate them for each such set of
+   inputs.
 
    In order to achieve robustness, the Aggregators MUST ensure that the
    nonces used to process the measurements in a batch are all unique.

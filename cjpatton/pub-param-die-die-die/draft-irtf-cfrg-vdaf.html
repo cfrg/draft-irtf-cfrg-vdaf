@@ -1025,7 +1025,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 14 November 2022</td>
+<td class="center">Expires 17 November 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1038,12 +1038,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-05-13" class="published">13 May 2022</time>
+<time datetime="2022-05-16" class="published">16 May 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-11-14">14 November 2022</time></dd>
+<dd class="expires"><time datetime="2022-11-17">17 November 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1102,7 +1102,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 November 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 17 November 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -4700,15 +4700,15 @@ the measurements of honest Clients.<a href="#section-9-3.2" class="pilcrow">¶</
 </li>
       </ol>
 <p id="section-9-4">Note that, to achieve robustness, it is important to ensure that the
-verification parameters distributed to the Aggregators (<code>verify_params</code>, see
-<a href="#setup" class="xref">Section 8.2.1</a>) is never revealed to the Clients.<a href="#section-9-4" class="pilcrow">¶</a></p>
+verification key distributed to the Aggregators (<code>verify_key</code>, see <a href="#setup" class="xref">Section 8.2.1</a>) is
+never revealed to the Clients.<a href="#section-9-4" class="pilcrow">¶</a></p>
 <p id="section-9-5">It is also possible to consider a stronger form of robustness, where the
 attacker also controls a subset of Aggregators (see <span>[<a href="#BBCGGI19" class="xref">BBCGGI19</a>]</span>, Section 6.3).
 To satisfy this stronger notion of robustness, it is necessary to prevent the
-attacker from sharing the verification parameters with the Clients. It is
-therefore <span class="bcp14">RECOMMENDED</span> that the Aggregators generate <code>verify_params</code> only after a
-set of Client inputs has been collected for verification, and re-generate them
-for each such set of inputs.<a href="#section-9-5" class="pilcrow">¶</a></p>
+attacker from sharing the verification key with the Clients. It is therefore
+<span class="bcp14">RECOMMENDED</span> that the Aggregators generate <code>verify_key</code> only after a set of
+Client inputs has been collected for verification, and re-generate them for each
+such set of inputs.<a href="#section-9-5" class="pilcrow">¶</a></p>
 <p id="section-9-6">In order to achieve robustness, the Aggregators <span class="bcp14">MUST</span> ensure that the nonces used
 to process the measurements in a batch are all unique.<a href="#section-9-6" class="pilcrow">¶</a></p>
 <p id="section-9-7">A VDAF is the core cryptographic primitive of a protocol that achieves
