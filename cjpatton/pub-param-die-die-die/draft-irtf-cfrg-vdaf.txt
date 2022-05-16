@@ -793,7 +793,7 @@ Table of Contents
          OPEN ISSUE: What security properties do we need for this key
          exchange?  See issue#18.
 
-      The applicaiton MUST ensure that the Aggregator's identifier is
+      The application MUST ensure that the Aggregator's identifier is
       equal to the integer in range [0, SHARES) that matches the index
       of input_share in the sequence of input shares output by the
       Client.
