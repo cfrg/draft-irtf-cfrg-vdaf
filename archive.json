@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-05-15T01:06:16.922461+00:00",
+  "timestamp": "2022-05-17T00:53:19.801569+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4644,18 +4644,40 @@
       "labels": [],
       "body": "Closes #19.\r\n\r\nThere are currently no VDAFs that use the public parameter. As noted\r\nnoted in https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/18 and https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19, this creates friction for applications like DAP\r\n(formerly known as PPM) that require frequent rotation of the\r\nverification parameter shared by the Aggregators. This change addresses\r\nthis issue by dropping the public parameter from the syntax.\r\n\r\nFor our current set of VDAFs (Prio3 and Poplar1), the verification\r\nparameter held by an Aggregator is basically a shared secret and some\r\nsort of identifier of its role (aggregator 0, aggregator 1, ...). This\r\nchange codifies these two values in the syntax by dropping the\r\nverification parameter and replacing it with a shared \"verification key\"\r\nand an \"aggregator ID\". This allows us to replace the `setup()`\r\nprocedure with simply generating a shared secret, paving the way for a\r\nsolution for https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/18 that doesn't require breaking the abstraction boundary.",
       "createdAt": "2022-05-13T17:58:09Z",
-      "updatedAt": "2022-05-13T20:31:36Z",
+      "updatedAt": "2022-05-16T23:35:55Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "3888d46adb568c5ea8e6d276524954172e92d4c6",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/pub-param-die-die-die",
-      "headRefOid": "fe8a3f30b6aa5016f421a2fb67914cb5e7cd375b",
+      "headRefOid": "8e5e1a5f5ede806582706467cac74c6a1fd3ab8e",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There are still a couple of `verify_param` throughout the document, for example under Security Considerations. Do you plan to replace them in this PR?",
+          "createdAt": "2022-05-16T23:21:59Z",
+          "updatedAt": "2022-05-16T23:21:59Z"
+        },
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There are still a couple of `verify_param` throughout the document, for example under Security Considerations. Do you plan to replace them in this PR?",
+          "createdAt": "2022-05-16T23:21:59Z",
+          "updatedAt": "2022-05-16T23:21:59Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> There are still a couple of `verify_param` throughout the document, for example under Security Considerations. Do you plan to replace them in this PR?\r\n\r\nI intended to leave the Poplar1 section unchanged, but missed the updates in Security Considerations. Nice catch, fixed.",
+          "createdAt": "2022-05-16T23:32:27Z",
+          "updatedAt": "2022-05-16T23:32:27Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc45-lqt",
@@ -4676,6 +4698,39 @@
               "updatedAt": "2022-05-13T20:31:36Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc46GE55",
+          "commit": {
+            "abbreviatedOid": "fe8a3f3"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-05-16T23:32:41Z",
+          "updatedAt": "2022-05-16T23:32:41Z",
+          "comments": [
+            {
+              "originalPosition": 127,
+              "body": "Done.",
+              "createdAt": "2022-05-16T23:32:41Z",
+              "updatedAt": "2022-05-16T23:32:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc46GFTH",
+          "commit": {
+            "abbreviatedOid": "8e5e1a5"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-16T23:35:55Z",
+          "updatedAt": "2022-05-16T23:35:55Z",
+          "comments": []
         }
       ]
     }
