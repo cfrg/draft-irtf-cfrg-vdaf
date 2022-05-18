@@ -79,12 +79,11 @@ Table of Contents
      4.4.  Unsharding
      4.5.  Execution of a DAF
    5.  Definition of VDAFs
-     5.1.  Setup
-     5.2.  Sharding
-     5.3.  Preparation
-     5.4.  Aggregation
-     5.5.  Unsharding
-     5.6.  Execution of a VDAF
+     5.1.  Sharding
+     5.2.  Preparation
+     5.3.  Aggregation
+     5.4.  Unsharding
+     5.5.  Execution of a VDAF
    6.  Preliminaries
      6.1.  Finite Fields
        6.1.1.  Auxiliary Functions
@@ -96,12 +95,11 @@ Table of Contents
      7.1.  Fully Linear Proof (FLP) Systems
        7.1.1.  Encoding the Input
      7.2.  Construction
-       7.2.1.  Setup
-       7.2.2.  Sharding
-       7.2.3.  Preparation
-       7.2.4.  Aggregation
-       7.2.5.  Unsharding
-       7.2.6.  Auxiliary Functions
+       7.2.1.  Sharding
+       7.2.2.  Preparation
+       7.2.3.  Aggregation
+       7.2.4.  Unsharding
+       7.2.5.  Auxiliary Functions
      7.3.  A General-Purpose FLP
        7.3.1.  Overview
        7.3.2.  Validity Circuits
@@ -489,8 +487,8 @@ Table of Contents
    *  Daf.measurement_to_input_shares(input: Measurement) -> Vec[Bytes]
       is the randomized input-distribution algorithm run by each Client.
       It consumes the measurement and produces a sequence of input
-      shares, one for each Aggregator.  The length of the output MUST be
-      SHARES.
+      shares, one for each Aggregator.  The length of the output vector
+      MUST be SHARES.
 
        Client
        ======
@@ -651,12 +649,9 @@ Table of Contents
    Unsharding.  However, the Preparation stage will require interaction
    among the Aggregators in order to facilitate verifiability of the
    computation's correctness.  Accommodating this interaction will
-   require syntactic changes, as well as a new Setup phase for
-   distributing long-lived verification parameters.
+   require syntactic changes.
 
    Overall execution of a VDAF comprises the following stages:
-
-   *  Setup - Generating shared parameters for Sharding and Preparation
 
    *  Sharding - Computing input shares from an individual measurement
 
@@ -671,84 +666,55 @@ Table of Contents
       aggregate result
 
    In contrast to DAFs, the Preparation stage for VDAFs now performs an
-   additional important task: verification of the validity of the
+   additional important task: Verification of the validity of the
    recovered output shares.  This process ensures that aggregating the
-   output shares will not lead to a garbled aggregate result.
+   output shares will not lead to a garbled aggregate result.  Note
+   that, before the Preparation stage can begin, the Aggregators are
+   required to exchange a long-lived shared secret.  See Section 5.2 for
+   details.
 
    The remainder of this section defines the VDAF interface.  The
    attributes are listed in Table 2 are defined by each concrete VDAF.
 
-       +=============+=============================================+
-       | Parameter   | Description                                 |
-       +=============+=============================================+
-       | ROUNDS      | Number of rounds of communication during    |
-       |             | the Preparation stage (Section 5.3)         |
-       +-------------+---------------------------------------------+
-       | SHARES      | Number of input shares into which each      |
-       |             | measurement is sharded (Section 5.2)        |
-       +-------------+---------------------------------------------+
-       | Measurement | Type of each measurement                    |
-       +-------------+---------------------------------------------+
-       | PublicParam | Type of public parameter used by the Client |
-       |             | during Sharding (Section 5.2)               |
-       +-------------+---------------------------------------------+
-       | VerifyParam | Type of verification parameter used by each |
-       |             | Aggregator during Preparation (Section 5.3) |
-       +-------------+---------------------------------------------+
-       | AggParam    | Type of aggregation parameter               |
-       +-------------+---------------------------------------------+
-       | Prep        | State of each Aggregator during Peparation  |
-       |             | (Section 5.3)                               |
-       +-------------+---------------------------------------------+
-       | OutShare    | Type of each output share                   |
-       +-------------+---------------------------------------------+
-       | AggShare    | Type of each aggregate share                |
-       +-------------+---------------------------------------------+
-       | AggResult   | Type of the aggregate result                |
-       +-------------+---------------------------------------------+
+      +=================+==========================================+
+      | Parameter       | Description                              |
+      +=================+==========================================+
+      | VERIFY_KEY_SIZE | Size (in bytes) of the verification key  |
+      |                 | (Section 5.2)                            |
+      +-----------------+------------------------------------------+
+      | ROUNDS          | Number of rounds of communication during |
+      |                 | the Preparation stage (Section 5.2)      |
+      +-----------------+------------------------------------------+
+      | SHARES          | Number of input shares into which each   |
+      |                 | measurement is sharded (Section 5.1)     |
+      +-----------------+------------------------------------------+
+      | Measurement     | Type of each measurement                 |
+      +-----------------+------------------------------------------+
+      | AggParam        | Type of aggregation parameter            |
+      +-----------------+------------------------------------------+
+      | Prep            | State of each Aggregator during          |
+      |                 | Peparation (Section 5.2)                 |
+      +-----------------+------------------------------------------+
+      | OutShare        | Type of each output share                |
+      +-----------------+------------------------------------------+
+      | AggShare        | Type of each aggregate share             |
+      +-----------------+------------------------------------------+
+      | AggResult       | Type of the aggregate result             |
+      +-----------------+------------------------------------------+
 
-        Table 2: Constants and types defined by each concrete VDAF.
+       Table 2: Constants and types defined by each concrete VDAF.
 
-5.1.  Setup
+5.1.  Sharding
 
-   Before execution of the VDAF can begin, it is necessary to distribute
-   long-lived parameters to the Client and Aggregators.  The long-lived
-   parameters are generated by the following algorithm:
+   Sharding is identical to DAFs (cf.  Section 4.1):
 
-   *  Vdaf.setup() -> (PublicParam, Vec[VerifyParam]) is the randomized
-      setup algorithm used to generate the public parameter used by the
-      Clients and the verification parameters used by the Aggregators.
-      The length of the latter MUST be equal to SHARES.  In general, an
-      Aggregator's verification parameter is considered secret and MUST
-      NOT be revealed to the Clients, Collector or other Aggregators.
-      The parameters MAY be reused across multiple VDAF evaluations.
-      See Section 9 for a discussion of the security implications this
-      has depending on the threat model.
+   *  Vdaf.measurement_to_input_shares(measurement: Measurement) ->
+      Vec[Bytes] is the randomized input-distribution algorithm run by
+      each Client.  It consumes the measurement and produces a sequence
+      of input shares, one for each Aggregator.  The length of the
+      output vector MUST be SHARES.
 
-5.2.  Sharding
-
-   Sharding is identical to DAFs (cf.  Section 4.1) except that the
-   input-distribution algorithm takes in the public parameter generated
-   during the Setup phase:
-
-   *  Vdaf.measurement_to_input_shares(public_param: PublicParam, input:
-      Measurement) -> Vec[Bytes] is the randomized input-distribution
-      algorithm run by each Client.  It consumes the public parameter
-      and input measurement and produces a sequence of input shares, one
-      for each Aggregator.  The length of the output MUST be SHARES.
-
-   The data flow for this stage is the same as illustrated in Figure 2.
-
-      OPEN ISSUE The public_param is intended to allow for protocols
-      that require the Client to use a public key for sharding its
-      measurement.  When rotating the verify_param for such a scheme, it
-      would be necessary to also update the public_param with which the
-      clients are configured.  For DAP it would be nice if we could
-      rotate the verify_param without also having to update the clients.
-      We should consider dropping this at some point.  See
-      https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19.
-
-5.3.  Preparation
+5.2.  Preparation
 
    To recover and verify output shares, the Aggregators interact with
    one another over ROUNDS rounds.  Prior to each round, each Aggregator
@@ -808,15 +774,29 @@ Table of Contents
    To facilitate the preparation process, a concrete VDAF implements the
    following class methods:
 
-   *  Vdaf.prep_init(verify_param: VerifyParam, agg_param: AggParam,
-      nonce: Bytes, input_share: Bytes) -> Prep is the deterministic
-      preparation-state initialization algorithm run by each Aggregator
-      to begin processing its input share into an output share.  Its
-      inputs are its verification parameter (verify_param), the
-      aggregation parameter (agg_param), the nonce provided by the
-      environment (nonce, see Figure 7), and one of the input shares
-      generated by the client (input_share).  Its output is the
-      Aggregator's initial preparation state.
+   *  Vdaf.prep_init(verify_key: Bytes, agg_id: Unsigned, agg_param:
+      AggParam, nonce: Bytes, input_share: Bytes) -> Prep is the
+      deterministic preparation-state initialization algorithm run by
+      each Aggregator to begin processing its input share into an output
+      share.  Its inputs are the shared verification key (verify_key),
+      the Aggregator's unique identifier (agg_id), the aggregation
+      parameter (agg_param), the nonce provided by the environment
+      (nonce, see Figure 7), and one of the input shares generated by
+      the client (input_share).  Its output is the Aggregator's initial
+      preparation state.
+
+      The length of verify_key MUST be VERIFY_KEY_SIZE.  It is up to the
+      application to arrange for the distribution of the verification
+      key among the Aggregators prior to the start of this phase of VDAF
+      evaluation.
+
+         OPEN ISSUE: What security properties do we need for this key
+         exchange?  See issue#18.
+
+      The application MUST ensure that the Aggregator's identifier is
+      equal to the integer in range [0, SHARES) that matches the index
+      of input_share in the sequence of input shares output by the
+      Client.
 
    *  Vdaf.prep_next(prep: Prep, inbound: Optional[Bytes]) ->
       Union[Tuple[Prep, Bytes], OutShare] is the deterministic
@@ -864,10 +844,10 @@ Table of Contents
    require some amount of interaction in order to ensure validity of the
    output shares (while also maintaining privacy).
 
-      OPEN ISSUE Depending on what we do for issue#20, we may end up
-      needing to revise the above paragraph.
+      OPEN ISSUE Depending on what we do for issue#19 and issue#20, we
+      may end up needing to revise the above paragraph.
 
-5.4.  Aggregation
+5.3.  Aggregation
 
    VDAF Aggregation is identical to DAF Aggregation (cf.  Section 4.3):
 
@@ -882,7 +862,7 @@ Table of Contents
    also support a "streaming" form, where shares are processed one at a
    time.
 
-5.5.  Unsharding
+5.4.  Unsharding
 
    VDAF Unsharding is identical to DAF Unssharding (cf.  Section 4.4):
 
@@ -894,7 +874,7 @@ Table of Contents
 
    The data flow for this stage is illustrated in Figure 4.
 
-5.6.  Execution of a VDAF
+5.5.  Execution of a VDAF
 
    Secure execution of a VDAF involves simulating the following
    procedure.
@@ -903,20 +883,18 @@ Table of Contents
                 agg_param: Vdaf.AggParam,
                 nonces: Vec[Bytes],
                 measurements: Vec[Vdaf.Measurement]):
-       # Distribute long-lived parameters.
-       (public_param, verify_params) = Vdaf.setup()
+       # Generate the long-lived verification key.
+       verify_key = gen_rand(Vdaf.VERIFY_KEY_SIZE)
 
        out_shares = []
        for (nonce, measurement) in zip(nonces, measurements):
-
            # Each Client shards its measurement into input shares.
-           input_shares = Vdaf.measurement_to_input_shares(public_param,
-                                                           measurement)
+           input_shares = Vdaf.measurement_to_input_shares(measurement)
 
            # Each Aggregator initializes its preparation state.
            prep_states = []
            for j in range(Vdaf.SHARES):
-               state = Vdaf.prep_init(verify_params[j],
+               state = Vdaf.prep_init(verify_key, j,
                                       agg_param,
                                       nonce,
                                       input_shares[j])
@@ -1400,48 +1378,31 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    sharding, preparation, aggregation, and unsharding are described in
    the remaining subsections.
 
-      +=============+===============================================+
-      | Parameter   | Value                                         |
-      +=============+===============================================+
-      | ROUNDS      | 1                                             |
-      +-------------+-----------------------------------------------+
-      | SHARES      | in [2, 255)                                   |
-      +-------------+-----------------------------------------------+
-      | Measurement | Flp.Measurement                               |
-      +-------------+-----------------------------------------------+
-      | PublicParam | None                                          |
-      +-------------+-----------------------------------------------+
-      | VerifyParam | Tuple[Unsigned, Bytes]                        |
-      +-------------+-----------------------------------------------+
-      | AggParam    | None                                          |
-      +-------------+-----------------------------------------------+
-      | Prep        | Tuple[Vec[Flp.Field], Optional[Bytes], Bytes] |
-      +-------------+-----------------------------------------------+
-      | OutShare    | Vec[Flp.Field]                                |
-      +-------------+-----------------------------------------------+
-      | AggShare    | Vec[Flp.Field]                                |
-      +-------------+-----------------------------------------------+
-      | AggResult   | Vec[Unsigned]                                 |
-      +-------------+-----------------------------------------------+
+    +=================+===============================================+
+    | Parameter       | Value                                         |
+    +=================+===============================================+
+    | VERIFY_KEY_SIZE | Prg.SEED_SIZE                                 |
+    +-----------------+-----------------------------------------------+
+    | ROUNDS          | 1                                             |
+    +-----------------+-----------------------------------------------+
+    | SHARES          | in [2, 255)                                   |
+    +-----------------+-----------------------------------------------+
+    | Measurement     | Flp.Measurement                               |
+    +-----------------+-----------------------------------------------+
+    | AggParam        | None                                          |
+    +-----------------+-----------------------------------------------+
+    | Prep            | Tuple[Vec[Flp.Field], Optional[Bytes], Bytes] |
+    +-----------------+-----------------------------------------------+
+    | OutShare        | Vec[Flp.Field]                                |
+    +-----------------+-----------------------------------------------+
+    | AggShare        | Vec[Flp.Field]                                |
+    +-----------------+-----------------------------------------------+
+    | AggResult       | Vec[Unsigned]                                 |
+    +-----------------+-----------------------------------------------+
 
              Table 6: Associated parameters for the Prio3 VDAF.
 
-7.2.1.  Setup
-
-   The setup algorithm generates a symmetric key shared by all of the
-   Aggregators.  The key is used to derive query randomness for the FLP
-   query-generation algorithm run by the Aggregators during preparation.
-   An Aggregator's verification parameter also includes its "ID", a
-   unique integer in [0, SHARES).
-
-   def setup(Prio3):
-       k_query_init = gen_rand(Prio3.Prg.SEED_SIZE)
-       verify_param = [(j, k_query_init) for j in range(Prio3.SHARES)]
-       return (None, verify_param)
-
-                 Figure 13: The setup algorithm for Prio3.
-
-7.2.2.  Sharding
+7.2.1.  Sharding
 
    Recall from Section 7.1 that the FLP syntax calls for "joint
    randomness" shared by the prover (i.e., the Client) and the verifier
@@ -1472,9 +1433,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    The code refers to a pair of auxiliary functions for encoding the
    shares.  These are called encode_leader_share and encode_helper_share
-   respectively and they are described in Section 7.2.6.
+   respectively and they are described in Section 7.2.5.
 
-   def measurement_to_input_shares(Prio3, _public_param, measurement):
+   def measurement_to_input_shares(Prio3, measurement):
        # Domain separation tag for PRG info string
        dst = b"vdaf-00 prio3"
        inp = Prio3.Flp.encode(measurement)
@@ -1558,9 +1519,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            ))
        return input_shares
 
-             Figure 14: Input-distribution algorithm for Prio3.
+             Figure 13: Input-distribution algorithm for Prio3.
 
-7.2.3.  Preparation
+7.2.2.  Preparation
 
    This section describes the process of recovering output shares from
    the input shares.  The high-level idea is that each Aggregator first
@@ -1592,83 +1553,81 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    The algorithms required for preparation are defined as follows.
    These algorithms make use of encoding and decoding methods defined in
-   Section 7.2.6.
+   Section 7.2.5.
 
-   def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
-       # Domain separation tag for PRG info string
-       dst = b"vdaf-00 prio3"
-       (j, k_query_init) = verify_param
+def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
+    # Domain separation tag for PRG info string
+    dst = b"vdaf-00 prio3"
 
-       (input_share, proof_share, k_blind, k_hint) = \
-           Prio3.decode_leader_share(input_share) if j == 0 else \
-           Prio3.decode_helper_share(dst, j, input_share)
+    (input_share, proof_share, k_blind, k_hint) = \
+        Prio3.decode_leader_share(input_share) if agg_id == 0 else \
+        Prio3.decode_helper_share(dst, agg_id, input_share)
 
-       out_share = Prio3.Flp.truncate(input_share)
+    out_share = Prio3.Flp.truncate(input_share)
 
-       k_query_rand = Prio3.Prg.derive_seed(k_query_init,
-                                            byte(255) + nonce)
-       query_rand = Prio3.Prg.expand_into_vec(
-           Prio3.Flp.Field,
-           k_query_rand,
-           dst,
-           Prio3.Flp.QUERY_RAND_LEN
-       )
-       joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
-       if Prio3.Flp.JOINT_RAND_LEN > 0:
-           encoded = Prio3.Flp.Field.encode_vec(input_share)
-           k_joint_rand_share = Prio3.Prg.derive_seed(k_blind,
-                                                      byte(j) + encoded)
-           k_joint_rand = xor(k_hint, k_joint_rand_share)
-           joint_rand = Prio3.Prg.expand_into_vec(
-               Prio3.Flp.Field,
-               k_joint_rand,
-               dst,
-               Prio3.Flp.JOINT_RAND_LEN
-           )
-       verifier_share = Prio3.Flp.query(input_share,
-                                        proof_share,
-                                        query_rand,
-                                        joint_rand,
-                                        Prio3.SHARES)
+    k_query_rand = Prio3.Prg.derive_seed(verify_key, byte(255) + nonce)
+    query_rand = Prio3.Prg.expand_into_vec(
+        Prio3.Flp.Field,
+        k_query_rand,
+        dst,
+        Prio3.Flp.QUERY_RAND_LEN
+    )
+    joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded = Prio3.Flp.Field.encode_vec(input_share)
+        k_joint_rand_share = Prio3.Prg.derive_seed(
+            k_blind, byte(agg_id) + encoded)
+        k_joint_rand = xor(k_hint, k_joint_rand_share)
+        joint_rand = Prio3.Prg.expand_into_vec(
+            Prio3.Flp.Field,
+            k_joint_rand,
+            dst,
+            Prio3.Flp.JOINT_RAND_LEN
+        )
+    verifier_share = Prio3.Flp.query(input_share,
+                                     proof_share,
+                                     query_rand,
+                                     joint_rand,
+                                     Prio3.SHARES)
 
-       prep_msg = Prio3.encode_prepare_message(verifier_share,
-                                               k_joint_rand_share)
-       return (out_share, k_joint_rand, prep_msg)
+    prep_msg = Prio3.encode_prepare_message(verifier_share,
+                                            k_joint_rand_share)
+    return (out_share, k_joint_rand, prep_msg)
 
-   def prep_next(Prio3, prep, inbound):
-       (out_share, k_joint_rand, prep_msg) = prep
+def prep_next(Prio3, prep, inbound):
+    (out_share, k_joint_rand, prep_msg) = prep
 
-       if inbound is None:
-           return (prep, prep_msg)
+    if inbound is None:
+        return (prep, prep_msg)
 
-       (verifier, k_joint_rand_check) = \
-           Prio3.decode_prepare_message(inbound)
+    (verifier, k_joint_rand_check) = \
+        Prio3.decode_prepare_message(inbound)
 
-       if k_joint_rand_check != k_joint_rand or \
-               not Prio3.Flp.decide(verifier):
-           raise ERR_VERIFY
+    if k_joint_rand_check != k_joint_rand or \
+            not Prio3.Flp.decide(verifier):
+        raise ERR_VERIFY
 
-       return out_share
+    return out_share
 
-   def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
-       verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
-       k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
-       for encoded in prep_shares:
-           (verifier_share, k_joint_rand_share) = \
-               Prio3.decode_prepare_message(encoded)
+def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
+    verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
+    k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
+    for encoded in prep_shares:
+        (verifier_share, k_joint_rand_share) = \
+            Prio3.decode_prepare_message(encoded)
 
-           verifier = vec_add(verifier, verifier_share)
+        verifier = vec_add(verifier, verifier_share)
 
-           if Prio3.Flp.JOINT_RAND_LEN > 0:
-               k_joint_rand_check = xor(k_joint_rand_check,
-                                        k_joint_rand_share)
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            k_joint_rand_check = xor(k_joint_rand_check,
+                                     k_joint_rand_share)
 
-       return Prio3.encode_prepare_message(verifier,
-                                           k_joint_rand_check)
+    return Prio3.encode_prepare_message(verifier,
+                                        k_joint_rand_check)
 
-                  Figure 15: Preparation state for Prio3.
+               Figure 14: Preparation state for Prio3.
 
-7.2.4.  Aggregation
+7.2.3.  Aggregation
 
    Aggregating a set of output shares is simply a matter of adding up
    the vectors element-wise.
@@ -1679,9 +1638,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            agg_share = vec_add(agg_share, out_share)
        return agg_share
 
-                Figure 16: Aggregation algorithm for Prio3.
+                Figure 15: Aggregation algorithm for Prio3.
 
-7.2.5.  Unsharding
+7.2.4.  Unsharding
 
    To unshard a set of aggregate shares, the Collector first adds up the
    vectors element-wise.  It then converts each element of the vector
@@ -1693,9 +1652,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            agg = vec_add(agg, agg_share)
        return list(map(lambda x: x.as_unsigned(), agg))
 
-         Figure 17: Computation of the aggregate result for Prio3.
+         Figure 16: Computation of the aggregate result for Prio3.
 
-7.2.6.  Auxiliary Functions
+7.2.5.  Auxiliary Functions
 
    def encode_leader_share(Prio3,
                            input_share,
@@ -1739,17 +1698,17 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            encoded += k_hint
        return encoded
 
-   def decode_helper_share(Prio3, dst, j, encoded):
+   def decode_helper_share(Prio3, dst, agg_id, encoded):
        l = Prio3.Prg.SEED_SIZE
        k_input_share, encoded = encoded[:l], encoded[l:]
        input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                k_input_share,
-                                               dst + byte(j),
+                                               dst + byte(agg_id),
                                                Prio3.Flp.INPUT_LEN)
        k_proof_share, encoded = encoded[:l], encoded[l:]
        proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                k_proof_share,
-                                               dst + byte(j),
+                                               dst + byte(agg_id),
                                                Prio3.Flp.PROOF_LEN)
        k_blind, k_hint = None, None
        if Prio3.Flp.JOINT_RAND_LEN > 0:
@@ -1778,7 +1737,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            raise ERR_DECODE
        return (verifier, k_joint_rand)
 
-              Figure 18: Helper functions required for Prio3.
+              Figure 17: Helper functions required for Prio3.
 
 7.3.  A General-Purpose FLP
 
@@ -2011,7 +1970,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            length += g.ARITY + 1
        return length
 
-             Figure 19: Derived methods for validity circuits.
+             Figure 18: Derived methods for validity circuits.
 
 7.3.3.  Construction
 
@@ -2368,6 +2327,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
 8.  Poplar1
 
+      TODO Update this section in light of removing the public parameter
+      and replacing the verification parameter.
+
       NOTE The spec for Poplar1 is still a work-in-progress.  A partial
       implementation can be found at https://github.com/abetterinternet/
       libprio-rs/blob/main/src/vdaf/poplar1.rs.  The verification logic
@@ -2497,7 +2459,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
      k_verify_init = gen_rand(SEED_SIZE)
      return (None, [(0, k_verify_init), (1, k_verify_init)])
 
-                Figure 20: The setup algorithm for poplar1.
+                Figure 19: The setup algorithm for poplar1.
 
 8.2.1.1.  Client
 
@@ -2550,7 +2512,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
      return input_shares
 
-          Figure 21: The input-distribution algorithm for poplar1.
+          Figure 20: The input-distribution algorithm for poplar1.
 
       TODO It would be more efficient to represent the shares of a, b,
       and c using PRG seeds as suggested in [BBCGGI21].
@@ -2632,7 +2594,7 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
 
   return Field[l].encode_vec(verifier)
 
-              Figure 22: Preparation state for poplar1.
+              Figure 21: Preparation state for poplar1.
 
 8.2.3.  Aggregation
 
@@ -2647,7 +2609,7 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
 
      return Field[l].encode_vec(agg_share)
 
-               Figure 23: Aggregation algorithm for poplar1.
+               Figure 22: Aggregation algorithm for poplar1.
 
 8.2.4.  Unsharding
 
@@ -2661,7 +2623,7 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
 
      return Field[l].encode_vec(agg)
 
-        Figure 24: Computation of the aggregate result for poplar1.
+        Figure 23: Computation of the aggregate result for poplar1.
 
 8.2.5.  Helper Functions
 
@@ -2696,17 +2658,17 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
        the aggregate of the measurements of honest Clients.
 
    Note that, to achieve robustness, it is important to ensure that the
-   verification parameters distributed to the Aggregators
-   (verify_params, see Section 7.2.1) is never revealed to the Clients.
+   verification key distributed to the Aggregators (verify_key, see
+   Section 8.2.1) is never revealed to the Clients.
 
    It is also possible to consider a stronger form of robustness, where
    the attacker also controls a subset of Aggregators (see [BBCGGI19],
    Section 6.3).  To satisfy this stronger notion of robustness, it is
-   necessary to prevent the attacker from sharing the verification
-   parameters with the Clients.  It is therefore RECOMMENDED that the
-   Aggregators generate verify_params only after a set of Client inputs
-   has been collected for verification, and re-generate them for each
-   such set of inputs.
+   necessary to prevent the attacker from sharing the verification key
+   with the Clients.  It is therefore RECOMMENDED that the Aggregators
+   generate verify_key only after a set of Client inputs has been
+   collected for verification, and re-generate them for each such set of
+   inputs.
 
    In order to achieve robustness, the Aggregators MUST ensure that the
    nonces used to process the measurements in a batch are all unique.
@@ -2845,6 +2807,8 @@ Acknowledgments
    feedback on and contributions to the spec.
 
 Test Vectors
+
+      TODO Re-generate test vectors
 
    Test vectors cover the generation of input shares and the conversion
    of input shares into output shares.  Vectors specify the public and
