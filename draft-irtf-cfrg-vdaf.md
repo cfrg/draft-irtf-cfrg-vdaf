@@ -624,17 +624,17 @@ shares are recovered first, then validated. For other protocols, like Prio+
 The remainder of this section defines the VDAF interface. The attributes are
 listed in {{vdaf-param}} are defined by each concrete VDAF.
 
-| Parameter          | Description              |
-|:-------------------|:-------------------------|
+| Parameter         | Description              |
+|:------------------|:-------------------------|
 | `VERIFY_KEY_SIZE` | Size (in bytes) of the verification key ({{sec-vdaf-prepare}}) |
-| `ROUNDS`      | Number of rounds of communication during the Preparation stage ({{sec-vdaf-prepare}}) |
-| `SHARES`      | Number of input shares into which each measurement is sharded ({{sec-vdaf-shard}}) |
-| `Measurement` | Type of each measurement      |
-| `AggParam`    | Type of aggregation parameter |
-| `Prep`        | State of each Aggregator during Peparation ({{sec-vdaf-prepare}}) |
-| `OutShare`    | Type of each output share     |
-| `AggShare`    | Type of each aggregate share  |
-| `AggResult`   | Type of the aggregate result  |
+| `ROUNDS`          | Number of rounds of communication during the Preparation stage ({{sec-vdaf-prepare}}) |
+| `SHARES`          | Number of input shares into which each measurement is sharded ({{sec-vdaf-shard}}) |
+| `Measurement`     | Type of each measurement |
+| `AggParam`        | Type of aggregation parameter |
+| `Prep`            | State of each Aggregator during Peparation ({{sec-vdaf-prepare}}) |
+| `OutShare`        | Type of each output share |
+| `AggShare`        | Type of each aggregate share |
+| `AggResult`       | Type of the aggregate result |
 {: #vdaf-param title="Constants and types defined by each concrete VDAF."}
 
 ## Sharding {#sec-vdaf-shard}
@@ -1240,17 +1240,17 @@ This section specifies `Prio3`, an implementation of the `Vdaf` interface
 are defined in {{prio3-param}}. The methods required for sharding, preparation,
 aggregation, and unsharding are described in the remaining subsections.
 
-| Parameter     | Value                    |
-|:--------------|:-------------------------|
-| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`      |
-| `ROUNDS`      | `1`                      |
-| `SHARES`      | in `[2, 255)`            |
-| `Measurement` | `Flp.Measurement`        |
-| `AggParam`    | `None`                   |
-| `Prep`        | `Tuple[Vec[Flp.Field], Optional[Bytes], Bytes]` |
-| `OutShare`    | `Vec[Flp.Field]`         |
-| `AggShare`    | `Vec[Flp.Field]`         |
-| `AggResult`   | `Vec[Unsigned]`          |
+| Parameter         | Value             |
+|:------------------|:------------------|
+| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`   |
+| `ROUNDS`          | `1`               |
+| `SHARES`          | in `[2, 255)`     |
+| `Measurement`     | `Flp.Measurement` |
+| `AggParam`        | `None`            |
+| `Prep`            | `Tuple[Vec[Flp.Field], Optional[Bytes], Bytes]` |
+| `OutShare`        | `Vec[Flp.Field]`  |
+| `AggShare`        | `Vec[Flp.Field]`  |
+| `AggResult`       | `Vec[Unsigned]`   |
 {: #prio3-param title="Associated parameters for the Prio3 VDAF."}
 
 ### Sharding
