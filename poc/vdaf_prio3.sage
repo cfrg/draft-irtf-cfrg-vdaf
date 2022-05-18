@@ -157,8 +157,8 @@ class Prio3(Vdaf):
                                          joint_rand,
                                          Prio3.SHARES)
 
-        prep_msg = Prio3.encode_prepare_message(verifier_share,
-                                                k_joint_rand_share)
+        prep_msg = Prio3.encode_prep_share(verifier_share,
+                                           k_joint_rand_share)
         return (out_share, k_joint_rand, prep_msg)
 
     @classmethod
@@ -168,12 +168,9 @@ class Prio3(Vdaf):
         if inbound is None:
             return (prep, prep_msg)
 
-        (verifier, k_joint_rand_check) = \
-            Prio3.decode_prepare_message(inbound)
-
-        if k_joint_rand_check != k_joint_rand or \
-                not Prio3.Flp.decide(verifier):
-            raise ERR_VERIFY
+        k_joint_rand_check = Prio3.decode_prep_msg(inbound)
+        if k_joint_rand_check != k_joint_rand:
+            raise ERR_VERIFY # joint randomness check failed
 
         return out_share
 
@@ -183,7 +180,7 @@ class Prio3(Vdaf):
         k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
         for encoded in prep_shares:
             (verifier_share, k_joint_rand_share) = \
-                Prio3.decode_prepare_message(encoded)
+                Prio3.decode_prep_share(encoded)
 
             verifier = vec_add(verifier, verifier_share)
 
@@ -191,7 +188,10 @@ class Prio3(Vdaf):
                 k_joint_rand_check = xor(k_joint_rand_check,
                                          k_joint_rand_share)
 
-        return Prio3.encode_prepare_message(verifier, k_joint_rand_check)
+        if not Prio3.Flp.decide(verifier):
+            raise ERR_VERIFY # proof verifier check failed
+
+        return Prio3.encode_prep_msg(k_joint_rand_check)
 
     @classmethod
     def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
@@ -274,7 +274,7 @@ class Prio3(Vdaf):
         return (input_share, proof_share, k_blind, k_hint)
 
     @classmethod
-    def encode_prepare_message(Prio3, verifier, k_joint_rand):
+    def encode_prep_share(Prio3, verifier, k_joint_rand):
         encoded = Bytes()
         encoded += Prio3.Flp.Field.encode_vec(verifier)
         if Prio3.Flp.JOINT_RAND_LEN > 0:
@@ -282,7 +282,7 @@ class Prio3(Vdaf):
         return encoded
 
     @classmethod
-    def decode_prepare_message(Prio3, encoded):
+    def decode_prep_share(Prio3, encoded):
         l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.VERIFIER_LEN
         encoded_verifier, encoded = encoded[:l], encoded[l:]
         verifier = Prio3.Flp.Field.decode_vec(encoded_verifier)
@@ -293,6 +293,23 @@ class Prio3(Vdaf):
         if len(encoded) != 0:
             raise ERR_DECODE
         return (verifier, k_joint_rand)
+
+    @classmethod
+    def encode_prep_msg(Prio3, k_joint_rand_check):
+        encoded = Bytes()
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            encoded += k_joint_rand_check
+        return encoded
+
+    @classmethod
+    def decode_prep_msg(Prio3, encoded):
+        k_joint_rand_check = None
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            l = Prio3.Prg.SEED_SIZE
+            k_joint_rand_check, encoded = encoded[:l], encoded[l:]
+        if len(encoded) != 0:
+            raise ERR_DECODE
+        return k_joint_rand_check
 
     @classmethod
     def with_shares(cls, num_shares: Unsigned):
