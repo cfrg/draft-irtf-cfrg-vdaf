@@ -1317,6 +1317,7 @@ are described in {{prio3-helper-functions}}.
 
 ~~~
 def measurement_to_input_shares(Prio3, _public_param, measurement):
+    # Domain separation tag for PRG info string
     dst = b"vdaf-00 prio3"
     inp = Prio3.Flp.encode(measurement)
     k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
@@ -1433,6 +1434,7 @@ make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 
 ~~~
 def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
+    # Domain separation tag for PRG info string
     dst = b"vdaf-00 prio3"
     (j, k_query_init) = verify_param
 
