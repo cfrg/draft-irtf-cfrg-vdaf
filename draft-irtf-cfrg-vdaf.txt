@@ -2817,8 +2817,8 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
 Acknowledgments
 
    Thanks to David Cook, Henry Corrigan-Gibbs, Armando Faz-Hernandez,
-   Mariana Raykova, Jacob Rothstein, and Christopher Wood for useful
-   feedback on and contributions to the spec.
+   Tim Geoghegan, Mariana Raykova, Jacob Rothstein, and Christopher Wood
+   for useful feedback on and contributions to the spec.
 
 Test Vectors
 
