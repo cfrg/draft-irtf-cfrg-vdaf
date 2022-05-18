@@ -1432,8 +1432,8 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
                                      joint_rand,
                                      Prio3.SHARES)
 
-    prep_msg = Prio3.encode_prepare_message(verifier_share,
-                                            k_joint_rand_share)
+    prep_msg = Prio3.encode_prep_share(verifier_share,
+                                       k_joint_rand_share)
     return (out_share, k_joint_rand, prep_msg)
 
 def prep_next(Prio3, prep, inbound):
@@ -1442,12 +1442,9 @@ def prep_next(Prio3, prep, inbound):
     if inbound is None:
         return (prep, prep_msg)
 
-    (verifier, k_joint_rand_check) = \
-        Prio3.decode_prepare_message(inbound)
-
-    if k_joint_rand_check != k_joint_rand or \
-            not Prio3.Flp.decide(verifier):
-        raise ERR_VERIFY
+    k_joint_rand_check = Prio3.decode_prep_msg(inbound)
+    if k_joint_rand_check != k_joint_rand:
+        raise ERR_VERIFY # joint randomness check failed
 
     return out_share
 
@@ -1456,7 +1453,7 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
     k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
     for encoded in prep_shares:
         (verifier_share, k_joint_rand_share) = \
-            Prio3.decode_prepare_message(encoded)
+            Prio3.decode_prep_share(encoded)
 
         verifier = vec_add(verifier, verifier_share)
 
@@ -1464,8 +1461,10 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
             k_joint_rand_check = xor(k_joint_rand_check,
                                      k_joint_rand_share)
 
-    return Prio3.encode_prepare_message(verifier,
-                                        k_joint_rand_check)
+    if not Prio3.Flp.decide(verifier):
+        raise ERR_VERIFY # proof verifier check failed
+
+    return Prio3.encode_prep_msg(k_joint_rand_check)
 ~~~
 {: #prio3-prep-state title="Preparation state for Prio3."}
 
@@ -1562,14 +1561,14 @@ def decode_helper_share(Prio3, dst, agg_id, encoded):
         raise ERR_DECODE
     return (input_share, proof_share, k_blind, k_hint)
 
-def encode_prepare_message(Prio3, verifier, k_joint_rand):
+def encode_prep_share(Prio3, verifier, k_joint_rand):
     encoded = Bytes()
     encoded += Prio3.Flp.Field.encode_vec(verifier)
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded += k_joint_rand
     return encoded
 
-def decode_prepare_message(Prio3, encoded):
+def decode_prep_share(Prio3, encoded):
     l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.VERIFIER_LEN
     encoded_verifier, encoded = encoded[:l], encoded[l:]
     verifier = Prio3.Flp.Field.decode_vec(encoded_verifier)
@@ -1580,6 +1579,21 @@ def decode_prepare_message(Prio3, encoded):
     if len(encoded) != 0:
         raise ERR_DECODE
     return (verifier, k_joint_rand)
+
+def encode_prep_msg(Prio3, k_joint_rand_check):
+    encoded = Bytes()
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded += k_joint_rand_check
+    return encoded
+
+def decode_prep_msg(Prio3, encoded):
+    k_joint_rand_check = None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        l = Prio3.Prg.SEED_SIZE
+        k_joint_rand_check, encoded = encoded[:l], encoded[l:]
+    if len(encoded) != 0:
+        raise ERR_DECODE
+    return k_joint_rand_check
 ~~~
 {: #prio3-helpers title="Helper functions required for Prio3."}
 
