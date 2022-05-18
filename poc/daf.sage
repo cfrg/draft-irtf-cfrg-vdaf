@@ -35,10 +35,13 @@ class Daf:
         raise Error('not implemented')
 
     # Prepare an input share for aggregation. This algorithm takes as input an
-    # Aggregator's input share and an aggreation parameter and returns the
-    # corresponding output share.
+    # Aggregator's input share, the Aggregator's ID (a unique integer in range
+    # `[0, SHARES)` corresponding to the index of `input_share` in the Client's
+    # output), and an aggreation parameter and returns the corresponding output
+    # share.
     @classmethod
     def prep(Daf,
+             agg_id: Unsigned,
              agg_param: AggParam,
              input_share: Bytes) -> OutShare:
         raise Error('not implemented')
@@ -78,7 +81,7 @@ def run_daf(Daf,
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(Daf.SHARES):
-            out_shares[j].append(Daf.prep(agg_param, input_shares[j]))
+            out_shares[j].append(Daf.prep(j, agg_param, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
     # share and it to the Collector.
@@ -123,7 +126,7 @@ class DafTest(Daf):
         return input_shares
 
     @classmethod
-    def prep(cls, _agg_param, input_share):
+    def prep(cls, _agg_id, _agg_param, input_share):
         # For this simple test DAF, the output share is the same as the input
         # share.
         return cls.Field.decode_vec(input_share)
