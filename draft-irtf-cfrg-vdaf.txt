@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 14 November 2022                               Cloudflare, Inc.
+Expires: 19 November 2022                               Cloudflare, Inc.
                                                            P. Schoppmann
                                                                   Google
-                                                             13 May 2022
+                                                             18 May 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 November 2022.
+   This Internet-Draft will expire on 19 November 2022.
 
 Copyright Notice
 
@@ -1475,6 +1475,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    respectively and they are described in Section 7.2.6.
 
    def measurement_to_input_shares(Prio3, _public_param, measurement):
+       # Domain separation tag for PRG info string
        dst = b"vdaf-00 prio3"
        inp = Prio3.Flp.encode(measurement)
        k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
@@ -1594,6 +1595,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    Section 7.2.6.
 
    def prep_init(Prio3, verify_param, _agg_param, nonce, input_share):
+       # Domain separation tag for PRG info string
        dst = b"vdaf-00 prio3"
        (j, k_query_init) = verify_param
 
