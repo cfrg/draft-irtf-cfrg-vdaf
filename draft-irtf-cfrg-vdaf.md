@@ -1166,12 +1166,13 @@ validity (encoding is described below in {{flp-encode}}):
   and verifier.
 
 * `Flp.query(input: Vec[Field], proof: Vec[Field], query_rand: Vec[Field],
-  joint_rand: Vec[Field]) -> Vec[Field]` is the query-generation algorithm run
-  by the verifier. This is used to "query" the input and proof. The result of
-  the query (i.e., the output of this function) is called the "verifier
-  message". In addition to the input and proof, this algorithm takes as input
-  the query randomness `query_rand` and the joint randomness `joint_rand`. The
-  former is used only by the verifier.
+  joint_rand: Vec[Field], num_shares: Unsigned) -> Vec[Field]` is the
+  query-generation algorithm run by the verifier. This is used to "query" the
+  input and proof. The result of the query (i.e., the output of this function)
+  is called the "verifier message". In addition to the input and proof, this
+  algorithm takes as input the query randomness `query_rand` and the joint
+  randomness `joint_rand`. The former is used only by the verifier. The
+  semantics of `num_shares` is discussed below.
 
 * `Flp.decide(verifier: Vec[Field]) -> Bool` is the deterministic decision
   algorithm run by the verifier. It takes as input the verifier message and
@@ -1186,6 +1187,15 @@ of the FLP system ensures that the verifier message reveals nothing about the
 input's validity. Therefore, to decide if an input is valid, the Aggregators
 will run the query-generation algorithm locally, exchange verifier shares,
 combine them to recover the verifier message, and run the decision algorithm.
+
+The query-generation algorithm includes a parameter `num_shares` that specifies
+the number of shares of the input and proof that were generated. If these data
+are not secret shared, then `num_shares == 1`. This parameter is useful for
+certain FLP constructions. For example, the FLP in {{flp-generic}} is defined in
+terms of an arithmetic circuit; when the circuit contains constants, it is
+sometimes necessary to normalize those constants to ensure that the circuit's
+output, when run on a valid input, is the same regardless of the nuber of
+shares.
 
 An FLP is executed by the prover and verifier as follows:
 
@@ -1207,7 +1217,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 {: #run-flp title="Execution of an FLP."}
 
 The proof system is constructed so that, if `input` is a valid input, then
-`run_flp(Flp, input)` always returns `True`. On the other hand, if `input` is
+`run_flp(Flp, input, 1)` always returns `True`. On the other hand, if `input` is
 invalid, then as long as `joint_rand` and `query_rand` are generated uniform
 randomly, the output is `False` with overwhelming probability.
 
