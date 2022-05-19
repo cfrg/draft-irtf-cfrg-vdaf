@@ -1179,8 +1179,8 @@ validity (encoding is described below in {{flp-encode}}):
   valid.
 
 Our application requires that the FLP is "fully linear" in the sense defined in
-{{BBCGGI19}} As a practical matter, what this property implies is that, when run
-on a share of the input and proof, the query-generation algorithm outputs a
+{{BBCGGI19}}. As a practical matter, what this property implies is that, when
+run on a share of the input and proof, the query-generation algorithm outputs a
 share of the verifier message. Furthermore, the "strong zero-knowledge" property
 of the FLP system ensures that the verifier message reveals nothing about the
 input's validity. Therefore, to decide if an input is valid, the Aggregators
