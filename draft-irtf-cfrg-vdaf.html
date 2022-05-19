@@ -1025,7 +1025,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 19 November 2022</td>
+<td class="center">Expires 20 November 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1038,12 +1038,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-05-18" class="published">18 May 2022</time>
+<time datetime="2022-05-19" class="published">19 May 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-11-19">19 November 2022</time></dd>
+<dd class="expires"><time datetime="2022-11-20">20 November 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1102,7 +1102,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 November 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 November 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1723,8 +1723,8 @@ the aggregate share is necessarily sent over the network.<a href="#section-4-8.1
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-sharding" class="section-name selfRef">Sharding</a>
         </h3>
 <p id="section-4.1-1">In order to protect the privacy of its measurements, a DAF Client shards its
-measurements into a sequence of "input shares".  The
-<code>measurement_to_input_shares</code> method is used for this purpose.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+measurements into a sequence of input shares. The <code>measurement_to_input_shares</code>
+method is used for this purpose.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.1-2.1">
             <code>Daf.measurement_to_input_shares(input: Measurement) -&gt; Vec[Bytes]</code> is the
@@ -2647,7 +2647,7 @@ class PrgAes128:
           <p id="section-7-1.1.1">NOTE This construction has not undergone significant security analysis.<a href="#section-7-1.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-7-2">This section describes "Prio3", a VDAF for Prio <span>[<a href="#CGB17" class="xref">CGB17</a>]</span>. Prio is suitable for
+<p id="section-7-2">This section describes Prio3, a VDAF for Prio <span>[<a href="#CGB17" class="xref">CGB17</a>]</span>. Prio is suitable for
 a wide variety of aggregation functions, including (but not limited to) sum,
 mean, standard deviation, estimation of quantiles (e.g., median), and linear
 regression. In fact, the scheme described in this section is compatible with any
@@ -2676,7 +2676,7 @@ the aggregate shares and computes the aggregate result.<a href="#section-7-4" cl
 <p id="section-7-5">This VDAF does not have an aggregation parameter. Instead, the output share is
 derived from the input share by applying a fixed map. See <a href="#poplar1" class="xref">Section 8</a> for an
 example of a VDAF that makes meaningful use of the aggregation parameter.<a href="#section-7-5" class="pilcrow">¶</a></p>
-<p id="section-7-6">As the name implies, "Prio3" is a descendant of the original Prio construction.
+<p id="section-7-6">As the name implies, Prio3 is a descendant of the original Prio construction.
 A second iteration was deployed in the <span>[<a href="#ENPA" class="xref">ENPA</a>]</span> system, and like the VDAF
 described here, the ENPA system was built from techniques introduced in
 <span>[<a href="#BBCGGI19" class="xref">BBCGGI19</a>]</span> that significantly improve communication cost. That system was
@@ -2809,11 +2809,11 @@ valid.<a href="#section-7.1-6.3" class="pilcrow">¶</a>
 <p id="section-7.1-7">Our application requires that the FLP is "fully linear" in the sense defined in
 <span>[<a href="#BBCGGI19" class="xref">BBCGGI19</a>]</span> As a practical matter, what this property implies is that, when run
 on a share of the input and proof, the query-generation algorithm outputs a
-share of the verifier message. Furthermore, the "zero-knowledge" property of the
-FLP system ensures that the verifier message reveals nothing about the input's
-validity. Therefore, to decide if an input is valid, the Aggregators will run
-the query-generation algorithm locally, exchange verifier shares, combine
-them to recover the verifier message, and run the decision algorithm.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
+share of the verifier message. Furthermore, the "strong zero-knowledge" property
+of the FLP system ensures that the verifier message reveals nothing about the
+input's validity. Therefore, to decide if an input is valid, the Aggregators
+will run the query-generation algorithm locally, exchange verifier shares,
+combine them to recover the verifier message, and run the decision algorithm.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.1-8">An FLP is executed by the prover and verifier as follows:<a href="#section-7.1-8" class="pilcrow">¶</a></p>
 <span id="name-execution-of-an-flp"></span><div id="run-flp">
 <figure id="figure-12">
@@ -3013,7 +3013,7 @@ are described in <a href="#prio3-helper-functions" class="xref">Section 7.2.5</a
 <pre>
 def measurement_to_input_shares(Prio3, measurement):
     # Domain separation tag for PRG info string
-    dst = b"vdaf-00 prio3"
+    dst = b'vdaf-00 prio3'
     inp = Prio3.Flp.encode(measurement)
     k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
@@ -3140,7 +3140,7 @@ make use of encoding and decoding methods defined in <a href="#prio3-helper-func
 <pre>
 def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
     # Domain separation tag for PRG info string
-    dst = b"vdaf-00 prio3"
+    dst = b'vdaf-00 prio3'
 
     (input_share, proof_share, k_blind, k_hint) = \
         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
@@ -3442,7 +3442,7 @@ linear operations on (its share of) the input and proof.<a href="#section-7.3.1-
 exhibit a special structure. Specifically, an arithmetic circuit with "G-gates"
 (see <span>[<a href="#BBCGGI19" class="xref">BBCGGI19</a>]</span>, Definition 5.2) is composed of affine gates and any number of
 instances of a distinguished gate <code>G</code>, which may be non-affine. We will refer to
-this class of circuits as "gadget circuits" and to <code>G</code> as the "gadget".<a href="#section-7.3.1-5" class="pilcrow">¶</a></p>
+this class of circuits as 'gadget circuits' and to <code>G</code> as the "gadget".<a href="#section-7.3.1-5" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-6">As an illustrative example, consider a validity circuit <code>C</code> that recognizes the
 set <code>L = set([0], [1])</code>. That is, <code>C</code> takes as input a length-1 vector <code>x</code> and
 returns 0 if <code>x[0]</code> is in <code>[0,2)</code> and outputs something else otherwise. This
@@ -4543,14 +4543,14 @@ class PrepState:
      self.correlation_shares) = decode_input_share(input_share)
     (self.party_id, k_verify_init) = verify_param
     self.k_verify_rand = get_key(k_verify_init, nonce)
-    self.step = "ready"
+    self.step = 'ready'
 
   def next(self, inbound: Optional[Bytes]):
     l = self.l
     (a_share, b_share, c_share,
      A_share, B_share) = correlation_shares[l-1]
 
-    if self.step == "ready" and inbound == None:
+    if self.step == 'ready' and inbound == None:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
       for x in self.candidate_prefixes:
@@ -4567,10 +4567,10 @@ class PrepState:
       ]
 
       self.output_share = data_share
-      self.step = "sketch round 1"
+      self.step = 'sketch round 1'
       return verifier_share_1
 
-    elif self.step == "sketch round 1" and inbound != None:
+    elif self.step == 'sketch round 1' and inbound != None:
       verifier_1 = Field[l].decode_vec(inbound)
       verifier_share_2 = [
         (verifier_1[0] * verifier_1[0] \
@@ -4580,10 +4580,10 @@ class PrepState:
         + B_share
       ]
 
-      self.step = "sketch round 2"
+      self.step = 'sketch round 2'
       return Field[l].encode_vec(verifier_share_2)
 
-    elif self.step == "sketch round 2" and inbound != None:
+    elif self.step == 'sketch round 2' and inbound != None:
       verifier_2 = Field[l].decode_vec(inbound)
       if verifier_2 != 0: raise ERR_INVALID
       return Field[l].encode_vec(self.output_share)
