@@ -155,16 +155,6 @@ class Prio3(Vdaf):
         return ((out_share, k_joint_rand), prep_msg)
 
     @classmethod
-    def prep_next(Prio3, prep_state, inbound):
-        (out_share, k_joint_rand) = prep_state
-
-        k_joint_rand_check = Prio3.decode_prep_msg(inbound)
-        if k_joint_rand_check != k_joint_rand:
-            raise ERR_VERIFY # joint randomness check failed
-
-        return out_share
-
-    @classmethod
     def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
         verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
         k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
@@ -182,6 +172,16 @@ class Prio3(Vdaf):
             raise ERR_VERIFY # proof verifier check failed
 
         return Prio3.encode_prep_msg(k_joint_rand_check)
+
+    @classmethod
+    def prep_next(Prio3, prep_state, inbound):
+        (out_share, k_joint_rand) = prep_state
+
+        k_joint_rand_check = Prio3.decode_prep_msg(inbound)
+        if k_joint_rand_check != k_joint_rand:
+            raise ERR_VERIFY # joint randomness check failed
+
+        return out_share
 
     @classmethod
     def out_shares_to_agg_share(Prio3, _agg_param, out_shares):

@@ -1437,15 +1437,6 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
                                        k_joint_rand_share)
     return ((out_share, k_joint_rand), prep_msg)
 
-def prep_next(Prio3, prep_state, inbound):
-    (out_share, k_joint_rand) = prep_state
-
-    k_joint_rand_check = Prio3.decode_prep_msg(inbound)
-    if k_joint_rand_check != k_joint_rand:
-        raise ERR_VERIFY # joint randomness check failed
-
-    return out_share
-
 def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
     verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
     k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
@@ -1463,6 +1454,15 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
         raise ERR_VERIFY # proof verifier check failed
 
     return Prio3.encode_prep_msg(k_joint_rand_check)
+
+def prep_next(Prio3, prep_state, inbound):
+    (out_share, k_joint_rand) = prep_state
+
+    k_joint_rand_check = Prio3.decode_prep_msg(inbound)
+    if k_joint_rand_check != k_joint_rand:
+        raise ERR_VERIFY # joint randomness check failed
+
+    return out_share
 ~~~
 {: #prio3-prep-state title="Preparation state for Prio3."}
 
