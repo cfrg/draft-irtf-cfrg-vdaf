@@ -732,9 +732,9 @@ def run_daf(Daf,
 
        Table 2: Constants and types defined by each concrete VDAF.
 
-   As for DAFs (seet {[sec-daf}}), any output of a VDAF method that must
-   be transmitted from one party to another is treated as an opaque byte
-   string.  All other quantitites are given a concrete type.
+   Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that
+   must be transmitted from one party to another is treated as an opaque
+   byte string.  All other quantitites are given a concrete type.
 
       OPEN ISSUE: It might be cleaner to define a type for each value,
       then have that type implement an encoding where necessary.  See
