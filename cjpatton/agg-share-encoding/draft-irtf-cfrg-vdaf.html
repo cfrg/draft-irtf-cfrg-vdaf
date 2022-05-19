@@ -2308,7 +2308,8 @@ def run_vdaf(Vdaf,
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an
-    # aggregate share.
+    # aggregate share. In a distributed VDAF computation, the
+    # aggregate shares are sent over the network.
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
