@@ -289,6 +289,13 @@ define input and output types. A fatal error in a program (e.g., failure to
 parse one of the function parameters) is usually handled by raising an
 exception.
 
+A variable with type `Bytes` is a byte string. This document defines several
+byte-string constants. When comprised of printable ASCII characters, they are
+written as Python 3 byte-string literals (e.g., `b'some constant string'`).
+
+A global constant `VERSION` is defined, which algorithms are free to use as
+desired. Its value SHALL be `b'vdaf-00'`.
+
 Some common functionalities:
 
 * `zeros(len: Unsigned) -> Bytes` returns an array of zero bytes. The length of
@@ -1282,7 +1289,7 @@ are described in {{prio3-helper-functions}}.
 ~~~
 def measurement_to_input_shares(Prio3, measurement):
     # Domain separation tag for PRG info string
-    dst = b'vdaf-00 prio3'
+    dst = VERSION + b' prio3'
     inp = Prio3.Flp.encode(measurement)
     k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
@@ -1399,7 +1406,7 @@ make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 ~~~
 def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
     # Domain separation tag for PRG info string
-    dst = b'vdaf-00 prio3'
+    dst = VERSION + b'prio3'
 
     (input_share, proof_share, k_blind, k_hint) = \
         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
