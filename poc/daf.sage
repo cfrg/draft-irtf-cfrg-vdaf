@@ -21,9 +21,6 @@ class Daf:
     # The output share type.
     OutShare = None
 
-    # The aggregate share type.
-    AggShare = None
-
     # The aggregate result type.
     AggResult = None
 
@@ -46,20 +43,21 @@ class Daf:
              input_share: Bytes) -> OutShare:
         raise Error('not implemented')
 
-    # Merge a list of output shares into an aggregate share. This is called by
-    # an Aggregator after recovering a batch of output shares.
+    # Merge a list of output shares into an aggregate share, encoded as a byte
+    # string. This is called by an Aggregator after recovering a batch of output
+    # shares.
     @classmethod
     def out_shares_to_agg_share(Daf,
                                 agg_param: AggParam,
-                                out_shares: Vec[OutShare]) -> AggShare:
+                                out_shares: Vec[OutShare]) -> Bytes:
         raise Error('not implemented')
 
-    # Unshard the aggregate shares and compute the aggregate result. This is
-    # called by the Collector.
+    # Unshard the aggregate shares (encoded as byte strings) and compute the
+    # aggregate result. This is called by the Collector.
     @classmethod
     def agg_shares_to_result(Daf,
                              agg_param: AggParam,
-                             agg_shares: Vec[AggShare]) -> AggResult:
+                             agg_shares: Vec[Bytes]) -> AggResult:
         raise Error('not implemented')
 
     # Returns a printable version of the verification parameters. This is used
@@ -109,7 +107,6 @@ class DafTest(Daf):
     SHARES = 2
 
     # Associated types
-    AggShare = Vec[Field]
     OutShare = Vec[Field]
     Measurement = Unsigned
     AggResult = Unsigned
@@ -133,11 +130,14 @@ class DafTest(Daf):
 
     @classmethod
     def out_shares_to_agg_share(cls, _agg_param, out_shares):
-        return reduce(lambda x, y: [x[0] + y[0]], out_shares)
+        return cls.Field.encode_vec(
+            reduce(lambda x, y: [x[0] + y[0]], out_shares))
 
     @classmethod
     def agg_shares_to_result(cls, _agg_param, agg_shares):
-        return [reduce(lambda x, y: [x[0] + y[0]], agg_shares)[0].as_unsigned()]
+        return [reduce(lambda x, y: [x[0] + y[0]],
+            map(lambda encoded: cls.Field.decode_vec(encoded),
+                agg_shares))[0].as_unsigned()]
 
     @classmethod
     def test_vector_verify_params(cls, verify_params: Vec[VerifyParam]):

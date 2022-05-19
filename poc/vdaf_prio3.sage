@@ -25,7 +25,6 @@ class Prio3(Vdaf):
     # Types required by `Vdaf`
     Measurement = Flp.Measurement
     OutShare = Vec[Flp.Field]
-    AggShare = Vec[Flp.Field]
     AggResult = Vec[Unsigned]
     Prep = Tuple[Vec[Flp.Field],  # output share
                  Bytes,           # k_joint_rand
@@ -192,13 +191,13 @@ class Prio3(Vdaf):
         agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
         for out_share in out_shares:
             agg_share = vec_add(agg_share, out_share)
-        return agg_share
+        return Prio3.Flp.Field.encode_vec(agg_share)
 
     @classmethod
     def agg_shares_to_result(Prio3, _agg_param, agg_shares):
         agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
         for agg_share in agg_shares:
-            agg = vec_add(agg, agg_share)
+            agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
         return list(map(lambda x: x.as_unsigned(), agg))
 
     @classmethod
