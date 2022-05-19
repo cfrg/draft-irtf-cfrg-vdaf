@@ -296,6 +296,14 @@ written as Python 3 byte-string literals (e.g., `b'some constant string'`).
 A global constant `VERSION` is defined, which algorithms are free to use as
 desired. Its value SHALL be `b'vdaf-00'`.
 
+This document describes algorithms for multi-party computations in which the
+parties typically communicate over a network. Wherever a quantity is defined
+that must be be transmitted from one party to another, this document prescribes
+a particular encoding of that quantity as a byte string.
+
+> OPEN ISSUE: It might be better to not be prescriptive about how quantities are
+> encoded on the wire. See issue #58.
+
 Some common functionalities:
 
 * `zeros(len: Unsigned) -> Bytes` returns an array of zero bytes. The length of
@@ -428,12 +436,19 @@ types enumerated in the following table.
 | `Measurement` | Type of each measurement      |
 | `AggParam`    | Type of aggregation parameter |
 | `OutShare`    | Type of each output share     |
-| `AggShare`    | Type of each aggregate share  |
 | `AggResult`   | Type of the aggregate result  |
 {: #daf-param title="Constants and types defined by each concrete DAF."}
 
-> QUESTION: The type `AggShare` should perhaps be replaced with `Bytes`, since
-> the aggregate share is necessarily sent over the network.
+These types define some of the inputs and outputs of DAF methods at various
+stages of the computation. Observe that only the measurements, output shares,
+the aggregate result, and the aggregation parameter have an explicit type. All
+other values --- in particular, the input shares and the aggregate shares ---
+have type `Bytes` and are treated as opaque byte strings. This is because these
+values must be transmitted between parties over a network.
+
+> OPEN ISSUE: It might be cleaner to define a type for each value, then have
+> that type implement an encoding where necessary. This way each method
+> parameter has a meaningful type hint. See issue#58.
 
 ## Sharding {#sec-daf-shard}
 
@@ -488,8 +503,8 @@ batches are defined by the application), it combines them into a share of the
 desired aggregate result:
 
 * `Daf.out_shares_to_agg_share(agg_param: AggParam, out_shares: Vec[OutShare])
-  -> agg_share: AggShare` is the deterministic aggregation algorithm. It is run
-  by each Aggregator over the output shares it has computed over a batch of
+  -> agg_share: Bytes` is the deterministic aggregation algorithm. It is run by
+  each Aggregator over the output shares it has computed over a batch of
   measurement inputs.
 
 ~~~~
@@ -526,7 +541,7 @@ After the Aggregators have aggregated a sufficient number of output shares, each
 sends its aggregate share to the Collector, who runs the following algorithm to
 recover the following output:
 
-* `Daf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[AggShare]) ->
+* `Daf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) ->
   AggResult` is run by the Collector in order to compute the aggregate result
   from the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
   This algorithm is deterministic.
@@ -644,9 +659,15 @@ listed in {{vdaf-param}} are defined by each concrete VDAF.
 | `AggParam`        | Type of aggregation parameter |
 | `Prep`            | State of each Aggregator during Peparation ({{sec-vdaf-prepare}}) |
 | `OutShare`        | Type of each output share |
-| `AggShare`        | Type of each aggregate share |
 | `AggResult`       | Type of the aggregate result |
 {: #vdaf-param title="Constants and types defined by each concrete VDAF."}
+
+Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that must be
+transmitted from one party to another is treated as an opaque byte string. All
+other quantitites are given a concrete type.
+
+> OPEN ISSUE: It might be cleaner to define a type for each value, then have
+> that type implement an encoding where necessary. See issue#58.
 
 ## Sharding {#sec-vdaf-shard}
 
@@ -788,8 +809,8 @@ privacy).
 VDAF Aggregation is identical to DAF Aggregation (cf. {{sec-daf-aggregate}}):
 
 * `Vdaf.out_shares_to_agg_share(agg_param: AggParam, out_shares: Vec[OutShare])
-  -> agg_share: AggShare` is the deterministic aggregation algorithm. It is run
-  by each Aggregator over the output shares it has computed over a batch of
+  -> agg_share: Bytes` is the deterministic aggregation algorithm. It is run by
+  each Aggregator over the output shares it has computed over a batch of
   measurement inputs.
 
 The data flow for this stage is illustrated in {{aggregate-flow}}. Here again,
@@ -801,7 +822,7 @@ form, where shares are processed one at a time.
 
 VDAF Unsharding is identical to DAF Unssharding (cf. {{sec-daf-unshard}}):
 
-* `Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[AggShare]) ->
+* `Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) ->
   AggResult` is run by the Collector in order to compute the aggregate result
   from the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
   This algorithm is deterministic.
@@ -853,7 +874,8 @@ def run_vdaf(Vdaf,
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an
-    # aggregate share.
+    # aggregate share. In a distributed VDAF computation, the
+    # aggregate shares are sent over the network.
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
@@ -1270,7 +1292,6 @@ aggregation, and unsharding are described in the remaining subsections.
 | `AggParam`        | `None`            |
 | `Prep`            | `Tuple[Vec[Flp.Field], Optional[Bytes], Bytes]` |
 | `OutShare`        | `Vec[Flp.Field]`  |
-| `AggShare`        | `Vec[Flp.Field]`  |
 | `AggResult`       | `Vec[Unsigned]`   |
 {: #prio3-param title="Associated parameters for the Prio3 VDAF."}
 
@@ -1499,7 +1520,7 @@ def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
     agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for out_share in out_shares:
         agg_share = vec_add(agg_share, out_share)
-    return agg_share
+    return Prio3.Flp.Field.encode_vec(agg_share)
 ~~~
 {: #prio3-out2agg title="Aggregation algorithm for Prio3."}
 
@@ -1512,7 +1533,7 @@ element-wise. It then converts each element of the vector into an integer.
 def agg_shares_to_result(Prio3, _agg_param, agg_shares):
     agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for agg_share in agg_shares:
-        agg = vec_add(agg, agg_share)
+        agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
     return list(map(lambda x: x.as_unsigned(), agg))
 ~~~
 {: #prio3-agg-output title="Computation of the aggregate result for Prio3."}

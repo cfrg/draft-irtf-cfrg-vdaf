@@ -32,9 +32,6 @@ class Vdaf:
     # The output share type.
     OutShare = None
 
-    # The aggregate share type.
-    AggShare = None
-
     # The aggregate result type.
     AggResult = None
 
@@ -79,20 +76,21 @@ class Vdaf:
                             prep_shares: Vec[Bytes]) -> Bytes:
         raise Error('not implemented')
 
-    # Merge a list of output shares into an aggregate share. This is called by
-    # an aggregator after recovering a batch of output shares.
+    # Merge a list of output shares into an aggregate share, encoded as a byte
+    # string. This is called by an aggregator after recovering a batch of
+    # output shares.
     @classmethod
     def out_shares_to_agg_share(Vdaf,
                                 agg_param: AggParam,
-                                out_shares: Vec[OutShare]) -> AggShare:
+                                out_shares: Vec[OutShare]) -> Bytes:
         raise Error('not implemented')
 
-    # Unshard the aggregate shares and compute the aggregate result. This is
-    # called by the ccollector.
+    # Unshard the aggregate shares (encoded as byte strings) and compute the
+    # aggregate result. This is called by the Collector.
     @classmethod
     def agg_shares_to_result(Vdaf,
                              agg_param: AggParam,
-                             agg_shares: Vec[AggShare]) -> AggResult:
+                             agg_shares: Vec[Bytes]) -> AggResult:
         raise Error('not implemented')
 
 
@@ -164,15 +162,15 @@ def run_vdaf(Vdaf,
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an
-    # aggregate share.
+    # aggregate share. In a distributed VDAF computation, the
+    # aggregate shares are sent over the network.
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
         agg_share_j = Vdaf.out_shares_to_agg_share(agg_param,
                                                    out_shares_j)
         agg_shares.append(agg_share_j)
-        test_vector['agg_shares'].append(
-            list(map(lambda x: x.as_unsigned(), agg_share_j)))
+        test_vector['agg_shares'].append(agg_share_j)
 
     # Collector unshards the aggregate.
     agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares)
@@ -200,7 +198,6 @@ class VdafTest(Vdaf):
     ROUNDS = 1
 
     # Associated types
-    AggShare = Vec[Field]
     OutShare = Vec[Field]
     Measurement = Unsigned
     AggResult = Unsigned
@@ -257,11 +254,14 @@ class VdafTest(Vdaf):
 
     @classmethod
     def out_shares_to_agg_share(cls, _agg_param, out_shares):
-        return reduce(lambda x, y: [x[0] + y[0]], out_shares)
+        return cls.Field.encode_vec(
+            reduce(lambda x, y: [x[0] + y[0]], out_shares))
 
     @classmethod
     def agg_shares_to_result(cls, _agg_param, agg_shares):
-        return [reduce(lambda x, y: [x[0] + y[0]], agg_shares)[0].as_unsigned()]
+        return [reduce(lambda x, y: [x[0] + y[0]],
+            map(lambda encoded: cls.Field.decode_vec(encoded),
+                agg_shares))[0].as_unsigned()]
 
 
 def test_vdaf(cls,
