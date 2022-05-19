@@ -110,6 +110,19 @@ if __name__ == '__main__':
 
     cls = PrgAes128
     test_prg(cls, Field128, 23)
+
+    # These constants were found in a brute-force search, and they test that
+    # the PRG performs rejection sampling correctly when raw AES-CTR output
+    # exceeds the prime modulus.
+    from sagelib.field import Field96
+    expanded_vec = PrgAes128.expand_into_vec(
+        Field96,
+        b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x5f",
+        b"",
+        146
+    )
+    assert expanded_vec[-1] == Field96(39729620190871453347343769187)
+
     if TEST_VECTOR:
         seed = gen_rand(cls.SEED_SIZE)
         info = b'info string'
