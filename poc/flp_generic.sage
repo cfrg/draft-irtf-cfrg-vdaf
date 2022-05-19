@@ -18,11 +18,11 @@ class Gadget:
 
     # Evaluate the gadget on a sequence of field elements.
     def eval(self, Field, inp):
-        raise Error("eval() not implemented")
+        raise Error('eval() not implemented')
 
     # Evaluate the gadget on a sequence of polynomials over a fieldo.
     def eval_poly(self, Field, inp_poly):
-        raise Error("eval_poly() not implemented")
+        raise Error('eval_poly() not implemented')
 
 # A validity circuit.
 class Valid:
@@ -76,19 +76,19 @@ class Valid:
     # Encode a measurement as an input.
     @classmethod
     def encode(Valid, measurement: Measurement) -> Vec[Field]:
-        raise Error("encode() not implemented")
+        raise Error('encode() not implemented')
 
     # Truncate an input to the length of an aggregatable output.
     @classmethod
     def truncate(Valid, inp: Vec[Field]) -> Vec[Field]:
-        raise Error("truncate() not implemented")
+        raise Error('truncate() not implemented')
 
     # Evaluate the circuit on the provided input and joint randomness.
     def eval(self,
              inp: Vec[Field],
              joint_rand: Vec[Field],
              num_shares: Unsigned):
-        raise Error("eval() not implemented")
+        raise Error('eval() not implemented')
 
 
 class ProveGadget:
@@ -356,7 +356,7 @@ class PolyEval(Gadget):
                 break
 
         if len(p) < 1:
-            raise Error("invalid polynomial: zero length")
+            raise Error('invalid polynomial: zero length')
 
         self.p = p
         self.DEGREE = len(p) - 1
@@ -445,7 +445,7 @@ class Sum(Valid):
     @classmethod
     def with_bits(cls, bits):
         if 2^bits >= cls.Field.MODULUS:
-            raise Error("bit size exceeds field modulus")
+            raise Error('bit size exceeds field modulus')
 
         new_cls = deepcopy(cls)
         new_cls.GADGET_CALLS = [bits]
@@ -574,16 +574,16 @@ def test_flp_generic(cls, test_cases):
         joint_rand = cls.Field.rand_vec(cls.JOINT_RAND_LEN)
         v = cls.Valid().eval(inp, joint_rand, 1)
         if (v == cls.Field(0)) != expected_decision:
-            print("{}: test {} failed: validity circuit returned {}".format(
+            print('{}: test {} failed: validity circuit returned {}'.format(
                 cls.Valid.__name__, i, v))
 
         # Run the FLP.
         decision = run_flp(cls, inp, 1)
         if decision != expected_decision:
-            print("{}: test {} failed: proof evaluation resulted in {}; want {}".format(
+            print('{}: test {} failed: proof evaluation resulted in {}; want {}'.format(
                 cls.Valid.__name__, i, decision, expected_decision))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cls = FlpGeneric.with_valid(Count)
     test_flp_generic(cls, [
         (cls.encode(0), True),

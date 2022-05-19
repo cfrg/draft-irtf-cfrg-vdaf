@@ -36,7 +36,7 @@ class Flp:
     # Encode a measurement as an input.
     @classmethod
     def encode(Flp, measurement: Measurement) -> Vec[Field]:
-        raise Error("encode() not implemented")
+        raise Error('encode() not implemented')
 
     # Generate a proof of an input's validity.
     @classmethod
@@ -44,7 +44,7 @@ class Flp:
               inp: Vec[Field],
               prove_rand: Vec[Field],
               joint_rand: Vec[Field]) -> Vec[Field]:
-        raise Error("prove() not implemented")
+        raise Error('prove() not implemented')
 
     # Generate a verifier message for an input and proof.
     @classmethod
@@ -54,17 +54,17 @@ class Flp:
               query_rand: Vec[Field],
               joint_rand: Vec[Field],
               num_shares: Unsigned) -> Vec[Field]:
-        raise Error("query() not implemented")
+        raise Error('query() not implemented')
 
     # Decide if a verifier message was generated from a valid input.
     @classmethod
     def decide(Flp, verifier: Vec[Field]) -> Bool:
-        raise Error("decide() not implemented")
+        raise Error('decide() not implemented')
 
     #  Map an input to an aggregatable output.
     @classmethod
     def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
-        raise Error("truncate() not implemented")
+        raise Error('truncate() not implemented')
 
 
 # Run the FLP on an input.
@@ -146,7 +146,7 @@ class FlpTestField128(FlpTest):
         return new_cls
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cls = FlpTestField128
     assert run_flp(cls, cls.encode(0), 1) == True
     assert run_flp(cls, cls.encode(4), 1) == True

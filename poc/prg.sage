@@ -24,11 +24,11 @@ class Prg:
 
     # Construct a new instnace of this PRG from the given seed and info string.
     def __init__(self, seed: Bytes, info: Bytes) -> Prg:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Output the next `length` bytes of the PRG stream.
     def next(self, length: Unsigned) -> Bytes:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Derive a new seed.
     @classmethod
@@ -81,7 +81,7 @@ class PrgAes128(Prg):
 #
 
 def test_prg(Prg, F, expanded_len):
-    info = b"info string"
+    info = b'info string'
     seed = gen_rand(Prg.SEED_SIZE)
 
     # Test next
@@ -89,7 +89,7 @@ def test_prg(Prg, F, expanded_len):
     assert len(expanded_data) == expanded_len
 
     want = Prg(seed, info).next(700)
-    got = b""
+    got = b''
     prg = Prg(seed, info)
     for i in range(0, 700, 7):
         got += prg.next(7)
@@ -104,7 +104,7 @@ def test_prg(Prg, F, expanded_len):
     assert len(expanded_vec) == expanded_len
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import json
     from sagelib.field import Field128
 
@@ -112,21 +112,21 @@ if __name__ == "__main__":
     test_prg(cls, Field128, 23)
     if TEST_VECTOR:
         seed = gen_rand(cls.SEED_SIZE)
-        info = b"info string"
+        info = b'info string'
         length = 40
 
         test_vector = {
-            "seed": seed.hex(),
-            "info": info.hex(),
-            "length": int(length),
-            "derived_seed": None, # set below
-            "expanded_vec": None, # set below
+            'seed': seed.hex(),
+            'info': info.hex(),
+            'length': int(length),
+            'derived_seed': None, # set below
+            'expanded_vec': None, # set below
         }
 
-        test_vector["derived_seed"] = cls.derive_seed(seed, info).hex()
-        test_vector["expanded_vec"] = Field128.encode_vec(
+        test_vector['derived_seed'] = cls.derive_seed(seed, info).hex()
+        test_vector['expanded_vec'] = Field128.encode_vec(
                 cls.expand_into_vec(Field128, seed, info, length)).hex()
 
-        print("--- {} ({}) ----------------------------".format(cls, Field128))
+        print('--- {} ({}) ----------------------------'.format(cls, Field128))
         print(json.dumps(test_vector, indent=4))
         print()

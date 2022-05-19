@@ -32,7 +32,7 @@ class Daf:
     @classmethod
     def measurement_to_input_shares(Daf,
                                     measurement: Measurement) -> Vec[Bytes]:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Prepare an input share for aggregation. This algorithm takes as input an
     # Aggregator's input share and an aggreation parameter and returns the
@@ -41,7 +41,7 @@ class Daf:
     def prep(Daf,
              agg_param: AggParam,
              input_share: Bytes) -> OutShare:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Merge a list of output shares into an aggregate share. This is called by
     # an Aggregator after recovering a batch of output shares.
@@ -49,7 +49,7 @@ class Daf:
     def out_shares_to_agg_share(Daf,
                                 agg_param: AggParam,
                                 out_shares: Vec[OutShare]) -> AggShare:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Unshard the aggregate shares and compute the aggregate result. This is
     # called by the Collector.
@@ -57,13 +57,13 @@ class Daf:
     def agg_shares_to_result(Daf,
                              agg_param: AggParam,
                              agg_shares: Vec[AggShare]) -> AggResult:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Returns a printable version of the verification parameters. This is used
     # for test vector generation.
     @classmethod
     def test_vector_verify_params(Daf, verify_params: Vec[VerifyParam]):
-        raise Error("not implemented")
+        raise Error('not implemented')
 
 
 # Run a DAF on a list of measurements.
@@ -149,9 +149,9 @@ def test_daf(cls,
                          agg_param,
                          measurements)
     if agg_result != expected_agg_result:
-        print("vdaf test failed ({} on {}): unexpected result: got {}; want {}".format(
+        print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'.format(
             cls, measurements, agg_result, expected_agg_result))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_daf(DafTest, None, [1, 2, 3, 4], [10])

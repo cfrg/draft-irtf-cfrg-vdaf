@@ -43,7 +43,7 @@ class Vdaf:
     @classmethod
     def measurement_to_input_shares(Vdaf,
                                     measurement: Measurement) -> Vec[Bytes]:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Initialize the Prepare state for the given input share. This method is run
     # by an Aggregator. Along with the input share, the inputs include the
@@ -57,7 +57,7 @@ class Vdaf:
                   agg_param: AggParam,
                   nonce: Bytes,
                   input_share: Bytes) -> Prep:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Consume the inbound message from the previous round (or `None` if this is
     # the first round) and return the aggregator's share of the next round (or
@@ -67,7 +67,7 @@ class Vdaf:
                   prep: Prep,
                   inbound: Optional[Bytes],
                   ) -> Union[Tuple[Prep, Bytes], Vdaf.OutShare]:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Unshard the Prepare message shares from the previous round of the Prapare
     # computation. This is called by an aggregator after receiving all of the
@@ -77,7 +77,7 @@ class Vdaf:
     def prep_shares_to_prep(Vdaf,
                             agg_param: AggParam,
                             prep_shares: Vec[Bytes]) -> Bytes:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Merge a list of output shares into an aggregate share. This is called by
     # an aggregator after recovering a batch of output shares.
@@ -85,7 +85,7 @@ class Vdaf:
     def out_shares_to_agg_share(Vdaf,
                                 agg_param: AggParam,
                                 out_shares: Vec[OutShare]) -> AggShare:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
     # Unshard the aggregate shares and compute the aggregate result. This is
     # called by the ccollector.
@@ -93,7 +93,7 @@ class Vdaf:
     def agg_shares_to_result(Vdaf,
                              agg_param: AggParam,
                              agg_shares: Vec[AggShare]) -> AggResult:
-        raise Error("not implemented")
+        raise Error('not implemented')
 
 
 # Run the VDAF on a list of measurements.
@@ -108,27 +108,27 @@ def run_vdaf(Vdaf,
     verify_key = gen_rand(Vdaf.VERIFY_KEY_SIZE)
 
     test_vector = {
-        "verify_key": verify_key.hex(),
-        "agg_param": agg_param,
-        "prep": [],
-        "agg_shares": [],
-        "agg_result": None, # set below
+        'verify_key': verify_key.hex(),
+        'agg_param': agg_param,
+        'prep': [],
+        'agg_shares': [],
+        'agg_result': None, # set below
     }
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
 
         prep_test_vector = {
-            "measurement": int(measurement),
-            "nonce": nonce.hex(),
-            "input_shares": [],
-            "prep_shares": [[] for _ in range(Vdaf.ROUNDS)],
-            "out_shares": [],
+            'measurement': int(measurement),
+            'nonce': nonce.hex(),
+            'input_shares': [],
+            'prep_shares': [[] for _ in range(Vdaf.ROUNDS)],
+            'out_shares': [],
         }
 
         # Each Client shards its measurement into input shares.
         input_shares = Vdaf.measurement_to_input_shares(measurement)
         for input_share in input_shares:
-            prep_test_vector["input_shares"].append(input_share.hex())
+            prep_test_vector['input_shares'].append(input_share.hex())
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
@@ -152,15 +152,15 @@ def run_vdaf(Vdaf,
             # network in a distributed VDAF computation.
             if i < Vdaf.ROUNDS:
                 for prep_share in outbound:
-                    prep_test_vector["prep_shares"][i].append(prep_share.hex())
+                    prep_test_vector['prep_shares'][i].append(prep_share.hex())
                 inbound = Vdaf.prep_shares_to_prep(agg_param,
                                                    outbound)
 
         # The final outputs of prepare phasre are the output shares.
         for out_share in outbound:
-            prep_test_vector["out_shares"].append(
+            prep_test_vector['out_shares'].append(
                 list(map(lambda x: x.as_unsigned(), out_share)))
-        test_vector["prep"].append(prep_test_vector)
+        test_vector['prep'].append(prep_test_vector)
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an
@@ -171,15 +171,15 @@ def run_vdaf(Vdaf,
         agg_share_j = Vdaf.out_shares_to_agg_share(agg_param,
                                                    out_shares_j)
         agg_shares.append(agg_share_j)
-        test_vector["agg_shares"].append(
+        test_vector['agg_shares'].append(
             list(map(lambda x: x.as_unsigned(), agg_share_j)))
 
     # Collector unshards the aggregate.
     agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares)
-    test_vector["agg_result"] = list(map(lambda x: int(x), agg_result))
+    test_vector['agg_result'] = list(map(lambda x: int(x), agg_result))
 
     if print_test_vector:
-        print("---- {} -----------------------------".format(Vdaf))
+        print('---- {} -----------------------------'.format(Vdaf))
         print(json.dumps(test_vector, indent=4))
         print()
     return agg_result
@@ -277,9 +277,9 @@ def test_vdaf(cls,
                           measurements,
                           print_test_vector)
     if agg_result != expected_agg_result:
-        print("vdaf test failed ({} on {}): unexpected result: got {}; want {}".format(
+        print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'.format(
             cls, measurements, agg_result, expected_agg_result))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_vdaf(VdafTest, None, [1, 2, 3, 4], [10])

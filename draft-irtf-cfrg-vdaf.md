@@ -431,8 +431,8 @@ types enumerated in the following table.
 ## Sharding {#sec-daf-shard}
 
 In order to protect the privacy of its measurements, a DAF Client shards its
-measurements into a sequence of "input shares".  The
-`measurement_to_input_shares` method is used for this purpose.
+measurements into a sequence of input shares. The `measurement_to_input_shares`
+method is used for this purpose.
 
 * `Daf.measurement_to_input_shares(input: Measurement) -> Vec[Bytes]` is the
   randomized input-distribution algorithm run by each Client. It consumes the
@@ -1071,7 +1071,7 @@ class PrgAes128:
 
 > NOTE This construction has not undergone significant security analysis.
 
-This section describes "Prio3", a VDAF for Prio {{CGB17}}. Prio is suitable for
+This section describes Prio3, a VDAF for Prio {{CGB17}}. Prio is suitable for
 a wide variety of aggregation functions, including (but not limited to) sum,
 mean, standard deviation, estimation of quantiles (e.g., median), and linear
 regression. In fact, the scheme described in this section is compatible with any
@@ -1099,7 +1099,7 @@ This VDAF does not have an aggregation parameter. Instead, the output share is
 derived from the input share by applying a fixed map. See {{poplar1}} for an
 example of a VDAF that makes meaningful use of the aggregation parameter.
 
-As the name implies, "Prio3" is a descendant of the original Prio construction.
+As the name implies, Prio3 is a descendant of the original Prio construction.
 A second iteration was deployed in the {{ENPA}} system, and like the VDAF
 described here, the ENPA system was built from techniques introduced in
 {{BBCGGI19}} that significantly improve communication cost. That system was
@@ -1174,11 +1174,11 @@ validity (encoding is described below in {{flp-encode}}):
 Our application requires that the FLP is "fully linear" in the sense defined in
 {{BBCGGI19}} As a practical matter, what this property implies is that, when run
 on a share of the input and proof, the query-generation algorithm outputs a
-share of the verifier message. Furthermore, the "zero-knowledge" property of the
-FLP system ensures that the verifier message reveals nothing about the input's
-validity. Therefore, to decide if an input is valid, the Aggregators will run
-the query-generation algorithm locally, exchange verifier shares, combine
-them to recover the verifier message, and run the decision algorithm.
+share of the verifier message. Furthermore, the "strong zero-knowledge" property
+of the FLP system ensures that the verifier message reveals nothing about the
+input's validity. Therefore, to decide if an input is valid, the Aggregators
+will run the query-generation algorithm locally, exchange verifier shares,
+combine them to recover the verifier message, and run the decision algorithm.
 
 An FLP is executed by the prover and verifier as follows:
 
@@ -1282,7 +1282,7 @@ are described in {{prio3-helper-functions}}.
 ~~~
 def measurement_to_input_shares(Prio3, measurement):
     # Domain separation tag for PRG info string
-    dst = b"vdaf-00 prio3"
+    dst = b'vdaf-00 prio3'
     inp = Prio3.Flp.encode(measurement)
     k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
@@ -1399,7 +1399,7 @@ make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 ~~~
 def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
     # Domain separation tag for PRG info string
-    dst = b"vdaf-00 prio3"
+    dst = b'vdaf-00 prio3'
 
     (input_share, proof_share, k_blind, k_hint) = \
         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
@@ -1655,7 +1655,7 @@ To make this work, the proof system is restricted to validity circuits that
 exhibit a special structure. Specifically, an arithmetic circuit with "G-gates"
 (see {{BBCGGI19}}, Definition 5.2) is composed of affine gates and any number of
 instances of a distinguished gate `G`, which may be non-affine. We will refer to
-this class of circuits as "gadget circuits" and to `G` as the "gadget".
+this class of circuits as 'gadget circuits' and to `G` as the "gadget".
 
 As an illustrative example, consider a validity circuit `C` that recognizes the
 set `L = set([0], [1])`. That is, `C` takes as input a length-1 vector `x` and
@@ -2331,14 +2331,14 @@ class PrepState:
      self.correlation_shares) = decode_input_share(input_share)
     (self.party_id, k_verify_init) = verify_param
     self.k_verify_rand = get_key(k_verify_init, nonce)
-    self.step = "ready"
+    self.step = 'ready'
 
   def next(self, inbound: Optional[Bytes]):
     l = self.l
     (a_share, b_share, c_share,
      A_share, B_share) = correlation_shares[l-1]
 
-    if self.step == "ready" and inbound == None:
+    if self.step == 'ready' and inbound == None:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
       for x in self.candidate_prefixes:
@@ -2355,10 +2355,10 @@ class PrepState:
       ]
 
       self.output_share = data_share
-      self.step = "sketch round 1"
+      self.step = 'sketch round 1'
       return verifier_share_1
 
-    elif self.step == "sketch round 1" and inbound != None:
+    elif self.step == 'sketch round 1' and inbound != None:
       verifier_1 = Field[l].decode_vec(inbound)
       verifier_share_2 = [
         (verifier_1[0] * verifier_1[0] \
@@ -2368,10 +2368,10 @@ class PrepState:
         + B_share
       ]
 
-      self.step = "sketch round 2"
+      self.step = 'sketch round 2'
       return Field[l].encode_vec(verifier_share_2)
 
-    elif self.step == "sketch round 2" and inbound != None:
+    elif self.step == 'sketch round 2' and inbound != None:
       verifier_2 = Field[l].decode_vec(inbound)
       if verifier_2 != 0: raise ERR_INVALID
       return Field[l].encode_vec(self.output_share)
