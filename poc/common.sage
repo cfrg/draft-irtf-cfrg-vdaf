@@ -11,9 +11,9 @@ TEST_VECTOR = False
 
 # Document version, reved with each new draft.
 #
-# NOTE The CFRG has not yet adopted this spec. Version "vdaf-00" will match
+# NOTE The CFRG has not yet adopted this spec. Version 'vdaf-00' will match
 # draft-irtf-cfrg-vdaf-00.
-VERSION = b"vdaf-00"
+VERSION = b'vdaf-00'
 
 
 # Primitive types
@@ -30,11 +30,11 @@ class Error(BaseException):
 
 
 # Errors
-ERR_ABORT = Error("algorithm aborted")
-ERR_DECODE = Error("decode failure")
-ERR_ENCODE = Error("encode failure")
-ERR_INPUT = Error("invalid input parameter")
-ERR_VERIFY = Error("verification of the user's input failed")
+ERR_ABORT = Error('algorithm aborted')
+ERR_DECODE = Error('decode failure')
+ERR_ENCODE = Error('encode failure')
+ERR_INPUT = Error('invalid input parameter')
+ERR_VERIFY = Error('verification of the user\'s input failed')
 
 
 # Return the smallest power of 2 that is larger than or equal to n.
@@ -82,13 +82,13 @@ def vec_add(left, right):
 def I2OSP(val, length):
     val = int(val)
     if val < 0 or val >= (1 << (8 * length)):
-        raise ValueError("bad I2OSP call: val=%d length=%d" % (val, length))
+        raise ValueError('bad I2OSP call: val=%d length=%d' % (val, length))
     ret = [0] * length
     val_ = val
     for idx in reversed(range(0, length)):
         ret[idx] = val_ & 0xff
         val_ = val_ >> 8
-    ret = struct.pack("=" + "B" * length, *ret)
+    ret = struct.pack('=' + 'B' * length, *ret)
     assert OS2IP(ret, True) == val
     return ret
 
@@ -100,7 +100,7 @@ def I2OSP(val, length):
 # it, similar to what the voprf draft does.
 def OS2IP(octets, skip_assert=False):
     ret = 0
-    for octet in struct.unpack("=" + "B" * len(octets), octets):
+    for octet in struct.unpack('=' + 'B' * len(octets), octets):
         ret = ret << 8
         ret += octet
     if not skip_assert:

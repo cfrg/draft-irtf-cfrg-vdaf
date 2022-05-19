@@ -33,7 +33,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def measurement_to_input_shares(Prio3, measurement):
-        dst = VERSION + b" prio3"
+        dst = VERSION + b' prio3'
         inp = Prio3.Flp.encode(measurement)
         k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
@@ -118,7 +118,7 @@ class Prio3(Vdaf):
     # randomness directly.
     @classmethod
     def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
-        dst = VERSION + b" prio3"
+        dst = VERSION + b' prio3'
 
         (input_share, proof_share, k_blind, k_hint) = \
             Prio3.decode_leader_share(input_share) if agg_id == 0 else \
@@ -366,7 +366,7 @@ class Prio3Aes128Histogram(Prio3):
 # TESTS
 #
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     cls = Prio3 \
         .with_prg(prg.PrgAes128) \
         .with_flp(flp.FlpTestField128) \

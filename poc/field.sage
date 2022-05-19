@@ -24,7 +24,7 @@ class Field:
 
     @classmethod
     def gen(cls) -> Field:
-        raise Error("gen() not implemented")
+        raise Error('gen() not implemented')
 
     @classmethod
     def zeros(cls, length: Unsigned) -> Vec[Field]:
@@ -170,7 +170,7 @@ def poly_eval(Field, p, eval_at):
 
 # Compute the Lagrange interpolation polynomial for the given points.
 def poly_interp(Field, xs, ys):
-    R = PolynomialRing(Field.gf, "x")
+    R = PolynomialRing(Field.gf, 'x')
     p = R.lagrange_polynomial([(x.val, y.val) for (x, y) in zip(xs, ys)])
     return poly_strip(Field, list(map(lambda x: Field(x), p.coefficients())))
 
@@ -211,7 +211,7 @@ def test_field(cls):
     assert cls.gen()^cls.GEN_ORDER == cls(1)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     test_field(Field64)
     test_field(Field96)
     test_field(Field128)
