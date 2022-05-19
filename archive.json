@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-05-17T00:53:19.801569+00:00",
+  "timestamp": "2022-05-19T01:01:34.910878+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -47,6 +47,16 @@
       "name": "wontfix",
       "description": "This will not be worked on",
       "color": "ffffff"
+    },
+    {
+      "name": "draft-01",
+      "description": "",
+      "color": "F6C11D"
+    },
+    {
+      "name": "draft-02",
+      "description": "",
+      "color": "019C33"
     }
   ],
   "issues": [
@@ -567,15 +577,17 @@
       "id": "I_kwDOGKuqOc5CXDUr",
       "title": "VDAFs that use the public parameter?",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-01"
+      ],
       "body": "The \"setup\" algorithm outputs a public parameter used by the clients to shard their measurement into input shares. This was added to the syntax in anticipation of VDAFs that might make use of public-key cryptography in some way. For example, in the appendix, [BBCGGI19] describes alternative applications for FLPs, e.g., using homomorphic encryption. One can imagine a VDAF that uses homomorphic encryption in order to save a round trip for input validation. (This is basically what [AdScale](https://isi.jhu.edu/~mgreen/advertising.pdf) does, as I understand.)\r\n\r\nThis is a bit of a pain for PPM, since it means that rotating the verification parameter also requires re-configuring the clients with the new public parameter. (See https://github.com/abetterinternet/ppm-specification/issues/161.) Since we don't yet have a VDAF that makes use of the public parameter, it might be preferable to drop it from the syntax.",
       "createdAt": "2022-01-25T02:06:43Z",
-      "updatedAt": "2022-01-25T02:06:43Z",
-      "closedAt": null,
+      "updatedAt": "2022-05-18T23:12:33Z",
+      "closedAt": "2022-05-18T23:12:33Z",
       "comments": []
     },
     {
@@ -625,10 +637,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-02"
+      ],
       "body": "At this point we have fairly clear criteria for choosing fields for Prio. Namely, the prime modulus `p` should be of the form `2^k * q + 1`, where `k` is large enough to support proof sizes we're interested in. The fact that the multiplicative group has a subgroup of order `2^k` is exploited for fast polynomial interpolation. `k` should also be chosen to align with the word size of the machine, e.g., `32` or `64` so that fast arithmetic can be generated for it (cc/ @armfazh).\r\n\r\nThe requirements are different for Poplar, though any field we choose for Prio ought to be suitable for Poplar as well. The main difference I see is that we'll need a much larger field for the leaves of the IPDF tree than we need for the inner nodes. I wonder if the leaves could use `GF(2^255 - 19)`, since there are already fast, heavily vetted implementation of this field (namely for X25519 and ed25519)? @schoppmp do you have any other thoughts here?",
       "createdAt": "2022-02-02T16:59:10Z",
-      "updatedAt": "2022-03-04T01:45:53Z",
+      "updatedAt": "2022-05-18T18:50:50Z",
       "closedAt": null,
       "comments": [
         {
@@ -676,15 +690,17 @@
       "id": "I_kwDOGKuqOc5FZnLF",
       "title": "Serializaiton of the verification parameter",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/38",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-01"
+      ],
       "body": "As @tgeoghegan pointed out in https://github.com/abetterinternet/libprio-rs/pull/192#issuecomment-1062483035, some applications will require transmitting verification parameters over a secure channel. To support these, we we ought to require that VDAFs specify an encoding.",
       "createdAt": "2022-03-09T19:20:51Z",
-      "updatedAt": "2022-05-10T02:31:07Z",
-      "closedAt": null,
+      "updatedAt": "2022-05-18T23:15:36Z",
+      "closedAt": "2022-05-18T23:15:35Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -692,6 +708,13 @@
           "body": "One way to resolve this issue is to codify the \"aggregator ID\" in the syntax and make the verification parameter simply a shared secret. This would be compatible with at least Prio3 and Poplar1.",
           "createdAt": "2022-05-10T01:05:18Z",
           "updatedAt": "2022-05-10T01:05:18Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closed by #62.",
+          "createdAt": "2022-05-18T23:15:35Z",
+          "updatedAt": "2022-05-18T23:15:35Z"
         }
       ]
     },
@@ -700,16 +723,26 @@
       "id": "I_kwDOGKuqOc5FxJ2w",
       "title": "Prio3: Shorten the prepare message",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/39",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-01"
+      ],
       "body": "By moving `decide()` into `prep_shares_to_prep()` we can avoid sending the unsharded verifier message over the network.",
       "createdAt": "2022-03-16T04:05:40Z",
-      "updatedAt": "2022-04-19T17:50:30Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2022-05-18T23:13:52Z",
+      "closedAt": "2022-05-18T23:13:52Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closed via #64.",
+          "createdAt": "2022-05-18T23:13:52Z",
+          "updatedAt": "2022-05-18T23:13:52Z"
+        }
+      ]
     },
     {
       "number": 40,
@@ -810,10 +843,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-02"
+      ],
       "body": "Currently only the nonce is used to derive the shared verification randomness. This should also depend on the aggregation parameter so that the verification randomness is unique for each aggregation parameter.",
       "createdAt": "2022-04-06T19:23:33Z",
-      "updatedAt": "2022-04-06T19:23:33Z",
+      "updatedAt": "2022-05-18T18:50:07Z",
       "closedAt": null,
       "comments": []
     },
@@ -1025,10 +1060,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-01"
+      ],
       "body": "Assuming we:\r\n(1) merge https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/53\r\n(2) resolve https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19 by removing the public parameter\r\n\r\nthere will be no possibility of a 0-round VDAF. In this case we should consider modifying the VDAF syntax so that `prep_init()` outputs the first prepare-message share. This would resolve some ugliness in the state machine of implementations. For Prio3 for instance, we need to distinguish between a \"Ready\" state and a \"Waiting\" state, where the only difference is whether the prepare-message share has been sent. For example, see libprio-rs: https://github.com/divviup/libprio-rs/blob/main/src/vdaf/prio3.rs#L942-L946\r\n\r\n@tgeoghegan, @divergentdave, I'd love to have your thoughts here. Note that this change would go in the next draft.\r\n",
       "createdAt": "2022-05-10T01:29:40Z",
-      "updatedAt": "2022-05-13T19:21:25Z",
+      "updatedAt": "2022-05-18T23:32:14Z",
       "closedAt": null,
       "comments": [
         {
@@ -1044,6 +1081,20 @@
           "body": "Here's what I had in mind: https://github.com/cfrg/draft-irtf-cfrg-vdaf/commit/ad5ad030bbe6be7a4ecd109686569fb9b2bbb665\r\n\r\nBasically the main difference is that `prep_next()` always takes in a prepare message, whereas before in the first round the input would be `None`.",
           "createdAt": "2022-05-13T19:21:24Z",
           "updatedAt": "2022-05-13T19:21:24Z"
+        },
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "It seems like the options here are isomorphic.\r\n\r\nNew->Old: Since the share contents are defined by the concrete protocol, if a protocol couldn't generate a real share in the first instance, it could send an empty value.\r\n\r\nOld->New: Similarly, in a zero-round VDAF, the protocol could specify that any putatively non-local inputs to `prep_next()` actually have some value that can be computed locally.  Then an aggregator implementing said protocol could just call `prep_init()` and `prep_next()` together to simulate the proposed modification to `prep_init()`.\r\n\r\nAssuming I've got that right, it seems like it doesn't really matter and we should just pick the one that is most natural for the cases we have in hand.",
+          "createdAt": "2022-05-18T19:29:08Z",
+          "updatedAt": "2022-05-18T19:29:08Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "That's a good way of looking at it, yeah. And I agree they're isomorphic. I think the new syntax would be more natural for the [DAP spec](https://ietf-wg-ppm.github.io/draft-ietf-ppm-dap/draft-ietf-ppm-dap.html#name-input-share-preparation). In particular it would allow us to rewrite\r\n> ```\r\n> prep_state = VDAF.prep_init(vdaf_verify_param, agg_param, nonce, input_share)\r\n> out = VDAF.prep_next(prep_state, None)\r\n> ```\r\n>\r\n> vdaf_verify_param is the public VDAF parameter, and agg_param is the opaque aggregation parameter. If either step fails, the aggregator marks the report as invalid with error vdaf-prep-error.\r\n>\r\n> Otherwise, the value out is interpreted as follows. If this is the last round of the VDAF, then out is the aggregator's output share. Otherwise, out is the pair (prep_state, prep_msg).\r\n\r\nas\r\n\r\n> ```\r\n> (prep_state, prep_msg) = VDAF.prep_init(vdaf_verify_key, agg_id, agg_param, nonce, input_share)\r\n> ```\r\n>\r\n> vdaf_verify_key is the secret VDAF verification key shared by both aggregators, agg_id is equal to `0` for the leader and `1` for the helper, and agg_param is the opaque aggregation parameter. If this step fails, the aggregator marks the report as invalid with error vdaf-prep-error.",
+          "createdAt": "2022-05-18T23:31:58Z",
+          "updatedAt": "2022-05-18T23:32:14Z"
         }
       ]
     },
@@ -1059,7 +1110,7 @@
       "labels": [],
       "body": "From [previous discussion](https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/53#pullrequestreview-966895328):\r\n\r\nI think it makes sense to split up the preparation (as in, turning an input share into an output share), and the verification.\r\nThe reason is that the outer protocol using a VDAF might want to \"opportunistically\" aggregate shares, in particular for Poplar, where there are many rounds of Preparation, Aggregation, and Unsharding. This would save communication rounds, since the verification on one layer (of the Poplar tree) can be done in parallel with computing the aggregation shares on the next layer. In case a share turns out to be invalid, the corresponding aggregation shares can just be subtracted from the aggregated result.",
       "createdAt": "2022-05-10T17:15:59Z",
-      "updatedAt": "2022-05-13T16:00:40Z",
+      "updatedAt": "2022-05-17T18:57:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -1072,9 +1123,16 @@
         {
           "author": "cjpatton",
           "authorAssociation": "COLLABORATOR",
-          "body": "Note that (a) would require changes to DAP (formerly known as PPM). We would also want to consider adopting DAP for (c).",
+          "body": "Note that (a) would require changes to DAP (formerly known as PPM). We would also want to consider adapting DAP for (c).",
           "createdAt": "2022-05-13T16:00:40Z",
-          "updatedAt": "2022-05-13T16:00:40Z"
+          "updatedAt": "2022-05-17T18:47:07Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "body": "@schoppmp how much work would it be to produce data indicating the cost of Poplar _without_ this change (released of unverified shares)? I wonder how much of this is premature optimization.",
+          "createdAt": "2022-05-17T18:57:54Z",
+          "updatedAt": "2022-05-17T18:57:54Z"
         }
       ]
     },
@@ -1122,6 +1180,62 @@
           "updatedAt": "2022-05-13T20:18:39Z"
         }
       ]
+    },
+    {
+      "number": 67,
+      "id": "I_kwDOGKuqOc5J62_r",
+      "title": "Define `VERSION` constant for building DSTs",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/67",
+      "state": "CLOSED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-01"
+      ],
+      "body": "DSTs throughout the spec are likely to share a common prefix identifying the version of spec (e.g., \"vdaf-00\"). This common prefix could be defined in Section 2 so that it can be referenced from VDAF definitions. See discussion on #65 for motivation.\r\n\r\ncc/ @tgeoghegan ",
+      "createdAt": "2022-05-18T15:51:17Z",
+      "updatedAt": "2022-05-19T00:41:45Z",
+      "closedAt": "2022-05-19T00:41:45Z",
+      "comments": []
+    },
+    {
+      "number": 68,
+      "id": "I_kwDOGKuqOc5J65MZ",
+      "title": "Add aggregator ID to DAP syntax",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/68",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-01"
+      ],
+      "body": "This is likely needed to distinguish \"big\" input shares from \"small\" input shares. This would align with https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/62.",
+      "createdAt": "2022-05-18T15:57:30Z",
+      "updatedAt": "2022-05-18T16:06:29Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 72,
+      "id": "I_kwDOGKuqOc5J9d1v",
+      "title": "Miscellaneous tasks before cutting draft-01",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/72",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "draft-01"
+      ],
+      "body": "* Update test vectors\r\n* Add Change Log section enumerating non-editorial changes from draft-00",
+      "createdAt": "2022-05-19T00:46:46Z",
+      "updatedAt": "2022-05-19T00:46:46Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -4637,24 +4751,26 @@
       "id": "PR_kwDOGKuqOc43zOts",
       "title": "Remove public param and simplify verify param",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/62",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #19.\r\n\r\nThere are currently no VDAFs that use the public parameter. As noted\r\nnoted in https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/18 and https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19, this creates friction for applications like DAP\r\n(formerly known as PPM) that require frequent rotation of the\r\nverification parameter shared by the Aggregators. This change addresses\r\nthis issue by dropping the public parameter from the syntax.\r\n\r\nFor our current set of VDAFs (Prio3 and Poplar1), the verification\r\nparameter held by an Aggregator is basically a shared secret and some\r\nsort of identifier of its role (aggregator 0, aggregator 1, ...). This\r\nchange codifies these two values in the syntax by dropping the\r\nverification parameter and replacing it with a shared \"verification key\"\r\nand an \"aggregator ID\". This allows us to replace the `setup()`\r\nprocedure with simply generating a shared secret, paving the way for a\r\nsolution for https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/18 that doesn't require breaking the abstraction boundary.",
       "createdAt": "2022-05-13T17:58:09Z",
-      "updatedAt": "2022-05-16T23:35:55Z",
+      "updatedAt": "2022-05-18T23:12:34Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "3888d46adb568c5ea8e6d276524954172e92d4c6",
+      "baseRefOid": "f2c70cc9547333945e287adbbd22ddd81d89a5be",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/pub-param-die-die-die",
-      "headRefOid": "8e5e1a5f5ede806582706467cac74c6a1fd3ab8e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "902b849a4c0a7591a5899accb031febc96e336d5",
+      "closedAt": "2022-05-18T23:12:34Z",
+      "mergedAt": "2022-05-18T23:12:33Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b08c3e9cc0bce68315ead46dafc69a3a7edc7c4a"
+      },
       "comments": [
         {
           "author": "schoppmp",
@@ -4731,8 +4847,262 @@
           "createdAt": "2022-05-16T23:35:55Z",
           "updatedAt": "2022-05-16T23:35:55Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc46QxmC",
+          "commit": {
+            "abbreviatedOid": "93677c0"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-18T19:12:41Z",
+          "updatedAt": "2022-05-18T19:13:36Z",
+          "comments": [
+            {
+              "originalPosition": 41,
+              "body": "Nit: Please add spaces below so that the column dividers align.",
+              "createdAt": "2022-05-18T19:12:41Z",
+              "updatedAt": "2022-05-18T19:13:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc46Rx8D",
+          "commit": {
+            "abbreviatedOid": "93677c0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-05-18T23:08:16Z",
+          "updatedAt": "2022-05-18T23:08:16Z",
+          "comments": [
+            {
+              "originalPosition": 41,
+              "body": "Done",
+              "createdAt": "2022-05-18T23:08:16Z",
+              "updatedAt": "2022-05-18T23:08:16Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "number": 64,
+      "id": "PR_kwDOGKuqOc43_qpl",
+      "title": "Prio3: Move proof verifier check to prep_shares_to_prep()",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/64",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Moves the proof verifier check to prep_shares_to_prep() in oder to avoid\r\nincluding the verifier in the unsharded prep message. Now this message\r\nincludes just the joint randomness checker, unless no joint randomness\r\nis required, in which case the unshareded prep message is the empty\r\nstring.",
+      "createdAt": "2022-05-18T02:22:28Z",
+      "updatedAt": "2022-05-18T23:12:55Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3888d46adb568c5ea8e6d276524954172e92d4c6",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/prio3-prep-share",
+      "headRefOid": "9b387224c84726c4734327710950357c082f9fe5",
+      "closedAt": "2022-05-18T23:12:54Z",
+      "mergedAt": "2022-05-18T23:12:54Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "6e1eb6fc296f92ec147c88d8c6e2e9139a1b0ceb"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 65,
+      "id": "PR_kwDOGKuqOc44B_Tc",
+      "title": "define \"domain separation tag\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/65",
+      "state": "CLOSED",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "@jbr pointed out that the `dst` variables that occur in a few VDAF\r\ninstantiations are a bit inscrutable. This commit adds `DST` associated\r\nconstants to the DAF and VDAF definitions which are then used in PRGs.\r\nThe intent is to (1) provide a clear definition of a DST and (2) reduce\r\nthe number of places where the string `vdaf-00 prio3` has to be updated\r\nto `vdaf-01 prio3`.",
+      "createdAt": "2022-05-18T14:22:56Z",
+      "updatedAt": "2022-05-18T15:48:07Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3888d46adb568c5ea8e6d276524954172e92d4c6",
+      "headRepository": "tgeoghegan/vdaf",
+      "headRefName": "timg/define-dst",
+      "headRefOid": "3df27257d2b9ed54018eea794fefa7fd95883e1d",
+      "closedAt": "2022-05-18T15:46:38Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Tagging @jbr and @cjpatton: I don't have the privileges to request review on this PR, but PTAL. Chris, if this seems good to you, then I'll make the corresponding changes to the Sage scripts.",
+          "createdAt": "2022-05-18T14:26:06Z",
+          "updatedAt": "2022-05-18T14:26:06Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "One more note: I think a comment defining the acronym DST is sufficient.",
+          "createdAt": "2022-05-18T15:38:41Z",
+          "updatedAt": "2022-05-18T15:38:41Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> One more note: I think a comment defining the acronym DST is sufficient.\r\n\r\nYeah, in the interest of moving forward and not re-writing half the doc and POC, I'm going to close this PR and just add a couple of comments: #66 ",
+          "createdAt": "2022-05-18T15:46:38Z",
+          "updatedAt": "2022-05-18T15:48:07Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc46Paw7",
+          "commit": {
+            "abbreviatedOid": "3df2725"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I agree that DST needs to be defined somewhere and that de-duplicating is desirable. However I don't think this change is at the right level of the \"stack\".\r\n\r\nTwo important things to note here:\r\n(1) Not every (V)DAF will necessarily have a DST that serves the same purpose.\r\n(2) Many DSTs will have a common prefix, e.g., \"vdaf-00\".\r\n\r\nPer (1) I don't think it makes sense to lift the DST to a parameter of the (V)DAF. \r\nPer (2) I think it's a good idea to define the common prefix somewhere.\r\n\r\nWhat do you think about this alternative:\r\n* Define somewhere in the document a global constant `VERSION` whose value is `vdaf-00`. Perhaps this could go in Section 2.\r\n* In the Prio3 definition, let `dst = VERSION + b\" prio3\"`.\r\n\r\n",
+          "createdAt": "2022-05-18T14:54:54Z",
+          "updatedAt": "2022-05-18T14:54:54Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 66,
+      "id": "PR_kwDOGKuqOc44CXmG",
+      "title": "Clarify that `dst` = domain separation tag",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/66",
+      "state": "MERGED",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-05-18T15:47:47Z",
+      "updatedAt": "2022-05-18T16:05:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3888d46adb568c5ea8e6d276524954172e92d4c6",
+      "headRepository": "tgeoghegan/vdaf",
+      "headRefName": "timg/dst-comment",
+      "headRefOid": "16ed69280261cbbf7038424458e91725ce07357b",
+      "closedAt": "2022-05-18T15:49:04Z",
+      "mergedAt": "2022-05-18T15:49:04Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "f2c70cc9547333945e287adbbd22ddd81d89a5be"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc46PwV9",
+          "commit": {
+            "abbreviatedOid": "16ed692"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-18T15:48:49Z",
+          "updatedAt": "2022-05-18T15:48:49Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 69,
+      "id": "PR_kwDOGKuqOc44EQxq",
+      "title": "Add Aggregator ID to `Vdaf.prep()`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/69",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #68.\r\n\r\nThis allows DAFs to distinguish between different types of input shares\r\nwithout requiring the input shares themselves to encode the\r\ndistinguisher.",
+      "createdAt": "2022-05-18T23:42:44Z",
+      "updatedAt": "2022-05-18T23:42:44Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6e1eb6fc296f92ec147c88d8c6e2e9139a1b0ceb",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/daf-agg-id",
+      "headRefOid": "1a4614c4369d9521399917948c34fca1b71f24a2",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 70,
+      "id": "PR_kwDOGKuqOc44Ej-H",
+      "title": "editorial: Replace double quotes with single quotes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/70",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Backticks get rendered as double quotes in the plaintext version,\r\npotentially colliding with byte string literals in the spec, e.g.:\r\n\r\n    \"b\"vdaf-00\"\"\r\n\r\nBy using single quotes, we ensure this gets rendored instead as\r\n\r\n    \"b'vdaf'00'\"\r\n\r\nwhich is a bit clearer.\r\n\r\nWe may want to consider removing backticks altogether.",
+      "createdAt": "2022-05-19T00:31:33Z",
+      "updatedAt": "2022-05-19T00:33:56Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b1fa888930d2eb6d1c1318ea6a0bfe3509078c27",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/editorial",
+      "headRefOid": "4bdabec3af55cd6321c7595f1e4c20fd03baa63d",
+      "closedAt": "2022-05-19T00:33:56Z",
+      "mergedAt": "2022-05-19T00:33:56Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "6f46b822a760cb6c1ca5a083587719e79dd088d6"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 71,
+      "id": "PR_kwDOGKuqOc44ElYi",
+      "title": "Define global `VERSION` for building domain separation tags",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/71",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #67.",
+      "createdAt": "2022-05-19T00:35:33Z",
+      "updatedAt": "2022-05-19T00:41:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6f46b822a760cb6c1ca5a083587719e79dd088d6",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/global-vers",
+      "headRefOid": "62ec407229b5544c4de947b23479cc1094276505",
+      "closedAt": "2022-05-19T00:41:45Z",
+      "mergedAt": "2022-05-19T00:41:45Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "180ffa005dcbf9d88341d104b81aef691c23bbd2"
+      },
+      "comments": [],
+      "reviews": []
     }
   ]
 }
