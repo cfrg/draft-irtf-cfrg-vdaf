@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-05-19T01:01:34.910878+00:00",
+  "timestamp": "2022-05-22T00:53:01.411872+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -994,7 +994,7 @@
       "labels": [],
       "body": "`Vdaf` implementations need to define a type`Vdaf.AggShare` for the aggregate shares. Because the aggregate share are transmitted over the network, their encoding needs to be specified. There are two solutions to consider:\r\n(1) Replace `Vdaf.AggShare` with `Bytes`\r\n(2) Add methods on `Vdaf.AggShare` for encoding/decoding\r\n\r\nThe other quantities written to the network are input shares, prepare message shares, and the combined prepare message for each round. If we do (2), then for consistency we should also consider defining separate encoding/decoding methods for these. Currently the methods are implicit, since the type of each of these values is `Bytes`.",
       "createdAt": "2022-05-09T22:39:52Z",
-      "updatedAt": "2022-05-10T19:53:24Z",
+      "updatedAt": "2022-05-19T22:57:03Z",
       "closedAt": null,
       "comments": [
         {
@@ -1017,6 +1017,13 @@
           "body": "Good question. I don't think there is consensus in the CFRG: some drafts aim to be perspective about encoding, others don't. Thus far this draft has been prescriptive.\r\n\r\nMy personal view is that the specification of a cryptographic algorithm should be as prescriptive as possible. The goal of being prescriptive is to eliminate classes of bugs that occur when two different implementations of the same algorithm try to interoperate. (See https://eprint.iacr.org/2021/923 for a recent example.) Certainly the manner by which VDAF messages are encoded falls into this category. Imagine, for example, that you had a DAF (al a #53) for which one implementation chose big endian encoding of field elements and the other chose little endian.",
           "createdAt": "2022-05-10T19:53:24Z",
           "updatedAt": "2022-05-10T19:53:24Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I don't want to cut off the discussion on this thread, but I would at least like to ensure that the next draft specifies an encoding of agg shares. This is accomplished by https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/75. There are two questions raised here, which the PR explicitly punts on:\r\n(1) Should all quantities have an explicit type, regardless of whether the type needs to be encoded?\r\n(2) Should the document be prescriptive about encoding?",
+          "createdAt": "2022-05-19T22:57:01Z",
+          "updatedAt": "2022-05-19T22:57:01Z"
         }
       ]
     },
@@ -1204,7 +1211,7 @@
       "id": "I_kwDOGKuqOc5J65MZ",
       "title": "Add aggregator ID to DAP syntax",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/68",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -1213,8 +1220,8 @@
       ],
       "body": "This is likely needed to distinguish \"big\" input shares from \"small\" input shares. This would align with https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/62.",
       "createdAt": "2022-05-18T15:57:30Z",
-      "updatedAt": "2022-05-18T16:06:29Z",
-      "closedAt": null,
+      "updatedAt": "2022-05-19T20:45:59Z",
+      "closedAt": "2022-05-19T20:45:59Z",
       "comments": []
     },
     {
@@ -1231,9 +1238,9 @@
       "labels": [
         "draft-01"
       ],
-      "body": "* Update test vectors\r\n* Add Change Log section enumerating non-editorial changes from draft-00",
+      "body": "* Update test vectors\r\n* Add Change Log section enumerating non-editorial changes from draft-00\r\n* Update VERSION",
       "createdAt": "2022-05-19T00:46:46Z",
-      "updatedAt": "2022-05-19T00:46:46Z",
+      "updatedAt": "2022-05-19T20:46:52Z",
       "closedAt": null,
       "comments": []
     }
@@ -5027,25 +5034,42 @@
       "id": "PR_kwDOGKuqOc44EQxq",
       "title": "Add Aggregator ID to `Vdaf.prep()`",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/69",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #68.\r\n\r\nThis allows DAFs to distinguish between different types of input shares\r\nwithout requiring the input shares themselves to encode the\r\ndistinguisher.",
       "createdAt": "2022-05-18T23:42:44Z",
-      "updatedAt": "2022-05-18T23:42:44Z",
+      "updatedAt": "2022-05-19T20:45:59Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e1eb6fc296f92ec147c88d8c6e2e9139a1b0ceb",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/daf-agg-id",
       "headRefOid": "1a4614c4369d9521399917948c34fca1b71f24a2",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "closedAt": "2022-05-19T20:45:59Z",
+      "mergedAt": "2022-05-19T20:45:59Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "67f12eb900b5c6e7efe2e196eb752ad58044efe4"
+      },
+      "comments": [
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I believe this also addresses #40, unless there's another spot in VDAF where the leader distinction matters.",
+          "createdAt": "2022-05-19T14:37:39Z",
+          "updatedAt": "2022-05-19T14:37:39Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I don't think the aggregator ID adequately addresses that issue. The draft may need more guidance on generating input shares, as pointed out by @branlwyd: https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/40#issuecomment-1099719279",
+          "createdAt": "2022-05-19T15:55:48Z",
+          "updatedAt": "2022-05-19T15:57:35Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -5101,6 +5125,212 @@
       "mergeCommit": {
         "oid": "180ffa005dcbf9d88341d104b81aef691c23bbd2"
       },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 73,
+      "id": "PR_kwDOGKuqOc44E0L0",
+      "title": "Have `Vdaf.prep_init()` output first round prep share",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/73",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #60.\r\n\r\nNow that we have defined DAFs explicitly and removed the public\r\nparameter, there is no longer a need to support 0-round VDAFs. This\r\nchange codifies the requirement that ROUNDS >= 1 in the syntax.",
+      "createdAt": "2022-05-19T01:11:52Z",
+      "updatedAt": "2022-05-19T21:52:11Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "50e872c2f0d4c1f5cf4d60146bae57d0f8eaa1a6",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/refactor-prep-init",
+      "headRefOid": "f3a6f421a37f118899569dc2af09fcc0da7021cf",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Is there a reason for requiring at least one verification round? I don't think it's immediately clear why the verification can't be non-interactive (e.g., the client provides separate NIZK proofs to each party).",
+          "createdAt": "2022-05-19T21:01:27Z",
+          "updatedAt": "2022-05-19T21:01:27Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Is there a reason for requiring at least one verification round? I don't think it's immediately clear why the verification can't be non-interactive (e.g., the client provides separate NIZK proofs to each party).\r\n\r\nI agree it's not immediately clear. However, in particular for NIZKs I think the prover would need a public key, right?  In fact, the draft-00 anticipated adapting something like https://isi.jhu.edu/~mgreen/advertising.pdf into a 0-round VDAF. Such a scheme would have used the public parameter to encode one of the Aggregator's public key (whoever does the verifying).\r\n\r\nThe downside to making room for this hypothetical construction is extra complexity for applications: see https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/60#issuecomment-1130733568. At this point, my feeling is if we wanted to a VDAF that uses some form of public key crypto, it ought to be considered a different kind of object. Especially since it's likely to have different applications.\r\n\r\nIf someone comes along with a 0-round VDAF that doesn't use public key crypto, perhaps it would fit more or less into the new DAF syntax?\r\n\r\n",
+          "createdAt": "2022-05-19T21:11:55Z",
+          "updatedAt": "2022-05-19T21:12:21Z"
+        },
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm not sure we should exclude VDAFs based on public-key cryptography. I was under the assumption that the issue with the public parameter was that it would need to be frequently rotated. Even without it, I can imagine a spec for a VDAF that has some out-of-band mechanism of retrieving public keys.\r\n\r\nIn your linked comment, both solutions don't look very complex to me... Is there maybe a way to have the simpler interface you propose in #60 without prescribing at least one communication round between aggregators?\r\n",
+          "createdAt": "2022-05-19T21:38:11Z",
+          "updatedAt": "2022-05-19T21:38:11Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I'm not sure we should exclude VDAFs based on public-key cryptography. I was under the assumption that the issue with the public parameter was that it would need to be frequently rotated. Even without it, I can imagine a spec for a VDAF that has some out-of-band mechanism of retrieving public keys.\r\n\r\nI'm not suggesting we exclude this, I'm merely suggesting it can be treated as a different type of primitive, perhaps defined in this draft. Call it a PK-VDAF or something :)\r\n\r\n> In your linked comment, both solutions don't look very complex to me... Is there maybe a way to have the simpler interface you propose in #60 without prescribing at least one communication round between aggregators?\r\n\r\nMaybe! We can hold off on merging this if you want to spend some time thinking about it.\r\n",
+          "createdAt": "2022-05-19T21:42:50Z",
+          "updatedAt": "2022-05-19T21:42:50Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "FWIW, translating the vdaf-00 syntax into a Rust API unearthed at least one nasty edge case: In some applications it'll be necessary to serialize the Prepare state. (Concretely, consider a DAP helper, who needs to carry state across HTTP requests during the aggregation flow.) However it is never the case that you need to serialize the first state, since you immediately consume it to get the next output bound prep share. See https://github.com/divviup/libprio-rs/pull/218 for details.",
+          "createdAt": "2022-05-19T21:47:51Z",
+          "updatedAt": "2022-05-19T21:52:11Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc46UjtX",
+          "commit": {
+            "abbreviatedOid": "46d99bf"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-19T12:17:02Z",
+          "updatedAt": "2022-05-19T12:17:18Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "Nit: I would adjust this so that the `...` is vertically centered between the boxes",
+              "createdAt": "2022-05-19T12:17:03Z",
+              "updatedAt": "2022-05-19T12:17:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc46XfC8",
+          "commit": {
+            "abbreviatedOid": "46d99bf"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-05-19T20:36:39Z",
+          "updatedAt": "2022-05-19T20:36:39Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "Done.",
+              "createdAt": "2022-05-19T20:36:39Z",
+              "updatedAt": "2022-05-19T20:36:39Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 74,
+      "id": "PR_kwDOGKuqOc44IEWZ",
+      "title": "poc: Add test for expand_into_vec rejection sampling",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/74",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The inputs for this test were chosen through a brute-force search, so that they exercise the rejection sampling logic.\r\n\r\nI will be submitting PRs with the same test vector to the Rust and TypeScript implementations.",
+      "createdAt": "2022-05-19T14:35:18Z",
+      "updatedAt": "2022-05-19T20:55:19Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "67f12eb900b5c6e7efe2e196eb752ad58044efe4",
+      "headRepository": "divergentdave/vdaf",
+      "headRefName": "rejection-sampling-test",
+      "headRefOid": "e59c66f95c68db4a2e160ed761345cd3c741e2f5",
+      "closedAt": "2022-05-19T20:55:19Z",
+      "mergedAt": "2022-05-19T20:55:19Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "222517a6dc72870924236dd0e6c60c4092c4aa94"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc46V1Vx",
+          "commit": {
+            "abbreviatedOid": "39cf430"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "Nice! One minor ask.",
+          "createdAt": "2022-05-19T15:30:41Z",
+          "updatedAt": "2022-05-19T15:30:50Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Would you mind copy-pasting this comment here? https://github.com/divviup/libprio-rs/pull/222/files#diff-ee53018b069fa1ccd59e63911e683c27b728af0963b465436b100019b691808eR192-R193",
+              "createdAt": "2022-05-19T15:30:41Z",
+              "updatedAt": "2022-05-19T15:30:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc46WRKs",
+          "commit": {
+            "abbreviatedOid": "5c401bf"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "Perfect! Please squash changes into a single commit, and I'll merge.",
+          "createdAt": "2022-05-19T16:50:06Z",
+          "updatedAt": "2022-05-19T16:50:06Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc46XjpK",
+          "commit": {
+            "abbreviatedOid": "e59c66f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-19T20:55:12Z",
+          "updatedAt": "2022-05-19T20:55:12Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 75,
+      "id": "PR_kwDOGKuqOc44JyiW",
+      "title": "Specify encoding of aggregate shares",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/75",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-01"
+      ],
+      "body": "Removes the associated type `AggShare` from `Vdaf` and `Daf` and\r\nmodifies the syntax to treat the aggregate share as an opauqe byte\r\nstring. This is consistent with input shares, which, like the aggregate\r\nshare, are ncessarily transmitted over the network.\r\n\r\nThis partially addresses #58. In the future we may want to define a type\r\nfor every quantity and have that type implement a type whereever\r\napplicable. Or we might decide not to be prescriptive about encoding at\r\nall.\r\n\r\ncc/ @tgeoghegan",
+      "createdAt": "2022-05-19T22:53:29Z",
+      "updatedAt": "2022-05-19T22:57:19Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "222517a6dc72870924236dd0e6c60c4092c4aa94",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/agg-share-encoding",
+      "headRefOid": "a7752a459eeee9550989211a13a9758fe18823b8",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
       "comments": [],
       "reviews": []
     }
