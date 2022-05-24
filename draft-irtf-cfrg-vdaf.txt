@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 20 November 2022                               Cloudflare, Inc.
+Expires: 25 November 2022                               Cloudflare, Inc.
                                                            P. Schoppmann
                                                                   Google
-                                                             19 May 2022
+                                                             24 May 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 November 2022.
+   This Internet-Draft will expire on 25 November 2022.
 
 Copyright Notice
 
@@ -316,6 +316,15 @@ Table of Contents
    A global constant VERSION is defined, which algorithms are free to
    use as desired.  Its value SHALL be b'vdaf-00'.
 
+   This document describes algorithms for multi-party computations in
+   which the parties typically communicate over a network.  Wherever a
+   quantity is defined that must be be transmitted from one party to
+   another, this document prescribes a particular encoding of that
+   quantity as a byte string.
+
+      OPEN ISSUE: It might be better to not be prescriptive about how
+      quantities are encoded on the wire.  See issue #58.
+
    Some common functionalities:
 
    *  zeros(len: Unsigned) -> Bytes returns an array of zero bytes.  The
@@ -475,16 +484,24 @@ Table of Contents
             +-------------+-----------------------------------+
             | OutShare    | Type of each output share         |
             +-------------+-----------------------------------+
-            | AggShare    | Type of each aggregate share      |
-            +-------------+-----------------------------------+
             | AggResult   | Type of the aggregate result      |
             +-------------+-----------------------------------+
 
                 Table 1: Constants and types defined by each
                                concrete DAF.
 
-      QUESTION: The type AggShare should perhaps be replaced with Bytes,
-      since the aggregate share is necessarily sent over the network.
+   These types define some of the inputs and outputs of DAF methods at
+   various stages of the computation.  Observe that only the
+   measurements, output shares, the aggregate result, and the
+   aggregation parameter have an explicit type.  All other values --- in
+   particular, the input shares and the aggregate shares --- have type
+   Bytes and are treated as opaque byte strings.  This is because these
+   values must be transmitted between parties over a network.
+
+      OPEN ISSUE: It might be cleaner to define a type for each value,
+      then have that type implement an encoding where necessary.  This
+      way each method parameter has a meaningful type hint.  See
+      issue#58.
 
 4.1.  Sharding
 
@@ -540,7 +557,7 @@ Table of Contents
    a share of the desired aggregate result:
 
    *  Daf.out_shares_to_agg_share(agg_param: AggParam, out_shares:
-      Vec[OutShare]) -> agg_share: AggShare is the deterministic
+      Vec[OutShare]) -> agg_share: Bytes is the deterministic
       aggregation algorithm.  It is run by each Aggregator over the
       output shares it has computed over a batch of measurement inputs.
 
@@ -579,7 +596,7 @@ Table of Contents
    following algorithm to recover the following output:
 
    *  Daf.agg_shares_to_result(agg_param: AggParam, agg_shares:
-      Vec[AggShare]) -> AggResult is run by the Collector in order to
+      Vec[Bytes]) -> AggResult is run by the Collector in order to
       compute the aggregate result from the Aggregators' shares.  The
       length of agg_shares MUST be SHARES.  This algorithm is
       deterministic.
@@ -710,12 +727,18 @@ def run_daf(Daf,
       +-----------------+------------------------------------------+
       | OutShare        | Type of each output share                |
       +-----------------+------------------------------------------+
-      | AggShare        | Type of each aggregate share             |
-      +-----------------+------------------------------------------+
       | AggResult       | Type of the aggregate result             |
       +-----------------+------------------------------------------+
 
        Table 2: Constants and types defined by each concrete VDAF.
+
+   Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that
+   must be transmitted from one party to another is treated as an opaque
+   byte string.  All other quantitites are given a concrete type.
+
+      OPEN ISSUE: It might be cleaner to define a type for each value,
+      then have that type implement an encoding where necessary.  See
+      issue#58.
 
 5.1.  Sharding
 
@@ -865,7 +888,7 @@ def run_daf(Daf,
    VDAF Aggregation is identical to DAF Aggregation (cf.  Section 4.3):
 
    *  Vdaf.out_shares_to_agg_share(agg_param: AggParam, out_shares:
-      Vec[OutShare]) -> agg_share: AggShare is the deterministic
+      Vec[OutShare]) -> agg_share: Bytes is the deterministic
       aggregation algorithm.  It is run by each Aggregator over the
       output shares it has computed over a batch of measurement inputs.
 
@@ -880,7 +903,7 @@ def run_daf(Daf,
    VDAF Unsharding is identical to DAF Unssharding (cf.  Section 4.4):
 
    *  Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares:
-      Vec[AggShare]) -> AggResult is run by the Collector in order to
+      Vec[Bytes]) -> AggResult is run by the Collector in order to
       compute the aggregate result from the Aggregators' shares.  The
       length of agg_shares MUST be SHARES.  This algorithm is
       deterministic.
@@ -932,7 +955,8 @@ def run_daf(Daf,
            out_shares.append(outbound)
 
        # Each Aggregator aggregates its output shares into an
-       # aggregate share.
+       # aggregate share. In a distributed VDAF computation, the
+       # aggregate shares are sent over the network.
        agg_shares = []
        for j in range(Vdaf.SHARES):
            out_shares_j = [out[j] for out in out_shares]
@@ -1419,8 +1443,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     +-----------------+-----------------------------------------------+
     | OutShare        | Vec[Flp.Field]                                |
     +-----------------+-----------------------------------------------+
-    | AggShare        | Vec[Flp.Field]                                |
-    +-----------------+-----------------------------------------------+
     | AggResult       | Vec[Unsigned]                                 |
     +-----------------+-----------------------------------------------+
 
@@ -1659,7 +1681,7 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
        agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
        for out_share in out_shares:
            agg_share = vec_add(agg_share, out_share)
-       return agg_share
+       return Prio3.Flp.Field.encode_vec(agg_share)
 
                 Figure 15: Aggregation algorithm for Prio3.
 
@@ -1672,7 +1694,7 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
    def agg_shares_to_result(Prio3, _agg_param, agg_shares):
        agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
        for agg_share in agg_shares:
-           agg = vec_add(agg, agg_share)
+           agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
        return list(map(lambda x: x.as_unsigned(), agg))
 
          Figure 16: Computation of the aggregate result for Prio3.

@@ -1025,7 +1025,7 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 20 November 2022</td>
+<td class="center">Expires 25 November 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1038,12 +1038,12 @@ svg [stroke="fill"], svg [fill^="#fff"] {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-05-19" class="published">19 May 2022</time>
+<time datetime="2022-05-24" class="published">24 May 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-11-20">20 November 2022</time></dd>
+<dd class="expires"><time datetime="2022-11-25">25 November 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1102,7 +1102,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 November 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 25 November 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1507,32 +1507,42 @@ byte-string constants. When comprised of printable ASCII characters, they are
 written as Python 3 byte-string literals (e.g., <code>b'some constant string'</code>).<a href="#section-2-3" class="pilcrow">¶</a></p>
 <p id="section-2-4">A global constant <code>VERSION</code> is defined, which algorithms are free to use as
 desired. Its value <span class="bcp14">SHALL</span> be <code>b'vdaf-00'</code>.<a href="#section-2-4" class="pilcrow">¶</a></p>
-<p id="section-2-5">Some common functionalities:<a href="#section-2-5" class="pilcrow">¶</a></p>
+<p id="section-2-5">This document describes algorithms for multi-party computations in which the
+parties typically communicate over a network. Wherever a quantity is defined
+that must be be transmitted from one party to another, this document prescribes
+a particular encoding of that quantity as a byte string.<a href="#section-2-5" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-2-6.1">
+          <p id="section-2-6.1.1">OPEN ISSUE: It might be better to not be prescriptive about how quantities are
+encoded on the wire. See issue #58.<a href="#section-2-6.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-2-7">Some common functionalities:<a href="#section-2-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2-6.1">
+<li class="normal" id="section-2-8.1">
           <code>zeros(len: Unsigned) -&gt; Bytes</code> returns an array of zero bytes. The length of
-<code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-6.1" class="pilcrow">¶</a>
+<code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-8.1" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-6.2">
+        <li class="normal" id="section-2-8.2">
           <code>gen_rand(len: Unsigned) -&gt; Bytes</code> returns an array of random bytes. The
-length of <code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-6.2" class="pilcrow">¶</a>
+length of <code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-8.2" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-6.3">
+        <li class="normal" id="section-2-8.3">
           <code>byte(int: Unsigned) -&gt; Bytes</code> returns the representation of <code>int</code> as a byte
-string. The value of <code>int</code> <span class="bcp14">MUST</span> be in <code>[0,256)</code>.<a href="#section-2-6.3" class="pilcrow">¶</a>
+string. The value of <code>int</code> <span class="bcp14">MUST</span> be in <code>[0,256)</code>.<a href="#section-2-8.3" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-6.4">
+        <li class="normal" id="section-2-8.4">
           <code>xor(left: Bytes, right: Bytes) -&gt; Bytes</code> returns the bitwise XOR of <code>left</code>
-and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-6.4" class="pilcrow">¶</a>
+and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-8.4" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-6.5">
+        <li class="normal" id="section-2-8.5">
           <code>I2OSP</code> and <code>OS2IP</code> from <span>[<a href="#RFC8017" class="xref">RFC8017</a>]</span>, which are used, respectively, to
 convert a non-negative integer to a byte string and convert a byte string to a
-non-negative integer.<a href="#section-2-6.5" class="pilcrow">¶</a>
+non-negative integer.<a href="#section-2-8.5" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-6.6">
+        <li class="normal" id="section-2-8.6">
           <code>next_power_of_2(n: Unsigned) -&gt; Unsigned</code> returns the smallest integer
-greater than or equal to <code>n</code> that is also a power of two.<a href="#section-2-6.6" class="pilcrow">¶</a>
+greater than or equal to <code>n</code> that is also a power of two.<a href="#section-2-8.6" class="pilcrow">¶</a>
 </li>
       </ul>
 </section>
@@ -1703,12 +1713,6 @@ types enumerated in the following table.<a href="#section-4-6" class="pilcrow">�
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>AggShare</code>
-</td>
-            <td class="text-left" rowspan="1" colspan="1">Type of each aggregate share</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">
               <code>AggResult</code>
 </td>
             <td class="text-left" rowspan="1" colspan="1">Type of the aggregate result</td>
@@ -1716,10 +1720,17 @@ types enumerated in the following table.<a href="#section-4-6" class="pilcrow">�
         </tbody>
       </table>
 </div>
+<p id="section-4-8">These types define some of the inputs and outputs of DAF methods at various
+stages of the computation. Observe that only the measurements, output shares,
+the aggregate result, and the aggregation parameter have an explicit type. All
+other values --- in particular, the input shares and the aggregate shares ---
+have type <code>Bytes</code> and are treated as opaque byte strings. This is because these
+values must be transmitted between parties over a network.<a href="#section-4-8" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-4-8.1">
-          <p id="section-4-8.1.1">QUESTION: The type <code>AggShare</code> should perhaps be replaced with <code>Bytes</code>, since
-the aggregate share is necessarily sent over the network.<a href="#section-4-8.1.1" class="pilcrow">¶</a></p>
+<li class="normal ulEmpty" id="section-4-9.1">
+          <p id="section-4-9.1.1">OPEN ISSUE: It might be cleaner to define a type for each value, then have
+that type implement an encoding where necessary. This way each method
+parameter has a meaningful type hint. See issue#58.<a href="#section-4-9.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <div id="sec-daf-shard">
@@ -1797,8 +1808,8 @@ desired aggregate result:<a href="#section-4.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3-2.1">
             <code>Daf.out_shares_to_agg_share(agg_param: AggParam, out_shares: Vec[OutShare])
--&gt; agg_share: AggShare</code> is the deterministic aggregation algorithm. It is run
-by each Aggregator over the output shares it has computed over a batch of
+-&gt; agg_share: Bytes</code> is the deterministic aggregation algorithm. It is run by
+each Aggregator over the output shares it has computed over a batch of
 measurement inputs.<a href="#section-4.3-2.1" class="pilcrow">¶</a>
 </li>
         </ul>
@@ -1849,7 +1860,7 @@ sends its aggregate share to the Collector, who runs the following algorithm to
 recover the following output:<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-2.1">
-            <code>Daf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[AggShare]) -&gt;
+            <code>Daf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) -&gt;
 AggResult</code> is run by the Collector in order to compute the aggregate result
 from the Aggregators' shares. The length of <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>.
 This algorithm is deterministic.<a href="#section-4.4-2.1" class="pilcrow">¶</a>
@@ -2036,12 +2047,6 @@ listed in <a href="#vdaf-param" class="xref">Table 2</a> are defined by each con
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>AggShare</code>
-</td>
-            <td class="text-left" rowspan="1" colspan="1">Type of each aggregate share</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">
               <code>AggResult</code>
 </td>
             <td class="text-left" rowspan="1" colspan="1">Type of the aggregate result</td>
@@ -2049,6 +2054,15 @@ listed in <a href="#vdaf-param" class="xref">Table 2</a> are defined by each con
         </tbody>
       </table>
 </div>
+<p id="section-5-7">Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that must be
+transmitted from one party to another is treated as an opaque byte string. All
+other quantitites are given a concrete type.<a href="#section-5-7" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-5-8.1">
+          <p id="section-5-8.1.1">OPEN ISSUE: It might be cleaner to define a type for each value, then have
+that type implement an encoding where necessary. See issue#58.<a href="#section-5-8.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
 <div id="sec-vdaf-shard">
 <section id="section-5.1">
         <h3 id="name-sharding-2">
@@ -2216,8 +2230,8 @@ needing to revise the above paragraph.<a href="#section-5.2-11.1.1" class="pilcr
 <ul class="normal">
 <li class="normal" id="section-5.3-2.1">
             <code>Vdaf.out_shares_to_agg_share(agg_param: AggParam, out_shares: Vec[OutShare])
--&gt; agg_share: AggShare</code> is the deterministic aggregation algorithm. It is run
-by each Aggregator over the output shares it has computed over a batch of
+-&gt; agg_share: Bytes</code> is the deterministic aggregation algorithm. It is run by
+each Aggregator over the output shares it has computed over a batch of
 measurement inputs.<a href="#section-5.3-2.1" class="pilcrow">¶</a>
 </li>
         </ul>
@@ -2235,7 +2249,7 @@ form, where shares are processed one at a time.<a href="#section-5.3-3" class="p
 <p id="section-5.4-1">VDAF Unsharding is identical to DAF Unssharding (cf. <a href="#sec-daf-unshard" class="xref">Section 4.4</a>):<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-2.1">
-            <code>Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[AggShare]) -&gt;
+            <code>Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) -&gt;
 AggResult</code> is run by the Collector in order to compute the aggregate result
 from the Aggregators' shares. The length of <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>.
 This algorithm is deterministic.<a href="#section-5.4-2.1" class="pilcrow">¶</a>
@@ -2294,7 +2308,8 @@ def run_vdaf(Vdaf,
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an
-    # aggregate share.
+    # aggregate share. In a distributed VDAF computation, the
+    # aggregate shares are sent over the network.
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
@@ -2976,14 +2991,6 @@ aggregation, and unsharding are described in the remaining subsections.<a href="
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>AggShare</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>Vec[Flp.Field]</code>
-</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
                 <code>AggResult</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
@@ -3246,7 +3253,7 @@ def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
     agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for out_share in out_shares:
         agg_share = vec_add(agg_share, out_share)
-    return agg_share
+    return Prio3.Flp.Field.encode_vec(agg_share)
 </pre>
 </div>
 <figcaption><a href="#figure-15" class="selfRef">Figure 15</a>:
@@ -3269,7 +3276,7 @@ element-wise. It then converts each element of the vector into an integer.<a hre
 def agg_shares_to_result(Prio3, _agg_param, agg_shares):
     agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for agg_share in agg_shares:
-        agg = vec_add(agg, agg_share)
+        agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
     return list(map(lambda x: x.as_unsigned(), agg))
 </pre>
 </div>
