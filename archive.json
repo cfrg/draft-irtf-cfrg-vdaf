@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-05-22T00:53:01.411872+00:00",
+  "timestamp": "2022-05-24T00:58:14.308149+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -994,7 +994,7 @@
       "labels": [],
       "body": "`Vdaf` implementations need to define a type`Vdaf.AggShare` for the aggregate shares. Because the aggregate share are transmitted over the network, their encoding needs to be specified. There are two solutions to consider:\r\n(1) Replace `Vdaf.AggShare` with `Bytes`\r\n(2) Add methods on `Vdaf.AggShare` for encoding/decoding\r\n\r\nThe other quantities written to the network are input shares, prepare message shares, and the combined prepare message for each round. If we do (2), then for consistency we should also consider defining separate encoding/decoding methods for these. Currently the methods are implicit, since the type of each of these values is `Bytes`.",
       "createdAt": "2022-05-09T22:39:52Z",
-      "updatedAt": "2022-05-19T22:57:03Z",
+      "updatedAt": "2022-05-23T16:22:50Z",
       "closedAt": null,
       "comments": [
         {
@@ -1024,6 +1024,13 @@
           "body": "I don't want to cut off the discussion on this thread, but I would at least like to ensure that the next draft specifies an encoding of agg shares. This is accomplished by https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/75. There are two questions raised here, which the PR explicitly punts on:\r\n(1) Should all quantities have an explicit type, regardless of whether the type needs to be encoded?\r\n(2) Should the document be prescriptive about encoding?",
           "createdAt": "2022-05-19T22:57:01Z",
           "updatedAt": "2022-05-19T22:57:01Z"
+        },
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> (2) Should the document be prescriptive about encoding?\r\n\r\nI'm okay with ensuring that our current VDAF candidates (Prio3 & Poplar1) specify encodings (so all implementations use the same endianness etc.), but I wouldn't prescribe anything at the VDAF level, and instead leave this to the specs for particular VDAFs.",
+          "createdAt": "2022-05-23T16:22:50Z",
+          "updatedAt": "2022-05-23T16:22:50Z"
         }
       ]
     },
@@ -5140,7 +5147,7 @@
       "labels": [],
       "body": "Closes #60.\r\n\r\nNow that we have defined DAFs explicitly and removed the public\r\nparameter, there is no longer a need to support 0-round VDAFs. This\r\nchange codifies the requirement that ROUNDS >= 1 in the syntax.",
       "createdAt": "2022-05-19T01:11:52Z",
-      "updatedAt": "2022-05-19T21:52:11Z",
+      "updatedAt": "2022-05-23T16:36:27Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "50e872c2f0d4c1f5cf4d60146bae57d0f8eaa1a6",
@@ -5186,6 +5193,13 @@
           "body": "FWIW, translating the vdaf-00 syntax into a Rust API unearthed at least one nasty edge case: In some applications it'll be necessary to serialize the Prepare state. (Concretely, consider a DAP helper, who needs to carry state across HTTP requests during the aggregation flow.) However it is never the case that you need to serialize the first state, since you immediately consume it to get the next output bound prep share. See https://github.com/divviup/libprio-rs/pull/218 for details.",
           "createdAt": "2022-05-19T21:47:51Z",
           "updatedAt": "2022-05-19T21:52:11Z"
+        },
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > I'm not sure we should exclude VDAFs based on public-key cryptography. I was under the assumption that the issue with the public parameter was that it would need to be frequently rotated. Even without it, I can imagine a spec for a VDAF that has some out-of-band mechanism of retrieving public keys.\r\n> \r\n> I'm not suggesting we exclude this, I'm merely suggesting it can be treated as a different type of primitive, perhaps defined in this draft. Call it a PK-VDAF or something :)\r\n\r\nWhat I mean is that VDAF should include any DAF that has a verification procedure, even if it's public-key or zero-round. Otherwise I'd worry that standards like DAP could over-optimize towards particular VDAFs and for example be incompatible with your proposed \"PK-VDAF\" or non-interactive verification. So in overall I'd prefer generality when it comes to the VDAF interface, to ensure compatibility of various VDAFs that might be developed in the future with the DAP infrastructure that is being developed right now.\r\n\r\n> However it is never the case that you need to serialize the first state, since you immediately consume it to get the next output bound prep share.\r\n\r\nI can see that this is a bit inefficient, although I don't think this will be a bottle neck in terms of performance. I guess one possibility would be to allow for an OPTIONAL combined function, but that seems like premature optimization to me.",
+          "createdAt": "2022-05-23T16:36:26Z",
+          "updatedAt": "2022-05-23T16:36:26Z"
         }
       ],
       "reviews": [
@@ -5320,7 +5334,7 @@
       ],
       "body": "Removes the associated type `AggShare` from `Vdaf` and `Daf` and\r\nmodifies the syntax to treat the aggregate share as an opauqe byte\r\nstring. This is consistent with input shares, which, like the aggregate\r\nshare, are ncessarily transmitted over the network.\r\n\r\nThis partially addresses #58. In the future we may want to define a type\r\nfor every quantity and have that type implement a type whereever\r\napplicable. Or we might decide not to be prescriptive about encoding at\r\nall.\r\n\r\ncc/ @tgeoghegan",
       "createdAt": "2022-05-19T22:53:29Z",
-      "updatedAt": "2022-05-19T22:57:19Z",
+      "updatedAt": "2022-05-23T16:23:01Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "222517a6dc72870924236dd0e6c60c4092c4aa94",
@@ -5332,7 +5346,28 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc46hm6Q",
+          "commit": {
+            "abbreviatedOid": "a7752a4"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-23T14:41:09Z",
+          "updatedAt": "2022-05-23T16:23:01Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "```suggestion\r\n    # aggregate result. This is called by the Collector.\r\n```",
+              "createdAt": "2022-05-23T14:41:09Z",
+              "updatedAt": "2022-05-23T16:23:01Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
