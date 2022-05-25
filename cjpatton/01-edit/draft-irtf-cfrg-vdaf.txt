@@ -70,6 +70,7 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction
+     1.1.  Change Log
    2.  Conventions and Definitions
    3.  Overview
    4.  Definition of DAFs
@@ -294,6 +295,23 @@ Table of Contents
    Section 7 describes the Prio3 construction; Section 8 describes the
    Poplar1 construction; and Section 9 enumerates the security
    considerations for VDAFs.
+
+1.1.  Change Log
+
+   (*) Indicates a change that breaks compatibility with the previous
+   draft.
+
+   01:
+
+   *  Require that VDAFs specify serialization of aggregate shares.
+
+   *  Define Distributed Aggregation Fucntions (DAFs).
+
+   *  Prio3: Move proof verifier check from prep_next() to
+      prep_shares_to_prep(). (*)
+
+   *  Remove public parameter and replace verification parameter with a
+      "verification key" and "Aggregator ID".
 
 2.  Conventions and Definitions
 
