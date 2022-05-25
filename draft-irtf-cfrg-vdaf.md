@@ -281,6 +281,22 @@ are common to our constructions; {{prio3}} describes the Prio3 construction;
 {{poplar1}} describes the Poplar1 construction; and {{security}} enumerates the
 security considerations for VDAFs.
 
+## Change Log
+
+(*) Indicates a change that breaks compatibility with the previous draft.
+
+01:
+
+* Require that VDAFs specify serialization of aggregate shares.
+
+* Define Distributed Aggregation Fucntions (DAFs).
+
+* Prio3: Move proof verifier check from `prep_next()` to
+  `prep_shares_to_prep()`. (*)
+
+* Remove public parameter and replace verification parameter with a
+  "verification key" and "Aggregator ID".
+
 # Conventions and Definitions
 
 {::boilerplate bcp14-tagged}
