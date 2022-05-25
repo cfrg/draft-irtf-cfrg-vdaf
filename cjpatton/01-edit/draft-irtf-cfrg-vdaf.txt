@@ -305,7 +305,7 @@ Table of Contents
 
    *  Require that VDAFs specify serialization of aggregate shares.
 
-   *  Define Distributed Aggregation Fucntions (DAFs).
+   *  Define Distributed Aggregation Functions (DAFs).
 
    *  Prio3: Move proof verifier check from prep_next() to
       prep_shares_to_prep(). (*)
@@ -738,7 +738,7 @@ Table of Contents
       | AggParam        | Type of aggregation parameter            |
       +-----------------+------------------------------------------+
       | Prep            | State of each Aggregator during          |
-      |                 | Peparation (Section 5.2)                 |
+      |                 | Preparation (Section 5.2)                |
       +-----------------+------------------------------------------+
       | OutShare        | Type of each output share                |
       +-----------------+------------------------------------------+
@@ -749,7 +749,7 @@ Table of Contents
 
    Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that
    must be transmitted from one party to another is treated as an opaque
-   byte string.  All other quantitites are given a concrete type.
+   byte string.  All other quantities are given a concrete type.
 
       OPEN ISSUE: It might be cleaner to define a type for each value,
       then have that type implement an encoding where necessary.  See
@@ -897,7 +897,7 @@ Table of Contents
    require some amount of interaction in order to ensure validity of the
    output shares (while also maintaining privacy).
 
-      OPEN ISSUE Accammadating 0-round VDAFs may require syntax changes
+      OPEN ISSUE accommodating 0-round VDAFs may require syntax changes
       if, for example, public keys are required.  On the other hand, we
       could consider defining this class of schemes as a different
       primitive.  See issue#77.
@@ -919,7 +919,7 @@ Table of Contents
 
 5.4.  Unsharding
 
-   VDAF Unsharding is identical to DAF Unssharding (cf.  Section 4.4):
+   VDAF Unsharding is identical to DAF Unsharding (cf.  Section 4.4):
 
    *  Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares:
       Vec[Bytes]) -> AggResult is run by the Collector in order to
@@ -970,7 +970,7 @@ Table of Contents
                    inbound = Vdaf.prep_shares_to_prep(agg_param,
                                                       outbound)
 
-           # The final outputs of prepare phasre are the output shares.
+           # The final outputs of prepare phase are the output shares.
            out_shares.append(outbound)
 
        # Each Aggregator aggregates its output shares into an
@@ -993,8 +993,8 @@ Table of Contents
    measurements, and a nonce for each measurement.  This document does
    not specify how the nonces are chosen, but security requires that the
    nonces be unique.  See Section 9 for details.  As explained in
-   Section 4.5, the secure execution of a VDAF requires the applicaiton
-   to instantiate secure channels between each of the prtocol
+   Section 4.5, the secure execution of a VDAF requires the application
+   to instantiate secure channels between each of the protocol
    participants.
 
 6.  Preliminaries
@@ -1137,7 +1137,7 @@ Table of Contents
    (pseudo)random seed into a long string of pseudorandom bits.  A PRG
    suitable for this document implements the interface specified in this
    section.  Concrete constructions are described in the subsections
-   that folllow.
+   that follow.
 
    PRGs are defined by a class Prg with the following associated
    parameter:
@@ -1378,7 +1378,7 @@ class PrgAes128:
    circuit; when the circuit contains constants, it is sometimes
    necessary to normalize those constants to ensure that the circuit's
    output, when run on a valid input, is the same regardless of the
-   nuber of shares.
+   number of shares.
 
    An FLP is executed by the prover and verifier as follows:
 
@@ -2893,7 +2893,7 @@ Test Vectors
    Test vectors cover the generation of input shares and the conversion
    of input shares into output shares.  Vectors specify the verification
    key, measurements, aggregation parameter, and any parameters needed
-   to construct the VdAF.  (For example, for Prio3AesSum, the user
+   to construct the VDAF.  (For example, for Prio3AesSum, the user
    specifies the number of bits for representing each summand.)
 
    Byte strings are encoded in hexadecimal To make the tests
