@@ -116,7 +116,8 @@ class Prio3(Vdaf):
     # deriving `k_query_rand`, we use `verify_key` to derive the query
     # randomness directly.
     @classmethod
-    def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
+    def prep_init(Prio3,
+                  verify_key, agg_id, _agg_param, nonce, input_share):
         dst = VERSION + b' prio3'
 
         (input_share, proof_share, k_blind, k_hint) = \

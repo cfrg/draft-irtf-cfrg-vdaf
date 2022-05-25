@@ -120,12 +120,12 @@ informative:
     date: 2020
     target: https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
 
-  Vad16:
-    title: "The Complexity of Differential Privacy"
-    author:
-      - ins: S. Vadhan
-    date: 2016
-    target: https://link.springer.com/chapter/10.1007/978-3-319-57048-8_7
+  #Vad16:
+  #  title: "The Complexity of Differential Privacy"
+  #  author:
+  #    - ins: S. Vadhan
+  #  date: 2016
+  #  target: https://link.springer.com/chapter/10.1007/978-3-319-57048-8_7
 
 --- abstract
 
@@ -591,7 +591,8 @@ def run_daf(Daf,
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(Daf.SHARES):
-            out_shares[j].append(Daf.prep(j, agg_param, input_shares[j]))
+            out_shares[j].append(
+                Daf.prep(j, agg_param, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
     # share and it to the Collector.
@@ -1444,7 +1445,8 @@ The algorithms required for preparation are defined as follows. These algorithms
 make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 
 ~~~
-def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
+def prep_init(Prio3,
+              verify_key, agg_id, _agg_param, nonce, input_share):
     # Domain separation tag for PRG info string
     dst = VERSION + b'prio3'
 
@@ -2394,7 +2396,8 @@ class PrepState:
         auth_share.append(value[1])
 
       # Prepare first sketch verification message.
-      r = Prg.expand_into_vec(Field[l], self.k_verify_rand, len(data_share))
+      r = Prg.expand_into_vec(
+        Field[l], self.k_verify_rand, len(data_share))
       verifier_share_1 = [
          a_share + inner_product(data_share, r),
          b_share + inner_product(data_share, r * r),
