@@ -325,6 +325,10 @@ class Prio3(Vdaf):
         new_cls.Flp = Flp
         return new_cls
 
+    @classmethod
+    def test_vec_set_type_param(Prio3, test_vec):
+        return Prio3.Flp.test_vec_set_type_param(test_vec)
+
 
 ##
 # INSTANTIATIONS
@@ -382,11 +386,11 @@ if __name__ == '__main__':
 
     cls = Prio3Aes128Count.with_shares(2)
     test_vdaf(cls, None, [0, 1, 1, 0, 1], [3])
-    test_vdaf(cls, None, [1], [1], print_test_vector=TEST_VECTOR)
+    test_vdaf(cls, None, [1], [1], print_test_vec=TEST_VECTOR)
 
     cls = Prio3Aes128Sum.with_shares(2).with_bits(8)
     test_vdaf(cls, None, [0, 147, 1, 0, 11, 0], [159])
-    test_vdaf(cls, None, [100], [100], print_test_vector=TEST_VECTOR)
+    test_vdaf(cls, None, [100], [100], print_test_vec=TEST_VECTOR)
 
     cls = Prio3Aes128Histogram.with_shares(2).with_buckets([1, 10, 100])
     test_vdaf(cls, None, [0], [1, 0, 0, 0])
@@ -396,4 +400,4 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [100], [0, 0, 1, 0])
     test_vdaf(cls, None, [101], [0, 0, 0, 1])
     test_vdaf(cls, None, [0, 1, 5, 10, 15, 100, 101, 101], [2, 2, 2, 2])
-    test_vdaf(cls, None, [50], [0, 0, 1, 0], print_test_vector=TEST_VECTOR)
+    test_vdaf(cls, None, [50], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)

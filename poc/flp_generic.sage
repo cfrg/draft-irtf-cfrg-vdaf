@@ -91,6 +91,14 @@ class Valid:
         raise Error('eval() not implemented')
 
 
+    # Add any parameters to `test_vec` that are required to construct this
+    # class. Return the key that was set or `None` if `test_vec` was not
+    # modified.
+    @classmethod
+    def test_vec_set_type_param(Valid, test_vec):
+        return None
+
+
 class ProveGadget:
 
     def __init__(self, Field, wire_seeds, g, g_calls):
@@ -292,6 +300,10 @@ class FlpGeneric(Flp):
     def truncate(FlpGeneric, inp):
         return FlpGeneric.Valid.truncate(inp)
 
+    @classmethod
+    def test_vec_set_type_param(FlpGeneric, test_vec):
+        return FlpGeneric.Valid.test_vec_set_type_param(test_vec)
+
 
 ##
 # GADGETS
@@ -452,6 +464,11 @@ class Sum(Valid):
         new_cls.INPUT_LEN = bits
         return new_cls
 
+    @classmethod
+    def test_vec_set_type_param(cls, test_vec):
+        test_vec['bits'] = int(cls.INPUT_LEN)
+        return 'bits'
+
 
 class Histogram(Valid):
     # Operational parameters
@@ -509,6 +526,12 @@ class Histogram(Valid):
         new_cls.INPUT_LEN = len(buckets) + 1
         new_cls.OUTPUT_LEN = len(buckets) + 1
         return new_cls
+
+    @classmethod
+    def test_vec_set_type_param(cls, test_vec):
+        test_vec['buckets'] = list(map(lambda x: int(x), cls.buckets))
+        return 'buckets'
+
 
 
 ##
