@@ -289,7 +289,7 @@ security considerations for VDAFs.
 
 * Require that VDAFs specify serialization of aggregate shares.
 
-* Define Distributed Aggregation Fucntions (DAFs).
+* Define Distributed Aggregation Functions (DAFs).
 
 * Prio3: Move proof verifier check from `prep_next()` to
   `prep_shares_to_prep()`. (*)
@@ -678,14 +678,14 @@ listed in {{vdaf-param}} are defined by each concrete VDAF.
 | `SHARES`          | Number of input shares into which each measurement is sharded ({{sec-vdaf-shard}}) |
 | `Measurement`     | Type of each measurement |
 | `AggParam`        | Type of aggregation parameter |
-| `Prep`            | State of each Aggregator during Peparation ({{sec-vdaf-prepare}}) |
+| `Prep`            | State of each Aggregator during Preparation ({{sec-vdaf-prepare}}) |
 | `OutShare`        | Type of each output share |
 | `AggResult`       | Type of the aggregate result |
 {: #vdaf-param title="Constants and types defined by each concrete VDAF."}
 
 Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that must be
 transmitted from one party to another is treated as an opaque byte string. All
-other quantitites are given a concrete type.
+other quantities are given a concrete type.
 
 > OPEN ISSUE: It might be cleaner to define a type for each value, then have
 > that type implement an encoding where necessary. See issue#58.
@@ -825,7 +825,7 @@ However, most, if not all, constructions will require some amount of interaction
 in order to ensure validity of the output shares (while also maintaining
 privacy).
 
-> OPEN ISSUE Accammadating 0-round VDAFs may require syntax changes if, for
+> OPEN ISSUE accommodating 0-round VDAFs may require syntax changes if, for
 > example, public keys are required. On the other hand, we could consider
 > defining this class of schemes as a different primitive. See issue#77.
 
@@ -845,7 +845,7 @@ form, where shares are processed one at a time.
 
 ## Unsharding {#sec-vdaf-unshard}
 
-VDAF Unsharding is identical to DAF Unssharding (cf. {{sec-daf-unshard}}):
+VDAF Unsharding is identical to DAF Unsharding (cf. {{sec-daf-unshard}}):
 
 * `Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) ->
   AggResult` is run by the Collector in order to compute the aggregate result
@@ -895,7 +895,7 @@ def run_vdaf(Vdaf,
                 inbound = Vdaf.prep_shares_to_prep(agg_param,
                                                    outbound)
 
-        # The final outputs of prepare phasre are the output shares.
+        # The final outputs of prepare phase are the output shares.
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an
@@ -918,8 +918,8 @@ The inputs to this algorithm are the aggregation parameter, a list of
 measurements, and a nonce for each measurement. This document does not specify
 how the nonces are chosen, but security requires that the nonces be unique. See
 {{security}} for details. As explained in {{daf-execution}}, the secure
-execution of a VDAF requires the applicaiton to instantiate secure channels
-between each of the prtocol participants.
+execution of a VDAF requires the application to instantiate secure channels
+between each of the protocol participants.
 
 # Preliminaries {#prelim}
 
@@ -1046,7 +1046,7 @@ The tables below define finite fields used in the remainder of this document.
 A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
 into a long string of pseudorandom bits. A PRG suitable for this document
 implements the interface specified in this section. Concrete constructions are
-described in the subsections that folllow.
+described in the subsections that follow.
 
 PRGs are defined by a class `Prg` with the following associated parameter:
 
@@ -1245,7 +1245,7 @@ are not secret shared, then `num_shares == 1`. This parameter is useful for
 certain FLP constructions. For example, the FLP in {{flp-generic}} is defined in
 terms of an arithmetic circuit; when the circuit contains constants, it is
 sometimes necessary to normalize those constants to ensure that the circuit's
-output, when run on a valid input, is the same regardless of the nuber of
+output, when run on a valid input, is the same regardless of the number of
 shares.
 
 An FLP is executed by the prover and verifier as follows:
@@ -2593,7 +2593,7 @@ Wood for useful feedback on and contributions to the spec.
 
 Test vectors cover the generation of input shares and the conversion of input
 shares into output shares. Vectors specify the verification key, measurements,
-aggregation parameter, and any parameters needed to construct the VdAF. (For
+aggregation parameter, and any parameters needed to construct the VDAF. (For
 example, for `Prio3AesSum`, the user specifies the number of bits for
 representing each summand.)
 
