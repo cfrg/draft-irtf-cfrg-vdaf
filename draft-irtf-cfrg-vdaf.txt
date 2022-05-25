@@ -5,7 +5,7 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 26 November 2022                               Cloudflare, Inc.
+Expires: 26 November 2022                                     Cloudflare
                                                            P. Schoppmann
                                                                   Google
                                                              25 May 2022
@@ -3012,7 +3012,7 @@ Authors' Addresses
 
 
    Christopher Patton
-   Cloudflare, Inc.
+   Cloudflare
    Email: chrispatton+ietf@gmail.com
 
 
