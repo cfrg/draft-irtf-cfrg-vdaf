@@ -318,7 +318,7 @@ parties typically communicate over a network. Wherever a quantity is defined
 that must be be transmitted from one party to another, this document prescribes
 a particular encoding of that quantity as a byte string.
 
-> OPEN ISSUE: It might be better to not be prescriptive about how quantities are
+> OPEN ISSUE It might be better to not be prescriptive about how quantities are
 > encoded on the wire. See issue #58.
 
 Some common functionalities:
@@ -463,9 +463,9 @@ other values --- in particular, the input shares and the aggregate shares ---
 have type `Bytes` and are treated as opaque byte strings. This is because these
 values must be transmitted between parties over a network.
 
-> OPEN ISSUE: It might be cleaner to define a type for each value, then have
-> that type implement an encoding where necessary. This way each method
-> parameter has a meaningful type hint. See issue#58.
+> OPEN ISSUE It might be cleaner to define a type for each value, then have that
+> type implement an encoding where necessary. This way each method parameter has
+> a meaningful type hint. See issue#58.
 
 ## Sharding {#sec-daf-shard}
 
@@ -548,7 +548,7 @@ For simplicity, we have written this algorithm in a "one-shot" form, where all
 output shares for a batch are provided at the same time. Many DAFs may also
 support a "streaming" form, where shares are processed one at a time.
 
-> OPEN ISSUE: It may be worthwhile to explicitly define the "streaming" API. See
+> OPEN ISSUE It may be worthwhile to explicitly define the "streaming" API. See
 > issue#47.
 
 ## Unsharding {#sec-daf-unshard}
@@ -687,8 +687,8 @@ Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that must be
 transmitted from one party to another is treated as an opaque byte string. All
 other quantities are given a concrete type.
 
-> OPEN ISSUE: It might be cleaner to define a type for each value, then have
-> that type implement an encoding where necessary. See issue#58.
+> OPEN ISSUE It might be cleaner to define a type for each value, then have that
+> type implement an encoding where necessary. See issue#58.
 
 ## Sharding {#sec-vdaf-shard}
 
@@ -775,7 +775,7 @@ class methods:
   the verification key among the Aggregators prior to the start of this phase of
   VDAF evaluation.
 
-  > OPEN ISSUE: What security properties do we need for this key exchange? See
+  > OPEN ISSUE What security properties do we need for this key exchange? See
   > issue#18.
 
   Protocols using the VDAF MUST ensure that the Aggregator's identifier is equal
@@ -1095,8 +1095,7 @@ def expand_into_vec(Prg,
 ### PrgAes128 {#prg-aes128}
 
 > OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be more
-> performant (https://eprint.iacr.org/2019/074.pdf). See
-> https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/32 for details.
+> performant (https://eprint.iacr.org/2019/074.pdf). See issue#32.
 
 Our first construction, `PrgAes128`, converts a blockcipher, namely AES-128,
 into a PRG. Seed expansion involves two steps. In the first step, CMAC
