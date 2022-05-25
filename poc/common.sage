@@ -107,7 +107,7 @@ def OS2IP(octets, skip_assert=False):
     return ret
 
 def print_wrapped_line(line, tab):
-    width=70
+    width=72
     chunk_len = width - tab
     for start in range(0, len(line), chunk_len):
         end = min(start+chunk_len, len(line))
