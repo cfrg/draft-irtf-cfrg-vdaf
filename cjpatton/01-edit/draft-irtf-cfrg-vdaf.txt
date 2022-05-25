@@ -340,7 +340,7 @@ Table of Contents
    another, this document prescribes a particular encoding of that
    quantity as a byte string.
 
-      OPEN ISSUE: It might be better to not be prescriptive about how
+      OPEN ISSUE It might be better to not be prescriptive about how
       quantities are encoded on the wire.  See issue #58.
 
    Some common functionalities:
@@ -514,7 +514,7 @@ Table of Contents
    Bytes and are treated as opaque byte strings.  This is because these
    values must be transmitted between parties over a network.
 
-      OPEN ISSUE: It might be cleaner to define a type for each value,
+      OPEN ISSUE It might be cleaner to define a type for each value,
       then have that type implement an encoding where necessary.  This
       way each method parameter has a meaningful type hint.  See
       issue#58.
@@ -603,7 +603,7 @@ Table of Contents
    Many DAFs may also support a "streaming" form, where shares are
    processed one at a time.
 
-      OPEN ISSUE: It may be worthwhile to explicitly define the
+      OPEN ISSUE It may be worthwhile to explicitly define the
       "streaming" API.  See issue#47.
 
 4.4.  Unsharding
@@ -751,7 +751,7 @@ Table of Contents
    must be transmitted from one party to another is treated as an opaque
    byte string.  All other quantities are given a concrete type.
 
-      OPEN ISSUE: It might be cleaner to define a type for each value,
+      OPEN ISSUE It might be cleaner to define a type for each value,
       then have that type implement an encoding where necessary.  See
       issue#58.
 
@@ -843,7 +843,7 @@ Table of Contents
       distribution of the verification key among the Aggregators prior
       to the start of this phase of VDAF evaluation.
 
-         OPEN ISSUE: What security properties do we need for this key
+         OPEN ISSUE What security properties do we need for this key
          exchange?  See issue#18.
 
       Protocols using the VDAF MUST ensure that the Aggregator's
@@ -1190,8 +1190,7 @@ Table of Contents
 
       OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be
       more performant (https://eprint.iacr.org/2019/074.pdf).  See
-      https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/32 for
-      details.
+      issue#32.
 
    Our first construction, PrgAes128, converts a blockcipher, namely
    AES-128, into a PRG.  Seed expansion involves two steps.  In the
