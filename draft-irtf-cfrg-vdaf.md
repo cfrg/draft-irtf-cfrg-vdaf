@@ -20,7 +20,7 @@ author:
     email: rlb@ipv.sx
  -
     name: Christopher Patton
-    organization: Cloudflare, Inc.
+    organization: Cloudflare
     email: chrispatton+ietf@gmail.com
  -
     name: Phillipp Schoppmann
