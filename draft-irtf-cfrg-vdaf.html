@@ -1920,7 +1920,8 @@ def run_daf(Daf,
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(Daf.SHARES):
-            out_shares[j].append(Daf.prep(j, agg_param, input_shares[j]))
+            out_shares[j].append(
+                Daf.prep(j, agg_param, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
     # share and it to the Collector.
@@ -3160,7 +3161,8 @@ make use of encoding and decoding methods defined in <a href="#prio3-helper-func
 <figure id="figure-14">
             <div class="alignLeft art-text artwork" id="section-7.2.2-6.1">
 <pre>
-def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
+def prep_init(Prio3,
+              verify_key, agg_id, _agg_param, nonce, input_share):
     # Domain separation tag for PRG info string
     dst = VERSION + b'prio3'
 
@@ -4581,7 +4583,8 @@ class PrepState:
         auth_share.append(value[1])
 
       # Prepare first sketch verification message.
-      r = Prg.expand_into_vec(Field[l], self.k_verify_rand, len(data_share))
+      r = Prg.expand_into_vec(
+        Field[l], self.k_verify_rand, len(data_share))
       verifier_share_1 = [
          a_share + inner_product(data_share, r),
          b_share + inner_product(data_share, r * r),
@@ -4872,12 +4875,8 @@ removing it after unsharding.<a href="#section-9-11" class="pilcrow">¶</a></p>
 <span class="refAuthor">Gilboa, N.</span> and <span class="refAuthor">Y. Ishai</span>, <span class="refTitle">"Distributed Point Functions and Their Applications"</span>, <span class="seriesInfo">EUROCRYPT 2014 </span>, <time datetime="2014" class="refDate">2014</time>, <span>&lt;<a href="https://link.springer.com/chapter/10.1007/978-3-642-55220-5_35">https://link.springer.com/chapter/10.1007/978-3-642-55220-5_35</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="OriginTelemetry">[OriginTelemetry]</dt>
-        <dd>
-<span class="refTitle">"Origin Telemetry"</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html">https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="Vad16">[Vad16]</dt>
       <dd>
-<span class="refAuthor">Vadhan, S.</span>, <span class="refTitle">"The Complexity of Differential Privacy"</span>, <time datetime="2016" class="refDate">2016</time>, <span>&lt;<a href="https://link.springer.com/chapter/10.1007/978-3-319-57048-8_7">https://link.springer.com/chapter/10.1007/978-3-319-57048-8_7</a>&gt;</span>. </dd>
+<span class="refTitle">"Origin Telemetry"</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html">https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

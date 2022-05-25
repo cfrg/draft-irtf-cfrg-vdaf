@@ -627,32 +627,33 @@ Table of Contents
 
    Securely executing a DAF involves emulating the following procedure.
 
-def run_daf(Daf,
-            agg_param: Daf.AggParam,
-            measurements: Vec[Daf.Measurement]):
-    out_shares = [ [] for j in range(Daf.SHARES) ]
-    for measurement in measurements:
-        # Each Client shards its measurement into input shares and
-        # distributes them among the Aggregators.
-        input_shares = Daf.measurement_to_input_shares(measurement)
+   def run_daf(Daf,
+               agg_param: Daf.AggParam,
+               measurements: Vec[Daf.Measurement]):
+       out_shares = [ [] for j in range(Daf.SHARES) ]
+       for measurement in measurements:
+           # Each Client shards its measurement into input shares and
+           # distributes them among the Aggregators.
+           input_shares = Daf.measurement_to_input_shares(measurement)
 
-        # Each Aggregator prepares its input share for aggregation.
-        for j in range(Daf.SHARES):
-            out_shares[j].append(Daf.prep(j, agg_param, input_shares[j]))
+           # Each Aggregator prepares its input share for aggregation.
+           for j in range(Daf.SHARES):
+               out_shares[j].append(
+                   Daf.prep(j, agg_param, input_shares[j]))
 
-    # Each Aggregator aggregates its output shares into an aggregate
-    # share and it to the Collector.
-    agg_shares = []
-    for j in range(Daf.SHARES):
-        agg_share_j = Daf.out_shares_to_agg_share(agg_param,
-                                                  out_shares[j])
-        agg_shares.append(agg_share_j)
+       # Each Aggregator aggregates its output shares into an aggregate
+       # share and it to the Collector.
+       agg_shares = []
+       for j in range(Daf.SHARES):
+           agg_share_j = Daf.out_shares_to_agg_share(agg_param,
+                                                     out_shares[j])
+           agg_shares.append(agg_share_j)
 
-    # Collector unshards the aggregate result.
-    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares)
-    return agg_result
+       # Collector unshards the aggregate result.
+       agg_result = Daf.agg_shares_to_result(agg_param, agg_shares)
+       return agg_result
 
-                    Figure 5: Execution of a DAF.
+                       Figure 5: Execution of a DAF.
 
    The inputs to this procedure are the same as the aggregation function
    computed by the DAF: An aggregation parameter and a sequence of
@@ -1599,76 +1600,77 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    These algorithms make use of encoding and decoding methods defined in
    Section 7.2.5.
 
-def prep_init(Prio3, verify_key, agg_id, _agg_param, nonce, input_share):
-    # Domain separation tag for PRG info string
-    dst = VERSION + b'prio3'
+ def prep_init(Prio3,
+               verify_key, agg_id, _agg_param, nonce, input_share):
+     # Domain separation tag for PRG info string
+     dst = VERSION + b'prio3'
 
-    (input_share, proof_share, k_blind, k_hint) = \
-        Prio3.decode_leader_share(input_share) if agg_id == 0 else \
-        Prio3.decode_helper_share(dst, agg_id, input_share)
+     (input_share, proof_share, k_blind, k_hint) = \
+         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
+         Prio3.decode_helper_share(dst, agg_id, input_share)
 
-    out_share = Prio3.Flp.truncate(input_share)
+     out_share = Prio3.Flp.truncate(input_share)
 
-    k_query_rand = Prio3.Prg.derive_seed(verify_key, byte(255) + nonce)
-    query_rand = Prio3.Prg.expand_into_vec(
-        Prio3.Flp.Field,
-        k_query_rand,
-        dst,
-        Prio3.Flp.QUERY_RAND_LEN
-    )
-    joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
-    if Prio3.Flp.JOINT_RAND_LEN > 0:
-        encoded = Prio3.Flp.Field.encode_vec(input_share)
-        k_joint_rand_share = Prio3.Prg.derive_seed(
-            k_blind, byte(agg_id) + encoded)
-        k_joint_rand = xor(k_hint, k_joint_rand_share)
-        joint_rand = Prio3.Prg.expand_into_vec(
-            Prio3.Flp.Field,
-            k_joint_rand,
-            dst,
-            Prio3.Flp.JOINT_RAND_LEN
-        )
-    verifier_share = Prio3.Flp.query(input_share,
-                                     proof_share,
-                                     query_rand,
-                                     joint_rand,
-                                     Prio3.SHARES)
+     k_query_rand = Prio3.Prg.derive_seed(verify_key, byte(255) + nonce)
+     query_rand = Prio3.Prg.expand_into_vec(
+         Prio3.Flp.Field,
+         k_query_rand,
+         dst,
+         Prio3.Flp.QUERY_RAND_LEN
+     )
+     joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
+     if Prio3.Flp.JOINT_RAND_LEN > 0:
+         encoded = Prio3.Flp.Field.encode_vec(input_share)
+         k_joint_rand_share = Prio3.Prg.derive_seed(
+             k_blind, byte(agg_id) + encoded)
+         k_joint_rand = xor(k_hint, k_joint_rand_share)
+         joint_rand = Prio3.Prg.expand_into_vec(
+             Prio3.Flp.Field,
+             k_joint_rand,
+             dst,
+             Prio3.Flp.JOINT_RAND_LEN
+         )
+     verifier_share = Prio3.Flp.query(input_share,
+                                      proof_share,
+                                      query_rand,
+                                      joint_rand,
+                                      Prio3.SHARES)
 
-    prep_msg = Prio3.encode_prep_share(verifier_share,
-                                       k_joint_rand_share)
-    return (out_share, k_joint_rand, prep_msg)
+     prep_msg = Prio3.encode_prep_share(verifier_share,
+                                        k_joint_rand_share)
+     return (out_share, k_joint_rand, prep_msg)
 
-def prep_next(Prio3, prep, inbound):
-    (out_share, k_joint_rand, prep_msg) = prep
+ def prep_next(Prio3, prep, inbound):
+     (out_share, k_joint_rand, prep_msg) = prep
 
-    if inbound is None:
-        return (prep, prep_msg)
+     if inbound is None:
+         return (prep, prep_msg)
 
-    k_joint_rand_check = Prio3.decode_prep_msg(inbound)
-    if k_joint_rand_check != k_joint_rand:
-        raise ERR_VERIFY # joint randomness check failed
+     k_joint_rand_check = Prio3.decode_prep_msg(inbound)
+     if k_joint_rand_check != k_joint_rand:
+         raise ERR_VERIFY # joint randomness check failed
 
-    return out_share
+     return out_share
 
-def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
-    verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
-    k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
-    for encoded in prep_shares:
-        (verifier_share, k_joint_rand_share) = \
-            Prio3.decode_prep_share(encoded)
+ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
+     verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
+     k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
+     for encoded in prep_shares:
+         (verifier_share, k_joint_rand_share) = \
+             Prio3.decode_prep_share(encoded)
 
-        verifier = vec_add(verifier, verifier_share)
+         verifier = vec_add(verifier, verifier_share)
 
-        if Prio3.Flp.JOINT_RAND_LEN > 0:
-            k_joint_rand_check = xor(k_joint_rand_check,
-                                     k_joint_rand_share)
+         if Prio3.Flp.JOINT_RAND_LEN > 0:
+             k_joint_rand_check = xor(k_joint_rand_check,
+                                      k_joint_rand_share)
 
-    if not Prio3.Flp.decide(verifier):
-        raise ERR_VERIFY # proof verifier check failed
+     if not Prio3.Flp.decide(verifier):
+         raise ERR_VERIFY # proof verifier check failed
 
-    return Prio3.encode_prep_msg(k_joint_rand_check)
+     return Prio3.encode_prep_msg(k_joint_rand_check)
 
-               Figure 14: Preparation state for Prio3.
+                Figure 14: Preparation state for Prio3.
 
 7.2.3.  Aggregation
 
@@ -2588,71 +2590,72 @@ def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
       CP Consider adding aggregation parameter as input to k_verify_rand
       derivation.
 
-class PrepState:
-  def __init__(verify_param, agg_param, nonce, input_share):
-    (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
-    (self.idpf_key,
-     self.correlation_shares) = decode_input_share(input_share)
-    (self.party_id, k_verify_init) = verify_param
-    self.k_verify_rand = get_key(k_verify_init, nonce)
-    self.step = 'ready'
+   class PrepState:
+     def __init__(verify_param, agg_param, nonce, input_share):
+       (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
+       (self.idpf_key,
+        self.correlation_shares) = decode_input_share(input_share)
+       (self.party_id, k_verify_init) = verify_param
+       self.k_verify_rand = get_key(k_verify_init, nonce)
+       self.step = 'ready'
 
-  def next(self, inbound: Optional[Bytes]):
-    l = self.l
-    (a_share, b_share, c_share,
-     A_share, B_share) = correlation_shares[l-1]
+     def next(self, inbound: Optional[Bytes]):
+       l = self.l
+       (a_share, b_share, c_share,
+        A_share, B_share) = correlation_shares[l-1]
 
-    if self.step == 'ready' and inbound == None:
-      # Evaluate IDPF on candidate prefixes.
-      data_share, auth_share = [], []
-      for x in self.candidate_prefixes:
-        value = self.idpf_key.eval(l, x)
-        data_share.append(value[0])
-        auth_share.append(value[1])
+       if self.step == 'ready' and inbound == None:
+         # Evaluate IDPF on candidate prefixes.
+         data_share, auth_share = [], []
+         for x in self.candidate_prefixes:
+           value = self.idpf_key.eval(l, x)
+           data_share.append(value[0])
+           auth_share.append(value[1])
 
-      # Prepare first sketch verification message.
-      r = Prg.expand_into_vec(Field[l], self.k_verify_rand, len(data_share))
-      verifier_share_1 = [
-         a_share + inner_product(data_share, r),
-         b_share + inner_product(data_share, r * r),
-         c_share + inner_product(auth_share, r),
-      ]
+         # Prepare first sketch verification message.
+         r = Prg.expand_into_vec(
+           Field[l], self.k_verify_rand, len(data_share))
+         verifier_share_1 = [
+            a_share + inner_product(data_share, r),
+            b_share + inner_product(data_share, r * r),
+            c_share + inner_product(auth_share, r),
+         ]
 
-      self.output_share = data_share
-      self.step = 'sketch round 1'
-      return verifier_share_1
+         self.output_share = data_share
+         self.step = 'sketch round 1'
+         return verifier_share_1
 
-    elif self.step == 'sketch round 1' and inbound != None:
-      verifier_1 = Field[l].decode_vec(inbound)
-      verifier_share_2 = [
-        (verifier_1[0] * verifier_1[0] \
-         - verifier_1[1] \
-         - verifier_1[2]) * self.party_id \
-        + A_share * verifier_1[0] \
-        + B_share
-      ]
+       elif self.step == 'sketch round 1' and inbound != None:
+         verifier_1 = Field[l].decode_vec(inbound)
+         verifier_share_2 = [
+           (verifier_1[0] * verifier_1[0] \
+            - verifier_1[1] \
+            - verifier_1[2]) * self.party_id \
+           + A_share * verifier_1[0] \
+           + B_share
+         ]
 
-      self.step = 'sketch round 2'
-      return Field[l].encode_vec(verifier_share_2)
+         self.step = 'sketch round 2'
+         return Field[l].encode_vec(verifier_share_2)
 
-    elif self.step == 'sketch round 2' and inbound != None:
-      verifier_2 = Field[l].decode_vec(inbound)
-      if verifier_2 != 0: raise ERR_INVALID
-      return Field[l].encode_vec(self.output_share)
+       elif self.step == 'sketch round 2' and inbound != None:
+         verifier_2 = Field[l].decode_vec(inbound)
+         if verifier_2 != 0: raise ERR_INVALID
+         return Field[l].encode_vec(self.output_share)
 
-    else: raise ERR_INVALID_STATE
+       else: raise ERR_INVALID_STATE
 
-def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
-  if len(inbound) != 2:
-    raise ERR_INVALID_INPUT
+   def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
+     if len(inbound) != 2:
+       raise ERR_INVALID_INPUT
 
-  (l, _) = decode_indexes(agg_param)
-  verifier = Field[l].decode_vec(inbound[0]) + \
-             Field[l].decode_vec(inbound[1])
+     (l, _) = decode_indexes(agg_param)
+     verifier = Field[l].decode_vec(inbound[0]) + \
+                Field[l].decode_vec(inbound[1])
 
-  return Field[l].encode_vec(verifier)
+     return Field[l].encode_vec(verifier)
 
-              Figure 21: Preparation state for poplar1.
+                 Figure 21: Preparation state for poplar1.
 
 8.2.3.  Aggregation
 
@@ -2853,10 +2856,6 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
               "Origin Telemetry", 2020, <https://firefox-source-
               docs.mozilla.org/toolkit/components/telemetry/collection/
               origin.html>.
-
-   [Vad16]    Vadhan, S., "The Complexity of Differential Privacy",
-              2016, <https://link.springer.com/
-              chapter/10.1007/978-3-319-57048-8_7>.
 
 Acknowledgments
 
