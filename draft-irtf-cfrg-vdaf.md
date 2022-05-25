@@ -805,8 +805,9 @@ However, most, if not all, constructions will require some amount of interaction
 in order to ensure validity of the output shares (while also maintaining
 privacy).
 
-> OPEN ISSUE Depending on what we do for issue#19 and issue#20, we may end up
-> needing to revise the above paragraph.
+> OPEN ISSUE Accammadating 0-round VDAFs may require syntax changes if, for
+> example, public keys are required. On the other hand, we could consider
+> defining this class of schemes as a different primitive. See issue#77.
 
 ## Aggregation {#sec-vdaf-aggregate}
 
