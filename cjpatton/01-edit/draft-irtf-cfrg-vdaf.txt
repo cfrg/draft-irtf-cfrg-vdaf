@@ -2862,8 +2862,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 Acknowledgments
 
    Thanks to David Cook, Henry Corrigan-Gibbs, Armando Faz-Hernandez,
-   Tim Geoghegan, Mariana Raykova, Jacob Rothstein, and Christopher Wood
-   for useful feedback on and contributions to the spec.
+   Simon Friedberger, Tim Geoghegan, Mariana Raykova, Jacob Rothstein,
+   and Christopher Wood for useful feedback on and contributions to the
+   spec.
 
 Test Vectors
 
