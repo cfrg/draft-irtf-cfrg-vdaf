@@ -6,14 +6,13 @@ import struct
 import os
 
 
-# If set, then a fixed source of randomness is used for `gen_rand()`.
+# If set, then test vectors will be generated. A fixed source of randomness is
+# used for `gen_rand()`.
 TEST_VECTOR = False
 
-# Document version, reved with each new draft.
-#
-# NOTE The CFRG has not yet adopted this spec. Version 'vdaf-00' will match
-# draft-irtf-cfrg-vdaf-00.
-VERSION = b'vdaf-00'
+# Document version, reved with each draft that contains breaking changes.
+DRAFT = '01'
+VERSION = bytes(bytearray('vdaf-{}'.format(DRAFT), 'ascii'))
 
 
 # Primitive types
@@ -106,3 +105,10 @@ def OS2IP(octets, skip_assert=False):
     if not skip_assert:
         assert octets == I2OSP(ret, len(octets))
     return ret
+
+def print_wrapped_line(line, tab):
+    width=70
+    chunk_len = width - tab
+    for start in range(0, len(line), chunk_len):
+        end = min(start+chunk_len, len(line))
+        print(' ' * tab + line[start:end])

@@ -61,10 +61,17 @@ class Flp:
     def decide(Flp, verifier: Vec[Field]) -> Bool:
         raise Error('decide() not implemented')
 
-    #  Map an input to an aggregatable output.
+    # Map an input to an aggregatable output.
     @classmethod
     def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
         raise Error('truncate() not implemented')
+
+    # Add any parameters to `test_vec` that are required to construct this
+    # class. Return the key that was set or `None` if `test_vec` was not
+    # modified.
+    @classmethod
+    def test_vec_set_type_param(Vdaf, test_vec):
+        return None
 
 
 # Run the FLP on an input.
