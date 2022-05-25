@@ -2627,7 +2627,7 @@ agg_share_0: >
   ae5483343eb35a52
 agg_share_1: >
   51ab7ccac14ca5b0
-agg_result: 1
+agg_result: [1]
 ~~~
 
 ## Prio3Aes128Sum
@@ -2680,7 +2680,7 @@ agg_share_0: >
   b6a735c5636efee29c0c1455e0c0f7d8
 agg_share_1: >
   4958ca3a9c91010163f3ebaa1f3f088d
-agg_result: 100
+agg_result: [100]
 
 ~~~
 
@@ -2733,5 +2733,5 @@ agg_share_0: >
 agg_share_1: >
   51ab7ccac14ca5b08e41137086916504f79348d2fa57c5a641041d8c534fbefa784e50
   45df9a209076fee02769cf6e1fffb05f8036efe734c8725b8376540e44
-agg_result: 0, 0, 1, 0
+agg_result: [0, 0, 1, 0]
 ~~~
