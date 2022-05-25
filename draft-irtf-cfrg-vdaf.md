@@ -2204,9 +2204,9 @@ sharded. This is provided to the FLP by Prio3.
 
 > NOTE The spec for Poplar1 is still a work-in-progress. A partial
 > implementation can be found at
-> https://github.com/abetterinternet/libprio-rs/blob/main/src/vdaf/poplar1.rs.
-> The verification logic is nearly complete, however as of this draft the code
-> is missing the IDPF. An implementation of the IDPF can be found at
+> https://github.com/divviup/libprio-rs/blob/main/src/vdaf/poplar1.rs. The
+> verification logic is nearly complete, however as of this draft the code is
+> missing the IDPF. An implementation of the IDPF can be found at
 > https://github.com/google/distributed_point_functions/.
 
 This section specifies Poplar1, a VDAF for the following task. Each Client holds
