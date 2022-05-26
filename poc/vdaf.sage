@@ -203,6 +203,7 @@ def run_vdaf(Vdaf,
         os.system('mkdir -p test_vec/{}'.format(DRAFT))
         with open('test_vec/{}/{}.json'.format(DRAFT, Vdaf.__name__), 'w') as f:
             json.dump(test_vec, f, indent=4, sort_keys=True)
+            f.write('\n')
 
     return agg_result
 

@@ -151,4 +151,5 @@ if __name__ == '__main__':
         os.system('mkdir -p test_vec/{}'.format(DRAFT))
         with open('test_vec/{}/{}.json'.format(DRAFT, cls.__name__), 'w') as f:
             json.dump(test_vector, f, indent=4, sort_keys=True)
+            f.write('\n')
 
