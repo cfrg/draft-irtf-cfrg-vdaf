@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 26 November 2022                                     Cloudflare
+Expires: 27 November 2022                                     Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             25 May 2022
+                                                             26 May 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 November 2022.
+   This Internet-Draft will expire on 27 November 2022.
 
 Copyright Notice
 
@@ -70,6 +70,7 @@ Copyright Notice
 Table of Contents
 
    1.  Introduction
+     1.1.  Change Log
    2.  Conventions and Definitions
    3.  Overview
    4.  Definition of DAFs
@@ -205,10 +206,10 @@ Table of Contents
    security considerations, sometimes in subtle but consequential ways.
    This document therefore has two important goals:
 
-   1.  Providing applications like [DAP] with a simple, uniform
-       interface for accessing privacy-preserving measurement schemes,
-       and documenting relevant operational and security bounds for that
-       interface:
+   1.  Providing higher-level protocols like [DAP] with a simple,
+       uniform interface for accessing privacy-preserving measurement
+       schemes, and documenting relevant operational and security bounds
+       for that interface:
 
        1.  General patterns of communications among the various actors
            involved in the system (clients, aggregation servers, and the
@@ -220,8 +221,8 @@ Table of Contents
        3.  Conditions that are necessary to ensure that malicious
            clients cannot corrupt the computation.
 
-   2.  Providing cryptographers with design criteria that allow new
-       constructions to be easily used by applications.
+   2.  Providing cryptographers with design criteria that provide a
+       clear deployment roadmap for new constructions.
 
    This document also specifies two concrete VDAF schemes, each based on
    a protocol from the literature.
@@ -295,6 +296,23 @@ Table of Contents
    Poplar1 construction; and Section 9 enumerates the security
    considerations for VDAFs.
 
+1.1.  Change Log
+
+   (*) Indicates a change that breaks compatibility with the previous
+   draft.
+
+   01:
+
+   *  Require that VDAFs specify serialization of aggregate shares.
+
+   *  Define Distributed Aggregation Functions (DAFs).
+
+   *  Prio3: Move proof verifier check from prep_next() to
+      prep_shares_to_prep(). (*)
+
+   *  Remove public parameter and replace verification parameter with a
+      "verification key" and "Aggregator ID".
+
 2.  Conventions and Definitions
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -322,7 +340,7 @@ Table of Contents
    another, this document prescribes a particular encoding of that
    quantity as a byte string.
 
-      OPEN ISSUE: It might be better to not be prescriptive about how
+      OPEN ISSUE It might be better to not be prescriptive about how
       quantities are encoded on the wire.  See issue #58.
 
    Some common functionalities:
@@ -418,11 +436,12 @@ Table of Contents
    server protocol.
 
    In this document, we describe the computations performed by the
-   actors in this system.  It is up to applications to arrange for the
-   required information to be delivered to the proper actors in the
-   proper sequence.  In general, we assume that all communications are
-   confidential and mutually authenticated, with the exception that
-   Clients submitting measurements may be anonymous.
+   actors in this system.  It is up to the higher-level protocol making
+   use of the (V)DAF to arrange for the required information to be
+   delivered to the proper actors in the proper sequence.  In general,
+   we assume that all communications are confidential and mutually
+   authenticated, with the exception that Clients submitting
+   measurements may be anonymous.
 
 4.  Definition of DAFs
 
@@ -495,7 +514,7 @@ Table of Contents
    Bytes and are treated as opaque byte strings.  This is because these
    values must be transmitted between parties over a network.
 
-      OPEN ISSUE: It might be cleaner to define a type for each value,
+      OPEN ISSUE It might be cleaner to define a type for each value,
       then have that type implement an encoding where necessary.  This
       way each method parameter has a meaningful type hint.  See
       issue#58.
@@ -543,9 +562,10 @@ Table of Contents
       Aggregator's unique identifier, and the aggregation parameter
       selected by the Collector and returns an output share.
 
-   The application MUST ensure that the Aggregator's identifier is equal
-   to the integer in range [0, SHARES) that matches the index of
-   input_share in the sequence of input shares output by the Client.
+   The protocol in which the DAF is used MUST ensure that the
+   Aggregator's identifier is equal to the integer in range [0, SHARES)
+   that matches the index of input_share in the sequence of input shares
+   output by the Client.
 
 4.3.  Aggregation
 
@@ -583,7 +603,7 @@ Table of Contents
    Many DAFs may also support a "streaming" form, where shares are
    processed one at a time.
 
-      OPEN ISSUE: It may be worthwhile to explicitly define the
+      OPEN ISSUE It may be worthwhile to explicitly define the
       "streaming" API.  See issue#47.
 
 4.4.  Unsharding
@@ -718,7 +738,7 @@ Table of Contents
       | AggParam        | Type of aggregation parameter            |
       +-----------------+------------------------------------------+
       | Prep            | State of each Aggregator during          |
-      |                 | Peparation (Section 5.2)                 |
+      |                 | Preparation (Section 5.2)                |
       +-----------------+------------------------------------------+
       | OutShare        | Type of each output share                |
       +-----------------+------------------------------------------+
@@ -729,9 +749,9 @@ Table of Contents
 
    Similarly to DAFs (see {[sec-daf}}), any output of a VDAF method that
    must be transmitted from one party to another is treated as an opaque
-   byte string.  All other quantitites are given a concrete type.
+   byte string.  All other quantities are given a concrete type.
 
-      OPEN ISSUE: It might be cleaner to define a type for each value,
+      OPEN ISSUE It might be cleaner to define a type for each value,
       then have that type implement an encoding where necessary.  See
       issue#58.
 
@@ -819,17 +839,17 @@ Table of Contents
       preparation state.
 
       The length of verify_key MUST be VERIFY_KEY_SIZE.  It is up to the
-      application to arrange for the distribution of the verification
-      key among the Aggregators prior to the start of this phase of VDAF
-      evaluation.
+      high level protocol in which the VDAF is used to arrange for the
+      distribution of the verification key among the Aggregators prior
+      to the start of this phase of VDAF evaluation.
 
-         OPEN ISSUE: What security properties do we need for this key
+         OPEN ISSUE What security properties do we need for this key
          exchange?  See issue#18.
 
-      The application MUST ensure that the Aggregator's identifier is
-      equal to the integer in range [0, SHARES) that matches the index
-      of input_share in the sequence of input shares output by the
-      Client.
+      Protocols using the VDAF MUST ensure that the Aggregator's
+      identifier is equal to the integer in range [0, SHARES) that
+      matches the index of input_share in the sequence of input shares
+      output by the Client.
 
    *  Vdaf.prep_next(prep: Prep, inbound: Optional[Bytes]) ->
       Union[Tuple[Prep, Bytes], OutShare] is the deterministic
@@ -877,7 +897,7 @@ Table of Contents
    require some amount of interaction in order to ensure validity of the
    output shares (while also maintaining privacy).
 
-      OPEN ISSUE Accammadating 0-round VDAFs may require syntax changes
+      OPEN ISSUE accommodating 0-round VDAFs may require syntax changes
       if, for example, public keys are required.  On the other hand, we
       could consider defining this class of schemes as a different
       primitive.  See issue#77.
@@ -899,7 +919,7 @@ Table of Contents
 
 5.4.  Unsharding
 
-   VDAF Unsharding is identical to DAF Unssharding (cf.  Section 4.4):
+   VDAF Unsharding is identical to DAF Unsharding (cf.  Section 4.4):
 
    *  Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares:
       Vec[Bytes]) -> AggResult is run by the Collector in order to
@@ -950,7 +970,7 @@ Table of Contents
                    inbound = Vdaf.prep_shares_to_prep(agg_param,
                                                       outbound)
 
-           # The final outputs of prepare phasre are the output shares.
+           # The final outputs of prepare phase are the output shares.
            out_shares.append(outbound)
 
        # Each Aggregator aggregates its output shares into an
@@ -973,8 +993,8 @@ Table of Contents
    measurements, and a nonce for each measurement.  This document does
    not specify how the nonces are chosen, but security requires that the
    nonces be unique.  See Section 9 for details.  As explained in
-   Section 4.5, the secure execution of a VDAF requires the applicaiton
-   to instantiate secure channels between each of the prtocol
+   Section 4.5, the secure execution of a VDAF requires the application
+   to instantiate secure channels between each of the protocol
    participants.
 
 6.  Preliminaries
@@ -1117,7 +1137,7 @@ Table of Contents
    (pseudo)random seed into a long string of pseudorandom bits.  A PRG
    suitable for this document implements the interface specified in this
    section.  Concrete constructions are described in the subsections
-   that folllow.
+   that follow.
 
    PRGs are defined by a class Prg with the following associated
    parameter:
@@ -1170,8 +1190,7 @@ Table of Contents
 
       OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be
       more performant (https://eprint.iacr.org/2019/074.pdf).  See
-      https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/32 for
-      details.
+      issue#32.
 
    Our first construction, PrgAes128, converts a blockcipher, namely
    AES-128, into a PRG.  Seed expansion involves two steps.  In the
@@ -1358,7 +1377,7 @@ class PrgAes128:
    circuit; when the circuit contains constants, it is sometimes
    necessary to normalize those constants to ensure that the circuit's
    output, when run on a valid input, is the same regardless of the
-   nuber of shares.
+   number of shares.
 
    An FLP is executed by the prover and verifier as follows:
 
@@ -2391,10 +2410,10 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       and replacing the verification parameter.
 
       NOTE The spec for Poplar1 is still a work-in-progress.  A partial
-      implementation can be found at https://github.com/abetterinternet/
-      libprio-rs/blob/main/src/vdaf/poplar1.rs.  The verification logic
-      is nearly complete, however as of this draft the code is missing
-      the IDPF.  An implementation of the IDPF can be found at
+      implementation can be found at https://github.com/divviup/libprio-
+      rs/blob/main/src/vdaf/poplar1.rs.  The verification logic is
+      nearly complete, however as of this draft the code is missing the
+      IDPF.  An implementation of the IDPF can be found at
       https://github.com/google/distributed_point_functions/.
 
    This section specifies Poplar1, a VDAF for the following task.  Each
@@ -2860,8 +2879,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 Acknowledgments
 
    Thanks to David Cook, Henry Corrigan-Gibbs, Armando Faz-Hernandez,
-   Tim Geoghegan, Mariana Raykova, Jacob Rothstein, and Christopher Wood
-   for useful feedback on and contributions to the spec.
+   Simon Friedberger, Tim Geoghegan, Mariana Raykova, Jacob Rothstein,
+   and Christopher Wood for useful feedback on and contributions to the
+   spec.
 
 Test Vectors
 
@@ -2872,7 +2892,7 @@ Test Vectors
    Test vectors cover the generation of input shares and the conversion
    of input shares into output shares.  Vectors specify the verification
    key, measurements, aggregation parameter, and any parameters needed
-   to construct the VdAF.  (For example, for Prio3AesSum, the user
+   to construct the VDAF.  (For example, for Prio3AesSum, the user
    specifies the number of bits for representing each summand.)
 
    Byte strings are encoded in hexadecimal To make the tests
@@ -2904,7 +2924,7 @@ agg_share_0: >
   ae5483343eb35a52
 agg_share_1: >
   51ab7ccac14ca5b0
-agg_result: 1
+agg_result: [1]
 
 Prio3Aes128Sum
 
@@ -2954,7 +2974,7 @@ agg_share_0: >
   b6a735c5636efee29c0c1455e0c0f7d8
 agg_share_1: >
   4958ca3a9c91010163f3ebaa1f3f088d
-agg_result: 100
+agg_result: [100]
 
 Prio3Aes128Histogram
 
@@ -3003,7 +3023,7 @@ agg_share_0: >
 agg_share_1: >
   51ab7ccac14ca5b08e41137086916504f79348d2fa57c5a641041d8c534fbefa784e50
   45df9a209076fee02769cf6e1fffb05f8036efe734c8725b8376540e44
-agg_result: 0, 0, 1, 0
+agg_result: [0, 0, 1, 0]
 
 Authors' Addresses
 
