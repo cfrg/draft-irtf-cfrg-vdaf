@@ -145,7 +145,7 @@ if __name__ == '__main__':
         print('  info: "{}"'.format(test_vector['info']))
         print('  length: {}'.format(test_vector['length']))
         print('  derived_seed: "{}"'.format(test_vector['derived_seed']))
-        print('  expanded_vec_field128: >')
+        print('  expanded_vec_field128: >-')
         print_wrapped_line(test_vector['expanded_vec_field128'], tab=4)
 
         os.system('mkdir -p test_vec/{}'.format(DRAFT))

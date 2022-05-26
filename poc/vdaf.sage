@@ -222,16 +222,16 @@ def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
 
         # Shard
         for (i, input_share) in enumerate(prep_test_vec['input_shares']):
-            print('  input_share_{}: >'.format(i))
+            print('  input_share_{}: >-'.format(i))
             print_wrapped_line(input_share, tab=4)
 
         # Prepare
         for (i, (prep_shares, prep_msg)) in enumerate(zip(prep_test_vec['prep_shares'], prep_test_vec['prep_messages'])):
             print('  round_{}:'.format(i))
             for (j, prep_share) in enumerate(prep_shares):
-                print('    prep_share_{}: >'.format(j))
+                print('    prep_share_{}: >-'.format(j))
                 print_wrapped_line(prep_share, tab=6)
-            print('    prep_message: >')
+            print('    prep_message: >-')
             print_wrapped_line(prep_msg, tab=6)
 
         for (j, out_share) in enumerate(prep_test_vec['out_shares']):
@@ -241,7 +241,7 @@ def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
 
     # Aggregate
     for (j, agg_share) in enumerate(test_vec['agg_shares']):
-        print('agg_share_{}: >'.format(j))
+        print('agg_share_{}: >-'.format(j))
         print_wrapped_line(agg_share, tab=2)
 
     # Unshard
