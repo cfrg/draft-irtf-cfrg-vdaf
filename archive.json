@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-05-24T00:58:14.308149+00:00",
+  "timestamp": "2022-05-26T00:57:38.235614+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -985,7 +985,7 @@
     {
       "number": 58,
       "id": "I_kwDOGKuqOc5JVUC1",
-      "title": "Serialization of aggregate shares needs to be specified",
+      "title": "Should the draft be prescriptive about encoding? (was \"Serialization of aggregate shares needs to be specified\")",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/58",
       "state": "OPEN",
       "author": "cjpatton",
@@ -994,7 +994,7 @@
       "labels": [],
       "body": "`Vdaf` implementations need to define a type`Vdaf.AggShare` for the aggregate shares. Because the aggregate share are transmitted over the network, their encoding needs to be specified. There are two solutions to consider:\r\n(1) Replace `Vdaf.AggShare` with `Bytes`\r\n(2) Add methods on `Vdaf.AggShare` for encoding/decoding\r\n\r\nThe other quantities written to the network are input shares, prepare message shares, and the combined prepare message for each round. If we do (2), then for consistency we should also consider defining separate encoding/decoding methods for these. Currently the methods are implicit, since the type of each of these values is `Bytes`.",
       "createdAt": "2022-05-09T22:39:52Z",
-      "updatedAt": "2022-05-23T16:22:50Z",
+      "updatedAt": "2022-05-25T17:51:21Z",
       "closedAt": null,
       "comments": [
         {
@@ -1070,17 +1070,15 @@
       "id": "I_kwDOGKuqOc5JV33O",
       "title": "syntax: Have `prep_init()` output the first-round prepare-message share",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/60",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [
-        "draft-01"
-      ],
+      "labels": [],
       "body": "Assuming we:\r\n(1) merge https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/53\r\n(2) resolve https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/19 by removing the public parameter\r\n\r\nthere will be no possibility of a 0-round VDAF. In this case we should consider modifying the VDAF syntax so that `prep_init()` outputs the first prepare-message share. This would resolve some ugliness in the state machine of implementations. For Prio3 for instance, we need to distinguish between a \"Ready\" state and a \"Waiting\" state, where the only difference is whether the prepare-message share has been sent. For example, see libprio-rs: https://github.com/divviup/libprio-rs/blob/main/src/vdaf/prio3.rs#L942-L946\r\n\r\n@tgeoghegan, @divergentdave, I'd love to have your thoughts here. Note that this change would go in the next draft.\r\n",
       "createdAt": "2022-05-10T01:29:40Z",
-      "updatedAt": "2022-05-18T23:32:14Z",
-      "closedAt": null,
+      "updatedAt": "2022-05-25T17:29:06Z",
+      "closedAt": "2022-05-25T17:29:06Z",
       "comments": [
         {
           "author": "tgeoghegan",
@@ -1109,6 +1107,13 @@
           "body": "That's a good way of looking at it, yeah. And I agree they're isomorphic. I think the new syntax would be more natural for the [DAP spec](https://ietf-wg-ppm.github.io/draft-ietf-ppm-dap/draft-ietf-ppm-dap.html#name-input-share-preparation). In particular it would allow us to rewrite\r\n> ```\r\n> prep_state = VDAF.prep_init(vdaf_verify_param, agg_param, nonce, input_share)\r\n> out = VDAF.prep_next(prep_state, None)\r\n> ```\r\n>\r\n> vdaf_verify_param is the public VDAF parameter, and agg_param is the opaque aggregation parameter. If either step fails, the aggregator marks the report as invalid with error vdaf-prep-error.\r\n>\r\n> Otherwise, the value out is interpreted as follows. If this is the last round of the VDAF, then out is the aggregator's output share. Otherwise, out is the pair (prep_state, prep_msg).\r\n\r\nas\r\n\r\n> ```\r\n> (prep_state, prep_msg) = VDAF.prep_init(vdaf_verify_key, agg_id, agg_param, nonce, input_share)\r\n> ```\r\n>\r\n> vdaf_verify_key is the secret VDAF verification key shared by both aggregators, agg_id is equal to `0` for the leader and `1` for the helper, and agg_param is the opaque aggregation parameter. If this step fails, the aggregator marks the report as invalid with error vdaf-prep-error.",
           "createdAt": "2022-05-18T23:31:58Z",
           "updatedAt": "2022-05-18T23:32:14Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm not sure why GH decided to close this based on a PR from libprio getting merged. In any case, I've reopened this because we decided not to merge #73 for draft-01. @schoppmp pointed out that this may end up being a regression if we end up having a 0-round VDAF one day. In particular, in order to account for schemes with public keys we will need to either modify the VDAF syntax (basically revert #62) or define a new object (\"PK-VDAF\" for example). See discussion on #73 for details.",
+          "createdAt": "2022-05-25T16:28:01Z",
+          "updatedAt": "2022-05-25T16:28:01Z"
         }
       ]
     },
@@ -1247,9 +1252,40 @@
       ],
       "body": "* Update test vectors\r\n* Add Change Log section enumerating non-editorial changes from draft-00\r\n* Update VERSION",
       "createdAt": "2022-05-19T00:46:46Z",
-      "updatedAt": "2022-05-19T20:46:52Z",
+      "updatedAt": "2022-05-25T02:19:06Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 77,
+      "id": "I_kwDOGKuqOc5KaRon",
+      "title": "Scope Questions: Public-key, Shuffling-based, and Zero-round VDAFs?",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/77",
+      "state": "OPEN",
+      "author": "schoppmp",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "There have been a couple of issues around features in hyptothetical VDAFs that are needed by neither Prio3 nor Poplar1.\r\nTwo examples are public-key encryption based VDAFs (which are currently hard to support after the [removal of public parameters ](https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/62)), or [zero-round verification](https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/73). A third would be support for multi-round aggregation protocols that might include shuffling of individual records, to enable something like [IPA](https://docs.google.com/document/u/1/d/1KpdSKD8-Rn0bWPTu4UtK54ks0yv2j22pA5SrAD9av4s/edit).\r\n\r\nAll of these are not supported with the current VDAF syntax, and would require explicit accommodations in higher-level protocols such as [DAP](https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/). The goal of this issue is to discuss and align on the question how much flexibility we want to allow in the VDAF syntax.\r\n\r\nSome preliminary thoughts from a discussion with @cjpatton:\r\n- In general, providing too many options to choose from in protocols leads to security issues due to increased complexity, attack surface, possibility of downgrades, and so forth. If we want to provide flexibility here, we have to ensure that we don't introduce these issues.\r\n- We can't think of all possible syntax needs for hypothetical future constructions that semantically still fit a \"verifiable distributed aggregation function\". How can we extend the VDAF syntax in such cases? Do we instead want to require a new kind of object (e.g., a PK-VDAF that supports public keys), at the risk of not being compatible with higher-level protocols?",
+      "createdAt": "2022-05-25T16:58:41Z",
+      "updatedAt": "2022-05-25T17:47:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "ekr",
+          "authorAssociation": "NONE",
+          "body": ">    In general, providing too many options to choose from in protocols leads to security issues due to increased complexity, attack surface, possibility of downgrades, and so forth. If we want to provide flexibility here, we have to ensure that we don't introduce these issues.\r\n\r\nI don't think this is a very strong argument in this case. This is not a situation of negotiation but rather where there is a single explicit and verified configuration, but each VDAF (or whatever) runs effectively in parallel.\r\n\r\n> We can't think of all possible syntax needs for hypothetical future constructions that semantically still fit a \"verifiable distributed aggregation function\". How can we extend the VDAF syntax in such cases? Do we instead want to require a new kind of object (e.g., a PK-VDAF that supports public keys), at the risk of not being compatible with higher-level protocols?\r\n\r\nThere are two ways to extend DAP:\r\n\r\n1. Add new VDAFs\r\n2. Extend it to support new non-VDAF constructions\r\n\r\nIf there are new primitives that don't make sense as VDAFs but do make sense in DAP (for instance, IPA, or an ElGamal-based system like that in Adnostic), then we should do that by extending DAP.",
+          "createdAt": "2022-05-25T17:15:18Z",
+          "updatedAt": "2022-05-25T17:15:18Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "FTR, Adnostic is https://crypto.stanford.edu/adnostic/. There is also AdScale, which is follow-on work: https://isi.jhu.edu/~mgreen/advertising.pdf\r\n\r\nI (currently) agree with EKR, especially in light of our recent experience working VDAFs into DAP. But @schoppmp made one more point, which convinced me that we may not know yet what the best path forward is here.\r\n\r\nIn protocol design it's typical to treat symmetric-key primitives differently from their public-key analogues. For example, a protocol built around symmetric encryption is going to be different from one built around public-key encryption.\r\n\r\nThe current VDAF syntax is specialized for a specific class of schemes. In particular, it does not admit public keys. Following the design principle above, we would want to treat schemes that do (e.g., Adnostic or AdScale) as a different kind of primitive, e.g., a PK-VDAF. However, @schoppmp pointed out that, in the MPC literature, the boundaries between different classes of constructions are more blurry than \"public-key\" versus \"symmetric\".\r\n\r\nBefore making a decision here, it will be helpful to first try to flesh out those classes of constructions that intersect with the PPM working group (and maybe PATCG).",
+          "createdAt": "2022-05-25T17:43:49Z",
+          "updatedAt": "2022-05-25T17:47:17Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -5140,21 +5176,21 @@
       "id": "PR_kwDOGKuqOc44E0L0",
       "title": "Have `Vdaf.prep_init()` output first round prep share",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/73",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #60.\r\n\r\nNow that we have defined DAFs explicitly and removed the public\r\nparameter, there is no longer a need to support 0-round VDAFs. This\r\nchange codifies the requirement that ROUNDS >= 1 in the syntax.",
       "createdAt": "2022-05-19T01:11:52Z",
-      "updatedAt": "2022-05-23T16:36:27Z",
+      "updatedAt": "2022-05-25T17:24:09Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "50e872c2f0d4c1f5cf4d60146bae57d0f8eaa1a6",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/refactor-prep-init",
       "headRefOid": "f3a6f421a37f118899569dc2af09fcc0da7021cf",
-      "closedAt": null,
+      "closedAt": "2022-05-25T17:24:08Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -5200,6 +5236,20 @@
           "body": "> > I'm not sure we should exclude VDAFs based on public-key cryptography. I was under the assumption that the issue with the public parameter was that it would need to be frequently rotated. Even without it, I can imagine a spec for a VDAF that has some out-of-band mechanism of retrieving public keys.\r\n> \r\n> I'm not suggesting we exclude this, I'm merely suggesting it can be treated as a different type of primitive, perhaps defined in this draft. Call it a PK-VDAF or something :)\r\n\r\nWhat I mean is that VDAF should include any DAF that has a verification procedure, even if it's public-key or zero-round. Otherwise I'd worry that standards like DAP could over-optimize towards particular VDAFs and for example be incompatible with your proposed \"PK-VDAF\" or non-interactive verification. So in overall I'd prefer generality when it comes to the VDAF interface, to ensure compatibility of various VDAFs that might be developed in the future with the DAP infrastructure that is being developed right now.\r\n\r\n> However it is never the case that you need to serialize the first state, since you immediately consume it to get the next output bound prep share.\r\n\r\nI can see that this is a bit inefficient, although I don't think this will be a bottle neck in terms of performance. I guess one possibility would be to allow for an OPTIONAL combined function, but that seems like premature optimization to me.",
           "createdAt": "2022-05-23T16:36:26Z",
           "updatedAt": "2022-05-23T16:36:26Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > I'm not suggesting we exclude this, I'm merely suggesting it can be treated as a different type of primitive, perhaps defined in this draft. Call it a PK-VDAF or something :)\r\n> \r\n> What I mean is that VDAF should include any DAF that has a verification procedure, even if it's public-key or zero-round. Otherwise I'd worry that standards like DAP could over-optimize towards particular VDAFs and for example be incompatible with your proposed \"PK-VDAF\" or non-interactive verification. So in overall I'd prefer generality when it comes to the VDAF interface, to ensure compatibility of various VDAFs that might be developed in the future with the DAP infrastructure that is being developed right now.\r\n\r\nAgreed, we absolutely want to plan for other applications beyond DAP (and even potentially PPM). From this perspective, I wonder if you feel like #62 was a regression after all? The concern would be that the syntax for input-share generation no longer includes an explicit public key.\r\n\r\n#62 solved a specific problem, which is to allow DAP to rotate the verification parameters without having to push a new public parameter to the clients. The need to do so is inherent to a potential public-key VDAF, but not to the VDAFs we have today. The natural question to ask ourselves here is: At what point do we specialize syntax for specific classes of constructions?\r\n\r\nSo far we have addressed this question on a case-by-case basis, which I think is right. My rule of thumb is basically: \"specialize as soon as the generalization creates a rough edge\". In the case of #62, the rough edge was key distribution having different requirements for public-key and non-public-key schemes. Were we to add support for the latter into DAP, I think it would make sense to consider this an alternative \"mode of operation\" for the protocol.\r\n\r\n> > However it is never the case that you need to serialize the first state, since you immediately consume it to get the next output bound prep share.\r\n> \r\n> I can see that this is a bit inefficient, although I don't think this will be a bottle neck in terms of performance. I guess one possibility would be to allow for an OPTIONAL combined function, but that seems like premature optimization to me.\r\n\r\nI agree that would be premature, and to be honest this isn't a problem we need to solve in the VDAF spec. It would be sufficient to make a note about this somewhere, e.g.:\r\n\r\n```\r\nImplementation note: For VDAFs with one round or more, it is necessary in some applications to serialize the Aggregator's Prepare state so that it can be stored while the Aggregator awaits a prepare message from the network. However it is not necessary to serialize the output of `prep_init()`, but only the output of of `prep_next()`.\r\n```",
+          "createdAt": "2022-05-24T18:24:16Z",
+          "updatedAt": "2022-05-24T18:24:16Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closed in favor of #78.",
+          "createdAt": "2022-05-25T17:24:08Z",
+          "updatedAt": "2022-05-25T17:24:08Z"
         }
       ],
       "reviews": [
@@ -5325,7 +5375,7 @@
       "id": "PR_kwDOGKuqOc44JyiW",
       "title": "Specify encoding of aggregate shares",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/75",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -5334,17 +5384,19 @@
       ],
       "body": "Removes the associated type `AggShare` from `Vdaf` and `Daf` and\r\nmodifies the syntax to treat the aggregate share as an opauqe byte\r\nstring. This is consistent with input shares, which, like the aggregate\r\nshare, are ncessarily transmitted over the network.\r\n\r\nThis partially addresses #58. In the future we may want to define a type\r\nfor every quantity and have that type implement a type whereever\r\napplicable. Or we might decide not to be prescriptive about encoding at\r\nall.\r\n\r\ncc/ @tgeoghegan",
       "createdAt": "2022-05-19T22:53:29Z",
-      "updatedAt": "2022-05-23T16:23:01Z",
+      "updatedAt": "2022-05-24T15:06:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "222517a6dc72870924236dd0e6c60c4092c4aa94",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/agg-share-encoding",
-      "headRefOid": "a7752a459eeee9550989211a13a9758fe18823b8",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "b230f1b9b615aaacdf8a6506b3c0a762441d3dd7",
+      "closedAt": "2022-05-24T15:06:50Z",
+      "mergedAt": "2022-05-24T15:06:50Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b3f8a8c3f7f457ebf33ca74ea1f0a8346f6eace0"
+      },
       "comments": [],
       "reviews": [
         {
@@ -5368,6 +5420,102 @@
           ]
         }
       ]
+    },
+    {
+      "number": 76,
+      "id": "PR_kwDOGKuqOc44aATm",
+      "title": "Update VERSION and test vectors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/76",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Partially addresses #72.",
+      "createdAt": "2022-05-25T02:18:20Z",
+      "updatedAt": "2022-05-25T16:17:14Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "90c7438a25ade85e0ace93d9dcc2044a4be9b753",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/update-test-vec",
+      "headRefOid": "f1751a945343db53fa24bbe00eac3159dcaedeb5",
+      "closedAt": "2022-05-25T16:17:14Z",
+      "mergedAt": "2022-05-25T16:17:13Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "799f16f1e920a4b16b2dcc7557eddef74d1fa6fa"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 78,
+      "id": "PR_kwDOGKuqOc44dkC4",
+      "title": "Close #60 by doing nothing",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/78",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #60.\r\n\r\nThis issue touches on a broader question, which is how to account for a\r\nvariety of different cryptographic techniques while minimizing burden\r\nfor applications. This question is tracked by #77.",
+      "createdAt": "2022-05-25T17:22:47Z",
+      "updatedAt": "2022-05-25T17:29:06Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "799f16f1e920a4b16b2dcc7557eddef74d1fa6fa",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/issue60",
+      "headRefOid": "6bbc8f1a39bce7ddfcbc6856590051356038ed54",
+      "closedAt": "2022-05-25T17:29:06Z",
+      "mergedAt": "2022-05-25T17:29:06Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "481f48e7cec9c7509a6eedcf000ff4a2e84358c7"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc46uSZV",
+          "commit": {
+            "abbreviatedOid": "6bbc8f1"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-25T17:27:52Z",
+          "updatedAt": "2022-05-25T17:27:52Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 79,
+      "id": "PR_kwDOGKuqOc44epwe",
+      "title": "Change log and various editorial changes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/79",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #72.",
+      "createdAt": "2022-05-25T21:23:57Z",
+      "updatedAt": "2022-05-25T21:42:18Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "7a8ca7b5af8af043806c753207cd518a14c84a43",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/01-edit",
+      "headRefOid": "760c2d559a14b78727e0ab58ebfff35abcb12507",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
