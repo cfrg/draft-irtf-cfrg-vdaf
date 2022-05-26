@@ -118,6 +118,7 @@ class Prio3(Vdaf):
     @classmethod
     def prep_init(Prio3,
                   verify_key, agg_id, _agg_param, nonce, input_share):
+        # Domain separation tag for PRG info string
         dst = VERSION + b' prio3'
 
         (input_share, proof_share, k_blind, k_hint) = \
