@@ -1139,7 +1139,7 @@ aggregation function that has the following structure:
   encoded input. (An "arithmetic circuit" is a function comprised of arithmetic
   operations in the field.) The circuit's output is a single field element: if
   zero, then the input is said to be "valid"; otherwise, if the output is
-  non-zero, then the input is said to "invalid".
+  non-zero, then the input is said to be "invalid".
 * The aggregate result is obtained by summing up the encoded input vectors and
   computing some function of the sum.
 
@@ -1211,7 +1211,7 @@ validity (encoding is described below in {{flp-encode}}):
 * `Flp.prove(input: Vec[Field], prove_rand: Vec[Field], joint_rand: Vec[Field])
   -> Vec[Field]` is the deterministic proof-generation algorithm run by the
   prover. Its inputs are the encoded input, the "prover randomness"
-  `prove_rand`, and the "joint randomness" `joint_rand`. The proof randomness is
+  `prove_rand`, and the "joint randomness" `joint_rand`. The prover randomness is
   used only by the prover, but the joint randomness is shared by both the prover
   and verifier.
 
@@ -1221,8 +1221,8 @@ validity (encoding is described below in {{flp-encode}}):
   input and proof. The result of the query (i.e., the output of this function)
   is called the "verifier message". In addition to the input and proof, this
   algorithm takes as input the query randomness `query_rand` and the joint
-  randomness `joint_rand`. The former is used only by the verifier. The
-  semantics of `num_shares` is discussed below.
+  randomness `joint_rand`. The former is used only by the verifier. `num_shares`
+  specifies how many input and proof shares were generated.
 
 * `Flp.decide(verifier: Vec[Field]) -> Bool` is the deterministic decision
   algorithm run by the verifier. It takes as input the verifier message and
@@ -1288,7 +1288,7 @@ For some FLPs, the encoded input also includes redundant field elements that are
 useful for checking the proof, but which are not needed after the proof has been
 checked. An example is the "integer sum" data type from {{CGB17}} in which an
 integer in range `[0, 2^k)` is encoded as a vector of `k` field elements (this
-type is also defined in {{prio3-instantiations}}). After consuming this vector,
+type is also defined in {{prio3-sum}}). After consuming this vector,
 all that is needed is the integer it represents. Thus the FLP defines an
 algorithm for truncating the input to the length of the aggregated output:
 
@@ -1336,10 +1336,10 @@ The input-distribution algorithm involves the following steps:
 1. Run the FLP proof-generation algorithm using the derived joint randomness
 1. Shard the proof into a sequence of proof shares
 
-The algorithm is specified below. Notice that only one set input and proof shares
-(called the "leader" shares below) are vectors of field elements. The other
-shares (called the "helper" shares) are represented instead by PRG seeds, which
-are expanded into vectors of field elements.
+The algorithm is specified below. Notice that only one set of input and proof
+shares (called the "leader" shares below) are vectors of field elements. The
+other shares (called the "helper" shares) are represented instead by PRG seeds,
+which are expanded into vectors of field elements.
 
 The code refers to a pair of auxiliary functions for encoding the shares. These
 are called `encode_leader_share` and `encode_helper_share` respectively and they
@@ -2097,7 +2097,7 @@ def truncate(Sum, inp):
     return [decoded]
 ~~~
 
-The validity circuit checks that the input comprised of ones and zeros. Its
+The validity circuit checks that the input consists of ones and zeros. Its
 gadget, denoted `Range2`, is the degree-2, arity-1 gadget defined as
 
 ~~~
