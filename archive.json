@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-05-29T00:56:07.603260+00:00",
+  "timestamp": "2022-05-31T00:56:26.174619+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5560,6 +5560,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 81,
+      "id": "PR_kwDOGKuqOc44qP3F",
+      "title": "Small editorial changes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/81",
+      "state": "OPEN",
+      "author": "simon-friedberger",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Really just nits",
+      "createdAt": "2022-05-30T07:07:00Z",
+      "updatedAt": "2022-05-30T14:43:02Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "7c58b042d84d46e34b8d41f8deb663670a17a665",
+      "headRepository": "simon-friedberger/draft-irtf-cfrg-vdaf",
+      "headRefName": "main",
+      "headRefOid": "313a0ce1a2f3ab41cde9dfb203cd92e6f63e2fee",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
