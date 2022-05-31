@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 27 November 2022                                     Cloudflare
+Expires: 2 December 2022                                      Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             26 May 2022
+                                                             31 May 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 27 November 2022.
+   This Internet-Draft will expire on 2 December 2022.
 
 Copyright Notice
 
@@ -1238,7 +1238,7 @@ class PrgAes128:
       comprised of arithmetic operations in the field.)  The circuit's
       output is a single field element: if zero, then the input is said
       to be "valid"; otherwise, if the output is non-zero, then the
-      input is said to "invalid".
+      input is said to be "invalid".
 
    *  The aggregate result is obtained by summing up the encoded input
       vectors and computing some function of the sum.
@@ -1340,7 +1340,7 @@ class PrgAes128:
       Vec[Field]) -> Vec[Field] is the deterministic proof-generation
       algorithm run by the prover.  Its inputs are the encoded input,
       the "prover randomness" prove_rand, and the "joint randomness"
-      joint_rand.  The proof randomness is used only by the prover, but
+      joint_rand.  The prover randomness is used only by the prover, but
       the joint randomness is shared by both the prover and verifier.
 
    *  Flp.query(input: Vec[Field], proof: Vec[Field], query_rand:
@@ -1351,7 +1351,8 @@ class PrgAes128:
       message".  In addition to the input and proof, this algorithm
       takes as input the query randomness query_rand and the joint
       randomness joint_rand.  The former is used only by the verifier.
-      The semantics of num_shares is discussed below.
+      num_shares specifies how many input and proof shares were
+      generated.
 
    *  Flp.decide(verifier: Vec[Field]) -> Bool is the deterministic
       decision algorithm run by the verifier.  It takes as input the
@@ -1423,8 +1424,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    needed after the proof has been checked.  An example is the "integer
    sum" data type from [CGB17] in which an integer in range [0, 2^k) is
    encoded as a vector of k field elements (this type is also defined in
-   Section 7.4).  After consuming this vector, all that is needed is the
-   integer it represents.  Thus the FLP defines an algorithm for
+   Section 7.4.2).  After consuming this vector, all that is needed is
+   the integer it represents.  Thus the FLP defines an algorithm for
    truncating the input to the length of the aggregated output:
 
    *  Flp.truncate(input: Vec[Field]) -> Vec[Field] maps an encoded
@@ -1489,9 +1490,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    5.  Shard the proof into a sequence of proof shares
 
-   The algorithm is specified below.  Notice that only one set input and
-   proof shares (called the "leader" shares below) are vectors of field
-   elements.  The other shares (called the "helper" shares) are
+   The algorithm is specified below.  Notice that only one set of input
+   and proof shares (called the "leader" shares below) are vectors of
+   field elements.  The other shares (called the "helper" shares) are
    represented instead by PRG seeds, which are expanded into vectors of
    field elements.
 
@@ -2293,7 +2294,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            decoded += w * b
        return [decoded]
 
-   The validity circuit checks that the input comprised of ones and
+   The validity circuit checks that the input consists of ones and
    zeros.  Its gadget, denoted Range2, is the degree-2, arity-1 gadget
    defined as
 
