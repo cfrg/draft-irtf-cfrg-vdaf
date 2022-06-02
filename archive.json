@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-05-31T00:56:26.174619+00:00",
+  "timestamp": "2022-06-02T01:00:08.322051+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1284,6 +1284,74 @@
           "body": "FTR, Adnostic is https://crypto.stanford.edu/adnostic/. There is also AdScale, which is follow-on work: https://isi.jhu.edu/~mgreen/advertising.pdf\r\n\r\nI (currently) agree with EKR, especially in light of our recent experience working VDAFs into DAP. But @schoppmp made one more point, which convinced me that we may not know yet what the best path forward is here.\r\n\r\nIn protocol design it's typical to treat symmetric-key primitives differently from their public-key analogues. For example, a protocol built around symmetric encryption is going to be different from one built around public-key encryption.\r\n\r\nThe current VDAF syntax is specialized for a specific class of schemes. In particular, it does not admit public keys. Following the design principle above, we would want to treat schemes that do (e.g., Adnostic or AdScale) as a different kind of primitive, e.g., a PK-VDAF. However, @schoppmp pointed out that, in the MPC literature, the boundaries between different classes of constructions are more blurry than \"public-key\" versus \"symmetric\".\r\n\r\nBefore making a decision here, it will be helpful to first try to flesh out those classes of constructions that intersect with the PPM working group (and maybe PATCG).",
           "createdAt": "2022-05-25T17:43:49Z",
           "updatedAt": "2022-05-25T17:47:17Z"
+        }
+      ]
+    },
+    {
+      "number": 82,
+      "id": "I_kwDOGKuqOc5KwZJN",
+      "title": "Specify agg_param details",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/82",
+      "state": "OPEN",
+      "author": "simon-friedberger",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "draft-02"
+      ],
+      "body": "It should be clear what the type of agg_param is and how it should be handled.\r\nFor specific VDAFs it should probably be clarified when the agg_param needs to be available and how it is distributed.\r\n\r\nSee also ietf-wg-ppm/draft-ietf-ppm-dap/issues/267",
+      "createdAt": "2022-05-31T17:54:50Z",
+      "updatedAt": "2022-06-01T14:41:52Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Can you be a bit more specific? My take on https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/267 is that DAP treats the agg param as an opaque byte string, but the VDAF does not specify an encoding of this byte string.\r\n\r\nNote that this also relates to https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/58.",
+          "createdAt": "2022-05-31T18:12:39Z",
+          "updatedAt": "2022-05-31T18:12:39Z"
+        },
+        {
+          "author": "simon-friedberger",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The VDAFs only specify the contents of agg_params globally, e.g. in 7.2 in Table 6.\r\n\r\nDAP could be optimized by precalculating the validation step if it does not need agg_param for this step.\r\n\r\nSo - IIUC - not everything that is called agg_param in DAP will contain the thing that is called agg_param here. The VDAFs should be explicit about which agg_params are needed and for which steps.",
+          "createdAt": "2022-05-31T19:58:53Z",
+          "updatedAt": "2022-05-31T19:58:53Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Perhaps this is the misunderstanding: In DAP wherever there is a struct with a field `agg_param`, the type of that field is `opaque <0..2^16-1>`.  This is a length-prefixed byte string. There will always be here, even if it's just an empty string. For Prio3 for example, this field would simply be empty (That is, the encoding of `None` as a byte string would simply the empty string. To be clear, this is currently not specified at all.)\r\n\r\nFor some deployments the agg param may be \"predictable\". For Prio3 in particular, the only valid agg param is `None` (i.e., the empty string).",
+          "createdAt": "2022-05-31T21:30:47Z",
+          "updatedAt": "2022-05-31T21:30:47Z"
+        },
+        {
+          "author": "simon-friedberger",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Let me see if I got this right now....\r\n\r\n`run_vdaf` in Figure 7 uses `agg_param` in\r\n* `prep_init`\r\n* `prep_shares_to_prep`\r\n* `out_shares_to_agg_share`\r\n* `agg_shares_to_result`\r\nbut there is no statement about how `agg_param` would get distributed in a system like DAP. If some of the functions only need parts of `agg_param`, or some of them can be empty, the specific VDAF (so Chapter 7 and Chapter 8) should specify that.\r\n\r\n1. Prio3\r\nIn Prio3 `agg_param` is empty so it's simple because it can be defined task wide in DAP and sending empty messages is the cheapest anyway.\r\n* `task.agg_param = None`\r\n* `CollectReq.agg_param = None`\r\n* `AggregateInitializeReq.agg_param = None`\r\n* `AggregateShareReq.agg_param = None`\r\nWhich conveniently makes them all the same and the same as in the VDAF.\r\n\r\n2. Poplar1\r\nIn Poplar1 `agg_param` contains the candidate prefixes and, iiuc, needs to be provided by the DAP collector in `CollectReq.agg_param`.\r\nSo here we would end up with something like\r\n* `task.agg_param = None`\r\n* `CollectReq.agg_param = candidate_prefixes`\r\n* `AggregateInitializeReq.agg_param = CollectReq.agg_param`\r\n* `AggregateShareReq.agg_param = None`\r\nespecially, they are not all the same.\r\n\r\nImho, since the field in DAP is opaque this is okay, but we should clarify in DAP that the `agg_params` are not all the same.\r\nAnd for the VDAF examples, we should specify how to get the different AggParams for the different steps.",
+          "createdAt": "2022-06-01T08:09:04Z",
+          "updatedAt": "2022-06-01T08:09:04Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "* What is `task.agg_param`?\r\n* The value of `AggregateShareReq.agg_param` is supposed to match `CollectReq.agg_param`. Does the DAP spec say otherwise?",
+          "createdAt": "2022-06-01T14:23:32Z",
+          "updatedAt": "2022-06-01T14:23:32Z"
+        },
+        {
+          "author": "simon-friedberger",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "`task.agg_param` is just a name I gave it. The spec lists it here: \r\n\r\n> The basic unit of DAP is the \"task\" which represents a single measurement\r\n(though potentially taken over multiple time windows). The definition of a task\r\nincludes the following parameters:\r\n> * The type of each measurement.\r\n> * The aggregation function to compute (e.g., sum, mean, etc.) and an optional\r\n  aggregation parameter.\r\n\r\n`AggregateShareReq.agg_param` might be the same as `CollectReq.agg_param`. The spec says nothing on the topic.\r\n\r\nWas your intention that all the `agg_param`s in DAP should also be the same?",
+          "createdAt": "2022-06-01T14:29:32Z",
+          "updatedAt": "2022-06-01T14:29:32Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Ohh ok, this text is at least misleading, if not flat out wrong:\r\n```\r\nThe aggregation function to compute (e.g., sum, mean, etc.) and an optional\r\naggregation parameter.\r\n```\r\n\r\nIt's not as if there is a single agg param that's used for every collect request for a given task. The Collector is supposed to be able to choose each agg param based on previous agg results.\r\n\r\nWhat we are trying to get at here is that some agg functions have an an additional input that we call the \"agg param\".\r\n\r\n> AggregateShareReq.agg_param might be the same as CollectReq.agg_param. The spec says nothing on the topic.\r\n\r\nThen this needs to be fixed. Please send a PR! \r\n\r\n> Was your intention that all the agg_params in DAP should also be the same?\r\n\r\nYes.",
+          "createdAt": "2022-06-01T14:36:25Z",
+          "updatedAt": "2022-06-01T14:36:38Z"
         }
       ]
     }
@@ -5566,26 +5634,55 @@
       "id": "PR_kwDOGKuqOc44qP3F",
       "title": "Small editorial changes",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/81",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "simon-friedberger",
-      "authorAssociation": "NONE",
+      "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "Really just nits",
       "createdAt": "2022-05-30T07:07:00Z",
-      "updatedAt": "2022-05-30T14:43:02Z",
+      "updatedAt": "2022-05-31T15:14:06Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "7c58b042d84d46e34b8d41f8deb663670a17a665",
       "headRepository": "simon-friedberger/draft-irtf-cfrg-vdaf",
       "headRefName": "main",
       "headRefOid": "313a0ce1a2f3ab41cde9dfb203cd92e6f63e2fee",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2022-05-31T15:14:06Z",
+      "mergedAt": "2022-05-31T15:14:06Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "ed9b9043f362cb64be8bd6364be9f8e43f8a14b8"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc47Cihr",
+          "commit": {
+            "abbreviatedOid": "313a0ce"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-31T14:06:59Z",
+          "updatedAt": "2022-05-31T14:06:59Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc47C_MM",
+          "commit": {
+            "abbreviatedOid": "313a0ce"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-05-31T15:12:10Z",
+          "updatedAt": "2022-05-31T15:12:10Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
