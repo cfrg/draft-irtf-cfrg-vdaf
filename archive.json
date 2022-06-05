@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-02T01:00:08.322051+00:00",
+  "timestamp": "2022-06-05T00:57:38.938952+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -3905,7 +3905,7 @@
       "labels": [],
       "body": "This fixes a small bug in the prime searching script. Previously, it would skip candidate q values, since it decremented q by i, rather than check each `2^(n-k)-i`. In the interest of completeness, we now check each possible value.",
       "createdAt": "2022-03-28T17:58:47Z",
-      "updatedAt": "2022-04-06T19:15:20Z",
+      "updatedAt": "2022-06-02T16:37:52Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "d5d51ef9f7e990229ffa4b2fec624634ad398aa6",
@@ -3947,7 +3947,7 @@
       "labels": [],
       "body": "This collects some editorial changes throughout the document.\r\n\r\n1. Mention section 7 in the overview\r\n2. Link syntax\r\n3. Stray punctuation\r\n4. \"values `beta`\" appeared to be a singular/plural disagreement the first time I read it, until later reading that `beta` is itself a pair of values. This change identifies that at its introduction.\r\n5. Wrong variable in pseudocode\r\n6. Further explanation of how the correlation shares could be compressed\r\n7. Typo in pseudocode\r\n8. Copyediting",
       "createdAt": "2022-04-01T18:40:51Z",
-      "updatedAt": "2022-04-06T19:15:09Z",
+      "updatedAt": "2022-06-02T16:37:32Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "d5d51ef9f7e990229ffa4b2fec624634ad398aa6",
@@ -5375,7 +5375,7 @@
       "labels": [],
       "body": "The inputs for this test were chosen through a brute-force search, so that they exercise the rejection sampling logic.\r\n\r\nI will be submitting PRs with the same test vector to the Rust and TypeScript implementations.",
       "createdAt": "2022-05-19T14:35:18Z",
-      "updatedAt": "2022-05-19T20:55:19Z",
+      "updatedAt": "2022-06-02T16:36:06Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "67f12eb900b5c6e7efe2e196eb752ad58044efe4",
