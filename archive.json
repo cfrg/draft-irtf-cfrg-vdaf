@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-09T00:53:54.225038+00:00",
+  "timestamp": "2022-06-12T00:57:06.316004+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1367,17 +1367,35 @@
       "labels": [],
       "body": "### Why\r\nWith Prio3Aes128CountVec, each measurement is a vector of integers in `[0,2)` and the aggregate is the element-wise sum. This is very helpful for supporting some use cases, e.g., checkbox survey question.\r\n\r\n### Discussions\r\nBased on discussions in the chat group, there are some potential concerns with the trade-off between proof generation time and proof size. \r\n\r\n- If the circuit has arithmetic degree 3. The proof generation will be expensive. The proof size is O(sqrt(N)).\r\n- If the circuit has arithmetic degree 2. The proof generation is faster but the proof size is O(N)",
       "createdAt": "2022-06-08T19:54:09Z",
-      "updatedAt": "2022-06-08T21:35:15Z",
+      "updatedAt": "2022-06-09T00:59:40Z",
       "closedAt": null,
       "comments": [
         {
           "author": "cjpatton",
           "authorAssociation": "COLLABORATOR",
-          "body": "For context, `Prio3Aes128CountVec` refers to a Prio3 variant implemented in libprio-rs.\r\n\r\nI've added some benchmarks to libprio-rs that allow us to roughly compare these two proof systems. (See https://github.com/divviup/libprio-rs/pull/243.) The latter, which has degree 2 and proof size O(N), is very similar to what's used in ENPA today. I'll call this `Prio2`. `Prio3Aeas128CountVecMultithreaded` is a variant of `Prio3Aes128CountVec` that implements the same proof system but parallelizes part of the computation. The field used for each is `Field128`.\r\n\r\ninput size: 10 (number of field elements)\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 29 | 10us | 12us |\r\n| Prio3Aes128CountVec | 28 | 21us | 15us |\r\n| Prio3Aes128CountVecMultithreaded | 28 | 67us | 15us |\r\n\r\ninput size: 100\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 231 | 76us | 58us |\r\n| Prio3Aes128CountVec | 66 | 121us | 39us |\r\n| Prio3Aes128CountVecMultithreaded | 66 | 146us | 37us |\r\n\r\ninput size: 1,000\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 2,027 | 678us | 528us |\r\n| Prio3Aes128CountVec | 252 | 3020us | 375us |\r\n| Prio3Aes128CountVecMultithreaded | 252 | 1001us | 366us |\r\n\r\ninput size: 10,000\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 26,387 | 14.9ms | 10.7ms |\r\n| Prio3Aes128CountVec | 582 | 21.4ms | 2.5ms |\r\n| Prio3Aes128CountVecMultithreaded | 582 | 6.3ms | 2.5ms |",
+          "body": "For context, `Prio3Aes128CountVec` refers to a Prio3 variant implemented in libprio-rs.\r\n\r\nI've added some benchmarks to libprio-rs that allow us to roughly compare these two proof systems. (See https://github.com/divviup/libprio-rs/pull/243.) The latter, which has degree 2 and proof size O(N), is very similar to what's used in ENPA today. I'll call this `Prio2`. `Prio3Aeas128CountVecMultithreaded` is a variant of `Prio3Aes128CountVec` that implements the same proof system but parallelizes part of the computation. The field used for each is `Field128`.\r\n\r\nReported times are from my 2.6 GHz 6-Core Intel Core i7 laptop.\r\n\r\ninput size: 10 (number of field elements)\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 29 | 10us | 12us |\r\n| Prio3Aes128CountVec | 28 | 21us | 15us |\r\n| Prio3Aes128CountVecMultithreaded | 28 | 67us | 15us |\r\n\r\ninput size: 100\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 231 | 76us | 58us |\r\n| Prio3Aes128CountVec | 66 | 121us | 39us |\r\n| Prio3Aes128CountVecMultithreaded | 66 | 146us | 37us |\r\n\r\ninput size: 1,000\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 2,027 | 678us | 528us |\r\n| Prio3Aes128CountVec | 252 | 3020us | 375us |\r\n| Prio3Aes128CountVecMultithreaded | 252 | 1001us | 366us |\r\n\r\ninput size: 10,000\r\n| System | proof size | generation time | query time |\r\n| ------- | ------ | ----- | ----- |\r\n| Prio2 | 26,387 | 14.9ms | 10.7ms |\r\n| Prio3Aes128CountVec | 582 | 21.4ms | 2.5ms |\r\n| Prio3Aes128CountVecMultithreaded | 582 | 6.3ms | 2.5ms |",
           "createdAt": "2022-06-08T21:34:20Z",
-          "updatedAt": "2022-06-08T21:35:15Z"
+          "updatedAt": "2022-06-09T00:59:40Z"
         }
       ]
+    },
+    {
+      "number": 84,
+      "id": "I_kwDOGKuqOc5LftGp",
+      "title": "Specify Poplar1 VDAF",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/84",
+      "state": "OPEN",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "draft-02"
+      ],
+      "body": "An upcoming draft-irtf-cfrg-vdaf should fully specify Poplar1.",
+      "createdAt": "2022-06-09T20:10:19Z",
+      "updatedAt": "2022-06-09T20:14:38Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
