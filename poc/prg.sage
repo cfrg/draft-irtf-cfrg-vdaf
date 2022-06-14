@@ -22,6 +22,17 @@ class Prg:
     def next(self, length: Unsigned) -> Bytes:
         raise Error('not implemented')
 
+    # Output the next `length` pseudorandom elements of `Field`.
+    def next_vec(self, Field, length: Unsigned):
+        m = next_power_of_2(Field.MODULUS) - 1
+        vec = []
+        while len(vec) < length:
+            x = OS2IP(self.next(Field.ENCODED_SIZE))
+            x &= m
+            if x < Field.MODULUS:
+                vec.append(Field(x))
+        return vec
+
     # Derive a new seed.
     @classmethod
     def derive_seed(Prg, seed: Bytes, info: Bytes) -> bytes:
@@ -35,15 +46,8 @@ class Prg:
                         seed: Bytes,
                         info: Bytes,
                         length: Unsigned):
-        m = next_power_of_2(Field.MODULUS) - 1
         prg = Prg(seed, info)
-        vec = []
-        while len(vec) < length:
-            x = OS2IP(prg.next(Field.ENCODED_SIZE))
-            x &= m
-            if x < Field.MODULUS:
-                vec.append(Field(x))
-        return vec
+        return prg.next_vec(Field, length)
 
 class PrgAes128(Prg):
     # Associated parameters

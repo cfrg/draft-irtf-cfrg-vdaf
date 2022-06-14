@@ -38,7 +38,8 @@ ERR_VERIFY = Error('verification of the user\'s input failed')
 
 # Return the smallest power of 2 that is larger than or equal to n.
 def next_power_of_2(n):
-    return 1<<(n-1).nbits()
+    assert n > 0
+    return 2^((n-1).nbits())
 
 
 # Return the requested number of zero bytes.
@@ -72,6 +73,9 @@ def vec_sub(left, right):
 def vec_add(left, right):
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
 
+# Negate the input vector.
+def vec_neg(vec):
+    return list(map(lambda x: -x, vec))
 
 # As defined in {{!RFC3447}}, Section 4.1.
 #
