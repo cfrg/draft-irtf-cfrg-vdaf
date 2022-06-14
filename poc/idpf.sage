@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from typing import Union
-from sagelib.common import Bytes, Error, Unsigned, Vec
+from sagelib.common import Bool, Bytes, Error, Unsigned, Vec, vec_add
 import sagelib.field as field
 import sagelib.prg as prg
 
@@ -44,13 +44,84 @@ class Idpf:
     # length `VALUE_LEN`. The output field is `FieldLeaf` if `level == BITS` and
     # `FieldInner` otherwise.
     #
+    # Let `LSB(x, N)` denote the least significant `N` bits of positive integer
+    # `x`. By definition, a positive integer `x` is said to be the length-`L`
+    # prefix of positive integer `y` if `LSB(x, L)` is equal to the most
+    # significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is
+    # the length-3 prefix of 25 (11001), but 7 (111) is not.
+    #
+    # Each element of `prefixes` is an integer in `[0, 2^level)`. For each
+    # element of `prefixes` that is the length-`level` prefix of the input
+    # encoded by the IDPF-key generation algorithm (i.e., `alpha`), the sum of
+    # the corresponding output shares will be equal to one of the programmed
+    # output vectors (i.e., an element of `beta_inner + [beta_leaf]`). For all
+    # other elements of `prefixes`, the corresponding output shares will sum up
+    # to the 0-vector.
+    #
     # An error is raised if any element of `prefixes` is larger than or equal to
-    # `2^level` or if `level` greater than `BITS`.
+    # `2^level` or if `level` is greater than `BITS`.
     @classmethod
     def eval(Idpf,
+             agg_id: Unsigned,
              public_share: Bytes,
              key: Bytes,
              level: Unsigned,
              prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]],
                                                Vec[Vec[Idpf.FieldLeaf]]]:
         raise Error('not implemented')
+
+    @classmethod
+    def current_field(IdpfPoplar, level):
+        return IdpfPoplar.FieldInner if level < IdpfPoplar.BITS-1 \
+                    else IdpfPoplar.FieldLeaf
+
+    # Returns `True` iff `x` is the prefix of `y` of length `L`.
+    @classmethod
+    def is_prefix(IdpfPoplar, x: Unsigned, y: Unsigned, L: Unsigned) -> Bool:
+        assert 0 < L and L <= IdpfPoplar.BITS
+        return y >> (IdpfPoplar.BITS - L) == x
+
+
+# Generate a set of IDPF keys and test every possible output.
+def test_idpf_exhaustive(Idpf, alpha):
+    # Generate random outputs with which to program the IDPF.
+    beta_inner = []
+    for _ in range(Idpf.BITS - 1):
+        beta_inner.append(Idpf.FieldInner.rand_vec(Idpf.VALUE_LEN))
+    beta_leaf = Idpf.FieldLeaf.rand_vec(Idpf.VALUE_LEN)
+
+    # Generate the IDPF keys.
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
+
+    # Evaluate the IDPF at every node of the tree.
+    for level in range(Idpf.BITS):
+        #print('debug: level {0}'.format(level))
+        prefixes = list(range(2^level))
+
+        out_shares = []
+        for agg_id in range(Idpf.SHARES):
+            out_shares.append(
+                Idpf.eval(agg_id, public_share,
+                          keys[agg_id], level, prefixes))
+
+        # Check that each set of output shares for each prefix sums up to the
+        # correct value.
+        for prefix in prefixes:
+            got = reduce(lambda x, y: vec_add(x,y),
+                map(lambda x: x[prefix], out_shares))
+            #print('debug: {0:b} {1:b}: got {2}'.format(
+            #    alpha, prefix, got))
+
+            if Idpf.is_prefix(prefix, alpha, level+1):
+                if level < Idpf.BITS-1:
+                    want = beta_inner[level]
+                else:
+                    want = beta_leaf
+            elif level < Idpf.BITS-1:
+                want = Idpf.FieldInner.zeros(Idpf.VALUE_LEN)
+            else:
+                want = Idpf.FieldLeaf.zeros(Idpf.VALUE_LEN)
+
+            if got != want:
+                print('error: {0:b} {1:b} {2}: got {3}; want {4}'.format(
+                    alpha, prefix, level, got, want))
