@@ -1,4 +1,21 @@
-# Generating test vectors
+# VDAF reference implementations
+
+This directory contains SageMath implementations of VDAFs. This code is used to
+generate test vectors as well as the algorithm definitions in the document
+themesleves.
+
+## Installation
+
+This code is compatilbe with SageMath version 9.6.
+
+In order to run the code you will need to install
+[PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/index.html).
+
+```
+sage --pip install pycryptodomex
+```
+
+## Generating test vectors
 
 To generate test vectors, set the value of `TEST_VECTOR` in `common.sage` to
 `True` and run `make test`.
