@@ -23,3 +23,4 @@ test: pyfiles
 	sage vdaf.sage
 	sage vdaf_prio3.sage
 	sage daf.sage
+	sage idpf.sage
