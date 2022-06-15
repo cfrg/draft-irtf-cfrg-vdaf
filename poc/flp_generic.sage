@@ -26,8 +26,9 @@ class Gadget:
 
 # A validity circuit.
 class Valid:
-    # Generic parameters overwritten by a concrete validity circuit.
-    Field = field.Field
+    # Generic parameters overwritten by a concrete validity circuit. `Field`
+    # MUST be FFT-friendly.
+    Field: field.FftField = None
     Measurement = None
 
     # Length of the input to the validity circuit.

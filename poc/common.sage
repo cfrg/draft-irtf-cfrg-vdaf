@@ -38,7 +38,7 @@ ERR_VERIFY = Error('verification of the user\'s input failed')
 
 # Return the smallest power of 2 that is larger than or equal to n.
 def next_power_of_2(n):
-    return 2^ceil(log(n) / log(2))
+    return 1<<(n-1).nbits()
 
 
 # Return the requested number of zero bytes.
