@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-16T00:55:30.488497+00:00",
+  "timestamp": "2022-06-19T00:55:11.270622+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1394,6 +1394,24 @@
       "body": "An upcoming draft-irtf-cfrg-vdaf should fully specify Poplar1.",
       "createdAt": "2022-06-09T20:10:19Z",
       "updatedAt": "2022-06-09T20:14:38Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 89,
+      "id": "I_kwDOGKuqOc5L9DhU",
+      "title": "Field element decoding: check that the inputs are fully reduced",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/89",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-02"
+      ],
+      "body": "@armfazh pointed this out here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88#discussion_r899660677",
+      "createdAt": "2022-06-17T00:39:37Z",
+      "updatedAt": "2022-06-17T00:45:52Z",
       "closedAt": null,
       "comments": []
     }
@@ -5731,25 +5749,35 @@
       "id": "PR_kwDOGKuqOc45qXPm",
       "title": "poc: Define syntax for IDPFs",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/85",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Partially addresses #84.",
       "createdAt": "2022-06-14T20:55:38Z",
-      "updatedAt": "2022-06-15T18:12:48Z",
+      "updatedAt": "2022-06-16T18:57:22Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "7ad9f0e5c94240674a5881a188bc9aba133353f9",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/idpf-1",
-      "headRefOid": "eddc8a6b5c7edf9431859f545f6059f770381eaa",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "381d8e808549820b0ff74afb134e8099831be38a",
+      "closedAt": "2022-06-16T18:57:22Z",
+      "mergedAt": "2022-06-16T18:57:22Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "40198da9b45b16eb93d891a6847baa6ce512ff78"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "FYI, I pushed some minor changes to the syntax (https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/85/commits/447b04ca40686a0a951321a4ed68a3a4fdd6fb2d that resulted from having implemented the Poplar IDPF. I will squash the commit once the PR is approved.",
+          "createdAt": "2022-06-16T01:44:26Z",
+          "updatedAt": "2022-06-16T01:49:01Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc47_ytG",
@@ -5998,6 +6026,498 @@
               "body": "> Can you elaborate on how you'd implement this optimized version?\r\n> \r\n> I was thinking of passing the state into and out of the VDAF interface by appropriately defined input/output shares. In fact, in the C++ DPF library, I use an [`EvaluationContext`](https://github.com/google/distributed_point_functions/blob/0f7f758d2c67092c05a3b93ff4ae9ad00cca1487/dpf/distributed_point_function.proto#L156=) object as the input to [`EvaluateNext`](https://github.com/google/distributed_point_functions/blob/0f7f758d2c67092c05a3b93ff4ae9ad00cca1487/dpf/distributed_point_function.h#L307=)/[`EvaluateUntil`](https://github.com/google/distributed_point_functions/blob/0f7f758d2c67092c05a3b93ff4ae9ad00cca1487/dpf/distributed_point_function.h#L302=), which wraps a [`DpfKey`](https://github.com/google/distributed_point_functions/blob/0f7f758d2c67092c05a3b93ff4ae9ad00cca1487/dpf/distributed_point_function.proto#L129=) and additionally keeps state between iterations.\r\n\r\nYeah this is more or less what I would do in an efficient implementation of `Poplar1`. The [current API for libprio-rs](https://github.com/divviup/libprio-rs/blob/main/src/vdaf.rs#L164-L174) is too strict and will need to be changed in order to allow `prepare_init()` to to update this `EvaluationContext`.",
               "createdAt": "2022-06-15T18:12:48Z",
               "updatedAt": "2022-06-15T18:12:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48IiBk",
+          "commit": {
+            "abbreviatedOid": "c62939c"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T11:00:50Z",
+          "updatedAt": "2022-06-16T11:00:50Z",
+          "comments": [
+            {
+              "originalPosition": 46,
+              "body": "Okay, as long as this can still be implemented while being standard-compliant, I'm fine with it.",
+              "createdAt": "2022-06-16T11:00:50Z",
+              "updatedAt": "2022-06-16T11:00:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48IiWr",
+          "commit": {
+            "abbreviatedOid": "f5c0bf6"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T11:02:08Z",
+          "updatedAt": "2022-06-16T11:03:44Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "Does `Unsigned` here have a limit on the bit length? For large domains (e.g. 256 bits), `Bytes` might be more appropriate.",
+              "createdAt": "2022-06-16T11:02:08Z",
+              "updatedAt": "2022-06-16T11:03:44Z"
+            },
+            {
+              "originalPosition": 42,
+              "body": "Is there a particular reason for this change? It forces the caller to repeatedly deserialize `key`, right?",
+              "createdAt": "2022-06-16T11:03:40Z",
+              "updatedAt": "2022-06-16T11:03:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48JteE",
+          "commit": {
+            "abbreviatedOid": "f5c0bf6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T14:55:22Z",
+          "updatedAt": "2022-06-16T14:55:22Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "No it doesn't. This seemed like a reasonable way to represent the input string and candidate prefixes, but I'm open to alternatives. One concern I have about `Bytes` is that we need to represent bit strings whose length are not a multiple of 8.\r\n\r\nOf course, the input string and prefixes need not have the same type. We could have the input string be `Bytes` (this will be perfectly fine for most applications, if not all) and we could define the candidate prefixes as `Unsigned` (and leave it to implementations to deal with larger domains).",
+              "createdAt": "2022-06-16T14:55:22Z",
+              "updatedAt": "2022-06-16T14:55:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48JuFL",
+          "commit": {
+            "abbreviatedOid": "f5c0bf6"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T14:56:59Z",
+          "updatedAt": "2022-06-16T14:57:00Z",
+          "comments": [
+            {
+              "originalPosition": 30,
+              "body": "Alright, if `Unsigned` doesn't have a limit then let's keep it, I agree that being able to specify the bit-length makes it a better choice than `Bytes`.",
+              "createdAt": "2022-06-16T14:56:59Z",
+              "updatedAt": "2022-06-16T14:57:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48Ju9r",
+          "commit": {
+            "abbreviatedOid": "f5c0bf6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T14:59:16Z",
+          "updatedAt": "2022-06-16T14:59:16Z",
+          "comments": [
+            {
+              "originalPosition": 42,
+              "body": "This is consistent with the (current) convention that anything that needs to be written to the network is dealt with explicitly as a `Bytes`. We might change this convention in the future, see https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/58. In any case, I think it's reasonable to leave this to implementations.",
+              "createdAt": "2022-06-16T14:59:16Z",
+              "updatedAt": "2022-06-16T14:59:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48JwJo",
+          "commit": {
+            "abbreviatedOid": "f5c0bf6"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T15:02:29Z",
+          "updatedAt": "2022-06-16T15:02:29Z",
+          "comments": [
+            {
+              "originalPosition": 42,
+              "body": "SG",
+              "createdAt": "2022-06-16T15:02:29Z",
+              "updatedAt": "2022-06-16T15:02:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48JwV5",
+          "commit": {
+            "abbreviatedOid": "f5c0bf6"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-06-16T15:03:01Z",
+          "updatedAt": "2022-06-16T15:03:01Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 86,
+      "id": "PR_kwDOGKuqOc45vuQ6",
+      "title": "poc: Add `OUT_LEN` parameter to IDPF syntax",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/86",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Based on #85 (merge that first).\r\n\r\nSpecifies that the output type is a vector over a finite field. This\r\nallows IDPFs to be specified that are more naturally integrated with the\r\nPoplar secure sketching scheme where one of the programmed outputs is\r\n`1` and the other is a random \"authenticator\" value.",
+      "createdAt": "2022-06-16T02:46:27Z",
+      "updatedAt": "2022-06-16T19:02:49Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/idpf-1",
+      "baseRefOid": "381d8e808549820b0ff74afb134e8099831be38a",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/idpf-2",
+      "headRefOid": "579bc3666311d36bea72062ae53a3ad29c61116d",
+      "closedAt": "2022-06-16T18:59:11Z",
+      "mergedAt": "2022-06-16T18:59:10Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "fbf37e01440ddc1ee51198d2e2a4fa9b467ea4c3"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Merged into the wrong branch!",
+          "createdAt": "2022-06-16T19:02:48Z",
+          "updatedAt": "2022-06-16T19:02:48Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc48JECD",
+          "commit": {
+            "abbreviatedOid": "e7e20a0"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T13:04:45Z",
+          "updatedAt": "2022-06-16T13:06:03Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Doesn't the output length depend on the number of prefixes? Or is this to support tuples as values?",
+              "createdAt": "2022-06-16T13:04:46Z",
+              "updatedAt": "2022-06-16T13:06:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48JvP0",
+          "commit": {
+            "abbreviatedOid": "e7e20a0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T14:59:58Z",
+          "updatedAt": "2022-06-16T14:59:58Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "This is to support tuples as values. I guess the comments need to be clearer ...",
+              "createdAt": "2022-06-16T14:59:58Z",
+              "updatedAt": "2022-06-16T14:59:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48Jw4L",
+          "commit": {
+            "abbreviatedOid": "e7e20a0"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T15:04:34Z",
+          "updatedAt": "2022-06-16T15:04:34Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Maybe call it `VALUE_LEN` then, since it's the length of one output value, not the entire output?",
+              "createdAt": "2022-06-16T15:04:34Z",
+              "updatedAt": "2022-06-16T15:04:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48Jw9B",
+          "commit": {
+            "abbreviatedOid": "e7e20a0"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-06-16T15:04:46Z",
+          "updatedAt": "2022-06-16T15:04:46Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48JxOF",
+          "commit": {
+            "abbreviatedOid": "e7e20a0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T15:05:30Z",
+          "updatedAt": "2022-06-16T15:05:31Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Oh that's better.",
+              "createdAt": "2022-06-16T15:05:30Z",
+              "updatedAt": "2022-06-16T15:05:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48LJS8",
+          "commit": {
+            "abbreviatedOid": "e7e20a0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-16T18:58:47Z",
+          "updatedAt": "2022-06-16T18:58:47Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Done.",
+              "createdAt": "2022-06-16T18:58:47Z",
+              "updatedAt": "2022-06-16T18:58:47Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 87,
+      "id": "PR_kwDOGKuqOc45zD9b",
+      "title": "poc: Add `VALUE_LEN` parameter to IDPF syntax",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/87",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Specifies that the output type is a vector over a finite field. This\r\nallows IDPFs to be defined that are more naturally integrated with the\r\nPoplar secure sketching scheme.",
+      "createdAt": "2022-06-16T19:05:22Z",
+      "updatedAt": "2022-06-16T19:08:41Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "40198da9b45b16eb93d891a6847baa6ce512ff78",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/idpf-2-retry",
+      "headRefOid": "3c3049a5f1fd09c9411b4bc8dba9d0edd3edb2b4",
+      "closedAt": "2022-06-16T19:08:41Z",
+      "mergedAt": "2022-06-16T19:08:41Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "485e7c4cab08f0d0a1a763b423b265f222ba832e"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Replaces https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/86, which I merged into the wrong branch.",
+          "createdAt": "2022-06-16T19:05:50Z",
+          "updatedAt": "2022-06-16T19:06:08Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 88,
+      "id": "PR_kwDOGKuqOc45z_cv",
+      "title": "poc: Implement the Poplar IDPF",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #22.\r\nPartially addresses #84.\r\n\r\n\r\nImplement the Poplar IDPF, extended to allow the outputs to be tuples.\r\nThis required a few minor changes:\r\n\r\n* Extend the IPDF syntax so that `eval()` takes as input the Aggregator\r\n  ID. (This would be passed via `Poplar1.prep_init()`.)\r\n\r\n* Refactor `Prg` by adding a derived method, `next_vec()`, that outputs\r\n  a vector of field elements and updates the PRG state.\r\n\r\n* Allow fields to be defined that aren't suitable for FFT.",
+      "createdAt": "2022-06-17T00:07:07Z",
+      "updatedAt": "2022-06-18T17:37:43Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "485e7c4cab08f0d0a1a763b423b265f222ba832e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/idpf-3",
+      "headRefOid": "a1320055dda86bd103597a568cc72a6904eea1e1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc48MUkr",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T00:15:05Z",
+          "updatedAt": "2022-06-17T00:15:05Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "@armfazh I was hoping you can double check that the encoding we specify here for `GF(2^255-19)` will be convenient for existing implementations of this field.",
+              "createdAt": "2022-06-17T00:15:05Z",
+              "updatedAt": "2022-06-17T00:15:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48MUto",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T00:16:32Z",
+          "updatedAt": "2022-06-17T00:16:32Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "See `Field.encode_vec()` in `field.sage` for the encoding.",
+              "createdAt": "2022-06-17T00:16:32Z",
+              "updatedAt": "2022-06-17T00:16:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48MWAb",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T00:29:23Z",
+          "updatedAt": "2022-06-17T00:29:23Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "that function is using I2OSP, which is an encoding in big-endian format, while most implementations of Fp25519 use little-endian format.\r\nRelated: there is no check while decoding whether the numbers are fully reduced mod p.",
+              "createdAt": "2022-06-17T00:29:23Z",
+              "updatedAt": "2022-06-17T00:29:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48MXBT",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T00:39:54Z",
+          "updatedAt": "2022-06-17T00:39:54Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "* Do you think it would be worth going to little-endian for compaitibility with existing implementations? Did you consider this in the hash-to-curve draft?\r\n* Good point about checking that the inputs are reduced mod p. Raised https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/89.",
+              "createdAt": "2022-06-17T00:39:54Z",
+              "updatedAt": "2022-06-17T00:39:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48QDQB",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T17:27:39Z",
+          "updatedAt": "2022-06-17T17:27:40Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Ok, if we decide to use Fp25519 (as opposed to some other field of similar size), then we'll have to make accommodations. I will file an issue once this PR lands.",
+              "createdAt": "2022-06-17T17:27:39Z",
+              "updatedAt": "2022-06-17T17:27:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48QDwB",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T17:29:51Z",
+          "updatedAt": "2022-06-17T17:29:51Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Precedent (thanks @armfazh): https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-voprf#section-4.1.1",
+              "createdAt": "2022-06-17T17:29:51Z",
+              "updatedAt": "2022-06-17T17:29:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48QD2Q",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T17:30:16Z",
+          "updatedAt": "2022-06-17T17:30:17Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "For example, in the [VOPRF draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-voprf#section-4.1.1), it is considered the encoding of fp25519 as little-endian.",
+              "createdAt": "2022-06-17T17:30:16Z",
+              "updatedAt": "2022-06-17T17:30:17Z"
             }
           ]
         }
