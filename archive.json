@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-19T00:55:11.270622+00:00",
+  "timestamp": "2022-06-21T00:56:09.869248+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1407,11 +1407,12 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
+        "bug",
         "draft-02"
       ],
       "body": "@armfazh pointed this out here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88#discussion_r899660677",
       "createdAt": "2022-06-17T00:39:37Z",
-      "updatedAt": "2022-06-17T00:45:52Z",
+      "updatedAt": "2022-06-20T23:25:46Z",
       "closedAt": null,
       "comments": []
     }
@@ -6368,13 +6369,13 @@
       "labels": [],
       "body": "Closes #22.\r\nPartially addresses #84.\r\n\r\n\r\nImplement the Poplar IDPF, extended to allow the outputs to be tuples.\r\nThis required a few minor changes:\r\n\r\n* Extend the IPDF syntax so that `eval()` takes as input the Aggregator\r\n  ID. (This would be passed via `Poplar1.prep_init()`.)\r\n\r\n* Refactor `Prg` by adding a derived method, `next_vec()`, that outputs\r\n  a vector of field elements and updates the PRG state.\r\n\r\n* Allow fields to be defined that aren't suitable for FFT.",
       "createdAt": "2022-06-17T00:07:07Z",
-      "updatedAt": "2022-06-18T17:37:43Z",
+      "updatedAt": "2022-06-21T00:36:50Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "485e7c4cab08f0d0a1a763b423b265f222ba832e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/idpf-3",
-      "headRefOid": "a1320055dda86bd103597a568cc72a6904eea1e1",
+      "headRefOid": "d3a7889d6637de8e41ce505a50acfccf01c71de8",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -6518,6 +6519,132 @@
               "body": "For example, in the [VOPRF draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-voprf#section-4.1.1), it is considered the encoding of fp25519 as little-endian.",
               "createdAt": "2022-06-17T17:30:16Z",
               "updatedAt": "2022-06-17T17:30:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48OAcL",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-17T10:15:35Z",
+          "updatedAt": "2022-06-20T16:23:05Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I don't think this is computing \"the smallest power of 2 that is larger than or equal to n\".",
+              "createdAt": "2022-06-17T10:15:35Z",
+              "updatedAt": "2022-06-20T16:23:06Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "Here, \"prefix\" means bits starting from least significant to most significant, right? This should be explicitly documented.\r\nAlso, it seems like this just ignores the higher-level bits of `prefix`, so `is_prefix(0xABCD, 0xDECD, 1)` would return `True` (which might be intentional but again should be documented).",
+              "createdAt": "2022-06-20T11:37:30Z",
+              "updatedAt": "2022-06-20T16:23:06Z"
+            },
+            {
+              "originalPosition": 65,
+              "body": "... or too short",
+              "createdAt": "2022-06-20T13:29:25Z",
+              "updatedAt": "2022-06-20T16:23:06Z"
+            },
+            {
+              "originalPosition": 58,
+              "body": "Since we have a PRG with arbitrary stretch, we could go with the variant described in the last paragraph of Section C.2 in the paper. That is, instead of expanding the seed into two seeds and then expanding one seed to a group element and the \"actual\" seed again, we can generate the group element (of the current level) in parallel with the expansion of seeds for the next level. This saves at least one AES call per expansion. It's probably more relevant for `eval` than `gen`, but has to be considered in both places since the two variants are incompatible. This incompatibility also means that this needs to be decided sooner rather than later, unless we want to standardize both variants.",
+              "createdAt": "2022-06-20T13:47:26Z",
+              "updatedAt": "2022-06-20T16:23:06Z"
+            },
+            {
+              "originalPosition": 83,
+              "body": "Can you add a comment to the base class documentation what exactly the elements in `prefixes` are?",
+              "createdAt": "2022-06-20T15:46:22Z",
+              "updatedAt": "2022-06-20T16:23:06Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "One thing to consider is that with this notion of prefix, the leaves of the DPF tree do not enumerate the domain in order, but instead in bit-flipped order. I.e., the leftmost two leaves are 0 and 1 << l, not 0 and 1. This has implications for how the DPF evaluation depends on the location of non-zeros in the domain, i.e., how many non-zero prefixes you'll find in the part of the DPF evaluation trree close to the root.",
+              "createdAt": "2022-06-20T15:53:04Z",
+              "updatedAt": "2022-06-20T16:23:06Z"
+            },
+            {
+              "originalPosition": 176,
+              "body": "The fact that a part of the DPF keys is shared by aggregators has security implications for Poplar, so it would be good to emphasize this. If this is not enforced by the syntax (i.e., a malicious client could submit different correction words to the aggregators), then the aggregators need to check the CWs are the same at verification time.",
+              "createdAt": "2022-06-20T16:21:23Z",
+              "updatedAt": "2022-06-20T16:23:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48WrR3",
+          "commit": {
+            "abbreviatedOid": "429422e"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-20T17:20:19Z",
+          "updatedAt": "2022-06-20T22:40:34Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "It seems to work for n > 0:\r\n* Suppose 2^k-1 < n < 2^k for some k > 0. Then (n-1).nbits() = k, thus next_power_of_2(n) = 2^k.\r\n* Suppose n = 2^k for some k >= 0. Then (n-1).nbits() = k, thus next_power_of_2(n) = 2^k.\r\n\r\nNote that nbits() is the number of bits required to encode the number. For example, (2^32-1).nbits() would be 32, but 2^32.nbits() would be 33.\r\n\r\nI added an assertion that n > 0. For context, this needed to change because sage can't precisely compute log(n) / log(2) for elements of field as large as `GF(2^255-19)`.",
+              "createdAt": "2022-06-20T17:20:19Z",
+              "updatedAt": "2022-06-20T22:40:34Z"
+            },
+            {
+              "originalPosition": 65,
+              "body": "Done",
+              "createdAt": "2022-06-20T17:40:35Z",
+              "updatedAt": "2022-06-20T22:40:35Z"
+            },
+            {
+              "originalPosition": 83,
+              "body": "Done",
+              "createdAt": "2022-06-20T20:26:06Z",
+              "updatedAt": "2022-06-20T22:40:35Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "I've modified the code to traverse `alpha` beginning with the most significant bit. This leads to a more natural definition of \"prefix\", which has been updated.",
+              "createdAt": "2022-06-20T20:29:03Z",
+              "updatedAt": "2022-06-20T22:40:34Z"
+            },
+            {
+              "originalPosition": 176,
+              "body": "Do you have an attack in mind? I thought that the \"secure sketch\" scheme would handle this.\r\n\r\nIn any case, a syntactic change seems useful here. However unless this really is a security issue for Poplar1,  then I would say let's hold off and do it in a future PR.",
+              "createdAt": "2022-06-20T21:28:07Z",
+              "updatedAt": "2022-06-20T22:40:35Z"
+            },
+            {
+              "originalPosition": 58,
+              "body": "I think only one variant should be specified. I don't quite understand the optimization, but would be happy to consider it in a future PR. I've added a TODO to consider this later.\r\n\r\n",
+              "createdAt": "2022-06-20T22:40:14Z",
+              "updatedAt": "2022-06-20T22:40:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48Xqle",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-21T00:36:49Z",
+          "updatedAt": "2022-06-21T00:36:50Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "@schoppmp if you have no objection to using this particular field, I will open an issue to discuss what to do about endianness. Basically our options are:\r\n1. Use big-endian for all fields (status quo). This seems \"standard\", but would be slightly inconvenient for anyone using an existing implementation of Fp25519.\r\n2. Use little-endian for all fields. My impression is that this would be somewhat non-standard, as many CFRG things use I2OSP() for encoding numbers.\r\n3. Allow each field to specify its own `encode_vec()`.\r\n4. If we decide to not be prescriptive about encoding (cf. #58), then this is a non-issue.",
+              "createdAt": "2022-06-21T00:36:50Z",
+              "updatedAt": "2022-06-21T00:36:50Z"
             }
           ]
         }
