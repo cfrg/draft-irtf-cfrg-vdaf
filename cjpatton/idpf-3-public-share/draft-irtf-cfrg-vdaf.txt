@@ -529,7 +529,7 @@ Table of Contents
       Vec[Bytes]) is the randomized input-distribution algorithm run by
       each Client.  It consumes the measurement and produces a "public
       share", distributed to each of the Aggregators, and a
-      corresponding eequence of input shares, one for each Aggregator.
+      corresponding sequence of input shares, one for each Aggregator.
       The length of the output vector MUST be SHARES.
 
        Client
