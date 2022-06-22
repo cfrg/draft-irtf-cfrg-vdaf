@@ -24,9 +24,10 @@ class Idpf:
     # The finite field used to represent the leaf nodes of the IDPF tree.
     FieldLeaf: field.Field = None
 
-    # Generates a sequence of IDPF-keys of length `SHARES`. Value `alpha` is the
-    # input to encode. Values `beta_inner` and `beta_leaf` are assigned to the
-    # values of the nodes on the non-zero path of the IPDF tree.
+    # Generates an IDPF public share and sequence of IDPF-keys of length
+    # `SHARES`. Value `alpha` is the input to encode. Values `beta_inner` and
+    # `beta_leaf` are assigned to the values of the nodes on the non-zero path
+    # of the IPDF tree.
     #
     # An error is raised if integer `alpha` is larger than or equal to `2^BITS`,
     # any elment of `beta_inner` has length other than `VALUE_LEN`, or if
@@ -35,7 +36,7 @@ class Idpf:
     def gen(Ipdf,
             alpha: Unsigned,
             beta_inner: Vec[Vec[Idpf.FieldInner]],
-            beta_leaf: Vec[Idpf.FieldLeaf]) -> Vec[Bytes]:
+            beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
     # Evaluate an IDPF key at a given level of the tree and with the given set
@@ -47,6 +48,7 @@ class Idpf:
     # `2^level` or if `level` greater than `BITS`.
     @classmethod
     def eval(Idpf,
+             public_share: Bytes,
              key: Bytes,
              level: Unsigned,
              prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]],
