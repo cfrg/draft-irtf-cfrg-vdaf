@@ -37,24 +37,26 @@ class Vdaf:
     # The aggregate result type.
     AggResult = None
 
-    # Shard a measurement into a sequence of input shares. This method is run
-    # by the client.
+    # Shard a measurement into a "public share" and a sequence of input shares,
+    # one for each Aggregator. This method is run by the Client.
     @classmethod
     def measurement_to_input_shares(Vdaf,
-                                    measurement: Measurement) -> Vec[Bytes]:
+                                    measurement: Measurement) -> (Bytes,
+                                                                  Vec[Bytes]):
         raise Error('not implemented')
 
     # Initialize the Prepare state for the given input share. This method is run
-    # by an Aggregator. Along with the input share, the inputs include the
-    # verification key shared by all of the Aggregators, the Aggregator's ID (a
-    # unique integer in range `[0, SHARES)`, and the aggregation parameter and
-    # nonce agreed upon by all of the Aggregators.
+    # by an Aggregator. Along with the the public share and its input share, the
+    # inputs include the verification key shared by all of the Aggregators, the
+    # Aggregator's ID (a unique integer in range `[0, SHARES)`, and the
+    # aggregation parameter and nonce agreed upon by all of the Aggregators.
     @classmethod
     def prep_init(Vdaf,
                   verify_key: Bytes,
                   agg_id: Unsigned,
                   agg_param: AggParam,
                   nonce: Bytes,
+                  public_share: Byhtes,
                   input_share: Bytes) -> Prep:
         raise Error('not implemented')
 
@@ -136,7 +138,8 @@ def run_vdaf(Vdaf,
         }
 
         # Each Client shards its measurement into input shares.
-        input_shares = Vdaf.measurement_to_input_shares(measurement)
+        (public_share, input_shares) = \
+            Vdaf.measurement_to_input_shares(measurement)
 
         # REMOVE ME
         for input_share in input_shares:
@@ -148,6 +151,7 @@ def run_vdaf(Vdaf,
             state = Vdaf.prep_init(verify_key, j,
                                    agg_param,
                                    nonce,
+                                   public_share,
                                    input_shares[j])
             prep_states.append(state)
 
@@ -256,7 +260,7 @@ def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
 #
 
 # An insecure VDAF used only for testing purposes.
-class VdafTest(Vdaf):
+class TestVdaf(Vdaf):
     # Operational parameters
     Field = field.Field128
 
@@ -291,11 +295,18 @@ class VdafTest(Vdaf):
         input_shares = [cls.Field.encode_vec([leader_share])]
         for helper_share in helper_shares:
             input_shares.append(cls.Field.encode_vec([helper_share]))
-        return input_shares
+        public_share = b'dummy public share'
+        return (public_share, input_shares)
 
     @classmethod
-    def prep_init(cls, _verify_key, _agg_id, _agg_param, _nonce, input_share):
-        return VdafTest.Prep(cls.input_range, input_share)
+    def prep_init(cls,
+                  _verify_key,
+                  _agg_id,
+                  _agg_param,
+                  _nonce,
+                  _public_share,
+                  input_share):
+        return TestVdaf.Prep(cls.input_range, input_share)
 
     @classmethod
     def prep_next(cls, prep, inbound):
@@ -350,4 +361,4 @@ def test_vdaf(cls,
 
 
 if __name__ == '__main__':
-    test_vdaf(VdafTest, None, [1, 2, 3, 4], [10])
+    test_vdaf(TestVdaf, None, [1, 2, 3, 4], [10])

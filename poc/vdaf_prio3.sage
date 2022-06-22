@@ -110,14 +110,14 @@ class Prio3(Vdaf):
                 k_helper_blinds[j],
                 k_helper_hints[j],
             ))
-        return input_shares
+        return (b'', input_shares)
 
     # TODO We could shave off a couple of blockcipher calls if, instead of
     # deriving `k_query_rand`, we use `verify_key` to derive the query
     # randomness directly.
     @classmethod
-    def prep_init(Prio3,
-                  verify_key, agg_id, _agg_param, nonce, input_share):
+    def prep_init(Prio3, verify_key, agg_id, _agg_param,
+                  nonce, _public_share, input_share):
         # Domain separation tag for PRG info string
         dst = VERSION + b' prio3'
 
