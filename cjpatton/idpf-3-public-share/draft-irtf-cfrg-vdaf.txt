@@ -857,7 +857,9 @@ Table of Contents
       matches the index of input_share in the sequence of input shares
       output by the Client.  In addition, protocols MUST ensure that
       public share consumed by each of the Aggregators is identical.
-      See Section 9 for details.
+      This is security critical for VDAFs such as Poplar1 that require
+      an extractable distributed point function.  (See Section 8 for
+      details.)
 
    *  Vdaf.prep_next(prep: Prep, inbound: Optional[Bytes]) ->
       Union[Tuple[Prep, Bytes], OutShare] is the deterministic
@@ -1592,7 +1594,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
                k_helper_blinds[j],
                k_helper_hints[j],
            ))
-       return input_shares
+       return (b'', input_shares)
 
              Figure 13: Input-distribution algorithm for Prio3.
 
@@ -1630,8 +1632,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    These algorithms make use of encoding and decoding methods defined in
    Section 7.2.5.
 
- def prep_init(Prio3,
-               verify_key, agg_id, _agg_param, nonce, input_share):
+ def prep_init(Prio3, verify_key, agg_id, _agg_param,
+               nonce, _public_share, input_share):
      # Domain separation tag for PRG info string
      dst = VERSION + b' prio3'
 

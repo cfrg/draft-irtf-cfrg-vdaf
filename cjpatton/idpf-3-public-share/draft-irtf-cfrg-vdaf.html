@@ -2212,7 +2212,8 @@ Protocols using the VDAF <span class="bcp14">MUST</span> ensure that the Aggrega
 to the integer in range <code>[0, SHARES)</code> that matches the index of <code>input_share</code>
 in the sequence of input shares output by the Client. In addition, protocols
 <span class="bcp14">MUST</span> ensure that public share consumed by each of the Aggregators is
-identical. See <a href="#security" class="xref">Section 9</a> for details.<a href="#section-5.2-6.1.4" class="pilcrow">¶</a></p>
+identical. This is security critical for VDAFs such as Poplar1 that require an
+extractable distributed point function. (See <a href="#poplar1" class="xref">Section 8</a> for details.)<a href="#section-5.2-6.1.4" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.2-6.2">
             <code>Vdaf.prep_next(prep: Prep, inbound: Optional[Bytes]) -&gt; Union[Tuple[Prep,
@@ -3166,7 +3167,7 @@ def measurement_to_input_shares(Prio3, measurement):
             k_helper_blinds[j],
             k_helper_hints[j],
         ))
-    return input_shares
+    return (b'', input_shares)
 </pre>
 </div>
 <figcaption><a href="#figure-13" class="selfRef">Figure 13</a>:
@@ -3211,8 +3212,8 @@ make use of encoding and decoding methods defined in <a href="#prio3-helper-func
 <figure id="figure-14">
             <div class="alignLeft art-text artwork" id="section-7.2.2-6.1">
 <pre>
-def prep_init(Prio3,
-              verify_key, agg_id, _agg_param, nonce, input_share):
+def prep_init(Prio3, verify_key, agg_id, _agg_param,
+              nonce, _public_share, input_share):
     # Domain separation tag for PRG info string
     dst = VERSION + b' prio3'
 
