@@ -1,4 +1,4 @@
-# An IDFP based on the construction of [BBCGGI21, Section 6].
+# An IDPF based on the construction of [BBCGGI21, Section 6].
 
 from copy import deepcopy
 from sagelib.common import ERR_INPUT, OS2IP, VERSION, Bytes, Error, \
