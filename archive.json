@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-21T00:56:09.869248+00:00",
+  "timestamp": "2022-06-23T00:49:36.715857+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -633,7 +633,7 @@
       "id": "I_kwDOGKuqOc5C4vjo",
       "title": "Specify fields for poplar1 (was \"Specify fields for prio3 and poplar1\")",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/22",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -642,8 +642,8 @@
       ],
       "body": "At this point we have fairly clear criteria for choosing fields for Prio. Namely, the prime modulus `p` should be of the form `2^k * q + 1`, where `k` is large enough to support proof sizes we're interested in. The fact that the multiplicative group has a subgroup of order `2^k` is exploited for fast polynomial interpolation. `k` should also be chosen to align with the word size of the machine, e.g., `32` or `64` so that fast arithmetic can be generated for it (cc/ @armfazh).\r\n\r\nThe requirements are different for Poplar, though any field we choose for Prio ought to be suitable for Poplar as well. The main difference I see is that we'll need a much larger field for the leaves of the IPDF tree than we need for the inner nodes. I wonder if the leaves could use `GF(2^255 - 19)`, since there are already fast, heavily vetted implementation of this field (namely for X25519 and ed25519)? @schoppmp do you have any other thoughts here?",
       "createdAt": "2022-02-02T16:59:10Z",
-      "updatedAt": "2022-05-18T18:50:50Z",
-      "closedAt": null,
+      "updatedAt": "2022-06-22T15:19:37Z",
+      "closedAt": "2022-06-22T15:19:37Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -1415,6 +1415,51 @@
       "updatedAt": "2022-06-20T23:25:46Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 90,
+      "id": "I_kwDOGKuqOc5MP7Qf",
+      "title": "Field element encoding: Accommodations for `GF(2^255-19)`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/90",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As of #88, we'll use `GF(2^255-19)` for the leaf node field for `IdpfPoplar`. This field is a natural choice because it is close to the security level cited by [the paper](https://eprint.iacr.org/2021/017) and there are already a number of implementations of it already. (E.g., https://github.com/cloudflare/circl/tree/master/math/fp25519.) However, this choice surfaces an issue related to field element encoding that needs discussion.\r\n\r\nFirst, the manner in which field elements are represented as byte strings matters for two reasons:\r\n1. In `Prio3`, vectors of field elements are encoded and used for key derivation. In general, it's likely that the VDAF draft will have cryptographic computations that depend on encoded field elements.\r\n2. So far we have opted to be prescriptive about the encoding of any value that would be written to the network by some application. For example, input shares and prep messages all have a fully-specified encoding. For additional discussion, see #58.\r\n\r\n@armfazh [points out](https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88#discussion_r899660677) that implementations of `GF(2^255-19)` typically operate directly on little-endian byte-strings (https://github.com/cloudflare/circl/blob/master/math/fp25519/fp.go#L14). The current draft uses `I2OSP()` from RFC 3447 for encoding field elements, which is big-endian. This is makes it inconvenient to use these implementations for `IdpfPoplar`, as they will be required to re-order the byte strings in order to encode them properly. This is unlikely to be a performance issue, but is potentially a source of bugs.\r\n\r\nA related question raised by this issue is whether little-endian is somehow \"better\" for optimized finite field arithmetic. Perhaps using `I2OSP()` is an anti-pattern, given current trends in cryptographic code design?\r\n\r\nHere are a few ways we might resolve this issue:\r\n\r\n1. Keep the current big-endian encoding for all fields. In order to be compatible with the draft, an implementation of `IdpfPoplar` that uses an existing implementation of `GF(2^255-19)` may need to adjust the encoding.\r\n2. Use little-endian for all fields. This would make it convenient to use existing implementations of `GF(2^255-19)`. Of course, this would require changing the other fields defined in the draft. However, these fields are new and there are no optimized implementations of them yet. (For what it's worth, the choice to use `I2SOP()` was somewhat arbitrary.  We noticed that it was used for other drafts, like [hash-to-curve](https://datatracker.ietf.org/doc/draft-irtf-cfrg-hash-to-curve/), and it seemed like a good idea to crib on prior work.)\r\n3. Allow each field to specify its own encoding. The potential downside here is code complexity. (It's nice when there is only one way to do a thing.)\r\n4. If we decide not to be prescriptive about encoding (cf. #58), then this is issue is somewhat less relevant. However we would still need to specify how to encode field elements that are used as inputs to other cryptographic operations. This may or may not end up mattering for `GF(2^255-19)`.",
+      "createdAt": "2022-06-21T23:41:24Z",
+      "updatedAt": "2022-06-22T05:46:10Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Currently I'm inclined to take option (2.), but I would like to understand better why `I2SOP()` was designed the way it is. As it comes from [RFC 3447](https://datatracker.ietf.org/doc/html/rfc3447), we can infer that it was developed in a world in which all keys read from the wire are RSA moduli. In this world, big-endian probably seems sensible because it would allow you consume the RSA modulus from the wire one byte a time without buffering it. This is less relevant to us because we need to decode numbers whose sizes are constant (cf. `Field.ENCODED_SIZE`) and relatively small (<=32 bytes).",
+          "createdAt": "2022-06-21T23:47:08Z",
+          "updatedAt": "2022-06-21T23:47:08Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Here are my two cents,\r\nI think is better do not to specify any encodings, unless they are part of the _cryptographic protocol_ (and not of the communication protocol).\r\nFor example, if some element needs to be serialized because it will be an input of a hash function, then an encoding should be explicitly enforced. (here it does not matter which on is used).\r\n\r\nApplications could be free to choose the encoding for the communication protocol. For interoperability between applications an encoding could be recommended, but not enforced.\r\nFor test vectors, an encoding could be chosen only for the test code.",
+          "createdAt": "2022-06-22T01:41:32Z",
+          "updatedAt": "2022-06-22T01:41:32Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I2OSP seems to be omnipresent in all crypto libraries, mainly due to RSA and friends.\r\n\r\nThe little-endian seems to be relevant for Fp25519 and other optimized implementations. But in fact, optimized implementations actually represent field elements with multiple words and with redundancy, so the byte representation is not so important and it is only used at transport.\r\n",
+          "createdAt": "2022-06-22T01:46:35Z",
+          "updatedAt": "2022-06-22T01:46:35Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Here are my two cents, I think is better do not to specify any encodings, unless they are part of the _cryptographic protocol_ (and not of the communication protocol). For example, if some element needs to be serialized because it will be an input of a hash function, then an encoding should be explicitly enforced. (here it does not matter which on is used).\r\n\r\nAs I mentioned at the top, in Prio3, vectors of field elements are used as input for a hash function.\r\n\r\n\r\n",
+          "createdAt": "2022-06-22T03:45:23Z",
+          "updatedAt": "2022-06-22T05:46:10Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -6362,24 +6407,26 @@
       "id": "PR_kwDOGKuqOc45z_cv",
       "title": "poc: Implement the Poplar IDPF",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #22.\r\nPartially addresses #84.\r\n\r\n\r\nImplement the Poplar IDPF, extended to allow the outputs to be tuples.\r\nThis required a few minor changes:\r\n\r\n* Extend the IPDF syntax so that `eval()` takes as input the Aggregator\r\n  ID. (This would be passed via `Poplar1.prep_init()`.)\r\n\r\n* Refactor `Prg` by adding a derived method, `next_vec()`, that outputs\r\n  a vector of field elements and updates the PRG state.\r\n\r\n* Allow fields to be defined that aren't suitable for FFT.",
       "createdAt": "2022-06-17T00:07:07Z",
-      "updatedAt": "2022-06-21T00:36:50Z",
+      "updatedAt": "2022-06-22T15:19:38Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "485e7c4cab08f0d0a1a763b423b265f222ba832e",
+      "baseRefOid": "3a4a167c1696b18c2f2dbf2b197b1e5428e6d619",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/idpf-3",
-      "headRefOid": "d3a7889d6637de8e41ce505a50acfccf01c71de8",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "abc10d841d69926c8bd4960027a39f5dd091c340",
+      "closedAt": "2022-06-22T15:19:38Z",
+      "mergedAt": "2022-06-22T15:19:37Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "e74218c3551f58e6c28b912ce4e2b59b1bb2c157"
+      },
       "comments": [],
       "reviews": [
         {
@@ -6647,6 +6694,501 @@
               "updatedAt": "2022-06-21T00:36:50Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48aPiy",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-21T12:28:21Z",
+          "updatedAt": "2022-06-21T12:28:22Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "I have no objections to using this field.",
+              "createdAt": "2022-06-21T12:28:21Z",
+              "updatedAt": "2022-06-21T12:28:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48aQUd",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-21T12:30:36Z",
+          "updatedAt": "2022-06-21T12:30:36Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "You are right, I somehow misread this as `(1<<(n-1)).nbits()`.",
+              "createdAt": "2022-06-21T12:30:36Z",
+              "updatedAt": "2022-06-21T12:30:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48aRES",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-21T12:32:48Z",
+          "updatedAt": "2022-06-21T12:32:48Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I suggest adding parentheses or spaces, even though the operator precedence is pretty clear in this case.",
+              "createdAt": "2022-06-21T12:32:48Z",
+              "updatedAt": "2022-06-21T12:32:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48aSYV",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-21T12:36:31Z",
+          "updatedAt": "2022-06-21T12:36:32Z",
+          "comments": [
+            {
+              "originalPosition": 176,
+              "body": "The security issue is described in Appendix D in the paper. Basically, a malicious client could create a DPF that has non-zero output in two location instead of one when the correction words given to each aggregator are different.",
+              "createdAt": "2022-06-21T12:36:32Z",
+              "updatedAt": "2022-06-21T12:36:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48aTAP",
+          "commit": {
+            "abbreviatedOid": "d3a7889"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-21T12:38:21Z",
+          "updatedAt": "2022-06-21T13:56:29Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "As written in the older comment, I suggest adding parentheses:\r\n`2 ** ((n - 1).nbits())`",
+              "createdAt": "2022-06-21T12:38:21Z",
+              "updatedAt": "2022-06-21T13:56:29Z"
+            },
+            {
+              "originalPosition": 16,
+              "body": "Does the notion of \"most significant bit\" not depend on the integer type? I.e., for a 8-bit integer with value 6 (00000110), the MSB is 0, and it would not be a prefix of the 8-bit integer 25 (00011001). Maybe you can say \"is equal to the most significant `L` bits among the `BITS` least significant bits of `y`.\"? In that case, 6 would be a prefix of 25 again if `BITS == 5`.",
+              "createdAt": "2022-06-21T12:46:28Z",
+              "updatedAt": "2022-06-21T13:56:29Z"
+            },
+            {
+              "originalPosition": 42,
+              "body": "See above.",
+              "createdAt": "2022-06-21T12:47:53Z",
+              "updatedAt": "2022-06-21T13:56:29Z"
+            },
+            {
+              "originalPosition": 45,
+              "body": "Maybe add an assertion that `L >= IdpfPoplar.BITS` (or whatever error handling you want to use in this reference implementation)",
+              "createdAt": "2022-06-21T12:49:45Z",
+              "updatedAt": "2022-06-21T13:56:29Z"
+            },
+            {
+              "originalPosition": 50,
+              "body": "```suggestion\r\n    # the end of [BBCGGI21, Appendix C.3]. This could on average reduce the number of\r\n```",
+              "createdAt": "2022-06-21T13:56:17Z",
+              "updatedAt": "2022-06-21T13:56:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48dSbv",
+          "commit": {
+            "abbreviatedOid": "6572ae0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-21T22:22:08Z",
+          "updatedAt": "2022-06-22T01:03:46Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Done.",
+              "createdAt": "2022-06-21T22:22:08Z",
+              "updatedAt": "2022-06-22T01:03:46Z"
+            },
+            {
+              "originalPosition": 16,
+              "body": "Nice catch. In fact we need to refine this a bit more, since we care about the `L` least significant bits of `x`. (See updated definition.)\r\n\r\nTaking a step back: Is this the right way to define prefixes? What's nice about it is that each prefix at tree level `level` can be expressed as an `L`-bit integer.",
+              "createdAt": "2022-06-21T22:41:44Z",
+              "updatedAt": "2022-06-22T01:03:46Z"
+            },
+            {
+              "originalPosition": 42,
+              "body": "Done.",
+              "createdAt": "2022-06-21T22:41:52Z",
+              "updatedAt": "2022-06-22T01:03:46Z"
+            },
+            {
+              "originalPosition": 45,
+              "body": "Added an assertion that `0 < L and L < IdpfPoplar.BITS`. I don't think this going to end up appearing in the spec (maybe it will?) so an `assert` is sufficient.",
+              "createdAt": "2022-06-21T22:43:46Z",
+              "updatedAt": "2022-06-22T01:03:46Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "Raised https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/90.",
+              "createdAt": "2022-06-21T23:47:54Z",
+              "updatedAt": "2022-06-22T01:03:46Z"
+            },
+            {
+              "originalPosition": 58,
+              "body": "Bump :)",
+              "createdAt": "2022-06-21T23:48:11Z",
+              "updatedAt": "2022-06-22T01:03:46Z"
+            },
+            {
+              "originalPosition": 176,
+              "body": "Got it, nice catch. Let's be sure to address this now. I crated https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/91 and rebased this PR on top.\r\n\r\nA potential way to solve this without syntax changes would be to have the Aggregators exchange the hash of the correction words during preparation. This seems a little hacky to me. Plus, as pointed out in the TODO encoding the correction words in each input share is wasteful.\r\n",
+              "createdAt": "2022-06-21T23:51:02Z",
+              "updatedAt": "2022-06-22T01:03:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48doUI",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T01:04:55Z",
+          "updatedAt": "2022-06-22T01:04:56Z",
+          "comments": [
+            {
+              "originalPosition": 176,
+              "body": "I have rebase on top of #91. For your convenience, you can see the changes by looking at `git pull && git diff 6a51ac1..6572ae0`",
+              "createdAt": "2022-06-22T01:04:56Z",
+              "updatedAt": "2022-06-22T01:04:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48doW3",
+          "commit": {
+            "abbreviatedOid": "7b6d49d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T01:05:21Z",
+          "updatedAt": "2022-06-22T01:05:21Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Done.",
+              "createdAt": "2022-06-22T01:05:21Z",
+              "updatedAt": "2022-06-22T01:05:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48dpIH",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T01:10:11Z",
+          "updatedAt": "2022-06-22T01:10:12Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "Bump",
+              "createdAt": "2022-06-22T01:10:11Z",
+              "updatedAt": "2022-06-22T01:10:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48ficO",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T10:12:01Z",
+          "updatedAt": "2022-06-22T10:12:01Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "The new definition of prefix sounds good.",
+              "createdAt": "2022-06-22T10:12:01Z",
+              "updatedAt": "2022-06-22T10:12:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48fijO",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T10:12:22Z",
+          "updatedAt": "2022-06-22T10:12:22Z",
+          "comments": [
+            {
+              "originalPosition": 58,
+              "body": "Sounds good.",
+              "createdAt": "2022-06-22T10:12:22Z",
+              "updatedAt": "2022-06-22T10:12:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48fj-L",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T10:16:31Z",
+          "updatedAt": "2022-06-22T10:16:32Z",
+          "comments": [
+            {
+              "originalPosition": 176,
+              "body": "Thanks! #91 looks good to me.",
+              "createdAt": "2022-06-22T10:16:32Z",
+              "updatedAt": "2022-06-22T10:16:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48fk0R",
+          "commit": {
+            "abbreviatedOid": "d3a7889"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T10:18:24Z",
+          "updatedAt": "2022-06-22T10:18:24Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "> Taking a step back: Is this the right way to define prefixes? What's nice about it is that each prefix at tree level level can be expressed as an L-bit integer.\r\n\r\nI agree it's quite complicated, but I also haven't found an easier way to express it. Maybe if we went to a \"bit vector\" type instead of numbers for alpha and prefixes?",
+              "createdAt": "2022-06-22T10:18:24Z",
+              "updatedAt": "2022-06-22T10:18:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48ftf8",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T10:43:43Z",
+          "updatedAt": "2022-06-22T10:43:44Z",
+          "comments": [
+            {
+              "originalPosition": 176,
+              "body": "> For your convenience, you can see the changes by looking at git pull && git diff 6a51ac1..6572ae0\r\n\r\nThis doesn't work for me, as `6a51ac1` is not part of any active branch (I hadn't pulled the previous version).\r\nWould it work to defer rebasing until the commit is fully reviewed? Then the GH web interface shows the diff nicely.",
+              "createdAt": "2022-06-22T10:43:44Z",
+              "updatedAt": "2022-06-22T10:43:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48fttX",
+          "commit": {
+            "abbreviatedOid": "d3a7889"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T10:44:28Z",
+          "updatedAt": "2022-06-22T10:44:28Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "Either way I think this can be addressed in a future PR.",
+              "createdAt": "2022-06-22T10:44:28Z",
+              "updatedAt": "2022-06-22T10:44:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48ft1l",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T10:44:56Z",
+          "updatedAt": "2022-06-22T10:44:57Z",
+          "comments": [
+            {
+              "originalPosition": 176,
+              "body": "Either way, this PR looks good assuming no substantial changes beyond what's commented on.",
+              "createdAt": "2022-06-22T10:44:57Z",
+              "updatedAt": "2022-06-22T10:44:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48ft6y",
+          "commit": {
+            "abbreviatedOid": "6572ae0"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-06-22T10:45:13Z",
+          "updatedAt": "2022-06-22T10:45:13Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48hYVU",
+          "commit": {
+            "abbreviatedOid": "a132005"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T15:15:43Z",
+          "updatedAt": "2022-06-22T15:15:44Z",
+          "comments": [
+            {
+              "originalPosition": 176,
+              "body": "Ohhh, `6a51ac1` only exists in my reflog. I thought pushing would have also pushed that head.\r\n\r\nI typically try to hold off on rebasing until review is done, but in this instance we needed to rebase on #91. This would all be much easier if we had Gerrit..\r\n\r\nIn any case, there were no significant changes. Here's the patch:\r\n```\r\ndiff --git a/poc/idpf.sage b/poc/idpf.sage\r\nindex 4191c4f..e95637f 100644\r\n--- a/poc/idpf.sage\r\n+++ b/poc/idpf.sage\r\n@@ -91,7 +91,7 @@ def test_idpf_exhaustive(Idpf, alpha):\r\n     beta_leaf = Idpf.FieldLeaf.rand_vec(Idpf.VALUE_LEN)\r\n\r\n     # Generate the IDPF keys.\r\n-    keys = Idpf.gen(alpha, beta_inner, beta_leaf)\r\n+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)\r\n\r\n     # Evaluate the IDPF at every node of the tree.\r\n     for level in range(Idpf.BITS):\r\n@@ -100,7 +100,9 @@ def test_idpf_exhaustive(Idpf, alpha):\r\n\r\n         out_shares = []\r\n         for agg_id in range(Idpf.SHARES):\r\n-            out_shares.append(Idpf.eval(agg_id, keys[agg_id], level, prefixes))\r\n+            out_shares.append(\r\n+                Idpf.eval(agg_id, public_share,\r\n+                          keys[agg_id], level, prefixes))\r\n\r\n         # Check that each set of output shares for each prefix sums up to the\r\n         # correct value.\r\ndiff --git a/poc/idpf_poplar.sage b/poc/idpf_poplar.sage\r\nindex e0c33ac..2f71e96 100644\r\n--- a/poc/idpf_poplar.sage\r\n+++ b/poc/idpf_poplar.sage\r\n@@ -69,16 +69,17 @@ class IdpfPoplar(Idpf):\r\n                 w_cw = vec_neg(w_cw)\r\n             correction_words.append((seed_cw, ctrl_cw, w_cw))\r\n\r\n-        return IdpfPoplar.encode_keys(correction_words, init_seed)\r\n+        public_share = IdpfPoplar.encode_public_share(correction_words)\r\n+        return (public_share, init_seed)\r\n\r\n     @classmethod\r\n-    def eval(IdpfPoplar, agg_id, key, level, prefixes):\r\n+    def eval(IdpfPoplar, agg_id, public_share, init_seed, level, prefixes):\r\n         if agg_id >= IdpfPoplar.SHARES:\r\n             raise ERR_INPUT # invalid aggregator ID\r\n         if level >= IdpfPoplar.BITS:\r\n             raise ERR_INPUT # level too deep\r\n\r\n-        (correction_words, init_seed) = IdpfPoplar.decode_key(key)\r\n+        correction_words = IdpfPoplar.decode_public_share(public_share)\r\n         out_share = []\r\n         for prefix in prefixes:\r\n             if prefix >= 2^level:\r\n@@ -156,28 +157,23 @@ class IdpfPoplar(Idpf):\r\n         return (next_seed, w)\r\n\r\n     @classmethod\r\n-    def encode_keys(IdpfPoplar, correction_words, init_seed):\r\n+    def encode_public_share(IdpfPoplar, correction_words):\r\n         encoded = Bytes()\r\n         for (level, (seed_cw, ctrl_cw, w_cw)) in enumerate(correction_words):\r\n             encoded += seed_cw\r\n-            # TODO Packing only two control bits into a byte is wasteful.\r\n-            # Consider packing them more tightly.\r\n+            # TODO Consider packing the correction bits more tightly. This\r\n+            # encoding is designed to make it convenient for implementations to\r\n+            # \"throw away\" correction words they know they're no longer going to\r\n+            # need. However, using a byte to encode two bits is slightly\r\n+            # wasteful.\r\n             encoded += byte(ctrl_cw[0].as_unsigned() | \\\r\n                            (ctrl_cw[1].as_unsigned() << 1))\r\n             Field = IdpfPoplar.current_field(level)\r\n             encoded += Field.encode_vec(w_cw)\r\n-        # TODO The correction words vector needs to be encoded by both IPDF key\r\n-        # shares so that both Aggregators have access to it. This is wasteful\r\n-        # for applications like DAP in which the VDAF input shares are encrypted\r\n-        # and sent to one Aggregator: The correction words vector ends up\r\n-        # getting sent twice when sending them once would have been sufficient.\r\n-        #\r\n-        # Consider modifying the VDAF syntax so that the sharding algorithm\r\n-        # outputs a public value shared by all Aggregators.\r\n-        return [encoded + init_seed[0], encoded + init_seed[1]]\r\n+        return encoded\r\n\r\n     @classmethod\r\n-    def decode_key(IdpfPoplar, encoded):\r\n+    def decode_public_share(IdpfPoplar, encoded):\r\n         correction_words = []\r\n         for level in range(IdpfPoplar.BITS):\r\n             l = IdpfPoplar.Prg.SEED_SIZE\r\n@@ -189,11 +185,9 @@ class IdpfPoplar(Idpf):\r\n             encoded_w_cw, encoded = encoded[:l], encoded[l:]\r\n             w_cw = Field.decode_vec(encoded_w_cw)\r\n             correction_words.append((seed_cw, ctrl_cw, w_cw))\r\n-        l = IdpfPoplar.Prg.SEED_SIZE\r\n-        seed, encoded = encoded[:l], encoded[l:]\r\n         if len(encoded) != 0:\r\n             raise ERR_DECODE\r\n-        return (correction_words, seed)\r\n+        return correction_words\r\n\r\n     @classmethod\r\n     def with_prg(IdpfPoplar, Prg):\r\n```",
+              "createdAt": "2022-06-22T15:15:43Z",
+              "updatedAt": "2022-06-22T15:15:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48hZOu",
+          "commit": {
+            "abbreviatedOid": "d3a7889"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T15:17:21Z",
+          "updatedAt": "2022-06-22T15:17:21Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "I think an explicit \"bit-vector\" representation would end up being cumbersome. It's complicated, and therefore needs to be explained well, but it seems like the best option to me.",
+              "createdAt": "2022-06-22T15:17:21Z",
+              "updatedAt": "2022-06-22T15:17:21Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 91,
+      "id": "PR_kwDOGKuqOc46EuE6",
+      "title": "Add public share to sharding algorithm",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/91",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Partially addresses #84.\r\n\r\nModifies the syntax for (V)DAFs to allow the Client to generate a\r\n\"public share\" that is distributed to all of the Aggregators. This is to\r\nsupport VDAFs such as Poplar1 that require an IDPF. (See see [BBCGGI21,\r\nAppendix D].)",
+      "createdAt": "2022-06-22T00:14:19Z",
+      "updatedAt": "2022-06-22T15:08:58Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "485e7c4cab08f0d0a1a763b423b265f222ba832e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/idpf-3-public-share",
+      "headRefOid": "64ed2762dd74cb680b6233f41d8fc26c929933ff",
+      "closedAt": "2022-06-22T15:08:58Z",
+      "mergedAt": "2022-06-22T15:08:57Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "3a4a167c1696b18c2f2dbf2b197b1e5428e6d619"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc48dn9N",
+          "commit": {
+            "abbreviatedOid": "9a15373"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-22T01:01:55Z",
+          "updatedAt": "2022-06-22T01:01:55Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "```suggestion\r\n  Aggregators, and a corresponding sequence of input shares, one for each\r\n```",
+              "createdAt": "2022-06-22T01:01:55Z",
+              "updatedAt": "2022-06-22T01:01:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc48fjg1",
+          "commit": {
+            "abbreviatedOid": "9a15373"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-06-22T10:14:59Z",
+          "updatedAt": "2022-06-22T10:14:59Z",
+          "comments": []
         }
       ]
     }
