@@ -2264,35 +2264,47 @@ is zero everywhere except for one element, which is equal to one.
 ## Incremental Distributed Point Functions (IDPFs)
 
 An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
-defined by the IDPF. The Client specifies an index `alpha` and a pair of values
-`beta`, one for each "level" `1 <= l <= BITS`. The key generation generates two
-IDPF keys, one for each Aggregator. When evaluated at index `0 <= x < 2^l`, each
-IDPF share returns an additive share of `beta[l]` if `x` is the `l`-bit prefix
+defined by the IDPF. The Client specifies an index `alpha` and a vector of values
+`beta`, one for each "level" `1 <= L <= BITS`. The key generation generates two
+IDPF keys, one for each Aggregator. When evaluated at level `l` and index `0 <= x < 2^L`, each
+IDPF share returns an additive share of `beta[L]` if `x` is the `L`-bit prefix
 of `alpha` and shares of zero otherwise.
 
-> CP What does it mean for `x` to be the `l`-bit prefix of `alpha`? We need to
-> be a bit more precise here.
+Let `LSB(x, N)` denote the least significant `N` bits of positive integer
+`x`. By definition, a positive integer `0 <= x <= 2^L` is said to be the length-`L`
+prefix of positive integer `0 <= y <= BITS` if `LSB(x, L)` is equal to the most
+significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is
+the length-3 prefix of 25 (11001), but 7 (111) is not.
 
 > CP Why isn't the domain size actually `2^(BITS+1)`, i.e., the number of nodes
 > in a binary tree of height `BITS` (excluding the root)?
 
-Each `beta[l]` is a pair of elements of a finite field. Each level MAY have
-different field parameters. Thus a concrete IDPF specifies associated types
-`Field[1]`, `Field[2]`, ..., and `Field[BITS]` defining, respectively, the field
-parameters at level 1, level 2, ..., and level `BITS`.
+> PS If the height `BITS` is defined as the length of the longest path from root to a leaf (which matches IDPFs), then
+> the number of nodes is `2^BITS`.
 
-An IDPF is comprised of the following algorithms (let type `Value[l]` denote
-`(Field[l], Field[l])` for each level `l`):
+Each `beta[l]` is a vector of elements of a finite field. We distinguish two types of
+fields: one for inner nodes (denoted `Idpf.FieldInner`), and one for leaf nodes (`Idpf.FieldLeaf`).
 
-* `idpf_gen(alpha: Unsigned, beta: (Value[1], ..., Value[BITS])) -> key:
-  (IDPFKey, IDPFKey)` is the randomized key-generation algorithm run by the
+An IDPF is comprised of the following algorithms :
+
+* `Idpf.gen(alpha: Unsigned,
+            beta_inner: Vec[Vec[Idpf.FieldInner]],
+            beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])`:
+  is the randomized key-generation algorithm run by the
   client. Its inputs are the index `alpha` and the values `beta`. The value of
   `alpha` MUST be in range `[0, 2^BITS)`.
+  The output is a public part that is sent to all aggregators, and a vector of
+  private IDPF keys, one for each aggregator.
 
-* `IDPFKey.eval(l: Unsigned, x: Unsigned) -> value: Value[l])` is deterministic,
+* `Idpf.eval(agg_id: Unsigned,
+             public_share: Bytes,
+             key: Bytes,
+             level: Unsigned,
+             prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]],
+                                               Vec[Vec[Idpf.FieldLeaf]]]` is the deterministic,
   stateless key-evaluation algorithm run by each Aggregator. It returns the
-  value corresponding to index `x`. The value of `l` MUST be in `[1, BITS]` and
-  the value of `x` MUST be in range `[2^(l-1), 2^l)`.
+  value corresponding to index `x`. The value of `level` MUST be in `[1, BITS]` and
+  each element of `prefixes` must be in `[0, 2^(level-1)]`.
 
 A concrete IDPF specifies a single associated constant:
 
@@ -2300,12 +2312,8 @@ A concrete IDPF specifies a single associated constant:
 
 A concrete IDPF also specifies the following associated types:
 
-* `Field[l]` for each level `1 <= l <= BITS`. Each defines the same methods and
+* `FieldInner` and `FieldLeaf`. Each defines the same methods and
   associated constants as `Field` in {{prio3}}.
-
-Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
-the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
-Section 4.3.
 
 Finally, an implementation note. The interface for IDPFs specified here is
 stateless, in the sense that there is no state carried between IDPF evaluations.
