@@ -616,7 +616,7 @@ def run_daf(Daf,
                 Daf.prep(j, agg_param, public_share, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
-    # share and it to the Collector.
+    # share and sends it to the Collector.
     agg_shares = []
     for j in range(Daf.SHARES):
         agg_share_j = Daf.out_shares_to_agg_share(agg_param,
@@ -2327,19 +2327,7 @@ state across evaluations.
 The VDAF involves two rounds of communication (`ROUNDS == 2`) and is defined for
 two Aggregators (`SHARES == 2`).
 
-### Setup
-
-The verification parameter is a symmetric key shared by both Aggregators. This
-VDAF has no public parameter.
-
-~~~
-def vdaf_setup():
-  k_verify_init = gen_rand(SEED_SIZE)
-  return (None, [(0, k_verify_init), (1, k_verify_init)])
-~~~
-{: #poplar1-eval-setup title="The setup algorithm for poplar1."}
-
-#### Client
+### Client
 
 The client's input is an IDPF index, denoted `alpha`. The values are pairs of
 field elements `(1, k)` where each `k` is chosen at random. This random value is
@@ -2359,14 +2347,15 @@ Putting everything together, the input-distribution algorithm is defined as
 follows. Function `encode_input_share` is defined in {{poplar1-helper-functions}}.
 
 ~~~
-def measurement_to_input_shares(_, alpha):
+def measurement_to_input_shares(Poplar1, alpha):
   if alpha < 2**BITS: raise ERR_INVALID_INPUT
 
   # Prepare IDPF values.
   beta = []
   correlation_shares_0, correlation_shares_1 = [], []
   for l in range(1,BITS+1):
-    (k, a, b, c) = Field[l].rand_vec(4)
+    Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+    (k, a, b, c) = Field.rand_vec(4)
 
     # Construct values of the form (1, k), where k
     # is a random field element.
@@ -2376,13 +2365,13 @@ def measurement_to_input_shares(_, alpha):
     # the Aggregators' computation.
     A = -2*a+k
     B = a*a + b - a * k + c
-    correlation_share = Field[l].rand_vec(5)
+    correlation_share = Field.rand_vec(5)
     correlation_shares_1.append(correlation_share)
     correlation_shares_0.append(
       [a, b, c, A, B] - correlation_share)
 
   # Generate IDPF shares.
-  (key_0, key_1) = idpf_gen(alpha, beta)
+  (key_0, key_1) = idpf_gen(alpha, beta[:-1], beta[-1])
 
   input_shares = [
     encode_input_share(key_0, correlation_shares_0),
@@ -2405,47 +2394,51 @@ elements `data_share` and `auth_share`, The Aggregators use `auth_share` and the
 correlation shares provided by the Client to verify that their `data_share`
 vectors are additive shares of a one-hot vector.
 
-> CP Consider adding aggregation parameter as input to `k_verify_rand`
-> derivation.
-
 ~~~
-class PrepState:
-  def __init__(verify_param, agg_param, nonce, input_share):
-    (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
-    (self.idpf_key,
-     self.correlation_shares) = decode_input_share(input_share)
-    (self.party_id, k_verify_init) = verify_param
-    self.k_verify_rand = get_key(k_verify_init, nonce)
-    self.step = 'ready'
 
-  def next(self, inbound: Optional[Bytes]):
-    l = self.l
+def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, public_share, input_share):
+    l, self.candidate_prefixes = decode_indexes(agg_param)
+    idpf_key, correlation_shares = decode_input_share(input_share)
+    public_share = public_share
+    k_verify_rand = get_key(verify_key, nonce)
+    prep_step = 'ready'
+    output_share = None
+    prep_fixed = (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
+    return (prep_step, prep_fixed, output_share)
+
+
+def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
+    (prep_step, prep_fixed, output_share) = prep
+    (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
+      = prep_fixed
     (a_share, b_share, c_share,
      A_share, B_share) = correlation_shares[l-1]
 
-    if self.step == 'ready' and inbound == None:
+    Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+    if step == 'ready' and inbound == None:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
-      for x in self.candidate_prefixes:
-        value = self.idpf_key.eval(l, x)
+      for x in candidate_prefixes:
+        value = Poplar1.Idpf.eval(agg_id, public_share, idpf_key, l, candidate_prefixes)
         data_share.append(value[0])
         auth_share.append(value[1])
 
       # Prepare first sketch verification message.
-      r = Prg.expand_into_vec(
-        Field[l], self.k_verify_rand, len(data_share))
+      r = Poplar1.Prg.expand_into_vec(
+        Field, k_verify_rand, len(data_share))
       verifier_share_1 = [
          a_share + inner_product(data_share, r),
          b_share + inner_product(data_share, r * r),
          c_share + inner_product(auth_share, r),
       ]
 
-      self.output_share = data_share
-      self.step = 'sketch round 1'
-      return verifier_share_1
+      output_share = data_share
+      prep_step = 'sketch round 1'
+      prep = (prep_step, prep_fixed, output_share)
+      return (prep, Field.encode_vec(verifier_share_1))
 
     elif self.step == 'sketch round 1' and inbound != None:
-      verifier_1 = Field[l].decode_vec(inbound)
+      verifier_1 = Field.decode_vec(inbound)
       verifier_share_2 = [
         (verifier_1[0] * verifier_1[0] \
          - verifier_1[1] \
@@ -2454,13 +2447,14 @@ class PrepState:
         + B_share
       ]
 
-      self.step = 'sketch round 2'
-      return Field[l].encode_vec(verifier_share_2)
+      prep_step = 'sketch round 2'
+      prep = (prep_step, prep_fixed, output_share)
+      return (prep, Field.encode_vec(verifier_share_2))
 
     elif self.step == 'sketch round 2' and inbound != None:
-      verifier_2 = Field[l].decode_vec(inbound)
+      verifier_2 = Field.decode_vec(inbound)
       if verifier_2 != 0: raise ERR_INVALID
-      return Field[l].encode_vec(self.output_share)
+      return Field.encode_vec(output_share)
 
     else: raise ERR_INVALID_STATE
 
@@ -2469,41 +2463,44 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
     raise ERR_INVALID_INPUT
 
   (l, _) = decode_indexes(agg_param)
-  verifier = Field[l].decode_vec(inbound[0]) + \
-             Field[l].decode_vec(inbound[1])
+  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+  verifier = Field.decode_vec(inbound[0]) + \
+             Field.decode_vec(inbound[1])
 
-  return Field[l].encode_vec(verifier)
+  return Field.encode_vec(verifier)
 ~~~
 {: #poplar1-prep-state title="Preparation state for poplar1."}
 
 ### Aggregation
 
 ~~~
-def out_shares_to_agg_share(agg_param, output_shares: Vec[Bytes]):
+def out_shares_to_agg_share(Poplar1, agg_param, output_shares: Vec[OutShare]):
   (l, candidate_prefixes) = decode_indexes(agg_param)
   if len(output_shares) != len(candidate_prefixes):
     raise ERR_INVALID_INPUT
 
-  agg_share = Field[l].zeros(len(candidate_prefixes))
+  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+  agg_share = Field.zeros(len(candidate_prefixes))
   for output_share in output_shares:
-    agg_share += Field[l].decode_vec(output_share)
+    agg_share = vec_add(agg_share, output_share)
 
-  return Field[l].encode_vec(agg_share)
+  return Field.encode_vec(agg_share)
 ~~~
 {: #poplar1-out2agg title="Aggregation algorithm for poplar1."}
 
 ### Unsharding
 
 ~~~
-def agg_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
+def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
   (l, _) = decode_indexes(agg_param)
   if len(agg_shares) != 2:
     raise ERR_INVALID_INPUT
 
-  agg = Field[l].decode_vec(agg_shares[0]) + \
-        Field[l].decode_vec(agg_shares[1]J)
+  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+  agg = Field.decode_vec(agg_shares[0]) + \
+        Field.decode_vec(agg_shares[1])
 
-  return Field[l].encode_vec(agg)
+  return Field.encode_vec(agg)
 ~~~
 {: #poplar1-agg-output title="Computation of the aggregate result for poplar1."}
 
@@ -2539,7 +2536,7 @@ VDAFs have two essential security goals:
    the measurements of honest Clients.
 
 Note that, to achieve robustness, it is important to ensure that the
-verification key distributed to the Aggregators (`verify_key`, see {{setup}}) is
+verification key distributed to the Aggregators (`verify_key`, see {{sec-vdaf-prepare}}) is
 never revealed to the Clients.
 
 It is also possible to consider a stronger form of robustness, where the
