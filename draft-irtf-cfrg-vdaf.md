@@ -2361,7 +2361,7 @@ def measurement_to_input_shares(Poplar1, alpha):
       [a, b, c, A, B] - correlation_share)
 
   # Generate IDPF shares.
-  (key_0, key_1) = Idpf.gen(alpha, beta[:-1], beta[-1])
+  (key_0, key_1) = Poplar1.Idpf.gen(alpha, beta[:-1], beta[-1])
 
   input_shares = [
     encode_input_share(key_0, correlation_shares_0),
@@ -2513,9 +2513,9 @@ def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
 
 * `decode_indexes(encoded: Bytes) -> (l: Unsigned, indexes: Vec[Unsigned])`
   decodes a sequence of indexes, i.e., candidate indexes for IDPF evaluation.
-  The value of `l` MUST be in range `[1, BITS]` and `indexes[i]` MUST be in range
-  `[2^(l-1), 2^l)` for all `i`. An error is raised if `encoded` cannot be
-  decoded.
+  The value of `l` MUST be in range `[0, BITS-1]` and `indexes` MUST be empty
+  if `l == 0` or only contain values in range `[0, 2^l-1]` otherwise.
+  An error is raised if `encoded` cannot be decoded.
 
 # Security Considerations {#security}
 
