@@ -2276,35 +2276,24 @@ prefix of positive integer `0 <= y <= BITS` if `LSB(x, L)` is equal to the most
 significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is
 the length-3 prefix of 25 (11001), but 7 (111) is not.
 
-> CP Why isn't the domain size actually `2^(BITS+1)`, i.e., the number of nodes
-> in a binary tree of height `BITS` (excluding the root)?
-
-> PS If the height `BITS` is defined as the length of the longest path from root to a leaf (which matches IDPFs), then
-> the number of nodes is `2^BITS`.
-
 Each `beta[l]` is a vector of elements of a finite field. We distinguish two types of
 fields: one for inner nodes (denoted `Idpf.FieldInner`), and one for leaf nodes (`Idpf.FieldLeaf`).
 
 An IDPF is comprised of the following algorithms :
 
-* `Idpf.gen(alpha: Unsigned,
-            beta_inner: Vec[Vec[Idpf.FieldInner]],
-            beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])`:
+* `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])`
   is the randomized key-generation algorithm run by the
   client. Its inputs are the index `alpha` and the values `beta`. The value of
   `alpha` MUST be in range `[0, 2^BITS)`.
   The output is a public part that is sent to all aggregators, and a vector of
   private IDPF keys, one for each aggregator.
 
-* `Idpf.eval(agg_id: Unsigned,
-             public_share: Bytes,
-             key: Bytes,
-             level: Unsigned,
-             prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]],
-                                               Vec[Vec[Idpf.FieldLeaf]]]` is the deterministic,
+* `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned, prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]]`
+  is the deterministic,
   stateless key-evaluation algorithm run by each Aggregator. It returns the
-  value corresponding to index `x`. The value of `level` MUST be in `[1, BITS]` and
-  each element of `prefixes` must be in `[0, 2^(level-1)]`.
+  value corresponding to index `x`. The value of `level` MUST be in `[0, BITS-1]` and
+  `prefixes` must be empty when `level == 0`, and only contain values in
+  `[0, 2^level-1]` otherwise.
 
 A concrete IDPF specifies a single associated constant:
 
