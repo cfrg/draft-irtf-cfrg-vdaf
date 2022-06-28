@@ -4432,7 +4432,7 @@ is zero everywhere except for one element, which is equal to one.<a href="#secti
 <p id="section-8.1-1">An IDPF is defined over a domain of size <code>2^BITS</code>, where <code>BITS</code> is constant
 defined by the IDPF. The Client specifies an index <code>alpha</code> and a vector of values
 <code>beta</code>, one for each "level" <code>1 &lt;= L &lt;= BITS</code>. The key generation algorithm generates two
-IDPF keys, one for each Aggregator. When evaluated at level <code>l</code> and index <code>0 &lt;= x &lt; 2^L</code>, each
+IDPF keys, one for each Aggregator. When evaluated at level <code>L</code> and index <code>0 &lt;= x &lt; 2^L</code>, each
 IDPF share returns an additive share of <code>beta[L]</code> if <code>x</code> is the <code>L</code>-bit prefix
 of <code>alpha</code> and shares of zero otherwise.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.1-2">Let <code>LSB(x, N)</code> denote the least significant <code>N</code> bits of positive integer
@@ -4488,7 +4488,7 @@ each element of <code>prefixes</code> must be in <code>[0, 2^(level-1)]</code>.<
 <ul class="normal">
 <li class="normal" id="section-8.1-11.1">
             <code>FieldInner</code> and <code>FieldLeaf</code>. Each defines the same methods and
-associated constants as <code>Field</code> in <a href="#prio3" class="xref">Section 7</a>.<a href="#section-8.1-11.1" class="pilcrow">¶</a>
+associated constants as <code>Field</code> in <a href="#field" class="xref">Section 6.1</a>.<a href="#section-8.1-11.1" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-8.1-12">Finally, an implementation note. The interface for IDPFs specified here is
