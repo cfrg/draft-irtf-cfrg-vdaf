@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-23T00:49:36.715857+00:00",
+  "timestamp": "2022-06-28T00:59:33.749965+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1458,6 +1458,37 @@
           "body": "> Here are my two cents, I think is better do not to specify any encodings, unless they are part of the _cryptographic protocol_ (and not of the communication protocol). For example, if some element needs to be serialized because it will be an input of a hash function, then an encoding should be explicitly enforced. (here it does not matter which on is used).\r\n\r\nAs I mentioned at the top, in Prio3, vectors of field elements are used as input for a hash function.\r\n\r\n\r\n",
           "createdAt": "2022-06-22T03:45:23Z",
           "updatedAt": "2022-06-22T05:46:10Z"
+        }
+      ]
+    },
+    {
+      "number": 92,
+      "id": "I_kwDOGKuqOc5MmB6-",
+      "title": "Pass the number of reports to agg_shares_to_result()",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/92",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Inspired by the discussion on divviup/libprio-rs#256, I propose that the number of reports should be added as an argument to `agg_shares_to_result()` for DAFs and VDAFs. This would be useful in Prio for any AFE where the encoding does not preserve the additive identity. (or doesn't map some other identity to the additive identity) In such cases, then the unsharding algorithm could cancel out whatever constant term got added by every client's input. Any application using VDAF should already know how many reports contributed to one aggregate, we just need to expose it back down to the VDAF layer.\r\n\r\nNote that this would also enable computing an average \"inside the VDAF\" rather than computing a sum and leaving it to the application to compute the average from that. This is more trivial than remapping [-1, 1] to [0, 2^n], as in the example that motivated this.\r\n\r\nWhile it would be technically possible for an application to reverse the [-1, 1] to [0, 2^n] mapping, if given just a raw sum from Prio and a priori knowledge of the number of reports (by dividing by 2^(n-1) and subtracting num_reports), I think it would be more user-friendly if we made it possible for the unsharding step to do so. The postprocessing necessary for the averaging use case is easy enough to write out by hand, this fixed-point with offset encoding is slightly more difficult, but generally, AFE encodings could include multiple such encoded numbers, or even nonlinear functions composed with affine remappings. (The Prio paper includes examples of calculating a product or geometric mean. This would most likely be done by taking a logarithm of the input, and this logarithm would most likely need to be encoded as a fixed point number with an offset) For this reason, I think we should provide this number of reports to `agg_shares_to_result()`, so that unsharding can be \"as powerful as\" sharding, and applications won't have to concern themselves as much with the encoding details of particular more complicated VDAFs.\r\n\r\ncc @MxmUrw",
+      "createdAt": "2022-06-26T21:35:47Z",
+      "updatedAt": "2022-06-27T18:45:33Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This sounds like a reasonable change to me. My only worry would be scope creep, however a (V)DAF already explicitly defines the type of aggregate result, so I don't this actually changes the scope of the draft. It seems like this is likely to be useful for other types as well.\r\n\r\nBarring objections from @schoppmp or @bifurcation, I think this is a clear win. Would either @divergentdave or @MxmUrw care to start working on a PR? Ideally this PR would also make the corresponding change to the reference implementation.",
+          "createdAt": "2022-06-27T18:32:04Z",
+          "updatedAt": "2022-06-27T18:32:04Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Sure, I can write one up later this week",
+          "createdAt": "2022-06-27T18:45:33Z",
+          "updatedAt": "2022-06-27T18:45:33Z"
         }
       ]
     }
@@ -7189,6 +7220,89 @@
           "createdAt": "2022-06-22T10:14:59Z",
           "updatedAt": "2022-06-22T10:14:59Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 93,
+      "id": "PR_kwDOGKuqOc46bfEb",
+      "title": "Update Poplar1 syntax to match VDAF definition",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/93",
+      "state": "OPEN",
+      "author": "schoppmp",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2022-06-27T16:35:25Z",
+      "updatedAt": "2022-06-27T18:17:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "d272ec9d17e61205da5189c124ba7687b23f8dfd",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "schoppmp/poplar1",
+      "headRefOid": "04da0272473b867a8a60808e971968983cde5142",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc481Nv2",
+          "commit": {
+            "abbreviatedOid": "04da027"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "This is definitely moving in the right direction. One open question before we merge: Should `level` be in range `[1, BITS]` or `[0, BITS)`? The latter is used in the reference code, if I remember right.",
+          "createdAt": "2022-06-27T18:02:06Z",
+          "updatedAt": "2022-06-27T18:17:03Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "```suggestion\r\n`beta`, one for each \"level\" `1 <= L <= BITS`. The key generation algorithm generates two\r\n```",
+              "createdAt": "2022-06-27T18:02:06Z",
+              "updatedAt": "2022-06-27T18:17:03Z"
+            },
+            {
+              "originalPosition": 19,
+              "body": "```suggestion\r\nIDPF keys, one for each Aggregator. When evaluated at level `L` and index `0 <= x < 2^L`, each\r\n```",
+              "createdAt": "2022-06-27T18:02:54Z",
+              "updatedAt": "2022-06-27T18:17:03Z"
+            },
+            {
+              "originalPosition": 39,
+              "body": "Ack, feel free to remove my comment.",
+              "createdAt": "2022-06-27T18:04:12Z",
+              "updatedAt": "2022-06-27T18:17:03Z"
+            },
+            {
+              "originalPosition": 52,
+              "body": "nit: Remove colon (\":\") and put the function definition on a single line. https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/draft-irtf-cfrg-vdaf.md?plain=1#L476\r\n\r\nHere and below.",
+              "createdAt": "2022-06-27T18:10:10Z",
+              "updatedAt": "2022-06-27T18:17:03Z"
+            },
+            {
+              "originalPosition": 70,
+              "body": "The reference implementation begins indexing the levels at `0` rather than `1`. I don't care which we go with, as long as we're consistent. If you want to change this, either file an issue to fix the reference implementation or fix the reference implementation in this PR.",
+              "createdAt": "2022-06-27T18:12:24Z",
+              "updatedAt": "2022-06-27T18:17:03Z"
+            },
+            {
+              "originalPosition": 81,
+              "body": "```suggestion\r\n  associated constants as `Field` in {{field}}.\r\n```",
+              "createdAt": "2022-06-27T18:13:10Z",
+              "updatedAt": "2022-06-27T18:17:03Z"
+            },
+            {
+              "originalPosition": 141,
+              "body": "```suggestion\r\n  (key_0, key_1) = Idpf.gen(alpha, beta[:-1], beta[-1])\r\n```",
+              "createdAt": "2022-06-27T18:14:05Z",
+              "updatedAt": "2022-06-27T18:17:03Z"
+            }
+          ]
         }
       ]
     }
