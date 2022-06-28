@@ -616,7 +616,7 @@ def run_daf(Daf,
                 Daf.prep(j, agg_param, public_share, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
-    # share and it to the Collector.
+    # share and sends it to the Collector.
     agg_shares = []
     for j in range(Daf.SHARES):
         agg_share_j = Daf.out_shares_to_agg_share(agg_param,
@@ -2264,35 +2264,36 @@ is zero everywhere except for one element, which is equal to one.
 ## Incremental Distributed Point Functions (IDPFs)
 
 An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
-defined by the IDPF. The Client specifies an index `alpha` and a pair of values
-`beta`, one for each "level" `1 <= l <= BITS`. The key generation generates two
-IDPF keys, one for each Aggregator. When evaluated at index `0 <= x < 2^l`, each
-IDPF share returns an additive share of `beta[l]` if `x` is the `l`-bit prefix
+defined by the IDPF. The Client specifies an index `alpha` and a vector of values
+`beta`, one for each "level" `1 <= L <= BITS`. The key generation algorithm generates two
+IDPF keys, one for each Aggregator. When evaluated at level `L` and index `0 <= x < 2^L`, each
+IDPF share returns an additive share of `beta[L]` if `x` is the `L`-bit prefix
 of `alpha` and shares of zero otherwise.
 
-> CP What does it mean for `x` to be the `l`-bit prefix of `alpha`? We need to
-> be a bit more precise here.
+Let `LSB(x, N)` denote the least significant `N` bits of positive integer
+`x`. By definition, a positive integer `0 <= x <= 2^L` is said to be the length-`L`
+prefix of positive integer `0 <= y <= BITS` if `LSB(x, L)` is equal to the most
+significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is
+the length-3 prefix of 25 (11001), but 7 (111) is not.
 
-> CP Why isn't the domain size actually `2^(BITS+1)`, i.e., the number of nodes
-> in a binary tree of height `BITS` (excluding the root)?
+Each `beta[l]` is a vector of elements of a finite field. We distinguish two types of
+fields: one for inner nodes (denoted `Idpf.FieldInner`), and one for leaf nodes (`Idpf.FieldLeaf`).
 
-Each `beta[l]` is a pair of elements of a finite field. Each level MAY have
-different field parameters. Thus a concrete IDPF specifies associated types
-`Field[1]`, `Field[2]`, ..., and `Field[BITS]` defining, respectively, the field
-parameters at level 1, level 2, ..., and level `BITS`.
+An IDPF is comprised of the following algorithms :
 
-An IDPF is comprised of the following algorithms (let type `Value[l]` denote
-`(Field[l], Field[l])` for each level `l`):
-
-* `idpf_gen(alpha: Unsigned, beta: (Value[1], ..., Value[BITS])) -> key:
-  (IDPFKey, IDPFKey)` is the randomized key-generation algorithm run by the
+* `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])`
+  is the randomized key-generation algorithm run by the
   client. Its inputs are the index `alpha` and the values `beta`. The value of
   `alpha` MUST be in range `[0, 2^BITS)`.
+  The output is a public part that is sent to all aggregators, and a vector of
+  private IDPF keys, one for each aggregator.
 
-* `IDPFKey.eval(l: Unsigned, x: Unsigned) -> value: Value[l])` is deterministic,
+* `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned, prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]]`
+  is the deterministic,
   stateless key-evaluation algorithm run by each Aggregator. It returns the
-  value corresponding to index `x`. The value of `l` MUST be in `[1, BITS]` and
-  the value of `x` MUST be in range `[2^(l-1), 2^l)`.
+  value corresponding to index `x`. The value of `level` MUST be in `[0, BITS-1]` and
+  `prefixes` must be empty when `level == 0`, and only contain values in
+  `[0, 2^level-1]` otherwise.
 
 A concrete IDPF specifies a single associated constant:
 
@@ -2300,12 +2301,8 @@ A concrete IDPF specifies a single associated constant:
 
 A concrete IDPF also specifies the following associated types:
 
-* `Field[l]` for each level `1 <= l <= BITS`. Each defines the same methods and
-  associated constants as `Field` in {{prio3}}.
-
-Note that IDPF construction of [BBCGGI21] uses one field for the inner nodes of
-the tree and a different, larger field for the leaf nodes. See [BBCGGI21],
-Section 4.3.
+* `FieldInner` and `FieldLeaf`. Each defines the same methods and
+  associated constants as `Field` in {{field}}.
 
 Finally, an implementation note. The interface for IDPFs specified here is
 stateless, in the sense that there is no state carried between IDPF evaluations.
@@ -2319,19 +2316,7 @@ state across evaluations.
 The VDAF involves two rounds of communication (`ROUNDS == 2`) and is defined for
 two Aggregators (`SHARES == 2`).
 
-### Setup
-
-The verification parameter is a symmetric key shared by both Aggregators. This
-VDAF has no public parameter.
-
-~~~
-def vdaf_setup():
-  k_verify_init = gen_rand(SEED_SIZE)
-  return (None, [(0, k_verify_init), (1, k_verify_init)])
-~~~
-{: #poplar1-eval-setup title="The setup algorithm for poplar1."}
-
-#### Client
+### Client
 
 The client's input is an IDPF index, denoted `alpha`. The values are pairs of
 field elements `(1, k)` where each `k` is chosen at random. This random value is
@@ -2351,14 +2336,16 @@ Putting everything together, the input-distribution algorithm is defined as
 follows. Function `encode_input_share` is defined in {{poplar1-helper-functions}}.
 
 ~~~
-def measurement_to_input_shares(_, alpha):
+def measurement_to_input_shares(Poplar1, alpha):
   if alpha < 2**BITS: raise ERR_INVALID_INPUT
 
   # Prepare IDPF values.
   beta = []
   correlation_shares_0, correlation_shares_1 = [], []
   for l in range(1,BITS+1):
-    (k, a, b, c) = Field[l].rand_vec(4)
+    Field = Poplar1.Idpf.FieldInner if l <= BITS \
+      else Poplar1.Idpf.FieldLeaf
+    (k, a, b, c) = Field.rand_vec(4)
 
     # Construct values of the form (1, k), where k
     # is a random field element.
@@ -2368,13 +2355,13 @@ def measurement_to_input_shares(_, alpha):
     # the Aggregators' computation.
     A = -2*a+k
     B = a*a + b - a * k + c
-    correlation_share = Field[l].rand_vec(5)
+    correlation_share = Field.rand_vec(5)
     correlation_shares_1.append(correlation_share)
     correlation_shares_0.append(
       [a, b, c, A, B] - correlation_share)
 
   # Generate IDPF shares.
-  (key_0, key_1) = idpf_gen(alpha, beta)
+  (key_0, key_1) = Poplar1.Idpf.gen(alpha, beta[:-1], beta[-1])
 
   input_shares = [
     encode_input_share(key_0, correlation_shares_0),
@@ -2397,47 +2384,55 @@ elements `data_share` and `auth_share`, The Aggregators use `auth_share` and the
 correlation shares provided by the Client to verify that their `data_share`
 vectors are additive shares of a one-hot vector.
 
-> CP Consider adding aggregation parameter as input to `k_verify_rand`
-> derivation.
-
 ~~~
-class PrepState:
-  def __init__(verify_param, agg_param, nonce, input_share):
-    (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
-    (self.idpf_key,
-     self.correlation_shares) = decode_input_share(input_share)
-    (self.party_id, k_verify_init) = verify_param
-    self.k_verify_rand = get_key(k_verify_init, nonce)
-    self.step = 'ready'
 
-  def next(self, inbound: Optional[Bytes]):
-    l = self.l
+def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, \
+      public_share, input_share):
+    l, self.candidate_prefixes = decode_indexes(agg_param)
+    idpf_key, correlation_shares = decode_input_share(input_share)
+    public_share = public_share
+    k_verify_rand = get_key(verify_key, nonce)
+    prep_step = 'ready'
+    output_share = None
+    prep_fixed = (agg_id, l, candidate_prefixes, public_share, \
+      idpf_key, correlation_shares, k_verify_rand)
+    return (prep_step, prep_fixed, output_share)
+
+
+def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
+    (prep_step, prep_fixed, output_share) = prep
+    (agg_id, l, candidate_prefixes, public_share, idpf_key, \
+      correlation_shares, k_verify_rand) = prep_fixed
     (a_share, b_share, c_share,
      A_share, B_share) = correlation_shares[l-1]
 
-    if self.step == 'ready' and inbound == None:
+    Field = Poplar1.Idpf.FieldInner if l <= BITS \
+      else Poplar1.Idpf.FieldLeaf
+    if step == 'ready' and inbound == None:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
-      for x in self.candidate_prefixes:
-        value = self.idpf_key.eval(l, x)
+      for x in candidate_prefixes:
+        value = Poplar1.Idpf.eval(agg_id, public_share, \
+          idpf_key, l, candidate_prefixes)
         data_share.append(value[0])
         auth_share.append(value[1])
 
       # Prepare first sketch verification message.
-      r = Prg.expand_into_vec(
-        Field[l], self.k_verify_rand, len(data_share))
+      r = Poplar1.Prg.expand_into_vec(
+        Field, k_verify_rand, len(data_share))
       verifier_share_1 = [
          a_share + inner_product(data_share, r),
          b_share + inner_product(data_share, r * r),
          c_share + inner_product(auth_share, r),
       ]
 
-      self.output_share = data_share
-      self.step = 'sketch round 1'
-      return verifier_share_1
+      output_share = data_share
+      prep_step = 'sketch round 1'
+      prep = (prep_step, prep_fixed, output_share)
+      return (prep, Field.encode_vec(verifier_share_1))
 
     elif self.step == 'sketch round 1' and inbound != None:
-      verifier_1 = Field[l].decode_vec(inbound)
+      verifier_1 = Field.decode_vec(inbound)
       verifier_share_2 = [
         (verifier_1[0] * verifier_1[0] \
          - verifier_1[1] \
@@ -2446,13 +2441,14 @@ class PrepState:
         + B_share
       ]
 
-      self.step = 'sketch round 2'
-      return Field[l].encode_vec(verifier_share_2)
+      prep_step = 'sketch round 2'
+      prep = (prep_step, prep_fixed, output_share)
+      return (prep, Field.encode_vec(verifier_share_2))
 
     elif self.step == 'sketch round 2' and inbound != None:
-      verifier_2 = Field[l].decode_vec(inbound)
+      verifier_2 = Field.decode_vec(inbound)
       if verifier_2 != 0: raise ERR_INVALID
-      return Field[l].encode_vec(self.output_share)
+      return Field.encode_vec(output_share)
 
     else: raise ERR_INVALID_STATE
 
@@ -2461,41 +2457,48 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
     raise ERR_INVALID_INPUT
 
   (l, _) = decode_indexes(agg_param)
-  verifier = Field[l].decode_vec(inbound[0]) + \
-             Field[l].decode_vec(inbound[1])
+  Field = Poplar1.Idpf.FieldInner if l <= BITS \
+    else Poplar1.Idpf.FieldLeaf
+  verifier = Field.decode_vec(inbound[0]) + \
+             Field.decode_vec(inbound[1])
 
-  return Field[l].encode_vec(verifier)
+  return Field.encode_vec(verifier)
 ~~~
 {: #poplar1-prep-state title="Preparation state for poplar1."}
 
 ### Aggregation
 
 ~~~
-def out_shares_to_agg_share(agg_param, output_shares: Vec[Bytes]):
+def out_shares_to_agg_share(Poplar1, agg_param, \
+    output_shares: Vec[OutShare]):
   (l, candidate_prefixes) = decode_indexes(agg_param)
   if len(output_shares) != len(candidate_prefixes):
     raise ERR_INVALID_INPUT
 
-  agg_share = Field[l].zeros(len(candidate_prefixes))
+  Field = Poplar1.Idpf.FieldInner if l <= BITS \
+    else Poplar1.Idpf.FieldLeaf
+  agg_share = Field.zeros(len(candidate_prefixes))
   for output_share in output_shares:
-    agg_share += Field[l].decode_vec(output_share)
+    agg_share = vec_add(agg_share, output_share)
 
-  return Field[l].encode_vec(agg_share)
+  return Field.encode_vec(agg_share)
 ~~~
 {: #poplar1-out2agg title="Aggregation algorithm for poplar1."}
 
 ### Unsharding
 
 ~~~
-def agg_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
+def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
   (l, _) = decode_indexes(agg_param)
   if len(agg_shares) != 2:
     raise ERR_INVALID_INPUT
 
-  agg = Field[l].decode_vec(agg_shares[0]) + \
-        Field[l].decode_vec(agg_shares[1]J)
+  Field = Poplar1.Idpf.FieldInner if l <= BITS \
+    else Poplar1.Idpf.FieldLeaf
+  agg = Field.decode_vec(agg_shares[0]) + \
+        Field.decode_vec(agg_shares[1])
 
-  return Field[l].encode_vec(agg)
+  return Field.encode_vec(agg)
 ~~~
 {: #poplar1-agg-output title="Computation of the aggregate result for poplar1."}
 
@@ -2510,9 +2513,9 @@ def agg_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
 
 * `decode_indexes(encoded: Bytes) -> (l: Unsigned, indexes: Vec[Unsigned])`
   decodes a sequence of indexes, i.e., candidate indexes for IDPF evaluation.
-  The value of `l` MUST be in range `[1, BITS]` and `indexes[i]` MUST be in range
-  `[2^(l-1), 2^l)` for all `i`. An error is raised if `encoded` cannot be
-  decoded.
+  The value of `l` MUST be in range `[0, BITS-1]` and `indexes` MUST be empty
+  if `l == 0` or only contain values in range `[0, 2^l-1]` otherwise.
+  An error is raised if `encoded` cannot be decoded.
 
 # Security Considerations {#security}
 
@@ -2531,7 +2534,7 @@ VDAFs have two essential security goals:
    the measurements of honest Clients.
 
 Note that, to achieve robustness, it is important to ensure that the
-verification key distributed to the Aggregators (`verify_key`, see {{setup}}) is
+verification key distributed to the Aggregators (`verify_key`, see {{sec-vdaf-prepare}}) is
 never revealed to the Clients.
 
 It is also possible to consider a stronger form of robustness, where the
