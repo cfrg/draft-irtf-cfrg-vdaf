@@ -4440,63 +4440,46 @@ of <code>alpha</code> and shares of zero otherwise.<a href="#section-8.1-1" clas
 prefix of positive integer <code>0 &lt;= y &lt;= BITS</code> if <code>LSB(x, L)</code> is equal to the most
 significant <code>L</code> bits of <code>LSB(y, BITS)</code>, For example, 6 (110 in binary) is
 the length-3 prefix of 25 (11001), but 7 (111) is not.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.1-3.1">
-            <p id="section-8.1-3.1.1">CP Why isn't the domain size actually <code>2^(BITS+1)</code>, i.e., the number of nodes
-in a binary tree of height <code>BITS</code> (excluding the root)?<a href="#section-8.1-3.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.1-4.1">
-            <p id="section-8.1-4.1.1">PS If the height <code>BITS</code> is defined as the length of the longest path from root to a leaf (which matches IDPFs), then
-the number of nodes is <code>2^BITS</code>.<a href="#section-8.1-4.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-8.1-5">Each <code>beta[l]</code> is a vector of elements of a finite field. We distinguish two types of
-fields: one for inner nodes (denoted <code>Idpf.FieldInner</code>), and one for leaf nodes (<code>Idpf.FieldLeaf</code>).<a href="#section-8.1-5" class="pilcrow">¶</a></p>
-<p id="section-8.1-6">An IDPF is comprised of the following algorithms :<a href="#section-8.1-6" class="pilcrow">¶</a></p>
+<p id="section-8.1-3">Each <code>beta[l]</code> is a vector of elements of a finite field. We distinguish two types of
+fields: one for inner nodes (denoted <code>Idpf.FieldInner</code>), and one for leaf nodes (<code>Idpf.FieldLeaf</code>).<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.1-4">An IDPF is comprised of the following algorithms :<a href="#section-8.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.1-7.1">
-            <code>Idpf.gen(alpha: Unsigned,
-          beta_inner: Vec[Vec[Idpf.FieldInner]],
-          beta_leaf: Vec[Idpf.FieldLeaf]) -&gt; (Bytes, Vec[Bytes])</code>:
+<li class="normal" id="section-8.1-5.1">
+            <code>Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf: Vec[Idpf.FieldLeaf]) -&gt; (Bytes, Vec[Bytes])</code>
 is the randomized key-generation algorithm run by the
 client. Its inputs are the index <code>alpha</code> and the values <code>beta</code>. The value of
 <code>alpha</code> <span class="bcp14">MUST</span> be in range <code>[0, 2^BITS)</code>.
 The output is a public part that is sent to all aggregators, and a vector of
-private IDPF keys, one for each aggregator.<a href="#section-8.1-7.1" class="pilcrow">¶</a>
+private IDPF keys, one for each aggregator.<a href="#section-8.1-5.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-8.1-7.2">
-            <code>Idpf.eval(agg_id: Unsigned,
-           public_share: Bytes,
-           key: Bytes,
-           level: Unsigned,
-           prefixes: Vec[Unsigned]) -&gt; Union[Vec[Vec[Idpf.FieldInner]],
-                                             Vec[Vec[Idpf.FieldLeaf]]]</code> is the deterministic,
+          <li class="normal" id="section-8.1-5.2">
+            <code>Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned, prefixes: Vec[Unsigned]) -&gt; Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]]</code>
+is the deterministic,
 stateless key-evaluation algorithm run by each Aggregator. It returns the
-value corresponding to index <code>x</code>. The value of <code>level</code> <span class="bcp14">MUST</span> be in <code>[1, BITS]</code> and
-each element of <code>prefixes</code> must be in <code>[0, 2^(level-1)]</code>.<a href="#section-8.1-7.2" class="pilcrow">¶</a>
+value corresponding to index <code>x</code>. The value of <code>level</code> <span class="bcp14">MUST</span> be in <code>[0, BITS-1]</code> and
+<code>prefixes</code> must be empty when <code>level == 0</code>, and only contain values in
+<code>[0, 2^level-1]</code> otherwise.<a href="#section-8.1-5.2" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-8.1-8">A concrete IDPF specifies a single associated constant:<a href="#section-8.1-8" class="pilcrow">¶</a></p>
+<p id="section-8.1-6">A concrete IDPF specifies a single associated constant:<a href="#section-8.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.1-7.1">
+            <code>BITS: Unsigned</code> is the length of each Client input.<a href="#section-8.1-7.1" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-8.1-8">A concrete IDPF also specifies the following associated types:<a href="#section-8.1-8" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.1-9.1">
-            <code>BITS: Unsigned</code> is the length of each Client input.<a href="#section-8.1-9.1" class="pilcrow">¶</a>
-</li>
-        </ul>
-<p id="section-8.1-10">A concrete IDPF also specifies the following associated types:<a href="#section-8.1-10" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-8.1-11.1">
             <code>FieldInner</code> and <code>FieldLeaf</code>. Each defines the same methods and
-associated constants as <code>Field</code> in <a href="#field" class="xref">Section 6.1</a>.<a href="#section-8.1-11.1" class="pilcrow">¶</a>
+associated constants as <code>Field</code> in <a href="#field" class="xref">Section 6.1</a>.<a href="#section-8.1-9.1" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-8.1-12">Finally, an implementation note. The interface for IDPFs specified here is
+<p id="section-8.1-10">Finally, an implementation note. The interface for IDPFs specified here is
 stateless, in the sense that there is no state carried between IDPF evaluations.
 This is to align the IDPF syntax with the VDAF abstraction boundary, which does
 not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
-state across evaluations.<a href="#section-8.1-12" class="pilcrow">¶</a></p>
+state across evaluations.<a href="#section-8.1-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="poplar1-construction">
@@ -4538,7 +4521,8 @@ def measurement_to_input_shares(Poplar1, alpha):
   beta = []
   correlation_shares_0, correlation_shares_1 = [], []
   for l in range(1,BITS+1):
-    Field = Poplar1.Idpf.FieldInner if l &lt;= BITS else Poplar1.Idpf.FieldLeaf
+    Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+      else Poplar1.Idpf.FieldLeaf
     (k, a, b, c) = Field.rand_vec(4)
 
     # Construct values of the form (1, k), where k
@@ -4592,30 +4576,34 @@ vectors are additive shares of a one-hot vector.<a href="#section-8.2.2-1" class
 <figure id="figure-20">
             <div class="alignLeft art-text artwork" id="section-8.2.2-2.1">
 <pre>
-def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, public_share, input_share):
+def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, \
+      public_share, input_share):
     l, self.candidate_prefixes = decode_indexes(agg_param)
     idpf_key, correlation_shares = decode_input_share(input_share)
     public_share = public_share
     k_verify_rand = get_key(verify_key, nonce)
     prep_step = 'ready'
     output_share = None
-    prep_fixed = (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
+    prep_fixed = (agg_id, l, candidate_prefixes, public_share, \
+      idpf_key, correlation_shares, k_verify_rand)
     return (prep_step, prep_fixed, output_share)
 
 
 def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
     (prep_step, prep_fixed, output_share) = prep
-    (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
-      = prep_fixed
+    (agg_id, l, candidate_prefixes, public_share, idpf_key, \
+      correlation_shares, k_verify_rand) = prep_fixed
     (a_share, b_share, c_share,
      A_share, B_share) = correlation_shares[l-1]
 
-    Field = Poplar1.Idpf.FieldInner if l &lt;= BITS else Poplar1.Idpf.FieldLeaf
+    Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+      else Poplar1.Idpf.FieldLeaf
     if step == 'ready' and inbound == None:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
       for x in candidate_prefixes:
-        value = Poplar1.Idpf.eval(agg_id, public_share, idpf_key, l, candidate_prefixes)
+        value = Poplar1.Idpf.eval(agg_id, public_share, \
+          idpf_key, l, candidate_prefixes)
         data_share.append(value[0])
         auth_share.append(value[1])
 
@@ -4659,7 +4647,8 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
     raise ERR_INVALID_INPUT
 
   (l, _) = decode_indexes(agg_param)
-  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS else Poplar1.Idpf.FieldLeaf
+  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+    else Poplar1.Idpf.FieldLeaf
   verifier = Field.decode_vec(inbound[0]) + \
              Field.decode_vec(inbound[1])
 
@@ -4681,12 +4670,14 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
 <figure id="figure-21">
             <div class="alignLeft art-text artwork" id="section-8.2.3-1.1">
 <pre>
-def out_shares_to_agg_share(Poplar1, agg_param, output_shares: Vec[OutShare]):
+def out_shares_to_agg_share(Poplar1, agg_param, \
+    output_shares: Vec[OutShare]):
   (l, candidate_prefixes) = decode_indexes(agg_param)
   if len(output_shares) != len(candidate_prefixes):
     raise ERR_INVALID_INPUT
 
-  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS else Poplar1.Idpf.FieldLeaf
+  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+    else Poplar1.Idpf.FieldLeaf
   agg_share = Field.zeros(len(candidate_prefixes))
   for output_share in output_shares:
     agg_share = vec_add(agg_share, output_share)
@@ -4714,7 +4705,8 @@ def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
   if len(agg_shares) != 2:
     raise ERR_INVALID_INPUT
 
-  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS else Poplar1.Idpf.FieldLeaf
+  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+    else Poplar1.Idpf.FieldLeaf
   agg = Field.decode_vec(agg_shares[0]) + \
         Field.decode_vec(agg_shares[1])
 

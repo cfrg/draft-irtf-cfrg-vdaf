@@ -2497,13 +2497,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    (110 in binary) is the length-3 prefix of 25 (11001), but 7 (111) is
    not.
 
-      CP Why isn't the domain size actually 2^(BITS+1), i.e., the number
-      of nodes in a binary tree of height BITS (excluding the root)?
-
-      PS If the height BITS is defined as the length of the longest path
-      from root to a leaf (which matches IDPFs), then the number of
-      nodes is 2^BITS.
-
    Each beta[l] is a vector of elements of a finite field.  We
    distinguish two types of fields: one for inner nodes (denoted
    Idpf.FieldInner), and one for leaf nodes (Idpf.FieldLeaf).
@@ -2511,7 +2504,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    An IDPF is comprised of the following algorithms :
 
    *  Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]],
-      beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes]): is the
+      beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes]) is the
       randomized key-generation algorithm run by the client.  Its inputs
       are the index alpha and the values beta.  The value of alpha MUST
       be in range [0, 2^BITS).  The output is a public part that is sent
@@ -2523,8 +2516,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]] is the
       deterministic, stateless key-evaluation algorithm run by each
       Aggregator.  It returns the value corresponding to index x.  The
-      value of level MUST be in [1, BITS] and each element of prefixes
-      must be in [0, 2^(level-1)].
+      value of level MUST be in [0, BITS-1] and prefixes must be empty
+      when level == 0, and only contain values in [0, 2^level-1]
+      otherwise.
 
    A concrete IDPF specifies a single associated constant:
 
@@ -2567,40 +2561,41 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    defined as follows.  Function encode_input_share is defined in
    Section 8.2.5.
 
-def measurement_to_input_shares(Poplar1, alpha):
-  if alpha < 2**BITS: raise ERR_INVALID_INPUT
+   def measurement_to_input_shares(Poplar1, alpha):
+     if alpha < 2**BITS: raise ERR_INVALID_INPUT
 
-  # Prepare IDPF values.
-  beta = []
-  correlation_shares_0, correlation_shares_1 = [], []
-  for l in range(1,BITS+1):
-    Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
-    (k, a, b, c) = Field.rand_vec(4)
+     # Prepare IDPF values.
+     beta = []
+     correlation_shares_0, correlation_shares_1 = [], []
+     for l in range(1,BITS+1):
+       Field = Poplar1.Idpf.FieldInner if l <= BITS \
+         else Poplar1.Idpf.FieldLeaf
+       (k, a, b, c) = Field.rand_vec(4)
 
-    # Construct values of the form (1, k), where k
-    # is a random field element.
-    beta += [(1, k)]
+       # Construct values of the form (1, k), where k
+       # is a random field element.
+       beta += [(1, k)]
 
-    # Create secret shares of correlations to aid
-    # the Aggregators' computation.
-    A = -2*a+k
-    B = a*a + b - a * k + c
-    correlation_share = Field.rand_vec(5)
-    correlation_shares_1.append(correlation_share)
-    correlation_shares_0.append(
-      [a, b, c, A, B] - correlation_share)
+       # Create secret shares of correlations to aid
+       # the Aggregators' computation.
+       A = -2*a+k
+       B = a*a + b - a * k + c
+       correlation_share = Field.rand_vec(5)
+       correlation_shares_1.append(correlation_share)
+       correlation_shares_0.append(
+         [a, b, c, A, B] - correlation_share)
 
-  # Generate IDPF shares.
-  (key_0, key_1) = Idpf.gen(alpha, beta[:-1], beta[-1])
+     # Generate IDPF shares.
+     (key_0, key_1) = Idpf.gen(alpha, beta[:-1], beta[-1])
 
-  input_shares = [
-    encode_input_share(key_0, correlation_shares_0),
-    encode_input_share(key_1, correlation_shares_1),
-  ]
+     input_shares = [
+       encode_input_share(key_0, correlation_shares_0),
+       encode_input_share(key_1, correlation_shares_1),
+     ]
 
-  return input_shares
+     return input_shares
 
-       Figure 19: The input-distribution algorithm for poplar1.
+          Figure 19: The input-distribution algorithm for poplar1.
 
       TODO It would be more efficient to represent the shares of a, b,
       and c using PRG seeds as suggested in [BBCGGI21].
@@ -2615,111 +2610,119 @@ def measurement_to_input_shares(Poplar1, alpha):
    Client to verify that their data_share vectors are additive shares of
    a one-hot vector.
 
-def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, public_share, input_share):
-    l, self.candidate_prefixes = decode_indexes(agg_param)
-    idpf_key, correlation_shares = decode_input_share(input_share)
-    public_share = public_share
-    k_verify_rand = get_key(verify_key, nonce)
-    prep_step = 'ready'
-    output_share = None
-    prep_fixed = (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
-    return (prep_step, prep_fixed, output_share)
+   def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, \
+         public_share, input_share):
+       l, self.candidate_prefixes = decode_indexes(agg_param)
+       idpf_key, correlation_shares = decode_input_share(input_share)
+       public_share = public_share
+       k_verify_rand = get_key(verify_key, nonce)
+       prep_step = 'ready'
+       output_share = None
+       prep_fixed = (agg_id, l, candidate_prefixes, public_share, \
+         idpf_key, correlation_shares, k_verify_rand)
+       return (prep_step, prep_fixed, output_share)
 
 
-def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
-    (prep_step, prep_fixed, output_share) = prep
-    (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
-      = prep_fixed
-    (a_share, b_share, c_share,
-     A_share, B_share) = correlation_shares[l-1]
+   def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
+       (prep_step, prep_fixed, output_share) = prep
+       (agg_id, l, candidate_prefixes, public_share, idpf_key, \
+         correlation_shares, k_verify_rand) = prep_fixed
+       (a_share, b_share, c_share,
+        A_share, B_share) = correlation_shares[l-1]
 
-    Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
-    if step == 'ready' and inbound == None:
-      # Evaluate IDPF on candidate prefixes.
-      data_share, auth_share = [], []
-      for x in candidate_prefixes:
-        value = Poplar1.Idpf.eval(agg_id, public_share, idpf_key, l, candidate_prefixes)
-        data_share.append(value[0])
-        auth_share.append(value[1])
+       Field = Poplar1.Idpf.FieldInner if l <= BITS \
+         else Poplar1.Idpf.FieldLeaf
+       if step == 'ready' and inbound == None:
+         # Evaluate IDPF on candidate prefixes.
+         data_share, auth_share = [], []
+         for x in candidate_prefixes:
+           value = Poplar1.Idpf.eval(agg_id, public_share, \
+             idpf_key, l, candidate_prefixes)
+           data_share.append(value[0])
+           auth_share.append(value[1])
 
-      # Prepare first sketch verification message.
-      r = Poplar1.Prg.expand_into_vec(
-        Field, k_verify_rand, len(data_share))
-      verifier_share_1 = [
-         a_share + inner_product(data_share, r),
-         b_share + inner_product(data_share, r * r),
-         c_share + inner_product(auth_share, r),
-      ]
+         # Prepare first sketch verification message.
+         r = Poplar1.Prg.expand_into_vec(
+           Field, k_verify_rand, len(data_share))
+         verifier_share_1 = [
+            a_share + inner_product(data_share, r),
+            b_share + inner_product(data_share, r * r),
+            c_share + inner_product(auth_share, r),
+         ]
 
-      output_share = data_share
-      prep_step = 'sketch round 1'
-      prep = (prep_step, prep_fixed, output_share)
-      return (prep, Field.encode_vec(verifier_share_1))
+         output_share = data_share
+         prep_step = 'sketch round 1'
+         prep = (prep_step, prep_fixed, output_share)
+         return (prep, Field.encode_vec(verifier_share_1))
 
-    elif self.step == 'sketch round 1' and inbound != None:
-      verifier_1 = Field.decode_vec(inbound)
-      verifier_share_2 = [
-        (verifier_1[0] * verifier_1[0] \
-         - verifier_1[1] \
-         - verifier_1[2]) * self.party_id \
-        + A_share * verifier_1[0] \
-        + B_share
-      ]
+       elif self.step == 'sketch round 1' and inbound != None:
+         verifier_1 = Field.decode_vec(inbound)
+         verifier_share_2 = [
+           (verifier_1[0] * verifier_1[0] \
+            - verifier_1[1] \
+            - verifier_1[2]) * self.party_id \
+           + A_share * verifier_1[0] \
+           + B_share
+         ]
 
-      prep_step = 'sketch round 2'
-      prep = (prep_step, prep_fixed, output_share)
-      return (prep, Field.encode_vec(verifier_share_2))
+         prep_step = 'sketch round 2'
+         prep = (prep_step, prep_fixed, output_share)
+         return (prep, Field.encode_vec(verifier_share_2))
 
-    elif self.step == 'sketch round 2' and inbound != None:
-      verifier_2 = Field.decode_vec(inbound)
-      if verifier_2 != 0: raise ERR_INVALID
-      return Field.encode_vec(output_share)
+       elif self.step == 'sketch round 2' and inbound != None:
+         verifier_2 = Field.decode_vec(inbound)
+         if verifier_2 != 0: raise ERR_INVALID
+         return Field.encode_vec(output_share)
 
-    else: raise ERR_INVALID_STATE
+       else: raise ERR_INVALID_STATE
 
-def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
-  if len(inbound) != 2:
-    raise ERR_INVALID_INPUT
+   def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
+     if len(inbound) != 2:
+       raise ERR_INVALID_INPUT
 
-  (l, _) = decode_indexes(agg_param)
-  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
-  verifier = Field.decode_vec(inbound[0]) + \
-             Field.decode_vec(inbound[1])
+     (l, _) = decode_indexes(agg_param)
+     Field = Poplar1.Idpf.FieldInner if l <= BITS \
+       else Poplar1.Idpf.FieldLeaf
+     verifier = Field.decode_vec(inbound[0]) + \
+                Field.decode_vec(inbound[1])
 
-  return Field.encode_vec(verifier)
+     return Field.encode_vec(verifier)
 
-              Figure 20: Preparation state for poplar1.
+                 Figure 20: Preparation state for poplar1.
 
 8.2.3.  Aggregation
 
-def out_shares_to_agg_share(Poplar1, agg_param, output_shares: Vec[OutShare]):
-  (l, candidate_prefixes) = decode_indexes(agg_param)
-  if len(output_shares) != len(candidate_prefixes):
-    raise ERR_INVALID_INPUT
+   def out_shares_to_agg_share(Poplar1, agg_param, \
+       output_shares: Vec[OutShare]):
+     (l, candidate_prefixes) = decode_indexes(agg_param)
+     if len(output_shares) != len(candidate_prefixes):
+       raise ERR_INVALID_INPUT
 
-  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
-  agg_share = Field.zeros(len(candidate_prefixes))
-  for output_share in output_shares:
-    agg_share = vec_add(agg_share, output_share)
+     Field = Poplar1.Idpf.FieldInner if l <= BITS \
+       else Poplar1.Idpf.FieldLeaf
+     agg_share = Field.zeros(len(candidate_prefixes))
+     for output_share in output_shares:
+       agg_share = vec_add(agg_share, output_share)
 
-  return Field.encode_vec(agg_share)
+     return Field.encode_vec(agg_share)
 
-            Figure 21: Aggregation algorithm for poplar1.
+               Figure 21: Aggregation algorithm for poplar1.
 
 8.2.4.  Unsharding
 
-def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
-  (l, _) = decode_indexes(agg_param)
-  if len(agg_shares) != 2:
-    raise ERR_INVALID_INPUT
+   def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
+     (l, _) = decode_indexes(agg_param)
+     if len(agg_shares) != 2:
+       raise ERR_INVALID_INPUT
 
-  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
-  agg = Field.decode_vec(agg_shares[0]) + \
-        Field.decode_vec(agg_shares[1])
+     Field = Poplar1.Idpf.FieldInner if l <= BITS \
+       else Poplar1.Idpf.FieldLeaf
+     agg = Field.decode_vec(agg_shares[0]) + \
+           Field.decode_vec(agg_shares[1])
 
-  return Field.encode_vec(agg)
+     return Field.encode_vec(agg)
 
-     Figure 22: Computation of the aggregate result for poplar1.
+        Figure 22: Computation of the aggregate result for poplar1.
 
 8.2.5.  Helper Functions
 
