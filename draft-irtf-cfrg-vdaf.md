@@ -2371,7 +2371,7 @@ def measurement_to_input_shares(Poplar1, alpha):
       [a, b, c, A, B] - correlation_share)
 
   # Generate IDPF shares.
-  (key_0, key_1) = idpf_gen(alpha, beta[:-1], beta[-1])
+  (key_0, key_1) = Idpf.gen(alpha, beta[:-1], beta[-1])
 
   input_shares = [
     encode_input_share(key_0, correlation_shares_0),
