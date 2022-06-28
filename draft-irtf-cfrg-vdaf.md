@@ -2343,7 +2343,8 @@ def measurement_to_input_shares(Poplar1, alpha):
   beta = []
   correlation_shares_0, correlation_shares_1 = [], []
   for l in range(1,BITS+1):
-    Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+    Field = Poplar1.Idpf.FieldInner if l <= BITS \
+      else Poplar1.Idpf.FieldLeaf
     (k, a, b, c) = Field.rand_vec(4)
 
     # Construct values of the form (1, k), where k
@@ -2385,30 +2386,34 @@ vectors are additive shares of a one-hot vector.
 
 ~~~
 
-def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, public_share, input_share):
+def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, \
+      public_share, input_share):
     l, self.candidate_prefixes = decode_indexes(agg_param)
     idpf_key, correlation_shares = decode_input_share(input_share)
     public_share = public_share
     k_verify_rand = get_key(verify_key, nonce)
     prep_step = 'ready'
     output_share = None
-    prep_fixed = (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
+    prep_fixed = (agg_id, l, candidate_prefixes, public_share, \
+      idpf_key, correlation_shares, k_verify_rand)
     return (prep_step, prep_fixed, output_share)
 
 
 def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
     (prep_step, prep_fixed, output_share) = prep
-    (agg_id, l, candidate_prefixes, public_share, idpf_key, correlation_shares, k_verify_rand)
-      = prep_fixed
+    (agg_id, l, candidate_prefixes, public_share, idpf_key, \
+      correlation_shares, k_verify_rand) = prep_fixed
     (a_share, b_share, c_share,
      A_share, B_share) = correlation_shares[l-1]
 
-    Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+    Field = Poplar1.Idpf.FieldInner if l <= BITS \
+      else Poplar1.Idpf.FieldLeaf
     if step == 'ready' and inbound == None:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
       for x in candidate_prefixes:
-        value = Poplar1.Idpf.eval(agg_id, public_share, idpf_key, l, candidate_prefixes)
+        value = Poplar1.Idpf.eval(agg_id, public_share, \
+          idpf_key, l, candidate_prefixes)
         data_share.append(value[0])
         auth_share.append(value[1])
 
@@ -2452,7 +2457,8 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
     raise ERR_INVALID_INPUT
 
   (l, _) = decode_indexes(agg_param)
-  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+  Field = Poplar1.Idpf.FieldInner if l <= BITS \
+    else Poplar1.Idpf.FieldLeaf
   verifier = Field.decode_vec(inbound[0]) + \
              Field.decode_vec(inbound[1])
 
@@ -2463,12 +2469,14 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
 ### Aggregation
 
 ~~~
-def out_shares_to_agg_share(Poplar1, agg_param, output_shares: Vec[OutShare]):
+def out_shares_to_agg_share(Poplar1, agg_param, \
+    output_shares: Vec[OutShare]):
   (l, candidate_prefixes) = decode_indexes(agg_param)
   if len(output_shares) != len(candidate_prefixes):
     raise ERR_INVALID_INPUT
 
-  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+  Field = Poplar1.Idpf.FieldInner if l <= BITS \
+    else Poplar1.Idpf.FieldLeaf
   agg_share = Field.zeros(len(candidate_prefixes))
   for output_share in output_shares:
     agg_share = vec_add(agg_share, output_share)
@@ -2485,7 +2493,8 @@ def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
   if len(agg_shares) != 2:
     raise ERR_INVALID_INPUT
 
-  Field = Poplar1.Idpf.FieldInner if l <= BITS else Poplar1.Idpf.FieldLeaf
+  Field = Poplar1.Idpf.FieldInner if l <= BITS \
+    else Poplar1.Idpf.FieldLeaf
   agg = Field.decode_vec(agg_shares[0]) + \
         Field.decode_vec(agg_shares[1])
 
