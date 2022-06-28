@@ -2265,7 +2265,7 @@ is zero everywhere except for one element, which is equal to one.
 
 An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
 defined by the IDPF. The Client specifies an index `alpha` and a vector of values
-`beta`, one for each "level" `1 <= L <= BITS`. The key generation generates two
+`beta`, one for each "level" `1 <= L <= BITS`. The key generation algorithm generates two
 IDPF keys, one for each Aggregator. When evaluated at level `l` and index `0 <= x < 2^L`, each
 IDPF share returns an additive share of `beta[L]` if `x` is the `L`-bit prefix
 of `alpha` and shares of zero otherwise.
