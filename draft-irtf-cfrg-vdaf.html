@@ -1038,7 +1038,7 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 24 December 2022</td>
+<td class="center">Expires 30 December 2022</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-06-22" class="published">22 June 2022</time>
+<time datetime="2022-06-28" class="published">28 June 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-12-24">24 December 2022</time></dd>
+<dd class="expires"><time datetime="2022-12-30">30 December 2022</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1115,7 +1115,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 24 December 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 30 December 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1296,7 +1296,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
                 <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="xref">8.2</a>.  <a href="#name-construction-3" class="xref">Construction</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2.2.1">
-                    <p id="section-toc.1-1.8.2.2.2.1.1"><a href="#section-8.2.1" class="xref">8.2.1</a>.  <a href="#name-setup" class="xref">Setup</a></p>
+                    <p id="section-toc.1-1.8.2.2.2.1.1"><a href="#section-8.2.1" class="xref">8.2.1</a>.  <a href="#name-client" class="xref">Client</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2.2.2">
                     <p id="section-toc.1-1.8.2.2.2.2.1"><a href="#section-8.2.2" class="xref">8.2.2</a>.  <a href="#name-preparation-4" class="xref">Preparation</a></p>
@@ -1968,7 +1968,7 @@ def run_daf(Daf,
                 Daf.prep(j, agg_param, public_share, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
-    # share and it to the Collector.
+    # share and sends it to the Collector.
     agg_shares = []
     for j in range(Daf.SHARES):
         agg_share_j = Daf.out_shares_to_agg_share(agg_param,
@@ -4430,65 +4430,56 @@ is zero everywhere except for one element, which is equal to one.<a href="#secti
 <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-incremental-distributed-poi" class="section-name selfRef">Incremental Distributed Point Functions (IDPFs)</a>
         </h3>
 <p id="section-8.1-1">An IDPF is defined over a domain of size <code>2^BITS</code>, where <code>BITS</code> is constant
-defined by the IDPF. The Client specifies an index <code>alpha</code> and a pair of values
-<code>beta</code>, one for each "level" <code>1 &lt;= l &lt;= BITS</code>. The key generation generates two
-IDPF keys, one for each Aggregator. When evaluated at index <code>0 &lt;= x &lt; 2^l</code>, each
-IDPF share returns an additive share of <code>beta[l]</code> if <code>x</code> is the <code>l</code>-bit prefix
+defined by the IDPF. The Client specifies an index <code>alpha</code> and a vector of values
+<code>beta</code>, one for each "level" <code>1 &lt;= L &lt;= BITS</code>. The key generation algorithm generates two
+IDPF keys, one for each Aggregator. When evaluated at level <code>L</code> and index <code>0 &lt;= x &lt; 2^L</code>, each
+IDPF share returns an additive share of <code>beta[L]</code> if <code>x</code> is the <code>L</code>-bit prefix
 of <code>alpha</code> and shares of zero otherwise.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.1-2.1">
-            <p id="section-8.1-2.1.1">CP What does it mean for <code>x</code> to be the <code>l</code>-bit prefix of <code>alpha</code>? We need to
-be a bit more precise here.<a href="#section-8.1-2.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.1-3.1">
-            <p id="section-8.1-3.1.1">CP Why isn't the domain size actually <code>2^(BITS+1)</code>, i.e., the number of nodes
-in a binary tree of height <code>BITS</code> (excluding the root)?<a href="#section-8.1-3.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-8.1-4">Each <code>beta[l]</code> is a pair of elements of a finite field. Each level <span class="bcp14">MAY</span> have
-different field parameters. Thus a concrete IDPF specifies associated types
-<code>Field[1]</code>, <code>Field[2]</code>, ..., and <code>Field[BITS]</code> defining, respectively, the field
-parameters at level 1, level 2, ..., and level <code>BITS</code>.<a href="#section-8.1-4" class="pilcrow">¶</a></p>
-<p id="section-8.1-5">An IDPF is comprised of the following algorithms (let type <code>Value[l]</code> denote
-<code>(Field[l], Field[l])</code> for each level <code>l</code>):<a href="#section-8.1-5" class="pilcrow">¶</a></p>
+<p id="section-8.1-2">Let <code>LSB(x, N)</code> denote the least significant <code>N</code> bits of positive integer
+<code>x</code>. By definition, a positive integer <code>0 &lt;= x &lt;= 2^L</code> is said to be the length-<code>L</code>
+prefix of positive integer <code>0 &lt;= y &lt;= BITS</code> if <code>LSB(x, L)</code> is equal to the most
+significant <code>L</code> bits of <code>LSB(y, BITS)</code>, For example, 6 (110 in binary) is
+the length-3 prefix of 25 (11001), but 7 (111) is not.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+<p id="section-8.1-3">Each <code>beta[l]</code> is a vector of elements of a finite field. We distinguish two types of
+fields: one for inner nodes (denoted <code>Idpf.FieldInner</code>), and one for leaf nodes (<code>Idpf.FieldLeaf</code>).<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.1-4">An IDPF is comprised of the following algorithms :<a href="#section-8.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.1-6.1">
-            <code>idpf_gen(alpha: Unsigned, beta: (Value[1], ..., Value[BITS])) -&gt; key:
-(IDPFKey, IDPFKey)</code> is the randomized key-generation algorithm run by the
+<li class="normal" id="section-8.1-5.1">
+            <code>Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf: Vec[Idpf.FieldLeaf]) -&gt; (Bytes, Vec[Bytes])</code>
+is the randomized key-generation algorithm run by the
 client. Its inputs are the index <code>alpha</code> and the values <code>beta</code>. The value of
-<code>alpha</code> <span class="bcp14">MUST</span> be in range <code>[0, 2^BITS)</code>.<a href="#section-8.1-6.1" class="pilcrow">¶</a>
+<code>alpha</code> <span class="bcp14">MUST</span> be in range <code>[0, 2^BITS)</code>.
+The output is a public part that is sent to all aggregators, and a vector of
+private IDPF keys, one for each aggregator.<a href="#section-8.1-5.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-8.1-6.2">
-            <code>IDPFKey.eval(l: Unsigned, x: Unsigned) -&gt; value: Value[l])</code> is deterministic,
+          <li class="normal" id="section-8.1-5.2">
+            <code>Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned, prefixes: Vec[Unsigned]) -&gt; Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]]</code>
+is the deterministic,
 stateless key-evaluation algorithm run by each Aggregator. It returns the
-value corresponding to index <code>x</code>. The value of <code>l</code> <span class="bcp14">MUST</span> be in <code>[1, BITS]</code> and
-the value of <code>x</code> <span class="bcp14">MUST</span> be in range <code>[2^(l-1), 2^l)</code>.<a href="#section-8.1-6.2" class="pilcrow">¶</a>
+value corresponding to index <code>x</code>. The value of <code>level</code> <span class="bcp14">MUST</span> be in <code>[0, BITS-1]</code> and
+<code>prefixes</code> must be empty when <code>level == 0</code>, and only contain values in
+<code>[0, 2^level-1]</code> otherwise.<a href="#section-8.1-5.2" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-8.1-7">A concrete IDPF specifies a single associated constant:<a href="#section-8.1-7" class="pilcrow">¶</a></p>
+<p id="section-8.1-6">A concrete IDPF specifies a single associated constant:<a href="#section-8.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.1-8.1">
-            <code>BITS: Unsigned</code> is the length of each Client input.<a href="#section-8.1-8.1" class="pilcrow">¶</a>
+<li class="normal" id="section-8.1-7.1">
+            <code>BITS: Unsigned</code> is the length of each Client input.<a href="#section-8.1-7.1" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-8.1-9">A concrete IDPF also specifies the following associated types:<a href="#section-8.1-9" class="pilcrow">¶</a></p>
+<p id="section-8.1-8">A concrete IDPF also specifies the following associated types:<a href="#section-8.1-8" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-8.1-10.1">
-            <code>Field[l]</code> for each level <code>1 &lt;= l &lt;= BITS</code>. Each defines the same methods and
-associated constants as <code>Field</code> in <a href="#prio3" class="xref">Section 7</a>.<a href="#section-8.1-10.1" class="pilcrow">¶</a>
+<li class="normal" id="section-8.1-9.1">
+            <code>FieldInner</code> and <code>FieldLeaf</code>. Each defines the same methods and
+associated constants as <code>Field</code> in <a href="#field" class="xref">Section 6.1</a>.<a href="#section-8.1-9.1" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-8.1-11">Note that IDPF construction of <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span> uses one field for the inner nodes of
-the tree and a different, larger field for the leaf nodes. See <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>,
-Section 4.3.<a href="#section-8.1-11" class="pilcrow">¶</a></p>
-<p id="section-8.1-12">Finally, an implementation note. The interface for IDPFs specified here is
+<p id="section-8.1-10">Finally, an implementation note. The interface for IDPFs specified here is
 stateless, in the sense that there is no state carried between IDPF evaluations.
 This is to align the IDPF syntax with the VDAF abstraction boundary, which does
 not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
-state across evaluations.<a href="#section-8.1-12" class="pilcrow">¶</a></p>
+state across evaluations.<a href="#section-8.1-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="poplar1-construction">
@@ -4498,59 +4489,41 @@ state across evaluations.<a href="#section-8.1-12" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-8.2-1">The VDAF involves two rounds of communication (<code>ROUNDS == 2</code>) and is defined for
 two Aggregators (<code>SHARES == 2</code>).<a href="#section-8.2-1" class="pilcrow">¶</a></p>
-<div id="setup">
-<section id="section-8.2.1">
-          <h4 id="name-setup">
-<a href="#section-8.2.1" class="section-number selfRef">8.2.1. </a><a href="#name-setup" class="section-name selfRef">Setup</a>
-          </h4>
-<p id="section-8.2.1-1">The verification parameter is a symmetric key shared by both Aggregators. This
-VDAF has no public parameter.<a href="#section-8.2.1-1" class="pilcrow">¶</a></p>
-<span id="name-the-setup-algorithm-for-pop"></span><div id="poplar1-eval-setup">
-<figure id="figure-19">
-            <div class="alignLeft art-text artwork" id="section-8.2.1-2.1">
-<pre>
-def vdaf_setup():
-  k_verify_init = gen_rand(SEED_SIZE)
-  return (None, [(0, k_verify_init), (1, k_verify_init)])
-</pre>
-</div>
-<figcaption><a href="#figure-19" class="selfRef">Figure 19</a>:
-<a href="#name-the-setup-algorithm-for-pop" class="selfRef">The setup algorithm for poplar1.</a>
-            </figcaption></figure>
-</div>
 <div id="client">
-<section id="section-8.2.1.1">
-            <h5 id="name-client">
-<a href="#section-8.2.1.1" class="section-number selfRef">8.2.1.1. </a><a href="#name-client" class="section-name selfRef">Client</a>
-            </h5>
-<p id="section-8.2.1.1-1">The client's input is an IDPF index, denoted <code>alpha</code>. The values are pairs of
+<section id="section-8.2.1">
+          <h4 id="name-client">
+<a href="#section-8.2.1" class="section-number selfRef">8.2.1. </a><a href="#name-client" class="section-name selfRef">Client</a>
+          </h4>
+<p id="section-8.2.1-1">The client's input is an IDPF index, denoted <code>alpha</code>. The values are pairs of
 field elements <code>(1, k)</code> where each <code>k</code> is chosen at random. This random value is
 used as part of the secure sketching protocol of <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>. After evaluating
 their IDPF key shares on the set of candidate prefixes, the sketching protocol
 is used by the Aggregators to verify that they hold shares of a one-hot vector.
 In addition, for each level of the tree, the prover generates random elements
-<code>a</code>, <code>b</code>, and <code>c</code> and computes<a href="#section-8.2.1.1-1" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2.1.1-2">
+<code>a</code>, <code>b</code>, and <code>c</code> and computes<a href="#section-8.2.1-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.2.1-2">
 <pre>
     A = -2*a + k
     B = a*a + b - k*a + c
-</pre><a href="#section-8.2.1.1-2" class="pilcrow">¶</a>
+</pre><a href="#section-8.2.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2.1.1-3">and sends additive shares of <code>a</code>, <code>b</code>, <code>c</code>, <code>A</code> and <code>B</code> to the Aggregators.
+<p id="section-8.2.1-3">and sends additive shares of <code>a</code>, <code>b</code>, <code>c</code>, <code>A</code> and <code>B</code> to the Aggregators.
 Putting everything together, the input-distribution algorithm is defined as
-follows. Function <code>encode_input_share</code> is defined in <a href="#poplar1-helper-functions" class="xref">Section 8.2.5</a>.<a href="#section-8.2.1.1-3" class="pilcrow">¶</a></p>
+follows. Function <code>encode_input_share</code> is defined in <a href="#poplar1-helper-functions" class="xref">Section 8.2.5</a>.<a href="#section-8.2.1-3" class="pilcrow">¶</a></p>
 <span id="name-the-input-distribution-algo"></span><div id="poplar1-mes2inp">
-<figure id="figure-20">
-              <div class="alignLeft art-text artwork" id="section-8.2.1.1-4.1">
+<figure id="figure-19">
+            <div class="alignLeft art-text artwork" id="section-8.2.1-4.1">
 <pre>
-def measurement_to_input_shares(_, alpha):
+def measurement_to_input_shares(Poplar1, alpha):
   if alpha &lt; 2**BITS: raise ERR_INVALID_INPUT
 
   # Prepare IDPF values.
   beta = []
   correlation_shares_0, correlation_shares_1 = [], []
   for l in range(1,BITS+1):
-    (k, a, b, c) = Field[l].rand_vec(4)
+    Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+      else Poplar1.Idpf.FieldLeaf
+    (k, a, b, c) = Field.rand_vec(4)
 
     # Construct values of the form (1, k), where k
     # is a random field element.
@@ -4560,13 +4533,13 @@ def measurement_to_input_shares(_, alpha):
     # the Aggregators' computation.
     A = -2*a+k
     B = a*a + b - a * k + c
-    correlation_share = Field[l].rand_vec(5)
+    correlation_share = Field.rand_vec(5)
     correlation_shares_1.append(correlation_share)
     correlation_shares_0.append(
       [a, b, c, A, B] - correlation_share)
 
   # Generate IDPF shares.
-  (key_0, key_1) = idpf_gen(alpha, beta)
+  (key_0, key_1) = Poplar1.Idpf.gen(alpha, beta[:-1], beta[-1])
 
   input_shares = [
     encode_input_share(key_0, correlation_shares_0),
@@ -4576,18 +4549,16 @@ def measurement_to_input_shares(_, alpha):
   return input_shares
 </pre>
 </div>
-<figcaption><a href="#figure-20" class="selfRef">Figure 20</a>:
+<figcaption><a href="#figure-19" class="selfRef">Figure 19</a>:
 <a href="#name-the-input-distribution-algo" class="selfRef">The input-distribution algorithm for poplar1.</a>
-              </figcaption></figure>
+            </figcaption></figure>
 </div>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.2.1.1-5.1">
-                <p id="section-8.2.1.1-5.1.1">TODO It would be more efficient to represent the shares of <code>a</code>, <code>b</code>, and <code>c</code>
-using PRG seeds as suggested in <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>.<a href="#section-8.2.1.1-5.1.1" class="pilcrow">¶</a></p>
+<li class="normal ulEmpty" id="section-8.2.1-5.1">
+              <p id="section-8.2.1-5.1.1">TODO It would be more efficient to represent the shares of <code>a</code>, <code>b</code>, and <code>c</code>
+using PRG seeds as suggested in <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>.<a href="#section-8.2.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
-            </ul>
-</section>
-</div>
+          </ul>
 </section>
 </div>
 <div id="preparation-1">
@@ -4601,53 +4572,57 @@ IDPF share on each candidate prefix, recovering a pair of vectors of field
 elements <code>data_share</code> and <code>auth_share</code>, The Aggregators use <code>auth_share</code> and the
 correlation shares provided by the Client to verify that their <code>data_share</code>
 vectors are additive shares of a one-hot vector.<a href="#section-8.2.2-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.2.2-2.1">
-              <p id="section-8.2.2-2.1.1">CP Consider adding aggregation parameter as input to <code>k_verify_rand</code>
-derivation.<a href="#section-8.2.2-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
 <span id="name-preparation-state-for-popla"></span><div id="poplar1-prep-state">
-<figure id="figure-21">
-            <div class="alignLeft art-text artwork" id="section-8.2.2-3.1">
+<figure id="figure-20">
+            <div class="alignLeft art-text artwork" id="section-8.2.2-2.1">
 <pre>
-class PrepState:
-  def __init__(verify_param, agg_param, nonce, input_share):
-    (self.l, self.candidate_prefixes) = decode_indexes(agg_param)
-    (self.idpf_key,
-     self.correlation_shares) = decode_input_share(input_share)
-    (self.party_id, k_verify_init) = verify_param
-    self.k_verify_rand = get_key(k_verify_init, nonce)
-    self.step = 'ready'
+def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, \
+      public_share, input_share):
+    l, self.candidate_prefixes = decode_indexes(agg_param)
+    idpf_key, correlation_shares = decode_input_share(input_share)
+    public_share = public_share
+    k_verify_rand = get_key(verify_key, nonce)
+    prep_step = 'ready'
+    output_share = None
+    prep_fixed = (agg_id, l, candidate_prefixes, public_share, \
+      idpf_key, correlation_shares, k_verify_rand)
+    return (prep_step, prep_fixed, output_share)
 
-  def next(self, inbound: Optional[Bytes]):
-    l = self.l
+
+def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
+    (prep_step, prep_fixed, output_share) = prep
+    (agg_id, l, candidate_prefixes, public_share, idpf_key, \
+      correlation_shares, k_verify_rand) = prep_fixed
     (a_share, b_share, c_share,
      A_share, B_share) = correlation_shares[l-1]
 
-    if self.step == 'ready' and inbound == None:
+    Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+      else Poplar1.Idpf.FieldLeaf
+    if step == 'ready' and inbound == None:
       # Evaluate IDPF on candidate prefixes.
       data_share, auth_share = [], []
-      for x in self.candidate_prefixes:
-        value = self.idpf_key.eval(l, x)
+      for x in candidate_prefixes:
+        value = Poplar1.Idpf.eval(agg_id, public_share, \
+          idpf_key, l, candidate_prefixes)
         data_share.append(value[0])
         auth_share.append(value[1])
 
       # Prepare first sketch verification message.
-      r = Prg.expand_into_vec(
-        Field[l], self.k_verify_rand, len(data_share))
+      r = Poplar1.Prg.expand_into_vec(
+        Field, k_verify_rand, len(data_share))
       verifier_share_1 = [
          a_share + inner_product(data_share, r),
          b_share + inner_product(data_share, r * r),
          c_share + inner_product(auth_share, r),
       ]
 
-      self.output_share = data_share
-      self.step = 'sketch round 1'
-      return verifier_share_1
+      output_share = data_share
+      prep_step = 'sketch round 1'
+      prep = (prep_step, prep_fixed, output_share)
+      return (prep, Field.encode_vec(verifier_share_1))
 
     elif self.step == 'sketch round 1' and inbound != None:
-      verifier_1 = Field[l].decode_vec(inbound)
+      verifier_1 = Field.decode_vec(inbound)
       verifier_share_2 = [
         (verifier_1[0] * verifier_1[0] \
          - verifier_1[1] \
@@ -4656,13 +4631,14 @@ class PrepState:
         + B_share
       ]
 
-      self.step = 'sketch round 2'
-      return Field[l].encode_vec(verifier_share_2)
+      prep_step = 'sketch round 2'
+      prep = (prep_step, prep_fixed, output_share)
+      return (prep, Field.encode_vec(verifier_share_2))
 
     elif self.step == 'sketch round 2' and inbound != None:
-      verifier_2 = Field[l].decode_vec(inbound)
+      verifier_2 = Field.decode_vec(inbound)
       if verifier_2 != 0: raise ERR_INVALID
-      return Field[l].encode_vec(self.output_share)
+      return Field.encode_vec(output_share)
 
     else: raise ERR_INVALID_STATE
 
@@ -4671,13 +4647,15 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
     raise ERR_INVALID_INPUT
 
   (l, _) = decode_indexes(agg_param)
-  verifier = Field[l].decode_vec(inbound[0]) + \
-             Field[l].decode_vec(inbound[1])
+  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+    else Poplar1.Idpf.FieldLeaf
+  verifier = Field.decode_vec(inbound[0]) + \
+             Field.decode_vec(inbound[1])
 
-  return Field[l].encode_vec(verifier)
+  return Field.encode_vec(verifier)
 </pre>
 </div>
-<figcaption><a href="#figure-21" class="selfRef">Figure 21</a>:
+<figcaption><a href="#figure-20" class="selfRef">Figure 20</a>:
 <a href="#name-preparation-state-for-popla" class="selfRef">Preparation state for poplar1.</a>
             </figcaption></figure>
 </div>
@@ -4689,22 +4667,25 @@ def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
 <a href="#section-8.2.3" class="section-number selfRef">8.2.3. </a><a href="#name-aggregation-4" class="section-name selfRef">Aggregation</a>
           </h4>
 <span id="name-aggregation-algorithm-for-po"></span><div id="poplar1-out2agg">
-<figure id="figure-22">
+<figure id="figure-21">
             <div class="alignLeft art-text artwork" id="section-8.2.3-1.1">
 <pre>
-def out_shares_to_agg_share(agg_param, output_shares: Vec[Bytes]):
+def out_shares_to_agg_share(Poplar1, agg_param, \
+    output_shares: Vec[OutShare]):
   (l, candidate_prefixes) = decode_indexes(agg_param)
   if len(output_shares) != len(candidate_prefixes):
     raise ERR_INVALID_INPUT
 
-  agg_share = Field[l].zeros(len(candidate_prefixes))
+  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+    else Poplar1.Idpf.FieldLeaf
+  agg_share = Field.zeros(len(candidate_prefixes))
   for output_share in output_shares:
-    agg_share += Field[l].decode_vec(output_share)
+    agg_share = vec_add(agg_share, output_share)
 
-  return Field[l].encode_vec(agg_share)
+  return Field.encode_vec(agg_share)
 </pre>
 </div>
-<figcaption><a href="#figure-22" class="selfRef">Figure 22</a>:
+<figcaption><a href="#figure-21" class="selfRef">Figure 21</a>:
 <a href="#name-aggregation-algorithm-for-po" class="selfRef">Aggregation algorithm for poplar1.</a>
             </figcaption></figure>
 </div>
@@ -4716,21 +4697,23 @@ def out_shares_to_agg_share(agg_param, output_shares: Vec[Bytes]):
 <a href="#section-8.2.4" class="section-number selfRef">8.2.4. </a><a href="#name-unsharding-4" class="section-name selfRef">Unsharding</a>
           </h4>
 <span id="name-computation-of-the-aggregate"></span><div id="poplar1-agg-output">
-<figure id="figure-23">
+<figure id="figure-22">
             <div class="alignLeft art-text artwork" id="section-8.2.4-1.1">
 <pre>
-def agg_shares_to_result(agg_param, agg_shares: Vec[Bytes]):
+def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
   (l, _) = decode_indexes(agg_param)
   if len(agg_shares) != 2:
     raise ERR_INVALID_INPUT
 
-  agg = Field[l].decode_vec(agg_shares[0]) + \
-        Field[l].decode_vec(agg_shares[1]J)
+  Field = Poplar1.Idpf.FieldInner if l &lt;= BITS \
+    else Poplar1.Idpf.FieldLeaf
+  agg = Field.decode_vec(agg_shares[0]) + \
+        Field.decode_vec(agg_shares[1])
 
-  return Field[l].encode_vec(agg)
+  return Field.encode_vec(agg)
 </pre>
 </div>
-<figcaption><a href="#figure-23" class="selfRef">Figure 23</a>:
+<figcaption><a href="#figure-22" class="selfRef">Figure 22</a>:
 <a href="#name-computation-of-the-aggregate" class="selfRef">Computation of the aggregate result for poplar1.</a>
             </figcaption></figure>
 </div>
@@ -4757,9 +4740,9 @@ key share and correlation shares.<a href="#section-8.2.5-2.1" class="pilcrow">¶
             <li class="normal" id="section-8.2.5-2.3">
               <code>decode_indexes(encoded: Bytes) -&gt; (l: Unsigned, indexes: Vec[Unsigned])</code>
 decodes a sequence of indexes, i.e., candidate indexes for IDPF evaluation.
-The value of <code>l</code> <span class="bcp14">MUST</span> be in range <code>[1, BITS]</code> and <code>indexes[i]</code> <span class="bcp14">MUST</span> be in range
-<code>[2^(l-1), 2^l)</code> for all <code>i</code>. An error is raised if <code>encoded</code> cannot be
-decoded.<a href="#section-8.2.5-2.3" class="pilcrow">¶</a>
+The value of <code>l</code> <span class="bcp14">MUST</span> be in range <code>[0, BITS-1]</code> and <code>indexes</code> <span class="bcp14">MUST</span> be empty
+if <code>l == 0</code> or only contain values in range <code>[0, 2^l-1]</code> otherwise.
+An error is raised if <code>encoded</code> cannot be decoded.<a href="#section-8.2.5-2.3" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -4792,7 +4775,7 @@ the measurements of honest Clients.<a href="#section-9-3.2" class="pilcrow">¶</
 </li>
       </ol>
 <p id="section-9-4">Note that, to achieve robustness, it is important to ensure that the
-verification key distributed to the Aggregators (<code>verify_key</code>, see <a href="#setup" class="xref">Section 8.2.1</a>) is
+verification key distributed to the Aggregators (<code>verify_key</code>, see <a href="#sec-vdaf-prepare" class="xref">Section 5.2</a>) is
 never revealed to the Clients.<a href="#section-9-4" class="pilcrow">¶</a></p>
 <p id="section-9-5">It is also possible to consider a stronger form of robustness, where the
 attacker also controls a subset of Aggregators (see <span>[<a href="#BBCGGI19" class="xref">BBCGGI19</a>]</span>, Section 6.3).
