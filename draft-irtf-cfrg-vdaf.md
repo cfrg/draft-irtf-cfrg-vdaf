@@ -2313,7 +2313,7 @@ A concrete IDPF specifies a single associated constant:
 A concrete IDPF also specifies the following associated types:
 
 * `FieldInner` and `FieldLeaf`. Each defines the same methods and
-  associated constants as `Field` in {{prio3}}.
+  associated constants as `Field` in {{field}}.
 
 Finally, an implementation note. The interface for IDPFs specified here is
 stateless, in the sense that there is no state carried between IDPF evaluations.
