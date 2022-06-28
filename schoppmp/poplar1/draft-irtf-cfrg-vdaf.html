@@ -4539,7 +4539,7 @@ def measurement_to_input_shares(Poplar1, alpha):
       [a, b, c, A, B] - correlation_share)
 
   # Generate IDPF shares.
-  (key_0, key_1) = Idpf.gen(alpha, beta[:-1], beta[-1])
+  (key_0, key_1) = Poplar1.Idpf.gen(alpha, beta[:-1], beta[-1])
 
   input_shares = [
     encode_input_share(key_0, correlation_shares_0),
@@ -4740,9 +4740,9 @@ key share and correlation shares.<a href="#section-8.2.5-2.1" class="pilcrow">¶
             <li class="normal" id="section-8.2.5-2.3">
               <code>decode_indexes(encoded: Bytes) -&gt; (l: Unsigned, indexes: Vec[Unsigned])</code>
 decodes a sequence of indexes, i.e., candidate indexes for IDPF evaluation.
-The value of <code>l</code> <span class="bcp14">MUST</span> be in range <code>[1, BITS]</code> and <code>indexes[i]</code> <span class="bcp14">MUST</span> be in range
-<code>[2^(l-1), 2^l)</code> for all <code>i</code>. An error is raised if <code>encoded</code> cannot be
-decoded.<a href="#section-8.2.5-2.3" class="pilcrow">¶</a>
+The value of <code>l</code> <span class="bcp14">MUST</span> be in range <code>[0, BITS-1]</code> and <code>indexes</code> <span class="bcp14">MUST</span> be empty
+if <code>l == 0</code> or only contain values in range <code>[0, 2^l-1]</code> otherwise.
+An error is raised if <code>encoded</code> cannot be decoded.<a href="#section-8.2.5-2.3" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
