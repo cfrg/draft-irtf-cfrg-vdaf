@@ -28,8 +28,9 @@ class Gadget:
 class Valid:
     # Generic parameters overwritten by a concrete validity circuit. `Field`
     # MUST be FFT-friendly.
-    Field: field.FftField = None
     Measurement = None
+    AggResult = None
+    Field: field.FftField = None
 
     # Length of the input to the validity circuit.
     INPUT_LEN: Unsigned
@@ -83,6 +84,12 @@ class Valid:
     @classmethod
     def truncate(Valid, inp: Vec[Field]) -> Vec[Field]:
         raise Error('truncate() not implemented')
+
+    # Decode an aggregate result.
+    @classmethod
+    def decode(Valid, output: Vec[Field],
+               num_measurements: Unsigned) -> AggResult:
+        raise Error('decode() not implemented')
 
     # Evaluate the circuit on the provided input and joint randomness.
     def eval(self,
@@ -189,8 +196,9 @@ class FlpGeneric(Flp):
     def with_valid(FlpGeneric, Valid):
         new_cls = deepcopy(FlpGeneric)
         new_cls.Valid = Valid
-        new_cls.Field = Valid.Field
         new_cls.Measurement = Valid.Measurement
+        new_cls.AggResult = Valid.AggResult
+        new_cls.Field = Valid.Field
         new_cls.PROVE_RAND_LEN = Valid.prove_rand_len()
         new_cls.QUERY_RAND_LEN = Valid.query_rand_len()
         new_cls.JOINT_RAND_LEN = Valid.JOINT_RAND_LEN
@@ -302,6 +310,10 @@ class FlpGeneric(Flp):
         return FlpGeneric.Valid.truncate(inp)
 
     @classmethod
+    def decode(FlpGeneric, output, num_measurements):
+        return FlpGeneric.Valid.decode(output, num_measurements)
+
+    @classmethod
     def test_vec_set_type_param(FlpGeneric, test_vec):
         return FlpGeneric.Valid.test_vec_set_type_param(test_vec)
 
@@ -387,8 +399,9 @@ def check_valid_eval(Valid, inp, joint_rand):
 
 class Count(Valid):
     # Associated types
-    Field = field.Field64
     Measurement = Unsigned
+    AggResult = Vec[Unsigned]
+    Field = field.Field64
 
     # Associated parameters
     GADGETS = [Mul()]
@@ -413,11 +426,16 @@ class Count(Valid):
             raise ERR_INPUT
         return inp
 
+    @classmethod
+    def decode(Count, output, _num_measurements):
+        return [x.as_unsigned() for x in output]
+
 
 class Sum(Valid):
     # Associated types
-    Field = field.Field128
     Measurement = Unsigned
+    AggResult = Vec[Unsigned]
+    Field = field.Field128
 
     # Associated parametrs
     GADGETS = [PolyEval([0, -1, 1])]
@@ -453,6 +471,10 @@ class Sum(Valid):
             decoded += w * b
         return [decoded]
 
+    @classmethod
+    def decode(Count, output, _num_measurements):
+        return [x.as_unsigned() for x in output]
+
     # Instantiate an instace of the `Sum` circuit for inputs in range `[0,
     # 2^bits)`.
     @classmethod
@@ -476,8 +498,9 @@ class Histogram(Valid):
     buckets = None # Set by 'Histogram.with_buckets()`
 
     # Associated types
-    Field = field.Field128
     Measurement = Unsigned
+    AggResult = Vec[Unsigned]
+    Field = field.Field128
 
     # Associated parametrs
     GADGETS = [PolyEval([0, -1, 1])]
@@ -517,6 +540,10 @@ class Histogram(Valid):
     @classmethod
     def truncate(Histogram, inp):
         return inp
+
+    @classmethod
+    def decode(Histogram, output, _num_measurements):
+        return [bucket_count.as_unsigned() for bucket_count in output]
 
     # Instantiate an instace of the `Histogram` circuit with the given buckets.
     @classmethod
@@ -606,6 +633,22 @@ def test_flp_generic(cls, test_cases):
         if decision != expected_decision:
             print('{}: test {} failed: proof evaluation resulted in {}; want {}'.format(
                 cls.Valid.__name__, i, decision, expected_decision))
+
+
+class TestAverage(Sum):
+    """
+    Flp subclass that calculates the average of integers. The result is rounded
+    down.
+    """
+    # Associated types
+    AggResult = Unsigned
+
+    @classmethod
+    def decode(TestAverage_self, output, num_measurements):
+        sum = super(TestAverage, TestAverage_self).decode(output,
+                                                          num_measurements)[0]
+        return sum // num_measurements
+
 
 if __name__ == '__main__':
     cls = FlpGeneric.with_valid(Count)

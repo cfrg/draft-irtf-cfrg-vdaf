@@ -9,8 +9,9 @@ import sagelib.field as field
 # The base class for FLPs.
 class Flp:
     # Generic paraemters
-    Field = field.Field
     Measurement = None
+    AggResult = None
+    Field = field.Field
 
     # Length of the joint randomness shared by the prover and verifier.
     JOINT_RAND_LEN: Unsigned
@@ -66,6 +67,11 @@ class Flp:
     def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
         raise Error('truncate() not implemented')
 
+    # Decode an aggregate result.
+    @classmethod
+    def decode(output: Vec[Field], num_measurements: Unsigned) -> AggResult:
+        raise Error('decode() not implemented')
+
     # Add any parameters to `test_vec` that are required to construct this
     # class. Return the key that was set or `None` if `test_vec` was not
     # modified.
@@ -110,6 +116,7 @@ class FlpTest(Flp):
 
     # Associated types
     Measurement = Unsigned
+    AggResult = Vec[Unsigned]
 
     # Operational parameters
     input_range = range(5)
@@ -141,6 +148,10 @@ class FlpTest(Flp):
     @classmethod
     def truncate(cls, inp):
         return [inp[0]]
+
+    @classmethod
+    def decode(cls, output, _num_measurements):
+        return [x.as_unsigned() for x in output]
 
 
 class FlpTestField128(FlpTest):
