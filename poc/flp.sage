@@ -116,7 +116,7 @@ class FlpTest(Flp):
 
     # Associated types
     Measurement = Unsigned
-    AggResult = Vec[Unsigned]
+    AggResult = Unsigned
 
     # Operational parameters
     input_range = range(5)
@@ -151,7 +151,7 @@ class FlpTest(Flp):
 
     @classmethod
     def decode(cls, output, _num_measurements):
-        return [x.as_unsigned() for x in output]
+        return output[0].as_unsigned()
 
 
 class FlpTestField128(FlpTest):
