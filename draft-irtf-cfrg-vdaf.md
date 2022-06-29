@@ -559,10 +559,12 @@ After the Aggregators have aggregated a sufficient number of output shares, each
 sends its aggregate share to the Collector, who runs the following algorithm to
 recover the following output:
 
-* `Daf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) ->
-  AggResult` is run by the Collector in order to compute the aggregate result
-  from the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
-  This algorithm is deterministic.
+* `Daf.agg_shares_to_result(agg_param: AggParam,
+  agg_shares: Vec[Bytes], num_measurements: Unsigned) -> AggResult` is
+  run by the Collector in order to compute the aggregate result from
+  the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
+  `num_measurements` is the number of measurements that contributed to
+  each of the aggregate shares. This algorithm is deterministic.
 
 ~~~~
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
@@ -624,7 +626,9 @@ def run_daf(Daf,
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate result.
-    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares)
+    num_measurements = len(measurements)
+    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares,
+                                          num_measurements)
     return agg_result
 ~~~
 {: #run-daf title="Execution of a DAF."}
@@ -855,10 +859,12 @@ form, where shares are processed one at a time.
 
 VDAF Unsharding is identical to DAF Unsharding (cf. {{sec-daf-unshard}}):
 
-* `Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) ->
-  AggResult` is run by the Collector in order to compute the aggregate result
-  from the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
-  This algorithm is deterministic.
+* `Vdaf.agg_shares_to_result(agg_param: AggParam,
+  agg_shares: Vec[Bytes], num_measurements: Unsigned) -> AggResult` is
+  run by the Collector in order to compute the aggregate result from
+  the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
+  `num_measurements` is the number of measurements that contributed to
+  each of the aggregate shares. This algorithm is deterministic.
 
 The data flow for this stage is illustrated in {{unshard-flow}}.
 
@@ -919,7 +925,9 @@ def run_vdaf(Vdaf,
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate.
-    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares)
+    num_measurements = len(measurements)
+    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares,
+                                           num_measurements)
     return agg_result
 ~~~
 {: #run-vdaf title="Execution of a VDAF."}
@@ -1565,7 +1573,8 @@ To unshard a set of aggregate shares, the Collector first adds up the vectors
 element-wise. It then converts each element of the vector into an integer.
 
 ~~~
-def agg_shares_to_result(Prio3, _agg_param, agg_shares):
+def agg_shares_to_result(Prio3, _agg_param, agg_shares,
+                         num_measurements):
     agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for agg_share in agg_shares:
         agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
@@ -2488,7 +2497,8 @@ def out_shares_to_agg_share(Poplar1, agg_param, \
 ### Unsharding
 
 ~~~
-def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
+def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes],
+                         num_measurements):
   (l, _) = decode_indexes(agg_param)
   if len(agg_shares) != 2:
     raise ERR_INVALID_INPUT

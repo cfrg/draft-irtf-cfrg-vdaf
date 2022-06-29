@@ -59,7 +59,8 @@ class Daf:
     @classmethod
     def agg_shares_to_result(Daf,
                              agg_param: AggParam,
-                             agg_shares: Vec[Bytes]) -> AggResult:
+                             agg_shares: Vec[Bytes],
+                             num_measurements: Unsigned) -> AggResult:
         raise Error('not implemented')
 
     # Returns a printable version of the verification parameters. This is used
@@ -94,7 +95,9 @@ def run_daf(Daf,
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate result.
-    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares)
+    num_measurements = len(measurements)
+    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares,
+                                          num_measurements)
     return agg_result
 
 
@@ -138,7 +141,7 @@ class TestDaf(Daf):
             reduce(lambda x, y: [x[0] + y[0]], out_shares))
 
     @classmethod
-    def agg_shares_to_result(cls, _agg_param, agg_shares):
+    def agg_shares_to_result(cls, _agg_param, agg_shares, _num_measurements):
         return [reduce(lambda x, y: [x[0] + y[0]],
             map(lambda encoded: cls.Field.decode_vec(encoded),
                 agg_shares))[0].as_unsigned()]
