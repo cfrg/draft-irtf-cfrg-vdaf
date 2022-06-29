@@ -400,7 +400,7 @@ def check_valid_eval(Valid, inp, joint_rand):
 class Count(Valid):
     # Associated types
     Measurement = Unsigned
-    AggResult = Vec[Unsigned]
+    AggResult = Unsigned
     Field = field.Field64
 
     # Associated parameters
@@ -428,13 +428,13 @@ class Count(Valid):
 
     @classmethod
     def decode(Count, output, _num_measurements):
-        return [x.as_unsigned() for x in output]
+        return output[0].as_unsigned()
 
 
 class Sum(Valid):
     # Associated types
     Measurement = Unsigned
-    AggResult = Vec[Unsigned]
+    AggResult = Unsigned
     Field = field.Field128
 
     # Associated parametrs
@@ -473,7 +473,7 @@ class Sum(Valid):
 
     @classmethod
     def decode(Count, output, _num_measurements):
-        return [x.as_unsigned() for x in output]
+        return output[0].as_unsigned()
 
     # Instantiate an instace of the `Sum` circuit for inputs in range `[0,
     # 2^bits)`.
@@ -646,7 +646,7 @@ class TestAverage(Sum):
     @classmethod
     def decode(TestAverage_self, output, num_measurements):
         sum = super(TestAverage, TestAverage_self).decode(output,
-                                                          num_measurements)[0]
+                                                          num_measurements)
         return sum // num_measurements
 
 

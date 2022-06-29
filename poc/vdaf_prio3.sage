@@ -390,7 +390,7 @@ if __name__ == '__main__':
         .with_prg(prg.PrgAes128) \
         .with_flp(flp.FlpTestField128) \
         .with_shares(2)
-    test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])
+    test_vdaf(cls, None, [1, 2, 3, 4, 4], 14)
 
     # If JOINT_RAND_LEN == 0, then Fiat-Shamir isn't needed and we can skip
     # generating the joint randomness.
@@ -398,15 +398,15 @@ if __name__ == '__main__':
         .with_prg(prg.PrgAes128) \
         .with_flp(flp.FlpTestField128.with_joint_rand_len(0)) \
         .with_shares(2)
-    test_vdaf(cls, None, [1, 2, 3, 4, 4], [14])
+    test_vdaf(cls, None, [1, 2, 3, 4, 4], 14)
 
     cls = Prio3Aes128Count.with_shares(2)
-    test_vdaf(cls, None, [0, 1, 1, 0, 1], [3])
-    test_vdaf(cls, None, [1], [1], print_test_vec=TEST_VECTOR)
+    test_vdaf(cls, None, [0, 1, 1, 0, 1], 3)
+    test_vdaf(cls, None, [1], 1, print_test_vec=TEST_VECTOR)
 
     cls = Prio3Aes128Sum.with_shares(2).with_bits(8)
-    test_vdaf(cls, None, [0, 147, 1, 0, 11, 0], [159])
-    test_vdaf(cls, None, [100], [100], print_test_vec=TEST_VECTOR)
+    test_vdaf(cls, None, [0, 147, 1, 0, 11, 0], 159)
+    test_vdaf(cls, None, [100], 100, print_test_vec=TEST_VECTOR)
 
     cls = Prio3Aes128Histogram.with_shares(2).with_buckets([1, 10, 100])
     test_vdaf(cls, None, [0], [1, 0, 0, 0])

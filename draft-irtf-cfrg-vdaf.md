@@ -2098,7 +2098,7 @@ way. The parameters for this circuit are summarized below.
 | `OUTPUT_LEN`     | `1`                          |
 | `JOINT_RAND_LEN` | `0`                          |
 | `Measurement`    | `Unsigned`, in range `[0,2)` |
-| `AggResult`      | `Vec[Unsigned]`              |
+| `AggResult`      | `Unsigned`                   |
 | `Field`          | `Field64` ({{field64}})      |
 {: title="Parameters of validity circuit Count."}
 
@@ -2132,7 +2132,7 @@ def truncate(Sum, inp):
     return [decoded]
 
 def decode(Sum, output, _num_measurements):
-    return [x.as_unsigned() for x in output]
+    return output[0].as_unsigned()
 ~~~
 
 The validity circuit checks that the input consists of ones and zeros. Its
@@ -2165,7 +2165,7 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
 | `OUTPUT_LEN`     | `1`                          |
 | `JOINT_RAND_LEN` | `1`                          |
 | `Measurement`    | `Unsigned`, in range `[0, 2^bits)` |
-| `AggResult`      | `Vec[Unsigned]`              |
+| `AggResult`      | `Unsigned`                   |
 | `Field`          | `Field128` ({{field128}})    |
 {: title="Parameters of validity circuit Sum."}
 
