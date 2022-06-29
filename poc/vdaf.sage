@@ -203,7 +203,7 @@ def run_vdaf(Vdaf,
     agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares,
                                            num_measurements)
     # REMOVE ME
-    test_vec['agg_result'] = list(map(lambda x: int(x), agg_result))
+    test_vec['agg_result'] = agg_result
     if print_test_vec:
         pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param)
 
@@ -275,7 +275,7 @@ class TestVdaf(Vdaf):
     # Associated types
     OutShare = Vec[Field]
     Measurement = Unsigned
-    AggResult = Unsigned
+    AggResult = Vec[Unsigned]
 
     # Operational parameters
     input_range = range(5)
