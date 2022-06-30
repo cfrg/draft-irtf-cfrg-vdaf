@@ -22,6 +22,12 @@ class Prg:
     def next(self, length: Unsigned) -> Bytes:
         raise Error('not implemented')
 
+    # Derive a new seed.
+    @classmethod
+    def derive_seed(Prg, seed: Bytes, info: Bytes) -> bytes:
+        prg = Prg(seed, info)
+        return prg.next(Prg.SEED_SIZE)
+
     # Output the next `length` pseudorandom elements of `Field`.
     def next_vec(self, Field, length: Unsigned):
         m = next_power_of_2(Field.MODULUS) - 1
@@ -32,12 +38,6 @@ class Prg:
             if x < Field.MODULUS:
                 vec.append(Field(x))
         return vec
-
-    # Derive a new seed.
-    @classmethod
-    def derive_seed(Prg, seed: Bytes, info: Bytes) -> bytes:
-        prg = Prg(seed, info)
-        return prg.next(Prg.SEED_SIZE)
 
     # Expand the input `seed` into vector of `length` field elements.
     @classmethod

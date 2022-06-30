@@ -1059,6 +1059,16 @@ The tables below define finite fields used in the remainder of this document.
 | GEN_ORDER       | 2^66 |
 {: #field128 title="Field128, an FFT-friendly field."}
 
+| Parameter       | Value   |
+|:----------------|:--------|
+| MODULUS         | 2^255 - 19 |
+| ENCODED_SIZE    | 32 |
+{: #field255 title="Field255."}
+
+> OPEN ISSUE We currently use big-endian for encoding field elements. However,
+> for implementations of `GF(2^255-19)`, little endian is more common. See
+> issue#90.
+
 ## Pseudorandom Generators {#prg}
 
 A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
@@ -1092,21 +1102,25 @@ def derive_seed(Prg, seed: Bytes, info: Bytes) -> bytes:
     prg = Prg(seed, info)
     return prg.next(Prg.SEED_SIZE)
 
-# Expand a seed into a vector of Field elements.
+# Output the next `length` pseudorandom elements of `Field`.
+def next_vec(self, Field, length: Unsigned):
+    m = next_power_of_2(Field.MODULUS) - 1
+    vec = []
+    while len(vec) < length:
+        x = OS2IP(self.next(Field.ENCODED_SIZE))
+        x &= m
+        if x < Field.MODULUS:
+            vec.append(Field(x))
+    return vec
+
+# Expand the input `seed` into vector of `length` field elements.
 def expand_into_vec(Prg,
                     Field,
                     seed: Bytes,
                     info: Bytes,
                     length: Unsigned):
-    m = next_power_of_2(Field.MODULUS) - 1
     prg = Prg(seed, info)
-    vec = []
-    while len(vec) < length:
-        x = OS2IP(prg.next(Field.ENCODED_SIZE))
-        x &= m
-        if x < Field.MODULUS:
-            vec.append(Field(x))
-    return vec
+    return prg.next_vec(Field, length)
 ~~~
 {: #prg-derived-methods title="Derived class methods for PRGs."}
 
@@ -1943,8 +1957,6 @@ In the remainder, we let `[n]` denote the set `{1, ..., n}` for positive integer
     * Let `P_i = next_power_of_2(M_i+1)`
     * Let `alpha_i = Field.gen()^(Field.GEN_ORDER / P_i)`
 
-<br>
-
 | Parameter        | Value               |
 |:-----------------|:--------------------|
 | `PROVE_RAND_LEN` | `Valid.prove_rand_len()` (see {{flp-generic-valid}}) |
@@ -2088,8 +2100,6 @@ def Count(inp: Vec[Field64]):
 The measurement is encoded and decoded as a singleton vector in the natural
 way. The parameters for this circuit are summarized below.
 
-<br>
-
 | Parameter        | Value                        |
 |:-----------------|:-----------------------------|
 | `GADGETS`        | `[Mul]`                      |
@@ -2154,8 +2164,6 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
         r *= joint_rand[0]
     return out
 ~~~
-
-<br>
 
 | Parameter        | Value                        |
 |:-----------------|:-----------------------------|
@@ -2225,8 +2233,6 @@ def Histogram(inp: Vec[Field128],
 Note that this circuit depends on the number of shares into which the input is
 sharded. This is provided to the FLP by Prio3.
 
-<br>
-
 | Parameter        | Value                     |
 |:-----------------|:--------------------------|
 | `GADGETS`        | `[Range2]`                |
@@ -2241,27 +2247,19 @@ sharded. This is provided to the FLP by Prio3.
 
 # Poplar1 {#poplar1}
 
-> TODO Update this section in light of removing the public parameter and
-> replacing the verification parameter.
-
-> NOTE The spec for Poplar1 is still a work-in-progress. A partial
-> implementation can be found at
-> https://github.com/divviup/libprio-rs/blob/main/src/vdaf/poplar1.rs. The
-> verification logic is nearly complete, however as of this draft the code is
-> missing the IDPF. An implementation of the IDPF can be found at
-> https://github.com/google/distributed_point_functions/.
+> NOTE This construction has not undergone significant security analysis.
 
 This section specifies Poplar1, a VDAF for the following task. Each Client holds
-a `BITS`-bit string and the Aggregators hold a set of `l`-bit strings, where `l
-<= BITS`. We will refer to the latter as the set of "candidate prefixes". The
-Aggregators' goal is to count how many inputs are prefixed by each candidate
-prefix.
+a string of length `BITS` and the Aggregators hold a set of `l`-bit strings,
+where `l <= BITS`. We will refer to the latter as the set of "candidate
+prefixes". The Aggregators' goal is to count how many inputs are prefixed by
+each candidate prefix.
 
-This functionality is the core component of Poplar [BBCGGI21]. At a high level,
-the protocol works as follows.
+This functionality is the core component of the Poplar protocol {{BBCGGI21}}. At
+a high level, the protocol works as follows.
 
-1. Each Clients runs the input-distribution algorithm on its `n`-bit string and
-   sends an input share to each Aggregator.
+1. Each Client splits its input string into input shares and sends one share to
+   each Aggregator.
 2. The Aggregators agree on an initial set of candidate prefixes, say `0` and
    `1`.
 3. The Aggregators evaluate the VDAF on each set of input shares and aggregate
@@ -2275,281 +2273,652 @@ the protocol works as follows.
    in `H`, add add `p || 0` and `p || 1` to the set. Repeat step 3 with the new
    set of candidate prefixes.
 
-Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)", a
-primitive described by [BBCGGI21] that generalizes the notion of a Distributed
-Point Function (DPF) [GI14]. Briefly, a DPF is used to distribute the
-computation of a "point function", a function that evaluates to zero on every
-input except at a programmable "point". The computation is distributed in such a
-way that no one party knows either the point or what it evaluates to.
+Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)",
+a primitive described by {{BBCGGI21}} that generalizes the notion of a
+Distributed Point Function (DPF) {{GI14}}. Briefly, a DPF is used to distribute
+the computation of a "point function", a function that evaluates to zero on
+every input except at a programmable "point". The computation is distributed in
+such a way that no one party knows either the point or what it evaluates to.
 
 An IDPF generalizes this "point" to a path on a full binary tree from the root
 to one of the leaves. It is evaluated on an "index" representing a unique node
-of the tree. If the node is on the path, then function evaluates to to a
-non-zero value; otherwise it evaluates to zero. This structure allows an IDPF to
-provide the functionality required for the above protocol, while at the same
-time ensuring the same degree of privacy as a DPF.
+of the tree. If the node is on the programmed path, then function evaluates to
+to a non-zero value; otherwise it evaluates to zero. This structure allows an
+IDPF to provide the functionality required for the above protocol, while at the
+same time ensuring the same degree of privacy as a DPF.
 
-Our VDAF composes an IDPF with the "secure sketching" protocol of [BBCGGI21].
+Poplar1 composes an IDPF with the "secure sketching" protocol of {{BBCGGI21}}.
 This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
 is zero everywhere except for one element, which is equal to one.
 
-## Incremental Distributed Point Functions (IDPFs)
+The remainder of this section is structured as follows. IDPFs are defined in
+{{idpf}}; a concrete instantiation is given {{idpf-poplar}}. The Poplar1 VDAF is
+defined in {{poplar1-construction}} in terms of a generic IDPF. Finally, a
+concrete instantiation of Poplar1 is specified in {{poplar1-instantiation}};
+test vectors can be found in {{test-vectors}}.
+
+## Incremental Distributed Point Functions (IDPFs) {#idpf}
 
 An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
-defined by the IDPF. The Client specifies an index `alpha` and a vector of values
-`beta`, one for each "level" `1 <= L <= BITS`. The key generation algorithm generates two
-IDPF keys, one for each Aggregator. When evaluated at level `L` and index `0 <= x < 2^L`, each
-IDPF share returns an additive share of `beta[L]` if `x` is the `L`-bit prefix
-of `alpha` and shares of zero otherwise.
+defined by the IDPF. Indexes into the IDPF tree are encoded as integers in range
+`[0, 2^BITS)`. The Client specifies an index `alpha` and a vector of
+values `beta`, one for each "level" `L` in range `[0, BITS)`. The key generation
+algorithm generates one IDPF "key" for each Aggregator. When evaluated at level
+`L` and index `0 <= prefix < 2^L`, each IDPF key returns an additive share of
+`beta[L]` if `prefix` is the `L`-bit prefix of `alpha` and shares of zero
+otherwise.
 
-Let `LSB(x, N)` denote the least significant `N` bits of positive integer
-`x`. By definition, a positive integer `0 <= x <= 2^L` is said to be the length-`L`
-prefix of positive integer `0 <= y <= BITS` if `LSB(x, L)` is equal to the most
-significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is
-the length-3 prefix of 25 (11001), but 7 (111) is not.
+An index `x` is defined to be a prefix of another index `y` as follows. Let
+`LSB(x, N)` denote the least significant `N` bits of positive integer `x`. By
+definition, a positive integer `0 <= x < 2^L` is said to be the length-`L`
+prefix of positive integer `0 <= y < 2^BITS` if `LSB(x, L)` is equal to the most
+significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is the
+length-3 prefix of 25 (11001), but 7 (111) is not.
 
-Each `beta[l]` is a vector of elements of a finite field. We distinguish two types of
-fields: one for inner nodes (denoted `Idpf.FieldInner`), and one for leaf nodes (`Idpf.FieldLeaf`).
+Each of the programmed points `beta` is a vector of elements of some finite
+field. We distinguish two types of fields: One for inner nodes (denoted
+`Idpf.FieldInner`), and one for leaf nodes (`Idpf.FieldLeaf`). (Our
+instantiation of Poplar1 ({{poplar1-instantiation}}) will use a much larger
+field for leaf nodes than for inner nodes. This is to ensure the IDPF is
+"extractable" as defined in {{BBCGGI21}}, Definition 1.)
 
-An IDPF is comprised of the following algorithms :
+A concrete IDPF defines the types and constants enumerated in {{idpf-param}}. In
+the remainder we write `Idpf.Vec` as shorthand for the type
+`Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]]`. (This type denotes
+either a vector of inner node field elements or leaf node field elements.) The
+scheme is comprised of the following algorithms:
 
-* `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])`
-  is the randomized key-generation algorithm run by the
-  client. Its inputs are the index `alpha` and the values `beta`. The value of
-  `alpha` MUST be in range `[0, 2^BITS)`.
-  The output is a public part that is sent to all aggregators, and a vector of
-  private IDPF keys, one for each aggregator.
+* `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf:
+  Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])` is the randomized IDPF-key
+  generation algorithm. Its inputs are the index `alpha` and the values `beta`.
+  The value of `alpha` MUST be in range `[0, 2^BITS)`. The output is a public
+  part that is sent to all aggregators and a vector of private IDPF keys, one
+  for each aggregator.
 
-* `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned, prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]]`
-  is the deterministic,
-  stateless key-evaluation algorithm run by each Aggregator. It returns the
-  value corresponding to index `x`. The value of `level` MUST be in `[0, BITS-1]` and
-  `prefixes` must be empty when `level == 0`, and only contain values in
-  `[0, 2^level-1]` otherwise.
+* `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned,
+  prefixes: Vec[Unsigned]) -> Idpf.Vec` is the deterministic, stateless
+  IDPF-key evaluation algorithm run by each Aggregator. Its inputs are the
+  Aggregator's unique identifier, the public share distributed to all of the
+  Aggregators, the Aggregator's IDPF key, the "level" at which to evaluate the
+  IDPF, and the sequence of candidate prefixes. It returns the share of the
+  value corresponding to each candidate prefix.
 
-A concrete IDPF specifies a single associated constant:
+  The output type depends on the value of `level`: If `level < Idpf.BITS-1`, the
+  output is the value for an inner node, which has type
+  `Vec[Vec[Idpf.FieldInner]]`; otherwise, if `level == Idpf.BITS-1`, then the
+  output is the value for a leaf node, which has type
+  `Vec[Vec[Idpf.FieldLeaf]]`.
 
-* `BITS: Unsigned` is the length of each Client input.
+  The value of `level` MUST be in range `[0, BITS)`. The indexes in `prefixes`
+  MUST all be distinct and in range `[0, 2^level)`.
 
-A concrete IDPF also specifies the following associated types:
+  Applications MUST ensure that the Aggregator's identifier is equal to the
+  integer in range `[0, SHARES)` that matches the index of `key` in the sequence
+  of IDPF keys output by the Client.
 
-* `FieldInner` and `FieldLeaf`. Each defines the same methods and
-  associated constants as `Field` in {{field}}.
+In addition, the following method is derived for each concrete `Idpf`:
+
+~~~
+def current_field(Idpf, level):
+    return Idpf.FieldInner if level < Idpf.BITS-1 \
+                else Idpf.FieldLeaf
+~~~
 
 Finally, an implementation note. The interface for IDPFs specified here is
 stateless, in the sense that there is no state carried between IDPF evaluations.
 This is to align the IDPF syntax with the VDAF abstraction boundary, which does
 not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
-state across evaluations.
+state across evaluations. See {{idpf-poplar}} for details.
+
+| Parameter  | Description               |
+|:-----------|:--------------------------|
+| SHARES     | Number of IDPF keys output by IDPF-key generator |
+| BITS       | Length in bits of each input string |
+| VALUE_LEN  | Number of field elements of each output value |
+| KEY_SIZE   | Size in bytes of each IDPF key |
+| FieldInner | Implementation of `Field` ({{field}}) used for values of inner nodes |
+| FieldLeaf  | Implementation of `Field` used for values of leaf nodes |
+| Prg        | Implementation of `Prg` ({{prg}}) |
+{: #idpf-param title="Constants and types defined by a concrete IDPF."}
 
 ## Construction {#poplar1-construction}
 
-The VDAF involves two rounds of communication (`ROUNDS == 2`) and is defined for
-two Aggregators (`SHARES == 2`).
+This section specifies `Poplar1`, an implementation of the `Vdaf` interface
+({{vdaf}}). It is defined in terms of any `Idpf` ({{idpf}}) for which
+`Idpf.SHARES == 2` and `Idpf.VALUE_LEN == 2`. The associated constants and types
+required by the `Vdaf` interface are defined in {{poplar1-param}}. The methods
+required for sharding, preparation, aggregation, and unsharding are described in
+the remaining subsections.
+
+| Parameter         | Value             |
+|:------------------|:------------------|
+| `VERIFY_KEY_SIZE` | `Idpf.Prg.SEED_SIZE` |
+| `ROUNDS`          | `2` |
+| `SHARES`          | `2` |
+| `Measurement`     | `Unsigned` |
+| `AggParam`        | `Tuple[Unsigned, Vec[Unsigned]]` |
+| `Prep`            | `Tuple[Bytes, Unsigned, Idpf.Vec]` |
+| `OutShare`        | `Idpf.Vec` |
+| `AggResult`       | `Vec[Unsigned]` |
+{: #poplar1-param title="Associated parameters for the Poplar1 VDAF."}
 
 ### Client
 
-The client's input is an IDPF index, denoted `alpha`. The values are pairs of
-field elements `(1, k)` where each `k` is chosen at random. This random value is
-used as part of the secure sketching protocol of [BBCGGI21]. After evaluating
-their IDPF key shares on the set of candidate prefixes, the sketching protocol
-is used by the Aggregators to verify that they hold shares of a one-hot vector.
-In addition, for each level of the tree, the prover generates random elements
-`a`, `b`, and `c` and computes
+The client's input is an IDPF index, denoted `alpha`. The programmed IDPF values
+are pairs of field elements `(1, k)` where each `k` is chosen at random. This
+random value is used as part of the secure sketching protocol of {{BBCGGI21}},
+Appendix C.4. After evaluating their IDPF key shares on a given sequence of
+candidate prefixes, the sketching protocol is used by the Aggregators to verify
+that they hold shares of a one-hot vector. In addition, for each level of the
+tree, the prover generates random elements `a`, `b`, and `c` and computes
 
 ~~~
     A = -2*a + k
-    B = a*a + b - k*a + c
+    B = a^2 + b - k*a + c
 ~~~
 
 and sends additive shares of `a`, `b`, `c`, `A` and `B` to the Aggregators.
 Putting everything together, the input-distribution algorithm is defined as
-follows. Function `encode_input_share` is defined in {{poplar1-helper-functions}}.
+follows. Function `encode_input_shares` is defined in {{poplar1-helper-functions}}.
+
 
 ~~~
-def measurement_to_input_shares(Poplar1, alpha):
-  if alpha < 2**BITS: raise ERR_INVALID_INPUT
+def measurement_to_input_shares(Poplar1, measurement):
+    dst = VERSION + b' poplar1'
+    prg = Poplar1.Idpf.Prg(
+        gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))
 
-  # Prepare IDPF values.
-  beta = []
-  correlation_shares_0, correlation_shares_1 = [], []
-  for l in range(1,BITS+1):
-    Field = Poplar1.Idpf.FieldInner if l <= BITS \
-      else Poplar1.Idpf.FieldLeaf
-    (k, a, b, c) = Field.rand_vec(4)
+    # Construct the IDPF values for each level of the IDPF tree.
+    # Each "data" value is 1; in addition, the Client generates
+    # a random "authenticator" value used by the Aggregators to
+    # compute the sketch during preparation. This sketch is used
+    # to verify the one-hotness of their output shares.
+    beta_inner = [
+        [Poplar1.Idpf.FieldInner(1), k] \
+            for k in prg.next_vec(Poplar1.Idpf.FieldInner,
+                                  Poplar1.Idpf.BITS - 1) ]
+    beta_leaf = [Poplar1.Idpf.FieldLeaf(1)] + \
+        prg.next_vec(Poplar1.Idpf.FieldLeaf, 1)
 
-    # Construct values of the form (1, k), where k
-    # is a random field element.
-    beta += [(1, k)]
+    # Generate the IDPF keys.
+    (public_share, keys) = \
+        Poplar1.Idpf.gen(measurement, beta_inner, beta_leaf)
 
-    # Create secret shares of correlations to aid
-    # the Aggregators' computation.
-    A = -2*a+k
-    B = a*a + b - a * k + c
-    correlation_share = Field.rand_vec(5)
-    correlation_shares_1.append(correlation_share)
-    correlation_shares_0.append(
-      [a, b, c, A, B] - correlation_share)
+    # Generate correlated randomness used by the Aggregators to
+    # compute a sketch over their output shares. PRG seeds are
+    # used to encode shares of the `(a, b, c)` triples.
+    # (See [BBCGGI21, Appendix C.4].)
+    corr_seed = [
+        gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
+        gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
+    ]
+    corr_prg = [
+        Poplar1.Idpf.Prg(corr_seed[0], dst + byte(0)),
+        Poplar1.Idpf.Prg(corr_seed[1], dst + byte(1)),
+    ]
 
-  # Generate IDPF shares.
-  (key_0, key_1) = Poplar1.Idpf.gen(alpha, beta[:-1], beta[-1])
+    # For each level of the IDPF tree, shares of the `(A, B)`
+    # pairs are computed from the corresponding `(a, b, c)`
+    # triple and authenticator value `k`.
+    corr_inner = [[], []]
+    for level in range(Poplar1.Idpf.BITS):
+        Field = Poplar1.Idpf.current_field(level)
+        k = beta_inner[level][1] if level < Poplar1.Idpf.BITS - 1 \
+            else beta_leaf[1]
+        (a, b, c) = vec_add(corr_prg[0].next_vec(Field, 3),
+                            corr_prg[1].next_vec(Field, 3))
+        A = -Field(2) * a + k
+        B = a^2 + b - a * k + c
+        corr1 = prg.next_vec(Field, 2)
+        corr0 = vec_sub([A, B], corr1)
+        if level < Poplar1.Idpf.BITS - 1:
+            corr_inner[0] += corr0
+            corr_inner[1] += corr1
+        else:
+            corr_leaf = [corr0, corr1]
 
-  input_shares = [
-    encode_input_share(key_0, correlation_shares_0),
-    encode_input_share(key_1, correlation_shares_1),
-  ]
-
-  return input_shares
+    # Each input share consists of the Aggregator's IDPF key
+    # and a share of the correlated randomness.
+    return (public_share,
+            Poplar1.encode_input_shares(
+                keys, corr_seed, corr_inner, corr_leaf))
 ~~~
-{: #poplar1-mes2inp title="The input-distribution algorithm for poplar1."}
-
-> TODO It would be more efficient to represent the shares of `a`, `b`, and `c`
-> using PRG seeds as suggested in [BBCGGI21].
+{: #poplar1-mes2inp title="The input-distribution algorithm for Poplar1."}
 
 ### Preparation
 
 The aggregation parameter encodes a sequence of candidate prefixes. When an
 Aggregator receives an input share from the Client, it begins by evaluating its
-IDPF share on each candidate prefix, recovering a pair of vectors of field
-elements `data_share` and `auth_share`, The Aggregators use `auth_share` and the
-correlation shares provided by the Client to verify that their `data_share`
-vectors are additive shares of a one-hot vector.
+IDPF share on each candidate prefix, recovering a `data_share` and `auth_share`
+for each. The Aggregators use these and the correlation shares provided by the
+Client to verify that the sequence of `data_share` values are additive shares of
+a one-hot vector.
+
+The algorithms below make use of auxiliary functions `verify_context()` and
+`decode_input_share()` defined in {{poplar1-helper-functions}}.
 
 ~~~
+def prep_init(Poplar1, verify_key, agg_id, agg_param,
+              nonce, public_share, input_share):
+    dst = VERSION + b' poplar1'
+    (level, prefixes) = agg_param
+    (key, corr_seed, corr_inner, corr_leaf) = \
+        Poplar1.decode_input_share(input_share)
 
-def prep_init(Poplar1, verify_key, agg_id, agg_param, nonce, \
-      public_share, input_share):
-    l, self.candidate_prefixes = decode_indexes(agg_param)
-    idpf_key, correlation_shares = decode_input_share(input_share)
-    public_share = public_share
-    k_verify_rand = get_key(verify_key, nonce)
-    prep_step = 'ready'
-    output_share = None
-    prep_fixed = (agg_id, l, candidate_prefixes, public_share, \
-      idpf_key, correlation_shares, k_verify_rand)
-    return (prep_step, prep_fixed, output_share)
+    # Evaluate the IDPF key at the given set of prefixes.
+    value = Poplar1.Idpf.eval(
+        agg_id, public_share, key, level, prefixes)
 
+    # Get correlation shares for the given level of the IDPF tree.
+    #
+    # Implementation note: Computing the shares of `(a, b, c)`
+    # requires expanding PRG seeds into a vector of field elements
+    # of length proportional to the level of the tree. Typically
+    # the IDPF will be evaluated incrementally beginning with
+    # `level == 0`. Implementations can save computation by
+    # storing the intermediate PRG state between evaluations.
+    corr_prg = Poplar1.Idpf.Prg(corr_seed, dst + byte(agg_id))
+    for current_level in range(level+1):
+        Field = Poplar1.Idpf.current_field(current_level)
+        (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
+    (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
+        if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
-def prep_next(Poplar1, prep, inbound: Optional[Bytes]):
-    (prep_step, prep_fixed, output_share) = prep
-    (agg_id, l, candidate_prefixes, public_share, idpf_key, \
-      correlation_shares, k_verify_rand) = prep_fixed
-    (a_share, b_share, c_share,
-     A_share, B_share) = correlation_shares[l-1]
+    # Compute the Aggregator's first round of the sketch. These are
+    # called the "masked input values" [BBCGGI21, Appendix C.4].
+    Field = Poplar1.Idpf.current_field(level)
+    verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
+        dst + Poplar1.verify_context(nonce, level, prefixes))
+    verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
+    sketch_share = [a_share, b_share, c_share]
+    out_share = []
+    for (i, r) in enumerate(verify_rand):
+        (data_share, auth_share) = value[i]
+        sketch_share[0] += data_share * r
+        sketch_share[1] += data_share * r^2
+        sketch_share[2] += auth_share * r
+        out_share.append(data_share)
 
-    Field = Poplar1.Idpf.FieldInner if l <= BITS \
-      else Poplar1.Idpf.FieldLeaf
-    if step == 'ready' and inbound == None:
-      # Evaluate IDPF on candidate prefixes.
-      data_share, auth_share = [], []
-      for x in candidate_prefixes:
-        value = Poplar1.Idpf.eval(agg_id, public_share, \
-          idpf_key, l, candidate_prefixes)
-        data_share.append(value[0])
-        auth_share.append(value[1])
+    prep_mem = sketch_share \
+                + [A_share, B_share, Field(agg_id)] \
+                + out_share
+    return (b'ready', level, prep_mem)
 
-      # Prepare first sketch verification message.
-      r = Poplar1.Prg.expand_into_vec(
-        Field, k_verify_rand, len(data_share))
-      verifier_share_1 = [
-         a_share + inner_product(data_share, r),
-         b_share + inner_product(data_share, r * r),
-         c_share + inner_product(auth_share, r),
-      ]
+def prep_next(Poplar1, prep_state, opt_sketch):
+    (step, level, prep_mem) = prep_state
+    Field = Poplar1.Idpf.current_field(level)
 
-      output_share = data_share
-      prep_step = 'sketch round 1'
-      prep = (prep_step, prep_fixed, output_share)
-      return (prep, Field.encode_vec(verifier_share_1))
+    # Aggregators exchange masked input values (step (3.)
+    # of [BBCGGI21, Appendix C.4]).
+    if step == b'ready' and opt_sketch == None:
+        sketch_share, prep_mem = prep_mem[:3], prep_mem[3:]
+        return ((b'sketch round 1', level, prep_mem),
+                Field.encode_vec(sketch_share))
 
-    elif self.step == 'sketch round 1' and inbound != None:
-      verifier_1 = Field.decode_vec(inbound)
-      verifier_share_2 = [
-        (verifier_1[0] * verifier_1[0] \
-         - verifier_1[1] \
-         - verifier_1[2]) * self.party_id \
-        + A_share * verifier_1[0] \
-        + B_share
-      ]
+    # Aggregators exchange evaluated shares (step (4.)).
+    elif step == b'sketch round 1' and opt_sketch != None:
+        prev_sketch = Field.decode_vec(opt_sketch)
+        if len(prev_sketch) == 0:
+            prev_sketch = Field.zeros(3)
+        elif len(prev_sketch) != 3:
+            raise ERR_INPUT # prep message malformed
+        (A_share, B_share, agg_id), prep_mem = \
+            prep_mem[:3], prep_mem[3:]
+        sketch_share = [
+            agg_id * (prev_sketch[0]^2 \
+                        - prev_sketch[1]
+                        - prev_sketch[2]) \
+                + A_share * prev_sketch[0] \
+                + B_share
+        ]
+        return ((b'sketch round 2', level, prep_mem),
+                Field.encode_vec(sketch_share))
 
-      prep_step = 'sketch round 2'
-      prep = (prep_step, prep_fixed, output_share)
-      return (prep, Field.encode_vec(verifier_share_2))
+    elif step == b'sketch round 2' and opt_sketch != None:
+        prev_sketch = Field.decode_vec(opt_sketch)
+        if len(prev_sketch) == 0:
+            prev_sketch = Field.zeros(1)
+        elif len(prev_sketch) != 1:
+            raise ERR_INPUT # prep message malformed
+        if prev_sketch[0] != Field(0):
+            raise ERR_VERIFY
+        return prep_mem # Output shares
 
-    elif self.step == 'sketch round 2' and inbound != None:
-      verifier_2 = Field.decode_vec(inbound)
-      if verifier_2 != 0: raise ERR_INVALID
-      return Field.encode_vec(output_share)
+    raise ERR_INPUT # unexpected input
 
-    else: raise ERR_INVALID_STATE
-
-def prep_shares_to_prep(agg_param, inbound: Vec[Bytes]):
-  if len(inbound) != 2:
-    raise ERR_INVALID_INPUT
-
-  (l, _) = decode_indexes(agg_param)
-  Field = Poplar1.Idpf.FieldInner if l <= BITS \
-    else Poplar1.Idpf.FieldLeaf
-  verifier = Field.decode_vec(inbound[0]) + \
-             Field.decode_vec(inbound[1])
-
-  return Field.encode_vec(verifier)
+def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
+    if len(prep_shares) != 2:
+        raise ERR_INPUT # unexpected number of prep shares
+    (level, _) = agg_param
+    Field = Poplar1.Idpf.current_field(level)
+    sketch = vec_add(Field.decode_vec(prep_shares[0]),
+                     Field.decode_vec(prep_shares[1]))
+    if sketch == Field.zeros(len(sketch)):
+        # In order to reduce communication overhead, let the
+        # empty string denote the zero vector of the required
+        # length.
+        return b''
+    return Field.encode_vec(sketch)
 ~~~
-{: #poplar1-prep-state title="Preparation state for poplar1."}
+{: #poplar1-prep-state title="Preparation state for Poplar1."}
 
 ### Aggregation
 
-~~~
-def out_shares_to_agg_share(Poplar1, agg_param, \
-    output_shares: Vec[OutShare]):
-  (l, candidate_prefixes) = decode_indexes(agg_param)
-  if len(output_shares) != len(candidate_prefixes):
-    raise ERR_INVALID_INPUT
+Aggregation involves simply adding up the output shares.
 
-  Field = Poplar1.Idpf.FieldInner if l <= BITS \
-    else Poplar1.Idpf.FieldLeaf
-  agg_share = Field.zeros(len(candidate_prefixes))
-  for output_share in output_shares:
-    agg_share = vec_add(agg_share, output_share)
-
-  return Field.encode_vec(agg_share)
 ~~~
-{: #poplar1-out2agg title="Aggregation algorithm for poplar1."}
+def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
+    (level, prefixes) = agg_param
+    Field = Poplar1.Idpf.current_field(level)
+    agg_share = Field.zeros(len(prefixes))
+    for out_share in out_shares:
+        agg_share = vec_add(agg_share, out_share)
+    return Field.encode_vec(agg_share)
+~~~
+{: #poplar1-out2agg title="Aggregation algorithm for Poplar1."}
 
 ### Unsharding
 
+Finally, the Collector unshards the aggregate result by adding up the aggregate
+shares.
+
 ~~~
-def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes],
-                         num_measurements):
-  (l, _) = decode_indexes(agg_param)
-  if len(agg_shares) != 2:
-    raise ERR_INVALID_INPUT
-
-  Field = Poplar1.Idpf.FieldInner if l <= BITS \
-    else Poplar1.Idpf.FieldLeaf
-  agg = Field.decode_vec(agg_shares[0]) + \
-        Field.decode_vec(agg_shares[1])
-
-  return Field.encode_vec(agg)
+def agg_shares_to_result(Poplar1, agg_param,
+                         agg_shares, _num_measurements):
+    (level, prefixes) = agg_param
+    Field = Poplar1.Idpf.current_field(level)
+    agg = Field.zeros(len(prefixes))
+    for agg_share in agg_shares:
+        agg = vec_add(agg, Field.decode_vec(agg_share))
+    return list(map(lambda x: x.as_unsigned(), agg))
 ~~~
-{: #poplar1-agg-output title="Computation of the aggregate result for poplar1."}
+{: #poplar1-agg-output title="Computation of the aggregate result for Poplar1."}
 
-### Helper Functions {#poplar1-helper-functions}
+### Auxiliary Functions {#poplar1-helper-functions}
 
-> TODO Specify the following functionalities:
+~~~
+def encode_input_shares(Poplar1, keys,
+                        corr_seed, corr_inner, corr_leaf):
+    input_shares = []
+    for (key, seed, inner, leaf) in zip(keys,
+                                        corr_seed,
+                                        corr_inner,
+                                        corr_leaf):
+        encoded = Bytes()
+        encoded += key
+        encoded += seed
+        encoded += Poplar1.Idpf.FieldInner.encode_vec(inner)
+        encoded += Poplar1.Idpf.FieldLeaf.encode_vec(leaf)
+        input_shares.append(encoded)
+    return input_shares
 
-* `encode_input_share` is used to encode an input share, consisting of an IDPF
-  key share and correlation shares.
+def decode_input_share(Poplar1, encoded):
+    l = Poplar1.Idpf.KEY_SIZE
+    key, encoded = encoded[:l], encoded[l:]
+    l = Poplar1.Idpf.Prg.SEED_SIZE
+    corr_seed, encoded = encoded[:l], encoded[l:]
+    l = Poplar1.Idpf.FieldInner.ENCODED_SIZE \
+        * 2 * (Poplar1.Idpf.BITS - 1)
+    encoded_corr_inner, encoded = encoded[:l], encoded[l:]
+    corr_inner = Poplar1.Idpf.FieldInner.decode_vec(
+        encoded_corr_inner)
+    l = Poplar1.Idpf.FieldLeaf.ENCODED_SIZE * 2
+    encoded_corr_leaf, encoded = encoded[:l], encoded[l:]
+    corr_leaf = Poplar1.Idpf.FieldLeaf.decode_vec(
+        encoded_corr_leaf)
+    if len(encoded) != 0:
+        raise ERR_INPUT
+    return (key, corr_seed, corr_inner, corr_leaf)
 
-* `decode_input_share` is used to decode an input share.
+def encode_agg_param(Poplar1, level, prefixes):
+    if level > 2^16 - 1:
+        raise ERR_INPUT # level too deep
+    if len(prefixes) > 2^16 - 1:
+        raise ERR_INPUT # too many prefixes
+    encoded = Bytes()
+    encoded += I2OSP(level, 2)
+    encoded += I2OSP(len(prefixes), 2)
+    packed = 0
+    for (i, prefix) in enumerate(prefixes):
+        packed |= prefix << ((level+1) * i)
+    l = floor(((level+1) * len(prefixes) + 7) / 8)
+    encoded += I2OSP(packed, l)
+    return encoded
 
-* `decode_indexes(encoded: Bytes) -> (l: Unsigned, indexes: Vec[Unsigned])`
-  decodes a sequence of indexes, i.e., candidate indexes for IDPF evaluation.
-  The value of `l` MUST be in range `[0, BITS-1]` and `indexes` MUST be empty
-  if `l == 0` or only contain values in range `[0, 2^l-1]` otherwise.
-  An error is raised if `encoded` cannot be decoded.
+def verify_context(Poplar1, nonce, level, prefixes):
+    if len(nonce) > 255:
+        raise ERR_INPUT # nonce too long
+    context = Bytes()
+    context += byte(254)
+    context += byte(len(nonce))
+    context += nonce
+    context += Poplar1.encode_agg_param(level, prefixes)
+    return context
+~~~
+{: #poplar1-helpers title="Helper functions for Poplar1."}
+
+## The IDPF scheme of {{BBCGGI21}} {#idpf-poplar}
+
+In this section we specify a concrete IDPF, called IdpfPoplar, suitable for
+instantiating Poplar1. The scheme gets its name from the name of the protocol of
+{{BBCGGI21}}.
+
+> TODO We should consider giving `IdpfPoplar` a more distinctive name.
+
+The constant and type definitions required by the `Idpf` interface are given in
+{{idpf-poplar-param}}.
+
+| Parameter  | Value                     |
+|:-----------|:--------------------------|
+| SHARES     | `2`                       |
+| BITS       | any positive integer      |
+| VALUE_LEN  | any positive integer      |
+| KEY_SIZE   | `Prg.SEED_SIZE`           |
+| FieldInner | `Field64` ({{field64}})   |
+| FieldLeaf  | `Field255` ({{field255}}) |
+| Prg        | any implementation of `Prg` ({{prg}}) |
+{: #idpf-poplar-param title="Constants and type definitions for IdpfPoplar."}
+
+### Key Generation
+
+> TODO Describe the construction in prose, beginning with a gentle introduction
+> to the high level idea.
+
+The description of the IDPF-key generation algorithm makes use of auxiliary
+functions `extend()`, `convert()`, and `encode_public_share()` defined in
+{{idpf-poplar-helper-functions}}. In the following, we let `Field2` denote the
+field `GF(2)`.
+
+~~~
+def gen(IpdfPoplar, alpha, beta_inner, beta_leaf):
+    if alpha >= 2^IdpfPoplar.BITS:
+        raise ERR_INPUT # alpha too long
+    if len(beta_inner) != IdpfPoplar.BITS - 1:
+        raise ERR_INPUT # beta_inner vector is the wrong size
+
+    init_seed = [
+        gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+        gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+    ]
+
+    seed = init_seed.copy()
+    ctrl = [Field2(0), Field2(1)]
+    correction_words = []
+    for level in range(IdpfPoplar.BITS):
+        keep = (alpha >> (IdpfPoplar.BITS - level - 1)) & 1
+        lose = 1 - keep
+        bit = Field2(keep)
+
+        (s0, t0) = IdpfPoplar.extend(seed[0])
+        (s1, t1) = IdpfPoplar.extend(seed[1])
+        seed_cw = xor(s0[lose], s1[lose])
+        ctrl_cw = (
+            t0[0] + t1[0] + bit + Field2(1),
+            t0[1] + t1[1] + bit,
+        )
+
+        x0 = xor(s0[keep], seed_cw) if ctrl[0] == Field2(1) \
+                else s0[keep]
+        x1 = xor(s1[keep], seed_cw) if ctrl[1] == Field2(1) \
+                else s1[keep]
+        (seed[0], w0) = IdpfPoplar.convert(level, x0)
+        (seed[1], w1) = IdpfPoplar.convert(level, x1)
+        ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
+        ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
+
+        b = beta_inner[level] if level < IdpfPoplar.BITS-1 \
+                else beta_leaf
+        if len(b) != IdpfPoplar.VALUE_LEN:
+            raise ERR_INPUT # beta too long or too short
+
+        w_cw = vec_add(vec_sub(b, w0), w1)
+        if ctrl[1] == Field2(1):
+            w_cw = vec_neg(w_cw)
+        correction_words.append((seed_cw, ctrl_cw, w_cw))
+
+    public_share = IdpfPoplar.encode_public_share(correction_words)
+    return (public_share, init_seed)
+~~~
+{: #idpf-poplar-gen title="IDPF-key generation algorithm of IdpfPoplar."}
+
+### Key Evaluation
+
+> TODO Describe in prose how IDPF-key evaluation algorithm works.
+
+The description of the IDPF-evaluation algorithm makes use of auxiliary
+functions `extend()`, `convert()`, and `decode_public_share()` defined in
+{{idpf-poplar-helper-functions}}.
+
+~~~
+def eval(IdpfPoplar, agg_id, public_share, init_seed,
+         level, prefixes):
+    if agg_id >= IdpfPoplar.SHARES:
+        raise ERR_INPUT # invalid aggregator ID
+    if level >= IdpfPoplar.BITS:
+        raise ERR_INPUT # level too deep
+    if len(set(prefixes)) != len(prefixes):
+        raise ERR_INPUT # candidate prefixes are non-unique
+
+    correction_words = IdpfPoplar.decode_public_share(public_share)
+    out_share = []
+    for prefix in prefixes:
+        if prefix >= 2^(level+1):
+            raise ERR_INPUT # prefix too long
+
+        # The Aggregator's output share is the value of a node of
+        # the IDPF tree at the given `level`. The node's value is
+        # computed by traversing the path defined by the candidate
+        # `prefix`. Each node in the tree is represented by a seed
+        # (`seed`) and a set of control bits (`ctrl`).
+        seed = init_seed
+        ctrl = Field2(agg_id)
+        for current_level in range(level+1):
+            bit = (prefix >> (level - current_level)) & 1
+
+            # Implementation note: Typically the current round of
+            # candidate prefixes would have been derived from
+            # aggregate results computed during previous rounds. For
+            # example, when using `IdpfPoplar` to compute heavy
+            # hitters, a string whose hit count exceeded the given
+            # threshold in the last round would be the prefix of each
+            # `prefix` in the current round. (See [BBCGGI21,
+            # Section 5.1].) In this case, part of the path would
+            # have already been traversed.
+            #
+            # Re-computing nodes along previously traversed paths is
+            # wasteful. Implementations can eliminate this added
+            # complexity by caching nodes (i.e., `(seed, ctrl)`
+            # pairs) output by previous calls to `eval_next()`.
+            (seed, ctrl, y) = IdpfPoplar.eval_next(seed, ctrl,
+                correction_words[current_level], current_level, bit)
+        out_share.append(y if agg_id == 0 else vec_neg(y))
+    return out_share
+
+# Compute the next node in the IDPF tree along the path determined by
+# a candidiate prefix. The next node is determined by `bit`, the bit
+# of the prefix corresponding to the next level of the tree.
+#
+# TODO Consider implementing some version of the optimization
+# discussed at the end of [BBCGGI21, Appendix C.2]. This could on
+# average reduce the number of AES calls by a constant factor.
+def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
+              correction_word, level, bit):
+    (seed_cw, ctrl_cw, w_cw) = correction_word
+    (s, t) = IdpfPoplar.extend(prev_seed)
+    if prev_ctrl == Field2(1):
+        s[0] = xor(s[0], seed_cw)
+        s[1] = xor(s[1], seed_cw)
+        t[0] = t[0] + ctrl_cw[0]
+        t[1] = t[1] + ctrl_cw[1]
+
+    next_ctrl = t[bit]
+    (next_seed, y) = IdpfPoplar.convert(level, s[bit])
+    if next_ctrl == Field2(1):
+        y = vec_add(y, w_cw)
+    return (next_seed, next_ctrl, y)
+~~~
+{: #idpf-poplar-eval title="IDPF-evaluation generation algorithm of IdpfPoplar."}
+
+### Auxiliary Functions {#idpf-poplar-helper-functions}
+
+~~~
+def extend(IdpfPoplar, seed):
+    dst = VERSION + b' idpf poplar extend'
+    prg = IdpfPoplar.Prg(seed, dst)
+    s = [
+        prg.next(IdpfPoplar.Prg.SEED_SIZE),
+        prg.next(IdpfPoplar.Prg.SEED_SIZE),
+    ]
+    b = OS2IP(prg.next(1))
+    t = [Field2(b & 1), Field2((b >> 1) & 1)]
+    return (s, t)
+
+def convert(IdpfPoplar, level, seed):
+    dst = VERSION + b' idpf poplar convert'
+    prg = IdpfPoplar.Prg(seed, dst)
+    next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
+    Field = IdpfPoplar.current_field(level)
+    w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
+    return (next_seed, w)
+
+def encode_public_share(IdpfPoplar, correction_words):
+    encoded = Bytes()
+    for (level, (seed_cw, ctrl_cw, w_cw)) \
+        in enumerate(correction_words):
+        encoded += seed_cw
+        encoded += byte(ctrl_cw[0].as_unsigned() | \
+                       (ctrl_cw[1].as_unsigned() << 1))
+        Field = IdpfPoplar.current_field(level)
+        encoded += Field.encode_vec(w_cw)
+    return encoded
+
+@classmethod
+def decode_public_share(IdpfPoplar, encoded):
+    correction_words = []
+    for level in range(IdpfPoplar.BITS):
+        l = IdpfPoplar.Prg.SEED_SIZE
+        seed_cw, encoded = encoded[:l], encoded[l:]
+        b, encoded = OS2IP(encoded[:1]), encoded[1:]
+        ctrl_cw = (Field2(b & 1), Field2((b >> 1) & 1))
+        Field = IdpfPoplar.current_field(level)
+        l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
+        encoded_w_cw, encoded = encoded[:l], encoded[l:]
+        w_cw = Field.decode_vec(encoded_w_cw)
+        correction_words.append((seed_cw, ctrl_cw, w_cw))
+    if len(encoded) != 0:
+        raise ERR_DECODE
+    return correction_words
+~~~
+{: #idpf-poplar-helpers title="Helper functions for IdpfPoplar."}
+
+## Poplar1Aes128 {#poplar1-instantiation}
+
+We refer to Poplar1 instantiated with IdpfPoplar (`VALUE_LEN == 2`)
+and PrgAes128 ({{prg-aes128}}) as Poplar1Aes128. This VDAF is suitable
+for any positive value of `BITS`. Test vectors can be found in
+{{test-vectors}}.
 
 # Security Considerations {#security}
 
@@ -2674,7 +3043,7 @@ agg_share_0: >-
   ae5483343eb35a52
 agg_share_1: >-
   51ab7ccac14ca5b0
-agg_result: [1]
+agg_result: 1
 ~~~
 
 ## Prio3Aes128Sum
@@ -2727,7 +3096,7 @@ agg_share_0: >-
   b6a735c5636efee29c0c1455e0c0f7d8
 agg_share_1: >-
   4958ca3a9c91010163f3ebaa1f3f088d
-agg_result: [100]
+agg_result: 100
 ~~~
 
 ## Prio3Aes128Histogram
@@ -2780,4 +3149,187 @@ agg_share_1: >-
   51ab7ccac14ca5b08e41137086916504f79348d2fa57c5a641041d8c534fbefa784e50
   45df9a209076fee02769cf6e1fffb05f8036efe734c8725b8376540e44
 agg_result: [0, 0, 1, 0]
+~~~
+
+## Poplar1Aes128
+{:numbered="false"}
+
+### Sharding
+{:numbered="false"}
+
+~~~
+bits: 4
+upload_0:
+  measurement: 13
+  nonce: "01010101010101010101010101010101"
+  input_share_0: >-
+    0101010101010101010101010101010101010101010101010101010101010101a1ff
+    50e322112bc999124b1ed908c095c6060b8625318a0ed5be1b1d6a90a6b8210009f0
+    e29a1803f62d8a58bfcd4de60e64894a6110bd24758af5fffa677718e8ac8cc21d18
+    4e332f5e6edf267739d653fc98cc792f4876c810d63ee48e4ae5e2b1d6c6ce8af09c
+    4800657b74448d41
+  input_share_1: >-
+    0101010101010101010101010101010101010101010101010101010101010101dbe1
+    0fb739bbb33ffcccb23aa0a7131efcc2f76e3208d184480a57d8f8bf58aad6fece07
+    37637ae892a4c8fbc7f3c9812ebf98babfa58961175ec7270d6edb5c606701eecb2a
+    a24b1a618892a384cbb3318653c2d625780059924571df79a50b4641c3c0be192c4b
+    ba6021c43b0eb8e9
+~~~
+
+### Preparation, Aggregation, and Unsharding
+{:numbered="false"}
+
+~~~
+verify_key: "01010101010101010101010101010101"
+agg_param: (0, [0, 1])
+  round_0:
+    prep_share_0: >-
+      edc25ac116a751800f84d8bea69f52ea9cb4adf25b795b34
+    prep_share_1: >-
+      e615e226189f2345e311a545288635ebf271ce5dbda8f387
+    prep_message: >-
+      d3d83ce82f4674c4f2967e03cf2588d58f267c5119224eba
+  round_1:
+    prep_share_0: >-
+      ddf44b4bd6f32fe3
+    prep_share_1: >-
+      220bb4b3290cd01e
+    prep_message: >-
+  out_share_0:
+    - 16834726835239465118
+    - 5136183408577463159
+  out_share_1:
+    - 1612017234175119203
+    - 13310560660837121163
+agg_share_0: >-
+  e9a0f6dcc92f309e47476398f183c377
+agg_share_1: >-
+  165f092236d0cf63b8b89c660e7c3c8b
+agg_result: [0, 1]
+~~~
+
+~~~
+verify_key: "01010101010101010101010101010101"
+agg_param: (1, [0, 1, 2, 3])
+upload_0:
+  round_0:
+    prep_share_0: >-
+      145027cb05247efdcd558b5e6610d40545dcb88ba6f91a71
+    prep_share_1: >-
+      e6cf527daf1052aad18c3c24f180faaafde0dafd097cdfb0
+    prep_message: >-
+      fb1f7a48b434d1a79ee1c7845791ceae43bd9389b075fa20
+  round_1:
+    prep_share_0: >-
+      2a36615f35e282ea
+    prep_share_1: >-
+      d5c99e9fca1d7d17
+    prep_message: >-
+  out_share_0:
+    - 6820377394734832413
+    - 12795445861991443853
+    - 2366627395758091329
+    - 5985988638867927091
+  out_share_1:
+    - 11626366674679751908
+    - 5651298207423140468
+    - 16080116673656492992
+    - 12460755430546657231
+agg_share_0: >-
+  5ea6d91ac7461b1db1928e37e2bded8d20d7f313d7de6c41531280f3b13f3033
+agg_share_1: >-
+  a15926e438b9e4e44e6d71c71d421274df280ceb282193c0aced7f0b4ec0cfcf
+agg_result: [0, 0, 0, 1]
+~~~
+
+~~~
+verify_key: "01010101010101010101010101010101"
+agg_param: (2, [0, 2, 4, 6])
+upload_0:
+  round_0:
+    prep_share_0: >-
+      360bac167f601db362f46594c4a4cf2e4ff083a189579b9f
+    prep_share_1: >-
+      f186e48c4c91e327e4d3ab8e5a85a217b4f72c4283b16c35
+    prep_message: >-
+      279290a3cbf200d947c811241f2a714404e7afe50d0907d3
+  round_1:
+    prep_share_0: >-
+      f5c01b8f6258feda
+    prep_share_1: >-
+      0a3fe46f9da70127
+    prep_message: >-
+  out_share_0:
+    - 8456367523792337943
+    - 14766292257100309726
+    - 4726905797679644763
+    - 14049734244857133970
+  out_share_1:
+    - 9990376545622246378
+    - 3680451812314274595
+    - 13719838271734939558
+    - 4397009824557450352
+agg_share_0: >-
+  755b0d7589cabc17ccec68929a10a4de419957c75d6e005bc2faaedb6559bb92
+agg_share_1: >-
+  8aa4f289763543ea3313976c65ef5b23be66a837a291ffa63d0551239aa64470
+agg_result: [0, 0, 0, 1]
+~~~
+
+~~~
+verify_key: "01010101010101010101010101010101"
+agg_param: (3, [1, 3, 5, 7, 9, 13, 15])
+upload_0:
+  round_0:
+    prep_share_0: >-
+      3fe123df71a1b22bc57455a5d4e27c6078e55b7042f2f221262fcac4d37a268064
+      1191f61e9e09056b6180694a3221a6304eb62c82dc2d998c275cffa8167dc26b78
+      a17e08519ff860480cee10cd9446eae5df18c62d471ff1f6c9d7d6a68db9
+    prep_share_1: >-
+      3f439c33946f6c7ebbbb2e18997f643694e4a1f4504cbbd5bd05ceb046a1756730
+      5cf5b2a7c3d7d896d1e20873f9952129737d285d8ed9275f375e7c22fa7814153b
+      5a6bd69e346c6a87f280e651af66b22c9760838e414af9a1de3aa1fd2f64
+    prep_message: >-
+      7f24c01306111eaa812f83be6e61e0970dc9fd64933fadf6e33599751a1b9be714
+      6e87a8c661e0de02336271be2bb6c759c23354e06b06c0eb5ebb7bcb10f5e900b3
+      fbe9deefd464cacfff6ef71f43ad9d12767949bb886aeb98a81278a3bd30
+  round_1:
+    prep_share_0: >-
+      31bcca9beaa0f9259da82f15030902d8562bcb9d897c1abd4a23fd8dc14cd363
+    prep_share_1: >-
+      4e433564155f06da6257d0eafcf6fd27a9d434627683e542b5dc02723eb32c8a
+    prep_message: >-
+  out_share_0:
+    - 19817464588246125675911193409268841288455299126748886112128192934355453011140
+    - 26351018082725591729785951958772184090335738373939608285919371972483467636113
+    - 21026572773003686172169423413853318878977718990262797514535289012388354388037
+    - 17113019474436732100420915666557007914977784704548533789411908735564636296602
+    - 34390099714809941818668362307255888926703105626650921226064963904863725363597
+    - 16280551450609095559432051349394145737239831803700037681386701553426670311094
+    - 3550866960020812367219892598910257253155533823645817399872050057675940864670
+  out_share_1:
+    - 38078580030411972035874299095075112638179693206071395907600599069601111808809
+    - 31545026535932505981999540545571769836299253958880673733809420031473097183836
+    - 36869471845654411539616069090490635047657273342557484505193502991568210431912
+    - 40783025144221365611364576837786946011657207628271748230316883268391928523347
+    - 23505944903848155893117130197088064999931886706169360793663828099092839456352
+    - 41615493168049002152353441154949808189395160529120244338342090450529894508856
+    - 54345177658637285344565599905433696673479458509174464619856741946280623955279
+agg_share_0: >-
+  2bd049976ae30c001a8516dcf3fb6d895955d9e88355d565c48eb8f5d7bee4c43a4225
+  cf7e4328c8731d9a9b4af6d1bf5d775aa4692c6770f405f310176aed912e7c9e529334
+  791998aa21809ff5792afbc8bfa0ae52421f02ea331b63c8f04525d5a032ea054ef6ab
+  17cdd73fe66f0ea07ff6b16e924a3d3194dc742295159a4c081b4dd9699c06d15b7f70
+  bff1b2fb53d403dd94c1efbe3dc27b5e02df218d23fe772fc5962d72f7b630551121b1
+  e2598386ba745bd346ee5f23eee50c56b607d9b82faf0eca52d097b30410ffeacf8b46
+  5d02967b3bfba0f8f57229bca29e
+agg_share_1: >-
+  542fb668951cf3ffe57ae9230c049276a6aa26177caa2a9a3b71470a28411b2945bdda
+  3081bcd7378ce26564b5092e40a288a55b96d3988f0bfa0cefe895125c518361ad6ccb
+  86e66755de7f600a86d50437405f51adbde0fd15cce49c370fa85a2a5fcd15fab10954
+  e83228c01990f15f80094e916db5c2ce6b238bdd6aea5333f7e4b2269663f92ea4808f
+  400e4d04ac2bfc226b3e1041c23d84a1fd20de605c0188d03a69d28d0849cfaaeede4e
+  1da67c79458ba42cb911a0dc111af3a938782647d050f135ad2f684cfbef00153074b9
+  a2fd6984c4045f070a8dd6435d4f
+agg_result: [0, 0, 0, 0, 0, 1, 0]
 ~~~

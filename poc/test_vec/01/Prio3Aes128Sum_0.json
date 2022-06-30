@@ -1,8 +1,6 @@
 {
     "agg_param": null,
-    "agg_result": [
-        100
-    ],
+    "agg_result": 100,
     "agg_shares": [
         "b6a735c5636efee29c0c1455e0c0f7d8",
         "4958ca3a9c91010163f3ebaa1f3f088d"
