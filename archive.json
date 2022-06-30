@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-28T00:59:33.749965+00:00",
+  "timestamp": "2022-06-30T00:54:36.499101+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1405,14 +1405,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "bug",
         "draft-02"
       ],
       "body": "@armfazh pointed this out here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88#discussion_r899660677",
       "createdAt": "2022-06-17T00:39:37Z",
-      "updatedAt": "2022-06-20T23:25:46Z",
+      "updatedAt": "2022-06-28T15:29:50Z",
       "closedAt": null,
       "comments": []
     },
@@ -1469,11 +1471,15 @@
       "state": "OPEN",
       "author": "divergentdave",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
-      "labels": [],
-      "body": "Inspired by the discussion on divviup/libprio-rs#256, I propose that the number of reports should be added as an argument to `agg_shares_to_result()` for DAFs and VDAFs. This would be useful in Prio for any AFE where the encoding does not preserve the additive identity. (or doesn't map some other identity to the additive identity) In such cases, then the unsharding algorithm could cancel out whatever constant term got added by every client's input. Any application using VDAF should already know how many reports contributed to one aggregate, we just need to expose it back down to the VDAF layer.\r\n\r\nNote that this would also enable computing an average \"inside the VDAF\" rather than computing a sum and leaving it to the application to compute the average from that. This is more trivial than remapping [-1, 1] to [0, 2^n], as in the example that motivated this.\r\n\r\nWhile it would be technically possible for an application to reverse the [-1, 1] to [0, 2^n] mapping, if given just a raw sum from Prio and a priori knowledge of the number of reports (by dividing by 2^(n-1) and subtracting num_reports), I think it would be more user-friendly if we made it possible for the unsharding step to do so. The postprocessing necessary for the averaging use case is easy enough to write out by hand, this fixed-point with offset encoding is slightly more difficult, but generally, AFE encodings could include multiple such encoded numbers, or even nonlinear functions composed with affine remappings. (The Prio paper includes examples of calculating a product or geometric mean. This would most likely be done by taking a logarithm of the input, and this logarithm would most likely need to be encoded as a fixed point number with an offset) For this reason, I think we should provide this number of reports to `agg_shares_to_result()`, so that unsharding can be \"as powerful as\" sharding, and applications won't have to concern themselves as much with the encoding details of particular more complicated VDAFs.\r\n\r\ncc @MxmUrw",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "draft-02"
+      ],
+      "body": "Inspired by the discussion on divviup/libprio-rs#256, I propose that the number of reports should be added as an argument to `agg_shares_to_result()` for DAFs and VDAFs. This would be useful in Prio for any AFE where the encoding does not preserve the additive identity. (or doesn't map some other identity to the additive identity) In such cases, then the unsharding algorithm could cancel out whatever constant term got added by every client's input. Any application using VDAF should already know how many reports contributed to one aggregate, we just need to expose it back down to the VDAF layer.\r\n\r\nNote that this would also enable computing an average \"inside the VDAF\" rather than computing a sum and leaving it to the application to compute the average from that. This is more trivial than remapping [-1, 1] to [0, 2^n], as in the example that motivated this.\r\n\r\nWhile it would be technically possible for an application to reverse the [-1, 1] to [0, 2^n] mapping, if given just a raw sum from Prio and a priori knowledge of the number of reports (by dividing by 2^(n-1) and subtracting num_reports), I think it would be more user-friendly if we made it possible for the unsharding step to do so. The postprocessing necessary for the averaging use case is easy enough to write out by hand, this fixed-point with offset encoding is slightly more difficult, but generally, AFE encodings could include multiple such encoded numbers, or even nonlinear functions composed with affine remappings. (The Prio paper includes examples of calculating a product or geometric mean. This would be done by taking a logarithm of the input, and this logarithm would most likely need to be encoded as a fixed point number with an offset.) For this reason, I think we should provide this number of reports to `agg_shares_to_result()`, so that unsharding can be \"as powerful as\" sharding, and applications won't have to concern themselves as much with the encoding details of particular more complicated VDAFs.\r\n\r\ncc @MxmUrw",
       "createdAt": "2022-06-26T21:35:47Z",
-      "updatedAt": "2022-06-27T18:45:33Z",
+      "updatedAt": "2022-06-28T15:54:29Z",
       "closedAt": null,
       "comments": [
         {
@@ -1489,6 +1495,114 @@
           "body": "Sure, I can write one up later this week",
           "createdAt": "2022-06-27T18:45:33Z",
           "updatedAt": "2022-06-27T18:45:33Z"
+        },
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Sounds good, no objection from my side.",
+          "createdAt": "2022-06-28T11:27:46Z",
+          "updatedAt": "2022-06-28T11:27:46Z"
+        }
+      ]
+    },
+    {
+      "number": 94,
+      "id": "I_kwDOGKuqOc5MvfOB",
+      "title": "Accommodations for differential privacy",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/94",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "We wish for the VDAF draft to have first-class support for schemes that are amendable to differential privacy (DP). The task for this issue is to identify what changes need to be made, if any, to accommodate DP. In addition, we should consider adding guidance to the draft about best practices.",
+      "createdAt": "2022-06-28T15:22:45Z",
+      "updatedAt": "2022-06-29T21:24:37Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "At a minimum, I imagine we will need a way for:\r\n(a) an Aggregator to add noise to its aggregate share\r\n(b) a Client to add noise to its measurement\r\n\r\n(a) is straight-forward for both Prio3 and Poplar1 since the aggregate shares are vectors over some finite field. In general, I think all we'll need syntactically is that the set of all aggregate shares form a (semi-)group. The mechanism for (b) seems like it'll depend somewhat on the measurement type.\r\n",
+          "createdAt": "2022-06-28T15:28:20Z",
+          "updatedAt": "2022-06-28T15:28:20Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "My intuition is that (b) would be out of scope for [V]DAF or DAP since the DP would be applied before `Vdaf.measurement_to_input_shares` and removed after `Vdaf.agg_shares_to_result`. So long as a noised input is still a valid encoding of a measurement, VDAF doesn't need to know about the DP, right?",
+          "createdAt": "2022-06-28T17:20:26Z",
+          "updatedAt": "2022-06-28T17:20:26Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think that's probably right, except it may be desirable to add noise to the aggregate shares (a).",
+          "createdAt": "2022-06-28T17:22:32Z",
+          "updatedAt": "2022-06-28T17:24:34Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "body": "Yeah, I think I agree with @tgeoghegan here. I think it makes sense to add discussion to this draft as to how clients might add local DP, and how, for example, deployments might use shuffling to amplify that DP effect, but both seem outside the scope of the draft. In contrast, (a) being an application of central DP seems like something squarely in scope?",
+          "createdAt": "2022-06-28T17:33:45Z",
+          "updatedAt": "2022-06-28T17:33:45Z"
+        },
+        {
+          "author": "simon-friedberger",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Maybe I am misunderstanding but I think for heavy hitters the distribution complicates things. Some of the finite field vector values are just too unlikely.\r\n\r\nIf I flip a bit in \"https://www.facebook.com\" I might end up with \"https://www.fa{ebook.com\" which doesn't add meaningful privacy from a client point of view and makes the value almost useless from a collector point of view.\r\n\r\nTo clarify: The client has no good way of adding DP randomness here for (b). For (a) the servers could still adjust the count for \"https://www.facebook.com\" by random +/-10 when computing the Private Subset Histogram solution for that string. So, doing (b) would also be difficult here.",
+          "createdAt": "2022-06-29T12:16:29Z",
+          "updatedAt": "2022-06-29T12:23:35Z"
+        },
+        {
+          "author": "csharrison",
+          "authorAssociation": "NONE",
+          "body": "Note I wrote a bit of my thoughts on how we might want to do this in the DAP repo at https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/19#issuecomment-1118837160.\r\n\r\nA few relevant points from that discussion:\r\n- Do we even want to add noise addition to VDAF vs. specify it in DAP (my preference is to do it in VDAF)\r\n- Are we concerned about malicious helpers adding \"bad\" noise shares such that we would want to \"verify\" the noise shares (I think we don't need this given our threat model)\r\n\r\n@simon-friedberger I agree for the heavy hitters problem the client side noise addition is difficult. Your observation that a single bit flip in \"facebook.com\" doesn't add privacy is correct, the DP analysis would agree with you. You need to flip many bits in the entire (high entropy) output domain. However, remember that the privacy that we get is stronger than just the noise from a single client, we just want to achieve good privacy after aggregation (when everything is back in cleartext).\r\n\r\nThe biggest problem I see with client-side noise is that the poplar protocol (as far as I can tell) only really works with one-hot input vectors. This means that a RAPPOR-like randomizer similar to [ENPAs](https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ENPA_White_Paper.pdf) which randomly flips many bits independently in the whole domain would mean constructing tons of dpf keys (scaling linearly with the domain size) on the client for each noisy \"1\", leading to large communication and processing overhead.\r\n\r\nThere may be solutions here using different local randomizers, but I think it's hard to get around the domain size problem (e.g. regular randomized response will guarantee you that you only send a one-hot vector, but then the _noise_ scales with the domain size)",
+          "createdAt": "2022-06-29T13:47:27Z",
+          "updatedAt": "2022-06-29T13:47:27Z"
+        },
+        {
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "body": "For what it's worth, the [Poplar paper](https://arxiv.org/pdf/2012.14884.pdf) describes how to add noise for (a) in Appendix E. It may be the case that this is sufficient for reasonable measures of privacy, without requiring the client to do anything.",
+          "createdAt": "2022-06-29T15:05:24Z",
+          "updatedAt": "2022-06-29T15:05:34Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for bumping that thread, @csharrison.\r\n\r\n> * Do we even want to add noise addition to VDAF vs. specify it in DAP (my preference is to do it in VDAF)\r\n\r\nI agree, I think the mechanism needs to live in VDAF-land. However, ideally this would require only minimal syntax changes (e.g., as suggested for (a) here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/94#issuecomment-1168872702) and would leave it up to applications (like a DAP deployment) to tune noise as needed. The VDAF draft could also provide detailed recommendations for adding local DP, or central DP, or both (if applicable) to the VDAFs it specifies.\r\n\r\n> * Are we concerned about malicious helpers adding \"bad\" noise shares such that we would want to \"verify\" the noise shares (I think we don't need this given our threat model)\r\n\r\nI think this threat model only matters insofar as it impacts privacy. For correctness, we already concede that all of the Aggregators are trusted to execute the protocol correctly.\r\n\r\n",
+          "createdAt": "2022-06-29T15:07:52Z",
+          "updatedAt": "2022-06-29T15:10:54Z"
+        },
+        {
+          "author": "csharrison",
+          "authorAssociation": "NONE",
+          "body": "> For what it's worth, the [Poplar paper](https://arxiv.org/pdf/2012.14884.pdf) describes how to add noise for (a) in Appendix E. It may be the case that this is sufficient for reasonable measures of privacy, without requiring the client to do anything.\r\n\r\nYeah this is the standard way we'd add DP in the central model. I think there may be ways to optimize the noise in that section with (discretized) gaussian/skellam noise instead of Laplace too (see https://desfontain.es/privacy/gaussian-noise.html for an intro). \r\n\r\nI also think that section assumes each noisy prefix is published publicly, which I don't think is necessarily the view of the collector in the poplar vdaf (would need to double check that).",
+          "createdAt": "2022-06-29T16:04:22Z",
+          "updatedAt": "2022-06-29T16:06:46Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@schoppmp and I have been working on completing the spec for Poplar1 (#84). Once that's done, I think a great first step would be to add a subsection that spells out recommendations for adding DP to the heavy hitters computation. @csharrison would you be willing to spend time on this?\r\n\r\nAlternatively, we could get cracking on Prio3 right away.",
+          "createdAt": "2022-06-29T16:24:15Z",
+          "updatedAt": "2022-06-29T16:33:15Z"
+        },
+        {
+          "author": "csharrison",
+          "authorAssociation": "NONE",
+          "body": "> @schoppmp and I have been working on completing the spec for Poplar1 (#84). Once that's done, I think a great first step would be to add a subsection that spells out recommendations for adding DP to the heavy hitters computation. @csharrison would you be willing to spend time on this?\r\n\r\nI am actually on pat leave right now until late Aug so unfortunately I can't spend much time on this (just enough free time to bug ya'll on issues \ud83d\ude04 )  . Let's just make sure what's specified in the poplar paper is possible and I might be able to help out when I get back. In general, I think we want to consider:\r\n- Alternative noise mechanisms other than Laplace (this should be pretty simple)\r\n- Configurations where noise is only added at the last step of the heavy hitters protocol, vs. adding it to every prefix and publishing those prefixes publicly (this means that a malicious server could publish non-DP prefix counts, which may be OK in some deployments).",
+          "createdAt": "2022-06-29T17:16:51Z",
+          "updatedAt": "2022-06-29T17:20:54Z"
+        },
+        {
+          "author": "kunal-talwar",
+          "authorAssociation": "NONE",
+          "body": "I think it would be worth supporting both (a) and (b). \r\nFor (a), having an option to add central DP noise to the aggregate makes sense, and can perhaps be implemented as part of Daf.out_shares_to_agg_share() and this can be specified in each VDAF.\r\nFor (b): there are many ways of doing local randomization which are compatible with prio/poplar. In particular, for frequency estimation / heavy hitters, when working over a small universe, RAPPOR can be used in conjunction with pro. Over larger universes, PI-RAPPOR (https://arxiv.org/abs/2102.12099) and ProjectiveResponse (https://arxiv.org/abs/2203.00194) can be used to randomize to a one-hot vector over a smaller domain. This makes these well-compatible with prio or poplar, and I could imagine, for example, pi-rappor+poplar to be a useful VDAF.\r\nThe shuffling/aggregation based privacy amplification results though depend on a the batch over which we are summing to be large enough. This application therefore would make a strong case to have the min_batch_size be a natively supported feature in DAP. E.g. it would be great to have a way for the task parameter to specify just the minimum batch size and have the servers agree on a batch boundary that is close to getting this minimum batch size, without having to predict the batch interval in advance.",
+          "createdAt": "2022-06-29T21:24:37Z",
+          "updatedAt": "2022-06-29T21:24:37Z"
         }
       ]
     }
@@ -7228,25 +7342,35 @@
       "id": "PR_kwDOGKuqOc46bfEb",
       "title": "Update Poplar1 syntax to match VDAF definition",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/93",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "schoppmp",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2022-06-27T16:35:25Z",
-      "updatedAt": "2022-06-27T18:17:03Z",
+      "updatedAt": "2022-06-29T16:26:08Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "d272ec9d17e61205da5189c124ba7687b23f8dfd",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/poplar1",
-      "headRefOid": "04da0272473b867a8a60808e971968983cde5142",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "9d75d1a7e08f9cf5d5ca0c207b6349ae8f231599",
+      "closedAt": "2022-06-28T15:32:08Z",
+      "mergedAt": "2022-06-28T15:32:08Z",
+      "mergedBy": "schoppmp",
+      "mergeCommit": {
+        "oid": "bd63d077e9e67b8792fb3fe767bf21fa13a5ab07"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "For the record, this partially addresses #84.",
+          "createdAt": "2022-06-29T16:26:08Z",
+          "updatedAt": "2022-06-29T16:26:08Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc481Nv2",
@@ -7301,6 +7425,146 @@
               "body": "```suggestion\r\n  (key_0, key_1) = Idpf.gen(alpha, beta[:-1], beta[-1])\r\n```",
               "createdAt": "2022-06-27T18:14:05Z",
               "updatedAt": "2022-06-27T18:17:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc485EHQ",
+          "commit": {
+            "abbreviatedOid": "04da027"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-28T11:45:33Z",
+          "updatedAt": "2022-06-28T11:45:33Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "Done.",
+              "createdAt": "2022-06-28T11:45:33Z",
+              "updatedAt": "2022-06-28T11:45:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc485EJI",
+          "commit": {
+            "abbreviatedOid": "04da027"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-28T11:45:39Z",
+          "updatedAt": "2022-06-28T11:45:40Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Done.",
+              "createdAt": "2022-06-28T11:45:39Z",
+              "updatedAt": "2022-06-28T11:45:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc485Ec3",
+          "commit": {
+            "abbreviatedOid": "04da027"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-28T11:46:47Z",
+          "updatedAt": "2022-06-28T11:46:47Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "Changed it, now levels begin at 0.",
+              "createdAt": "2022-06-28T11:46:47Z",
+              "updatedAt": "2022-06-28T11:46:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc486NxM",
+          "commit": {
+            "abbreviatedOid": "9d75d1a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Approving to unblock this merge so that you can go on PTO with a clean plate. This is a great start!\r\n\r\nWould you mind squashing before merging?",
+          "createdAt": "2022-06-28T14:54:39Z",
+          "updatedAt": "2022-06-28T14:54:39Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 95,
+      "id": "PR_kwDOGKuqOc46mkc0",
+      "title": "Pass num_measurements when computing AggResult, add decode methods",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/95",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This implements the change proposed by #92, passing `num_measurements` to `agg_shares_to_result()`. For Prio3, I decided to thread this through both the FLP and validity circuit layers, in new `decode()` methods. With this change, `encode()`, `truncate()`, and `decode()` now give us a more complete API for Prio's AFEs. To test this, I wrote a quick Average type that makes use of the new argument. I also took advantage of the new flexibility in `Prio3.AggResult` to change the output types of Prio3Aes128Count and Prio3Aes128Sum to be `Unsigned`, as it's more intuitive and ergonomic. (If we don't like that last bit, it's separated out in the commit history already)",
+      "createdAt": "2022-06-29T23:01:06Z",
+      "updatedAt": "2022-06-30T00:21:38Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "bd63d077e9e67b8792fb3fe767bf21fa13a5ab07",
+      "headRepository": "divergentdave/vdaf",
+      "headRefName": "afe-decode-with-number-of-measurements",
+      "headRefOid": "dd81b5cdea778c0c2df77dcc48a424444c3feb67",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc49Csm2",
+          "commit": {
+            "abbreviatedOid": "e29d2df"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks @divergentdave! I massively appreciate your thoroughness and attention to detail here. Adding test code to exercise the new logic is particularly appreciated.\r\n\r\nI will give this a thorough review next Thursday, 7/7, when I'm back from PTO. In the meantime, a few high-level things:\r\n* I'm a bit weary of the reference implementation defining the VDAF `Prio3Aes128Average` without also defining it in the draft itself. That said it's definitely useful to exercise the API changes that are introduced in this change. We should either add it it to the draft or rename it to something like `TestPrio3Aes128Average` (to suggest that it's there for testing, but may eventually go in the draft).\r\n* Don't worry about updating the change log. We'll wait to do so until we're ready to cut the next draft.",
+          "createdAt": "2022-06-29T23:44:23Z",
+          "updatedAt": "2022-06-29T23:47:20Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "Does this method actually need to be re-implemented?",
+              "createdAt": "2022-06-29T23:44:23Z",
+              "updatedAt": "2022-06-29T23:47:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49CwPd",
+          "commit": {
+            "abbreviatedOid": "e29d2df"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-06-30T00:17:37Z",
+          "updatedAt": "2022-06-30T00:17:37Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "I re-implemented it to swap out `flp_generic.Sum` for `flp_generic.Average`. I could possibly define some new members on `Prio3Aes128Sum`, and and override a member for the validity circuit instead, but I figure the separate factory classmethod is less invasive.",
+              "createdAt": "2022-06-30T00:17:37Z",
+              "updatedAt": "2022-06-30T00:17:37Z"
             }
           ]
         }
