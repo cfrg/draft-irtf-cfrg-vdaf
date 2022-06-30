@@ -113,7 +113,8 @@ def run_vdaf(Vdaf,
              agg_param: Vdaf.AggParam,
              nonces: Vec[Bytes],
              measurements: Vec[Vdaf.Measurement],
-             print_test_vec=False):
+             print_test_vec=False,
+             test_vec_instance=0):
     # Generate the long-lived verification key.
     verify_key = gen_rand(Vdaf.VERIFY_KEY_SIZE)
     # REMOVE ME
@@ -208,7 +209,8 @@ def run_vdaf(Vdaf,
         pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param)
 
         os.system('mkdir -p test_vec/{}'.format(DRAFT))
-        with open('test_vec/{}/{}.json'.format(DRAFT, Vdaf.__name__), 'w') as f:
+        with open('test_vec/{}/{}_{}.json'.format(
+            DRAFT, Vdaf.__name__, test_vec_instance), 'w') as f:
             json.dump(test_vec, f, indent=4, sort_keys=True)
             f.write('\n')
 
@@ -349,14 +351,16 @@ def test_vdaf(cls,
               agg_param,
               measurements,
               expected_agg_result,
-              print_test_vec=False):
+              print_test_vec=False,
+              test_vec_instance=0):
     # The nonces need not be random, but merely non-repeating.
     nonces = [gen_rand(16) for _ in range(len(measurements))]
     agg_result = run_vdaf(cls,
                           agg_param,
                           nonces,
                           measurements,
-                          print_test_vec)
+                          print_test_vec,
+                          test_vec_instance)
     if agg_result != expected_agg_result:
         print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'.format(
             cls.__name__, measurements, agg_result, expected_agg_result))

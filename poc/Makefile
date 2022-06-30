@@ -17,11 +17,12 @@ sagelib/%.py: %.sage
 test: pyfiles
 	sage common.sage
 	sage field.sage
+	sage prg.sage
 	sage flp.sage
 	sage flp_generic.sage
-	sage prg.sage
-	sage vdaf.sage
-	sage vdaf_prio3.sage
-	sage daf.sage
 	sage idpf.sage
 	sage idpf_poplar.sage
+	sage daf.sage
+	sage vdaf.sage
+	sage vdaf_prio3.sage
+	sage vdaf_poplar1.sage
