@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-06-30T00:54:36.499101+00:00",
+  "timestamp": "2022-07-03T00:59:44.836286+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1517,7 +1517,7 @@
       "labels": [],
       "body": "We wish for the VDAF draft to have first-class support for schemes that are amendable to differential privacy (DP). The task for this issue is to identify what changes need to be made, if any, to accommodate DP. In addition, we should consider adding guidance to the draft about best practices.",
       "createdAt": "2022-06-28T15:22:45Z",
-      "updatedAt": "2022-06-29T21:24:37Z",
+      "updatedAt": "2022-06-30T15:30:44Z",
       "closedAt": null,
       "comments": [
         {
@@ -1603,6 +1603,20 @@
           "body": "I think it would be worth supporting both (a) and (b). \r\nFor (a), having an option to add central DP noise to the aggregate makes sense, and can perhaps be implemented as part of Daf.out_shares_to_agg_share() and this can be specified in each VDAF.\r\nFor (b): there are many ways of doing local randomization which are compatible with prio/poplar. In particular, for frequency estimation / heavy hitters, when working over a small universe, RAPPOR can be used in conjunction with pro. Over larger universes, PI-RAPPOR (https://arxiv.org/abs/2102.12099) and ProjectiveResponse (https://arxiv.org/abs/2203.00194) can be used to randomize to a one-hot vector over a smaller domain. This makes these well-compatible with prio or poplar, and I could imagine, for example, pi-rappor+poplar to be a useful VDAF.\r\nThe shuffling/aggregation based privacy amplification results though depend on a the batch over which we are summing to be large enough. This application therefore would make a strong case to have the min_batch_size be a natively supported feature in DAP. E.g. it would be great to have a way for the task parameter to specify just the minimum batch size and have the servers agree on a batch boundary that is close to getting this minimum batch size, without having to predict the batch interval in advance.",
           "createdAt": "2022-06-29T21:24:37Z",
           "updatedAt": "2022-06-29T21:24:37Z"
+        },
+        {
+          "author": "csharrison",
+          "authorAssociation": "NONE",
+          "body": "@kunal-talwar I would love to hear more about how concretely we could compose e.g. pi-rappor with poplar. It seems very non-obvious to me but I might be missing something. In pi-rappor we're sending some seed to the server, are you saying we'd encode this seed as a one-hot vector and aggregate over seeds in the VDAF?\r\n\r\nI hadn't seen the paper on ProjectiveReponse, will need to read it \ud83d\ude04 . In general though I agree with you about supporting both (a) and (b). The most obvious candidate requiring (b) support is the existing ENPA system.",
+          "createdAt": "2022-06-30T03:15:00Z",
+          "updatedAt": "2022-06-30T03:15:00Z"
+        },
+        {
+          "author": "kunal-talwar",
+          "authorAssociation": "NONE",
+          "body": "It is indeed not obvious (or at least wasn't obvious to me at first). But an approach along the lines you suggested works. We send the seed using poplar, and can either aggregate the seeds, or decode each seed to a vector in the original domain and aggregate those. The generalized version of PI-RAPPOR can allow additional efficiencies on top of this basic approach. We have a write-up that should be on the arxiv in a couple of weeks.",
+          "createdAt": "2022-06-30T15:30:44Z",
+          "updatedAt": "2022-06-30T15:30:44Z"
         }
       ]
     }
