@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 4 January 2023                                       Cloudflare
+Expires: 9 January 2023                                       Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             3 July 2022
+                                                             8 July 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 January 2023.
+   This Internet-Draft will expire on 9 January 2023.
 
 Copyright Notice
 
