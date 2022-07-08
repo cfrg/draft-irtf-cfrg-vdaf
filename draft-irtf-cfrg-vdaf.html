@@ -17,22 +17,22 @@ are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
 input that would result in an incorrect aggregate result. 
     " name="description">
-<meta content="xml2rfc 3.12.10" name="generator">
+<meta content="xml2rfc 3.13.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.12.10
+  xml2rfc 3.13.0
     Python 3.10.4
     appdirs 1.4.4
     ConfigArgParse 1.5.3
-    google-i18n-address 2.5.1
+    google-i18n-address 2.5.2
     html5lib 1.1
     intervaltree 3.1.0
-    Jinja2 2.11.3
+    Jinja2 3.1.2
     kitchen 1.2.6
-    lxml 4.8.0
-    MarkupSafe 2.0.1
-    pycountry 20.7.3
+    lxml 4.9.1
+    MarkupSafe 2.1.1
+    pycountry 22.3.5
     pyflakes 2.4.0
     PyYAML 6.0
     requests 2.27.1
@@ -1034,11 +1034,11 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">VDAF</td>
-<td class="right">June 2022</td>
+<td class="right">July 2022</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 30 December 2022</td>
+<td class="center">Expires 9 January 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([stroke="fill"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2022-06-28" class="published">28 June 2022</time>
+<time datetime="2022-07-08" class="published">8 July 2022</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2022-12-30">30 December 2022</time></dd>
+<dd class="expires"><time datetime="2023-01-09">9 January 2023</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1115,7 +1115,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 30 December 2022.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 January 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1900,10 +1900,12 @@ sends its aggregate share to the Collector, who runs the following algorithm to
 recover the following output:<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-2.1">
-            <code>Daf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) -&gt;
-AggResult</code> is run by the Collector in order to compute the aggregate result
-from the Aggregators' shares. The length of <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>.
-This algorithm is deterministic.<a href="#section-4.4-2.1" class="pilcrow">¶</a>
+            <code>Daf.agg_shares_to_result(agg_param: AggParam,
+agg_shares: Vec[Bytes], num_measurements: Unsigned) -&gt; AggResult</code> is
+run by the Collector in order to compute the aggregate result from
+the Aggregators' shares. The length of <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>.
+<code>num_measurements</code> is the number of measurements that contributed to
+each of the aggregate shares. This algorithm is deterministic.<a href="#section-4.4-2.1" class="pilcrow">¶</a>
 </li>
         </ul>
 <span id="name-computation-of-the-final-ag"></span><div id="unshard-flow">
@@ -1976,7 +1978,9 @@ def run_daf(Daf,
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate result.
-    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares)
+    num_measurements = len(measurements)
+    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares,
+                                          num_measurements)
     return agg_result
 </pre>
 </div>
@@ -2298,10 +2302,12 @@ form, where shares are processed one at a time.<a href="#section-5.3-3" class="p
 <p id="section-5.4-1">VDAF Unsharding is identical to DAF Unsharding (cf. <a href="#sec-daf-unshard" class="xref">Section 4.4</a>):<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-2.1">
-            <code>Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares: Vec[Bytes]) -&gt;
-AggResult</code> is run by the Collector in order to compute the aggregate result
-from the Aggregators' shares. The length of <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>.
-This algorithm is deterministic.<a href="#section-5.4-2.1" class="pilcrow">¶</a>
+            <code>Vdaf.agg_shares_to_result(agg_param: AggParam,
+agg_shares: Vec[Bytes], num_measurements: Unsigned) -&gt; AggResult</code> is
+run by the Collector in order to compute the aggregate result from
+the Aggregators' shares. The length of <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>.
+<code>num_measurements</code> is the number of measurements that contributed to
+each of the aggregate shares. This algorithm is deterministic.<a href="#section-5.4-2.1" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-5.4-3">The data flow for this stage is illustrated in <a href="#unshard-flow" class="xref">Figure 4</a>.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
@@ -2369,7 +2375,9 @@ def run_vdaf(Vdaf,
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate.
-    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares)
+    num_measurements = len(measurements)
+    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares,
+                                           num_measurements)
     return agg_result
 </pre>
 </div>
@@ -2845,6 +2853,12 @@ a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
+                <code>AggResult</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">Type of the aggregate result</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
                 <code>Field</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">As defined in (<a href="#field" class="xref">Section 6.1</a>)</td>
@@ -2955,8 +2969,20 @@ aggregatable output. The length of the input <span class="bcp14">MUST</span> be 
 of the output <span class="bcp14">MUST</span> be <code>OUTPUT_LEN</code>.<a href="#section-7.1.1-4.1" class="pilcrow">¶</a>
 </li>
           </ul>
-<p id="section-7.1.1-5">We remark that, taken together, these two functionalities correspond roughly to
-the notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CGB17" class="xref">CGB17</a>]</span>.<a href="#section-7.1.1-5" class="pilcrow">¶</a></p>
+<p id="section-7.1.1-5">Once the aggregate shares have been computed and combined together, their sum
+can be converted into the aggregate result. This could be a projection from
+the FLP's field to the integers, or it could include additional
+post-processing.<a href="#section-7.1.1-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1.1-6.1">
+              <code>Flp.decode(output: Vec[Field], num_measurements: Unsigned) -&gt; AggResult</code>
+maps a sum of aggregate shares to an aggregate result. The length of the
+input <span class="bcp14">MUST</span> be <code>OUTPUT_LEN</code>. <code>num_measurements</code> is the number of measurements
+that contributed to the aggregated output.<a href="#section-7.1.1-6.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-7.1.1-7">We remark that, taken together, these three functionalities correspond roughly
+to the notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CGB17" class="xref">CGB17</a>]</span>.<a href="#section-7.1.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3044,7 +3070,7 @@ aggregation, and unsharding are described in the remaining subsections.<a href="
                 <code>AggResult</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Vec[Unsigned]</code>
+                <code>Flp.AggResult</code>
 </td>
             </tr>
           </tbody>
@@ -3324,11 +3350,12 @@ element-wise. It then converts each element of the vector into an integer.<a hre
 <figure id="figure-16">
             <div class="alignLeft art-text artwork" id="section-7.2.4-2.1">
 <pre>
-def agg_shares_to_result(Prio3, _agg_param, agg_shares):
+def agg_shares_to_result(Prio3, _agg_param, agg_shares,
+                         num_measurements):
     agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for agg_share in agg_shares:
         agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
-    return list(map(lambda x: x.as_unsigned(), agg))
+    return Prio3.Flp.decode(agg, num_measurements)
 </pre>
 </div>
 <figcaption><a href="#figure-16" class="selfRef">Figure 16</a>:
@@ -3673,6 +3700,12 @@ validity circuit <code>Valid</code> that implements the interface described here
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
+                  <code>AggResult</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Type of the aggregate result</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
                   <code>Field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">An FFT-friendly finite field as defined in <a href="#field-fft-friendly" class="xref">Section 6.1.2</a>
@@ -3688,8 +3721,8 @@ has degree <code>2</code>. Hence, the arithmetic degree of this gadget is <code>
 <p id="section-7.3.2-5">Each gadget also defines a parameter <code>ARITY</code> that specifies the circuit's arity
 (i.e., the number of input wires).<a href="#section-7.3.2-5" class="pilcrow">¶</a></p>
 <p id="section-7.3.2-6">A concrete <code>Valid</code> provides the following methods for encoding a measurement as
-an input vector and truncating an input vector to the length of an aggregatable
-output:<a href="#section-7.3.2-6" class="pilcrow">¶</a></p>
+an input vector, truncating an input vector to the length of an aggregatable
+output, and converting an aggregated output to an aggregate result:<a href="#section-7.3.2-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.2-7.1">
               <code>Valid.encode(measurement: Measurement) -&gt; Vec[Field]</code> returns a vector of
@@ -3698,6 +3731,10 @@ length <code>INPUT_LEN</code> representing a measurement.<a href="#section-7.3.2
             <li class="normal" id="section-7.3.2-7.2">
               <code>Valid.truncate(input: Vec[Field]) -&gt; Vec[Field]</code> returns a vector of length
 <code>OUTPUT_LEN</code> representing an aggregatable output.<a href="#section-7.3.2-7.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-7.3.2-7.3">
+              <code>Valid.decode(output: Vec[Field], num_measurements: Unsigned) -&gt; AggResult</code>
+returns an aggregate result.<a href="#section-7.3.2-7.3" class="pilcrow">¶</a>
 </li>
           </ul>
 <p id="section-7.3.2-8">Finally, the following class methods are derived for each concrete <code>Valid</code>:<a href="#section-7.3.2-8" class="pilcrow">¶</a></p>
@@ -3985,8 +4022,8 @@ follows:<a href="#section-7.3.3.3-1" class="pilcrow">¶</a></p>
             <h5 id="name-encoding">
 <a href="#section-7.3.3.4" class="section-number selfRef">7.3.3.4. </a><a href="#name-encoding" class="section-name selfRef">Encoding</a>
             </h5>
-<p id="section-7.3.3.4-1">The FLP encoding and truncation methods invoke <code>Valid.encode</code> and
-<code>Valid.truncate</code> in the natural way.<a href="#section-7.3.3.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.3.3.4-1">The FLP encoding and truncation methods invoke <code>Valid.encode</code>,
+<code>Valid.truncate</code>, and <code>Valid.decode</code> in the natural way.<a href="#section-7.3.3.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -4031,8 +4068,8 @@ def Count(inp: Vec[Field64]):
     return Mul(inp[0], inp[0]) - inp[0]
 </pre><a href="#section-7.4.1-5" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.1-6">The measurement is encoded as a singleton vector in the natural way. The
-parameters for this circuit are summarized below.<a href="#section-7.4.1-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-6">The measurement is encoded and decoded as a singleton vector in the natural
+way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.1-7"><br></p>
 <span id="name-parameters-of-validity-circ"></span><table class="center" id="table-9">
             <caption>
@@ -4096,6 +4133,14 @@ parameters for this circuit are summarized below.<a href="#section-7.4.1-6" clas
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
+                  <code>AggResult</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Unsigned</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
                   <code>Field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -4135,6 +4180,9 @@ def truncate(Sum, inp):
         w = Sum.Field(1 &lt;&lt; l)
         decoded += w * b
     return [decoded]
+
+def decode(Sum, output, _num_measurements):
+    return output[0].as_unsigned()
 </pre><a href="#section-7.4.2-3" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.2-4">The validity circuit checks that the input consists of ones and zeros. Its
@@ -4220,6 +4268,14 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
+                  <code>AggResult</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Unsigned</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
                   <code>Field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -4255,6 +4311,9 @@ def encode(Histogram, measurement: Integer):
 
 def truncate(Histogram, inp: Vec[Field128]):
     return inp
+
+def decode(Histogram, output: Vec[Field128], _num_measurements):
+    return [bucket_count.as_unsigned() for bucket_count in output]
 </pre><a href="#section-7.4.3-3" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.3-4">The validity circuit uses <code>Range2</code> (see <a href="#prio3-sum" class="xref">Section 7.4.2</a>) as its single gadget. It
@@ -4342,6 +4401,14 @@ sharded. This is provided to the FLP by Prio3.<a href="#section-7.4.3-6" class="
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Integer</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>AggResult</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Vec[Unsigned]</code>
 </td>
               </tr>
               <tr>
@@ -4700,7 +4767,8 @@ def out_shares_to_agg_share(Poplar1, agg_param, \
 <figure id="figure-22">
             <div class="alignLeft art-text artwork" id="section-8.2.4-1.1">
 <pre>
-def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
+def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes],
+                         num_measurements):
   (l, _) = decode_indexes(agg_param)
   if len(agg_shares) != 2:
     raise ERR_INVALID_INPUT

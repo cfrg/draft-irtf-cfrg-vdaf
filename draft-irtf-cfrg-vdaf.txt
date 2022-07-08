@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 30 December 2022                                     Cloudflare
+Expires: 9 January 2023                                       Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            28 June 2022
+                                                             8 July 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 December 2022.
+   This Internet-Draft will expire on 9 January 2023.
 
 Copyright Notice
 
@@ -615,10 +615,11 @@ Table of Contents
    following algorithm to recover the following output:
 
    *  Daf.agg_shares_to_result(agg_param: AggParam, agg_shares:
-      Vec[Bytes]) -> AggResult is run by the Collector in order to
-      compute the aggregate result from the Aggregators' shares.  The
-      length of agg_shares MUST be SHARES.  This algorithm is
-      deterministic.
+      Vec[Bytes], num_measurements: Unsigned) -> AggResult is run by the
+      Collector in order to compute the aggregate result from the
+      Aggregators' shares.  The length of agg_shares MUST be SHARES.
+      num_measurements is the number of measurements that contributed to
+      each of the aggregate shares.  This algorithm is deterministic.
 
        Aggregator 0    Aggregator 1        Aggregator SHARES-1
        ============    ============        ===================
@@ -673,7 +674,9 @@ Table of Contents
           agg_shares.append(agg_share_j)
 
       # Collector unshards the aggregate result.
-      agg_result = Daf.agg_shares_to_result(agg_param, agg_shares)
+      num_measurements = len(measurements)
+      agg_result = Daf.agg_shares_to_result(agg_param, agg_shares,
+                                            num_measurements)
       return agg_result
 
                       Figure 5: Execution of a DAF.
@@ -932,10 +935,11 @@ Table of Contents
    VDAF Unsharding is identical to DAF Unsharding (cf.  Section 4.4):
 
    *  Vdaf.agg_shares_to_result(agg_param: AggParam, agg_shares:
-      Vec[Bytes]) -> AggResult is run by the Collector in order to
-      compute the aggregate result from the Aggregators' shares.  The
-      length of agg_shares MUST be SHARES.  This algorithm is
-      deterministic.
+      Vec[Bytes], num_measurements: Unsigned) -> AggResult is run by the
+      Collector in order to compute the aggregate result from the
+      Aggregators' shares.  The length of agg_shares MUST be SHARES.
+      num_measurements is the number of measurements that contributed to
+      each of the aggregate shares.  This algorithm is deterministic.
 
    The data flow for this stage is illustrated in Figure 4.
 
@@ -996,7 +1000,9 @@ Table of Contents
            agg_shares.append(agg_share_j)
 
        # Collector unshards the aggregate.
-       agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares)
+       num_measurements = len(measurements)
+       agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares,
+                                              num_measurements)
        return agg_result
 
                        Figure 7: Execution of a VDAF.
@@ -1339,6 +1345,8 @@ class PrgAes128:
        +----------------+------------------------------------------+
        | Measurement    | Type of the measurement                  |
        +----------------+------------------------------------------+
+       | AggResult      | Type of the aggregate result             |
+       +----------------+------------------------------------------+
        | Field          | As defined in (Section 6.1)              |
        +----------------+------------------------------------------+
 
@@ -1444,9 +1452,20 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       input to an aggregatable output.  The length of the input MUST be
       INPUT_LEN and the length of the output MUST be OUTPUT_LEN.
 
-   We remark that, taken together, these two functionalities correspond
-   roughly to the notion of "Affine-aggregatable encodings (AFEs)" from
-   [CGB17].
+   Once the aggregate shares have been computed and combined together,
+   their sum can be converted into the aggregate result.  This could be
+   a projection from the FLP's field to the integers, or it could
+   include additional post-processing.
+
+   *  Flp.decode(output: Vec[Field], num_measurements: Unsigned) ->
+      AggResult maps a sum of aggregate shares to an aggregate result.
+      The length of the input MUST be OUTPUT_LEN. num_measurements is
+      the number of measurements that contributed to the aggregated
+      output.
+
+   We remark that, taken together, these three functionalities
+   correspond roughly to the notion of "Affine-aggregatable encodings
+   (AFEs)" from [CGB17].
 
 7.2.  Construction
 
@@ -1474,7 +1493,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     +-----------------+-----------------------------------------------+
     | OutShare        | Vec[Flp.Field]                                |
     +-----------------+-----------------------------------------------+
-    | AggResult       | Vec[Unsigned]                                 |
+    | AggResult       | Flp.AggResult                                 |
     +-----------------+-----------------------------------------------+
 
              Table 6: Associated parameters for the Prio3 VDAF.
@@ -1723,11 +1742,12 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    vectors element-wise.  It then converts each element of the vector
    into an integer.
 
-   def agg_shares_to_result(Prio3, _agg_param, agg_shares):
+   def agg_shares_to_result(Prio3, _agg_param, agg_shares,
+                            num_measurements):
        agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
        for agg_share in agg_shares:
            agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
-       return list(map(lambda x: x.as_unsigned(), agg))
+       return Prio3.Flp.decode(agg, num_measurements)
 
          Figure 16: Computation of the aggregate result for Prio3.
 
@@ -2011,6 +2031,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
         +----------------+---------------------------------------+
         | Measurement    | The type of measurement               |
         +----------------+---------------------------------------+
+        | AggResult      | Type of the aggregate result          |
+        +----------------+---------------------------------------+
         | Field          | An FFT-friendly finite field as       |
         |                | defined in Section 6.1.2              |
         +----------------+---------------------------------------+
@@ -2027,14 +2049,18 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    circuit's arity (i.e., the number of input wires).
 
    A concrete Valid provides the following methods for encoding a
-   measurement as an input vector and truncating an input vector to the
-   length of an aggregatable output:
+   measurement as an input vector, truncating an input vector to the
+   length of an aggregatable output, and converting an aggregated output
+   to an aggregate result:
 
    *  Valid.encode(measurement: Measurement) -> Vec[Field] returns a
       vector of length INPUT_LEN representing a measurement.
 
    *  Valid.truncate(input: Vec[Field]) -> Vec[Field] returns a vector
       of length OUTPUT_LEN representing an aggregatable output.
+
+   *  Valid.decode(output: Vec[Field], num_measurements: Unsigned) ->
+      AggResult returns an aggregate result.
 
    Finally, the following class methods are derived for each concrete
    Valid:
@@ -2218,8 +2244,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
 7.3.3.4.  Encoding
 
-   The FLP encoding and truncation methods invoke Valid.encode and
-   Valid.truncate in the natural way.
+   The FLP encoding and truncation methods invoke Valid.encode,
+   Valid.truncate, and Valid.decode in the natural way.
 
 7.4.  Instantiations
 
@@ -2252,8 +2278,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    def Count(inp: Vec[Field64]):
        return Mul(inp[0], inp[0]) - inp[0]
 
-   The measurement is encoded as a singleton vector in the natural way.
-   The parameters for this circuit are summarized below.
+   The measurement is encoded and decoded as a singleton vector in the
+   natural way.  The parameters for this circuit are summarized below.
 
 
 
@@ -2271,6 +2297,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
                | JOINT_RAND_LEN | 0                        |
                +----------------+--------------------------+
                | Measurement    | Unsigned, in range [0,2) |
+               +----------------+--------------------------+
+               | AggResult      | Unsigned                 |
                +----------------+--------------------------+
                | Field          | Field64 (Table 3)        |
                +----------------+--------------------------+
@@ -2306,6 +2334,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            decoded += w * b
        return [decoded]
 
+   def decode(Sum, output, _num_measurements):
+       return output[0].as_unsigned()
+
    The validity circuit checks that the input consists of ones and
    zeros.  Its gadget, denoted Range2, is the degree-2, arity-1 gadget
    defined as
@@ -2340,6 +2371,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
             +----------------+--------------------------------+
             | Measurement    | Unsigned, in range [0, 2^bits) |
             +----------------+--------------------------------+
+            | AggResult      | Unsigned                       |
+            +----------------+--------------------------------+
             | Field          | Field128 (Table 4)             |
             +----------------+--------------------------------+
 
@@ -2368,6 +2401,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    def truncate(Histogram, inp: Vec[Field128]):
        return inp
+
+   def decode(Histogram, output: Vec[Field128], _num_measurements):
+       return [bucket_count.as_unsigned() for bucket_count in output]
 
    The validity circuit uses Range2 (see Section 7.4.2) as its single
    gadget.  It checks for one-hotness in two steps, as follows:
@@ -2410,6 +2446,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
                   | JOINT_RAND_LEN | 2                  |
                   +----------------+--------------------+
                   | Measurement    | Integer            |
+                  +----------------+--------------------+
+                  | AggResult      | Vec[Unsigned]      |
                   +----------------+--------------------+
                   | Field          | Field128 (Table 4) |
                   +----------------+--------------------+
@@ -2710,7 +2748,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
 8.2.4.  Unsharding
 
-   def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes]):
+   def agg_shares_to_result(Poplar1, agg_param, agg_shares: Vec[Bytes],
+                            num_measurements):
      (l, _) = decode_indexes(agg_param)
      if len(agg_shares) != 2:
        raise ERR_INVALID_INPUT
