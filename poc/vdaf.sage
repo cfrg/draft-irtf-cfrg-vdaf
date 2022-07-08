@@ -253,7 +253,8 @@ def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
         print_wrapped_line(agg_share, tab=2)
 
     # Unshard
-    print('agg_result: {}'.format(test_vec['agg_result']))
+    print('agg_result: {}'.format(list(
+        map(lambda x: int(x), test_vec['agg_result']))))
     print()
 
 
