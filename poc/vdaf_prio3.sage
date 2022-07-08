@@ -196,7 +196,7 @@ class Prio3(Vdaf):
         return Prio3.Flp.Field.encode_vec(agg_share)
 
     @classmethod
-    def agg_shares_to_result(Prio3, _agg_param, agg_shares, num_measurements):
+    def agg_shares_to_result(Prio3, _agg_param, agg_shares):
         agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
         for agg_share in agg_shares:
             agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))

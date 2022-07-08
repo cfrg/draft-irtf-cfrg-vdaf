@@ -94,8 +94,7 @@ class Vdaf:
     @classmethod
     def agg_shares_to_result(Vdaf,
                              agg_param: AggParam,
-                             agg_shares: Vec[Bytes],
-                             num_measurements: Unsigned) -> AggResult:
+                             agg_shares: Vec[Bytes]) -> AggResult:
         raise Error('not implemented')
 
     # Add any parameters to `test_vec` that are required to construct this
@@ -199,9 +198,7 @@ def run_vdaf(Vdaf,
         test_vec['agg_shares'].append(agg_share_j.hex())
 
     # Collector unshards the aggregate.
-    num_measurements = len(measurements)
-    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares,
-                                           num_measurements)
+    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares)
     # REMOVE ME
     test_vec['agg_result'] = list(map(lambda x: int(x), agg_result))
     if print_test_vec:
@@ -340,7 +337,7 @@ class TestVdaf(Vdaf):
             reduce(lambda x, y: [x[0] + y[0]], out_shares))
 
     @classmethod
-    def agg_shares_to_result(cls, _agg_param, agg_shares, _num_measurements):
+    def agg_shares_to_result(cls, _agg_param, agg_shares):
         return [reduce(lambda x, y: [x[0] + y[0]],
             map(lambda encoded: cls.Field.decode_vec(encoded),
                 agg_shares))[0].as_unsigned()]
