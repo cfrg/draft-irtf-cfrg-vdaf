@@ -25,7 +25,7 @@ class Prio3(Vdaf):
     # Types required by `Vdaf`
     Measurement = Flp.Measurement
     OutShare = Vec[Flp.Field]
-    AggResult = Flp.AggResult
+    AggResult = Vec[Unsigned]
     Prep = Tuple[Vec[Flp.Field],  # output share
                  Bytes,           # k_joint_rand
                  Bytes]           # outbound message
@@ -200,7 +200,7 @@ class Prio3(Vdaf):
         agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
         for agg_share in agg_shares:
             agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
-        return Prio3.Flp.decode(agg, num_measurements)
+        return list(map(lambda x: x.as_unsigned(), agg))
 
     @classmethod
     def encode_leader_share(Prio3,
@@ -371,20 +371,6 @@ class Prio3Aes128Histogram(Prio3):
 # TESTS
 #
 
-class TestPrio3Aes128Average(Prio3Aes128Sum):
-    '''
-    A Prio3 instantiation to test use of num_measurements in the Valid
-    class's decode() method.
-    '''
-
-    @classmethod
-    def with_bits(cls, bits: Unsigned):
-        new_cls = deepcopy(cls).with_prg(prg.PrgAes128)
-        new_cls.Flp = flp_generic.FlpGeneric \
-            .with_valid(flp_generic.TestAverage.with_bits(bits))
-        return new_cls
-
-
 if __name__ == '__main__':
     cls = Prio3 \
         .with_prg(prg.PrgAes128) \
@@ -417,6 +403,3 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [101], [0, 0, 0, 1])
     test_vdaf(cls, None, [0, 1, 5, 10, 15, 100, 101, 101], [2, 2, 2, 2])
     test_vdaf(cls, None, [50], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
-
-    cls = TestPrio3Aes128Average.with_shares(2).with_bits(3)
-    test_vdaf(cls, None, [1, 5, 1, 1, 4, 1, 3, 2], 2)

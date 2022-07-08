@@ -116,7 +116,7 @@ class TestDaf(Daf):
     # Associated types
     OutShare = Vec[Field]
     Measurement = Unsigned
-    AggResult = Vec[Unsigned]
+    AggResult = Unsigned
 
     @classmethod
     def measurement_to_input_shares(cls, measurement):
