@@ -974,8 +974,7 @@ Likewise, each concrete `Field` implements a constructor for converting an
 unsigned integer into a field element:
 
 * `Field(integer: Unsigned)` returns `integer` represented as a field element.
-  If `integer >= Field.MODULUS`, then `integer` is first reduced modulo
-  `Field.MODULUS`.
+  The value of `integer` MUST be less than `Field.MODULUS`.
 
 Finally, each concrete `Field` has two derived class methods, one for encoding
 a vector of field elements as a byte string and another for decoding a vector of
@@ -996,8 +995,10 @@ def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
     vec = []
     for i in range(0, len(encoded), L):
         encoded_x = encoded[i:i+L]
-        x = Field(OS2IP(encoded_x))
-        vec.append(x)
+        x = OS2IP(encoded_x)
+        if x >= Field.MODULUS:
+            raise ERR_DECODE # Integer is larger than modulus
+        vec.append(Field(x))
     return vec
 ~~~
 {: #field-derived-methods title="Derived class methods for finite fields."}

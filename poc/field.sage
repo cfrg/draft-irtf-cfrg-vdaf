@@ -30,23 +30,25 @@ class Field:
         return vec
 
     @classmethod
-    def encode_vec(cls, data: Vec[Field]) -> Bytes:
+    def encode_vec(Field, data: Vec[Field]) -> Bytes:
         encoded = Bytes()
         for x in data:
-            encoded += I2OSP(x.as_unsigned(), cls.ENCODED_SIZE)
+            encoded += I2OSP(x.as_unsigned(), Field.ENCODED_SIZE)
         return encoded
 
     @classmethod
-    def decode_vec(cls, encoded: Bytes) -> Vec[Field]:
-        L = cls.ENCODED_SIZE
+    def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
+        L = Field.ENCODED_SIZE
         if len(encoded) % L != 0:
             raise ERR_DECODE
 
         vec = []
         for i in range(0, len(encoded), L):
             encoded_x = encoded[i:i+L]
-            x = cls(OS2IP(encoded_x))
-            vec.append(x)
+            x = OS2IP(encoded_x)
+            if x >= Field.MODULUS:
+                raise ERR_DECODE # Integer is larger than modulus
+            vec.append(Field(x))
         return vec
 
     def __add__(self, other: Field) -> Field:
