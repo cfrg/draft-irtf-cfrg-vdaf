@@ -1313,10 +1313,21 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
-                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="xref">8.3</a>.  <a href="#name-xxx" class="xref">XXX</a></p>
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="xref">8.3</a>.  <a href="#name-the-idpf-scheme-of" class="xref">The IDPF scheme of BBCGGI21</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.1">
+                    <p id="section-toc.1-1.8.2.3.2.1.1"><a href="#section-8.3.1" class="xref">8.3.1</a>.  <a href="#name-key-generation" class="xref">Key Generation</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.2">
+                    <p id="section-toc.1-1.8.2.3.2.2.1"><a href="#section-8.3.2" class="xref">8.3.2</a>.  <a href="#name-key-evaluation" class="xref">Key Evaluation</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.3">
+                    <p id="section-toc.1-1.8.2.3.2.3.1"><a href="#section-8.3.3" class="xref">8.3.3</a>.  <a href="#name-auxiliary-functions-4" class="xref">Auxiliary Functions</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
-                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="xref">8.4</a>.  <a href="#name-xxx-2" class="xref">XXX</a></p>
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="xref">8.4</a>.  <a href="#name-xxx" class="xref">XXX</a></p>
 </li>
             </ul>
 </li>
@@ -2613,6 +2624,30 @@ multiplicative group.<a href="#section-6.1.2-2.1" class="pilcrow">¶</a>
             </tbody>
           </table>
 </div>
+<span id="name-field255"></span><div id="field255">
+<table class="center" id="table-5">
+            <caption>
+<a href="#table-5" class="selfRef">Table 5</a>:
+<a href="#name-field255" class="selfRef">Field255.</a>
+            </caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">Parameter</th>
+                <th class="text-left" rowspan="1" colspan="1">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">MODULUS</td>
+                <td class="text-left" rowspan="1" colspan="1">2^255 - 19</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">ENCODED_SIZE</td>
+                <td class="text-left" rowspan="1" colspan="1">32</td>
+              </tr>
+            </tbody>
+          </table>
+</div>
 </section>
 </div>
 </section>
@@ -2659,21 +2694,25 @@ def derive_seed(Prg, seed: Bytes, info: Bytes) -&gt; bytes:
     prg = Prg(seed, info)
     return prg.next(Prg.SEED_SIZE)
 
-# Expand a seed into a vector of Field elements.
+# Output the next `length` pseudorandom elements of `Field`.
+def next_vec(self, Field, length: Unsigned):
+    m = next_power_of_2(Field.MODULUS) - 1
+    vec = []
+    while len(vec) &lt; length:
+        x = OS2IP(self.next(Field.ENCODED_SIZE))
+        x &amp;= m
+        if x &lt; Field.MODULUS:
+            vec.append(Field(x))
+    return vec
+
+# Expand the input `seed` into vector of `length` field elements.
 def expand_into_vec(Prg,
                     Field,
                     seed: Bytes,
                     info: Bytes,
                     length: Unsigned):
-    m = next_power_of_2(Field.MODULUS) - 1
     prg = Prg(seed, info)
-    vec = []
-    while len(vec) &lt; length:
-        x = OS2IP(prg.next(Field.ENCODED_SIZE))
-        x &amp;= m
-        if x &lt; Field.MODULUS:
-            vec.append(Field(x))
-    return vec
+    return prg.next_vec(Field, length)
 </pre>
 </div>
 <figcaption><a href="#figure-10" class="selfRef">Figure 10</a>:
@@ -2798,11 +2837,11 @@ if it holds a share of a valid input. (See <a href="#prio3-construction" class="
 <p id="section-7.1-2">As usual, we will describe the interface implemented by a concrete FLP in terms
 of an abstract base class <code>Flp</code> that specifies the set of methods and parameters
 a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
-<p id="section-7.1-3">The parameters provided by a concrete FLP are listed in <a href="#flp-param" class="xref">Table 5</a>.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.1-3">The parameters provided by a concrete FLP are listed in <a href="#flp-param" class="xref">Table 6</a>.<a href="#section-7.1-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-b"></span><div id="flp-param">
-<table class="center" id="table-5">
+<table class="center" id="table-6">
           <caption>
-<a href="#table-5" class="selfRef">Table 5</a>:
+<a href="#table-6" class="selfRef">Table 6</a>:
 <a href="#name-constants-and-types-defined-b" class="selfRef">Constants and types defined by a concrete FLP.</a>
           </caption>
 <thead>
@@ -3004,12 +3043,12 @@ to the notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CG
 <p id="section-7.2-1">This section specifies <code>Prio3</code>, an implementation of the <code>Vdaf</code> interface
 (<a href="#vdaf" class="xref">Section 5</a>). It has two generic parameters: an <code>Flp</code> (<a href="#flp" class="xref">Section 7.1</a>) and a <code>Prg</code>
 (<a href="#prg" class="xref">Section 6.2</a>). The associated constants and types required by the <code>Vdaf</code> interface
-are defined in <a href="#prio3-param" class="xref">Table 6</a>. The methods required for sharding, preparation,
+are defined in <a href="#prio3-param" class="xref">Table 7</a>. The methods required for sharding, preparation,
 aggregation, and unsharding are described in the remaining subsections.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <span id="name-associated-parameters-for-t"></span><div id="prio3-param">
-<table class="center" id="table-6">
+<table class="center" id="table-7">
           <caption>
-<a href="#table-6" class="selfRef">Table 6</a>:
+<a href="#table-7" class="selfRef">Table 7</a>:
 <a href="#name-associated-parameters-for-t" class="selfRef">Associated parameters for the Prio3 VDAF.</a>
           </caption>
 <thead>
@@ -3659,9 +3698,9 @@ Fourier Transform") algorithm. Note that this requires the field to be
 <p id="section-7.3.2-1">The FLP described in <a href="#flp-generic-construction" class="xref">Section 7.3.3</a> is defined in terms of a
 validity circuit <code>Valid</code> that implements the interface described here.<a href="#section-7.3.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.3.2-2">A concrete <code>Valid</code> defines the following parameters:<a href="#section-7.3.2-2" class="pilcrow">¶</a></p>
-<span id="name-validity-circuit-parameters"></span><table class="center" id="table-7">
+<span id="name-validity-circuit-parameters"></span><table class="center" id="table-8">
             <caption>
-<a href="#table-7" class="selfRef">Table 7</a>:
+<a href="#table-8" class="selfRef">Table 8</a>:
 <a href="#name-validity-circuit-parameters" class="selfRef">Validity circuit parameters.</a>
             </caption>
 <thead>
@@ -3793,7 +3832,7 @@ the interface defined in <a href="#flp-generic-valid" class="xref">Section 7.3.2
 https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/flp_generic.sage.<a href="#section-7.3.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-7.3.3-3">The FLP parameters for <code>FlpGeneric</code> are defined in <a href="#flp-generic-param" class="xref">Table 8</a>. The
+<p id="section-7.3.3-3">The FLP parameters for <code>FlpGeneric</code> are defined in <a href="#flp-generic-param" class="xref">Table 9</a>. The
 required methods for generating the proof, generating the verifier, and deciding
 validity are specified in the remaining subsections.<a href="#section-7.3.3-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.3-4">In the remainder, we let <code>[n]</code> denote the set <code>{1, ..., n}</code> for positive integer
@@ -3819,9 +3858,9 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
           </ul>
 <p id="section-7.3.3-6"><br></p>
 <span id="name-flp-parameters-of-flpgeneri"></span><div id="flp-generic-param">
-<table class="center" id="table-8">
+<table class="center" id="table-9">
             <caption>
-<a href="#table-8" class="selfRef">Table 8</a>:
+<a href="#table-9" class="selfRef">Table 9</a>:
 <a href="#name-flp-parameters-of-flpgeneri" class="selfRef">FLP Parameters of FlpGeneric.</a>
             </caption>
 <thead>
@@ -4080,9 +4119,9 @@ def Count(inp: Vec[Field64]):
 <p id="section-7.4.1-6">The measurement is encoded and decoded as a singleton vector in the natural
 way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.1-7"><br></p>
-<span id="name-parameters-of-validity-circ"></span><table class="center" id="table-9">
+<span id="name-parameters-of-validity-circ"></span><table class="center" id="table-10">
             <caption>
-<a href="#table-9" class="selfRef">Table 9</a>:
+<a href="#table-10" class="selfRef">Table 10</a>:
 <a href="#name-parameters-of-validity-circ" class="selfRef">Parameters of validity circuit Count.</a>
             </caption>
 <thead>
@@ -4215,9 +4254,9 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
 </pre><a href="#section-7.4.2-7" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.2-8"><br></p>
-<span id="name-parameters-of-validity-circu"></span><table class="center" id="table-10">
+<span id="name-parameters-of-validity-circu"></span><table class="center" id="table-11">
             <caption>
-<a href="#table-10" class="selfRef">Table 10</a>:
+<a href="#table-11" class="selfRef">Table 11</a>:
 <a href="#name-parameters-of-validity-circu" class="selfRef">Parameters of validity circuit Sum.</a>
             </caption>
 <thead>
@@ -4352,9 +4391,9 @@ def Histogram(inp: Vec[Field128],
 <p id="section-7.4.3-6">Note that this circuit depends on the number of shares into which the input is
 sharded. This is provided to the FLP by Prio3.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-7"><br></p>
-<span id="name-parameters-of-validity-circui"></span><table class="center" id="table-11">
+<span id="name-parameters-of-validity-circui"></span><table class="center" id="table-12">
             <caption>
-<a href="#table-11" class="selfRef">Table 11</a>:
+<a href="#table-12" class="selfRef">Table 12</a>:
 <a href="#name-parameters-of-validity-circui" class="selfRef">Parameters of validity circuit Histogram.</a>
             </caption>
 <thead>
@@ -4514,7 +4553,7 @@ field. We distinguish two types of fields: One for inner nodes (denoted
 of Poplar1 will use a much larger field for leaf nodes than for inner nodes.
 (This is to ensure the IDPF is "extractable", as defined in <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>,
 Definition 1.)<a href="#section-8.1-3" class="pilcrow">¶</a></p>
-<p id="section-8.1-4">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="xref">Table 12</a>. We
+<p id="section-8.1-4">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="xref">Table 13</a>. We
 write <code>Idpf.Vec</code> as shorthand for <code>Union[Vec[Vec[Idpf.FieldInner]],
 Vec[Vec[Idpf.FieldLeaf]]]</code>. The scheme is comprised of the following algorithms:<a href="#section-8.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -4564,9 +4603,9 @@ it will often be beneficial to expose a stateful API for IDPFs and carry the
 state across evaluations. See <a href="#idpf-poplar" class="xref">Section 8.3</a> for details.<a href="#section-8.1-8" class="pilcrow">¶</a></p>
 <p id="section-8.1-9"><br></p>
 <span id="name-constants-and-types-defined-by"></span><div id="idpf-param">
-<table class="center" id="table-12">
+<table class="center" id="table-13">
           <caption>
-<a href="#table-12" class="selfRef">Table 12</a>:
+<a href="#table-13" class="selfRef">Table 13</a>:
 <a href="#name-constants-and-types-defined-by" class="selfRef">Constants and types defined by a concrete IDPF.</a>
           </caption>
 <thead>
@@ -4602,7 +4641,7 @@ state across evaluations. See <a href="#idpf-poplar" class="xref">Section 8.3</a
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">Prg</td>
-              <td class="text-left" rowspan="1" colspan="1">Implemnetation of <code>Prg</code> (<a href="#prg" class="xref">Section 6.2</a>)</td>
+              <td class="text-left" rowspan="1" colspan="1">Implementation of <code>Prg</code> (<a href="#prg" class="xref">Section 6.2</a>)</td>
             </tr>
           </tbody>
         </table>
@@ -4617,13 +4656,13 @@ state across evaluations. See <a href="#idpf-poplar" class="xref">Section 8.3</a
 <p id="section-8.2-1">This section specifies <code>Poplar1</code>, an implementation of the <code>Vdaf</code> interface
 (<a href="#vdaf" class="xref">Section 5</a>). It is defined in terms of any <code>Idpf</code> (<a href="#idpf" class="xref">Section 8.1</a>) for which
 <code>Idpf.SHARES == 2</code> and <code>Idpf.VALUE_LEN == 2</code>. The associated constants and types
-required by the <code>Vdaf</code> interface are defined in <a href="#poplar1-param" class="xref">Table 13</a>. The methods
+required by the <code>Vdaf</code> interface are defined in <a href="#poplar1-param" class="xref">Table 14</a>. The methods
 required for sharding, preparation, aggregation, and unsharding are described in
 the remaining subsections.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-associated-parameters-for-th"></span><div id="poplar1-param">
-<table class="center" id="table-13">
+<table class="center" id="table-14">
           <caption>
-<a href="#table-13" class="selfRef">Table 13</a>:
+<a href="#table-14" class="selfRef">Table 14</a>:
 <a href="#name-associated-parameters-for-th" class="selfRef">Associated parameters for the Poplar1 VDAF.</a>
           </caption>
 <thead>
@@ -4966,7 +5005,7 @@ def agg_shares_to_result(Poplar1, agg_param,
           <h4 id="name-auxiliary-functions-3">
 <a href="#section-8.2.5" class="section-number selfRef">8.2.5. </a><a href="#name-auxiliary-functions-3" class="section-name selfRef">Auxiliary Functions</a>
           </h4>
-<span id="name-helper-functions-required-fo"></span><div id="poplar1-helpers">
+<span id="name-helper-functions-for-poplar"></span><div id="poplar1-helpers">
 <figure id="figure-23">
             <div class="alignLeft art-text artwork" id="section-8.2.5-1.1">
 <pre>
@@ -5030,7 +5069,7 @@ def verify_context(Poplar1, nonce, level, prefixes):
 </pre>
 </div>
 <figcaption><a href="#figure-23" class="selfRef">Figure 23</a>:
-<a href="#name-helper-functions-required-fo" class="selfRef">Helper functions required for Poplar1.</a>
+<a href="#name-helper-functions-for-poplar" class="selfRef">Helper functions for Poplar1.</a>
             </figcaption></figure>
 </div>
 </section>
@@ -5039,15 +5078,249 @@ def verify_context(Poplar1, nonce, level, prefixes):
 </div>
 <div id="idpf-poplar">
 <section id="section-8.3">
-        <h3 id="name-xxx">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-xxx" class="section-name selfRef">XXX</a>
-      </h3>
+        <h3 id="name-the-idpf-scheme-of">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-the-idpf-scheme-of" class="section-name selfRef">The IDPF scheme of <em class="xref">[BBCGGI21]</em></a>
+        </h3>
+<p id="section-8.3-1">In this section we specify a concrete IDPF, called IdpfPoplar, suitable for
+instantiating Poplar1. The scheme gets its name from the name of the protocol of
+<span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8.3-2.1">
+            <p id="section-8.3-2.1.1">TODO We should consider giving <code>IdpfPoplar</code> a more distinctive name.<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-8.3-3">The constant and type definitions required by the <code>Idpf</code> interface are given in
+<a href="#idpf-poplar-param" class="xref">Table 15</a>.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
+<p id="section-8.3-4"><br></p>
+<span id="name-constants-and-type-definiti"></span><div id="idpf-poplar-param">
+<table class="center" id="table-15">
+          <caption>
+<a href="#table-15" class="selfRef">Table 15</a>:
+<a href="#name-constants-and-type-definiti" class="selfRef">Constants and type definitions for IdpfPoplar.</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Parameter</th>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">SHARES</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>2</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">BITS</td>
+              <td class="text-left" rowspan="1" colspan="1">any positive integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">VALUE_LEN</td>
+              <td class="text-left" rowspan="1" colspan="1">any positive integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">KEY_SIZE</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>Prg.SEED_SIZE</code>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">FieldInner</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>Field64</code> (<a href="#field64" class="xref">Table 3</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">FieldLeaf</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>Field255</code> (<a href="#field255" class="xref">Table 5</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Prg</td>
+              <td class="text-left" rowspan="1" colspan="1">any implementation of <code>Prg</code> (<a href="#prg" class="xref">Section 6.2</a>)</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+<div id="key-generation">
+<section id="section-8.3.1">
+          <h4 id="name-key-generation">
+<a href="#section-8.3.1" class="section-number selfRef">8.3.1. </a><a href="#name-key-generation" class="section-name selfRef">Key Generation</a>
+          </h4>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8.3.1-1.1">
+              <p id="section-8.3.1-1.1.1">TODO Describe the construction in prose, beginning with a gentle introduction
+to the high level idea.<a href="#section-8.3.1-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-8.3.1-2">The description of the IDPF-key generation algorithm makes use of auxiliary
+functions <code>extend()</code>, <code>convert()</code>, and <code>encode_public_share()</code> defined in
+<a href="#idpf-poplar-helper-functions" class="xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote the
+field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
+<span id="name-idpf-key-generation-algorit"></span><div id="idpf-poplar-gen">
+<figure id="figure-24">
+            <div class="alignLeft art-text artwork" id="section-8.3.1-3.1">
+<pre>
+def gen(IpdfPoplar, alpha, beta_inner, beta_leaf):
+    if alpha &gt;= 2^IdpfPoplar.BITS:
+        raise ERR_INPUT # alpha too long
+    if len(beta_inner) != IdpfPoplar.BITS - 1:
+        raise ERR_INPUT # beta_inner vector is the wrong size
+
+    init_seed = [
+        gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+        gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+    ]
+
+    seed = init_seed.copy()
+    ctrl = [Field2(0), Field2(1)]
+    correction_words = []
+    for level in range(IdpfPoplar.BITS):
+        keep = (alpha &gt;&gt; (IdpfPoplar.BITS - level - 1)) &amp; 1
+        lose = 1 - keep
+        bit = Field2(keep)
+
+        (s0, t0) = IdpfPoplar.extend(seed[0])
+        (s1, t1) = IdpfPoplar.extend(seed[1])
+        seed_cw = xor(s0[lose], s1[lose])
+        ctrl_cw = (
+            t0[0] + t1[0] + bit + Field2(1),
+            t0[1] + t1[1] + bit,
+        )
+
+        x0 = xor(s0[keep], seed_cw) if ctrl[0] == Field2(1) \
+                else s0[keep]
+        x1 = xor(s1[keep], seed_cw) if ctrl[1] == Field2(1) \
+                else s1[keep]
+        (seed[0], w0) = IdpfPoplar.convert(level, x0)
+        (seed[1], w1) = IdpfPoplar.convert(level, x1)
+        ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
+        ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
+
+        b = beta_inner[level] if level &lt; IdpfPoplar.BITS-1 \
+                else beta_leaf
+        if len(b) != IdpfPoplar.VALUE_LEN:
+            raise ERR_INPUT # beta too long or too short
+
+        w_cw = vec_add(vec_sub(b, w0), w1)
+        if ctrl[1] == Field2(1):
+            w_cw = vec_neg(w_cw)
+        correction_words.append((seed_cw, ctrl_cw, w_cw))
+
+    public_share = IdpfPoplar.encode_public_share(correction_words)
+    return (public_share, init_seed)
+</pre>
+</div>
+<figcaption><a href="#figure-24" class="selfRef">Figure 24</a>:
+<a href="#name-idpf-key-generation-algorit" class="selfRef">IDPF-key generation algorithm of IdpfPoplar.</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="key-evaluation">
+<section id="section-8.3.2">
+          <h4 id="name-key-evaluation">
+<a href="#section-8.3.2" class="section-number selfRef">8.3.2. </a><a href="#name-key-evaluation" class="section-name selfRef">Key Evaluation</a>
+          </h4>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8.3.2-1.1">
+              <p id="section-8.3.2-1.1.1">TODO Describe in prose how IDPF-key evaluation algorithm works.<a href="#section-8.3.2-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-8.3.2-2">The description of the IDPF-evaluation generation algorithm makes use
+of auxiliary functions <code>extend()</code>, <code>convert()</code>, and
+<code>decode_public_share()</code> defined in <a href="#idpf-poplar-helper-functions" class="xref">Section 8.3.3</a>.
+In the following, we let <code>Field2</code> denote the field <code>GF(2)</code>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
+<span id="name-idpf-evaluation-generation-"></span><div id="idpf-poplar-eval">
+<figure id="figure-25">
+            <div class="alignLeft art-text artwork" id="section-8.3.2-3.1">
+<pre>
+def eval(IdpfPoplar, agg_id, public_share, init_seed,
+         level, prefixes):
+    if agg_id &gt;= IdpfPoplar.SHARES:
+        raise ERR_INPUT # invalid aggregator ID
+    if level &gt;= IdpfPoplar.BITS:
+        raise ERR_INPUT # level too deep
+    if len(set(prefixes)) != len(prefixes):
+        raise ERR_INPUT # candidate prefixes are non-unique
+
+    correction_words = IdpfPoplar.decode_public_share(public_share)
+    out_share = []
+    for prefix in prefixes:
+        if prefix &gt;= 2^(level+1):
+            raise ERR_INPUT # prefix too long
+
+        # The Aggregator's output share is the value of a node of
+        # the IDPF tree at the given `level`. The node's value is
+        # computed by traversing the path defined by the candidate
+        # `prefix`. Each node in the tree is represented by a seed
+        # (`seed`) and a set of control bits (`ctrl`).
+        seed = init_seed
+        ctrl = Field2(agg_id)
+        for current_level in range(level+1):
+            bit = (prefix &gt;&gt; (level - current_level)) &amp; 1
+
+            # Implementation note: Typically the current round of
+            # candidate prefixes would have been derived from
+            # aggregate results computed during previous rounds. For
+            # example, when using `IdpfPoplar` to compute heavy
+            # hitters, each `prefix` would be the prefix of a string
+            # whose hit count exceeded the given threshold. (See
+            # [BBCGGI21, Section 5.1].) In this case, part of the
+            # path would have already been traversed.
+            #
+            # Re-computing nodes along previously traversed paths is
+            # wasteful. Implementations can eliminate this added
+            # complexity by caching nodes (i.e., `(seed, ctrl)`
+            # pairs) output by previous calls to `eval_next()`.
+            (seed, ctrl, y) = IdpfPoplar.eval_next(seed, ctrl,
+                correction_words[current_level], current_level, bit)
+        out_share.append(y if agg_id == 0 else vec_neg(y))
+    return out_share
+
+# Compute the next node in the IDPF tree along the path determined by
+# a candidiate prefix. The next node is determined by `bit`, the bit
+# of the prefix corresponding to the next level of the tree.
+#
+# TODO Consider implementing some version of the optimization
+# discussed at the end of [BBCGGI21, Appendix C.3]. This could on
+# average reduce the number of AES calls by a constant factor.
+def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
+              correction_word, level, bit):
+    (seed_cw, ctrl_cw, w_cw) = correction_word
+    (s, t) = IdpfPoplar.extend(prev_seed)
+    if prev_ctrl == Field2(1):
+        s[0] = xor(s[0], seed_cw)
+        s[1] = xor(s[1], seed_cw)
+        t[0] = t[0] + ctrl_cw[0]
+        t[1] = t[1] + ctrl_cw[1]
+
+    next_ctrl = t[bit]
+    (next_seed, y) = IdpfPoplar.convert(level, s[bit])
+    if next_ctrl == Field2(1):
+        y = vec_add(y, w_cw)
+    return (next_seed, next_ctrl, y)
+</pre>
+</div>
+<figcaption><a href="#figure-25" class="selfRef">Figure 25</a>:
+<a href="#name-idpf-evaluation-generation-" class="selfRef">IDPF-evaluation generation algorithm of IdpfPoplar.</a>
+            </figcaption></figure>
+</div>
+</section>
+</div>
+<div id="idpf-poplar-helper-functions">
+<section id="section-8.3.3">
+          <h4 id="name-auxiliary-functions-4">
+<a href="#section-8.3.3" class="section-number selfRef">8.3.3. </a><a href="#name-auxiliary-functions-4" class="section-name selfRef">Auxiliary Functions</a>
+        </h4>
+</section>
+</div>
 </section>
 </div>
 <div id="poplar1-instantiation">
 <section id="section-8.4">
-        <h3 id="name-xxx-2">
-<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-xxx-2" class="section-name selfRef">XXX</a>
+        <h3 id="name-xxx">
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-xxx" class="section-name selfRef">XXX</a>
       </h3>
 </section>
 </div>

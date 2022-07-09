@@ -117,7 +117,10 @@ Table of Contents
        8.2.3.  Aggregation
        8.2.4.  Unsharding
        8.2.5.  Auxiliary Functions
-     8.3.  XXX
+     8.3.  The IDPF scheme of BBCGGI21
+       8.3.1.  Key Generation
+       8.3.2.  Key Evaluation
+       8.3.3.  Auxiliary Functions
      8.4.  XXX
    9.  Security Considerations
    10. IANA Considerations
@@ -1152,6 +1155,16 @@ Table of Contents
 
                  Table 4: Field128, an FFT-friendly field.
 
+                       +==============+============+
+                       | Parameter    | Value      |
+                       +==============+============+
+                       | MODULUS      | 2^255 - 19 |
+                       +--------------+------------+
+                       | ENCODED_SIZE | 32         |
+                       +--------------+------------+
+
+                             Table 5: Field255.
+
 6.2.  Pseudorandom Generators
 
    A pseudorandom generator (PRG) is used to expand a short,
@@ -1189,21 +1202,25 @@ Table of Contents
        prg = Prg(seed, info)
        return prg.next(Prg.SEED_SIZE)
 
-   # Expand a seed into a vector of Field elements.
+   # Output the next `length` pseudorandom elements of `Field`.
+   def next_vec(self, Field, length: Unsigned):
+       m = next_power_of_2(Field.MODULUS) - 1
+       vec = []
+       while len(vec) < length:
+           x = OS2IP(self.next(Field.ENCODED_SIZE))
+           x &= m
+           if x < Field.MODULUS:
+               vec.append(Field(x))
+       return vec
+
+   # Expand the input `seed` into vector of `length` field elements.
    def expand_into_vec(Prg,
                        Field,
                        seed: Bytes,
                        info: Bytes,
                        length: Unsigned):
-       m = next_power_of_2(Field.MODULUS) - 1
        prg = Prg(seed, info)
-       vec = []
-       while len(vec) < length:
-           x = OS2IP(prg.next(Field.ENCODED_SIZE))
-           x &= m
-           if x < Field.MODULUS:
-               vec.append(Field(x))
-       return vec
+       return prg.next_vec(Field, length)
 
                  Figure 10: Derived class methods for PRGs.
 
@@ -1318,7 +1335,7 @@ class PrgAes128:
    FLP in terms of an abstract base class Flp that specifies the set of
    methods and parameters a concrete FLP must provide.
 
-   The parameters provided by a concrete FLP are listed in Table 5.
+   The parameters provided by a concrete FLP are listed in Table 6.
 
        +================+==========================================+
        | Parameter      | Description                              |
@@ -1353,7 +1370,7 @@ class PrgAes128:
        | Field          | As defined in (Section 6.1)              |
        +----------------+------------------------------------------+
 
-          Table 5: Constants and types defined by a concrete FLP.
+          Table 6: Constants and types defined by a concrete FLP.
 
    An FLP specifies the following algorithms for generating and
    verifying proofs of validity (encoding is described below in
@@ -1475,7 +1492,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    This section specifies Prio3, an implementation of the Vdaf interface
    (Section 5).  It has two generic parameters: an Flp (Section 7.1) and
    a Prg (Section 6.2).  The associated constants and types required by
-   the Vdaf interface are defined in Table 6.  The methods required for
+   the Vdaf interface are defined in Table 7.  The methods required for
    sharding, preparation, aggregation, and unsharding are described in
    the remaining subsections.
 
@@ -1499,7 +1516,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     | AggResult       | Flp.AggResult                                 |
     +-----------------+-----------------------------------------------+
 
-             Table 6: Associated parameters for the Prio3 VDAF.
+             Table 7: Associated parameters for the Prio3 VDAF.
 
 7.2.1.  Sharding
 
@@ -2040,7 +2057,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
         |                | defined in Section 6.1.2              |
         +----------------+---------------------------------------+
 
-                  Table 7: Validity circuit parameters.
+                  Table 8: Validity circuit parameters.
 
    Each gadget G in GADGETS defines a constant DEGREE that specifies the
    circuit's "arithmetic degree".  This is defined to be the degree of
@@ -2103,7 +2120,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/
       flp_generic.sage.
 
-   The FLP parameters for FlpGeneric are defined in Table 8.  The
+   The FLP parameters for FlpGeneric are defined in Table 9.  The
    required methods for generating the proof, generating the verifier,
    and deciding validity are specified in the remaining subsections.
 
@@ -2148,7 +2165,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       | Field          | Valid.Field                                |
       +----------------+--------------------------------------------+
 
-                   Table 8: FLP Parameters of FlpGeneric.
+                   Table 9: FLP Parameters of FlpGeneric.
 
 7.3.3.1.  Proof Generation
 
@@ -2306,7 +2323,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
                | Field          | Field64 (Table 3)        |
                +----------------+--------------------------+
 
-                  Table 9: Parameters of validity circuit
+                  Table 10: Parameters of validity circuit
                                    Count.
 
 7.4.2.  Prio3Aes128Sum
@@ -2379,7 +2396,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
             | Field          | Field128 (Table 4)             |
             +----------------+--------------------------------+
 
-               Table 10: Parameters of validity circuit Sum.
+               Table 11: Parameters of validity circuit Sum.
 
 7.4.3.  Prio3Aes128Histogram
 
@@ -2455,7 +2472,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
                   | Field          | Field128 (Table 4) |
                   +----------------+--------------------+
 
-                      Table 11: Parameters of validity
+                      Table 12: Parameters of validity
                              circuit Histogram.
 
 8.  Poplar1
@@ -2544,7 +2561,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    the IDPF is "extractable", as defined in [BBCGGI21], Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 12.  We write Idpf.Vec as shorthand for
+   Table 13.  We write Idpf.Vec as shorthand for
    Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]].  The
    scheme is comprised of the following algorithms:
 
@@ -2611,10 +2628,10 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
      | FieldLeaf  | Implementation of Field used for values of leaf  |
      |            | nodes                                            |
      +------------+--------------------------------------------------+
-     | Prg        | Implemnetation of Prg (Section 6.2)              |
+     | Prg        | Implementation of Prg (Section 6.2)              |
      +------------+--------------------------------------------------+
 
-         Table 12: Constants and types defined by a concrete IDPF.
+         Table 13: Constants and types defined by a concrete IDPF.
 
 8.2.  Construction
 
@@ -2622,7 +2639,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    interface (Section 5).  It is defined in terms of any Idpf
    (Section 8.1) for which Idpf.SHARES == 2 and Idpf.VALUE_LEN == 2.
    The associated constants and types required by the Vdaf interface are
-   defined in Table 13.  The methods required for sharding, preparation,
+   defined in Table 14.  The methods required for sharding, preparation,
    aggregation, and unsharding are described in the remaining
    subsections.
 
@@ -2646,7 +2663,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
           | AggResult       | Vec[Unsigned]                    |
           +-----------------+----------------------------------+
 
-          Table 13: Associated parameters for the Poplar1 VDAF.
+          Table 14: Associated parameters for the Poplar1 VDAF.
 
 8.2.1.  Client
 
@@ -2927,9 +2944,180 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
        context += Poplar1.encode_agg_param(level, prefixes)
        return context
 
-             Figure 23: Helper functions required for Poplar1.
+                  Figure 23: Helper functions for Poplar1.
 
-8.3.  XXX
+8.3.  The IDPF scheme of [BBCGGI21]
+
+   In this section we specify a concrete IDPF, called IdpfPoplar,
+   suitable for instantiating Poplar1.  The scheme gets its name from
+   the name of the protocol of [BBCGGI21].
+
+      TODO We should consider giving IdpfPoplar a more distinctive name.
+
+   The constant and type definitions required by the Idpf interface are
+   given in Table 15.
+
+
+
+         +============+=========================================+
+         | Parameter  | Value                                   |
+         +============+=========================================+
+         | SHARES     | 2                                       |
+         +------------+-----------------------------------------+
+         | BITS       | any positive integer                    |
+         +------------+-----------------------------------------+
+         | VALUE_LEN  | any positive integer                    |
+         +------------+-----------------------------------------+
+         | KEY_SIZE   | Prg.SEED_SIZE                           |
+         +------------+-----------------------------------------+
+         | FieldInner | Field64 (Table 3)                       |
+         +------------+-----------------------------------------+
+         | FieldLeaf  | Field255 (Table 5)                      |
+         +------------+-----------------------------------------+
+         | Prg        | any implementation of Prg (Section 6.2) |
+         +------------+-----------------------------------------+
+
+         Table 15: Constants and type definitions for IdpfPoplar.
+
+8.3.1.  Key Generation
+
+      TODO Describe the construction in prose, beginning with a gentle
+      introduction to the high level idea.
+
+   The description of the IDPF-key generation algorithm makes use of
+   auxiliary functions extend(), convert(), and encode_public_share()
+   defined in Section 8.3.3.  In the following, we let Field2 denote the
+   field GF(2).
+
+   def gen(IpdfPoplar, alpha, beta_inner, beta_leaf):
+       if alpha >= 2^IdpfPoplar.BITS:
+           raise ERR_INPUT # alpha too long
+       if len(beta_inner) != IdpfPoplar.BITS - 1:
+           raise ERR_INPUT # beta_inner vector is the wrong size
+
+       init_seed = [
+           gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+           gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+       ]
+
+       seed = init_seed.copy()
+       ctrl = [Field2(0), Field2(1)]
+       correction_words = []
+       for level in range(IdpfPoplar.BITS):
+           keep = (alpha >> (IdpfPoplar.BITS - level - 1)) & 1
+           lose = 1 - keep
+           bit = Field2(keep)
+
+           (s0, t0) = IdpfPoplar.extend(seed[0])
+           (s1, t1) = IdpfPoplar.extend(seed[1])
+           seed_cw = xor(s0[lose], s1[lose])
+           ctrl_cw = (
+               t0[0] + t1[0] + bit + Field2(1),
+               t0[1] + t1[1] + bit,
+           )
+
+           x0 = xor(s0[keep], seed_cw) if ctrl[0] == Field2(1) \
+                   else s0[keep]
+           x1 = xor(s1[keep], seed_cw) if ctrl[1] == Field2(1) \
+                   else s1[keep]
+           (seed[0], w0) = IdpfPoplar.convert(level, x0)
+           (seed[1], w1) = IdpfPoplar.convert(level, x1)
+           ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
+           ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
+
+           b = beta_inner[level] if level < IdpfPoplar.BITS-1 \
+                   else beta_leaf
+           if len(b) != IdpfPoplar.VALUE_LEN:
+               raise ERR_INPUT # beta too long or too short
+
+           w_cw = vec_add(vec_sub(b, w0), w1)
+           if ctrl[1] == Field2(1):
+               w_cw = vec_neg(w_cw)
+           correction_words.append((seed_cw, ctrl_cw, w_cw))
+
+       public_share = IdpfPoplar.encode_public_share(correction_words)
+       return (public_share, init_seed)
+
+          Figure 24: IDPF-key generation algorithm of IdpfPoplar.
+
+8.3.2.  Key Evaluation
+
+      TODO Describe in prose how IDPF-key evaluation algorithm works.
+
+   The description of the IDPF-evaluation generation algorithm makes use
+   of auxiliary functions extend(), convert(), and decode_public_share()
+   defined in Section 8.3.3.  In the following, we let Field2 denote the
+   field GF(2).
+
+   def eval(IdpfPoplar, agg_id, public_share, init_seed,
+            level, prefixes):
+       if agg_id >= IdpfPoplar.SHARES:
+           raise ERR_INPUT # invalid aggregator ID
+       if level >= IdpfPoplar.BITS:
+           raise ERR_INPUT # level too deep
+       if len(set(prefixes)) != len(prefixes):
+           raise ERR_INPUT # candidate prefixes are non-unique
+
+       correction_words = IdpfPoplar.decode_public_share(public_share)
+       out_share = []
+       for prefix in prefixes:
+           if prefix >= 2^(level+1):
+               raise ERR_INPUT # prefix too long
+
+           # The Aggregator's output share is the value of a node of
+           # the IDPF tree at the given `level`. The node's value is
+           # computed by traversing the path defined by the candidate
+           # `prefix`. Each node in the tree is represented by a seed
+           # (`seed`) and a set of control bits (`ctrl`).
+           seed = init_seed
+           ctrl = Field2(agg_id)
+           for current_level in range(level+1):
+               bit = (prefix >> (level - current_level)) & 1
+
+               # Implementation note: Typically the current round of
+               # candidate prefixes would have been derived from
+               # aggregate results computed during previous rounds. For
+               # example, when using `IdpfPoplar` to compute heavy
+               # hitters, each `prefix` would be the prefix of a string
+               # whose hit count exceeded the given threshold. (See
+               # [BBCGGI21, Section 5.1].) In this case, part of the
+               # path would have already been traversed.
+               #
+               # Re-computing nodes along previously traversed paths is
+               # wasteful. Implementations can eliminate this added
+               # complexity by caching nodes (i.e., `(seed, ctrl)`
+               # pairs) output by previous calls to `eval_next()`.
+               (seed, ctrl, y) = IdpfPoplar.eval_next(seed, ctrl,
+                   correction_words[current_level], current_level, bit)
+           out_share.append(y if agg_id == 0 else vec_neg(y))
+       return out_share
+
+   # Compute the next node in the IDPF tree along the path determined by
+   # a candidiate prefix. The next node is determined by `bit`, the bit
+   # of the prefix corresponding to the next level of the tree.
+   #
+   # TODO Consider implementing some version of the optimization
+   # discussed at the end of [BBCGGI21, Appendix C.3]. This could on
+   # average reduce the number of AES calls by a constant factor.
+   def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
+                 correction_word, level, bit):
+       (seed_cw, ctrl_cw, w_cw) = correction_word
+       (s, t) = IdpfPoplar.extend(prev_seed)
+       if prev_ctrl == Field2(1):
+           s[0] = xor(s[0], seed_cw)
+           s[1] = xor(s[1], seed_cw)
+           t[0] = t[0] + ctrl_cw[0]
+           t[1] = t[1] + ctrl_cw[1]
+
+       next_ctrl = t[bit]
+       (next_seed, y) = IdpfPoplar.convert(level, s[bit])
+       if next_ctrl == Field2(1):
+           y = vec_add(y, w_cw)
+       return (next_seed, next_ctrl, y)
+
+       Figure 25: IDPF-evaluation generation algorithm of IdpfPoplar.
+
+8.3.3.  Auxiliary Functions
 
 8.4.  XXX
 
