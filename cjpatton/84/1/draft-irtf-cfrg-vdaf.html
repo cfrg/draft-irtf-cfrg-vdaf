@@ -4487,55 +4487,60 @@ sharded. This is provided to the FLP by Prio3.<a href="#section-7.4.3-6" class="
       <h2 id="name-poplar1">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-poplar1" class="section-name selfRef">Poplar1</a>
       </h2>
-<p id="section-8-1">This section specifies Poplar1, a VDAF for the following task. Each Client holds
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8-1.1">
+          <p id="section-8-1.1.1">NOTE This construction has not undergone significant security analysis.<a href="#section-8-1.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-8-2">This section specifies Poplar1, a VDAF for the following task. Each Client holds
 a string of length <code>BITS</code> and the Aggregators hold a set of <code>l</code>-bit strings,
 where <code>l &lt;= BITS</code>. We will refer to the latter as the set of "candidate
 prefixes". The Aggregators' goal is to count how many inputs are prefixed by
-each candidate prefix.<a href="#section-8-1" class="pilcrow">¶</a></p>
-<p id="section-8-2">This functionality is the core component of the Poplar protocol <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>. At
-a high level, the protocol works as follows.<a href="#section-8-2" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-8-3">
-<li id="section-8-3.1">Each Client splits its input string into input shares and sends one share to
-each Aggregator.<a href="#section-8-3.1" class="pilcrow">¶</a>
+each candidate prefix.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">This functionality is the core component of the Poplar protocol <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>. At
+a high level, the protocol works as follows.<a href="#section-8-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8-4">
+<li id="section-8-4.1">Each Client splits its input string into input shares and sends one share to
+each Aggregator.<a href="#section-8-4.1" class="pilcrow">¶</a>
 </li>
-        <li id="section-8-3.2">The Aggregators agree on an initial set of candidate prefixes, say <code>0</code> and
-<code>1</code>.<a href="#section-8-3.2" class="pilcrow">¶</a>
+        <li id="section-8-4.2">The Aggregators agree on an initial set of candidate prefixes, say <code>0</code> and
+<code>1</code>.<a href="#section-8-4.2" class="pilcrow">¶</a>
 </li>
-        <li id="section-8-3.3">The Aggregators evaluate the VDAF on each set of input shares and aggregate
+        <li id="section-8-4.3">The Aggregators evaluate the VDAF on each set of input shares and aggregate
 the recovered output shares. The aggregation parameter is the set of
-candidate prefixes.<a href="#section-8-3.3" class="pilcrow">¶</a>
+candidate prefixes.<a href="#section-8-4.3" class="pilcrow">¶</a>
 </li>
-        <li id="section-8-3.4">The Aggregators send their aggregate shares to the Collector, who combines
-them to recover the counts of each candidate prefix.<a href="#section-8-3.4" class="pilcrow">¶</a>
+        <li id="section-8-4.4">The Aggregators send their aggregate shares to the Collector, who combines
+them to recover the counts of each candidate prefix.<a href="#section-8-4.4" class="pilcrow">¶</a>
 </li>
-        <li id="section-8-3.5">Let <code>H</code> denote the set of prefixes that occurred at least <code>t</code> times. If the
+        <li id="section-8-4.5">Let <code>H</code> denote the set of prefixes that occurred at least <code>t</code> times. If the
 prefixes all have length <code>BITS</code>, then <code>H</code> is the set of <code>t</code>-heavy-hitters.
 Otherwise compute the next set of candidate prefixes as follows. For each <code>p</code>
 in <code>H</code>, add add <code>p || 0</code> and <code>p || 1</code> to the set. Repeat step 3 with the new
-set of candidate prefixes.<a href="#section-8-3.5" class="pilcrow">¶</a>
+set of candidate prefixes.<a href="#section-8-4.5" class="pilcrow">¶</a>
 </li>
       </ol>
-<p id="section-8-4">Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)",
+<p id="section-8-5">Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)",
 a primitive described by <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span> that generalizes the notion of a
 Distributed Point Function (DPF) <span>[<a href="#GI14" class="xref">GI14</a>]</span>. Briefly, a DPF is used to distribute
 the computation of a "point function", a function that evaluates to zero on
 every input except at a programmable "point". The computation is distributed in
-such a way that no one party knows either the point or what it evaluates to.<a href="#section-8-4" class="pilcrow">¶</a></p>
-<p id="section-8-5">An IDPF generalizes this "point" to a path on a full binary tree from the root
+such a way that no one party knows either the point or what it evaluates to.<a href="#section-8-5" class="pilcrow">¶</a></p>
+<p id="section-8-6">An IDPF generalizes this "point" to a path on a full binary tree from the root
 to one of the leaves. It is evaluated on an "index" representing a unique node
 of the tree. If the node is on the programmed path, then function evaluates to
 to a non-zero value; otherwise it evaluates to zero. This structure allows an
 IDPF to provide the functionality required for the above protocol, while at the
-same time ensuring the same degree of privacy as a DPF.<a href="#section-8-5" class="pilcrow">¶</a></p>
-<p id="section-8-6">Poplar1 composes an IDPF with the "secure sketching" protocol of <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>.
+same time ensuring the same degree of privacy as a DPF.<a href="#section-8-6" class="pilcrow">¶</a></p>
+<p id="section-8-7">Poplar1 composes an IDPF with the "secure sketching" protocol of <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>.
 This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
-is zero everywhere except for one element, which is equal to one.<a href="#section-8-6" class="pilcrow">¶</a></p>
-<p id="section-8-7">The remainder of this section is structured as follows. IDPFs are defined in
+is zero everywhere except for one element, which is equal to one.<a href="#section-8-7" class="pilcrow">¶</a></p>
+<p id="section-8-8">The remainder of this section is structured as follows. IDPFs are defined in
 <a href="#idpf" class="xref">Section 8.1</a>; a concrete instantiation is given <a href="#idpf-poplar" class="xref">Section 8.3</a>. The Poplar1 VDAF is
 defined in <a href="#poplar1-construction" class="xref">Section 8.2</a> in terms of a generic IDPF. A concrete
 instantiation can be found in <a href="#poplar1-instantiation" class="xref">Section 8.4</a>; test vectors can be
-found in <a href="#test-vectors" class="xref">Appendix "Test Vectors"</a>.<a href="#section-8-7" class="pilcrow">¶</a></p>
+found in <a href="#test-vectors" class="xref">Appendix "Test Vectors"</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
 <div id="idpf">
 <section id="section-8.1">
         <h3 id="name-incremental-distributed-poi">

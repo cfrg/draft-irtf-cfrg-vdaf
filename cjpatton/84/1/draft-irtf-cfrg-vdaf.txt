@@ -2479,6 +2479,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
 8.  Poplar1
 
+      NOTE This construction has not undergone significant security
+      analysis.
+
    This section specifies Poplar1, a VDAF for the following task.  Each
    Client holds a string of length BITS and the Aggregators hold a set
    of l-bit strings, where l <= BITS.  We will refer to the latter as
