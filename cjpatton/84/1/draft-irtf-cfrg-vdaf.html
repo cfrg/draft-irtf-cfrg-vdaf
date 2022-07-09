@@ -1327,7 +1327,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
-                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="xref">8.4</a>.  <a href="#name-xxx" class="xref">XXX</a></p>
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="xref">8.4</a>.  <a href="#name-poplar1aes128" class="xref">Poplar1Aes128</a></p>
 </li>
             </ul>
 </li>
@@ -1364,7 +1364,7 @@ input that would result in an incorrect aggregate result.<a href="#section-abstr
                 <p id="section-toc.1-1.13.2.3.1"><a href="#appendix-B.3" class="xref"></a><a href="#name-prio3aes128histogram-2" class="xref">Prio3Aes128Histogram</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4">
-                <p id="section-toc.1-1.13.2.4.1"><a href="#appendix-B.4" class="xref"></a><a href="#name-poplar1aes128" class="xref">Poplar1Aes128</a></p>
+                <p id="section-toc.1-1.13.2.4.1"><a href="#appendix-B.4" class="xref"></a><a href="#name-poplar1aes128-2" class="xref">Poplar1Aes128</a></p>
 </li>
             </ul>
 </li>
@@ -5229,8 +5229,7 @@ def gen(IpdfPoplar, alpha, beta_inner, beta_leaf):
           </ul>
 <p id="section-8.3.2-2">The description of the IDPF-evaluation generation algorithm makes use
 of auxiliary functions <code>extend()</code>, <code>convert()</code>, and
-<code>decode_public_share()</code> defined in <a href="#idpf-poplar-helper-functions" class="xref">Section 8.3.3</a>.
-In the following, we let <code>Field2</code> denote the field <code>GF(2)</code>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
+<code>decode_public_share()</code> defined in <a href="#idpf-poplar-helper-functions" class="xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-evaluation-generation-"></span><div id="idpf-poplar-eval">
 <figure id="figure-25">
             <div class="alignLeft art-text artwork" id="section-8.3.2-3.1">
@@ -5312,16 +5311,76 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 <section id="section-8.3.3">
           <h4 id="name-auxiliary-functions-4">
 <a href="#section-8.3.3" class="section-number selfRef">8.3.3. </a><a href="#name-auxiliary-functions-4" class="section-name selfRef">Auxiliary Functions</a>
-        </h4>
+          </h4>
+<span id="name-helper-functions-for-idpfpo"></span><div id="idpf-poplar-helpers">
+<figure id="figure-26">
+            <div class="alignLeft art-text artwork" id="section-8.3.3-1.1">
+<pre>
+def extend(IdpfPoplar, seed):
+    dst = VERSION + b' idpf poplar extend'
+    prg = IdpfPoplar.Prg(seed, dst)
+    s = [
+        prg.next(IdpfPoplar.Prg.SEED_SIZE),
+        prg.next(IdpfPoplar.Prg.SEED_SIZE),
+    ]
+    b = OS2IP(prg.next(1))
+    t = [Field2(b &amp; 1), Field2((b &gt;&gt; 1) &amp; 1)]
+    return (s, t)
+
+def convert(IdpfPoplar, level, seed):
+    dst = VERSION + b' idpf poplar convert'
+    prg = IdpfPoplar.Prg(seed, dst)
+    next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
+    Field = IdpfPoplar.current_field(level)
+    w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
+    return (next_seed, w)
+
+def encode_public_share(IdpfPoplar, correction_words):
+    encoded = Bytes()
+    for (level, (seed_cw, ctrl_cw, w_cw)) \
+        in enumerate(correction_words):
+        encoded += seed_cw
+        encoded += byte(ctrl_cw[0].as_unsigned() | \
+                       (ctrl_cw[1].as_unsigned() &lt;&lt; 1))
+        Field = IdpfPoplar.current_field(level)
+        encoded += Field.encode_vec(w_cw)
+    return encoded
+
+@classmethod
+def decode_public_share(IdpfPoplar, encoded):
+    correction_words = []
+    for level in range(IdpfPoplar.BITS):
+        l = IdpfPoplar.Prg.SEED_SIZE
+        seed_cw, encoded = encoded[:l], encoded[l:]
+        b, encoded = OS2IP(encoded[:1]), encoded[1:]
+        ctrl_cw = (Field2(b &amp; 1), Field2((b &gt;&gt; 1) &amp; 1))
+        Field = IdpfPoplar.current_field(level)
+        l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
+        encoded_w_cw, encoded = encoded[:l], encoded[l:]
+        w_cw = Field.decode_vec(encoded_w_cw)
+        correction_words.append((seed_cw, ctrl_cw, w_cw))
+    if len(encoded) != 0:
+        raise ERR_DECODE
+    return correction_words
+</pre>
+</div>
+<figcaption><a href="#figure-26" class="selfRef">Figure 26</a>:
+<a href="#name-helper-functions-for-idpfpo" class="selfRef">Helper functions for IdpfPoplar.</a>
+            </figcaption></figure>
+</div>
 </section>
 </div>
 </section>
 </div>
 <div id="poplar1-instantiation">
 <section id="section-8.4">
-        <h3 id="name-xxx">
-<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-xxx" class="section-name selfRef">XXX</a>
-      </h3>
+        <h3 id="name-poplar1aes128">
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-poplar1aes128" class="section-name selfRef">Poplar1Aes128</a>
+        </h3>
+<p id="section-8.4-1">We refer to Poplar1 instantiated with IdpfPoplar (<code>VALUE_LEN == 2</code>)
+and PrgAes128 (<a href="#prg-aes128" class="xref">Section 6.2.1</a>) as Poplar1Aes128. This VDAF is suitable
+for any positive value of <code>BITS</code>. Test vectors can be found in
+<a href="#test-vectors" class="xref">Appendix "Test Vectors"</a>.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -5671,8 +5730,8 @@ agg_result: [0, 0, 1, 0]
 </div>
 <div id="poplar1aes128">
 <section id="appendix-B.4">
-        <h3 id="name-poplar1aes128">
-<a href="#name-poplar1aes128" class="section-name selfRef">Poplar1Aes128</a>
+        <h3 id="name-poplar1aes128-2">
+<a href="#name-poplar1aes128-2" class="section-name selfRef">Poplar1Aes128</a>
         </h3>
 <p id="appendix-B.4-1">XXX<a href="#appendix-B.4-1" class="pilcrow">¶</a></p>
 </section>

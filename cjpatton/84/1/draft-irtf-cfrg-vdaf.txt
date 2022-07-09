@@ -121,7 +121,7 @@ Table of Contents
        8.3.1.  Key Generation
        8.3.2.  Key Evaluation
        8.3.3.  Auxiliary Functions
-     8.4.  XXX
+     8.4.  Poplar1Aes128
    9.  Security Considerations
    10. IANA Considerations
    11. References
@@ -3046,8 +3046,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    The description of the IDPF-evaluation generation algorithm makes use
    of auxiliary functions extend(), convert(), and decode_public_share()
-   defined in Section 8.3.3.  In the following, we let Field2 denote the
-   field GF(2).
+   defined in Section 8.3.3.
 
    def eval(IdpfPoplar, agg_id, public_share, init_seed,
             level, prefixes):
@@ -3119,7 +3118,61 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
 8.3.3.  Auxiliary Functions
 
-8.4.  XXX
+   def extend(IdpfPoplar, seed):
+       dst = VERSION + b' idpf poplar extend'
+       prg = IdpfPoplar.Prg(seed, dst)
+       s = [
+           prg.next(IdpfPoplar.Prg.SEED_SIZE),
+           prg.next(IdpfPoplar.Prg.SEED_SIZE),
+       ]
+       b = OS2IP(prg.next(1))
+       t = [Field2(b & 1), Field2((b >> 1) & 1)]
+       return (s, t)
+
+   def convert(IdpfPoplar, level, seed):
+       dst = VERSION + b' idpf poplar convert'
+       prg = IdpfPoplar.Prg(seed, dst)
+       next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
+       Field = IdpfPoplar.current_field(level)
+       w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
+       return (next_seed, w)
+
+   def encode_public_share(IdpfPoplar, correction_words):
+       encoded = Bytes()
+       for (level, (seed_cw, ctrl_cw, w_cw)) \
+           in enumerate(correction_words):
+           encoded += seed_cw
+           encoded += byte(ctrl_cw[0].as_unsigned() | \
+                          (ctrl_cw[1].as_unsigned() << 1))
+           Field = IdpfPoplar.current_field(level)
+           encoded += Field.encode_vec(w_cw)
+       return encoded
+
+   @classmethod
+   def decode_public_share(IdpfPoplar, encoded):
+       correction_words = []
+       for level in range(IdpfPoplar.BITS):
+           l = IdpfPoplar.Prg.SEED_SIZE
+           seed_cw, encoded = encoded[:l], encoded[l:]
+           b, encoded = OS2IP(encoded[:1]), encoded[1:]
+           ctrl_cw = (Field2(b & 1), Field2((b >> 1) & 1))
+           Field = IdpfPoplar.current_field(level)
+           l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
+           encoded_w_cw, encoded = encoded[:l], encoded[l:]
+           w_cw = Field.decode_vec(encoded_w_cw)
+           correction_words.append((seed_cw, ctrl_cw, w_cw))
+       if len(encoded) != 0:
+           raise ERR_DECODE
+       return correction_words
+
+                Figure 26: Helper functions for IdpfPoplar.
+
+8.4.  Poplar1Aes128
+
+   We refer to Poplar1 instantiated with IdpfPoplar (VALUE_LEN == 2) and
+   PrgAes128 (Section 6.2.1) as Poplar1Aes128.  This VDAF is suitable
+   for any positive value of BITS.  Test vectors can be found in
+   Appendix "Test Vectors".
 
 9.  Security Considerations
 
