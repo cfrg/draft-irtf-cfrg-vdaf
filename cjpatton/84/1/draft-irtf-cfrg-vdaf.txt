@@ -118,6 +118,7 @@ Table of Contents
        8.2.4.  Unsharding
        8.2.5.  Helper Functions
      8.3.  XXX
+     8.4.  XXX
    9.  Security Considerations
    10. IANA Considerations
    11. References
@@ -2497,7 +2498,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    that no one party knows either the point or what it evaluates to.
 
    An IDPF generalizes this "point" to a path on a full binary tree from
-   the root to one of the leaves.  It is evaluated on a "prefix"
+   the root to one of the leaves.  It is evaluated on an "index"
    representing a unique node of the tree.  If the node is on the
    programmed path, then function evaluates to to a non-zero value;
    otherwise it evaluates to zero.  This structure allows an IDPF to
@@ -2512,19 +2513,22 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    The remainder of this section is structured as follows.  IDPFs are
    defined in Section 8.1; a concrete instantiation is given
-   Section 8.3.  The Poplar1 VDAF is defined in Section 8.2.  Test
-   vectors for Poplar1 can be found in Appendix "Test Vectors".
+   Section 8.3.  The Poplar1 VDAF is defined in Section 8.2 in terms of
+   a generic IPDF.  A concrete instantiation can be found in
+   Section 8.4; test vectors can be found in Appendix "Test Vectors".
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
    An IDPF is defined over a domain of size 2^BITS, where BITS is
-   constant defined by the IDPF.  The Client specifies an index alpha
-   and a vector of values beta, one for each "level" 1 <= L <= BITS.
-   The key generation algorithm generates two IDPF keys, one for each
-   Aggregator.  When evaluated at level L and index 0 <= x < 2^L, each
-   IDPF share returns an additive share of beta[L] if x is the L-bit
-   prefix of alpha and shares of zero otherwise.
+   constant defined by the IDPF.  Indexes into the IDPF tree are encoded
+   as integers in range [0, 2^BITS).  The Client specifies an index
+   alpha and a vector of values beta, one for each "level" L in range
+   [0, BITS).  The key generation algorithm generates one IDPF "key" for
+   each Aggregator.  When evaluated at level L and index 0 <= prefix <
+   2^L, each IDPF key returns an additive share of beta[L] if prefix is
+   the L-bit prefix of alpha and shares of zero otherwise.
 
+   An index x is defined to be a prefix of another index y as follows.
    Let LSB(x, N) denote the least significant N bits of positive integer
    x.  By definition, a positive integer 0 <= x <= 2^L is said to be the
    length-L prefix of positive integer 0 <= y <= BITS if LSB(x, L) is
@@ -2532,37 +2536,47 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    (110 in binary) is the length-3 prefix of 25 (11001), but 7 (111) is
    not.
 
-   Each beta[l] is a vector of elements of a finite field.  We
-   distinguish two types of fields: one for inner nodes (denoted
-   Idpf.FieldInner), and one for leaf nodes (Idpf.FieldLeaf).
+   Each of the programmed points beta is a vector of elements of some
+   finite field.  We distinguish two types of fields: One for inner
+   nodes (denoted Idpf.FieldInner), and one for leaf nodes
+   (Idpf.FieldLeaf).  Our instantiation of Poplar1 will use a much
+   larger field for leaf nodes than for inner nodes.  (This is to ensure
+   the IDPF is "extractable", as defined in [BBCGGI21], Definition 1.)
 
-   An IDPF is comprised of the following algorithms :
+   A concrete IDPF defines the types and constants enumerated in
+   Table 12.  We write IdpfValue as shorthand for
+   Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]].  The
+   scheme is comprised of the following algorithms:
 
    *  Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]],
       beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes]) is the
-      randomized key-generation algorithm run by the client.  Its inputs
-      are the index alpha and the values beta.  The value of alpha MUST
-      be in range [0, 2^BITS).  The output is a public part that is sent
-      to all aggregators, and a vector of private IDPF keys, one for
-      each aggregator.
+      randomized IDPF-key generation algorithm.  Its inputs are the
+      index alpha and the values beta.  The value of alpha MUST be in
+      range [0, 2^BITS).  The output is a public part that is sent to
+      all aggregators and a vector of private IDPF keys, one for each
+      aggregator.
 
    *  Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes,
-      level: Unsigned, prefixes: Vec[Unsigned]) ->
-      Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]] is the
-      deterministic, stateless key-evaluation algorithm run by each
-      Aggregator.  It returns the value corresponding to index x.  The
-      value of level MUST be in [0, BITS-1] and prefixes must be empty
-      when level == 0, and only contain values in [0, 2^level-1]
-      otherwise.
+      level: Unsigned, prefixes: Vec[Unsigned]) -> IdpfValue is the
+      deterministic, stateless IDPF-key evaluation algorithm run by each
+      Aggregator.  Its inputs are the Aggregator's unique identifier,
+      the public share distributed to all of the Aggregators, the
+      Aggregator's IPDF key, the "level" at which to evaluate the IDPF,
+      and the sequence of candidate prefixes.  It returns the share of
+      the value corresponding to each candidate prefix.
 
-   A concrete IDPF specifies a single associated constant:
+      The type the output depends on the value of level: If level <
+      Idpf.BITS-1, the output is the value for an inner node, which has
+      type Vec[Idpf.FieldInner]; otherwise, if level == BITS-1, then the
+      output is the value for a leaf node, which has type
+      Vec[Idpf.FieldLeaf].
 
-   *  BITS: Unsigned is the length of each Client input.
+      The value of level MUST be in range [0, BITS).  The indexes in
+      prefixes MUST all be distinct and in range [0,2^level).
 
-   A concrete IDPF also specifies the following associated types:
-
-   *  FieldInner and FieldLeaf.  Each defines the same methods and
-      associated constants as Field in Section 6.1.
+      Applications MUST ensure that the Aggregator's identifier is equal
+      to the integer in range [0, SHARES) that matches the index of key
+      in the sequence of IDPF keys output by the Client.
 
    Finally, an implementation note.  The interface for IDPFs specified
    here is stateless, in the sense that there is no state carried
@@ -2570,7 +2584,29 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    VDAF abstraction boundary, which does not include shared state across
    across VDAF evaluations.  In practice, of course, it will often be
    beneficial to expose a stateful API for IDPFs and carry the state
-   across evaluations.
+   across evaluations.  See Section 8.3 for details.
+
+
+
+     +============+==================================================+
+     | Parameter  | Description                                      |
+     +============+==================================================+
+     | SHARES     | Number of IPDF keys output by IDPF-key generator |
+     +------------+--------------------------------------------------+
+     | BITS       | Length in bits of each input string              |
+     +------------+--------------------------------------------------+
+     | VALUE_LEN  | Number of field elements of each output value    |
+     +------------+--------------------------------------------------+
+     | KEY_SIZE   | Size in bytes of each IDPF key                   |
+     +------------+--------------------------------------------------+
+     | FieldInner | Concrete Field (Section 6.1) used for values of  |
+     |            | inner nodes                                      |
+     +------------+--------------------------------------------------+
+     | FieldLeaf  | Concrete Field (Section 6.1) used for values of  |
+     |            | leaf nodes                                       |
+     +------------+--------------------------------------------------+
+
+       Table 12: Constants and types defined by a concrete IDPF.  Let
 
 8.2.  Construction
 
@@ -2777,6 +2813,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       cannot be decoded.
 
 8.3.  XXX
+
+8.4.  XXX
 
 9.  Security Considerations
 
