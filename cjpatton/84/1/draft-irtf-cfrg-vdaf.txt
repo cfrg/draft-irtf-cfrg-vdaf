@@ -2514,7 +2514,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    The remainder of this section is structured as follows.  IDPFs are
    defined in Section 8.1; a concrete instantiation is given
    Section 8.3.  The Poplar1 VDAF is defined in Section 8.2 in terms of
-   a generic IPDF.  A concrete instantiation can be found in
+   a generic IDPF.  A concrete instantiation can be found in
    Section 8.4; test vectors can be found in Appendix "Test Vectors".
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
@@ -2544,7 +2544,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    the IDPF is "extractable", as defined in [BBCGGI21], Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 12.  We write IdpfValue as shorthand for
+   Table 12.  We write Idpf.Vec as shorthand for
    Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]].  The
    scheme is comprised of the following algorithms:
 
@@ -2557,11 +2557,11 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       aggregator.
 
    *  Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes,
-      level: Unsigned, prefixes: Vec[Unsigned]) -> IdpfValue is the
+      level: Unsigned, prefixes: Vec[Unsigned]) -> Idpf.Vec is the
       deterministic, stateless IDPF-key evaluation algorithm run by each
       Aggregator.  Its inputs are the Aggregator's unique identifier,
       the public share distributed to all of the Aggregators, the
-      Aggregator's IPDF key, the "level" at which to evaluate the IDPF,
+      Aggregator's IDPF key, the "level" at which to evaluate the IDPF,
       and the sequence of candidate prefixes.  It returns the share of
       the value corresponding to each candidate prefix.
 
@@ -2591,7 +2591,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
      +============+==================================================+
      | Parameter  | Description                                      |
      +============+==================================================+
-     | SHARES     | Number of IPDF keys output by IDPF-key generator |
+     | SHARES     | Number of IDPF keys output by IDPF-key generator |
      +------------+--------------------------------------------------+
      | BITS       | Length in bits of each input string              |
      +------------+--------------------------------------------------+
@@ -2599,19 +2599,48 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
      +------------+--------------------------------------------------+
      | KEY_SIZE   | Size in bytes of each IDPF key                   |
      +------------+--------------------------------------------------+
-     | FieldInner | Concrete Field (Section 6.1) used for values of  |
-     |            | inner nodes                                      |
+     | FieldInner | Implementation of Field (Section 6.1) used for   |
+     |            | values of inner nodes                            |
      +------------+--------------------------------------------------+
-     | FieldLeaf  | Concrete Field (Section 6.1) used for values of  |
-     |            | leaf nodes                                       |
+     | FieldLeaf  | Implementation of Field used for values of leaf  |
+     |            | nodes                                            |
+     +------------+--------------------------------------------------+
+     | Prg        | Implemnetation of Prg (Section 6.2)              |
      +------------+--------------------------------------------------+
 
          Table 12: Constants and types defined by a concrete IDPF.
 
 8.2.  Construction
 
-   The VDAF involves two rounds of communication (ROUNDS == 2) and is
-   defined for two Aggregators (SHARES == 2).
+   This section specifies Poplar1, an implementation of the Vdaf
+   interface (Section 5).  It is defined in terms of any Idpf
+   (Section 8.1) for which Idpf.SHARES == 2 and Idpf.VALUE_LEN == 2.
+   The associated constants and types required by the Vdaf interface are
+   defined in Table 13.  The methods required for sharding, preparation,
+   aggregation, and unsharding are described in the remaining
+   subsections.
+
+          +=================+==================================+
+          | Parameter       | Value                            |
+          +=================+==================================+
+          | VERIFY_KEY_SIZE | Idpf.Prg.SEED_SIZE               |
+          +-----------------+----------------------------------+
+          | ROUNDS          | 2                                |
+          +-----------------+----------------------------------+
+          | SHARES          | 2                                |
+          +-----------------+----------------------------------+
+          | Measurement     | Unsigned                         |
+          +-----------------+----------------------------------+
+          | AggParam        | Tuple[Unsigned, Vec[Unsigned]]   |
+          +-----------------+----------------------------------+
+          | Prep            | Tuple[Bytes, Unsigned, Idpf.Vec] |
+          +-----------------+----------------------------------+
+          | OutShare        | Idpf.Vec                         |
+          +-----------------+----------------------------------+
+          | AggResult       | Vec[Unsigned]                    |
+          +-----------------+----------------------------------+
+
+          Table 13: Associated parameters for the Poplar1 VDAF.
 
 8.2.1.  Client
 
