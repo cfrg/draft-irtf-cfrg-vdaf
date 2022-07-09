@@ -2606,7 +2606,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
      |            | leaf nodes                                       |
      +------------+--------------------------------------------------+
 
-       Table 12: Constants and types defined by a concrete IDPF.  Let
+         Table 12: Constants and types defined by a concrete IDPF.
 
 8.2.  Construction
 
