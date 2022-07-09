@@ -1,9 +1,9 @@
 # An IDPF based on the construction of [BBCGGI21, Section 6].
 
 from copy import deepcopy
-from sagelib.common import ERR_INPUT, OS2IP, VERSION, Bytes, Error, \
-                           Unsigned, Vec, byte, gen_rand, vec_add, vec_neg, \
-                           vec_sub, xor
+from sagelib.common import ERR_DECODE, ERR_INPUT, I2OSP, OS2IP, VERSION, \
+                           Bytes, Error, Unsigned, Vec, byte, gen_rand, \
+                           vec_add, vec_neg, vec_sub, xor
 from sagelib.field import Field2
 from sagelib.idpf import Idpf, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
@@ -165,29 +165,33 @@ class IdpfPoplar(Idpf):
     @classmethod
     def encode_public_share(IdpfPoplar, correction_words):
         encoded = Bytes()
-        for (level, (seed_cw, ctrl_cw, w_cw)) \
+        packed_ctrl = 0
+        for (level, (_, ctrl_cw, _)) \
             in enumerate(correction_words):
-            encoded += seed_cw
-            # TODO Consider packing the correction bits more tightly. This
-            # encoding is designed to make it convenient for implementations to
-            # "throw away" correction words they know they're no longer going to
-            # need. However, using a byte to encode two bits is slightly
-            # wasteful.
-            encoded += byte(ctrl_cw[0].as_unsigned() | \
-                           (ctrl_cw[1].as_unsigned() << 1))
+            packed_ctrl |= ctrl_cw[0].as_unsigned() << (2*level)
+            packed_ctrl |= ctrl_cw[1].as_unsigned() << (2*level+1)
+        l = floor((2*IdpfPoplar.BITS + 7) / 8)
+        encoded += I2OSP(packed_ctrl, l)
+        for (level, (seed_cw, _, w_cw)) \
+            in enumerate(correction_words):
             Field = IdpfPoplar.current_field(level)
+            encoded += seed_cw
             encoded += Field.encode_vec(w_cw)
         return encoded
 
     @classmethod
     def decode_public_share(IdpfPoplar, encoded):
+        l = floor((2*IdpfPoplar.BITS + 7) / 8)
+        encoded_ctrl, encoded = encoded[:l], encoded[l:]
+        packed_ctrl = OS2IP(encoded_ctrl)
         correction_words = []
         for level in range(IdpfPoplar.BITS):
+            Field = IdpfPoplar.current_field(level)
+            ctrl_cw = (Field2(packed_ctrl & 1),
+                       Field2((packed_ctrl >> 1) & 1))
+            packed_ctrl >>= 2
             l = IdpfPoplar.Prg.SEED_SIZE
             seed_cw, encoded = encoded[:l], encoded[l:]
-            b, encoded = OS2IP(encoded[:1]), encoded[1:]
-            ctrl_cw = (Field2(b & 1), Field2((b >> 1) & 1))
-            Field = IdpfPoplar.current_field(level)
             l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
             encoded_w_cw, encoded = encoded[:l], encoded[l:]
             w_cw = Field.decode_vec(encoded_w_cw)
