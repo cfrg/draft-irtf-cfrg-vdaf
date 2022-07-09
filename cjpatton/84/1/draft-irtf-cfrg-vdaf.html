@@ -4916,7 +4916,9 @@ def prep_next(Poplar1, prep_state, opt_sketch):
     # Aggregators exchange evaluated shares (step (4.)).
     elif step == b'sketch round 1' and opt_sketch != None:
         prev_sketch = Field.decode_vec(opt_sketch)
-        if len(prev_sketch) != 3:
+        if len(prev_sketch) == 0:
+            prev_sketch = Field.zeros(3)
+        elif len(prev_sketch) != 3:
             raise ERR_INPUT # prep message malformed
         (A_share, B_share, agg_id), prep_mem = \
             prep_mem[:3], prep_mem[3:]
@@ -4932,7 +4934,9 @@ def prep_next(Poplar1, prep_state, opt_sketch):
 
     elif step == b'sketch round 2' and opt_sketch != None:
         prev_sketch = Field.decode_vec(opt_sketch)
-        if len(prev_sketch) != 1:
+        if len(prev_sketch) == 0:
+            prev_sketch = Field.zeros(1)
+        elif len(prev_sketch) != 1:
             raise ERR_INPUT # prep message malformed
         if prev_sketch[0] != Field(0):
             raise ERR_VERIFY
@@ -4947,6 +4951,11 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
     Field = Poplar1.Idpf.current_field(level)
     sketch = vec_add(Field.decode_vec(prep_shares[0]),
                      Field.decode_vec(prep_shares[1]))
+    if sketch == Field.zeros(len(sketch)):
+        # In order to reduce communication overhead, let the
+        # empty string denote the zero vector of the required
+        # length.
+        return b''
     return Field.encode_vec(sketch)
 </pre>
 </div>
@@ -5790,7 +5799,6 @@ agg_param: (0, [0, 1])
     prep_share_1: &gt;-
       220bb4b3290cd01e
     prep_message: &gt;-
-      0000000000000000
   out_share_0:
     - 16834726835239465118
     - 5136183408577463159
@@ -5822,7 +5830,6 @@ upload_0:
     prep_share_1: &gt;-
       d5c99e9fca1d7d17
     prep_message: &gt;-
-      0000000000000000
   out_share_0:
     - 6820377394734832413
     - 12795445861991443853
@@ -5858,7 +5865,6 @@ upload_0:
     prep_share_1: &gt;-
       0a3fe46f9da70127
     prep_message: &gt;-
-      0000000000000000
   out_share_0:
     - 8456367523792337943
     - 14766292257100309726
@@ -5900,7 +5906,6 @@ upload_0:
     prep_share_1: &gt;-
       4e433564155f06da6257d0eafcf6fd27a9d434627683e542b5dc02723eb32c8a
     prep_message: &gt;-
-      0000000000000000000000000000000000000000000000000000000000000000
   out_share_0:
     - 19817464588246125675911193409268841288455299126748886112128192934355453011140
     - 26351018082725591729785951958772184090335738373939608285919371972483467636113
