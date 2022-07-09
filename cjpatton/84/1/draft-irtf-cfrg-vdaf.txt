@@ -117,6 +117,7 @@ Table of Contents
        8.2.3.  Aggregation
        8.2.4.  Unsharding
        8.2.5.  Helper Functions
+     8.3.  XXX
    9.  Security Considerations
    10. IANA Considerations
    11. References
@@ -127,6 +128,7 @@ Table of Contents
      Prio3Aes128Count
      Prio3Aes128Sum
      Prio3Aes128Histogram
+     Poplar1Aes128
    Authors' Addresses
 
 1.  Introduction
@@ -2457,27 +2459,17 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
 8.  Poplar1
 
-      TODO Update this section in light of removing the public parameter
-      and replacing the verification parameter.
-
-      NOTE The spec for Poplar1 is still a work-in-progress.  A partial
-      implementation can be found at https://github.com/divviup/libprio-
-      rs/blob/main/src/vdaf/poplar1.rs.  The verification logic is
-      nearly complete, however as of this draft the code is missing the
-      IDPF.  An implementation of the IDPF can be found at
-      https://github.com/google/distributed_point_functions/.
-
    This section specifies Poplar1, a VDAF for the following task.  Each
-   Client holds a BITS-bit string and the Aggregators hold a set of
-   l-bit strings, where l <= BITS.  We will refer to the latter as the
-   set of "candidate prefixes".  The Aggregators' goal is to count how
-   many inputs are prefixed by each candidate prefix.
+   Client holds a string of length BITS and the Aggregators hold a set
+   of l-bit strings, where l <= BITS.  We will refer to the latter as
+   the set of "candidate prefixes".  The Aggregators' goal is to count
+   how many inputs are prefixed by each candidate prefix.
 
-   This functionality is the core component of Poplar [BBCGGI21].  At a
-   high level, the protocol works as follows.
+   This functionality is the core component of the Poplar protocol
+   [BBCGGI21].  At a high level, the protocol works as follows.
 
-   1.  Each Clients runs the input-distribution algorithm on its n-bit
-       string and sends an input share to each Aggregator.
+   1.  Each Client splits its input string into input shares and sends
+       one share to each Aggregator.
 
    2.  The Aggregators agree on an initial set of candidate prefixes,
        say 0 and 1.
@@ -2505,18 +2497,23 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    that no one party knows either the point or what it evaluates to.
 
    An IDPF generalizes this "point" to a path on a full binary tree from
-   the root to one of the leaves.  It is evaluated on an "index"
-   representing a unique node of the tree.  If the node is on the path,
-   then function evaluates to to a non-zero value; otherwise it
-   evaluates to zero.  This structure allows an IDPF to provide the
-   functionality required for the above protocol, while at the same time
-   ensuring the same degree of privacy as a DPF.
+   the root to one of the leaves.  It is evaluated on a "prefix"
+   representing a unique node of the tree.  If the node is on the
+   programmed path, then function evaluates to to a non-zero value;
+   otherwise it evaluates to zero.  This structure allows an IDPF to
+   provide the functionality required for the above protocol, while at
+   the same time ensuring the same degree of privacy as a DPF.
 
-   Our VDAF composes an IDPF with the "secure sketching" protocol of
+   Poplar1 composes an IDPF with the "secure sketching" protocol of
    [BBCGGI21].  This protocol ensures that evaluating a set of input
    shares on a unique set of candidate prefixes results in shares of a
    "one-hot" vector, i.e., a vector that is zero everywhere except for
    one element, which is equal to one.
+
+   The remainder of this section is structured as follows.  IDPFs are
+   defined in Section 8.1; a concrete instantiation is given
+   Section 8.3.  The Poplar1 VDAF is defined in Section 8.2.  Test
+   vectors for Poplar1 can be found in Appendix "Test Vectors".
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
@@ -2778,6 +2775,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       BITS-1] and indexes MUST be empty if l == 0 or only contain values
       in range [0, 2^l-1] otherwise.  An error is raised if encoded
       cannot be decoded.
+
+8.3.  XXX
 
 9.  Security Considerations
 
@@ -3083,6 +3082,10 @@ agg_share_1: >-
   51ab7ccac14ca5b08e41137086916504f79348d2fa57c5a641041d8c534fbefa784e50
   45df9a209076fee02769cf6e1fffb05f8036efe734c8725b8376540e44
 agg_result: [0, 0, 1, 0]
+
+Poplar1Aes128
+
+   XXX
 
 Authors' Addresses
 
