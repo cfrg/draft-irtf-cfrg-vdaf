@@ -2885,24 +2885,32 @@ def convert(IdpfPoplar, level, seed):
 
 def encode_public_share(IdpfPoplar, correction_words):
     encoded = Bytes()
-    for (level, (seed_cw, ctrl_cw, w_cw)) \
+    packed_ctrl = 0
+    for (level, (_, ctrl_cw, _)) \
         in enumerate(correction_words):
-        encoded += seed_cw
-        encoded += byte(ctrl_cw[0].as_unsigned() | \
-                       (ctrl_cw[1].as_unsigned() << 1))
+        packed_ctrl |= ctrl_cw[0].as_unsigned() << (2*level)
+        packed_ctrl |= ctrl_cw[1].as_unsigned() << (2*level+1)
+    l = floor((2*IdpfPoplar.BITS + 7) / 8)
+    encoded += I2OSP(packed_ctrl, l)
+    for (level, (seed_cw, _, w_cw)) \
+        in enumerate(correction_words):
         Field = IdpfPoplar.current_field(level)
+        encoded += seed_cw
         encoded += Field.encode_vec(w_cw)
     return encoded
 
-@classmethod
 def decode_public_share(IdpfPoplar, encoded):
+    l = floor((2*IdpfPoplar.BITS + 7) / 8)
+    encoded_ctrl, encoded = encoded[:l], encoded[l:]
+    packed_ctrl = OS2IP(encoded_ctrl)
     correction_words = []
     for level in range(IdpfPoplar.BITS):
+        Field = IdpfPoplar.current_field(level)
+        ctrl_cw = (Field2(packed_ctrl & 1),
+                   Field2((packed_ctrl >> 1) & 1))
+        packed_ctrl >>= 2
         l = IdpfPoplar.Prg.SEED_SIZE
         seed_cw, encoded = encoded[:l], encoded[l:]
-        b, encoded = OS2IP(encoded[:1]), encoded[1:]
-        ctrl_cw = (Field2(b & 1), Field2((b >> 1) & 1))
-        Field = IdpfPoplar.current_field(level)
         l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
         encoded_w_cw, encoded = encoded[:l], encoded[l:]
         w_cw = Field.decode_vec(encoded_w_cw)
@@ -3024,6 +3032,7 @@ verify_key: "01010101010101010101010101010101"
 upload_0:
   measurement: 1
   nonce: "01010101010101010101010101010101"
+  public_share: >-
   input_share_0: >-
     ae5483343eb35a52fcb36a62271a7ddb47f09d0ea2c6613807f84ac2e16814c82bca
     bdc9db5080fdf4f4f778734644fc
@@ -3055,6 +3064,7 @@ verify_key: "01010101010101010101010101010101"
 upload_0:
   measurement: 100
   nonce: "01010101010101010101010101010101"
+  public_share: >-
   input_share_0: >-
     ae5483353eb35a3371beec8f796e9afd086cb72d05a83a3dbefbe273acb0410787b1
     afba2065df5389011fd8963091e3004fa07fc91018af378da47c89abf1bd85047e40
@@ -3108,6 +3118,7 @@ verify_key: "01010101010101010101010101010101"
 upload_0:
   measurement: 50
   nonce: "01010101010101010101010101010101"
+  public_share: >-
   input_share_0: >-
     ae5483353eb35a3371beec8f796e9afd086cb72d05a83a3dbefbe273acb0410787b1
     afba2065df5389011fd8963091e3004fa07fc91018af378da47c89abf1bdfcb36a63
@@ -3162,6 +3173,13 @@ bits: 4
 upload_0:
   measurement: 13
   nonce: "01010101010101010101010101010101"
+  public_share: >-
+    9a00000000000000000000000000000000ffffffff00000000223fa406a1b0f64600
+    000000000000000000000000000000ffffffff00000000e120e6078a27a1a0000000
+    00000000000000000000000000ffffffff00000000408f5a74257581110000000000
+    00000000000000000000000000000000000000000000000000000000000000000000
+    0000000000000000013751b51e46a11e9135e3b29f7d71e057dae0d7ce3dca05f016
+    1ac51242c08a0c
   input_share_0: >-
     0101010101010101010101010101010101010101010101010101010101010101a1ff
     50e322112bc999124b1ed908c095c6060b8625318a0ed5be1b1d6a90a6b8210009f0

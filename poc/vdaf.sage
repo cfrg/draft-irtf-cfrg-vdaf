@@ -133,6 +133,7 @@ def run_vdaf(Vdaf,
         prep_test_vec = {
             'measurement': int(measurement),
             'nonce': nonce.hex(),
+            'public_share': None, # set below
             'input_shares': [],
             'prep_shares': [[] for _ in range(Vdaf.ROUNDS)],
             'prep_messages': [],
@@ -144,6 +145,7 @@ def run_vdaf(Vdaf,
             Vdaf.measurement_to_input_shares(measurement)
 
         # REMOVE ME
+        prep_test_vec['public_share'] = public_share.hex()
         for input_share in input_shares:
             prep_test_vec['input_shares'].append(input_share.hex())
 
@@ -229,6 +231,8 @@ def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
         print('upload_{}:'.format(n))
         print('  measurement: {}'.format(prep_test_vec['measurement']))
         print('  nonce: "{}"'.format(prep_test_vec['nonce']))
+        print('  public_share: >-')
+        print_wrapped_line(prep_test_vec['public_share'], tab=4)
 
         # Shard
         for (i, input_share) in enumerate(prep_test_vec['input_shares']):
