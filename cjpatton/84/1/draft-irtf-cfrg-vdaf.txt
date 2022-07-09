@@ -1167,6 +1167,10 @@ Table of Contents
 
                              Table 5: Field255.
 
+      OPEN ISSUE We currently use big-endian for encoding field
+      elements.  However, for implementations of GF(2^255-19), little
+      endian is more common.  See issue#90.
+
 6.2.  Pseudorandom Generators
 
    A pseudorandom generator (PRG) is used to expand a short,
@@ -3392,7 +3396,7 @@ agg_share_0: >-
   ae5483343eb35a52
 agg_share_1: >-
   51ab7ccac14ca5b0
-agg_result: [1]
+agg_result: 1
 
 Prio3Aes128Sum
 
@@ -3442,7 +3446,7 @@ agg_share_0: >-
   b6a735c5636efee29c0c1455e0c0f7d8
 agg_share_1: >-
   4958ca3a9c91010163f3ebaa1f3f088d
-agg_result: [100]
+agg_result: 100
 
 Prio3Aes128Histogram
 
