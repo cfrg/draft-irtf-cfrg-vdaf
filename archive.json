@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-07-03T00:59:44.836286+00:00",
+  "timestamp": "2022-07-10T01:03:29.754493+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1292,7 +1292,7 @@
       "id": "I_kwDOGKuqOc5KwZJN",
       "title": "Specify agg_param details",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/82",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "simon-friedberger",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -1301,8 +1301,8 @@
       ],
       "body": "It should be clear what the type of agg_param is and how it should be handled.\r\nFor specific VDAFs it should probably be clarified when the agg_param needs to be available and how it is distributed.\r\n\r\nSee also ietf-wg-ppm/draft-ietf-ppm-dap/issues/267",
       "createdAt": "2022-05-31T17:54:50Z",
-      "updatedAt": "2022-06-01T14:41:52Z",
-      "closedAt": null,
+      "updatedAt": "2022-07-09T23:58:22Z",
+      "closedAt": "2022-07-09T23:58:22Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -1352,6 +1352,13 @@
           "body": "Ohh ok, this text is at least misleading, if not flat out wrong:\r\n```\r\nThe aggregation function to compute (e.g., sum, mean, etc.) and an optional\r\naggregation parameter.\r\n```\r\n\r\nIt's not as if there is a single agg param that's used for every collect request for a given task. The Collector is supposed to be able to choose each agg param based on previous agg results.\r\n\r\nWhat we are trying to get at here is that some agg functions have an an additional input that we call the \"agg param\".\r\n\r\n> AggregateShareReq.agg_param might be the same as CollectReq.agg_param. The spec says nothing on the topic.\r\n\r\nThen this needs to be fixed. Please send a PR! \r\n\r\n> Was your intention that all the agg_params in DAP should also be the same?\r\n\r\nYes.",
           "createdAt": "2022-06-01T14:36:25Z",
           "updatedAt": "2022-06-01T14:36:38Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I suspect this issue is solved in DAP by https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/pull/282, so I will close this. @simon-friedberger, feel free to re-open if you think there is something else that needs to be done.",
+          "createdAt": "2022-07-09T23:58:22Z",
+          "updatedAt": "2022-07-09T23:58:22Z"
         }
       ]
     },
@@ -1468,7 +1475,7 @@
       "id": "I_kwDOGKuqOc5MmB6-",
       "title": "Pass the number of reports to agg_shares_to_result()",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/92",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -1479,8 +1486,8 @@
       ],
       "body": "Inspired by the discussion on divviup/libprio-rs#256, I propose that the number of reports should be added as an argument to `agg_shares_to_result()` for DAFs and VDAFs. This would be useful in Prio for any AFE where the encoding does not preserve the additive identity. (or doesn't map some other identity to the additive identity) In such cases, then the unsharding algorithm could cancel out whatever constant term got added by every client's input. Any application using VDAF should already know how many reports contributed to one aggregate, we just need to expose it back down to the VDAF layer.\r\n\r\nNote that this would also enable computing an average \"inside the VDAF\" rather than computing a sum and leaving it to the application to compute the average from that. This is more trivial than remapping [-1, 1] to [0, 2^n], as in the example that motivated this.\r\n\r\nWhile it would be technically possible for an application to reverse the [-1, 1] to [0, 2^n] mapping, if given just a raw sum from Prio and a priori knowledge of the number of reports (by dividing by 2^(n-1) and subtracting num_reports), I think it would be more user-friendly if we made it possible for the unsharding step to do so. The postprocessing necessary for the averaging use case is easy enough to write out by hand, this fixed-point with offset encoding is slightly more difficult, but generally, AFE encodings could include multiple such encoded numbers, or even nonlinear functions composed with affine remappings. (The Prio paper includes examples of calculating a product or geometric mean. This would be done by taking a logarithm of the input, and this logarithm would most likely need to be encoded as a fixed point number with an offset.) For this reason, I think we should provide this number of reports to `agg_shares_to_result()`, so that unsharding can be \"as powerful as\" sharding, and applications won't have to concern themselves as much with the encoding details of particular more complicated VDAFs.\r\n\r\ncc @MxmUrw",
       "createdAt": "2022-06-26T21:35:47Z",
-      "updatedAt": "2022-06-28T15:54:29Z",
-      "closedAt": null,
+      "updatedAt": "2022-07-10T00:13:06Z",
+      "closedAt": "2022-07-10T00:13:05Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -1502,6 +1509,13 @@
           "body": "Sounds good, no objection from my side.",
           "createdAt": "2022-06-28T11:27:46Z",
           "updatedAt": "2022-06-28T11:27:46Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closed by #95.",
+          "createdAt": "2022-07-10T00:13:05Z",
+          "updatedAt": "2022-07-10T00:13:05Z"
         }
       ]
     },
@@ -1517,7 +1531,7 @@
       "labels": [],
       "body": "We wish for the VDAF draft to have first-class support for schemes that are amendable to differential privacy (DP). The task for this issue is to identify what changes need to be made, if any, to accommodate DP. In addition, we should consider adding guidance to the draft about best practices.",
       "createdAt": "2022-06-28T15:22:45Z",
-      "updatedAt": "2022-06-30T15:30:44Z",
+      "updatedAt": "2022-07-08T14:47:22Z",
       "closedAt": null,
       "comments": [
         {
@@ -1617,6 +1631,13 @@
           "body": "It is indeed not obvious (or at least wasn't obvious to me at first). But an approach along the lines you suggested works. We send the seed using poplar, and can either aggregate the seeds, or decode each seed to a vector in the original domain and aggregate those. The generalized version of PI-RAPPOR can allow additional efficiencies on top of this basic approach. We have a write-up that should be on the arxiv in a couple of weeks.",
           "createdAt": "2022-06-30T15:30:44Z",
           "updatedAt": "2022-06-30T15:30:44Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Great discussion, I'm very happy to see engagement on this draft from folks who are deep in differential privacy. Something to keep in mind here is that this document will be developed by the CFRG (\"Cryptography Forum Research Group\"), which, to my knowledge, has not done a lot with DP as of yet. Thus I think a useful goal would be to ensure that (V)DAFs are compatible with a variety of mechanisms for (a) and (b), but without being too prescriptive about a particular mechanism.\r\n\r\nThat said, @kunal-talwar we would welcome text in the document that describes how some of these methods might be applied to either Prio3 or Poplar1. Such text would be maximally useful if it also provided a gentle introduction to the method described.",
+          "createdAt": "2022-07-08T14:47:22Z",
+          "updatedAt": "2022-07-08T14:47:22Z"
         }
       ]
     }
@@ -7522,25 +7543,42 @@
       "id": "PR_kwDOGKuqOc46mkc0",
       "title": "Pass num_measurements when computing AggResult, add decode methods",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/95",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This implements the change proposed by #92, passing `num_measurements` to `agg_shares_to_result()`. For Prio3, I decided to thread this through both the FLP and validity circuit layers, in new `decode()` methods. With this change, `encode()`, `truncate()`, and `decode()` now give us a more complete API for Prio's AFEs. To test this, I wrote a quick Average type that makes use of the new argument. I also took advantage of the new flexibility in `Prio3.AggResult` to change the output types of Prio3Aes128Count and Prio3Aes128Sum to be `Unsigned`, as it's more intuitive and ergonomic. (If we don't like that last bit, it's separated out in the commit history already)",
       "createdAt": "2022-06-29T23:01:06Z",
-      "updatedAt": "2022-06-30T00:21:38Z",
+      "updatedAt": "2022-07-08T17:01:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "bd63d077e9e67b8792fb3fe767bf21fa13a5ab07",
       "headRepository": "divergentdave/vdaf",
       "headRefName": "afe-decode-with-number-of-measurements",
-      "headRefOid": "dd81b5cdea778c0c2df77dcc48a424444c3feb67",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "9eed57da7d68c64e49a42ce08ff5dcb724ecf844",
+      "closedAt": "2022-07-08T17:01:47Z",
+      "mergedAt": "2022-07-08T17:01:47Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "a363a96268edbb2fedac26766696efaddcde0f70"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks @divergentdave! Please squash the last commit (\"Review comments\") before merging. Great work.",
+          "createdAt": "2022-07-08T14:32:29Z",
+          "updatedAt": "2022-07-08T14:32:29Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I rebased to clean up the commit history, and also added an editorial change to the spec (propagating the x => bucket_count change) and fixed two associated types in test-only classes. https://github.com/cfrg/draft-irtf-cfrg-vdaf/compare/5e772df22a071f8fab828073a361805424399ff8..9eed57da7d68c64e49a42ce08ff5dcb724ecf844",
+          "createdAt": "2022-07-08T15:51:07Z",
+          "updatedAt": "2022-07-08T15:51:07Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc49Csm2",
@@ -7581,8 +7619,157 @@
               "updatedAt": "2022-06-30T00:17:37Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49h1rf",
+          "commit": {
+            "abbreviatedOid": "dd81b5c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "Excellent work! Just a few minor comments and this'll be ready to merge.",
+          "createdAt": "2022-07-08T00:29:36Z",
+          "updatedAt": "2022-07-08T00:41:08Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "nit: Since this parameter gets ignored here, prefix it with `_`. ",
+              "createdAt": "2022-07-08T00:29:36Z",
+              "updatedAt": "2022-07-08T00:41:08Z"
+            },
+            {
+              "originalPosition": 103,
+              "body": "A more descriptive name than `x` would be useful. How about `bucket_count`?",
+              "createdAt": "2022-07-08T00:33:03Z",
+              "updatedAt": "2022-07-08T00:41:08Z"
+            },
+            {
+              "originalPosition": 115,
+              "body": "I'm not sure we should have `float` as the result type, since the measurements are `Unsigned` and thus have a different precisison. What about defining this aggregation function as `floor(average(measurements))` and letting `AggResult = Unsigned`.",
+              "createdAt": "2022-07-08T00:37:15Z",
+              "updatedAt": "2022-07-08T00:41:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49klPy",
+          "commit": {
+            "abbreviatedOid": "5e772df"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-07-08T14:31:52Z",
+          "updatedAt": "2022-07-08T14:31:52Z",
+          "comments": []
         }
       ]
+    },
+    {
+      "number": 96,
+      "id": "PR_kwDOGKuqOc47Hs73",
+      "title": "Revert \"Pass num_measurements when computing AggResult, add decode methods\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/96",
+      "state": "CLOSED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Reverts cfrg/draft-irtf-cfrg-vdaf#95. This was reviewed and ready for approval, but I got punchy and merged before @nakatsuka-y had a chance to squash.",
+      "createdAt": "2022-07-08T17:03:41Z",
+      "updatedAt": "2022-07-08T17:03:49Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "a363a96268edbb2fedac26766696efaddcde0f70",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "revert-95-afe-decode-with-number-of-measurements",
+      "headRefOid": "b0d8e24ca426fdf6f4f05b52b043ecb74fc2a100",
+      "closedAt": "2022-07-08T17:03:49Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 97,
+      "id": "PR_kwDOGKuqOc47JZA-",
+      "title": "Complete spec of Poplar1",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/97",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #84.\r\nCloses #44.\r\n\r\nCompletes the specification of Poplar1, including the reference\r\nimplementation and test vectors.\r\n\r\n* poc: Add additional tests for IdpfPoplar.\r\n* poc: Modify Idpf syntax so that the size of the keys is defined. This\r\n  is needed for decoding the keysfrom the Poplar1 input share.\r\n* poc: Fix a minor bug in IdpfPoplar that caused `eval()` to throw an\r\n  error when it shouldn't.\r\n* poc: Have `eval()` check that the prefixes are unique. This is needed\r\n  for Poplar1, which checks for one-hotness of the output shares.\r\n* poc: Fix various typos.\r\n* poc: Implement Poplar1 and add code for generating test vectors.\r\n* Add new field `Field255`, as required for IdpfPoplar.\r\n* Refactor Prg interface to align with reference implementation.\r\n* Re-generate test vectors and add test vectors for Poplar1Aes128.",
+      "createdAt": "2022-07-09T23:04:45Z",
+      "updatedAt": "2022-07-09T23:04:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "a363a96268edbb2fedac26766696efaddcde0f70",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/84/1",
+      "headRefOid": "80904de365d288716a166f7df53ee8a9dd1df245",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 98,
+      "id": "PR_kwDOGKuqOc47JZzg",
+      "title": "IdpfPoplar: Pack control bits more tightly in public share",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/98",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Merge #97 first.\r\n\r\nWhile at it, add the public share to the test vectors.",
+      "createdAt": "2022-07-09T23:42:34Z",
+      "updatedAt": "2022-07-09T23:42:54Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/84/1",
+      "baseRefOid": "80904de365d288716a166f7df53ee8a9dd1df245",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/84/2",
+      "headRefOid": "8e9220d9dcab9500fb380f486157394308118a1b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 99,
+      "id": "PR_kwDOGKuqOc47JaE8",
+      "title": "Check that field eleements are fully reduced while decoding",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/99",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #89.\r\nMerge #98 first.",
+      "createdAt": "2022-07-09T23:55:38Z",
+      "updatedAt": "2022-07-09T23:56:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/84/2",
+      "baseRefOid": "8e9220d9dcab9500fb380f486157394308118a1b",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/89",
+      "headRefOid": "2c1d7aa9224a69d1cb08b186a3df3b157452f09b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
