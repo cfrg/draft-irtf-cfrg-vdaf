@@ -2147,8 +2147,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
       -  Let alpha_i = Field.gen()^(Field.GEN_ORDER / P_i)
 
-
-
       +================+============================================+
       | Parameter      | Value                                      |
       +================+============================================+
@@ -2307,8 +2305,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.
 
-
-
                +================+==========================+
                | Parameter      | Value                    |
                +================+==========================+
@@ -2379,8 +2375,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
            out += r * Range2(x)
            r *= joint_rand[0]
        return out
-
-
 
             +================+================================+
             | Parameter      | Value                          |
@@ -2455,8 +2449,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    Note that this circuit depends on the number of shares into which the
    input is sharded.  This is provided to the FLP by Prio3.
-
-
 
                   +================+====================+
                   | Parameter      | Value              |
@@ -2557,8 +2549,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
    An index x is defined to be a prefix of another index y as follows.
    Let LSB(x, N) denote the least significant N bits of positive integer
-   x.  By definition, a positive integer 0 <= x <= 2^L is said to be the
-   length-L prefix of positive integer 0 <= y <= BITS if LSB(x, L) is
+   x.  By definition, a positive integer 0 <= x < 2^L is said to be the
+   length-L prefix of positive integer 0 <= y < 2^BITS if LSB(x, L) is
    equal to the most significant L bits of LSB(y, BITS), For example, 6
    (110 in binary) is the length-3 prefix of 25 (11001), but 7 (111) is
    not.
@@ -2595,14 +2587,14 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
       and the sequence of candidate prefixes.  It returns the share of
       the value corresponding to each candidate prefix.
 
-      The type the output depends on the value of level: If level <
+      The output type depends on the value of level: If level <
       Idpf.BITS-1, the output is the value for an inner node, which has
-      type Vec[Idpf.FieldInner]; otherwise, if level == BITS-1, then the
-      output is the value for a leaf node, which has type
-      Vec[Idpf.FieldLeaf].
+      type Vec[Vec[Idpf.FieldInner]]; otherwise, if level == Idpf.BITS-
+      1, then the output is the value for a leaf node, which has type
+      Vec[Vec[Idpf.FieldLeaf]].
 
       The value of level MUST be in range [0, BITS).  The indexes in
-      prefixes MUST all be distinct and in range [0,2^level).
+      prefixes MUST all be distinct and in range [0, 2^level).
 
       Applications MUST ensure that the Aggregator's identifier is equal
       to the integer in range [0, SHARES) that matches the index of key
@@ -2621,8 +2613,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    across VDAF evaluations.  In practice, of course, it will often be
    beneficial to expose a stateful API for IDPFs and carry the state
    across evaluations.  See Section 8.3 for details.
-
-
 
      +============+==================================================+
      | Parameter  | Description                                      |
@@ -2786,7 +2776,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
        # Get correlation shares for the given level of the IDPF tree.
        #
        # Implementation note: Computing the shares of `(a, b, c)`
-       # requires expanding PRG seeds into a vector field elements
+       # requires expanding PRG seeds into a vector of field elements
        # of length proportional to the level of the tree. Typically
        # the IDPF will be evaluated incrementally beginning with
        # `level == 0`. Implementations can save computation by
@@ -2979,8 +2969,6 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    The constant and type definitions required by the Idpf interface are
    given in Table 15.
 
-
-
          +============+=========================================+
          | Parameter  | Value                                   |
          +============+=========================================+
@@ -3066,8 +3054,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 
       TODO Describe in prose how IDPF-key evaluation algorithm works.
 
-   The description of the IDPF-evaluation generation algorithm makes use
-   of auxiliary functions extend(), convert(), and decode_public_share()
+   The description of the IDPF-evaluation algorithm makes use of
+   auxiliary functions extend(), convert(), and decode_public_share()
    defined in Section 8.3.3.
 
    def eval(IdpfPoplar, agg_id, public_share, init_seed,
@@ -3099,10 +3087,11 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
                # candidate prefixes would have been derived from
                # aggregate results computed during previous rounds. For
                # example, when using `IdpfPoplar` to compute heavy
-               # hitters, each `prefix` would be the prefix of a string
-               # whose hit count exceeded the given threshold. (See
-               # [BBCGGI21, Section 5.1].) In this case, part of the
-               # path would have already been traversed.
+               # hitters, a string whose hit count exceeded the given
+               # threshold in the last round would be the prefix of each
+               # `prefix` in the current round. (See [BBCGGI21,
+               # Section 5.1].) In this case, part of the path would
+               # have already been traversed.
                #
                # Re-computing nodes along previously traversed paths is
                # wasteful. Implementations can eliminate this added
@@ -3118,7 +3107,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    # of the prefix corresponding to the next level of the tree.
    #
    # TODO Consider implementing some version of the optimization
-   # discussed at the end of [BBCGGI21, Appendix C.3]. This could on
+   # discussed at the end of [BBCGGI21, Appendix C.2]. This could on
    # average reduce the number of AES calls by a constant factor.
    def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
                  correction_word, level, bit):
@@ -3330,9 +3319,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    [DAP]      Geoghegan, T., Patton, C., Rescorla, E., and C. A. Wood,
               "Distributed Aggregation Protocol for Privacy Preserving
               Measurement", Work in Progress, Internet-Draft, draft-
-              ietf-ppm-dap-00, 4 May 2022,
+              ietf-ppm-dap-01, 11 July 2022,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              00>.
+              01>.
 
    [Dou02]    Douceur, J., "The Sybil Attack", IPTPS 2002 , 2002,
               <https://doi.org/10.1007/3-540-45748-8_24>.
