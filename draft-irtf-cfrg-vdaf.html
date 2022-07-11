@@ -2472,8 +2472,7 @@ unsigned integer into a field element:<a href="#section-6.1-7" class="pilcrow">�
 <ul class="normal">
 <li class="normal" id="section-6.1-8.1">
             <code>Field(integer: Unsigned)</code> returns <code>integer</code> represented as a field element.
-If <code>integer &gt;= Field.MODULUS</code>, then <code>integer</code> is first reduced modulo
-<code>Field.MODULUS</code>.<a href="#section-6.1-8.1" class="pilcrow">¶</a>
+The value of <code>integer</code> <span class="bcp14">MUST</span> be less than <code>Field.MODULUS</code>.<a href="#section-6.1-8.1" class="pilcrow">¶</a>
 </li>
         </ul>
 <p id="section-6.1-9">Finally, each concrete <code>Field</code> has two derived class methods, one for encoding
@@ -2497,8 +2496,10 @@ def decode_vec(Field, encoded: Bytes) -&gt; Vec[Field]:
     vec = []
     for i in range(0, len(encoded), L):
         encoded_x = encoded[i:i+L]
-        x = Field(OS2IP(encoded_x))
-        vec.append(x)
+        x = OS2IP(encoded_x)
+        if x &gt;= Field.MODULUS:
+            raise ERR_DECODE # Integer is larger than modulus
+        vec.append(Field(x))
     return vec
 </pre>
 </div>
