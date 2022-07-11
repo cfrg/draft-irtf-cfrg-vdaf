@@ -11,7 +11,7 @@ import os
 TEST_VECTOR = False
 
 # Document version, reved with each draft that contains breaking changes.
-DRAFT = '01'
+DRAFT = '02'
 VERSION = bytes(bytearray('vdaf-{}'.format(DRAFT), 'ascii'))
 
 
