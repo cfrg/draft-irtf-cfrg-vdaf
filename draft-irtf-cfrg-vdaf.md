@@ -283,7 +283,30 @@ security considerations for VDAFs.
 
 ## Change Log
 
-(*) Indicates a change that breaks compatibility with the previous draft.
+(*) Indicates a change that breaks wire compatibility with the previous draft.
+
+02:
+
+* Complete the initial specification of Poplar1.
+
+* Extend (V)DAF syntax to include a "public share" output by the Client and
+  distributed to all of the Aggregators. This is to accommodate "extractable"
+  IDPFs as required for Poplar1. (See {{BBCGGI21}}, Section 4.3 for details.)
+
+* Extend (V)DAF syntax to allow the unsharding step to take into account the
+  number of measurements aggregated.
+
+* Extend FLP syntax by adding a method for decoding the aggregate result from a
+  vector of field elements. The new method takes into account the number of
+  measurements.
+
+* Prio3: Align aggregate result computation with updated FLP syntax.
+
+* Prg: Add a method for statefully generating a vector of field elements.
+
+* Field: Require that field elements are fully reduced before decoding. (*)
+
+* Define new field Field255.
 
 01:
 
