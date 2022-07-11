@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 10 January 2023                                      Cloudflare
+Expires: 12 January 2023                                      Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             9 July 2022
+                                                            11 July 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 January 2023.
+   This Internet-Draft will expire on 12 January 2023.
 
 Copyright Notice
 
@@ -3156,23 +3156,24 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
        return (next_seed, w)
 
    def encode_public_share(IdpfPoplar, correction_words):
-       packed_ctrl = 0
        encoded = Bytes()
-       for (level, (seed_cw, ctrl_cw, w_cw)) \
+       packed_ctrl = 0
+       for (level, (_, ctrl_cw, _)) \
+           in enumerate(correction_words):
+           packed_ctrl |= ctrl_cw[0].as_unsigned() << (2*level)
+           packed_ctrl |= ctrl_cw[1].as_unsigned() << (2*level+1)
+       l = floor((2*IdpfPoplar.BITS + 7) / 8)
+       encoded += I2OSP(packed_ctrl, l)
+       for (level, (seed_cw, _, w_cw)) \
            in enumerate(correction_words):
            Field = IdpfPoplar.current_field(level)
            encoded += seed_cw
-           packed_ctrl |= ctrl_cw[0].as_unsigned() << (2*level)
-           packed_ctrl |= ctrl_cw[1].as_unsigned() << (2*level+1)
            encoded += Field.encode_vec(w_cw)
-       l = floor((2*IdpfPoplar.BITS + 7) / 8)
-       encoded += I2OSP(packed_ctrl, l)
        return encoded
 
-   @classmethod
    def decode_public_share(IdpfPoplar, encoded):
        l = floor((2*IdpfPoplar.BITS + 7) / 8)
-       encoded, encoded_ctrl = encoded[:-l], encoded[-l:]
+       encoded_ctrl, encoded = encoded[:l], encoded[l:]
        packed_ctrl = OS2IP(encoded_ctrl)
        correction_words = []
        for level in range(IdpfPoplar.BITS):
@@ -3516,12 +3517,12 @@ upload_0:
   measurement: 13
   nonce: "01010101010101010101010101010101"
   public_share: >-
-    00000000000000000000000000000000ffffffff00000000223fa406a1b0f6460000
-    0000000000000000000000000000ffffffff00000000e120e6078a27a1a000000000
-    000000000000000000000000ffffffff00000000408f5a7425758111000000000000
+    9a00000000000000000000000000000000ffffffff00000000223fa406a1b0f64600
+    000000000000000000000000000000ffffffff00000000e120e6078a27a1a0000000
+    00000000000000000000000000ffffffff00000000408f5a74257581110000000000
     00000000000000000000000000000000000000000000000000000000000000000000
-    00000000000000013751b51e46a11e9135e3b29f7d71e057dae0d7ce3dca05f0161a
-    c51242c08a0c9a
+    0000000000000000013751b51e46a11e9135e3b29f7d71e057dae0d7ce3dca05f016
+    1ac51242c08a0c
   input_share_0: >-
     0101010101010101010101010101010101010101010101010101010101010101a1ff
     50e322112bc999124b1ed908c095c6060b8625318a0ed5be1b1d6a90a6b8210009f0
