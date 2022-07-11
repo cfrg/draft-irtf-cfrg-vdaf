@@ -5,10 +5,10 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                 C. Patton
-Expires: 10 January 2023                                      Cloudflare
+Expires: 12 January 2023                                      Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             9 July 2022
+                                                            11 July 2022
 
 
               Verifiable Distributed Aggregation Functions
@@ -51,7 +51,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 January 2023.
+   This Internet-Draft will expire on 12 January 2023.
 
 Copyright Notice
 
@@ -2540,8 +2540,9 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    The remainder of this section is structured as follows.  IDPFs are
    defined in Section 8.1; a concrete instantiation is given
    Section 8.3.  The Poplar1 VDAF is defined in Section 8.2 in terms of
-   a generic IDPF.  A concrete instantiation can be found in
-   Section 8.4; test vectors can be found in Appendix "Test Vectors".
+   a generic IDPF.  Finally, a concrete instantiation of Poplar1 is
+   specified in Section 8.4; test vectors can be found in Appendix "Test
+   Vectors".
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
@@ -2565,14 +2566,17 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    Each of the programmed points beta is a vector of elements of some
    finite field.  We distinguish two types of fields: One for inner
    nodes (denoted Idpf.FieldInner), and one for leaf nodes
-   (Idpf.FieldLeaf).  Our instantiation of Poplar1 will use a much
-   larger field for leaf nodes than for inner nodes.  (This is to ensure
-   the IDPF is "extractable", as defined in [BBCGGI21], Definition 1.)
+   (Idpf.FieldLeaf).  (Our instantiation of Poplar1 (Section 8.4) will
+   use a much larger field for leaf nodes than for inner nodes.  This is
+   to ensure the IDPF is "extractable" as defined in [BBCGGI21],
+   Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 13.  We write Idpf.Vec as shorthand for
-   Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]].  The
-   scheme is comprised of the following algorithms:
+   Table 13.  In the remainder we write Idpf.Vec as shorthand for the
+   type Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]].
+   (This type denotes either a vector of inner node field elements or
+   leaf node field elements.)  The scheme is comprised of the following
+   algorithms:
 
    *  Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]],
       beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes]) is the
@@ -2765,7 +2769,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
    sequence of data_share values are additive shares of a one-hot
    vector.
 
-   The algorithms below make use of auxiliary function verify_context()
+   The algorithms below make use of auxiliary functions verify_context()
    and decode_input_share() defined in Section 8.2.5.
 
    def prep_init(Poplar1, verify_key, agg_id, agg_param,
