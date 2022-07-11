@@ -3871,7 +3871,6 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
               </ul>
 </li>
           </ul>
-<p id="section-7.3.3-6"><br></p>
 <span id="name-flp-parameters-of-flpgeneri"></span><div id="flp-generic-param">
 <table class="center" id="table-9">
             <caption>
@@ -4133,7 +4132,6 @@ def Count(inp: Vec[Field64]):
 </div>
 <p id="section-7.4.1-6">The measurement is encoded and decoded as a singleton vector in the natural
 way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-7"><br></p>
 <span id="name-parameters-of-validity-circ"></span><table class="center" id="table-10">
             <caption>
 <a href="#table-10" class="selfRef">Table 10</a>:
@@ -4268,7 +4266,6 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
     return out
 </pre><a href="#section-7.4.2-7" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.2-8"><br></p>
 <span id="name-parameters-of-validity-circu"></span><table class="center" id="table-11">
             <caption>
 <a href="#table-11" class="selfRef">Table 11</a>:
@@ -4405,7 +4402,6 @@ def Histogram(inp: Vec[Field128],
 </div>
 <p id="section-7.4.3-6">Note that this circuit depends on the number of shares into which the input is
 sharded. This is provided to the FLP by Prio3.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-7"><br></p>
 <span id="name-parameters-of-validity-circui"></span><table class="center" id="table-12">
             <caption>
 <a href="#table-12" class="selfRef">Table 12</a>:
@@ -4563,8 +4559,8 @@ algorithm generates one IDPF "key" for each Aggregator. When evaluated at level
 otherwise.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.1-2">An index <code>x</code> is defined to be a prefix of another index <code>y</code> as follows. Let
 <code>LSB(x, N)</code> denote the least significant <code>N</code> bits of positive integer <code>x</code>. By
-definition, a positive integer <code>0 &lt;= x &lt;= 2^L</code> is said to be the length-<code>L</code>
-prefix of positive integer <code>0 &lt;= y &lt;= BITS</code> if <code>LSB(x, L)</code> is equal to the most
+definition, a positive integer <code>0 &lt;= x &lt; 2^L</code> is said to be the length-<code>L</code>
+prefix of positive integer <code>0 &lt;= y &lt; 2^BITS</code> if <code>LSB(x, L)</code> is equal to the most
 significant <code>L</code> bits of <code>LSB(y, BITS)</code>, For example, 6 (110 in binary) is the
 length-3 prefix of 25 (11001), but 7 (111) is not.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1-3">Each of the programmed points <code>beta</code> is a vector of elements of some finite
@@ -4596,13 +4592,14 @@ Aggregators, the Aggregator's IDPF key, the "level" at which to evaluate the
 IDPF, and the sequence of candidate prefixes. It returns the share of the
 value corresponding to each candidate prefix.<a href="#section-8.1-5.2.1" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.2.2">
-The type the output depends on the value of <code>level</code>: If <code>level &lt; Idpf.BITS-1</code>,
-the output is the value for an inner node, which has type
-<code>Vec[Idpf.FieldInner]</code>; otherwise, if <code>level == BITS-1</code>, then the output is
-the value for a leaf node, which has type <code>Vec[Idpf.FieldLeaf]</code>.<a href="#section-8.1-5.2.2" class="pilcrow">¶</a></p>
+The output type depends on the value of <code>level</code>: If <code>level &lt; Idpf.BITS-1</code>, the
+output is the value for an inner node, which has type
+<code>Vec[Vec[Idpf.FieldInner]]</code>; otherwise, if <code>level == Idpf.BITS-1</code>, then the
+output is the value for a leaf node, which has type
+<code>Vec[Vec[Idpf.FieldLeaf]]</code>.<a href="#section-8.1-5.2.2" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.2.3">
 The value of <code>level</code> <span class="bcp14">MUST</span> be in range <code>[0, BITS)</code>. The indexes in <code>prefixes</code>
-              <span class="bcp14">MUST</span> all be distinct and in range <code>[0,2^level)</code>.<a href="#section-8.1-5.2.3" class="pilcrow">¶</a></p>
+              <span class="bcp14">MUST</span> all be distinct and in range <code>[0, 2^level)</code>.<a href="#section-8.1-5.2.3" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.2.4">
 Applications <span class="bcp14">MUST</span> ensure that the Aggregator's identifier is equal to the
 integer in range <code>[0, SHARES)</code> that matches the index of <code>key</code> in the sequence
@@ -4623,7 +4620,6 @@ This is to align the IDPF syntax with the VDAF abstraction boundary, which does
 not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
 state across evaluations. See <a href="#idpf-poplar" class="xref">Section 8.3</a> for details.<a href="#section-8.1-8" class="pilcrow">¶</a></p>
-<p id="section-8.1-9"><br></p>
 <span id="name-constants-and-types-defined-by"></span><div id="idpf-param">
 <table class="center" id="table-13">
           <caption>
@@ -4884,7 +4880,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # Get correlation shares for the given level of the IDPF tree.
     #
     # Implementation note: Computing the shares of `(a, b, c)`
-    # requires expanding PRG seeds into a vector field elements
+    # requires expanding PRG seeds into a vector of field elements
     # of length proportional to the level of the tree. Typically
     # the IDPF will be evaluated incrementally beginning with
     # `level == 0`. Implementations can save computation by
@@ -5122,7 +5118,6 @@ instantiating Poplar1. The scheme gets its name from the name of the protocol of
         </ul>
 <p id="section-8.3-3">The constant and type definitions required by the <code>Idpf</code> interface are given in
 <a href="#idpf-poplar-param" class="xref">Table 15</a>.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
-<p id="section-8.3-4"><br></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-poplar-param">
 <table class="center" id="table-15">
           <caption>
@@ -5258,9 +5253,9 @@ def gen(IpdfPoplar, alpha, beta_inner, beta_leaf):
               <p id="section-8.3.2-1.1.1">TODO Describe in prose how IDPF-key evaluation algorithm works.<a href="#section-8.3.2-1.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-8.3.2-2">The description of the IDPF-evaluation generation algorithm makes use
-of auxiliary functions <code>extend()</code>, <code>convert()</code>, and
-<code>decode_public_share()</code> defined in <a href="#idpf-poplar-helper-functions" class="xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-8.3.2-2">The description of the IDPF-evaluation algorithm makes use of auxiliary
+functions <code>extend()</code>, <code>convert()</code>, and <code>decode_public_share()</code> defined in
+<a href="#idpf-poplar-helper-functions" class="xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-evaluation-generation-"></span><div id="idpf-poplar-eval">
 <figure id="figure-25">
             <div class="alignLeft art-text artwork" id="section-8.3.2-3.1">
@@ -5294,10 +5289,11 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
             # candidate prefixes would have been derived from
             # aggregate results computed during previous rounds. For
             # example, when using `IdpfPoplar` to compute heavy
-            # hitters, each `prefix` would be the prefix of a string
-            # whose hit count exceeded the given threshold. (See
-            # [BBCGGI21, Section 5.1].) In this case, part of the
-            # path would have already been traversed.
+            # hitters, a string whose hit count exceeded the given
+            # threshold in the last round would be the prefix of each
+            # `prefix` in the current round. (See [BBCGGI21,
+            # Section 5.1].) In this case, part of the path would
+            # have already been traversed.
             #
             # Re-computing nodes along previously traversed paths is
             # wasteful. Implementations can eliminate this added
@@ -5313,7 +5309,7 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
 # of the prefix corresponding to the next level of the tree.
 #
 # TODO Consider implementing some version of the optimization
-# discussed at the end of [BBCGGI21, Appendix C.3]. This could on
+# discussed at the end of [BBCGGI21, Appendix C.2]. This could on
 # average reduce the number of AES calls by a constant factor.
 def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
               correction_word, level, bit):
@@ -5551,7 +5547,7 @@ removing it after unsharding.<a href="#section-9-11" class="pilcrow">¶</a></p>
 <dd class="break"></dd>
 <dt id="DAP">[DAP]</dt>
         <dd>
-<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-00</span>, <time datetime="2022-05-04" class="refDate">4 May 2022</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-00">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-00</a>&gt;</span>. </dd>
+<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-01</span>, <time datetime="2022-07-11" class="refDate">11 July 2022</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-01">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-01</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Dou02">[Dou02]</dt>
         <dd>
