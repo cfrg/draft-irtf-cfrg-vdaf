@@ -4545,9 +4545,9 @@ candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
 is zero everywhere except for one element, which is equal to one.<a href="#section-8-7" class="pilcrow">¶</a></p>
 <p id="section-8-8">The remainder of this section is structured as follows. IDPFs are defined in
 <a href="#idpf" class="xref">Section 8.1</a>; a concrete instantiation is given <a href="#idpf-poplar" class="xref">Section 8.3</a>. The Poplar1 VDAF is
-defined in <a href="#poplar1-construction" class="xref">Section 8.2</a> in terms of a generic IDPF. A concrete
-instantiation can be found in <a href="#poplar1-instantiation" class="xref">Section 8.4</a>; test vectors can be
-found in <a href="#test-vectors" class="xref">Appendix "Test Vectors"</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
+defined in <a href="#poplar1-construction" class="xref">Section 8.2</a> in terms of a generic IDPF. Finally, a
+concrete instantiation of Poplar1 is specified in <a href="#poplar1-instantiation" class="xref">Section 8.4</a>;
+test vectors can be found in <a href="#test-vectors" class="xref">Appendix "Test Vectors"</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
 <div id="idpf">
 <section id="section-8.1">
         <h3 id="name-incremental-distributed-poi">
@@ -4569,13 +4569,15 @@ significant <code>L</code> bits of <code>LSB(y, BITS)</code>, For example, 6 (11
 length-3 prefix of 25 (11001), but 7 (111) is not.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1-3">Each of the programmed points <code>beta</code> is a vector of elements of some finite
 field. We distinguish two types of fields: One for inner nodes (denoted
-<code>Idpf.FieldInner</code>), and one for leaf nodes (<code>Idpf.FieldLeaf</code>). Our instantiation
-of Poplar1 will use a much larger field for leaf nodes than for inner nodes.
-(This is to ensure the IDPF is "extractable", as defined in <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>,
-Definition 1.)<a href="#section-8.1-3" class="pilcrow">¶</a></p>
-<p id="section-8.1-4">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="xref">Table 13</a>. We
-write <code>Idpf.Vec</code> as shorthand for <code>Union[Vec[Vec[Idpf.FieldInner]],
-Vec[Vec[Idpf.FieldLeaf]]]</code>. The scheme is comprised of the following algorithms:<a href="#section-8.1-4" class="pilcrow">¶</a></p>
+<code>Idpf.FieldInner</code>), and one for leaf nodes (<code>Idpf.FieldLeaf</code>). (Our
+instantiation of Poplar1 (<a href="#poplar1-instantiation" class="xref">Section 8.4</a>) will use a much larger
+field for leaf nodes than for inner nodes. This is to ensure the IDPF is
+"extractable" as defined in <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>, Definition 1.)<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.1-4">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="xref">Table 13</a>. In
+the remainder we write <code>Idpf.Vec</code> as shorthand for the type
+<code>Union[Vec[Vec[Idpf.FieldInner]], Vec[Vec[Idpf.FieldLeaf]]]</code>. (This type denotes
+either a vector of inner node field elements or leaf node field elements.) The
+scheme is comprised of the following algorithms:<a href="#section-8.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.1-5.1">
             <code>Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf:
@@ -4862,7 +4864,7 @@ IDPF share on each candidate prefix, recovering a <code>data_share</code> and <c
 for each. The Aggregators use these and the correlation shares provided by the
 Client to verify that the sequence of <code>data_share</code> values are additive shares of
 a one-hot vector.<a href="#section-8.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-8.2.2-2">The algorithms below make use of auxiliary function <code>verify_context()</code> and
+<p id="section-8.2.2-2">The algorithms below make use of auxiliary functions <code>verify_context()</code> and
 <code>decode_input_share()</code> defined in <a href="#poplar1-helper-functions" class="xref">Section 8.2.5</a>.<a href="#section-8.2.2-2" class="pilcrow">¶</a></p>
 <span id="name-preparation-state-for-popla"></span><div id="poplar1-prep-state">
 <figure id="figure-20">
