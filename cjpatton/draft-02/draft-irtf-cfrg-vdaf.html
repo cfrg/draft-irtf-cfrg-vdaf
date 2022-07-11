@@ -1545,7 +1545,7 @@ security considerations for VDAFs.<a href="#section-1-16" class="pilcrow">¶</a>
 <li class="normal" id="section-1.1-3.1">Complete the initial specification of Poplar1.<a href="#section-1.1-3.1" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-1.1-3.2">Extend (V)DAF syntax to include a "public share" output by the Client and
-distributed to all of the Aggregators. This is to accommodate n "extractable"
+distributed to all of the Aggregators. This is to accommodate "extractable"
 IDPFs as required for Poplar1. (See <span>[<a href="#BBCGGI21" class="xref">BBCGGI21</a>]</span>, Section 4.3 for details.)<a href="#section-1.1-3.2" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-1.1-3.3">Extend (V)DAF syntax to allow the unsharding step to take into account the
@@ -1553,13 +1553,13 @@ number of measurements aggregated.<a href="#section-1.1-3.3" class="pilcrow">¶<
 </li>
           <li class="normal" id="section-1.1-3.4">Extend FLP syntax by adding a method for decoding the aggregate result from a
 vector of field elements. The new method takes into account the number of
-measurements aggregated.<a href="#section-1.1-3.4" class="pilcrow">¶</a>
+measurements.<a href="#section-1.1-3.4" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-1.1-3.5">Prio3: Align aggregate result computation with updated FLP syntax.<a href="#section-1.1-3.5" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-1.1-3.6">Prg: Add a method for statefully generating a vector of field elements.<a href="#section-1.1-3.6" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-1.1-3.7">Field: Require that field elements are fully reduced while decoding. (*)<a href="#section-1.1-3.7" class="pilcrow">¶</a>
+          <li class="normal" id="section-1.1-3.7">Field: Require that field elements are fully reduced before decoding. (*)<a href="#section-1.1-3.7" class="pilcrow">¶</a>
 </li>
           <li class="normal" id="section-1.1-3.8">Define new field Field255.<a href="#section-1.1-3.8" class="pilcrow">¶</a>
 </li>
