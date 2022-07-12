@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-07-10T01:03:29.754493+00:00",
+  "timestamp": "2022-07-12T01:01:28.727668+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -245,9 +245,17 @@
       "labels": [],
       "body": "With `prio3` it's straightforward to roughly estimate quantiles using a histogram (cf https://docs.rs/prio/0.6.1/prio/vdaf/prio3/type.Prio3Histogram64.html). But what if you wanted to precisely compute, say, the 50th percentile (i.e., the median) or the 95th percentile? Prio isn't well-suited for this (cf [[CGB17], Appendix G]).\r\n\r\nIf your application allows for multiple rounds of interaction with the clients, maybe you could do a kind of binary search to find the quantile you're after. Suppose the client measurements are arbitrary 32-bit integers and you want to compute the median. Suppose there are `N` measurements in all. Let `buckets = [2^31]`. Have the clients shard their measurements using `buckets` as the bucket boundaries. Execute the VDAF over the set of input shares, getting bucket counts `agg` as the aggregate result. `agg[0]` is equal to the number of measurements less than or equal to `2^31`, and `agg[1] <= N/2`, then the median must be less than `2^31`. On the other hand, if `agg[1] > N/2` then you know the median must greater than `2^31`. You then repeat the process, adjusting the bucket boundaries based on the previous result: if the median is less than `2^31`, then let `buckets = [2^31 - 2^30]`; otherwise let `buckets = [2^31 + 2^30]`.\r\n\r\nI'm not sure how many iterations would be needed, or how precisely you could compute quantiles this way. Regardless, ideally there would be a VDAF that allows for computing quantiles without interacting with clients more than once.\r\n\r\n\r\n\r\n\r\n\r\n[CGB17]: https://crypto.stanford.edu/prio/paper.pdf",
       "createdAt": "2021-11-17T17:58:28Z",
-      "updatedAt": "2021-11-17T17:58:28Z",
+      "updatedAt": "2022-07-11T22:24:52Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "In addition to histograms, Prio3 could be used to estimate quantiles by constructing a CountMin sketch. (See section 5.1 here https://dsf.berkeley.edu/cs286/papers/countmin-latin2004.pdf) I think this would also require some tuning based on expected measurement ranges and precision. The underlying FLP validity condition would be equivalent to running multiple independent histograms.\r\n\r\nPoplar1 could be used to exactly compute quantiles, at a higher computational cost. Assuming the measurements are already integers, you could directly shard the measurements with Poplar1, and then run the Poplar1 aggregation process several times with a new tree-walking algorithm to arrive at the quantile. This algorithm would do a binary search to find the tree node where the number of measurements to the left, divided by the total number of measurements, is the closest to the target quantile level.",
+          "createdAt": "2022-07-11T22:24:52Z",
+          "updatedAt": "2022-07-11T22:24:52Z"
+        }
+      ]
     },
     {
       "number": 13,
@@ -839,7 +847,7 @@
       "id": "I_kwDOGKuqOc5HO1SU",
       "title": "Poplar1: `k_verify_rand` should be derived from agg param",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/44",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -848,8 +856,8 @@
       ],
       "body": "Currently only the nonce is used to derive the shared verification randomness. This should also depend on the aggregation parameter so that the verification randomness is unique for each aggregation parameter.",
       "createdAt": "2022-04-06T19:23:33Z",
-      "updatedAt": "2022-05-18T18:50:07Z",
-      "closedAt": null,
+      "updatedAt": "2022-07-11T21:00:31Z",
+      "closedAt": "2022-07-11T21:00:31Z",
       "comments": []
     },
     {
@@ -1391,7 +1399,7 @@
       "id": "I_kwDOGKuqOc5LftGp",
       "title": "Specify Poplar1 VDAF",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/84",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "tgeoghegan",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -1400,8 +1408,8 @@
       ],
       "body": "An upcoming draft-irtf-cfrg-vdaf should fully specify Poplar1.",
       "createdAt": "2022-06-09T20:10:19Z",
-      "updatedAt": "2022-06-09T20:14:38Z",
-      "closedAt": null,
+      "updatedAt": "2022-07-11T21:00:31Z",
+      "closedAt": "2022-07-11T21:00:31Z",
       "comments": []
     },
     {
@@ -1409,7 +1417,7 @@
       "id": "I_kwDOGKuqOc5L9DhU",
       "title": "Field element decoding: check that the inputs are fully reduced",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/89",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -1421,8 +1429,8 @@
       ],
       "body": "@armfazh pointed this out here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88#discussion_r899660677",
       "createdAt": "2022-06-17T00:39:37Z",
-      "updatedAt": "2022-06-28T15:29:50Z",
-      "closedAt": null,
+      "updatedAt": "2022-07-11T21:13:02Z",
+      "closedAt": "2022-07-11T21:13:02Z",
       "comments": []
     },
     {
@@ -1640,6 +1648,22 @@
           "updatedAt": "2022-07-08T14:47:22Z"
         }
       ]
+    },
+    {
+      "number": 101,
+      "id": "I_kwDOGKuqOc5Nj8Zm",
+      "title": "Guidance for encoding IDPF index",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/101",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "IDPFs (and Poplar1 by extension) take in an \"index\" `alpha` represented as an `Unsigned`. @bifurcation pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/97#discussion_r918280713 that we also call this a \"bit-string\", which is ambiguous. The draft needs guidance on how applications should represent bit strings as IDPF indexes.",
+      "createdAt": "2022-07-11T21:48:30Z",
+      "updatedAt": "2022-07-11T21:48:51Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -7698,76 +7722,385 @@
       "id": "PR_kwDOGKuqOc47JZA-",
       "title": "Complete spec of Poplar1",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/97",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #84.\r\nCloses #44.\r\n\r\nCompletes the specification of Poplar1, including the reference\r\nimplementation and test vectors.\r\n\r\n* poc: Add additional tests for IdpfPoplar.\r\n* poc: Modify Idpf syntax so that the size of the keys is defined. This\r\n  is needed for decoding the keysfrom the Poplar1 input share.\r\n* poc: Fix a minor bug in IdpfPoplar that caused `eval()` to throw an\r\n  error when it shouldn't.\r\n* poc: Have `eval()` check that the prefixes are unique. This is needed\r\n  for Poplar1, which checks for one-hotness of the output shares.\r\n* poc: Fix various typos.\r\n* poc: Implement Poplar1 and add code for generating test vectors.\r\n* Add new field `Field255`, as required for IdpfPoplar.\r\n* Refactor Prg interface to align with reference implementation.\r\n* Re-generate test vectors and add test vectors for Poplar1Aes128.",
       "createdAt": "2022-07-09T23:04:45Z",
-      "updatedAt": "2022-07-09T23:04:45Z",
+      "updatedAt": "2022-07-11T21:38:10Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "a363a96268edbb2fedac26766696efaddcde0f70",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/84/1",
-      "headRefOid": "80904de365d288716a166f7df53ee8a9dd1df245",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "352a8d2db8c447c119f663650f7b198e562895cb",
+      "closedAt": "2022-07-11T21:00:31Z",
+      "mergedAt": "2022-07-11T21:00:31Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "a88e2cef27b754677e2a6c30bc1e070f75f9012a"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc49qe6R",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Looks good, I left remarks with a variety of small cleanups. I'm excited!",
+          "createdAt": "2022-07-11T15:34:24Z",
+          "updatedAt": "2022-07-11T19:02:42Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "This reflects a change I made in #95, which is not in draft-01. I see the `01` directory is named after the draft number, so I think the `agg_result`-unwrapping part of this should be backed out, and the new Poplar1 test vectors should go in a different directory. (\"latest\"? \"next\"? \"02\"?)",
+              "createdAt": "2022-07-11T15:34:24Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 199,
+              "body": "nit\r\n```suggestion\r\n  The type of the output depends on the value of `level`: If `level < Idpf.BITS-1`,\r\n```",
+              "createdAt": "2022-07-11T16:05:25Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 201,
+              "body": "For consistency:\r\n```suggestion\r\n  `Vec[Idpf.FieldInner]`; otherwise, if `level == Idpf.BITS-1`, then the output is\r\n```",
+              "createdAt": "2022-07-11T16:05:56Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 202,
+              "body": "Should we make the two layers of `Vec` explicit here?\r\n```suggestion\r\n  `Vec[Vec[Idpf.FieldInner]]`; otherwise, if `level == BITS-1`, then the output is\r\n  the value for a leaf node, which has type `Vec[Vec[Idpf.FieldLeaf]]`.\r\n```",
+              "createdAt": "2022-07-11T16:07:30Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 411,
+              "body": "nit\r\n```suggestion\r\n    # requires expanding PRG seeds into a vector of field elements\r\n```",
+              "createdAt": "2022-07-11T17:25:19Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 814,
+              "body": "I think this got left over from the prior section.\r\n```suggestion\r\nThe description of the IDPF evaluation algorithm makes use\r\n```",
+              "createdAt": "2022-07-11T18:32:41Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 849,
+              "body": "I think the prefix-of relationship is backwards here.\r\n```suggestion\r\n            # example, when using `IdpfPoplar` to compute heavy\r\n            # hitters, a string whose hit count exceeded the given\r\n            # threshold in the last round would be the prefix of each\r\n            # `prefix` in the current round. (See\r\n```",
+              "createdAt": "2022-07-11T18:37:28Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 867,
+              "body": "Should this refer to C.2? C.3 is just a proof.\r\n```suggestion\r\n# discussed at the end of [BBCGGI21, Appendix C.2]. This could on\r\n```",
+              "createdAt": "2022-07-11T18:42:10Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            },
+            {
+              "originalPosition": 961,
+              "body": "See my comment regarding the Prio3 test vector files",
+              "createdAt": "2022-07-11T18:49:08Z",
+              "updatedAt": "2022-07-11T19:02:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49riC0",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Couple of high-level notes, otherwise LGTM",
+          "createdAt": "2022-07-11T19:17:57Z",
+          "updatedAt": "2022-07-11T19:31:18Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "I note that before you say `1 <= L <= BITS` and here you say `[0, BITS)`.  The latter is the former shifted by one.  Just making sure this is correct.",
+              "createdAt": "2022-07-11T19:17:57Z",
+              "updatedAt": "2022-07-11T19:31:18Z"
+            },
+            {
+              "originalPosition": 173,
+              "body": "`alpha` is the index being sharded here, right?  If so, it would be clearer to call it a bit string, not an integer, since that's how it is referred to above.  (Maybe internally to the function it is converted to an integer, but that doesn't really matter as long as all participants put the bits in the same order.)\r\n\r\nWhere do the `beta` values come from?  If they're computed from `alpha`, it seems like there's a missing step for that.  If they're constant / defined by the IDPF, then it seems like they can be treated as internal to the function, not arguments.",
+              "createdAt": "2022-07-11T19:29:57Z",
+              "updatedAt": "2022-07-11T19:31:18Z"
+            },
+            {
+              "originalPosition": 233,
+              "body": "```suggestion\r\n```",
+              "createdAt": "2022-07-11T19:30:34Z",
+              "updatedAt": "2022-07-11T19:31:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49ryz1",
+          "commit": {
+            "abbreviatedOid": "80904de"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T20:24:51Z",
+          "updatedAt": "2022-07-11T20:24:52Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Right now the plan is for the test vectors to match a tag of the repo. For example, test_vec/01 will matches `draft-irtf-cfrg-vdaf-01`. Moreover, I plan to remove test vectors from old versions from the repo as changes are made. (See #100). Thus these \"in-between\" changes to the test vectors don't matter much for interop.",
+              "createdAt": "2022-07-11T20:24:51Z",
+              "updatedAt": "2022-07-11T20:24:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49rzay",
+          "commit": {
+            "abbreviatedOid": "80904de"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T20:27:16Z",
+          "updatedAt": "2022-07-11T20:27:16Z",
+          "comments": [
+            {
+              "originalPosition": 202,
+              "body": "Yes, nice catch.",
+              "createdAt": "2022-07-11T20:27:16Z",
+              "updatedAt": "2022-07-11T20:27:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49rz0E",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T20:28:52Z",
+          "updatedAt": "2022-07-11T20:28:52Z",
+          "comments": [
+            {
+              "originalPosition": 814,
+              "body": "\u2764\ufe0f ",
+              "createdAt": "2022-07-11T20:28:52Z",
+              "updatedAt": "2022-07-11T20:28:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49r3LW",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T20:41:28Z",
+          "updatedAt": "2022-07-11T20:41:28Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "The level SHOULD be in range `[0, BITS)`. Looking at all instances of \"BITS\" in the doc, I believe this is consistent. However I did spot a range bug in the definition of \"prefix\" below. Fixed now.",
+              "createdAt": "2022-07-11T20:41:28Z",
+              "updatedAt": "2022-07-11T20:41:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49r3fm",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T20:42:41Z",
+          "updatedAt": "2022-07-11T20:42:42Z",
+          "comments": [
+            {
+              "originalPosition": 233,
+              "body": "Done, here and elsewhere.",
+              "createdAt": "2022-07-11T20:42:41Z",
+              "updatedAt": "2022-07-11T20:42:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49r5IU",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T20:49:13Z",
+          "updatedAt": "2022-07-11T20:49:13Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "> `alpha` is the index being sharded here, right? If so, it would be clearer to call it a bit string, not an integer, since that's how it is referred to above. (Maybe internally to the function it is converted to an integer, but that doesn't really matter as long as all participants put the bits in the same order.)\r\n\r\n@schoppmp and I discussed this a bit and decided that `Unsigned` was the best representation of the input. A couple of alternatives:\r\n* `Bytes` - This is the most intuitive, however it has the problem of not being able to represent a bit strings whose length is not a multiple of 8. Of course we could consider requiring input strings be a multiple 8. This would probably be fine for most applications.\r\n* Define some sort of `BitString` type, perhaps even making use of ASN.1. We decided this would be a bit too complicated.\r\n \r\n> Where do the `beta` values come from? If they're computed from `alpha`, it seems like there's a missing step for that. If they're constant / defined by the IDPF, then it seems like they can be treated as internal to the function, not arguments.\r\n\r\nThe `beta` values are arbitrary and are picked by the caller. In `Poplar1`, they are chosen in a particular way.\r\n\r\n",
+              "createdAt": "2022-07-11T20:49:13Z",
+              "updatedAt": "2022-07-11T20:49:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49sCWy",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T21:29:10Z",
+          "updatedAt": "2022-07-11T21:29:10Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "On the first point: I'm not overly picky here.  Maybe you could just say somewhere that the Unsigned value is the input bit string of length `BITS`, interpreted as a `BITS`-bit big-endian integer (or whatever, doesn't really matter).\r\n\r\nOn the second point: If they're (a) generated unilaterally by the caller and (b) not used elsewhere, they should get generated internally to `gen`, not passed in as arguments.",
+              "createdAt": "2022-07-11T21:29:10Z",
+              "updatedAt": "2022-07-11T21:29:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc49sEJf",
+          "commit": {
+            "abbreviatedOid": "e3b465c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2022-07-11T21:38:10Z",
+          "updatedAt": "2022-07-11T21:38:10Z",
+          "comments": [
+            {
+              "originalPosition": 173,
+              "body": "> On the first point: I'm not overly picky here. Maybe you could just say somewhere that the Unsigned value is the input bit string of length `BITS`, interpreted as a `BITS`-bit big-endian integer (or whatever, doesn't really matter).\r\n\r\nYeah we should provide some guidance here, but at this point I'm not sure what to recommend here. Really any encoding is fine, so long as the application is consistent.\r\n\r\n\r\n> On the second point: If they're (a) generated unilaterally by the caller and (b) not used elsewhere, they should get generated internally to `gen`, not passed in as arguments.\r\n\r\nWell, one could imagine different applications for IDPFs that call for different values to be \"programmed\". For Poplar1, the programmed values are pairs `(1, k)` where `k` is a random field element used for verifying the output shares. When used in a plain DAF, there would be no need for the random field element. One could also imagine an application in which \"weighted\" inputs are used, i.e., rather than always output `1`, output some integer in range `[0, c)` chosen by the user.\r\n\r\nAnother thing to note is that the current IDPF syntax more or less matches the paper.\r\n",
+              "createdAt": "2022-07-11T21:38:10Z",
+              "updatedAt": "2022-07-11T21:38:10Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 98,
       "id": "PR_kwDOGKuqOc47JZzg",
       "title": "IdpfPoplar: Pack control bits more tightly in public share",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/98",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Merge #97 first.\r\n\r\nWhile at it, add the public share to the test vectors.",
       "createdAt": "2022-07-09T23:42:34Z",
-      "updatedAt": "2022-07-09T23:42:54Z",
+      "updatedAt": "2022-07-11T21:05:37Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/84/1",
-      "baseRefOid": "80904de365d288716a166f7df53ee8a9dd1df245",
+      "baseRefName": "main",
+      "baseRefOid": "a88e2cef27b754677e2a6c30bc1e070f75f9012a",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/84/2",
-      "headRefOid": "8e9220d9dcab9500fb380f486157394308118a1b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "2e86acce649d7f815e6bbac8b6415e4145f19e5b",
+      "closedAt": "2022-07-11T21:05:37Z",
+      "mergedAt": "2022-07-11T21:05:37Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "e2ab413e9268f8e0ea0630489d7c033c99a3749e"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc49rlxL",
+          "commit": {
+            "abbreviatedOid": "67d213d"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2022-07-11T19:33:07Z",
+          "updatedAt": "2022-07-11T19:33:07Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 99,
       "id": "PR_kwDOGKuqOc47JaE8",
-      "title": "Check that field eleements are fully reduced while decoding",
+      "title": "Check that field elements are fully reduced while decoding",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/99",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Closes #89.\r\nMerge #98 first.",
       "createdAt": "2022-07-09T23:55:38Z",
-      "updatedAt": "2022-07-09T23:56:03Z",
+      "updatedAt": "2022-07-11T21:13:03Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/84/2",
-      "baseRefOid": "8e9220d9dcab9500fb380f486157394308118a1b",
+      "baseRefName": "main",
+      "baseRefOid": "e2ab413e9268f8e0ea0630489d7c033c99a3749e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/89",
-      "headRefOid": "2c1d7aa9224a69d1cb08b186a3df3b157452f09b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "f612338b31b41382c9d6baae72d5fe2fbd12d076",
+      "closedAt": "2022-07-11T21:13:02Z",
+      "mergedAt": "2022-07-11T21:13:02Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "26365db5cbbc995c9a7daa1017505076fdf1bf02"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 100,
+      "id": "PR_kwDOGKuqOc47Nmdx",
+      "title": "Prepare to cut draft-02",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/100",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Merge #99 first.\r\n\r\nChanges for draft-02, including:\r\n\r\n* Bump VERSION\r\n* Update Change Log\r\n* Update test vectors",
+      "createdAt": "2022-07-11T18:28:45Z",
+      "updatedAt": "2022-07-11T21:18:18Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "26365db5cbbc995c9a7daa1017505076fdf1bf02",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-02",
+      "headRefOid": "ed7d2d40dc1f988a94f159dbc5843c5a1c866264",
+      "closedAt": "2022-07-11T21:18:17Z",
+      "mergedAt": "2022-07-11T21:18:17Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "5bfef02e11ac27de5106d013ce0c2e879f3883b4"
+      },
       "comments": [],
       "reviews": []
     }
