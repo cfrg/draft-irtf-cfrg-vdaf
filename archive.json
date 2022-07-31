@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2022-07-12T01:01:28.727668+00:00",
+  "timestamp": "2022-07-31T01:01:29.415031+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -57,6 +57,11 @@
       "name": "draft-02",
       "description": "",
       "color": "019C33"
+    },
+    {
+      "name": "draft-03",
+      "description": "",
+      "color": "5C9ACE"
     }
   ],
   "issues": [
@@ -1662,6 +1667,24 @@
       "body": "IDPFs (and Poplar1 by extension) take in an \"index\" `alpha` represented as an `Unsigned`. @bifurcation pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/97#discussion_r918280713 that we also call this a \"bit-string\", which is ambiguous. The draft needs guidance on how applications should represent bit strings as IDPF indexes.",
       "createdAt": "2022-07-11T21:48:30Z",
       "updatedAt": "2022-07-11T21:48:51Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 102,
+      "id": "I_kwDOGKuqOc5OxfY4",
+      "title": "Review: Henry Corrigan-Gibbs",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/102",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-03"
+      ],
+      "body": "@henrycg reviewed draft 02 and sent his feedback privately via an email. \r\n\r\n- [ ] In the introduction, point out that VDAF can provide DP in addition to MPC-style security. (See also #94.)\r\n- [ ] Section 6.1.2: \"Large subgroup\": Say exactly how large the group needs to be. (2^20-ish is going to be sufficient, I think.)\r\n- [ ] Section 7.2.2: There is an attack on the soundness of Prio3 stemming from a bug in [the paper](https://eprint.iacr.org/2019/188). The paper has been updated with a patch.\r\n- [ ] Section 7.2.2: For Fiat-Shamir to be secure we may need a larger or field or to re-run the proof check multiple times. More investigation is needed.\r\n- [ ] Section 8: We should flag early on in this section that, when used multiple times, Poplar1 has leakage (via prefix hit counts) that other VDAFs don't necessarily suffer from in the same way.\r\n- [ ] Section 8: Discuss hashing construction from Appendix B.",
+      "createdAt": "2022-07-28T23:38:49Z",
+      "updatedAt": "2022-07-28T23:56:16Z",
       "closedAt": null,
       "comments": []
     }
