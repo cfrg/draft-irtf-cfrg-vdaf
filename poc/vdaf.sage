@@ -13,6 +13,9 @@ import os
 # A VDAF.
 class Vdaf:
 
+    # Algorithm identifier for this VDAF, a 32-bit integer.
+    ID: Unsigned = None
+
     # Length of the verification key shared by the Aggregators.
     VERIFY_KEY_SIZE = None
 
@@ -273,6 +276,7 @@ class TestVdaf(Vdaf):
     Field = field.Field128
 
     # Associated parameters
+    ID = 0xFFFFFFFF
     VERIFY_KEY_SIZE = 0
     SHARES = 2
     ROUNDS = 1
@@ -351,15 +355,19 @@ class TestVdaf(Vdaf):
                 agg_shares))[0].as_unsigned()]
 
 
-def test_vdaf(cls,
+def test_vdaf(Vdaf,
               agg_param,
               measurements,
               expected_agg_result,
               print_test_vec=False,
               test_vec_instance=0):
-    # The nonces need not be random, but merely non-repeating.
+    # Test that the algorithm identifier is in the correct range.
+    assert 0 <= Vdaf.ID and Vdaf.ID < 2^32
+
+    # Run the VDAF on the set of measurmenets. Note that the nonces need not be
+    # random, but merely non-repeating.
     nonces = [gen_rand(16) for _ in range(len(measurements))]
-    agg_result = run_vdaf(cls,
+    agg_result = run_vdaf(Vdaf,
                           agg_param,
                           nonces,
                           measurements,
@@ -367,7 +375,7 @@ def test_vdaf(cls,
                           test_vec_instance)
     if agg_result != expected_agg_result:
         print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'.format(
-            cls.__name__, measurements, agg_result, expected_agg_result))
+            Vdaf.__name__, measurements, agg_result, expected_agg_result))
 
 
 if __name__ == '__main__':

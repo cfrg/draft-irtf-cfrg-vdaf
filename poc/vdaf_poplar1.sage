@@ -17,6 +17,7 @@ class Poplar1(Vdaf):
     Idpf = idpf.Idpf
 
     # Parameters required by `Vdaf`.
+    ID = 0x00001000
     VERIFY_KEY_SIZE = None # Set by Idpf.Prg
     SHARES = 2
     ROUNDS = 2
@@ -34,7 +35,7 @@ class Poplar1(Vdaf):
 
     @classmethod
     def measurement_to_input_shares(Poplar1, measurement):
-        dst = VERSION + b' poplar1'
+        dst = VERSION + I2OSP(Poplar1.ID, 4)
         prg = Poplar1.Idpf.Prg(
             gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))
 
@@ -96,7 +97,7 @@ class Poplar1(Vdaf):
     @classmethod
     def prep_init(Poplar1, verify_key, agg_id, agg_param,
                   nonce, public_share, input_share):
-        dst = VERSION + b' poplar1'
+        dst = VERSION + I2OSP(Poplar1.ID, 4)
         (level, prefixes) = agg_param
         (key, corr_seed, corr_inner, corr_leaf) = \
             Poplar1.decode_input_share(input_share)
@@ -379,6 +380,7 @@ if __name__ == '__main__':
 
     # Generate test vectors.
     cls = Poplar1Aes128.with_bits(4)
+    assert cls.ID == 0x00001000
     measurements = [0b1101]
     tests = [
         # (level, prefixes, expected result)
