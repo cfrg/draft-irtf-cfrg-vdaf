@@ -472,6 +472,7 @@ types enumerated in the following table.
 
 | Parameter          | Description              |
 |:-------------------|:-------------------------|
+| `ID`          | Algorithm identifier for this DAF. |
 | `SHARES`      | Number of input shares into which each measurement is sharded |
 | `Measurement` | Type of each measurement      |
 | `AggParam`    | Type of aggregation parameter |
@@ -489,6 +490,9 @@ values must be transmitted between parties over a network.
 > OPEN ISSUE It might be cleaner to define a type for each value, then have that
 > type implement an encoding where necessary. This way each method parameter has
 > a meaningful type hint. See issue#58.
+
+Each DAF is identified by a unique, 32-bit integer `ID`. Identifiers for each
+(V)DAF specified in this document are defined in {{codepoints}}.
 
 ## Sharding {#sec-daf-shard}
 
@@ -703,6 +707,7 @@ listed in {{vdaf-param}} are defined by each concrete VDAF.
 
 | Parameter         | Description              |
 |:------------------|:-------------------------|
+| `ID`              | Algorithm identifier for this VDAF. |
 | `VERIFY_KEY_SIZE` | Size (in bytes) of the verification key ({{sec-vdaf-prepare}}) |
 | `ROUNDS`          | Number of rounds of communication during the Preparation stage ({{sec-vdaf-prepare}}) |
 | `SHARES`          | Number of input shares into which each measurement is sharded ({{sec-vdaf-shard}}) |
@@ -719,6 +724,9 @@ other quantities are given a concrete type.
 
 > OPEN ISSUE It might be cleaner to define a type for each value, then have that
 > type implement an encoding where necessary. See issue#58.
+
+Each VDAF is identified by a unique, 32-bit integer `ID`. Identifiers for each
+(V)DAF specified in this document are defined in {{codepoints}}.
 
 ## Sharding {#sec-vdaf-shard}
 
@@ -1345,7 +1353,7 @@ For some FLPs, the encoded input also includes redundant field elements that are
 useful for checking the proof, but which are not needed after the proof has been
 checked. An example is the "integer sum" data type from {{CGB17}} in which an
 integer in range `[0, 2^k)` is encoded as a vector of `k` field elements (this
-type is also defined in {{prio3-sum}}). After consuming this vector,
+type is also defined in {{prio3aes128sum}}). After consuming this vector,
 all that is needed is the integer it represents. Thus the FLP defines an
 algorithm for truncating the input to the length of the aggregated output:
 
@@ -1415,7 +1423,7 @@ are described in {{prio3-helper-functions}}.
 ~~~
 def measurement_to_input_shares(Prio3, measurement):
     # Domain separation tag for PRG info string
-    dst = VERSION + b' prio3'
+    dst = VERSION + I2OSP(Prio3.ID, 4)
     inp = Prio3.Flp.encode(measurement)
     k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
@@ -1436,16 +1444,16 @@ def measurement_to_input_shares(Prio3, measurement):
         leader_input_share = vec_sub(leader_input_share,
                                      helper_input_share)
         encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
-        k_hint = Prio3.Prg.derive_seed(k_blind,
-                                       byte(j+1) + encoded)
+        k_hint = Prio3.Prg.derive_seed(
+            k_blind, dst + byte(j+1) + encoded)
         k_joint_rand = xor(k_joint_rand, k_hint)
         k_helper_input_shares.append(k_share)
         k_helper_blinds.append(k_blind)
         k_helper_hints.append(k_hint)
     k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
     encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
-    k_leader_hint = Prio3.Prg.derive_seed(k_leader_blind,
-                                          byte(0) + encoded)
+    k_leader_hint = Prio3.Prg.derive_seed(
+        k_leader_blind, dst + byte(0) + encoded)
     k_joint_rand = xor(k_joint_rand, k_leader_hint)
 
     # Finish joint randomness hints.
@@ -1533,7 +1541,7 @@ make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
 def prep_init(Prio3, verify_key, agg_id, _agg_param,
               nonce, _public_share, input_share):
     # Domain separation tag for PRG info string
-    dst = VERSION + b' prio3'
+    dst = VERSION + I2OSP(Prio3.ID, 4)
 
     (input_share, proof_share, k_blind, k_hint) = \
         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
@@ -1541,7 +1549,8 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
 
     out_share = Prio3.Flp.truncate(input_share)
 
-    k_query_rand = Prio3.Prg.derive_seed(verify_key, byte(255) + nonce)
+    k_query_rand = Prio3.Prg.derive_seed(
+        verify_key, dst + byte(255) + nonce)
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_query_rand,
@@ -1552,7 +1561,7 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded = Prio3.Flp.Field.encode_vec(input_share)
         k_joint_rand_share = Prio3.Prg.derive_seed(
-            k_blind, byte(agg_id) + encoded)
+            k_blind, dst + byte(agg_id) + encoded)
         k_joint_rand = xor(k_hint, k_joint_rand_share)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
@@ -2136,7 +2145,7 @@ way. The parameters for this circuit are summarized below.
 | `Field`          | `Field64` ({{field64}})      |
 {: title="Parameters of validity circuit Count."}
 
-### Prio3Aes128Sum {#prio3-sum}
+### Prio3Aes128Sum
 
 The next instance of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in range `[0, 2^bits)`, where `bits` is an
@@ -2230,7 +2239,7 @@ def decode(Histogram, output: Vec[Field128], _num_measurements):
     return [bucket_count.as_unsigned() for bucket_count in output]
 ~~~
 
-The validity circuit uses `Range2` (see {{prio3-sum}}) as its single gadget. It
+The validity circuit uses `Range2` (see {{prio3aes128sum}}) as its single gadget. It
 checks for one-hotness in two steps, as follows:
 
 ~~~
@@ -2319,7 +2328,7 @@ is zero everywhere except for one element, which is equal to one.
 The remainder of this section is structured as follows. IDPFs are defined in
 {{idpf}}; a concrete instantiation is given {{idpf-poplar}}. The Poplar1 VDAF is
 defined in {{poplar1-construction}} in terms of a generic IDPF. Finally, a
-concrete instantiation of Poplar1 is specified in {{poplar1-instantiation}};
+concrete instantiation of Poplar1 is specified in {{poplar1aes128}};
 test vectors can be found in {{test-vectors}}.
 
 ## Incremental Distributed Point Functions (IDPFs) {#idpf}
@@ -2343,7 +2352,7 @@ length-3 prefix of 25 (11001), but 7 (111) is not.
 Each of the programmed points `beta` is a vector of elements of some finite
 field. We distinguish two types of fields: One for inner nodes (denoted
 `Idpf.FieldInner`), and one for leaf nodes (`Idpf.FieldLeaf`). (Our
-instantiation of Poplar1 ({{poplar1-instantiation}}) will use a much larger
+instantiation of Poplar1 ({{poplar1aes128}}) will use a much larger
 field for leaf nodes than for inner nodes. This is to ensure the IDPF is
 "extractable" as defined in {{BBCGGI21}}, Definition 1.)
 
@@ -2450,7 +2459,7 @@ follows. Function `encode_input_shares` is defined in {{poplar1-helper-functions
 
 ~~~
 def measurement_to_input_shares(Poplar1, measurement):
-    dst = VERSION + b' poplar1'
+    dst = VERSION + I2OSP(Poplar1.ID, 4)
     prg = Poplar1.Idpf.Prg(
         gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))
 
@@ -2526,7 +2535,7 @@ The algorithms below make use of auxiliary functions `verify_context()` and
 ~~~
 def prep_init(Poplar1, verify_key, agg_id, agg_param,
               nonce, public_share, input_share):
-    dst = VERSION + b' poplar1'
+    dst = VERSION + I2OSP(Poplar1.ID, 4)
     (level, prefixes) = agg_param
     (key, corr_seed, corr_inner, corr_leaf) = \
         Poplar1.decode_input_share(input_share)
@@ -2945,7 +2954,7 @@ def decode_public_share(IdpfPoplar, encoded):
 ~~~
 {: #idpf-poplar-helpers title="Helper functions for IdpfPoplar."}
 
-## Poplar1Aes128 {#poplar1-instantiation}
+## Poplar1Aes128
 
 We refer to Poplar1 instantiated with IdpfPoplar (`VALUE_LEN == 2`)
 and PrgAes128 ({{prg-aes128}}) as Poplar1Aes128. This VDAF is suitable
@@ -3020,8 +3029,25 @@ removing it after unsharding.
 
 # IANA Considerations
 
-This document makes no request of IANA.
+A codepoint for each (V)DAF in this document is defined in the table below. Note
+that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 
+| Value                        | Scheme               | Type | Reference                |
+|:-----------------------------|:---------------------|:-----|:-------------------------|
+| `0x00000000`                 | Prio3Aes128Count     | VDAF | {{prio3aes128count}}     |
+| `0x00000001`                 | Prio3Aes128Sum       | VDAF | {{prio3aes128sum}}       |
+| `0x00000002`                 | Prio3Aes128Histogram | VDAF | {{prio3aes128histogram}} |
+| `0x00000003` to `0x00000FFF` | reserved for Prio3   | VDAF | n/a                      |
+| `0x00001000`                 | Poplar1Aes128        | VDAF | {{poplar1aes128}}        |
+| `0xFFFF0000` to `0xFFFFFFFF` | reserved             | n/a  | n/a                      |
+{: #codepoints title="Unique identifers for (V)DAFs."}
+
+> TODO Add IANA considerations for the codepoints summarized in {{codepoints}}.
+
+> OPEN ISSUE Currently the scheme includes the PRG. This means that we need bits
+> of the codepoint to differentiate between PRGs. We could instead make the PRG
+> generic (e.g., Prio3Count(Aes128) instead of Prio3Aes128Count) and define a
+> separate codepoint for.
 
 --- back
 
@@ -3048,7 +3074,7 @@ Byte strings are encoded in hexadecimal To make the tests deterministic,
 `gen_rand()` was replaced with a function that returns the requested number of
 `0x01` octets.
 
-## Prio3Aes128Count
+## Prio3Aes128Count {#testvec-prio3aes128count}
 {:numbered="false"}
 
 ~~~
@@ -3079,7 +3105,7 @@ agg_share_1: >-
 agg_result: 1
 ~~~
 
-## Prio3Aes128Sum
+## Prio3Aes128Sum {#testvec-prio3aes128sum}
 {:numbered="false"}
 
 ~~~
@@ -3133,7 +3159,7 @@ agg_share_1: >-
 agg_result: 100
 ~~~
 
-## Prio3Aes128Histogram
+## Prio3Aes128Histogram {#testvec-prio3aes128histogram}
 {:numbered="false"}
 
 ~~~
@@ -3186,7 +3212,7 @@ agg_share_1: >-
 agg_result: [0, 0, 1, 0]
 ~~~
 
-## Poplar1Aes128
+## Poplar1Aes128 {#testvec-poplar1aes128}
 {:numbered="false"}
 
 ### Sharding

@@ -9,6 +9,9 @@ import json
 # A DAF
 class Daf:
 
+    # Algorithm identifier for this DAF, a 32-bit integer.
+    ID: Unsigned = None
+
     # The number of Aggregators.
     SHARES: Unsigned = None
 
@@ -111,6 +114,7 @@ class TestDaf(Daf):
     Field = field.Field128
 
     # Associated parameters
+    ID = 0xFFFFFFFF
     SHARES = 2
 
     # Associated types
@@ -151,16 +155,20 @@ class TestDaf(Daf):
         pass
 
 
-def test_daf(cls,
+def test_daf(Daf,
              agg_param,
              measurements,
              expected_agg_result):
-    agg_result = run_daf(cls,
+    # Test that the algorithm identifier is in the correct range.
+    assert 0 <= Daf.ID and Daf.ID < 2^32
+
+    # Run the DAF on the set of measurements.
+    agg_result = run_daf(Daf,
                          agg_param,
                          measurements)
     if agg_result != expected_agg_result:
         print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'.format(
-            cls, measurements, agg_result, expected_agg_result))
+            Daf.__classname__, measurements, agg_result, expected_agg_result))
 
 
 if __name__ == '__main__':
