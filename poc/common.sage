@@ -1,9 +1,9 @@
 # Functionalities used by other modules.
 
+from functools import reduce
 from typing import List, TypeVar
-
-import struct
 import os
+import struct
 
 
 # If set, then test vectors will be generated. A fixed source of randomness is
@@ -109,6 +109,10 @@ def OS2IP(octets, skip_assert=False):
     if not skip_assert:
         assert octets == I2OSP(ret, len(octets))
     return ret
+
+# Return the concatenated byte strings.
+def concat(strings: Vec[Bytes]) -> Bytes:
+    return reduce(lambda x, y: x + y, strings)
 
 def print_wrapped_line(line, tab):
     width=72
