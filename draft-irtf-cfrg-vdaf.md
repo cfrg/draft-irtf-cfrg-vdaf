@@ -355,6 +355,9 @@ Some common functionalities:
 * `byte(int: Unsigned) -> Bytes` returns the representation of `int` as a byte
   string. The value of `int` MUST be in `[0,256)`.
 
+* `concat(parts: Vec[Bytes]) -> Bytes` returns the concatenation of the input
+  byte strings, i.e., `parts[0] || ... || parts[len(parts)-1]`.
+
 * `xor(left: Bytes, right: Bytes) -> Bytes` returns the bitwise XOR of `left`
   and `right`. An exception is raised if the inputs are not the same length.
 
@@ -1161,6 +1164,11 @@ def expand_into_vec(Prg,
 > OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be more
 > performant (https://eprint.iacr.org/2019/074.pdf). See issue#32.
 
+> TODO(issue #106) Decide if it's safe to model this construction as a random
+> oracle. `PrgAes128.derive_seed()` is used for the Fiat-Shamir heuristic in
+> Prio3 ({{prio3}}). A fixed-key is used for this step (the all-zero string). A
+> reasoanble starting point would be to model AES as an ideal cipher.
+
 Our first construction, `PrgAes128`, converts a blockcipher, namely AES-128,
 into a PRG. Seed expansion involves two steps. In the first step, CMAC
 {{!RFC4493}} is applied to the seed and info string to get a fresh key. In the
@@ -1416,22 +1424,22 @@ shares (called the "leader" shares below) are vectors of field elements. The
 other shares (called the "helper" shares) are represented instead by PRG seeds,
 which are expanded into vectors of field elements.
 
-The code refers to a pair of auxiliary functions for encoding the shares. These
-are called `encode_leader_share` and `encode_helper_share` respectively and they
-are described in {{prio3-helper-functions}}.
+The code refers to auxiliary functions for encoding the shares and deriving the
+joint randomness. In particular, `encode_leader_share` and
+`encode_helper_share` are used for encoding and `joint_rand` is used for joint
+randomness. These are defined in {{prio3-helper-functions}}.
 
 ~~~
 def measurement_to_input_shares(Prio3, measurement):
     # Domain separation tag for PRG info string
     dst = VERSION + I2OSP(Prio3.ID, 4)
     inp = Prio3.Flp.encode(measurement)
-    k_joint_rand = zeros(Prio3.Prg.SEED_SIZE)
 
     # Generate input shares.
     leader_input_share = inp
     k_helper_input_shares = []
     k_helper_blinds = []
-    k_helper_hints = []
+    k_joint_rand_parts = []
     for j in range(Prio3.SHARES-1):
         k_blind = gen_rand(Prio3.Prg.SEED_SIZE)
         k_share = gen_rand(Prio3.Prg.SEED_SIZE)
@@ -1444,22 +1452,19 @@ def measurement_to_input_shares(Prio3, measurement):
         leader_input_share = vec_sub(leader_input_share,
                                      helper_input_share)
         encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
-        k_hint = Prio3.Prg.derive_seed(
+        k_joint_rand_part = Prio3.Prg.derive_seed(
             k_blind, dst + byte(j+1) + encoded)
-        k_joint_rand = xor(k_joint_rand, k_hint)
         k_helper_input_shares.append(k_share)
         k_helper_blinds.append(k_blind)
-        k_helper_hints.append(k_hint)
+        k_joint_rand_parts.append(k_joint_rand_part)
     k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
     encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
-    k_leader_hint = Prio3.Prg.derive_seed(
+    k_leader_joint_rand_part = Prio3.Prg.derive_seed(
         k_leader_blind, dst + byte(0) + encoded)
-    k_joint_rand = xor(k_joint_rand, k_leader_hint)
+    k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
 
-    # Finish joint randomness hints.
-    for j in range(Prio3.SHARES-1):
-        k_helper_hints[j] = xor(k_helper_hints[j], k_joint_rand)
-    k_leader_hint = xor(k_leader_hint, k_joint_rand)
+    # Compute joint randomness seed.
+    k_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
 
     # Generate the proof shares.
     prove_rand = Prio3.Prg.expand_into_vec(
@@ -1489,6 +1494,9 @@ def measurement_to_input_shares(Prio3, measurement):
         leader_proof_share = vec_sub(leader_proof_share,
                                      helper_proof_share)
 
+    # The Leader's "hint" consists of the joint randomness parts of the
+    # other Aggregators.
+    k_leader_hint = k_joint_rand_parts[1:]
     input_shares = []
     input_shares.append(Prio3.encode_leader_share(
         leader_input_share,
@@ -1497,11 +1505,15 @@ def measurement_to_input_shares(Prio3, measurement):
         k_leader_hint,
     ))
     for j in range(Prio3.SHARES-1):
+        # Each Helper's hint consists of the joint randomness part of the
+        # other Aggregators.
+        k_helper_hint = k_joint_rand_parts[:j+1] + \
+                        k_joint_rand_parts[j+2:]
         input_shares.append(Prio3.encode_helper_share(
             k_helper_input_shares[j],
             k_helper_proof_shares[j],
             k_helper_blinds[j],
-            k_helper_hints[j],
+            k_helper_hint,
         ))
     return (b'', input_shares)
 ~~~
@@ -1517,25 +1529,22 @@ which is used to decide whether to accept.
 
 In addition, the Aggregators must ensure that they have all used the same joint
 randomness for the query-generation algorithm. The joint randomness is generated
-by a PRG seed. Each Aggregator derives an XOR secret share of this seed from its
-input share and the "blind" generated by the client. Thus, before running the
-query-generation algorithm, it must first gather the XOR secret shares derived
-by the other Aggregators.
+by a PRG seed. Each Aggregator derives a "part" of this seed from its input
+share and the "blind" generated by the client. The seed is derived by hashing
+together the parts, so before running the query-generation algorithm, it must
+first gather the parts derived by the other Aggregators.
 
 In order to avoid extra round of communication, the Client sends each Aggregator
-a "hint" equal to the XOR of the other Aggregators' shares of the joint
-randomness seed. This leaves open the possibility that the Client cheated by,
-say, forcing the Aggregators to use joint randomness that biases the proof check
-procedure some way in its favor. To mitigate this, the Aggregators also check
-that they have all computed the same joint randomness seed before accepting
-their output shares. To do so, they exchange their XOR shares of the PRG seed
-along with their verifier shares.
-
-> NOTE This optimization somewhat diverges from Section 6.2.3 of {{BBCGGI19}}.
-> Security analysis is needed.
+a "hint" consisting of the other Aggregators' parts of the joint randomness
+seed. This leaves open the possibility that the Client cheated by, say, forcing
+the Aggregators to use joint randomness that biases the proof check procedure
+some way in its favor. To mitigate this, the Aggregators also check that they
+have all computed the same joint randomness seed before accepting their output
+shares. To do so, they exchange their parts of the joint randomness along with
+their verifier shares.
 
 The algorithms required for preparation are defined as follows. These algorithms
-make use of encoding and decoding methods defined in {{prio3-helper-functions}}.
+make use of methods defined in {{prio3-helper-functions}}.
 
 ~~~
 def prep_init(Prio3, verify_key, agg_id, _agg_param,
@@ -1557,12 +1566,15 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
         dst,
         Prio3.Flp.QUERY_RAND_LEN
     )
-    joint_rand, k_joint_rand, k_joint_rand_share = [], None, None
+    joint_rand, k_joint_rand, k_joint_rand_part = [], None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded = Prio3.Flp.Field.encode_vec(input_share)
-        k_joint_rand_share = Prio3.Prg.derive_seed(
+        k_joint_rand_part = Prio3.Prg.derive_seed(
             k_blind, dst + byte(agg_id) + encoded)
-        k_joint_rand = xor(k_hint, k_joint_rand_share)
+        k_joint_rand_parts = k_hint[:agg_id] + \
+                             [k_joint_rand_part] + \
+                             k_hint[agg_id:]
+        k_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_joint_rand,
@@ -1576,7 +1588,7 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
                                      Prio3.SHARES)
 
     prep_msg = Prio3.encode_prep_share(verifier_share,
-                                       k_joint_rand_share)
+                                       k_joint_rand_part)
     return (out_share, k_joint_rand, prep_msg)
 
 def prep_next(Prio3, prep, inbound):
@@ -1592,21 +1604,24 @@ def prep_next(Prio3, prep, inbound):
     return out_share
 
 def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
+    dst = VERSION + I2OSP(Prio3.ID, 4)
     verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
-    k_joint_rand_check = zeros(Prio3.Prg.SEED_SIZE)
+    k_joint_rand_parts = []
     for encoded in prep_shares:
-        (verifier_share, k_joint_rand_share) = \
+        (verifier_share, k_joint_rand_part) = \
             Prio3.decode_prep_share(encoded)
 
         verifier = vec_add(verifier, verifier_share)
 
         if Prio3.Flp.JOINT_RAND_LEN > 0:
-            k_joint_rand_check = xor(k_joint_rand_check,
-                                     k_joint_rand_share)
+            k_joint_rand_parts.append(k_joint_rand_part)
 
     if not Prio3.Flp.decide(verifier):
         raise ERR_VERIFY # proof verifier check failed
 
+    k_joint_rand_check = None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        k_joint_rand_check = Prio3.joint_rand(k_joint_rand_parts)
     return Prio3.encode_prep_msg(k_joint_rand_check)
 ~~~
 {: #prio3-prep-state title="Preparation state for Prio3."}
@@ -1643,6 +1658,12 @@ def agg_shares_to_result(Prio3, _agg_param, agg_shares,
 ### Auxiliary Functions {#prio3-helper-functions}
 
 ~~~
+def joint_rand(Prio3, k_joint_rand_parts):
+    dst = VERSION + I2OSP(Prio3.ID, 4)
+    return Prio3.Prg.derive_seed(
+        zeros(Prio3.Prg.SEED_SIZE),
+        dst + byte(255) + concat(k_joint_rand_parts))
+
 def encode_leader_share(Prio3,
                         input_share,
                         proof_share,
@@ -1653,7 +1674,7 @@ def encode_leader_share(Prio3,
     encoded += Prio3.Flp.Field.encode_vec(proof_share)
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded += k_blind
-        encoded += k_hint
+        encoded += concat(k_hint)
     return encoded
 
 def decode_leader_share(Prio3, encoded):
@@ -1667,7 +1688,10 @@ def decode_leader_share(Prio3, encoded):
     k_blind, k_hint = None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         k_blind, encoded = encoded[:l], encoded[l:]
-        k_hint, encoded = encoded[:l], encoded[l:]
+        k_hint = []
+        for _ in range(Prio3.SHARES-1):
+            k_joint_rand_part, encoded = encoded[:l], encoded[l:]
+            k_hint.append(k_joint_rand_part)
     if len(encoded) != 0:
         raise ERR_DECODE
     return (input_share, proof_share, k_blind, k_hint)
@@ -1682,7 +1706,7 @@ def encode_helper_share(Prio3,
     encoded += k_proof_share
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded += k_blind
-        encoded += k_hint
+        encoded += concat(k_hint)
     return encoded
 
 def decode_helper_share(Prio3, dst, agg_id, encoded):
@@ -1700,7 +1724,10 @@ def decode_helper_share(Prio3, dst, agg_id, encoded):
     k_blind, k_hint = None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         k_blind, encoded = encoded[:l], encoded[l:]
-        k_hint, encoded = encoded[:l], encoded[l:]
+        k_hint = []
+        for _ in range(Prio3.SHARES-1):
+            k_joint_rand_part, encoded = encoded[:l], encoded[l:]
+            k_hint.append(k_joint_rand_part)
     if len(encoded) != 0:
         raise ERR_DECODE
     return (input_share, proof_share, k_blind, k_hint)

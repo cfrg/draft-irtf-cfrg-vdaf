@@ -111,8 +111,8 @@ def OS2IP(octets, skip_assert=False):
     return ret
 
 # Return the concatenated byte strings.
-def concat(strings: Vec[Bytes]) -> Bytes:
-    return reduce(lambda x, y: x + y, strings)
+def concat(parts: Vec[Bytes]) -> Bytes:
+    return reduce(lambda x, y: x + y, parts)
 
 def print_wrapped_line(line, tab):
     width=72
