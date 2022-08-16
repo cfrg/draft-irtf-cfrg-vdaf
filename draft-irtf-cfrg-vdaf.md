@@ -178,10 +178,10 @@ employing DP techniques alone must strike a delicate balance between privacy and
 utility.
 
 The ideal goal for a privacy-preserving measurement system is that of secure
-multi-party computation: No participant in the protocol should learn anything
-about an individual input beyond what it can deduce from the aggregate. In this
-document, we describe Verifiable Distributed Aggregation Functions (VDAFs) as a
-general class of protocols that achieve this goal.
+multi-party computation (MPC): No participant in the protocol should learn
+anything about an individual input beyond what it can deduce from the aggregate.
+In this document, we describe Verifiable Distributed Aggregation Functions
+(VDAFs) as a general class of protocols that achieve this goal.
 
 VDAF schemes achieve their privacy goal by distributing the computation of the
 aggregate among a number of non-colluding aggregation servers. As long as a
@@ -189,7 +189,15 @@ subset of the servers executes the protocol honestly, VDAFs guarantee that no
 input is ever accessible to any party besides the client that submitted it. At
 the same time, VDAFs are "verifiable" in the sense that malformed inputs that
 would otherwise garble the output of the computation can be detected and removed
-from the set of inputs.
+from the set of input measurements.
+
+In addition to these MPC-style security goals, VDAFs can be composed with
+various mechanisms for differential privacy, thereby providing the added
+assurance that the aggregate result iteslf does not leak too much information
+about any one measurement.
+
+> TODO(issue #94) Provide guidance for local and central DP and point to it
+> here.
 
 The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
