@@ -283,7 +283,7 @@ security considerations for VDAFs.
 
 ## Change Log
 
-(*) Indicates a change that breaks wire compatibility with the previous draft.
+(\*) Indicates a change that breaks wire compatibility with the previous draft.
 
 02:
 
