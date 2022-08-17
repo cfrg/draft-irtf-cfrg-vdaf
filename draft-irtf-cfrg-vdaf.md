@@ -1567,17 +1567,9 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
     (input_share, proof_share, k_blind, k_hint) = \
         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
         Prio3.decode_helper_share(dst, agg_id, input_share)
-
     out_share = Prio3.Flp.truncate(input_share)
 
-    k_query_rand = Prio3.Prg.derive_seed(
-        verify_key, dst + byte(255) + nonce)
-    query_rand = Prio3.Prg.expand_into_vec(
-        Prio3.Flp.Field,
-        k_query_rand,
-        dst,
-        Prio3.Flp.QUERY_RAND_LEN
-    )
+    # Compute joint randomness.
     joint_rand, k_joint_rand, k_joint_rand_part = [], None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded = Prio3.Flp.Field.encode_vec(input_share)
@@ -1593,6 +1585,14 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
             dst,
             Prio3.Flp.JOINT_RAND_LEN
         )
+
+    # Query the input and proof share.
+    query_rand = Prio3.Prg.expand_into_vec(
+        Prio3.Flp.Field,
+        verify_key,
+        dst + byte(255) + nonce,
+        Prio3.Flp.QUERY_RAND_LEN
+    )
     verifier_share = Prio3.Flp.query(input_share,
                                      proof_share,
                                      query_rand,
