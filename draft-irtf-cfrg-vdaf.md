@@ -293,6 +293,19 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+03:
+
+* Define codepoints for (V)DAFs and use them for domain separation in Prio3 and
+  Poplar1. (\*)
+
+* Prio3: Align joint randomness computation with revised paper {{BBCGGI19}}.
+  This change mitigates an attack on robustness. (\*)
+
+* Prio3: Remove an intermediate PRG evaluation from query randomness generation.
+  (\*)
+
+* Add additional guidance for choosing FFT-friendly fields.
+
 02:
 
 * Complete the initial specification of Poplar1.
