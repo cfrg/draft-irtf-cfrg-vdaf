@@ -312,7 +312,7 @@ security considerations for VDAFs.
 
 * Prg: Add a method for statefully generating a vector of field elements.
 
-* Field: Require that field elements are fully reduced before decoding. (*)
+* Field: Require that field elements are fully reduced before decoding. (\*)
 
 * Define new field Field255.
 
@@ -323,7 +323,7 @@ security considerations for VDAFs.
 * Define Distributed Aggregation Functions (DAFs).
 
 * Prio3: Move proof verifier check from `prep_next()` to
-  `prep_shares_to_prep()`. (*)
+  `prep_shares_to_prep()`. (\*)
 
 * Remove public parameter and replace verification parameter with a
   "verification key" and "Aggregator ID".
