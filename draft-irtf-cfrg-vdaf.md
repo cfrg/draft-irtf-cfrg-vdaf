@@ -193,7 +193,7 @@ from the set of input measurements.
 
 In addition to these MPC-style security goals, VDAFs can be composed with
 various mechanisms for differential privacy, thereby providing the added
-assurance that the aggregate result iteslf does not leak too much information
+assurance that the aggregate result itself does not leak too much information
 about any one measurement.
 
 > TODO(issue #94) Provide guidance for local and central DP and point to it
@@ -1082,7 +1082,7 @@ def vec_add(left: Vec[Field], right: Vec[Field]):
 ### FFT-Friendly Fields {#field-fft-friendly}
 
 Some VDAFs require fields that are suitable for efficient computation of the
-discrete Fourier transform, as this allows for fast polynomial interoplation.
+discrete Fourier transform, as this allows for fast polynomial interpolation.
 (One example is Prio3 ({{prio3}}) when instantiated with the generic FLP of
 {{flp-generic-construction}}.) Specifically, a field is said to be
 "FFT-friendly" if, in addition to satisfying the interface described in
@@ -1192,7 +1192,7 @@ def expand_into_vec(Prg,
 > TODO(issue #106) Decide if it's safe to model this construction as a random
 > oracle. `PrgAes128.derive_seed()` is used for the Fiat-Shamir heuristic in
 > Prio3 ({{prio3}}). A fixed-key is used for this step (the all-zero string). A
-> reasoanble starting point would be to model AES as an ideal cipher.
+> reasonable starting point would be to model AES as an ideal cipher.
 
 Our first construction, `PrgAes128`, converts a blockcipher, namely AES-128,
 into a PRG. Seed expansion involves two steps. In the first step, CMAC
@@ -2418,7 +2418,7 @@ scheme is comprised of the following algorithms:
   Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])` is the randomized IDPF-key
   generation algorithm. Its inputs are the index `alpha` and the values `beta`.
   The value of `alpha` MUST be in range `[0, 2^BITS)`. The output is a public
-  part that is sent to all aggregators and a vector of private IDPF keys, one
+  part that is sent to all Aggregators and a vector of private IDPF keys, one
   for each aggregator.
 
 * `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned,
@@ -2817,7 +2817,7 @@ functions `extend()`, `convert()`, and `encode_public_share()` defined in
 field `GF(2)`.
 
 ~~~
-def gen(IpdfPoplar, alpha, beta_inner, beta_leaf):
+def gen(IdpfPoplar, alpha, beta_inner, beta_leaf):
     if alpha >= 2^IdpfPoplar.BITS:
         raise ERR_INPUT # alpha too long
     if len(beta_inner) != IdpfPoplar.BITS - 1:
@@ -3092,7 +3092,7 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 | `0x00000003` to `0x00000FFF` | reserved for Prio3   | VDAF | n/a                      |
 | `0x00001000`                 | Poplar1Aes128        | VDAF | {{poplar1aes128}}        |
 | `0xFFFF0000` to `0xFFFFFFFF` | reserved             | n/a  | n/a                      |
-{: #codepoints title="Unique identifers for (V)DAFs."}
+{: #codepoints title="Unique identifiers for (V)DAFs."}
 
 > TODO Add IANA considerations for the codepoints summarized in {{codepoints}}.
 
@@ -3119,7 +3119,7 @@ Wood for useful feedback on and contributions to the spec.
 Test vectors cover the generation of input shares and the conversion of input
 shares into output shares. Vectors specify the verification key, measurements,
 aggregation parameter, and any parameters needed to construct the VDAF. (For
-example, for `Prio3AesSum`, the user specifies the number of bits for
+example, for `Prio3Aes128Sum`, the user specifies the number of bits for
 representing each summand.)
 
 Byte strings are encoded in hexadecimal To make the tests deterministic,
