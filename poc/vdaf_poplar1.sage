@@ -28,8 +28,8 @@ class Poplar1(Vdaf):
     AggParam = Tuple[Unsigned, Vec[Unsigned]]
     Prep = Tuple[Bytes,
                  Unsigned,
-                 Union[Vec[Vec[Union[Idpf.FieldInner, Field2]]],
-                       Vec[Vec[Union[Idpf.FieldLeaf, Field2]]]]]
+                 Union[Vec[Vec[Union[Idpf.FieldInner, Field2]]]],
+                       Vec[Vec[Union[Idpf.FieldLeaf, Field2]]]]
     OutShare = Union[Vec[Vec[Idpf.FieldInner]],
                      Vec[Vec[Idpf.FieldLeaf]]]
     AggResult = Vec[Unsigned]
@@ -71,9 +71,10 @@ class Poplar1(Vdaf):
             prefix = (measurement // (2 ** (Poplar1.Idpf.BITS - 1 - level)))
             Field = Poplar1.Idpf.current_field(level)
             k = auth[level]
+            print('randomness\t:', k)
             (leader_data_share, leader_auth_share, leader_indicator_share) = \
                 Poplar1.Idpf.eval(0, public_share, keys[0], level, [prefix])[0]
-            helper_auth_share = leader_auth_share - k
+            helper_auth_share = leader_auth_share -k
             helper_data_share = leader_data_share - Field(1)
             w = Poplar1.hash1(level, prefix, \
                     [leader_data_share, leader_auth_share]) + \
@@ -124,8 +125,9 @@ class Poplar1(Vdaf):
         # and output share
         # sum over all prefixes for boundedness verification
         out_share = []
-        data_sum = Field(0)
-        auth_sum = Field(0)
+        data_sum = Field(1) if agg_id == 0 else Field(0)
+        auth_sum = auth[level] if agg_id == 0 else Field(0)
+        print('auth_sum:\t', auth_sum)
         corr_results = []
         correction_word = corr_inner[level] if level < Poplar1.Idpf.BITS-1 \
             else corr_leaf
@@ -172,12 +174,10 @@ class Poplar1(Vdaf):
             return (new_prep, msg)
         if status == b'finish':
             (agg_id, check_bound, out_share) = prep_state
-            # Helper checks that the nonzero entry, if there is one, equals 1
+            # Helper (only) verifies boundedness
             if (agg_id == 0):
                 return out_share
-            elif (agg_id == 1) and \
-                ((inbound[:Poplar1.Idpf.Prg.SEED_SIZE] == check_bound) or \
-                 (inbound[Poplar1.Idpf.Prg.SEED_SIZE:] == check_bound)):
+            elif (agg_id == 1) and (inbound == check_bound):
                 return out_share
             print('inbound:\t',inbound.hex())
             print('check_bound:\t', check_bound.hex())
