@@ -28,7 +28,6 @@ class IdpfPoplar(Idpf):
             raise ERR_INPUT # alpha too long
         if len(beta_inner) != IdpfPoplar.BITS - 1:
             raise ERR_INPUT # beta_inner vector is the wrong size
-
         init_seed = [
             gen_rand(IdpfPoplar.Prg.SEED_SIZE),
             gen_rand(IdpfPoplar.Prg.SEED_SIZE),
@@ -63,7 +62,6 @@ class IdpfPoplar(Idpf):
                     else beta_leaf
             if len(b) != IdpfPoplar.VALUE_LEN:
                 raise ERR_INPUT # beta too long or too short
-
             w_cw = vec_add(vec_sub(b, w0), w1)
             if ctrl[1] == Field2(1):
                 w_cw = vec_neg(w_cw)
@@ -159,7 +157,9 @@ class IdpfPoplar(Idpf):
         prg = IdpfPoplar.Prg(seed, dst)
         next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
         Field = IdpfPoplar.current_field(level)
-        w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
+        w = prg.next_vec(Field, 1) #data vector
+        w += prg.next_vec(Field, 1) #auth vector
+        w += prg.next_vec(Field2, 1) #field vector
         return (next_seed, w)
 
     @classmethod
@@ -176,7 +176,8 @@ class IdpfPoplar(Idpf):
             in enumerate(correction_words):
             Field = IdpfPoplar.current_field(level)
             encoded += seed_cw
-            encoded += Field.encode_vec(w_cw)
+            encoded += Field.encode_vec(w_cw[:2])
+            encoded += Field2.encode_vec(w_cw[2:])
         return encoded
 
     @classmethod
@@ -192,9 +193,12 @@ class IdpfPoplar(Idpf):
             packed_ctrl >>= 2
             l = IdpfPoplar.Prg.SEED_SIZE
             seed_cw, encoded = encoded[:l], encoded[l:]
-            l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
+            l = Field.ENCODED_SIZE * 2
             encoded_w_cw, encoded = encoded[:l], encoded[l:]
-            w_cw = Field.decode_vec(encoded_w_cw)
+            l = Field2.ENCODED_SIZE
+            encoded_w_indicator, encoded = encoded[:l], encoded[l:]
+            w_cw = Field.decode_vec(encoded_w_cw) + \
+                   Field2.decode_vec(encoded_w_indicator)
             correction_words.append((seed_cw, ctrl_cw, w_cw))
         if len(encoded) != 0:
             raise ERR_DECODE
@@ -227,7 +231,7 @@ class IdpfPoplar(Idpf):
 if __name__ == '__main__':
     cls = IdpfPoplar \
                 .with_prg(prg.PrgAes128) \
-                .with_value_len(2)
+                .with_value_len(3)
     test_idpf(cls.with_bits(16), 0b1111000011110000, 15, [0b1111000011110000])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 14, [0b111100001111000])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 13, [0b11110000111100])
