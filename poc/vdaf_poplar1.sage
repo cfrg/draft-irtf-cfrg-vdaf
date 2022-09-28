@@ -37,8 +37,8 @@ class Poplar1(Vdaf):
     @classmethod
     def measurement_to_input_shares(Poplar1, measurement):
         dst = VERSION + I2OSP(Poplar1.ID, 4)
-        prg = Poplar1.Idpf.Prg(
-            gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))
+        corr_seed = gen_rand(Poplar1.Idpf.Prg.SEED_SIZE)
+        prg = Poplar1.Idpf.Prg(corr_seed, dst + byte(255))
 
         # Construct the IDPF values for each level of the IDPF tree.
         # Each "data" value is 1; in addition, the Client generates
@@ -84,7 +84,7 @@ class Poplar1(Vdaf):
             else:
                 corr_leaf = w
 
-        input_shares = Poplar1.encode_input_shares(keys, auth)
+        input_shares = Poplar1.encode_input_shares(keys, corr_seed)
         # Each input share consists of the Aggregator's IDPF key
         # and the leader's includes the random value k
         # The public share consists of the IDPF public share and
@@ -102,7 +102,7 @@ class Poplar1(Vdaf):
         (level, prefixes) = agg_param
         (idpf_public_share, corr_inner, corr_leaf) = \
             Poplar1.decode_public_share(public_share)
-        (key, auth) = Poplar1.decode_input_share(input_share)
+        (key, corr_seed) = Poplar1.decode_input_share(input_share)
 
         Field = Poplar1.Idpf.current_field(level)
 
@@ -112,6 +112,13 @@ class Poplar1(Vdaf):
                                   key,
                                   level,
                                   prefixes)
+
+        #Leader expands randomness
+        if agg_id == 0:
+            prg = Poplar1.Idpf.Prg(corr_seed, dst + byte(255))
+            auth = prg.next_vec(Poplar1.Idpf.FieldInner,
+                                Poplar1.Idpf.BITS - 1)
+            auth += prg.next_vec(Poplar1.Idpf.FieldLeaf, 1)
 
         # Prepare one-hotness and boundnedness verification
         # and output share
@@ -212,11 +219,9 @@ class Poplar1(Vdaf):
         return list(map(lambda x: x.as_unsigned(), agg))
 
     @classmethod
-    def encode_input_shares(Poplar1, keys, auth):
+    def encode_input_shares(Poplar1, keys, corr_seed):
         input_shares = []
-        leader_encoded = Bytes([0]) + keys[0]
-        leader_encoded += Poplar1.Idpf.FieldInner.encode_vec(auth[:-1])
-        leader_encoded += Poplar1.Idpf.FieldLeaf.encode_vec([auth[-1]])
+        leader_encoded = Bytes([0]) + keys[0] + corr_seed
         helper_encoded = Bytes([1]) + keys[1]
         return (leader_encoded, helper_encoded)
 
@@ -247,18 +252,11 @@ class Poplar1(Vdaf):
         l = Poplar1.Idpf.KEY_SIZE
         key, encoded = encoded[:l], encoded[l:]
         if id == Bytes([0]):
-            l = Poplar1.Idpf.FieldInner.ENCODED_SIZE \
-            * (Poplar1.Idpf.BITS - 1)
-            encoded_auth_inner, encoded = encoded[:l], encoded[l:]
-            auth_inner = Poplar1.Idpf.FieldInner.decode_vec(
-                encoded_auth_inner)
-            l = Poplar1.Idpf.FieldLeaf.ENCODED_SIZE
-            encoded_auth_leaf, encoded = encoded[:l], encoded[l:]
-            auth = auth_inner + Poplar1.Idpf.FieldLeaf.decode_vec(
-            encoded_auth_leaf)
+            l = Poplar1.Idpf.Prg.SEED_SIZE
+            corr_seed, encoded = encoded[:l], encoded[l:]
         else:
-            auth = None
-        return (key, auth)
+            corr_seed = None
+        return (key, corr_seed)
 
     @classmethod
     def encode_agg_param(Poplar1, level, prefixes):
