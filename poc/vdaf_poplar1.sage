@@ -144,6 +144,7 @@ class Poplar1(Vdaf):
             data_sum -=  z * data_share
             auth_sum -=  z * auth_share
             out_share.append(data_share)
+
         corr_check = Poplar1.hash3(corr_results, level)
 
         bound_msg = Poplar1.hash2(data_sum, auth_sum, level) + \
