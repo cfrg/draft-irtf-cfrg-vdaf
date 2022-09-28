@@ -136,6 +136,8 @@ class Poplar1(Vdaf):
             auth_sum -=  z * auth_share
             out_share.append(data_share)
 
+        corr_check = Poplar1.hash3(corr_results, level)
+
         bound_msg = Poplar1.hash2(data_sum, auth_sum, level) + \
                     Poplar1.hash2(Field(1) + data_sum,
                                   auth[level] + auth_sum,
@@ -147,7 +149,7 @@ class Poplar1(Vdaf):
                       agg_id,
                       out_share,
                       check_bound,
-                      corr_results,
+                      corr_check,
                       bound_msg)
         return (b'init', prep_state)
 
@@ -156,11 +158,10 @@ class Poplar1(Vdaf):
         (status, prep_state) = prep
         #Send verification messages (1 round only)
         if status == b'init':
-            (level, agg_id, out_share, check_bound, corr_results, bound_msg) = \
+            (level, agg_id, out_share, check_bound, corr_check, bound_msg) = \
                                                                     prep_state
             new_prep = (b'finish',(agg_id, check_bound, out_share))
-            msg = Poplar1.Idpf.current_field(level).encode_vec(corr_results) + \
-                                                                    bound_msg
+            msg = corr_check + bound_msg
             return (new_prep, msg)
         if status == b'finish':
             (agg_id, check_bound, out_share) = prep_state
@@ -184,13 +185,11 @@ class Poplar1(Vdaf):
         Field = Poplar1.Idpf.current_field(level)
 
         #Verify one-hotness
-        corr_results1 = Field.decode_vec(prep_shares[1])
-        l = Field.ENCODED_SIZE * len(prefixes)
-        encoded_corr_results, bound_msg = prep_shares[0][:l], prep_shares[0][l:]
-        corr_results0 = Field.decode_vec(encoded_corr_results)
-        for i in range(len(prefixes)):
-            if corr_results0[i] != corr_results1[i]:
-                raise ERR_VERIFY #Input is not one-hot
+        corr_check1 = prep_shares[1]
+        l = Poplar1.Idpf.Prg.SEED_SIZE
+        (corr_check0, bound_msg) = prep_shares[0][:l], prep_shares[0][l:]
+        if corr_check0 != corr_check1:
+            raise ERR_VERIFY #Input is not one-hot
         return bound_msg
 
     @classmethod
@@ -344,6 +343,14 @@ class Poplar1(Vdaf):
             byte(2)+ Field.encode_vec([z,y]))
         return prg.next(Poplar1.Idpf.Prg.SEED_SIZE)
 
+    @classmethod
+    def hash3(Poplar1, v, level):
+        cntxt = Poplar1.Idpf.current_field(level).encode_vec(v)
+        prg = Poplar1.Idpf.Prg(
+            Bytes([7]*Poplar1.Idpf.Prg.SEED_SIZE), \
+            Bytes([3])+ cntxt)
+        return prg.next(Poplar1.Idpf.Prg.SEED_SIZE)
+
 
 class Poplar1Aes128(Poplar1):
 
@@ -358,7 +365,6 @@ class Poplar1Aes128(Poplar1):
 
 
 if __name__ == '__main__':
-    print("running vdaf_poplar1 as main")
     test_vdaf(Poplar1Aes128.with_bits(15), (15, []), [], [])
     test_vdaf(Poplar1Aes128.with_bits(2), (1, [0b11]), [], [0])
     test_vdaf(Poplar1Aes128.with_bits(2),
