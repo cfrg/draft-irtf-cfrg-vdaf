@@ -11,7 +11,7 @@ import struct
 TEST_VECTOR = False
 
 # Document version, reved with each draft that contains breaking changes.
-DRAFT = '04'
+DRAFT = '03'
 VERSION = bytes(bytearray('vdaf-{}'.format(DRAFT), 'ascii'))
 
 
