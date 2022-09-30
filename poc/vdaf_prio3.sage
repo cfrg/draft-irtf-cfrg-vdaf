@@ -31,7 +31,7 @@ class Prio3(Vdaf):
                  Bytes]           # outbound message
 
     @classmethod
-    def measurement_to_input_shares(Prio3, measurement):
+    def measurement_to_input_shares(Prio3, measurement, nonce):
         dst = VERSION + I2OSP(Prio3.ID, 4)
         inp = Prio3.Flp.encode(measurement)
 
@@ -53,14 +53,14 @@ class Prio3(Vdaf):
                                          helper_input_share)
             encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(
-                k_blind, dst + byte(j+1) + encoded)
+                k_blind, dst + byte(j+1) + nonce + encoded)
             k_helper_input_shares.append(k_share)
             k_helper_blinds.append(k_blind)
             k_joint_rand_parts.append(k_joint_rand_part)
         k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
         encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
         k_leader_joint_rand_part = Prio3.Prg.derive_seed(
-            k_leader_blind, dst + byte(0) + encoded)
+            k_leader_blind, dst + byte(0) + nonce + encoded)
         k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
 
         # Compute joint randomness seed.
@@ -133,7 +133,7 @@ class Prio3(Vdaf):
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             encoded = Prio3.Flp.Field.encode_vec(input_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(
-                k_blind, dst + byte(agg_id) + encoded)
+                k_blind, dst + byte(agg_id) + nonce + encoded)
             k_joint_rand_parts = k_hint[:agg_id] + \
                                  [k_joint_rand_part] + \
                                  k_hint[agg_id:]

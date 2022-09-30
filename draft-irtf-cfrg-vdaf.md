@@ -754,16 +754,18 @@ Each VDAF is identified by a unique, 32-bit integer `ID`. Identifiers for each
 
 ## Sharding {#sec-vdaf-shard}
 
-Sharding is syntactically identical to DAFs (cf. {{sec-daf-shard}}):
+Sharding transforms a measurement into input shares as it does in DAFs
+(cf. {{sec-daf-shard}}); in addition, it takes a nonce as input and
+produces a public share:
 
-* `Vdaf.measurement_to_input_shares(measurement: Measurement) -> (Bytes,
-  Vec[Bytes])` is the randomized input-distribution algorithm run by each
-  Client. It consumes the measurement and produces a public share, distributed
-  to each of Aggregators, and the corresponding sequence of input shares, one
-  for each Aggregator. Depending on the VDAF, the input shares may encode
-  additional information used to verify the recovered output shares (e.g., the
-  "proof shares" in Prio3 {{prio3}}). The length of the output vector MUST be
-  `SHARES`.
+* `Vdaf.measurement_to_input_shares(measurement: Measurement, nonce: Bytes) ->
+  (Bytes, Vec[Bytes])` is the randomized input-distribution algorithm run by
+  each Client. It consumes the measurement and the nonce and produces a public
+  share, distributed to each of Aggregators, and the corresponding sequence of
+  input shares, one for each Aggregator. Depending on the VDAF, the input shares
+  may encode additional information used to verify the recovered output shares
+  (e.g., the"proof shares" in Prio3 {{prio3}}). The length of the output vector
+  MUST be `SHARES`.
 
 ## Preparation {#sec-vdaf-prepare}
 
@@ -939,7 +941,7 @@ def run_vdaf(Vdaf,
     for (nonce, measurement) in zip(nonces, measurements):
         # Each Client shards its measurement into input shares.
         (public_share, input_shares) = \
-            Vdaf.measurement_to_input_shares(measurement)
+            Vdaf.measurement_to_input_shares(measurement, nonce)
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
@@ -1440,7 +1442,7 @@ The input-distribution algorithm involves the following steps:
 
 1. Encode the Client's raw measurement as an input for the FLP
 1. Shard the input into a sequence of input shares
-1. Derive the joint randomness from the input shares
+1. Derive the joint randomness from the input shares and nonce
 1. Run the FLP proof-generation algorithm using the derived joint randomness
 1. Shard the proof into a sequence of proof shares
 
@@ -1455,7 +1457,7 @@ joint randomness. In particular, `encode_leader_share` and
 randomness. These are defined in {{prio3-helper-functions}}.
 
 ~~~
-def measurement_to_input_shares(Prio3, measurement):
+def measurement_to_input_shares(Prio3, measurement, nonce):
     # Domain separation tag for PRG info string
     dst = VERSION + I2OSP(Prio3.ID, 4)
     inp = Prio3.Flp.encode(measurement)
@@ -1478,14 +1480,14 @@ def measurement_to_input_shares(Prio3, measurement):
                                      helper_input_share)
         encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
         k_joint_rand_part = Prio3.Prg.derive_seed(
-            k_blind, dst + byte(j+1) + encoded)
+            k_blind, dst + byte(j+1) + nonce + encoded)
         k_helper_input_shares.append(k_share)
         k_helper_blinds.append(k_blind)
         k_joint_rand_parts.append(k_joint_rand_part)
     k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
     encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
     k_leader_joint_rand_part = Prio3.Prg.derive_seed(
-        k_leader_blind, dst + byte(0) + encoded)
+        k_leader_blind, dst + byte(0) + nonce + encoded)
     k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
 
     # Compute joint randomness seed.
@@ -1587,7 +1589,7 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded = Prio3.Flp.Field.encode_vec(input_share)
         k_joint_rand_part = Prio3.Prg.derive_seed(
-            k_blind, dst + byte(agg_id) + encoded)
+            k_blind, dst + byte(agg_id) + nonce + encoded)
         k_joint_rand_parts = k_hint[:agg_id] + \
                              [k_joint_rand_part] + \
                              k_hint[agg_id:]
@@ -2510,7 +2512,7 @@ follows. Function `encode_input_shares` is defined in {{poplar1-helper-functions
 
 
 ~~~
-def measurement_to_input_shares(Poplar1, measurement):
+def measurement_to_input_shares(Poplar1, measurement, _nonce):
     dst = VERSION + I2OSP(Poplar1.ID, 4)
     prg = Poplar1.Idpf.Prg(
         gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))
