@@ -34,7 +34,7 @@ class Poplar1(Vdaf):
     AggResult = Vec[Unsigned]
 
     @classmethod
-    def measurement_to_input_shares(Poplar1, measurement):
+    def measurement_to_input_shares(Poplar1, measurement, _nonce):
         dst = VERSION + I2OSP(Poplar1.ID, 4)
         prg = Poplar1.Idpf.Prg(
             gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))

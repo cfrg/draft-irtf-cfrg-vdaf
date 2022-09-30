@@ -44,8 +44,8 @@ class Vdaf:
     # one for each Aggregator. This method is run by the Client.
     @classmethod
     def measurement_to_input_shares(Vdaf,
-                                    measurement: Measurement) -> (Bytes,
-                                                                  Vec[Bytes]):
+                                    measurement: Measurement,
+                                    nonce: Bytes) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
     # Initialize the Prepare state for the given input share. This method is run
@@ -145,7 +145,7 @@ def run_vdaf(Vdaf,
 
         # Each Client shards its measurement into input shares.
         (public_share, input_shares) = \
-            Vdaf.measurement_to_input_shares(measurement)
+            Vdaf.measurement_to_input_shares(measurement, nonce)
 
         # REMOVE ME
         prep_test_vec['public_share'] = public_share.hex()
@@ -299,7 +299,7 @@ class TestVdaf(Vdaf):
         return (None, [None for _ in range(cls.SHARES)])
 
     @classmethod
-    def measurement_to_input_shares(cls, measurement):
+    def measurement_to_input_shares(cls, measurement, nonce):
         helper_shares = cls.Field.rand_vec(cls.SHARES-1)
         leader_share = cls.Field(measurement)
         for helper_share in helper_shares:
