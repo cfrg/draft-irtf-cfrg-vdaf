@@ -159,7 +159,7 @@ class IdpfPoplar(Idpf):
         Field = IdpfPoplar.current_field(level)
         w = prg.next_vec(Field, 1) #data vector
         w += prg.next_vec(Field, 1) #auth vector
-        w += prg.next_vec(Field2, 1) #field vector
+        w += prg.next_vec(Field2, 1) # indicator vector
         return (next_seed, w)
 
     @classmethod
