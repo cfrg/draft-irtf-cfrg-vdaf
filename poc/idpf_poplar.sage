@@ -19,6 +19,8 @@ class IdpfPoplar(Idpf):
 
     # Parameters required by `Vdaf`.
     SHARES = 2
+
+    # Parameters specific to Poplar
     FieldInner = field.Field64
     FieldLeaf = field.Field255
 
@@ -60,7 +62,7 @@ class IdpfPoplar(Idpf):
 
             b = beta_inner[level] if level < IdpfPoplar.BITS-1 \
                     else beta_leaf
-            if len(b) != IdpfPoplar.VALUE_LEN:
+            if len(b) != len(w0) :
                 raise ERR_INPUT # beta too long or too short
             w_cw = vec_add(vec_sub(b, w0), w1)
             if ctrl[1] == Field2(1):
@@ -156,10 +158,10 @@ class IdpfPoplar(Idpf):
         dst = VERSION + b' idpf poplar convert'
         prg = IdpfPoplar.Prg(seed, dst)
         next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
-        Field = IdpfPoplar.current_field(level)
-        w = prg.next_vec(Field, 1) #data vector
-        w += prg.next_vec(Field, 1) #auth vector
-        w += prg.next_vec(Field2, 1) # indicator vector
+        Value = IdpfPoplar.current_value_type(level)
+        w = []
+        for Field in Value:
+            w += prg.next_vec(Field,1)
         return (next_seed, w)
 
     @classmethod
@@ -174,10 +176,11 @@ class IdpfPoplar(Idpf):
         encoded += I2OSP(packed_ctrl, l)
         for (level, (seed_cw, _, w_cw)) \
             in enumerate(correction_words):
-            Field = IdpfPoplar.current_field(level)
+            Value = IdpfPoplar.current_value_type(level)
             encoded += seed_cw
-            encoded += Field.encode_vec(w_cw[:2]) # data, auth vector
-            encoded += Field2.encode_vec(w_cw[2:]) # indicator vector
+            for Field in Value:
+                v, w_cw = w_cw[:1], w_cw[1:]
+                encoded+= Field.encode_vec(v)
         return encoded
 
     @classmethod
@@ -187,18 +190,17 @@ class IdpfPoplar(Idpf):
         packed_ctrl = OS2IP(encoded_ctrl)
         correction_words = []
         for level in range(IdpfPoplar.BITS):
-            Field = IdpfPoplar.current_field(level)
+            Value = IdpfPoplar.current_value_type(level)
             ctrl_cw = (Field2(packed_ctrl & 1),
                        Field2((packed_ctrl >> 1) & 1))
             packed_ctrl >>= 2
             l = IdpfPoplar.Prg.SEED_SIZE
             seed_cw, encoded = encoded[:l], encoded[l:]
-            l = Field.ENCODED_SIZE * 2
-            encoded_w_cw, encoded = encoded[:l], encoded[l:]
-            l = Field2.ENCODED_SIZE
-            encoded_w_indicator, encoded = encoded[:l], encoded[l:]
-            w_cw = Field.decode_vec(encoded_w_cw) + \
-                   Field2.decode_vec(encoded_w_indicator)
+            w_cw = []
+            for Field in Value:
+                l = Field.ENCODED_SIZE
+                encoded_v, encoded = encoded[:l], encoded[l:]
+                w_cw += Field.decode_vec(encoded_v)
             correction_words.append((seed_cw, ctrl_cw, w_cw))
         if len(encoded) != 0:
             raise ERR_DECODE
@@ -220,18 +222,20 @@ class IdpfPoplar(Idpf):
         return new_cls
 
     @classmethod
-    def with_value_len(IdpfPoplar, value_len: Unsigned):
-        if value_len == 0:
-            raise ERR_INPUT # value length must be positive
+    def with_value_type(IdpfPoplar, value_inner, value_leaf):
+        if value_inner == None or value_leaf == None:
+            raise ERR_INPUT # values must both be defined
         new_cls = deepcopy(IdpfPoplar)
-        new_cls.VALUE_LEN = value_len
+        new_cls.InnerValue = value_inner
+        new_cls.LeafValue = value_leaf
         return new_cls
 
 
 if __name__ == '__main__':
     cls = IdpfPoplar \
                 .with_prg(prg.PrgAes128) \
-                .with_value_len(3)
+                .with_value_type([field.Field64, field.Field64, Field2],
+                                 [field.Field255, field.Field255, Field2])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 15, [0b1111000011110000])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 14, [0b111100001111000])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 13, [0b11110000111100])

@@ -14,18 +14,14 @@ class Idpf:
     # Bit length of valid input values (i.e., the length of `alpha` in bits).
     BITS: Unsigned = None
 
-    # The length of each output vector (i.e., the length of `beta_leaf` and each
-    # element of `beta_inner`).
-    VALUE_LEN: Unsigned = None
+    # The value type for inner nodes
+    InnerValue = None
+
+    # The value type for outer nodes
+    OuterValue = None
 
     # Size in bytes of each IDPF key share.
     KEY_SIZE: Unsigned = None
-
-    # The finite field used to represent the inner nodes of the IDPF tree.
-    FieldInner: field.Field = None
-
-    # The finite field used to represent the leaf nodes of the IDPF tree.
-    FieldLeaf: field.Field = None
 
     # Generates an IDPF public share and sequence of IDPF-keys of length
     # `SHARES`. Value `alpha` is the input to encode. Values `beta_inner` and
@@ -38,15 +34,14 @@ class Idpf:
     @classmethod
     def gen(Ipdf,
             alpha: Unsigned,
-            beta_inner: Vec[Vec[Union[Idpf.FieldInner,Field2]]],
-            beta_leaf: Vec[Union[Idpf.FieldLeaf,Field2]]) -> \
+            beta_inner: Vec[InnerValue],
+            beta_leaf: OuterValue) -> \
             (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
     # Evaluate an IDPF key at a given level of the tree and with the given set
-    # of prefixes. The output is a vector where each element is a vector of
-    # length `VALUE_LEN`. The output field is `FieldLeaf` if `level == BITS` and
-    # `FieldInner` otherwise.
+    # of prefixes. The output is a vector where each element is a vector in
+    # LeafValue if `level == BITS` and `InnerValue` otherwise.
     #
     # Let `LSB(x, N)` denote the least significant `N` bits of positive integer
     # `x`. By definition, a positive integer `x` is said to be the length-`L`
@@ -70,16 +65,14 @@ class Idpf:
              public_share: Bytes,
              key: Bytes,
              level: Unsigned,
-             prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Union[Idpf.FieldInner,
-                                                            Field2]]],
-                                               Vec[Vec[Union[Idpf.FieldLeaf,
-                                                            Field2]]]]:
+             prefixes: Vec[Unsigned]) -> Union[Vec[InnerValue],
+                                               Vec[OuterValue]]:
         raise Error('not implemented')
 
     @classmethod
-    def current_field(Idpf, level):
-        return Idpf.FieldInner if level < Idpf.BITS-1 \
-                    else Idpf.FieldLeaf
+    def current_value_type(Idpf, level):
+        return Idpf.InnerValue if level < Idpf.BITS-1 \
+                    else Idpf.LeafValue
 
     # Returns `True` iff `x` is the prefix of `y` of length `L`.
     @classmethod
@@ -90,18 +83,20 @@ class Idpf:
 
 # Generate a set of IDPF keys and evaluate them on the given set of prefix.
 def test_idpf(Idpf, alpha, level, prefixes):
-    beta_inner = [[Idpf.FieldInner(1)] * 2 +[field.Field2(1)]]* (Idpf.BITS-1)
-    beta_leaf = [Idpf.FieldLeaf(1)] * 2 + [field.Field2(1)]
+    beta_inner = [[Field(1) for Field in Idpf.current_value_type(0)]] * \
+                                                                   (Idpf.BITS-1)
+    beta_leaf = [Field(1) for Field in Idpf.current_value_type(Idpf.BITS)]
 
     # Generate the IDPF keys.
     (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
 
-    out = [Idpf.current_field(level).zeros(2)+[field.Field2(0)]] * len(prefixes)
+    out = [[Field(0) for Field in Idpf.current_value_type(level)]] * len(prefixes)
+
     for agg_id in range(Idpf.SHARES):
         out_share = Idpf.eval(
             agg_id, public_share, keys[agg_id], level, prefixes)
         for i in range(len(prefixes)):
-            out[i] =  vec_add(out[i], out_share[i])
+            out[i] = vec_add(out[i], out_share[i])
 
     for (got, prefix) in zip(out, prefixes):
         #print('debug: {0:b} {1:b}: got {2}'.format(
@@ -113,7 +108,7 @@ def test_idpf(Idpf, alpha, level, prefixes):
             else:
                 want = beta_leaf
         else:
-            want = Idpf.current_field(level).zeros(2)+[field.Field2(0)]
+            want = [Field(0) for Field in Idpf.current_value_type(level)]
 
         if got != want:
             print('error: {0:b} {1:b} {2}: got {3}; want {4}'.format(
@@ -124,9 +119,12 @@ def test_idpf(Idpf, alpha, level, prefixes):
 def test_idpf_exhaustive(Idpf, alpha):
     # Generate random outputs with which to program the IDPF.
     beta_inner = []
-    for _ in range(Idpf.BITS - 1):
-        beta_inner.append(Idpf.FieldInner.rand_vec(2)+[field.Field2(1)])
-    beta_leaf = Idpf.FieldLeaf.rand_vec(2)+[field.Field2(1)]
+    beta_leaf = []
+    for level in range(Idpf.BITS - 1):
+        Value = Idpf.current_value_type(level)
+        beta_inner.append([Field.rand_vec(1)[0] for Field in Value])
+    Value = Idpf.current_value_type(Idpf.BITS)
+    beta_leaf = [Field.rand_vec(1)[0] for Field in Value]
 
     # Generate the IDPF keys.
     (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
@@ -156,7 +154,7 @@ def test_idpf_exhaustive(Idpf, alpha):
                 else:
                     want = beta_leaf
             else:
-                want = Idpf.current_field(level).zeros(2) + [field.Field2(0)]
+                want = [Field(0) for Field in Idpf.current_value_type(level)]
 
             if got != want:
                 print('error: {0:b} {1:b} {2}: got {3}; want {4}'.format(

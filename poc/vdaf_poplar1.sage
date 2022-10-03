@@ -12,10 +12,11 @@ import sagelib.idpf as idpf
 import sagelib.idpf_poplar as idpf_poplar
 import sagelib.prg as prg
 from sagelib.field import Field2
+import sagelib.field as field
 
 class Poplar1(Vdaf):
     # Types provided by a concrete instadce of `Poplar1`.
-    Idpf = idpf.Idpf
+    Idpf = idpf_poplar.IdpfPoplar
 
     # Parameters required by `Vdaf`.
     ID = 0x00001000
@@ -26,13 +27,14 @@ class Poplar1(Vdaf):
     # Types required by `Vdaf`.
     Measurement = Unsigned
     AggParam = Tuple[Unsigned, Vec[Unsigned]]
-    Prep = Tuple[Bytes,
-                 Unsigned,
-                 Union[Vec[Vec[Union[Idpf.FieldInner, Field2]]]],
-                       Vec[Vec[Union[Idpf.FieldLeaf, Field2]]]]
-    OutShare = Union[Vec[Vec[Idpf.FieldInner]],
-                     Vec[Vec[Idpf.FieldLeaf]]]
+    OutShare = Union[Vec[Idpf.FieldInner], Vec[Idpf.FieldLeaf]]
+    Prep = Tuple[Bytes, Union[Tuple[Vec[Bytes], Unsigned, OutShare],
+                              Tuple[Unsigned, Bytes, OutShare]]]
     AggResult = Vec[Unsigned]
+
+    # Poplar1 specific parameters
+    # maximum number of times a prefix may be counted per string
+    BOUND = 1
 
     @classmethod
     def measurement_to_input_shares(Poplar1, measurement):
@@ -69,9 +71,8 @@ class Poplar1(Vdaf):
         corr_inner = []
         for level in range(Poplar1.Idpf.BITS):
             prefix = (measurement // (2 ** (Poplar1.Idpf.BITS - 1 - level)))
-            Field = Poplar1.Idpf.current_field(level)
+            Field = Poplar1.Idpf.current_value_type(level)[0]
             k = auth[level]
-            print('randomness\t:', k)
             (leader_data_share, leader_auth_share, leader_indicator_share) = \
                 Poplar1.Idpf.eval(0, public_share, keys[0], level, [prefix])[0]
             helper_auth_share = leader_auth_share -k
@@ -105,7 +106,7 @@ class Poplar1(Vdaf):
             Poplar1.decode_public_share(public_share)
         (key, corr_seed) = Poplar1.decode_input_share(input_share)
 
-        Field = Poplar1.Idpf.current_field(level)
+        Field = Poplar1.Idpf.current_value_type(level)[0]
 
         # Evaluate the IDPF key at the given set of prefixes.
         value = Poplar1.Idpf.eval(agg_id,
@@ -125,9 +126,8 @@ class Poplar1(Vdaf):
         # and output share
         # sum over all prefixes for boundedness verification
         out_share = []
-        data_sum = Field(1) if agg_id == 0 else Field(0)
-        auth_sum = auth[level] if agg_id == 0 else Field(0)
-        print('auth_sum:\t', auth_sum)
+        data_sum = Field(0)
+        auth_sum = Field(0)
         corr_results = []
         correction_word = corr_inner[level] if level < Poplar1.Idpf.BITS-1 \
             else corr_leaf
@@ -147,40 +147,49 @@ class Poplar1(Vdaf):
 
         corr_check = Poplar1.hash3(corr_results, level)
 
-        bound_msg = Poplar1.hash2(data_sum, auth_sum, level) + \
-                    Poplar1.hash2(Field(1) + data_sum,
-                                  auth[level] + auth_sum,
-                                  level) if agg_id == 0 else b''
+        bound_msg_part_1 = b''
+        bound_msg_part_2 = b''
+        if agg_id == 0:
+            offset = OS2IP(gen_rand(Poplar1.BOUND)) % (Poplar1.BOUND + 1)
+            for i in range(0, offset):
+                bound_msg_part_2 += Poplar1.hash2(Field(i) + data_sum,
+                                            Field(i) * auth[level] + auth_sum,
+                                            level)
+            for i in range(offset, Poplar1.BOUND+1):
+                bound_msg_part_1 += Poplar1.hash2(Field(i) + data_sum,
+                                            Field(i) * auth[level] + auth_sum,
+                                            level)
+        bound_msg = bound_msg_part_1 + bound_msg_part_2 if agg_id == 0 else b''
+
         check_bound = b'' if agg_id == 0 \
                     else Poplar1.hash2(data_sum, auth_sum, level)
 
-        prep_state = (level,
-                      agg_id,
-                      out_share,
-                      check_bound,
-                      corr_check,
-                      bound_msg)
-        return (b'init', prep_state)
+        prep = (b'init', (agg_id,
+                                [check_bound, corr_check, bound_msg],
+                                out_share))
+        return prep
 
     @classmethod
     def prep_next(Poplar1, prep, inbound):
         (status, prep_state) = prep
         #Send verification messages (1 round only)
         if status == b'init':
-            (level, agg_id, out_share, check_bound, corr_check, bound_msg) = \
-                                                                    prep_state
+            (agg_id, (check_bound, corr_check, bound_msg), out_share) \
+                                                                    = prep_state
             new_prep = (b'finish',(agg_id, check_bound, out_share))
             msg = corr_check + bound_msg
             return (new_prep, msg)
         if status == b'finish':
             (agg_id, check_bound, out_share) = prep_state
+            l = Poplar1.Idpf.Prg.SEED_SIZE
+            possibilities = []
+            for i in range(Poplar1.BOUND+1):
+                possibilities.append(inbound[i * l : i*l + l])
             # Helper (only) verifies boundedness
             if agg_id == 0:
                 return out_share
-            elif (agg_id == 1) and (inbound == check_bound):
+            elif agg_id == 1 and check_bound in possibilities:
                 return out_share
-            print('inbound:\t',inbound.hex())
-            print('check_bound:\t', check_bound.hex())
             raise ERR_VERIFY #Input is one-hot but the entry is not 1
 
 
@@ -189,8 +198,7 @@ class Poplar1(Vdaf):
         if len(prep_shares) != 2:
             raise ERR_INPUT # unexpected number of prep shares
         (level, prefixes) = agg_param
-        Field = Poplar1.Idpf.current_field(level)
-
+        Field = Poplar1.Idpf.current_value_type(level)[0]
         #Verify one-hotness
         corr_check1 = prep_shares[1]
         l = Poplar1.Idpf.Prg.SEED_SIZE
@@ -202,7 +210,7 @@ class Poplar1(Vdaf):
     @classmethod
     def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
         (level, prefixes) = agg_param
-        Field = Poplar1.Idpf.current_field(level)
+        Field = Poplar1.Idpf.current_value_type(level)[0]
         agg_share = Field.zeros(len(prefixes))
         for out_share in out_shares:
             agg_share = vec_add(agg_share, out_share)
@@ -212,7 +220,7 @@ class Poplar1(Vdaf):
     def agg_shares_to_result(Poplar1, agg_param,
                              agg_shares, _num_measurements):
         (level, prefixes) = agg_param
-        Field = Poplar1.Idpf.current_field(level)
+        Field = Poplar1.Idpf.current_value_type(level)[0]
         agg = Field.zeros(len(prefixes))
         for agg_share in agg_shares:
             agg = vec_add(agg, Field.decode_vec(agg_share))
@@ -235,15 +243,14 @@ class Poplar1(Vdaf):
 
     @classmethod
     def decode_public_share(Poplar1, encoded):
-        l = Poplar1.Idpf.FieldInner.ENCODED_SIZE \
-            * (Poplar1.Idpf.BITS - 1)
+        l = Poplar1.Idpf.FieldInner.ENCODED_SIZE * (Poplar1.Idpf.BITS - 1)
         encoded_corr_inner, encoded = encoded[:l], encoded[l:]
-        corr_inner = Poplar1.Idpf.FieldInner.decode_vec(
-                    encoded_corr_inner)
+        corr_inner =  Poplar1.Idpf.FieldInner.decode_vec(encoded_corr_inner)
         l = Poplar1.Idpf.FieldLeaf.ENCODED_SIZE
-        encoded_corr_leaf, public_share = encoded[:l], encoded[l:]
+        encoded_corr_leaf, encoded = encoded[:l], encoded[l:]
         corr_leaf = Poplar1.Idpf.FieldLeaf.decode_vec(encoded_corr_leaf)[0]
-        return (public_share, corr_inner, corr_leaf)
+        idpf_public_share = encoded
+        return (idpf_public_share, corr_inner, corr_leaf)
 
 
     @classmethod
@@ -326,7 +333,7 @@ class Poplar1(Vdaf):
     @classmethod
     def hash1(Poplar1, level, x, y):
         # XXX Replace this with something secure
-        Field = Poplar1.Idpf.current_field(level)
+        Field = Poplar1.Idpf.current_value_type(level)[0]
         prg = Poplar1.Idpf.Prg(
             Bytes([5]*Poplar1.Idpf.Prg.SEED_SIZE),
             Bytes([1, level]) + I2OSP(x, Poplar1.Idpf.BITS) + \
@@ -335,7 +342,7 @@ class Poplar1(Vdaf):
 
     @classmethod
     def hash2(Poplar1, z, y, level):
-        Field = Poplar1.Idpf.current_field(level)
+        Field = Poplar1.Idpf.current_value_type(level)[0]
         prg = Poplar1.Idpf.Prg(
             Bytes([6]*Poplar1.Idpf.Prg.SEED_SIZE), \
             byte(2)+ Field.encode_vec([z,y]))
@@ -343,7 +350,7 @@ class Poplar1(Vdaf):
 
     @classmethod
     def hash3(Poplar1, v, level):
-        cntxt = Poplar1.Idpf.current_field(level).encode_vec(v)
+        cntxt = Poplar1.Idpf.current_value_type(level)[0].encode_vec(v)
         prg = Poplar1.Idpf.Prg(
             Bytes([7]*Poplar1.Idpf.Prg.SEED_SIZE), \
             Bytes([3])+ cntxt)
@@ -357,7 +364,8 @@ class Poplar1Aes128(Poplar1):
         return cls.with_idpf(
             idpf_poplar.IdpfPoplar \
                 .with_prg(prg.PrgAes128) \
-                .with_value_len(3) \
+                .with_value_type([field.Field64, field.Field64, Field2],
+                                 [field.Field255, field.Field255, Field2]) \
                 .with_bits(bits))
 
 
