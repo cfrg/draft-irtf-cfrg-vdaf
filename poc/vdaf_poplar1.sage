@@ -175,7 +175,7 @@ class Poplar1(Vdaf):
         if status == b'finish':
             (agg_id, check_bound, out_share) = prep_state
             # Helper (only) verifies boundedness
-            if (agg_id == 0):
+            if agg_id == 0:
                 return out_share
             elif (agg_id == 1) and (inbound == check_bound):
                 return out_share
