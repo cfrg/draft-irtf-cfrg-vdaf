@@ -114,7 +114,7 @@ class Poplar1(Vdaf):
                                   level,
                                   prefixes)
 
-        #Leader expands randomness
+        # Leader expands randomness
         if agg_id == 0:
             prg = Poplar1.Idpf.Prg(corr_seed, dst + byte(255))
             auth = prg.next_vec(Poplar1.Idpf.FieldInner,
