@@ -141,7 +141,7 @@ class Poplar1(Vdaf):
                                      indicator_share,
                                      correction_word)
             corr_results.append(result)
-            data_sum -=  z * data_share
+            data_sum -= z * data_share
             auth_sum -=  z * auth_share
             out_share.append(data_share)
 
