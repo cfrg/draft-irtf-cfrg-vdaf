@@ -176,8 +176,8 @@ class IdpfPoplar(Idpf):
             in enumerate(correction_words):
             Field = IdpfPoplar.current_field(level)
             encoded += seed_cw
-            encoded += Field.encode_vec(w_cw[:2])
-            encoded += Field2.encode_vec(w_cw[2:])
+            encoded += Field.encode_vec(w_cw[:2]) # data, auth vector
+            encoded += Field2.encode_vec(w_cw[2:]) # indicator vector
         return encoded
 
     @classmethod
