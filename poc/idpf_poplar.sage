@@ -180,7 +180,7 @@ class IdpfPoplar(Idpf):
             encoded += seed_cw
             for Field in Value:
                 v, w_cw = w_cw[:1], w_cw[1:]
-                encoded+= Field.encode_vec(v)
+                encoded += Field.encode_vec(v)
         return encoded
 
     @classmethod
