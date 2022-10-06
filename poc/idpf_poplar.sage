@@ -178,7 +178,8 @@ class IdpfPoplar(Idpf):
             in enumerate(correction_words):
             Value = IdpfPoplar.current_value_type(level)
             encoded += seed_cw
-            for Field in Value:
+            for (Field, elem) in zip(Value, w_cw):
+                 encoded += Field.encode_vec([elem])
                 v, w_cw = w_cw[:1], w_cw[1:]
                 encoded += Field.encode_vec(v)
         return encoded
