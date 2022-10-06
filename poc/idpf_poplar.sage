@@ -161,7 +161,7 @@ class IdpfPoplar(Idpf):
         Value = IdpfPoplar.current_value_type(level)
         w = []
         for Field in Value:
-            w += prg.next_vec(Field,1)
+            w += prg.next_vec(Field, 1)
         return (next_seed, w)
 
     @classmethod
