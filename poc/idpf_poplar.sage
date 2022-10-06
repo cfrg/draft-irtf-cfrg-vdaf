@@ -62,7 +62,7 @@ class IdpfPoplar(Idpf):
 
             b = beta_inner[level] if level < IdpfPoplar.BITS-1 \
                     else beta_leaf
-            if len(b) != len(w0) :
+            if len(b) != len(IdpfPoplar.current_value_type(level)):
                 raise ERR_INPUT # beta too long or too short
             w_cw = vec_add(vec_sub(b, w0), w1)
             if ctrl[1] == Field2(1):
