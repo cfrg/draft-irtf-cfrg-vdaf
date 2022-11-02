@@ -186,7 +186,7 @@ def run_vdaf(Vdaf,
         # REMOVE ME
         for out_share in outbound:
             prep_test_vec['out_shares'].append(
-                list(map(lambda x: x.as_unsigned(), out_share)))
+                list(map(lambda x: "{:x}".format(x.as_unsigned()), out_share)))
         test_vec['prep'].append(prep_test_vec)
 
         # The final outputs of prepare phase are the output shares.
