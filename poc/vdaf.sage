@@ -284,7 +284,7 @@ class TestVdaf(Vdaf):
     # Associated types
     OutShare = Vec[Field]
     Measurement = Unsigned
-    AggResult = Vec[Unsigned]
+    AggResult = Unsigned
 
     # Operational parameters
     input_range = range(5)
@@ -350,9 +350,9 @@ class TestVdaf(Vdaf):
 
     @classmethod
     def agg_shares_to_result(cls, _agg_param, agg_shares, _num_measurements):
-        return [reduce(lambda x, y: [x[0] + y[0]],
+        return reduce(lambda x, y: [x[0] + y[0]],
             map(lambda encoded: cls.Field.decode_vec(encoded),
-                agg_shares))[0].as_unsigned()]
+                agg_shares))[0].as_unsigned()
 
 
 def test_vdaf(Vdaf,
@@ -379,4 +379,4 @@ def test_vdaf(Vdaf,
 
 
 if __name__ == '__main__':
-    test_vdaf(TestVdaf, None, [1, 2, 3, 4], [10])
+    test_vdaf(TestVdaf, None, [1, 2, 3, 4], 10)
