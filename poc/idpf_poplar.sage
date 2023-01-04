@@ -23,7 +23,7 @@ class IdpfPoplar(Idpf):
     FieldLeaf = field.Field255
 
     @classmethod
-    def gen(IpdfPoplar, alpha, beta_inner, beta_leaf):
+    def gen(IdpfPoplar, alpha, beta_inner, beta_leaf):
         if alpha >= 2^IdpfPoplar.BITS:
             raise ERR_INPUT # alpha too long
         if len(beta_inner) != IdpfPoplar.BITS - 1:
