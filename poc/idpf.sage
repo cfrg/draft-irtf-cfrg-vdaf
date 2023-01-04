@@ -36,7 +36,7 @@ class Idpf:
     # any elment of `beta_inner` has length other than `VALUE_LEN`, or if
     # `beta_leaf` has length other than `VALUE_LEN`.
     @classmethod
-    def gen(Ipdf,
+    def gen(Idpf,
             alpha: Unsigned,
             beta_inner: Vec[Vec[Idpf.FieldInner]],
             beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes]):
