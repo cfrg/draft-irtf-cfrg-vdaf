@@ -60,14 +60,14 @@ class Prio3(Vdaf):
                                                helper_measurement_share)
             encoded = Prio3.Flp.Field.encode_vec(helper_measurement_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(
-                k_blind, dst + DST_JOINT_RAND_HINT + byte(j+1) + nonce + encoded)
+                k_blind, dst + DST_JOINT_RAND_PART + byte(j+1) + nonce + encoded)
             k_helper_measurement_shares.append(k_share)
             k_helper_blinds.append(k_blind)
             k_joint_rand_parts.append(k_joint_rand_part)
         k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
         encoded = Prio3.Flp.Field.encode_vec(leader_measurement_share)
         k_leader_joint_rand_part = Prio3.Prg.derive_seed(
-            k_leader_blind, dst + DST_JOINT_RAND_HINT + byte(0) + nonce + encoded)
+            k_leader_blind, dst + DST_JOINT_RAND_PART + byte(0) + nonce + encoded)
         k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
 
         # Compute joint randomness seed.
@@ -77,7 +77,7 @@ class Prio3(Vdaf):
         prove_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             gen_rand(Prio3.Prg.SEED_SIZE),
-            dst + DST_PROVER_RANDOMNESS,
+            dst + DST_PROVE_RANDOMNESS,
             Prio3.Flp.PROVE_RAND_LEN
         )
         joint_rand = Prio3.Prg.expand_into_vec(
@@ -137,7 +137,7 @@ class Prio3(Vdaf):
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             encoded = Prio3.Flp.Field.encode_vec(measurement_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(
-                k_blind, dst + DST_JOINT_RAND_HINT + byte(agg_id) \
+                k_blind, dst + DST_JOINT_RAND_PART + byte(agg_id) \
                 + nonce + encoded)
             k_corrected_joint_rand_parts = k_joint_rand_parts[:agg_id] + \
                                  [k_joint_rand_part] + \
