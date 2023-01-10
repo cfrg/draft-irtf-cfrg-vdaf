@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 from typing import Union
-from sagelib.common import Bool, Bytes, Error, Unsigned, Vec, vec_add
+from sagelib.common import DRAFT, Bool, Bytes, Error, Unsigned, Vec, vec_add
+import json
+import os
 import sagelib.field as field
 import sagelib.prg as prg
 
@@ -115,6 +117,32 @@ def test_idpf(Idpf, alpha, level, prefixes):
         if got != want:
             print('error: {0:b} {1:b} {2}: got {3}; want {4}'.format(
                 alpha, prefix, level, got, want))
+
+
+def gen_test_vec(Idpf, alpha, test_vec_instance):
+    beta_inner = [[Idpf.FieldInner(1)] * Idpf.VALUE_LEN] * (Idpf.BITS-1)
+    beta_leaf = [Idpf.FieldLeaf(1)] * Idpf.VALUE_LEN
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
+
+    printable_beta_inner = [
+        [ str(elem.as_unsigned()) for elem in value ] for value in beta_inner
+    ]
+    printable_beta_leaf = [ str(elem.as_unsigned()) for elem in beta_leaf ]
+    printable_keys = [ key.hex() for key in keys ]
+    test_vec = {
+        'bits': int(Idpf.BITS),
+        'beta_inner': printable_beta_inner,
+        'beta_leaf': printable_beta_leaf,
+        'public_share': public_share.hex(),
+        'keys': printable_keys,
+    }
+
+    os.system('mkdir -p test_vec/{}'.format(DRAFT))
+    with open('test_vec/{}/{}_{}.json'.format(
+        DRAFT, Idpf.__name__, test_vec_instance), 'w') as f:
+        json.dump(test_vec, f, indent=4, sort_keys=True)
+        f.write('\n')
+
 
 
 # Generate a set of IDPF keys and test every possible output.
