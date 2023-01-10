@@ -3,7 +3,7 @@
 from __future__ import annotations
 from sage.all import GF
 from sagelib.common import ERR_DECODE, I2OSP, OS2IP, Bytes, Error, Unsigned, \
-                           Vec
+                           Vec, byte
 
 
 # The base class for finite fields.
@@ -102,6 +102,19 @@ class Field2(Field):
     # Operational parameters
     gf = GF(MODULUS)
 
+    # Return `inp` unmodified if `self == 1`; otherwise return the
+    # all-zero string of the same length.
+    #
+    # Implementation note: To protect the code from timing side channels,
+    # it is important to implement this algorithm in constant time.
+    def conditional_select(self, inp: Bytes) -> Bytes:
+        # Convert the element into a bitmask such that `m == 255` if
+        # `self == 1` and `m == 0` otherwise.
+        m = 0
+        v = self.as_unsigned()
+        for i in range(8):
+            m |= v << i
+        return bytes(map(lambda x: m & x, inp))
 
 # The finite field GF(2^32 * 4294967295 + 1).
 class Field64(FftField):
@@ -250,6 +263,8 @@ if __name__ == '__main__':
     assert Field2(1) + Field2(1) == Field2(0)
     assert Field2(1) * Field2(1) == Field2(1)
     assert -Field2(1) == Field2(1)
+    assert Field2(1).conditional_select(b'hello') == b'hello'
+    assert Field2(0).conditional_select(b'hello') == bytes([0, 0, 0, 0, 0])
 
     # Test polynomial interpolation.
     cls = Field64
