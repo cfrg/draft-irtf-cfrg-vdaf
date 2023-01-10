@@ -38,6 +38,7 @@ class IdpfPoplar(Idpf):
         ctrl = [Field2(0), Field2(1)]
         correction_words = []
         for level in range(IdpfPoplar.BITS):
+            Field = IdpfPoplar.current_field(level)
             keep = (alpha >> (IdpfPoplar.BITS - level - 1)) & 1
             lose = 1 - keep
             bit = Field2(keep)
@@ -50,10 +51,8 @@ class IdpfPoplar(Idpf):
                 t0[1] + t1[1] + bit,
             )
 
-            x0 = xor(s0[keep], seed_cw) if ctrl[0] == Field2(1) \
-                    else s0[keep]
-            x1 = xor(s1[keep], seed_cw) if ctrl[1] == Field2(1) \
-                    else s1[keep]
+            x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
+            x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
             (seed[0], w0) = IdpfPoplar.convert(level, x0)
             (seed[1], w1) = IdpfPoplar.convert(level, x1)
             ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
@@ -65,8 +64,13 @@ class IdpfPoplar(Idpf):
                 raise ERR_INPUT # beta too long or too short
 
             w_cw = vec_add(vec_sub(b, w0), w1)
-            if ctrl[1] == Field2(1):
-                w_cw = vec_neg(w_cw)
+            # Implementation note: Here we negate the correction word if
+            # the control bit `ctrl[1]` is set. We avoid branching on the
+            # value in order to reduce leakage via timing side channels.
+            mask = Field(1) - Field(2) * Field(ctrl[1].as_unsigned())
+            for i in range(len(w_cw)):
+                w_cw[i] *= mask
+
             correction_words.append((seed_cw, ctrl_cw, w_cw))
 
         public_share = IdpfPoplar.encode_public_share(correction_words)
@@ -127,18 +131,23 @@ class IdpfPoplar(Idpf):
     @classmethod
     def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
                   correction_word, level, bit):
+        Field = IdpfPoplar.current_field(level)
         (seed_cw, ctrl_cw, w_cw) = correction_word
         (s, t) = IdpfPoplar.extend(prev_seed)
-        if prev_ctrl == Field2(1):
-            s[0] = xor(s[0], seed_cw)
-            s[1] = xor(s[1], seed_cw)
-            t[0] = t[0] + ctrl_cw[0]
-            t[1] = t[1] + ctrl_cw[1]
+        s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
+        s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
+        t[0] += ctrl_cw[0] * prev_ctrl
+        t[1] += ctrl_cw[1] * prev_ctrl
 
         next_ctrl = t[bit]
         (next_seed, y) = IdpfPoplar.convert(level, s[bit])
-        if next_ctrl == Field2(1):
-            y = vec_add(y, w_cw)
+        # Implementation note: Here we add the correction word to the
+        # output if `next_ctrl` is set. We avoid branching on the value of
+        # the control bit in order to reduce side channel leakage.
+        mask = Field(next_ctrl.as_unsigned())
+        for i in range(len(y)):
+            y[i] += w_cw[i] * mask
+
         return (next_seed, next_ctrl, y)
 
     @classmethod
