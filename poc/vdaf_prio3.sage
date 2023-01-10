@@ -27,7 +27,7 @@ class Prio3(Vdaf):
     # Parameters required by `Vdaf`
     VERIFY_KEY_SIZE = None # Set by the PRG
     ROUNDS = 1
-    SHARES = None  # A number between `[0, 255)` set later
+    SHARES = None  # A number between `[2, 256]` set later
 
     # Types required by `Vdaf`
     Measurement = Flp.Measurement
@@ -363,7 +363,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def with_shares(cls, num_shares: Unsigned):
-        if num_shares < 2 or num_shares > 254:
+        if num_shares < 2 or num_shares > 256:
             raise ERR_INPUT
         new_cls = deepcopy(cls)
         new_cls.SHARES = num_shares
