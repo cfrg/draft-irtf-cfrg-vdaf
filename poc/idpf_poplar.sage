@@ -234,9 +234,15 @@ class IdpfPoplar(Idpf):
 
 
 if __name__ == '__main__':
-    cls = IdpfPoplar \
-                .with_prg(prg.PrgAes128) \
-                .with_value_len(2)
+    # Definition of `IdpfPoplarAes128` is scoped this way so that we can
+    # generate test vectors that name the PRG, but prevent others from using
+    # this class directly. The normal way to construct an IDPF is via
+    # `IdpfPoplar.with_prg()`.
+    class IdpfPoplarAes128(IdpfPoplar):
+        Prg = prg.PrgAes128
+        KEY_SIZE = prg.PrgAes128.SEED_SIZE
+
+    cls = IdpfPoplarAes128.with_value_len(2)
     if TEST_VECTOR:
         gen_test_vec(cls.with_bits(10), 0, 0)
     test_idpf(cls.with_bits(16), 0b1111000011110000, 15, [0b1111000011110000])

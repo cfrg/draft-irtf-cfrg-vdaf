@@ -120,8 +120,10 @@ def test_idpf(Idpf, alpha, level, prefixes):
 
 
 def gen_test_vec(Idpf, alpha, test_vec_instance):
-    beta_inner = [[Idpf.FieldInner(1)] * Idpf.VALUE_LEN] * (Idpf.BITS-1)
-    beta_leaf = [Idpf.FieldLeaf(1)] * Idpf.VALUE_LEN
+    beta_inner = []
+    for level in range(Idpf.BITS-1):
+        beta_inner.append([Idpf.FieldInner(level)] * Idpf.VALUE_LEN)
+    beta_leaf = [Idpf.FieldLeaf(Idpf.BITS-1)] * Idpf.VALUE_LEN
     (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
 
     printable_beta_inner = [
@@ -131,6 +133,7 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
     printable_keys = [ key.hex() for key in keys ]
     test_vec = {
         'bits': int(Idpf.BITS),
+        'alpha': str(alpha),
         'beta_inner': printable_beta_inner,
         'beta_leaf': printable_beta_leaf,
         'public_share': public_share.hex(),
