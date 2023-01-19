@@ -205,7 +205,7 @@ class IdpfPoplar(Idpf):
             encoded_w_cw, encoded = encoded[:l], encoded[l:]
             w_cw = Field.decode_vec(encoded_w_cw)
             correction_words.append((seed_cw, ctrl_cw, w_cw))
-        if len(encoded) != 0:
+        if packed_ctrl != 0 or len(encoded) != 0:
             raise ERR_DECODE
         return correction_words
 
