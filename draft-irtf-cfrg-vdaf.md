@@ -33,6 +33,16 @@ author:
 
 normative:
 
+  SP800-185:
+    title: "SHA-3 Derived Functions: cSHAKE, KMAC, TupleHash and ParallelHash"
+    date: December 2016
+    seriesinfo: NIST Special Publication 800-185
+
+  FIPS202:
+    title: "SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions"
+    date: August 2015
+    seriesinfo: NIST FIPS PUB 202
+
 informative:
 
   AGJOP21:
@@ -358,8 +368,8 @@ A variable with type `Bytes` is a byte string. This document defines several
 byte-string constants. When comprised of printable ASCII characters, they are
 written as Python 3 byte-string literals (e.g., `b'some constant string'`).
 
-A global constant `VERSION` is defined, which algorithms are free to use as
-desired. Its value SHALL be `b'vdaf-03'`.
+A global constant `VERSION` of type `Unsigned` is defined, which algorithms are
+free to use as desired. Its value SHALL be `3`.
 
 This document describes algorithms for multi-party computations in which the
 parties typically communicate over a network. Wherever a quantity is defined
@@ -1139,8 +1149,7 @@ The tables below define finite fields used in the remainder of this document.
 
 A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
 into a long string of pseudorandom bits. A PRG suitable for this document
-implements the interface specified in this section. Concrete constructions are
-described in the subsections that follow.
+implements the interface specified in this section.
 
 PRGs are defined by a class `Prg` with the following associated parameter:
 
@@ -1148,10 +1157,11 @@ PRGs are defined by a class `Prg` with the following associated parameter:
 
 A concrete `Prg` implements the following class method:
 
-* `Prg(seed: Bytes, info: Bytes)` constructs an instance of `Prg` from the given
-  seed and info string. The seed MUST be of length `SEED_SIZE` and MUST be
-  generated securely (i.e., it is either the output of `gen_rand` or a previous
-  invocation of the PRG). The info string is used for domain separation.
+* `Prg(seed: Bytes[Prg.SEED_SIZE], custom: Bytes, binder: Bytes)` constructs an
+  instance of `Prg` from the given seed and customization and binder strings.
+  (See below for definitions of these.) The seed MUST be of length `SEED_SIZE`
+  and MUST be generated securely (i.e., it is either the output of `gen_rand` or
+  a previous invocation of the PRG).
 
 * `prg.next(length: Unsigned)` returns the next `length` bytes of output of PRG.
   If the seed was securely generated, the output can be treated as pseudorandom.
@@ -1164,8 +1174,8 @@ pseudorandom field elements. For each method, the seed MUST be of length
 
 ~~~
 # Derive a new seed.
-def derive_seed(Prg, seed: Bytes, info: Bytes) -> bytes:
-    prg = Prg(seed, info)
+def derive_seed(Prg, seed: Bytes[Prg.SEED_SIZE], custom: Bytes, binder: Bytes):
+    prg = Prg(seed, custom, binder)
     return prg.next(Prg.SEED_SIZE)
 
 # Output the next `length` pseudorandom elements of `Field`.
@@ -1182,50 +1192,71 @@ def next_vec(self, Field, length: Unsigned):
 # Expand the input `seed` into vector of `length` field elements.
 def expand_into_vec(Prg,
                     Field,
-                    seed: Bytes,
-                    info: Bytes,
+                    seed: Bytes[Prg.SEED_SIZE],
+                    custom: Bytes,
+                    binder: Bytes,
                     length: Unsigned):
-    prg = Prg(seed, info)
+    prg = Prg(seed, custom, binder)
     return prg.next_vec(Field, length)
 ~~~
 {: #prg-derived-methods title="Derived class methods for PRGs."}
 
-### PrgAes128 {#prg-aes128}
+### PrgSha3 {#prg-sha3}
 
-> OPEN ISSUE Phillipp points out that a fixed-key mode of AES may be more
-> performant (https://eprint.iacr.org/2019/074.pdf). See issue#32.
-
-> TODO(issue #106) Decide if it's safe to model this construction as a random
-> oracle. `PrgAes128.derive_seed()` is used for the Fiat-Shamir heuristic in
-> Prio3 ({{prio3}}). A fixed-key is used for this step (the all-zero string). A
-> reasonable starting point would be to model AES as an ideal cipher.
-
-Our first construction, `PrgAes128`, converts a blockcipher, namely AES-128,
-into a PRG. Seed expansion involves two steps. In the first step, CMAC
-{{!RFC4493}} is applied to the seed and info string to get a fresh key. In the
-second step, the fresh key is used in CTR-mode to produce a key stream for
-generating the output. A fixed initialization vector (IV) is used.
+This section describes PrgSha3, a PRG based on the Keccak permutation of SHA-3
+{{FIPS202}}. Keccak is used in the cSHAKE128 mode of operation {{SP800-185}}.
 
 ~~~
-class PrgAes128:
+class PrgSha3(Prg):
+    # Associated parameters
+    SEED_SIZE = 16
 
-    SEED_SIZE: Unsigned = 16
+    def __init__(self, seed, custom, binder):
+        self.l = 0
+        self.x = seed + binder
+        self.s = custom
 
-    def __init__(self, seed, info):
-        self.length_consumed = 0
+    def next(self, length: Unsigned) -> Bytes:
+        self.l += length
 
-        # Use CMAC as a pseudorandom function to derive a key.
-        self.key = AES128-CMAC(seed, info)
-
-    def next(self, length):
-        self.length_consumed += length
-
-        # CTR-mode encryption of the all-zero string of the desired
-        # length and using a fixed, all-zero IV.
-        stream = AES128-CTR(key, zeros(16), zeros(self.length_consumed))
+        # Function `cSHAKE128(x, l, n, s)` is as defined in
+        # [SP800-185, Section 3.3].
+        #
+        # Implementation note: Rather than re-generate the output
+        # stream each time `next()` is invoked, most implementations
+        # of SHA-3 will expose an "absorb-then-squeeze" API that
+        # allows stateful handling of the stream.
+        stream = cSHAKE128(self.x, self.l, b'', self.s)
         return stream[-length:]
 ~~~
-{: title="Definition of PRG PrgAes128."}
+{: title="Definition of PRG PrgSha3."}
+
+### The Context and Binder Strings
+
+PRGs are used to map a seed to a finite domain, e.g., a fresh seed or a vector
+of field elements. To ensure domain separation, the derivation is needs to be
+bound to some distinguished "customization string". The customization string
+encodes the following values:
+
+1. The document version (i.e.,`VERSION`);
+1. The "class" of the algorithm using the output (e.g., VDAF);
+1. A unique identifier for the algorithm; and
+1. Some indication of how the output is used (e.g., for deriving the measurement
+   shares in Prio3 {{prio3}}).
+
+The following algorithm is used in the remainder of this document in order to
+format the customization string:
+
+~~~
+def format_custom(algo_class: Unsigned, algo: Unsigned, usage: Unsigned):
+    return I2OSP(VERSION, 1) + \
+           I2OSP(algo_class, 1) + \
+           I2OSP(algo, 4) + \
+           I2OSP(usage, 2)
+~~~
+
+It is also sometimes necessary to bind the output to some ephemeral value that
+muliple parties need to agree on. We call this input the "binder string".
 
 # Prio3 {#prio3}
 
@@ -1392,9 +1423,9 @@ For some FLPs, the encoded input also includes redundant field elements that are
 useful for checking the proof, but which are not needed after the proof has been
 checked. An example is the "integer sum" data type from {{CGB17}} in which an
 integer in range `[0, 2^k)` is encoded as a vector of `k` field elements (this
-type is also defined in {{prio3aes128sum}}). After consuming this vector,
-all that is needed is the integer it represents. Thus the FLP defines an
-algorithm for truncating the input to the length of the aggregated output:
+type is also defined in {{prio3sum}}). After consuming this vector, all that is
+needed is the integer it represents. Thus the FLP defines an algorithm for
+truncating the input to the length of the aggregated output:
 
 * `Flp.truncate(input: Vec[Field]) -> Vec[Field]` maps an encoded input to an
   aggregatable output. The length of the input MUST be `INPUT_LEN` and the length
@@ -1434,15 +1465,15 @@ methods refer to constants enumerated in {{prio3-const}}.
 | `AggResult`       | `Flp.AggResult`   |
 {: #prio3-param title="VDAF parameters for Prio3."}
 
-| Variable                       | Value |
-|:-------------------------------|:------|
-| `DST_MEASUREMENT_SHARE: Bytes` | 0x01  |
-| `DST_PROOF_SHARE: Bytes`       | 0x02  |
-| `DST_JOINT_RANDOMNESS: Bytes`  | 0x03  |
-| `DST_PROVE_RANDOMNESS: Bytes`  | 0x04  |
-| `DST_QUERY_RANDOMNESS: Bytes`  | 0x05  |
-| `DST_JOINT_RAND_SEED: Bytes`   | 0x06  |
-| `DST_JOINT_RAND_PART: Bytes`   | 0x07  |
+| Variable                          | Value |
+|:----------------------------------|:------|
+| `DST_MEASUREMENT_SHARE: Unsigned` | 1     |
+| `DST_PROOF_SHARE: Unsigned`       | 2     |
+| `DST_JOINT_RANDOMNESS: Unsigned`  | 3     |
+| `DST_PROVE_RANDOMNESS: Unsigned`  | 4     |
+| `DST_QUERY_RANDOMNESS: Unsigned`  | 5     |
+| `DST_JOINT_RAND_SEED: Unsigned`   | 6     |
+| `DST_JOINT_RAND_PART: Unsigned`   | 7     |
 {: #prio3-const title="Constants used by Prio3."}
 
 ### Sharding
@@ -1472,7 +1503,6 @@ The definitions of constants and a few auxiliary functions are defined in
 
 ~~~
 def measurement_to_input_shares(Prio3, measurement, nonce):
-    dst = VERSION + I2OSP(Prio3.ID, 4)
     inp = Prio3.Flp.encode(measurement)
 
     # Generate measurement shares.
@@ -1486,21 +1516,24 @@ def measurement_to_input_shares(Prio3, measurement, nonce):
         helper_meas_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            dst + DST_MEASUREMENT_SHARE + byte(j+1),
+            Prio3.custom(DST_MEASUREMENT_SHARE),
+            byte(j+1),
             Prio3.Flp.INPUT_LEN
         )
         leader_meas_share = vec_sub(leader_meas_share,
                                     helper_meas_share)
         encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
         k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-            dst + DST_JOINT_RAND_PART + byte(j+1) + nonce + encoded)
+            Prio3.custom(DST_JOINT_RAND_PART),
+            byte(j+1) + nonce + encoded)
         k_helper_meas_shares.append(k_share)
         k_helper_blinds.append(k_blind)
         k_joint_rand_parts.append(k_joint_rand_part)
     k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
     encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
     k_leader_joint_rand_part = Prio3.Prg.derive_seed(k_leader_blind,
-        dst + DST_JOINT_RAND_PART + byte(0) + nonce + encoded)
+        Prio3.custom(DST_JOINT_RAND_PART),
+        byte(0) + nonce + encoded)
     k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
 
     # Compute joint randomness seed.
@@ -1510,14 +1543,16 @@ def measurement_to_input_shares(Prio3, measurement, nonce):
     prove_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         gen_rand(Prio3.Prg.SEED_SIZE),
-        dst + DST_PROVE_RANDOMNESS,
-        Prio3.Flp.PROVE_RAND_LEN
+        Prio3.custom(DST_PROVE_RANDOMNESS),
+        b'',
+        Prio3.Flp.PROVE_RAND_LEN,
     )
     joint_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_joint_rand,
-        dst + DST_JOINT_RANDOMNESS,
-        Prio3.Flp.JOINT_RAND_LEN
+        Prio3.custom(DST_JOINT_RANDOMNESS),
+        b'',
+        Prio3.Flp.JOINT_RAND_LEN,
     )
     proof = Prio3.Flp.prove(inp, prove_rand, joint_rand)
     leader_proof_share = proof
@@ -1528,8 +1563,9 @@ def measurement_to_input_shares(Prio3, measurement, nonce):
         helper_proof_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            dst + DST_PROOF_SHARE + byte(j+1),
-            Prio3.Flp.PROOF_LEN
+            Prio3.custom(DST_PROOF_SHARE),
+            byte(j+1),
+            Prio3.Flp.PROOF_LEN,
         )
         leader_proof_share = vec_sub(leader_proof_share,
                                      helper_proof_share)
@@ -1581,42 +1617,40 @@ their verifier shares.
 The definitions of constants and a few auxiliary functions are defined in
 {{prio3-auxiliary}}.
 
-
 ~~~
 def prep_init(Prio3, verify_key, agg_id, _agg_param,
               nonce, public_share, input_share):
-    # Domain separation tag for PRG info string
-    dst = VERSION + I2OSP(Prio3.ID, 4)
-
     k_joint_rand_parts = Prio3.decode_public_share(public_share)
     (meas_share, proof_share, k_blind) = \
         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
-        Prio3.decode_helper_share(dst, agg_id, input_share)
+        Prio3.decode_helper_share(agg_id, input_share)
     out_share = Prio3.Flp.truncate(meas_share)
 
     # Compute joint randomness.
     joint_rand = []
     k_corrected_joint_rand, k_joint_rand_part = None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded = Prio3.Flp.Field.encode_vec(meas_share)
         k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-            dst + DST_JOINT_RAND_PART + \
-            byte(agg_id) + nonce + \
-            Prio3.Flp.Field.encode_vec(meas_share))
+            Prio3.custom(DST_JOINT_RAND_PART),
+            byte(agg_id) + nonce + encoded)
         k_joint_rand_parts[agg_id] = k_joint_rand_part
         k_corrected_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_corrected_joint_rand,
-            dst + DST_JOINT_RANDOMNESS,
-            Prio3.Flp.JOINT_RAND_LEN
+            Prio3.custom(DST_JOINT_RANDOMNESS),
+            b'',
+            Prio3.Flp.JOINT_RAND_LEN,
         )
 
     # Query the measurement and proof share.
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         verify_key,
-        dst + DST_QUERY_RANDOMNESS + nonce,
-        Prio3.Flp.QUERY_RAND_LEN
+        Prio3.custom(DST_QUERY_RANDOMNESS),
+        nonce,
+        Prio3.Flp.QUERY_RAND_LEN,
     )
     verifier_share = Prio3.Flp.query(meas_share,
                                      proof_share,
@@ -1641,7 +1675,6 @@ def prep_next(Prio3, prep, inbound):
     return out_share
 
 def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
-    dst = VERSION + I2OSP(Prio3.ID, 4)
     verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
     k_joint_rand_parts = []
     for encoded in prep_shares:
@@ -1694,14 +1727,16 @@ def agg_shares_to_result(Prio3, _agg_param,
 
 ### Auxiliary Functions {#prio3-auxiliary}
 
-#### Joint Randomness Computation
-
 ~~~
 def joint_rand(Prio3, k_joint_rand_parts):
-    dst = VERSION + I2OSP(Prio3.ID, 4)
     return Prio3.Prg.derive_seed(
         zeros(Prio3.Prg.SEED_SIZE),
-        dst + DST_JOINT_RAND_SEED + concat(k_joint_rand_parts))
+        Prio3.custom(DST_JOINT_RAND_SEED),
+        concat(k_joint_rand_parts),
+    )
+
+def custom(Prio3, usage):
+    return format_custom(0, Prio3.ID, usage)
 ~~~
 
 #### Message Serialization
@@ -1746,19 +1781,21 @@ def encode_helper_share(Prio3,
         encoded += k_blind
     return encoded
 
-def decode_helper_share(Prio3, dst, agg_id, encoded):
-    info_meas_share = dst + DST_MEASUREMENT_SHARE + byte(agg_id)
-    info_proof_share = dst + DST_PROOF_SHARE + byte(agg_id)
+def decode_helper_share(Prio3, agg_id, encoded):
+    c_meas_share = Prio3.custom(DST_MEASUREMENT_SHARE)
+    c_proof_share = Prio3.custom(DST_PROOF_SHARE)
     l = Prio3.Prg.SEED_SIZE
     k_meas_share, encoded = encoded[:l], encoded[l:]
     meas_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                            k_meas_share,
-                                           info_meas_share,
+                                           c_meas_share,
+                                           byte(agg_id),
                                            Prio3.Flp.INPUT_LEN)
     k_proof_share, encoded = encoded[:l], encoded[l:]
     proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                             k_proof_share,
-                                            info_proof_share,
+                                            c_proof_share,
+                                            byte(agg_id),
                                             Prio3.Flp.PROOF_LEN)
     if Prio3.Flp.JOINT_RAND_LEN == 0:
         if len(encoded) != 0:
@@ -2197,12 +2234,12 @@ each can be found in {{test-vectors}}.
 > NOTE Reference implementations of each of these VDAFs can be found in
 > https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/vdaf_prio3.sage.
 
-### Prio3Aes128Count
+### Prio3Count
 
 Our first instance of Prio3 is for a simple counter: Each measurement is either
 one or zero and the aggregate result is the sum of the measurements.
 
-This instance uses `PrgAes128` ({{prg-aes128}}) as its PRG. Its validity
+This instance uses PrgSha3 ({{prg-sha3}) as its PRG. Its validity
 circuit, denoted `Count`, uses `Field64` ({{field64}}) as its finite field. Its
 gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
@@ -2233,17 +2270,16 @@ way. The parameters for this circuit are summarized below.
 | `Field`          | `Field64` ({{field64}})      |
 {: title="Parameters of validity circuit Count."}
 
-### Prio3Aes128Sum
+### Prio3Sum
 
 The next instance of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in range `[0, 2^bits)`, where `bits` is an
 associated parameter.
 
-This instance of Prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG.
-Its validity circuit, denoted `Sum`, uses `Field128` ({{field128}}) as its
-finite field. The measurement is encoded as a length-`bits` vector of field
-elements, where the `l`th element of the vector represents the `l`th bit of the
-summand:
+This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
+circuit, denoted `Sum`, uses `Field128` ({{field128}}) as its finite field. The
+measurement is encoded as a length-`bits` vector of field elements, where the
+`l`th element of the vector represents the `l`th bit of the summand:
 
 ~~~
 def encode(Sum, measurement: Integer):
@@ -2298,17 +2334,17 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
 | `Field`          | `Field128` ({{field128}})    |
 {: title="Parameters of validity circuit Sum."}
 
-### Prio3Aes128Histogram
+### Prio3Histogram
 
 This instance of Prio3 allows for estimating the distribution of the
 measurements by computing a simple histogram. Each measurement is an arbitrary
 integer and the aggregate result counts the number of measurements that fall in
 a set of fixed buckets.
 
-This instance of Prio3 uses `PrgAes128` ({{prg-aes128}}) as its PRG. Its
-validity circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its
-finite field. The measurement is encoded as a one-hot vector representing the
-bucket into which the measurement falls (let `bucket` denote a sequence of
+This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
+circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its finite
+field. The measurement is encoded as a one-hot vector representing the bucket
+into which the measurement falls (let `bucket` denote a sequence of
 monotonically increasing integers):
 
 ~~~
@@ -2327,7 +2363,7 @@ def decode(Histogram, output: Vec[Field128], _num_measurements):
     return [bucket_count.as_unsigned() for bucket_count in output]
 ~~~
 
-The validity circuit uses `Range2` (see {{prio3aes128sum}}) as its single gadget. It
+The validity circuit uses `Range2` (see {{prio3sum}}) as its single gadget. It
 checks for one-hotness in two steps, as follows:
 
 ~~~
@@ -2416,7 +2452,7 @@ is zero everywhere except for one element, which is equal to one.
 The remainder of this section is structured as follows. IDPFs are defined in
 {{idpf}}; a concrete instantiation is given {{idpf-poplar}}. The Poplar1 VDAF is
 defined in {{poplar1-construction}} in terms of a generic IDPF. Finally, a
-concrete instantiation of Poplar1 is specified in {{poplar1aes128}};
+concrete instantiation of Poplar1 is specified in {{poplar1-inst}};
 test vectors can be found in {{test-vectors}}.
 
 ## Incremental Distributed Point Functions (IDPFs) {#idpf}
@@ -2440,9 +2476,9 @@ length-3 prefix of 25 (11001), but 7 (111) is not.
 Each of the programmed points `beta` is a vector of elements of some finite
 field. We distinguish two types of fields: One for inner nodes (denoted
 `Idpf.FieldInner`), and one for leaf nodes (`Idpf.FieldLeaf`). (Our
-instantiation of Poplar1 ({{poplar1aes128}}) will use a much larger
-field for leaf nodes than for inner nodes. This is to ensure the IDPF is
-"extractable" as defined in {{BBCGGI21}}, Definition 1.)
+instantiation of Poplar1 ({{poplar1-inst}}) will use a much larger field for
+leaf nodes than for inner nodes. This is to ensure the IDPF is "extractable" as
+defined in {{BBCGGI21}}, Definition 1.)
 
 A concrete IDPF defines the types and constants enumerated in {{idpf-param}}. In
 the remainder we write `Idpf.Vec` as shorthand for the type
@@ -2544,12 +2580,10 @@ and sends additive shares of `a`, `b`, `c`, `A` and `B` to the Aggregators.
 Putting everything together, the input-distribution algorithm is defined as
 follows. Function `encode_input_shares` is defined in {{poplar1-helper-functions}}.
 
-
 ~~~
 def measurement_to_input_shares(Poplar1, measurement, _nonce):
-    dst = VERSION + I2OSP(Poplar1.ID, 4)
-    prg = Poplar1.Idpf.Prg(
-        gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))
+    prg = Poplar1.Idpf.Prg(gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
+                           Poplar1.custom(DST_SHARD_RAND), b'')
 
     # Construct the IDPF values for each level of the IDPF tree.
     # Each "data" value is 1; in addition, the Client generates
@@ -2576,8 +2610,10 @@ def measurement_to_input_shares(Poplar1, measurement, _nonce):
         gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
     ]
     corr_prg = [
-        Poplar1.Idpf.Prg(corr_seed[0], dst + byte(0)),
-        Poplar1.Idpf.Prg(corr_seed[1], dst + byte(1)),
+        Poplar1.Idpf.Prg(corr_seed[0],
+                         Poplar1.custom(DST_CORR_SHARE), byte(0)),
+        Poplar1.Idpf.Prg(corr_seed[1],
+                         Poplar1.custom(DST_CORR_SHARE), byte(1)),
     ]
 
     # For each level of the IDPF tree, shares of the `(A, B)`
@@ -2617,13 +2653,12 @@ for each. The Aggregators use these and the correlation shares provided by the
 Client to verify that the sequence of `data_share` values are additive shares of
 a one-hot vector.
 
-The algorithms below make use of auxiliary functions `verify_context()` and
+The algorithms below make use of auxiliary functions `verify_binder()` and
 `decode_input_share()` defined in {{poplar1-helper-functions}}.
 
 ~~~
 def prep_init(Poplar1, verify_key, agg_id, agg_param,
               nonce, public_share, input_share):
-    dst = VERSION + I2OSP(Poplar1.ID, 4)
     (level, prefixes) = agg_param
     (key, corr_seed, corr_inner, corr_leaf) = \
         Poplar1.decode_input_share(input_share)
@@ -2640,7 +2675,9 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # the IDPF will be evaluated incrementally beginning with
     # `level == 0`. Implementations can save computation by
     # storing the intermediate PRG state between evaluations.
-    corr_prg = Poplar1.Idpf.Prg(corr_seed, dst + byte(agg_id))
+    corr_prg = Poplar1.Idpf.Prg(corr_seed,
+                                Poplar1.custom(DST_CORR_SHARE),
+                                byte(agg_id))
     for current_level in range(level+1):
         Field = Poplar1.Idpf.current_field(current_level)
         (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
@@ -2651,7 +2688,8 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # called the "masked input values" [BBCGGI21, Appendix C.4].
     Field = Poplar1.Idpf.current_field(level)
     verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
-        dst + Poplar1.verify_context(nonce, level, prefixes))
+        Poplar1.custom(DST_VERIFY_RAND),
+        Poplar1.verify_binder(nonce, level, prefixes))
     verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
     sketch_share = [a_share, b_share, c_share]
     out_share = []
@@ -2760,6 +2798,23 @@ def agg_shares_to_result(Poplar1, agg_param,
 ### Auxiliary Functions {#poplar1-helper-functions}
 
 ~~~
+def custom(Poplar1, usage):
+    return format_custom(0, Poplar1.ID, usage)
+
+def verify_binder(Poplar1, nonce, level, prefixes):
+    if len(nonce) > 255:
+        raise ERR_INPUT # nonce too long
+    binder = Bytes()
+    binder += byte(254)
+    binder += byte(len(nonce))
+    binder += nonce
+    binder += Poplar1.encode_agg_param(level, prefixes)
+    return binder
+~~~
+
+#### Message Serialization
+
+~~~
 def encode_input_shares(Poplar1, keys,
                         corr_seed, corr_inner, corr_leaf):
     input_shares = []
@@ -2826,20 +2881,17 @@ def decode_agg_param(Poplar1, encoded):
     if len(encoded) != 0:
         raise ERR_INPUT
     return (level, prefixes)
-
-def verify_context(Poplar1, nonce, level, prefixes):
-    if len(nonce) > 255:
-        raise ERR_INPUT # nonce too long
-    context = Bytes()
-    context += byte(254)
-    context += byte(len(nonce))
-    context += nonce
-    context += Poplar1.encode_agg_param(level, prefixes)
-    return context
 ~~~
 {: #poplar1-helpers title="Helper functions for Poplar1."}
 
 ## The IDPF scheme of {{BBCGGI21}} {#idpf-poplar}
+
+> TODO(issue#32) Consider replacing the generic `Prg` object here with some
+> fixed-key mode for AES (something along the lines of ia.cr/2019/074). This
+> would allow us to take advantage of hardware acceleration, which would
+> significantly improve performance. We use SHA-3 primarily to instantiate
+> random oracles, but the random oracle model may not be required for IDPF. More
+> investigation is needed.
 
 In this section we specify a concrete IDPF, called IdpfPoplar, suitable for
 instantiating Poplar1. The scheme gets its name from the name of the protocol of
@@ -3014,8 +3066,7 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
 ~~~
 def extend(IdpfPoplar, seed):
-    dst = VERSION + b' idpf poplar extend'
-    prg = IdpfPoplar.Prg(seed, dst)
+    prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 0), b'')
     s = [
         prg.next(IdpfPoplar.Prg.SEED_SIZE),
         prg.next(IdpfPoplar.Prg.SEED_SIZE),
@@ -3025,8 +3076,7 @@ def extend(IdpfPoplar, seed):
     return (s, t)
 
 def convert(IdpfPoplar, level, seed):
-    dst = VERSION + b' idpf poplar convert'
-    prg = IdpfPoplar.Prg(seed, dst)
+    prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 1), b'')
     next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
     Field = IdpfPoplar.current_field(level)
     w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
@@ -3070,12 +3120,11 @@ def decode_public_share(IdpfPoplar, encoded):
 ~~~
 {: #idpf-poplar-helpers title="Helper functions for IdpfPoplar."}
 
-## Poplar1Aes128
+## Instantiation {#poplar1-inst}
 
-We refer to Poplar1 instantiated with IdpfPoplar (`VALUE_LEN == 2`)
-and PrgAes128 ({{prg-aes128}}) as Poplar1Aes128. This VDAF is suitable
-for any positive value of `BITS`. Test vectors can be found in
-{{test-vectors}}.
+By default, Poplar1 is instantiated with IdpfPoplar (`VALUE_LEN == 2`) and
+PrgSha3 ({{prg-sha3}}). This VDAF is suitable for any positive value of `BITS`.
+Test vectors can be found in {{test-vectors}}.
 
 # Security Considerations {#security}
 
@@ -3150,12 +3199,12 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 
 | Value                        | Scheme               | Type | Reference                |
 |:-----------------------------|:---------------------|:-----|:-------------------------|
-| `0x00000000`                 | Prio3Aes128Count     | VDAF | {{prio3aes128count}}     |
-| `0x00000001`                 | Prio3Aes128Sum       | VDAF | {{prio3aes128sum}}       |
-| `0x00000002`                 | Prio3Aes128Histogram | VDAF | {{prio3aes128histogram}} |
-| `0x00000003` to `0x00000FFF` | reserved for Prio3   | VDAF | n/a                      |
-| `0x00001000`                 | Poplar1Aes128        | VDAF | {{poplar1aes128}}        |
-| `0xFFFF0000` to `0xFFFFFFFF` | reserved             | n/a  | n/a                      |
+| `0x00000000`                 | Prio3Count         | VDAF | {{prio3count}}     |
+| `0x00000001`                 | Prio3Sum           | VDAF | {{prio3sum}}       |
+| `0x00000002`                 | Prio3Histogram     | VDAF | {{prio3histogram}} |
+| `0x00000003` to `0x00000FFF` | reserved for Prio3 | VDAF | n/a                |
+| `0x00001000`                 | Poplar1            | VDAF | {{poplar1-inst}}   |
+| `0xFFFF0000` to `0xFFFFFFFF` | reserved           | n/a  | n/a                |
 {: #codepoints title="Unique identifiers for (V)DAFs."}
 
 > TODO Add IANA considerations for the codepoints summarized in {{codepoints}}.
@@ -3190,7 +3239,7 @@ Byte strings are encoded in hexadecimal To make the tests deterministic,
 `gen_rand()` was replaced with a function that returns the requested number of
 `0x01` octets.
 
-## Prio3Aes128Count {#testvec-prio3aes128count}
+## Prio3Aes128Count {#testvec-prio3count}
 {:numbered="false"}
 
 ~~~
@@ -3221,7 +3270,7 @@ agg_share_1: >-
 agg_result: 1
 ~~~
 
-## Prio3Aes128Sum {#testvec-prio3aes128sum}
+## Prio3Aes128Sum {#testvec-prio3sum}
 {:numbered="false"}
 
 ~~~
@@ -3275,7 +3324,7 @@ agg_share_1: >-
 agg_result: 100
 ~~~
 
-## Prio3Aes128Histogram {#testvec-prio3aes128histogram}
+## Prio3Aes128Histogram {#testvec-prio3histogram}
 {:numbered="false"}
 
 ~~~
@@ -3328,7 +3377,7 @@ agg_share_1: >-
 agg_result: [0, 0, 1, 0]
 ~~~
 
-## Poplar1Aes128 {#testvec-poplar1aes128}
+## Poplar1Aes128 {#testvec-poplar1}
 {:numbered="false"}
 
 ### Sharding

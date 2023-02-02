@@ -5,12 +5,16 @@ from copy import deepcopy
 from collections import namedtuple
 from typing import Tuple, Union
 from sagelib.common import ERR_INPUT, ERR_VERIFY, I2OSP, OS2IP, TEST_VECTOR, \
-                           VERSION, Bytes, Error, Unsigned, Vec, byte, \
+                           Bytes, Error, Unsigned, Vec, byte, format_custom, \
                            gen_rand, vec_add, vec_sub
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.idpf as idpf
 import sagelib.idpf_poplar as idpf_poplar
 import sagelib.prg as prg
+
+DST_SHARD_RAND = 1
+DST_CORR_SHARE = 2
+DST_VERIFY_RAND = 3
 
 class Poplar1(Vdaf):
     # Types provided by a concrete instadce of `Poplar1`.
@@ -35,9 +39,8 @@ class Poplar1(Vdaf):
 
     @classmethod
     def measurement_to_input_shares(Poplar1, measurement, _nonce):
-        dst = VERSION + I2OSP(Poplar1.ID, 4)
-        prg = Poplar1.Idpf.Prg(
-            gen_rand(Poplar1.Idpf.Prg.SEED_SIZE), dst + byte(255))
+        prg = Poplar1.Idpf.Prg(gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
+                               Poplar1.custom(DST_SHARD_RAND), b'')
 
         # Construct the IDPF values for each level of the IDPF tree.
         # Each "data" value is 1; in addition, the Client generates
@@ -64,8 +67,10 @@ class Poplar1(Vdaf):
             gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
         ]
         corr_prg = [
-            Poplar1.Idpf.Prg(corr_seed[0], dst + byte(0)),
-            Poplar1.Idpf.Prg(corr_seed[1], dst + byte(1)),
+            Poplar1.Idpf.Prg(corr_seed[0],
+                             Poplar1.custom(DST_CORR_SHARE), byte(0)),
+            Poplar1.Idpf.Prg(corr_seed[1],
+                             Poplar1.custom(DST_CORR_SHARE), byte(1)),
         ]
 
         # For each level of the IDPF tree, shares of the `(A, B)`
@@ -97,7 +102,6 @@ class Poplar1(Vdaf):
     @classmethod
     def prep_init(Poplar1, verify_key, agg_id, agg_param,
                   nonce, public_share, input_share):
-        dst = VERSION + I2OSP(Poplar1.ID, 4)
         (level, prefixes) = agg_param
         (key, corr_seed, corr_inner, corr_leaf) = \
             Poplar1.decode_input_share(input_share)
@@ -114,7 +118,9 @@ class Poplar1(Vdaf):
         # the IDPF will be evaluated incrementally beginning with
         # `level == 0`. Implementations can save computation by
         # storing the intermediate PRG state between evaluations.
-        corr_prg = Poplar1.Idpf.Prg(corr_seed, dst + byte(agg_id))
+        corr_prg = Poplar1.Idpf.Prg(corr_seed,
+                                    Poplar1.custom(DST_CORR_SHARE),
+                                    byte(agg_id))
         for current_level in range(level+1):
             Field = Poplar1.Idpf.current_field(current_level)
             (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
@@ -125,7 +131,8 @@ class Poplar1(Vdaf):
         # called the "masked input values" [BBCGGI21, Appendix C.4].
         Field = Poplar1.Idpf.current_field(level)
         verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
-            dst + Poplar1.verify_context(nonce, level, prefixes))
+            Poplar1.custom(DST_VERIFY_RAND),
+            Poplar1.verify_binder(nonce, level, prefixes))
         verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
         sketch_share = [a_share, b_share, c_share]
         out_share = []
@@ -198,6 +205,10 @@ class Poplar1(Vdaf):
             # length.
             return b''
         return Field.encode_vec(sketch)
+
+    @classmethod
+    def custom(Poplar1, usage):
+        return format_custom(0, Poplar1.ID, usage)
 
     @classmethod
     def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
@@ -290,15 +301,15 @@ class Poplar1(Vdaf):
         return (level, prefixes)
 
     @classmethod
-    def verify_context(Poplar1, nonce, level, prefixes):
+    def verify_binder(Poplar1, nonce, level, prefixes):
         if len(nonce) > 255:
             raise ERR_INPUT # nonce too long
-        context = Bytes()
-        context += byte(254)
-        context += byte(len(nonce))
-        context += nonce
-        context += Poplar1.encode_agg_param(level, prefixes)
-        return context
+        binder = Bytes()
+        binder += byte(254)
+        binder += byte(len(nonce))
+        binder += nonce
+        binder += Poplar1.encode_agg_param(level, prefixes)
+        return binder
 
     @classmethod
     def with_idpf(cls, Idpf):
@@ -308,41 +319,38 @@ class Poplar1(Vdaf):
         return new_cls
 
     @classmethod
+    def with_bits(cls, bits):
+        return cls.with_idpf(
+            idpf_poplar.IdpfPoplar \
+                .with_prg(prg.PrgSha3) \
+                .with_value_len(2) \
+                .with_bits(bits))
+
+    @classmethod
     def test_vec_set_type_param(cls, test_vec):
         test_vec['bits'] = int(cls.Idpf.BITS)
         return 'bits'
 
 
-class Poplar1Aes128(Poplar1):
-
-    @classmethod
-    def with_bits(cls, bits):
-        return cls.with_idpf(
-            idpf_poplar.IdpfPoplar \
-                .with_prg(prg.PrgAes128) \
-                .with_value_len(2) \
-                .with_bits(bits))
-
-
 if __name__ == '__main__':
-    test_vdaf(Poplar1Aes128.with_bits(15), (15, []), [], [])
-    test_vdaf(Poplar1Aes128.with_bits(2), (1, [0b11]), [], [0])
-    test_vdaf(Poplar1Aes128.with_bits(2),
+    test_vdaf(Poplar1.with_bits(15), (15, []), [], [])
+    test_vdaf(Poplar1.with_bits(2), (1, [0b11]), [], [0])
+    test_vdaf(Poplar1.with_bits(2),
         (0, [0b0, 0b1]),
         [0b10, 0b00, 0b11, 0b01, 0b11],
         [2, 3],
     )
-    test_vdaf(Poplar1Aes128.with_bits(2),
+    test_vdaf(Poplar1.with_bits(2),
         (1, [0b00, 0b01]),
         [0b10, 0b00, 0b11, 0b01, 0b01],
         [1, 2],
     )
-    test_vdaf(Poplar1Aes128.with_bits(16),
+    test_vdaf(Poplar1.with_bits(16),
         (15, [0b1111000011110000]),
         [0b1111000011110000],
         [1],
     )
-    test_vdaf(Poplar1Aes128.with_bits(16),
+    test_vdaf(Poplar1.with_bits(16),
         (14, [0b111100001111000]),
         [
             0b1111000011110000,
@@ -353,7 +361,7 @@ if __name__ == '__main__':
         ],
         [2],
     )
-    test_vdaf(Poplar1Aes128.with_bits(128),
+    test_vdaf(Poplar1.with_bits(128),
         (
             127,
             [OS2IP(b'0123456789abcdef')],
@@ -363,7 +371,7 @@ if __name__ == '__main__':
         ],
         [1],
     )
-    test_vdaf(Poplar1Aes128.with_bits(256),
+    test_vdaf(Poplar1.with_bits(256),
         (
             63,
             [
@@ -379,7 +387,7 @@ if __name__ == '__main__':
     )
 
     # Generate test vectors.
-    cls = Poplar1Aes128.with_bits(4)
+    cls = Poplar1.with_bits(4)
     assert cls.ID == 0x00001000
     measurements = [0b1101]
     tests = [

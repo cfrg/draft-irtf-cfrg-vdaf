@@ -11,9 +11,7 @@ import struct
 TEST_VECTOR = False
 
 # Document version, reved with each draft that contains breaking changes.
-DRAFT = '03'
-VERSION = bytes(bytearray('vdaf-{}'.format(DRAFT), 'ascii'))
-
+VERSION = 3
 
 # Primitive types
 Bool = bool
@@ -113,6 +111,13 @@ def OS2IP(octets, skip_assert=False):
 # Return the concatenated byte strings.
 def concat(parts: Vec[Bytes]) -> Bytes:
     return reduce(lambda x, y: x + y, parts)
+
+# Format PRG context for use with a (V)DAF.
+def format_custom(algo_class: Unsigned, algo: Unsigned, usage: Unsigned):
+    return I2OSP(VERSION, 1) + \
+           I2OSP(algo_class, 1) + \
+           I2OSP(algo, 4) + \
+           I2OSP(usage, 2)
 
 def print_wrapped_line(line, tab):
     width=72
