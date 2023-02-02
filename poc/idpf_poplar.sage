@@ -2,8 +2,8 @@
 
 from copy import deepcopy
 from sagelib.common import ERR_DECODE, ERR_INPUT, I2OSP, OS2IP, VERSION, \
-                           Bytes, Error, Unsigned, Vec, byte, gen_rand, \
-                           vec_add, vec_neg, vec_sub, xor
+                           Bytes, Error, Unsigned, Vec, byte, format_custom, \
+                           gen_rand, vec_add, vec_neg, vec_sub, xor
 from sagelib.field import Field2
 from sagelib.idpf import Idpf, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
@@ -152,8 +152,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def extend(IdpfPoplar, seed):
-        dst = VERSION + b' idpf poplar extend'
-        prg = IdpfPoplar.Prg(seed, dst)
+        prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 0), b'')
         s = [
             prg.next(IdpfPoplar.Prg.SEED_SIZE),
             prg.next(IdpfPoplar.Prg.SEED_SIZE),
@@ -164,8 +163,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def convert(IdpfPoplar, level, seed):
-        dst = VERSION + b' idpf poplar convert'
-        prg = IdpfPoplar.Prg(seed, dst)
+        prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 1), b'')
         next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
         Field = IdpfPoplar.current_field(level)
         w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
@@ -235,7 +233,7 @@ class IdpfPoplar(Idpf):
 
 if __name__ == '__main__':
     cls = IdpfPoplar \
-                .with_prg(prg.PrgAes128) \
+                .with_prg(prg.PrgSha3) \
                 .with_value_len(2)
     test_idpf(cls.with_bits(16), 0b1111000011110000, 15, [0b1111000011110000])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 14, [0b111100001111000])

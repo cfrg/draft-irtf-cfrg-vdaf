@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from functools import reduce
-from sagelib.common import DRAFT, ERR_VERIFY, Bytes, Error, Unsigned, Vec, \
+from sagelib.common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
                            gen_rand, print_wrapped_line
 from typing import Optional, Tuple, Union
 import sagelib.field as field
@@ -213,9 +213,9 @@ def run_vdaf(Vdaf,
     if print_test_vec:
         pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param)
 
-        os.system('mkdir -p test_vec/{}'.format(DRAFT))
-        with open('test_vec/{}/{}_{}.json'.format(
-            DRAFT, Vdaf.__name__, test_vec_instance), 'w') as f:
+        os.system('mkdir -p test_vec/{:02}'.format(VERSION))
+        with open('test_vec/{:02}/{}_{}.json'.format(
+            VERSION, Vdaf.__name__, test_vec_instance), 'w') as f:
             json.dump(test_vec, f, indent=4, sort_keys=True)
             f.write('\n')
 

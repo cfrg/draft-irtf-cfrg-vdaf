@@ -2,21 +2,21 @@
 
 from copy import deepcopy
 from typing import Tuple
-from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, I2OSP, VERSION, \
+from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, I2OSP, \
                            TEST_VECTOR, Bytes, Unsigned, Vec, byte, concat, \
-                           gen_rand, vec_add, vec_sub, zeros
+                           format_custom, gen_rand, vec_add, vec_sub, zeros
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.flp as flp
 import sagelib.flp_generic as flp_generic
 import sagelib.prg as prg
 
-DST_MEASUREMENT_SHARE = byte(1)
-DST_PROOF_SHARE = byte(2)
-DST_JOINT_RANDOMNESS = byte(3)
-DST_PROVE_RANDOMNESS = byte(4)
-DST_QUERY_RANDOMNESS = byte(5)
-DST_JOINT_RAND_SEED = byte(6)
-DST_JOINT_RAND_PART = byte(7)
+DST_MEASUREMENT_SHARE = 1
+DST_PROOF_SHARE = 2
+DST_JOINT_RANDOMNESS = 3
+DST_PROVE_RANDOMNESS = 4
+DST_QUERY_RANDOMNESS = 5
+DST_JOINT_RAND_SEED = 6
+DST_JOINT_RAND_PART = 7
 
 # Base class for VDAFs based on prio3.
 class Prio3(Vdaf):
@@ -39,7 +39,6 @@ class Prio3(Vdaf):
 
     @classmethod
     def measurement_to_input_shares(Prio3, measurement, nonce):
-        dst = VERSION + I2OSP(Prio3.ID, 4)
         inp = Prio3.Flp.encode(measurement)
 
         # Generate measurement shares.
@@ -53,21 +52,24 @@ class Prio3(Vdaf):
             helper_meas_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_share,
-                dst + DST_MEASUREMENT_SHARE + byte(j+1),
+                Prio3.custom(DST_MEASUREMENT_SHARE),
+                byte(j+1),
                 Prio3.Flp.INPUT_LEN
             )
             leader_meas_share = vec_sub(leader_meas_share,
                                         helper_meas_share)
             encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-                dst + DST_JOINT_RAND_PART + byte(j+1) + nonce + encoded)
+                Prio3.custom(DST_JOINT_RAND_PART),
+                byte(j+1) + nonce + encoded)
             k_helper_meas_shares.append(k_share)
             k_helper_blinds.append(k_blind)
             k_joint_rand_parts.append(k_joint_rand_part)
         k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
         encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
         k_leader_joint_rand_part = Prio3.Prg.derive_seed(k_leader_blind,
-            dst + DST_JOINT_RAND_PART + byte(0) + nonce + encoded)
+            Prio3.custom(DST_JOINT_RAND_PART),
+            byte(0) + nonce + encoded)
         k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
 
         # Compute joint randomness seed.
@@ -77,14 +79,16 @@ class Prio3(Vdaf):
         prove_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             gen_rand(Prio3.Prg.SEED_SIZE),
-            dst + DST_PROVE_RANDOMNESS,
-            Prio3.Flp.PROVE_RAND_LEN
+            Prio3.custom(DST_PROVE_RANDOMNESS),
+            b'',
+            Prio3.Flp.PROVE_RAND_LEN,
         )
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_joint_rand,
-            dst + DST_JOINT_RANDOMNESS,
-            Prio3.Flp.JOINT_RAND_LEN
+            Prio3.custom(DST_JOINT_RANDOMNESS),
+            b'',
+            Prio3.Flp.JOINT_RAND_LEN,
         )
         proof = Prio3.Flp.prove(inp, prove_rand, joint_rand)
         leader_proof_share = proof
@@ -95,8 +99,9 @@ class Prio3(Vdaf):
             helper_proof_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_share,
-                dst + DST_PROOF_SHARE + byte(j+1),
-                Prio3.Flp.PROOF_LEN
+                Prio3.custom(DST_PROOF_SHARE),
+                byte(j+1),
+                Prio3.Flp.PROOF_LEN,
             )
             leader_proof_share = vec_sub(leader_proof_share,
                                          helper_proof_share)
@@ -122,38 +127,37 @@ class Prio3(Vdaf):
     @classmethod
     def prep_init(Prio3, verify_key, agg_id, _agg_param,
                   nonce, public_share, input_share):
-        # Domain separation tag for PRG info string
-        dst = VERSION + I2OSP(Prio3.ID, 4)
-
         k_joint_rand_parts = Prio3.decode_public_share(public_share)
         (meas_share, proof_share, k_blind) = \
             Prio3.decode_leader_share(input_share) if agg_id == 0 else \
-            Prio3.decode_helper_share(dst, agg_id, input_share)
+            Prio3.decode_helper_share(agg_id, input_share)
         out_share = Prio3.Flp.truncate(meas_share)
 
         # Compute joint randomness.
         joint_rand = []
         k_corrected_joint_rand, k_joint_rand_part = None, None
         if Prio3.Flp.JOINT_RAND_LEN > 0:
+            encoded = Prio3.Flp.Field.encode_vec(meas_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-                dst + DST_JOINT_RAND_PART + \
-                byte(agg_id) + nonce + \
-                Prio3.Flp.Field.encode_vec(meas_share))
+                Prio3.custom(DST_JOINT_RAND_PART),
+                byte(agg_id) + nonce + encoded)
             k_joint_rand_parts[agg_id] = k_joint_rand_part
             k_corrected_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
             joint_rand = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_corrected_joint_rand,
-                dst + DST_JOINT_RANDOMNESS,
-                Prio3.Flp.JOINT_RAND_LEN
+                Prio3.custom(DST_JOINT_RANDOMNESS),
+                b'',
+                Prio3.Flp.JOINT_RAND_LEN,
             )
 
         # Query the measurement and proof share.
         query_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             verify_key,
-            dst + DST_QUERY_RANDOMNESS + nonce,
-            Prio3.Flp.QUERY_RAND_LEN
+            Prio3.custom(DST_QUERY_RANDOMNESS),
+            nonce,
+            Prio3.Flp.QUERY_RAND_LEN,
         )
         verifier_share = Prio3.Flp.query(meas_share,
                                          proof_share,
@@ -180,7 +184,6 @@ class Prio3(Vdaf):
 
     @classmethod
     def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
-        dst = VERSION + I2OSP(Prio3.ID, 4)
         verifier = Prio3.Flp.Field.zeros(Prio3.Flp.VERIFIER_LEN)
         k_joint_rand_parts = []
         for encoded in prep_shares:
@@ -218,15 +221,15 @@ class Prio3(Vdaf):
     # Derive the joint randomness seed from its parts.
     @classmethod
     def joint_rand(Prio3, k_joint_rand_parts):
-        dst = VERSION + I2OSP(Prio3.ID, 4)
-        # TODO Decide if it is safe to model `Prg` as a random oracle. The joint
-        # randomenss is derived from the parts using a fixed seed. This looks a
-        # bit odd since every other use of this funciton takes in a
-        # (pseudo)random seed. However, we will need to model this as a random
-        # oracle anyway, in order to apply the Fiat-Shamir heuristic.
         return Prio3.Prg.derive_seed(
             zeros(Prio3.Prg.SEED_SIZE),
-            dst + DST_JOINT_RAND_SEED + concat(k_joint_rand_parts))
+            Prio3.custom(DST_JOINT_RAND_SEED),
+            concat(k_joint_rand_parts),
+        )
+
+    @classmethod
+    def custom(Prio3, usage):
+        return format_custom(0, Prio3.ID, usage)
 
     @classmethod
     def encode_leader_share(Prio3,
@@ -271,19 +274,21 @@ class Prio3(Vdaf):
         return encoded
 
     @classmethod
-    def decode_helper_share(Prio3, dst, agg_id, encoded):
-        info_meas_share = dst + DST_MEASUREMENT_SHARE + byte(agg_id)
-        info_proof_share = dst + DST_PROOF_SHARE + byte(agg_id)
+    def decode_helper_share(Prio3, agg_id, encoded):
+        c_meas_share = Prio3.custom(DST_MEASUREMENT_SHARE)
+        c_proof_share = Prio3.custom(DST_PROOF_SHARE)
         l = Prio3.Prg.SEED_SIZE
         k_meas_share, encoded = encoded[:l], encoded[l:]
         meas_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                k_meas_share,
-                                               info_meas_share,
+                                               c_meas_share,
+                                               byte(agg_id),
                                                Prio3.Flp.INPUT_LEN)
         k_proof_share, encoded = encoded[:l], encoded[l:]
         proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                                 k_proof_share,
-                                                info_proof_share,
+                                                c_proof_share,
+                                                byte(agg_id),
                                                 Prio3.Flp.PROOF_LEN)
         if Prio3.Flp.JOINT_RAND_LEN == 0:
             if len(encoded) != 0:
@@ -389,17 +394,17 @@ class Prio3(Vdaf):
 # INSTANTIATIONS
 #
 
-class Prio3Aes128Count(Prio3):
+class Prio3Count(Prio3):
     # Generic types required by `Prio3`
-    Prg = prg.PrgAes128
+    Prg = prg.PrgSha3
     Flp = flp_generic.FlpGeneric.with_valid(flp_generic.Count)
 
     # Associated parameters.
     ID = 0x00000000
 
-class Prio3Aes128Sum(Prio3):
+class Prio3Sum(Prio3):
     # Generic types required by `Prio3`
-    Prg = prg.PrgAes128
+    Prg = prg.PrgSha3
 
     @classmethod
     def with_bits(cls, bits: Unsigned):
@@ -409,9 +414,9 @@ class Prio3Aes128Sum(Prio3):
         new_cls.ID = 0x00000001
         return new_cls
 
-class Prio3Aes128Histogram(Prio3):
+class Prio3Histogram(Prio3):
     # Generic types required by `Prio3`
-    Prg = prg.PrgAes128
+    Prg = prg.PrgSha3
 
     @classmethod
     def with_buckets(cls, buckets: Vec[Unsigned]):
@@ -426,7 +431,7 @@ class Prio3Aes128Histogram(Prio3):
 # TESTS
 #
 
-class TestPrio3Aes128Average(Prio3Aes128Sum):
+class TestPrio3Average(Prio3Sum):
     '''
     A Prio3 instantiation to test use of num_measurements in the Valid
     class's decode() method.
@@ -447,7 +452,7 @@ if __name__ == '__main__':
     num_shares = 2 # Must be in range `[2, 256)`
 
     cls = Prio3 \
-        .with_prg(prg.PrgAes128) \
+        .with_prg(prg.PrgSha3) \
         .with_flp(flp.FlpTestField128) \
         .with_shares(num_shares)
     cls.ID = 0xFFFFFFFF
@@ -456,23 +461,23 @@ if __name__ == '__main__':
     # If JOINT_RAND_LEN == 0, then Fiat-Shamir isn't needed and we can skip
     # generating the joint randomness.
     cls = Prio3 \
-        .with_prg(prg.PrgAes128) \
+        .with_prg(prg.PrgSha3) \
         .with_flp(flp.FlpTestField128.with_joint_rand_len(0)) \
         .with_shares(num_shares)
     cls.ID = 0xFFFFFFFF
     test_vdaf(cls, None, [1, 2, 3, 4, 4], 14)
 
-    cls = Prio3Aes128Count.with_shares(num_shares)
+    cls = Prio3Count.with_shares(num_shares)
     assert cls.ID == 0x00000000
     test_vdaf(cls, None, [0, 1, 1, 0, 1], 3)
     test_vdaf(cls, None, [1], 1, print_test_vec=TEST_VECTOR)
 
-    cls = Prio3Aes128Sum.with_shares(num_shares).with_bits(8)
+    cls = Prio3Sum.with_shares(num_shares).with_bits(8)
     assert cls.ID == 0x00000001
     test_vdaf(cls, None, [0, 147, 1, 0, 11, 0], 159)
     test_vdaf(cls, None, [100], 100, print_test_vec=TEST_VECTOR)
 
-    cls = Prio3Aes128Histogram \
+    cls = Prio3Histogram \
             .with_shares(num_shares) \
             .with_buckets([1, 10, 100])
     assert cls.ID == 0x00000002
@@ -485,5 +490,5 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [0, 1, 5, 10, 15, 100, 101, 101], [2, 2, 2, 2])
     test_vdaf(cls, None, [50], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
 
-    cls = TestPrio3Aes128Average.with_shares(num_shares).with_bits(3)
+    cls = TestPrio3Average.with_shares(num_shares).with_bits(3)
     test_vdaf(cls, None, [1, 5, 1, 1, 4, 1, 3, 2], 2)
