@@ -1415,19 +1415,31 @@ This section specifies `Prio3`, an implementation of the `Vdaf` interface
 ({{vdaf}}). It has two generic parameters: an `Flp` ({{flp}}) and a `Prg`
 ({{prg}}). The associated constants and types required by the `Vdaf` interface
 are defined in {{prio3-param}}. The methods required for sharding, preparation,
-aggregation, and unsharding are described in the remaining subsections.
+aggregation, and unsharding are described in the remaining subsections. These
+methods refer to constants enumerated in {{prio3-const}}.
 
 | Parameter         | Value             |
 |:------------------|:------------------|
 | `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`   |
 | `ROUNDS`          | `1`               |
-| `SHARES`          | in `[2, 255)`     |
+| `SHARES`          | in `[2, 256)`     |
 | `Measurement`     | `Flp.Measurement` |
 | `AggParam`        | `None`            |
 | `Prep`            | `Tuple[Vec[Flp.Field], Optional[Bytes], Bytes]` |
 | `OutShare`        | `Vec[Flp.Field]`  |
 | `AggResult`       | `Flp.AggResult`   |
-{: #prio3-param title="Associated parameters for the Prio3 VDAF."}
+{: #prio3-param title="VDAF parameters for Prio3."}
+
+| Variable                       | Value |
+|:-------------------------------|:------|
+| `DST_MEASUREMENT_SHARE: Bytes` | 0x01  |
+| `DST_PROOF_SHARE: Bytes`       | 0x02  |
+| `DST_JOINT_RANDOMNESS: Bytes`  | 0x03  |
+| `DST_PROVE_RANDOMNESS: Bytes`  | 0x04  |
+| `DST_QUERY_RANDOMNESS: Bytes`  | 0x05  |
+| `DST_JOINT_RAND_SEED: Bytes`   | 0x06  |
+| `DST_JOINT_RAND_PART: Bytes`   | 0x07  |
+{: #prio3-const title="Constants used by Prio3."}
 
 ### Sharding
 
@@ -1451,43 +1463,40 @@ shares (called the "leader" shares below) are vectors of field elements. The
 other shares (called the "helper" shares) are represented instead by PRG seeds,
 which are expanded into vectors of field elements.
 
-The code refers to auxiliary functions for encoding the shares and deriving the
-joint randomness. In particular, `encode_leader_share` and
-`encode_helper_share` are used for encoding and `joint_rand` is used for joint
-randomness. These are defined in {{prio3-helper-functions}}.
+The definitions of constants and a few auxiliary functions are defined in
+{{prio3-auxiliary}}.
 
 ~~~
 def measurement_to_input_shares(Prio3, measurement, nonce):
-    # Domain separation tag for PRG info string
     dst = VERSION + I2OSP(Prio3.ID, 4)
     inp = Prio3.Flp.encode(measurement)
 
-    # Generate input shares.
-    leader_input_share = inp
-    k_helper_input_shares = []
+    # Generate measurement shares.
+    leader_meas_share = inp
+    k_helper_meas_shares = []
     k_helper_blinds = []
     k_joint_rand_parts = []
     for j in range(Prio3.SHARES-1):
         k_blind = gen_rand(Prio3.Prg.SEED_SIZE)
         k_share = gen_rand(Prio3.Prg.SEED_SIZE)
-        helper_input_share = Prio3.Prg.expand_into_vec(
+        helper_meas_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            dst + byte(j+1),
+            dst + DST_MEASUREMENT_SHARE + byte(j+1),
             Prio3.Flp.INPUT_LEN
         )
-        leader_input_share = vec_sub(leader_input_share,
-                                     helper_input_share)
-        encoded = Prio3.Flp.Field.encode_vec(helper_input_share)
-        k_joint_rand_part = Prio3.Prg.derive_seed(
-            k_blind, dst + byte(j+1) + nonce + encoded)
-        k_helper_input_shares.append(k_share)
+        leader_meas_share = vec_sub(leader_meas_share,
+                                    helper_meas_share)
+        encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
+        k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
+            dst + DST_JOINT_RAND_PART + byte(j+1) + nonce + encoded)
+        k_helper_meas_shares.append(k_share)
         k_helper_blinds.append(k_blind)
         k_joint_rand_parts.append(k_joint_rand_part)
     k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
-    encoded = Prio3.Flp.Field.encode_vec(leader_input_share)
-    k_leader_joint_rand_part = Prio3.Prg.derive_seed(
-        k_leader_blind, dst + byte(0) + nonce + encoded)
+    encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
+    k_leader_joint_rand_part = Prio3.Prg.derive_seed(k_leader_blind,
+        dst + DST_JOINT_RAND_PART + byte(0) + nonce + encoded)
     k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
 
     # Compute joint randomness seed.
@@ -1497,13 +1506,13 @@ def measurement_to_input_shares(Prio3, measurement, nonce):
     prove_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         gen_rand(Prio3.Prg.SEED_SIZE),
-        dst,
+        dst + DST_PROVE_RANDOMNESS,
         Prio3.Flp.PROVE_RAND_LEN
     )
     joint_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_joint_rand,
-        dst,
+        dst + DST_JOINT_RANDOMNESS,
         Prio3.Flp.JOINT_RAND_LEN
     )
     proof = Prio3.Flp.prove(inp, prove_rand, joint_rand)
@@ -1515,34 +1524,29 @@ def measurement_to_input_shares(Prio3, measurement, nonce):
         helper_proof_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            dst + byte(j+1),
+            dst + DST_PROOF_SHARE + byte(j+1),
             Prio3.Flp.PROOF_LEN
         )
         leader_proof_share = vec_sub(leader_proof_share,
                                      helper_proof_share)
 
-    # The Leader's "hint" consists of the joint randomness parts of the
-    # other Aggregators.
-    k_leader_hint = k_joint_rand_parts[1:]
+    # Each Aggregator's input share contains its measurement share,
+    # proof share, and blind. The public share contains the
+    # Aggregators' joint randomness parts.
     input_shares = []
     input_shares.append(Prio3.encode_leader_share(
-        leader_input_share,
+        leader_meas_share,
         leader_proof_share,
         k_leader_blind,
-        k_leader_hint,
     ))
     for j in range(Prio3.SHARES-1):
-        # Each Helper's hint consists of the joint randomness part of the
-        # other Aggregators.
-        k_helper_hint = k_joint_rand_parts[:j+1] + \
-                        k_joint_rand_parts[j+2:]
         input_shares.append(Prio3.encode_helper_share(
-            k_helper_input_shares[j],
+            k_helper_meas_shares[j],
             k_helper_proof_shares[j],
             k_helper_blinds[j],
-            k_helper_hint,
         ))
-    return (b'', input_shares)
+    public_share = Prio3.encode_public_share(k_joint_rand_parts)
+    return (public_share, input_shares)
 ~~~
 {: #prio3-eval-input title="Input-distribution algorithm for Prio3."}
 
@@ -1570,45 +1574,47 @@ have all computed the same joint randomness seed before accepting their output
 shares. To do so, they exchange their parts of the joint randomness along with
 their verifier shares.
 
-The algorithms required for preparation are defined as follows. These algorithms
-make use of methods defined in {{prio3-helper-functions}}.
+The definitions of constants and a few auxiliary functions are defined in
+{{prio3-auxiliary}}.
+
 
 ~~~
 def prep_init(Prio3, verify_key, agg_id, _agg_param,
-              nonce, _public_share, input_share):
+              nonce, public_share, input_share):
     # Domain separation tag for PRG info string
     dst = VERSION + I2OSP(Prio3.ID, 4)
 
-    (input_share, proof_share, k_blind, k_hint) = \
+    k_joint_rand_parts = Prio3.decode_public_share(public_share)
+    (meas_share, proof_share, k_blind) = \
         Prio3.decode_leader_share(input_share) if agg_id == 0 else \
         Prio3.decode_helper_share(dst, agg_id, input_share)
-    out_share = Prio3.Flp.truncate(input_share)
+    out_share = Prio3.Flp.truncate(meas_share)
 
     # Compute joint randomness.
-    joint_rand, k_joint_rand, k_joint_rand_part = [], None, None
+    joint_rand = []
+    k_corrected_joint_rand, k_joint_rand_part = None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
-        encoded = Prio3.Flp.Field.encode_vec(input_share)
-        k_joint_rand_part = Prio3.Prg.derive_seed(
-            k_blind, dst + byte(agg_id) + nonce + encoded)
-        k_joint_rand_parts = k_hint[:agg_id] + \
-                             [k_joint_rand_part] + \
-                             k_hint[agg_id:]
-        k_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
+        k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
+            dst + DST_JOINT_RAND_PART + \
+            byte(agg_id) + nonce + \
+            Prio3.Flp.Field.encode_vec(meas_share))
+        k_joint_rand_parts[agg_id] = k_joint_rand_part
+        k_corrected_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
-            k_joint_rand,
-            dst,
+            k_corrected_joint_rand,
+            dst + DST_JOINT_RANDOMNESS,
             Prio3.Flp.JOINT_RAND_LEN
         )
 
-    # Query the input and proof share.
+    # Query the measurement and proof share.
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         verify_key,
-        dst + byte(255) + nonce,
+        dst + DST_QUERY_RANDOMNESS + nonce,
         Prio3.Flp.QUERY_RAND_LEN
     )
-    verifier_share = Prio3.Flp.query(input_share,
+    verifier_share = Prio3.Flp.query(meas_share,
                                      proof_share,
                                      query_rand,
                                      joint_rand,
@@ -1616,16 +1622,16 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
 
     prep_msg = Prio3.encode_prep_share(verifier_share,
                                        k_joint_rand_part)
-    return (out_share, k_joint_rand, prep_msg)
+    return (out_share, k_corrected_joint_rand, prep_msg)
 
 def prep_next(Prio3, prep, inbound):
-    (out_share, k_joint_rand, prep_msg) = prep
+    (out_share, k_corrected_joint_rand, prep_msg) = prep
 
     if inbound is None:
         return (prep, prep_msg)
 
     k_joint_rand_check = Prio3.decode_prep_msg(inbound)
-    if k_joint_rand_check != k_joint_rand:
+    if k_joint_rand_check != k_corrected_joint_rand:
         raise ERR_VERIFY # joint randomness check failed
 
     return out_share
@@ -1673,8 +1679,8 @@ To unshard a set of aggregate shares, the Collector first adds up the vectors
 element-wise. It then converts each element of the vector into an integer.
 
 ~~~
-def agg_shares_to_result(Prio3, _agg_param, agg_shares,
-                         num_measurements):
+def agg_shares_to_result(Prio3, _agg_param,
+                         agg_shares, num_measurements):
     agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for agg_share in agg_shares:
         agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
@@ -1682,82 +1688,103 @@ def agg_shares_to_result(Prio3, _agg_param, agg_shares,
 ~~~
 {: #prio3-agg-output title="Computation of the aggregate result for Prio3."}
 
-### Auxiliary Functions {#prio3-helper-functions}
+### Auxiliary Functions {#prio3-auxiliary}
+
+#### Joint Randomness Computation
 
 ~~~
 def joint_rand(Prio3, k_joint_rand_parts):
     dst = VERSION + I2OSP(Prio3.ID, 4)
     return Prio3.Prg.derive_seed(
         zeros(Prio3.Prg.SEED_SIZE),
-        dst + byte(255) + concat(k_joint_rand_parts))
+        dst + DST_JOINT_RAND_SEED + concat(k_joint_rand_parts))
+~~~
 
+#### Message Serialization
+
+~~~
 def encode_leader_share(Prio3,
-                        input_share,
+                        meas_share,
                         proof_share,
-                        k_blind,
-                        k_hint):
+                        k_blind):
     encoded = Bytes()
-    encoded += Prio3.Flp.Field.encode_vec(input_share)
+    encoded += Prio3.Flp.Field.encode_vec(meas_share)
     encoded += Prio3.Flp.Field.encode_vec(proof_share)
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded += k_blind
-        encoded += concat(k_hint)
     return encoded
 
 def decode_leader_share(Prio3, encoded):
     l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.INPUT_LEN
-    encoded_input_share, encoded = encoded[:l], encoded[l:]
-    input_share = Prio3.Flp.Field.decode_vec(encoded_input_share)
+    encoded_meas_share, encoded = encoded[:l], encoded[l:]
+    meas_share = Prio3.Flp.Field.decode_vec(encoded_meas_share)
     l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.PROOF_LEN
     encoded_proof_share, encoded = encoded[:l], encoded[l:]
     proof_share = Prio3.Flp.Field.decode_vec(encoded_proof_share)
     l = Prio3.Prg.SEED_SIZE
-    k_blind, k_hint = None, None
-    if Prio3.Flp.JOINT_RAND_LEN > 0:
-        k_blind, encoded = encoded[:l], encoded[l:]
-        k_hint = []
-        for _ in range(Prio3.SHARES-1):
-            k_joint_rand_part, encoded = encoded[:l], encoded[l:]
-            k_hint.append(k_joint_rand_part)
+    if Prio3.Flp.JOINT_RAND_LEN == 0:
+        if len(encoded) != 0:
+            raise ERR_DECODE
+        return (meas_share, proof_share, None)
+    k_blind, encoded = encoded[:l], encoded[l:]
     if len(encoded) != 0:
         raise ERR_DECODE
-    return (input_share, proof_share, k_blind, k_hint)
+    return (meas_share, proof_share, k_blind)
 
 def encode_helper_share(Prio3,
-                        k_input_share,
+                        k_meas_share,
                         k_proof_share,
-                        k_blind,
-                        k_hint):
+                        k_blind):
     encoded = Bytes()
-    encoded += k_input_share
+    encoded += k_meas_share
     encoded += k_proof_share
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded += k_blind
-        encoded += concat(k_hint)
     return encoded
 
 def decode_helper_share(Prio3, dst, agg_id, encoded):
+    info_meas_share = dst + DST_MEASUREMENT_SHARE + byte(agg_id)
+    info_proof_share = dst + DST_PROOF_SHARE + byte(agg_id)
     l = Prio3.Prg.SEED_SIZE
-    k_input_share, encoded = encoded[:l], encoded[l:]
-    input_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
-                                            k_input_share,
-                                            dst + byte(agg_id),
-                                            Prio3.Flp.INPUT_LEN)
+    k_meas_share, encoded = encoded[:l], encoded[l:]
+    meas_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
+                                           k_meas_share,
+                                           info_meas_share,
+                                           Prio3.Flp.INPUT_LEN)
     k_proof_share, encoded = encoded[:l], encoded[l:]
     proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
                                             k_proof_share,
-                                            dst + byte(agg_id),
+                                            info_proof_share,
                                             Prio3.Flp.PROOF_LEN)
-    k_blind, k_hint = None, None
-    if Prio3.Flp.JOINT_RAND_LEN > 0:
-        k_blind, encoded = encoded[:l], encoded[l:]
-        k_hint = []
-        for _ in range(Prio3.SHARES-1):
-            k_joint_rand_part, encoded = encoded[:l], encoded[l:]
-            k_hint.append(k_joint_rand_part)
+    if Prio3.Flp.JOINT_RAND_LEN == 0:
+        if len(encoded) != 0:
+            raise ERR_DECODE
+        return (meas_share, proof_share, None)
+    k_blind, encoded = encoded[:l], encoded[l:]
     if len(encoded) != 0:
         raise ERR_DECODE
-    return (input_share, proof_share, k_blind, k_hint)
+    return (meas_share, proof_share, k_blind)
+
+def encode_public_share(Prio3,
+                        k_joint_rand_parts):
+    encoded = Bytes()
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        encoded += concat(k_joint_rand_parts)
+    return encoded
+
+def decode_public_share(Prio3, encoded):
+    l = Prio3.Prg.SEED_SIZE
+    if Prio3.Flp.JOINT_RAND_LEN == 0:
+        if len(encoded) != 0:
+            raise ERR_DECODE
+        return None
+    k_joint_rand_parts = []
+    for i in range(Prio3.SHARES):
+        k_joint_rand_part, encoded = encoded[:l], encoded[l:]
+        k_joint_rand_parts.append(k_joint_rand_part)
+    if len(encoded) != 0:
+        raise ERR_DECODE
+    return k_joint_rand_parts
 
 def encode_prep_share(Prio3, verifier, k_joint_rand):
     encoded = Bytes()
@@ -1770,10 +1797,12 @@ def decode_prep_share(Prio3, encoded):
     l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.VERIFIER_LEN
     encoded_verifier, encoded = encoded[:l], encoded[l:]
     verifier = Prio3.Flp.Field.decode_vec(encoded_verifier)
-    k_joint_rand = None
-    if Prio3.Flp.JOINT_RAND_LEN > 0:
-        l = Prio3.Prg.SEED_SIZE
-        k_joint_rand, encoded = encoded[:l], encoded[l:]
+    if Prio3.Flp.JOINT_RAND_LEN == 0:
+        if len(encoded) != 0:
+            raise ERR_DECODE
+        return (verifier, None)
+    l = Prio3.Prg.SEED_SIZE
+    k_joint_rand, encoded = encoded[:l], encoded[l:]
     if len(encoded) != 0:
         raise ERR_DECODE
     return (verifier, k_joint_rand)
@@ -1785,15 +1814,16 @@ def encode_prep_msg(Prio3, k_joint_rand_check):
     return encoded
 
 def decode_prep_msg(Prio3, encoded):
-    k_joint_rand_check = None
-    if Prio3.Flp.JOINT_RAND_LEN > 0:
-        l = Prio3.Prg.SEED_SIZE
-        k_joint_rand_check, encoded = encoded[:l], encoded[l:]
+    if Prio3.Flp.JOINT_RAND_LEN == 0:
+        if len(encoded) != 0:
+            raise ERR_DECODE
+        return None
+    l = Prio3.Prg.SEED_SIZE
+    k_joint_rand_check, encoded = encoded[:l], encoded[l:]
     if len(encoded) != 0:
         raise ERR_DECODE
     return k_joint_rand_check
 ~~~
-{: #prio3-helpers title="Helper functions required for Prio3."}
 
 ## A General-Purpose FLP {#flp-generic}
 
@@ -2772,7 +2802,26 @@ def encode_agg_param(Poplar1, level, prefixes):
         packed |= prefix << ((level+1) * i)
     l = floor(((level+1) * len(prefixes) + 7) / 8)
     encoded += I2OSP(packed, l)
+    # TODO Remove this assertion once agg param encoding is
+    # exercised by test_vdaf().
+    assert (level, prefixes) == Poplar1.decode_agg_param(encoded)
     return encoded
+
+def decode_agg_param(Poplar1, encoded):
+    encoded_level, encoded = encoded[:2], encoded[2:]
+    level = OS2IP(encoded_level)
+    encoded_prefix_count, encoded = encoded[:2], encoded[2:]
+    prefix_count = OS2IP(encoded_prefix_count)
+    l = floor(((level+1) * prefix_count + 7) / 8)
+    encoded_packed, encoded = encoded[:l], encoded[l:]
+    packed = OS2IP(encoded_packed)
+    prefixes = []
+    m = 2^(level+1) - 1
+    for i in range(prefix_count):
+        prefixes.append(packed >> ((level+1) * i) & m)
+    if len(encoded) != 0:
+        raise ERR_INPUT
+    return (level, prefixes)
 
 def verify_context(Poplar1, nonce, level, prefixes):
     if len(nonce) > 255:
@@ -2834,6 +2883,7 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf):
     ctrl = [Field2(0), Field2(1)]
     correction_words = []
     for level in range(IdpfPoplar.BITS):
+        Field = IdpfPoplar.current_field(level)
         keep = (alpha >> (IdpfPoplar.BITS - level - 1)) & 1
         lose = 1 - keep
         bit = Field2(keep)
@@ -2846,10 +2896,8 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf):
             t0[1] + t1[1] + bit,
         )
 
-        x0 = xor(s0[keep], seed_cw) if ctrl[0] == Field2(1) \
-                else s0[keep]
-        x1 = xor(s1[keep], seed_cw) if ctrl[1] == Field2(1) \
-                else s1[keep]
+        x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
+        x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
         (seed[0], w0) = IdpfPoplar.convert(level, x0)
         (seed[1], w1) = IdpfPoplar.convert(level, x1)
         ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
@@ -2861,8 +2909,13 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf):
             raise ERR_INPUT # beta too long or too short
 
         w_cw = vec_add(vec_sub(b, w0), w1)
-        if ctrl[1] == Field2(1):
-            w_cw = vec_neg(w_cw)
+        # Implementation note: Here we negate the correction word if
+        # the control bit `ctrl[1]` is set. We avoid branching on the
+        # value in order to reduce leakage via timing side channels.
+        mask = Field(1) - Field(2) * Field(ctrl[1].as_unsigned())
+        for i in range(len(w_cw)):
+            w_cw[i] *= mask
+
         correction_words.append((seed_cw, ctrl_cw, w_cw))
 
     public_share = IdpfPoplar.encode_public_share(correction_words)
@@ -2924,7 +2977,7 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
     return out_share
 
 # Compute the next node in the IDPF tree along the path determined by
-# a candidate prefix. The next node is determined by `bit`, the bit
+# a candidiate prefix. The next node is determined by `bit`, the bit
 # of the prefix corresponding to the next level of the tree.
 #
 # TODO Consider implementing some version of the optimization
@@ -2932,18 +2985,23 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
 # average reduce the number of AES calls by a constant factor.
 def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
               correction_word, level, bit):
+    Field = IdpfPoplar.current_field(level)
     (seed_cw, ctrl_cw, w_cw) = correction_word
     (s, t) = IdpfPoplar.extend(prev_seed)
-    if prev_ctrl == Field2(1):
-        s[0] = xor(s[0], seed_cw)
-        s[1] = xor(s[1], seed_cw)
-        t[0] = t[0] + ctrl_cw[0]
-        t[1] = t[1] + ctrl_cw[1]
+    s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
+    s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
+    t[0] += ctrl_cw[0] * prev_ctrl
+    t[1] += ctrl_cw[1] * prev_ctrl
 
     next_ctrl = t[bit]
     (next_seed, y) = IdpfPoplar.convert(level, s[bit])
-    if next_ctrl == Field2(1):
-        y = vec_add(y, w_cw)
+    # Implementation note: Here we add the correction word to the
+    # output if `next_ctrl` is set. We avoid branching on the value of
+    # the control bit in order to reduce side channel leakage.
+    mask = Field(next_ctrl.as_unsigned())
+    for i in range(len(y)):
+        y[i] += w_cw[i] * mask
+
     return (next_seed, next_ctrl, y)
 ~~~
 {: #idpf-poplar-eval title="IDPF-evaluation generation algorithm of IdpfPoplar."}
