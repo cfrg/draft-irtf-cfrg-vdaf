@@ -2689,6 +2689,14 @@ for each. The Aggregators use these and the correlation shares provided by the
 Client to verify that the sequence of `data_share` values are additive shares of
 a one-hot vector.
 
+Aggregators MUST ensure the candidate prefixes are all unique and appear in
+lexicographic order. (This is enforced in the definition of `prep_init()`
+below.) Uniqueness is necessary to ensure the refined measurement (i.e., the sum
+of the output shares) is in fact a one-hot vector. Otherwise, sketch
+verification might fail, causing the Aggregators to erroneously reject a report
+that is actually valid. Note that enforcing the order is not strictly necessary,
+but this does allow uniqueness to be determined more efficiently.
+
 The algorithms below make use of the auxiliary function `decode_input_share()`
 defined in {{poplar1-auxiliary}}.
 
@@ -2699,6 +2707,12 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     (key, corr_seed, corr_inner, corr_leaf) = \
         Poplar1.decode_input_share(input_share)
     Field = Poplar1.Idpf.current_field(level)
+
+    # Ensure that candidate prefixes are all unique and appear in
+    # lexicographic order.
+    for i in range(1,len(prefixes)):
+        if prefixes[i-1] >= prefixes[i]:
+            raise ERR_INPUT # out-of-order prefix
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = Poplar1.Idpf.eval(
