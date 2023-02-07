@@ -2689,8 +2689,8 @@ for each. The Aggregators use these and the correlation shares provided by the
 Client to verify that the sequence of `data_share` values are additive shares of
 a one-hot vector.
 
-The algorithms below make use of auxiliary functions `verify_binder()` and
-`decode_input_share()` defined in {{poplar1-auxiliary}}.
+The algorithms below make use of the auxiliary function `decode_input_share()`
+defined in {{poplar1-auxiliary}}.
 
 ~~~
 def prep_init(Poplar1, verify_key, agg_id, agg_param,
@@ -2725,7 +2725,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # called the "masked input values" [BBCGGI21, Appendix C.4].
     verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
         Poplar1.custom(DST_VERIFY_RAND),
-        Poplar1.verify_binder(nonce, level, prefixes))
+        nonce + I2OSP(level, 2))
     verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
     sketch_share = [a_share, b_share, c_share]
     out_share = []
@@ -2833,19 +2833,11 @@ def agg_shares_to_result(Poplar1, agg_param,
 
 ### Auxiliary Functions {#poplar1-auxiliary}
 
+> TODO(VDAF-04) editorial: Replace these with a common `Vdaf.custom()`
+> implementation.
 ~~~
 def custom(Poplar1, usage):
     return format_custom(0, Poplar1.ID, usage)
-
-def verify_binder(Poplar1, nonce, level, prefixes):
-    if len(nonce) > 255:
-        raise ERR_INPUT # nonce too long
-    binder = Bytes()
-    binder += byte(254)
-    binder += byte(len(nonce))
-    binder += nonce
-    binder += Poplar1.encode_agg_param(level, prefixes)
-    return binder
 ~~~
 
 #### Message Serialization
