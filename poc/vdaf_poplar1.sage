@@ -159,7 +159,7 @@ class Poplar1(Vdaf):
         # called the "masked input values" [BBCGGI21, Appendix C.4].
         verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
             Poplar1.custom(DST_VERIFY_RAND),
-            Poplar1.verify_binder(nonce, level, prefixes))
+            nonce + I2OSP(level, 2))
         verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
         sketch_share = [a_share, b_share, c_share]
         out_share = []
@@ -326,17 +326,6 @@ class Poplar1(Vdaf):
         if len(encoded) != 0:
             raise ERR_INPUT
         return (level, prefixes)
-
-    @classmethod
-    def verify_binder(Poplar1, nonce, level, prefixes):
-        if len(nonce) > 255:
-            raise ERR_INPUT # nonce too long
-        binder = Bytes()
-        binder += byte(254)
-        binder += byte(len(nonce))
-        binder += nonce
-        binder += Poplar1.encode_agg_param(level, prefixes)
-        return binder
 
     @classmethod
     def with_idpf(cls, Idpf):
