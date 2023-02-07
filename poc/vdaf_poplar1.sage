@@ -13,8 +13,9 @@ import sagelib.idpf_poplar as idpf_poplar
 import sagelib.prg as prg
 
 DST_SHARD_RAND = 1
-DST_CORR_SHARE = 2
-DST_VERIFY_RAND = 3
+DST_CORR_INNER = 2
+DST_CORR_LEAF = 3
+DST_VERIFY_RAND = 4
 
 class Poplar1(Vdaf):
     # Types provided by a concrete instadce of `Poplar1`.
@@ -66,12 +67,39 @@ class Poplar1(Vdaf):
             gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
             gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
         ]
-        corr_prg = [
-            Poplar1.Idpf.Prg(corr_seed[0],
-                             Poplar1.custom(DST_CORR_SHARE), byte(0)),
-            Poplar1.Idpf.Prg(corr_seed[1],
-                             Poplar1.custom(DST_CORR_SHARE), byte(1)),
-        ]
+
+        corr_offsets = vec_add(
+            Poplar1.Idpf.Prg.expand_into_vec(
+                Poplar1.Idpf.FieldInner,
+                corr_seed[0],
+                Poplar1.custom(DST_CORR_INNER),
+                byte(0),
+                3 * (Poplar1.Idpf.BITS-1),
+            ),
+            Poplar1.Idpf.Prg.expand_into_vec(
+                Poplar1.Idpf.FieldInner,
+                corr_seed[1],
+                Poplar1.custom(DST_CORR_INNER),
+                byte(1),
+                3 * (Poplar1.Idpf.BITS-1),
+            ),
+        )
+        corr_offsets += vec_add(
+            Poplar1.Idpf.Prg.expand_into_vec(
+                Poplar1.Idpf.FieldLeaf,
+                corr_seed[0],
+                Poplar1.custom(DST_CORR_LEAF),
+                byte(0),
+                3,
+            ),
+            Poplar1.Idpf.Prg.expand_into_vec(
+                Poplar1.Idpf.FieldLeaf,
+                corr_seed[1],
+                Poplar1.custom(DST_CORR_LEAF),
+                byte(1),
+                3,
+            ),
+        )
 
         # For each level of the IDPF tree, shares of the `(A, B)`
         # pairs are computed from the corresponding `(a, b, c)`
@@ -81,8 +109,7 @@ class Poplar1(Vdaf):
             Field = Poplar1.Idpf.current_field(level)
             k = beta_inner[level][1] if level < Poplar1.Idpf.BITS - 1 \
                 else beta_leaf[1]
-            (a, b, c) = vec_add(corr_prg[0].next_vec(Field, 3),
-                                corr_prg[1].next_vec(Field, 3))
+            (a, b, c), corr_offsets = corr_offsets[:3], corr_offsets[3:]
             A = -Field(2) * a + k
             B = a^2 + b - a * k + c
             corr1 = prg.next_vec(Field, 2)
@@ -105,31 +132,31 @@ class Poplar1(Vdaf):
         (level, prefixes) = agg_param
         (key, corr_seed, corr_inner, corr_leaf) = \
             Poplar1.decode_input_share(input_share)
+        Field = Poplar1.Idpf.current_field(level)
 
         # Evaluate the IDPF key at the given set of prefixes.
         value = Poplar1.Idpf.eval(
             agg_id, public_share, key, level, prefixes)
 
-        # Get correlation shares for the given level of the IDPF tree.
-        #
-        # Implementation note: Computing the shares of `(a, b, c)`
-        # requires expanding PRG seeds into a vector of field elements
-        # of length proportional to the level of the tree. Typically
-        # the IDPF will be evaluated incrementally beginning with
-        # `level == 0`. Implementations can save computation by
-        # storing the intermediate PRG state between evaluations.
-        corr_prg = Poplar1.Idpf.Prg(corr_seed,
-                                    Poplar1.custom(DST_CORR_SHARE),
-                                    byte(agg_id))
-        for current_level in range(level+1):
-            Field = Poplar1.Idpf.current_field(current_level)
-            (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
+        # Get shares of the correlated randomness for computing the
+        # Aggregator's share of the sketch for the given level of the IDPF
+        # tree.
+        if level < Poplar1.Idpf.BITS - 1:
+            corr_prg = Poplar1.Idpf.Prg(corr_seed,
+                                        Poplar1.custom(DST_CORR_INNER),
+                                        byte(agg_id))
+            # Fast-forward the PRG state to the current level.
+            corr_prg.next_vec(Field, 3 * level)
+        else:
+            corr_prg = Poplar1.Idpf.Prg(corr_seed,
+                                        Poplar1.custom(DST_CORR_LEAF),
+                                        byte(agg_id))
+        (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
         (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
             if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
         # Compute the Aggregator's first round of the sketch. These are
         # called the "masked input values" [BBCGGI21, Appendix C.4].
-        Field = Poplar1.Idpf.current_field(level)
         verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
             Poplar1.custom(DST_VERIFY_RAND),
             Poplar1.verify_binder(nonce, level, prefixes))
