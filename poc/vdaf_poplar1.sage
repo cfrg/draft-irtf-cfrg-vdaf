@@ -134,6 +134,12 @@ class Poplar1(Vdaf):
             Poplar1.decode_input_share(input_share)
         Field = Poplar1.Idpf.current_field(level)
 
+        # Ensure that candidate prefixes are all unique and appear in
+        # lexicographic order.
+        for i in range(1,len(prefixes)):
+            if prefixes[i-1] >= prefixes[i]:
+                raise ERR_INPUT # out-of-order prefix
+
         # Evaluate the IDPF key at the given set of prefixes.
         value = Poplar1.Idpf.eval(
             agg_id, public_share, key, level, prefixes)
@@ -391,15 +397,15 @@ if __name__ == '__main__':
         (
             63,
             [
-                OS2IP(b'01234567'),
                 OS2IP(b'00000000'),
+                OS2IP(b'01234567'),
             ],
         ),
         [
             OS2IP(b'0123456789abcdef0123456789abcdef'),
             OS2IP(b'01234567890000000000000000000000'),
         ],
-        [2, 0],
+        [0, 2],
     )
 
     # Generate test vectors.
