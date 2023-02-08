@@ -5,8 +5,8 @@ from copy import deepcopy
 from collections import namedtuple
 from typing import Tuple, Union
 from sagelib.common import ERR_INPUT, ERR_VERIFY, I2OSP, OS2IP, TEST_VECTOR, \
-                           Bytes, Error, Unsigned, Vec, byte, format_custom, \
-                           gen_rand, vec_add, vec_sub
+                           Bytes, Error, Unsigned, Vec, byte, gen_rand, \
+                           vec_add, vec_sub
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.idpf as idpf
 import sagelib.idpf_poplar as idpf_poplar
@@ -238,10 +238,6 @@ class Poplar1(Vdaf):
             # length.
             return b''
         return Field.encode_vec(sketch)
-
-    @classmethod
-    def custom(Poplar1, usage):
-        return format_custom(0, Poplar1.ID, usage)
 
     @classmethod
     def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
