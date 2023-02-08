@@ -2856,6 +2856,17 @@ def custom(Poplar1, usage):
 
 #### Message Serialization
 
+This section defines methods for serializing input shares, as required by the
+`Vdaf` interface. Optional serialization of the aggregation parameter is also
+specified below.
+
+Implementation note: The aggregation parameter includes the level of the IDPF
+tree and the sequence of indices to evaluate. For implementations that perform
+per-report caching across executions of the VDAF, this may be more information
+than is strictly needed. In particular, it may be sufficient to convey which
+indices from the previous execution will have their children included in the
+next. This would help reduce communication overhead.
+
 ~~~
 def encode_input_shares(Poplar1, keys,
                         corr_seed, corr_inner, corr_leaf):
