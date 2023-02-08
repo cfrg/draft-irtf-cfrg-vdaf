@@ -19,6 +19,10 @@ author:
     organization: Cisco
     email: rlb@ipv.sx
  -
+    name: David Cook
+    organization: ISRG
+    email: divergentdave@gmail.com
+ -
     name: Christopher Patton
     organization: Cloudflare
     email: chrispatton+ietf@gmail.com
