@@ -3267,9 +3267,9 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 # Acknowledgments
 {:numbered="false"}
 
-Thanks to David Cook, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
-Friedberger, Tim Geoghegan, Mariana Raykova, Jacob Rothstein, and Christopher
-Wood for useful feedback on and contributions to the spec.
+Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon Friedberger, Tim
+Geoghegan, Mariana Raykova, Jacob Rothstein, and Christopher Wood for useful
+feedback on and contributions to the spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}
