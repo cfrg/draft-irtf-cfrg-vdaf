@@ -2893,25 +2893,22 @@ def decode_input_share(Poplar1, encoded):
 def encode_agg_param(Poplar1, level, prefixes):
     if level > 2^16 - 1:
         raise ERR_INPUT # level too deep
-    if len(prefixes) > 2^16 - 1:
+    if len(prefixes) > 2^32 - 1:
         raise ERR_INPUT # too many prefixes
     encoded = Bytes()
     encoded += I2OSP(level, 2)
-    encoded += I2OSP(len(prefixes), 2)
+    encoded += I2OSP(len(prefixes), 4)
     packed = 0
     for (i, prefix) in enumerate(prefixes):
         packed |= prefix << ((level+1) * i)
     l = floor(((level+1) * len(prefixes) + 7) / 8)
     encoded += I2OSP(packed, l)
-    # TODO Remove this assertion once agg param encoding is
-    # exercised by test_vdaf().
-    assert (level, prefixes) == Poplar1.decode_agg_param(encoded)
     return encoded
 
 def decode_agg_param(Poplar1, encoded):
     encoded_level, encoded = encoded[:2], encoded[2:]
     level = OS2IP(encoded_level)
-    encoded_prefix_count, encoded = encoded[:2], encoded[2:]
+    encoded_prefix_count, encoded = encoded[:4], encoded[4:]
     prefix_count = OS2IP(encoded_prefix_count)
     l = floor(((level+1) * prefix_count + 7) / 8)
     encoded_packed, encoded = encoded[:l], encoded[l:]
@@ -2924,7 +2921,6 @@ def decode_agg_param(Poplar1, encoded):
         raise ERR_INPUT
     return (level, prefixes)
 ~~~
-{: #poplar1-helpers title="Helper functions for Poplar1."}
 
 ## The IDPF scheme of {{BBCGGI21}} {#idpf-poplar}
 
