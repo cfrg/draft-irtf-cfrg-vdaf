@@ -4,7 +4,7 @@ from copy import deepcopy
 from typing import Tuple
 from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, I2OSP, \
                            TEST_VECTOR, Bytes, Unsigned, Vec, byte, concat, \
-                           format_custom, gen_rand, vec_add, vec_sub, zeros
+                           gen_rand, vec_add, vec_sub, zeros
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.flp as flp
 import sagelib.flp_generic as flp_generic
@@ -226,10 +226,6 @@ class Prio3(Vdaf):
             Prio3.custom(DST_JOINT_RAND_SEED),
             concat(k_joint_rand_parts),
         )
-
-    @classmethod
-    def custom(Prio3, usage):
-        return format_custom(0, Prio3.ID, usage)
 
     @classmethod
     def encode_leader_share(Prio3,

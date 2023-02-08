@@ -3,7 +3,7 @@
 from __future__ import annotations
 from functools import reduce
 from sagelib.common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
-                           gen_rand, print_wrapped_line
+                           format_custom, gen_rand, print_wrapped_line
 from typing import Optional, Tuple, Union
 import sagelib.field as field
 import json
@@ -100,6 +100,11 @@ class Vdaf:
                              agg_shares: Vec[Bytes],
                              num_measurements: Unsigned) -> AggResult:
         raise Error('not implemented')
+
+    # Format customization string for this VDAF with the given usage.
+    @classmethod
+    def custom(Vdaf, usage: Unsigned) -> Bytes:
+        return format_custom(0, Vdaf.ID, usage)
 
     # Add any parameters to `test_vec` that are required to construct this
     # class. Return the key that was set or `None` if `test_vec` was not

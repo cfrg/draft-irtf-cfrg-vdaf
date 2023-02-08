@@ -764,7 +764,16 @@ other quantities are given a concrete type.
 > type implement an encoding where necessary. See issue#58.
 
 Each VDAF is identified by a unique, 32-bit integer `ID`. Identifiers for each
-(V)DAF specified in this document are defined in {{codepoints}}.
+(V)DAF specified in this document are defined in {{codepoints}}. The following
+method is defined for every VDAF:
+
+~~~
+def custom(Vdaf, usage: Unsigned) -> Bytes:
+    return format_custom(0, Vdaf.ID, usage)
+~~~
+
+It is used to construct a customization string for an instance of `Prg` used by
+the VDAF. (See {{prg}}.)
 
 ## Sharding {#sec-vdaf-shard}
 
@@ -1734,9 +1743,6 @@ def joint_rand(Prio3, k_joint_rand_parts):
         Prio3.custom(DST_JOINT_RAND_SEED),
         concat(k_joint_rand_parts),
     )
-
-def custom(Prio3, usage):
-    return format_custom(0, Prio3.ID, usage)
 ~~~
 
 #### Message Serialization
@@ -2846,13 +2852,6 @@ def agg_shares_to_result(Poplar1, agg_param,
 {: #poplar1-agg-output title="Computation of the aggregate result for Poplar1."}
 
 ### Auxiliary Functions {#poplar1-auxiliary}
-
-> TODO(VDAF-04) editorial: Replace these with a common `Vdaf.custom()`
-> implementation.
-~~~
-def custom(Poplar1, usage):
-    return format_custom(0, Poplar1.ID, usage)
-~~~
 
 #### Message Serialization
 
