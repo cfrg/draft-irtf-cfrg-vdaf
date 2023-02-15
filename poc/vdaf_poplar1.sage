@@ -39,7 +39,7 @@ class Poplar1(Vdaf):
     AggResult = Vec[Unsigned]
 
     @classmethod
-    def measurement_to_input_shares(Poplar1, measurement, _nonce):
+    def measurement_to_input_shares(Poplar1, measurement, nonce):
         prg = Poplar1.Idpf.Prg(gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
                                Poplar1.custom(DST_SHARD_RAND), b'')
 
@@ -73,14 +73,14 @@ class Poplar1(Vdaf):
                 Poplar1.Idpf.FieldInner,
                 corr_seed[0],
                 Poplar1.custom(DST_CORR_INNER),
-                byte(0),
+                byte(0) + nonce,
                 3 * (Poplar1.Idpf.BITS-1),
             ),
             Poplar1.Idpf.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
                 corr_seed[1],
                 Poplar1.custom(DST_CORR_INNER),
-                byte(1),
+                byte(1) + nonce,
                 3 * (Poplar1.Idpf.BITS-1),
             ),
         )
@@ -89,14 +89,14 @@ class Poplar1(Vdaf):
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[0],
                 Poplar1.custom(DST_CORR_LEAF),
-                byte(0),
+                byte(0) + nonce,
                 3,
             ),
             Poplar1.Idpf.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[1],
                 Poplar1.custom(DST_CORR_LEAF),
-                byte(1),
+                byte(1) + nonce,
                 3,
             ),
         )
@@ -150,13 +150,13 @@ class Poplar1(Vdaf):
         if level < Poplar1.Idpf.BITS - 1:
             corr_prg = Poplar1.Idpf.Prg(corr_seed,
                                         Poplar1.custom(DST_CORR_INNER),
-                                        byte(agg_id))
+                                        byte(agg_id) + nonce)
             # Fast-forward the PRG state to the current level.
             corr_prg.next_vec(Field, 3 * level)
         else:
             corr_prg = Poplar1.Idpf.Prg(corr_seed,
                                         Poplar1.custom(DST_CORR_LEAF),
-                                        byte(agg_id))
+                                        byte(agg_id) + nonce)
         (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
         (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
             if level < Poplar1.Idpf.BITS - 1 else corr_leaf
