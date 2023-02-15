@@ -19,6 +19,9 @@ class Vdaf:
     # Length of the verification key shared by the Aggregators.
     VERIFY_KEY_SIZE = None
 
+    # Length of the nonce.
+    NONCE_SIZE = None
+
     # The number of Aggregators.
     SHARES: Unsigned = None
 
@@ -45,7 +48,8 @@ class Vdaf:
     @classmethod
     def measurement_to_input_shares(Vdaf,
                                     measurement: Measurement,
-                                    nonce: Bytes) -> (Bytes, Vec[Bytes]):
+                                    nonce: Bytes[Vdaf.NONCE_SIZE]
+                                    ) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
     # Initialize the Prepare state for the given input share. This method is run
@@ -119,7 +123,7 @@ class Vdaf:
 # NOTE This is used to generate {{run-vdaf}}.
 def run_vdaf(Vdaf,
              agg_param: Vdaf.AggParam,
-             nonces: Vec[Bytes],
+             nonces: Vec[Bytes[Vdaf.NONCE_SIZE]],
              measurements: Vec[Vdaf.Measurement],
              print_test_vec=False,
              test_vec_instance=0):
@@ -138,6 +142,7 @@ def run_vdaf(Vdaf,
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
         # REMOVE ME
+        assert len(nonce) == Vdaf.NONCE_SIZE
         prep_test_vec = {
             'measurement': int(measurement),
             'nonce': nonce.hex(),
@@ -283,6 +288,7 @@ class TestVdaf(Vdaf):
     # Associated parameters
     ID = 0xFFFFFFFF
     VERIFY_KEY_SIZE = 0
+    NONCE_SIZE = 13
     SHARES = 2
     ROUNDS = 1
 
@@ -369,9 +375,8 @@ def test_vdaf(Vdaf,
     # Test that the algorithm identifier is in the correct range.
     assert 0 <= Vdaf.ID and Vdaf.ID < 2^32
 
-    # Run the VDAF on the set of measurmenets. Note that the nonces need not be
-    # random, but merely non-repeating.
-    nonces = [gen_rand(16) for _ in range(len(measurements))]
+    # Run the VDAF on the set of measurmenets.
+    nonces = [gen_rand(Vdaf.NONCE_SIZE) for _ in range(len(measurements))]
     agg_result = run_vdaf(Vdaf,
                           agg_param,
                           nonces,
