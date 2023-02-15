@@ -24,6 +24,7 @@ class Poplar1(Vdaf):
     # Parameters required by `Vdaf`.
     ID = 0x00001000
     VERIFY_KEY_SIZE = None # Set by Idpf.Prg
+    NONCE_SIZE = 16
     SHARES = 2
     ROUNDS = 2
 

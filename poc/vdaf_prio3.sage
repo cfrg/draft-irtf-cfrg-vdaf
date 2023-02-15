@@ -26,6 +26,7 @@ class Prio3(Vdaf):
 
     # Parameters required by `Vdaf`
     VERIFY_KEY_SIZE = None # Set by the PRG
+    NONCE_SIZE = 16
     ROUNDS = 1
     SHARES = None  # A number between `[2, 256)` set later
 
