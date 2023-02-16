@@ -172,13 +172,15 @@ class IdpfPoplar(Idpf):
     @classmethod
     def encode_public_share(IdpfPoplar, correction_words):
         encoded = Bytes()
-        packed_ctrl = 0
+        l = floor((2*IdpfPoplar.BITS + 7) / 8)
+        encoded_ctrl = [int(0)] * l
         for (level, (_, ctrl_cw, _)) \
             in enumerate(correction_words):
-            packed_ctrl |= ctrl_cw[0].as_unsigned() << (2*level)
-            packed_ctrl |= ctrl_cw[1].as_unsigned() << (2*level+1)
-        l = floor((2*IdpfPoplar.BITS + 7) / 8)
-        encoded += I2OSP(packed_ctrl, l)
+            encoded_ctrl[level // 4] |= (
+                ctrl_cw[0].as_unsigned() |
+                (ctrl_cw[1].as_unsigned() << 1)
+            ) << (level % 4 * 2)
+        encoded += Bytes(encoded_ctrl)
         for (level, (seed_cw, _, w_cw)) \
             in enumerate(correction_words):
             Field = IdpfPoplar.current_field(level)
@@ -190,20 +192,25 @@ class IdpfPoplar(Idpf):
     def decode_public_share(IdpfPoplar, encoded):
         l = floor((2*IdpfPoplar.BITS + 7) / 8)
         encoded_ctrl, encoded = encoded[:l], encoded[l:]
-        packed_ctrl = OS2IP(encoded_ctrl)
         correction_words = []
         for level in range(IdpfPoplar.BITS):
             Field = IdpfPoplar.current_field(level)
-            ctrl_cw = (Field2(packed_ctrl & 1),
-                       Field2((packed_ctrl >> 1) & 1))
-            packed_ctrl >>= 2
+            ctrl_cw = (
+                Field2((encoded_ctrl[level // 4] >>
+                    (level % 4 * 2)) & 1),
+                Field2((encoded_ctrl[level // 4] >>
+                    (level % 4 * 2 + 1)) & 1),
+            )
             l = IdpfPoplar.Prg.SEED_SIZE
             seed_cw, encoded = encoded[:l], encoded[l:]
             l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
             encoded_w_cw, encoded = encoded[:l], encoded[l:]
             w_cw = Field.decode_vec(encoded_w_cw)
             correction_words.append((seed_cw, ctrl_cw, w_cw))
-        if packed_ctrl != 0 or len(encoded) != 0:
+        leftover_bits = encoded_ctrl[-1] >> (
+            ((IdpfPoplar.BITS + 3) % 4 + 1) * 2
+        )
+        if leftover_bits != 0 or len(encoded) != 0:
             raise ERR_DECODE
         return correction_words
 
