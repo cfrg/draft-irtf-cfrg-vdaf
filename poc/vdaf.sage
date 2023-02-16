@@ -122,13 +122,12 @@ class Vdaf:
 #
 # NOTE This is used to generate {{run-vdaf}}.
 def run_vdaf(Vdaf,
+             verify_key: Bytes[Vdaf.VERIFY_KEY_SIZE],
              agg_param: Vdaf.AggParam,
              nonces: Vec[Bytes[Vdaf.NONCE_SIZE]],
              measurements: Vec[Vdaf.Measurement],
              print_test_vec=False,
              test_vec_instance=0):
-    # Generate the long-lived verification key.
-    verify_key = gen_rand(Vdaf.VERIFY_KEY_SIZE)
     # REMOVE ME
     test_vec = {
         'verify_key': verify_key.hex(),
@@ -377,7 +376,9 @@ def test_vdaf(Vdaf,
 
     # Run the VDAF on the set of measurmenets.
     nonces = [gen_rand(Vdaf.NONCE_SIZE) for _ in range(len(measurements))]
+    verify_key = gen_rand(Vdaf.VERIFY_KEY_SIZE)
     agg_result = run_vdaf(Vdaf,
+                          verify_key,
                           agg_param,
                           nonces,
                           measurements,
