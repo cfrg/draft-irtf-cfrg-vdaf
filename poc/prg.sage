@@ -5,7 +5,7 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Hash import CMAC, cSHAKE128
 from Cryptodome.Util import Counter
 from Cryptodome.Util.number import bytes_to_long
-from sagelib.common import I2OSP, OS2IP, TEST_VECTOR, Bytes, Error, \
+from sagelib.common import I2OSP, OS2IP, TEST_VECTOR, VERSION, Bytes, Error, \
                            Unsigned, format_custom, zeros, gen_rand, \
                            next_power_of_2, print_wrapped_line
 
@@ -142,31 +142,34 @@ if __name__ == '__main__':
 
     if TEST_VECTOR:
         seed = gen_rand(cls.SEED_SIZE)
-        info = b'info string'
+        custom = b'custom string'
+        binder = b'binder string'
         length = 40
 
         test_vector = {
             'seed': seed.hex(),
-            'info': info.hex(),
+            'custom': custom.hex(),
+            'binder': binder.hex(),
             'length': int(length),
             'derived_seed': None, # set below
             'expanded_vec_field128': None, # set below
         }
 
-        test_vector['derived_seed'] = cls.derive_seed(seed, info).hex()
+        test_vector['derived_seed'] = cls.derive_seed(seed, custom, binder).hex()
         test_vector['expanded_vec_field128'] = Field128.encode_vec(
-                cls.expand_into_vec(Field128, seed, info, length)).hex()
+                cls.expand_into_vec(Field128, seed, custom, binder, length)).hex()
 
         print('{}:'.format(cls.__name__))
         print('  seed: "{}"'.format(test_vector['seed']))
-        print('  info: "{}"'.format(test_vector['info']))
+        print('  custom: "{}"'.format(test_vector['custom']))
+        print('  binder: "{}"'.format(test_vector['binder']))
         print('  length: {}'.format(test_vector['length']))
         print('  derived_seed: "{}"'.format(test_vector['derived_seed']))
         print('  expanded_vec_field128: >-')
         print_wrapped_line(test_vector['expanded_vec_field128'], tab=4)
 
-        os.system('mkdir -p test_vec/{}'.format(DRAFT))
-        with open('test_vec/{}/{}.json'.format(DRAFT, cls.__name__), 'w') as f:
+        os.system('mkdir -p test_vec/{:02}'.format(VERSION))
+        with open('test_vec/{:02}/{}.json'.format(VERSION, cls.__name__), 'w') as f:
             json.dump(test_vector, f, indent=4, sort_keys=True)
             f.write('\n')
 
