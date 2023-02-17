@@ -140,6 +140,15 @@ if __name__ == '__main__':
     )
     assert expanded_vec[-1] == Field96(39729620190871453347343769187)
 
+    expanded_vec = PrgSha3.expand_into_vec(
+        Field96,
+        b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xd5',
+        b'', # custom
+        b'', # binder
+        10
+    )
+    assert expanded_vec[-1] == Field96(74403028385650568506271441532)
+
     if TEST_VECTOR:
         seed = gen_rand(cls.SEED_SIZE)
         custom = b'custom string'
