@@ -1,6 +1,7 @@
 # An IDPF based on the construction of [BBCGGI21, Section 6].
 
 from copy import deepcopy
+import itertools
 from sagelib.common import ERR_DECODE, ERR_INPUT, I2OSP, OS2IP, VERSION, \
                            Bytes, Error, Unsigned, Vec, byte, format_custom, \
                            gen_rand, vec_add, vec_neg, vec_sub, xor
@@ -172,15 +173,10 @@ class IdpfPoplar(Idpf):
     @classmethod
     def encode_public_share(IdpfPoplar, correction_words):
         encoded = Bytes()
-        l = floor((2*IdpfPoplar.BITS + 7) / 8)
-        encoded_ctrl = [int(0)] * l
-        for (level, (_, ctrl_cw, _)) \
-            in enumerate(correction_words):
-            encoded_ctrl[level // 4] |= (
-                ctrl_cw[0].as_unsigned() |
-                (ctrl_cw[1].as_unsigned() << 1)
-            ) << (level % 4 * 2)
-        encoded += Bytes(encoded_ctrl)
+        control_bits = list(itertools.chain.from_iterable(
+            cw[1] for cw in correction_words
+        ))
+        encoded += pack_bits(control_bits)
         for (level, (seed_cw, _, w_cw)) \
             in enumerate(correction_words):
             Field = IdpfPoplar.current_field(level)
@@ -192,14 +188,13 @@ class IdpfPoplar(Idpf):
     def decode_public_share(IdpfPoplar, encoded):
         l = floor((2*IdpfPoplar.BITS + 7) / 8)
         encoded_ctrl, encoded = encoded[:l], encoded[l:]
+        control_bits = unpack_bits(encoded_ctrl, 2 * IdpfPoplar.BITS)
         correction_words = []
         for level in range(IdpfPoplar.BITS):
             Field = IdpfPoplar.current_field(level)
             ctrl_cw = (
-                Field2((encoded_ctrl[level // 4] >>
-                    (level % 4 * 2)) & 1),
-                Field2((encoded_ctrl[level // 4] >>
-                    (level % 4 * 2 + 1)) & 1),
+                control_bits[level * 2],
+                control_bits[level * 2 + 1],
             )
             l = IdpfPoplar.Prg.SEED_SIZE
             seed_cw, encoded = encoded[:l], encoded[l:]
@@ -236,6 +231,23 @@ class IdpfPoplar(Idpf):
         new_cls = deepcopy(IdpfPoplar)
         new_cls.VALUE_LEN = value_len
         return new_cls
+
+
+def pack_bits(bits: Vec[Field2]) -> Bytes:
+    byte_len = (len(bits) + 7) // 8
+    packed = [int(0)] * byte_len
+    for i, bit in enumerate(bits):
+        packed[i // 8] |= bit.as_unsigned() << (i % 8)
+    return Bytes(packed)
+
+
+def unpack_bits(packed_bits: Bytes, length: Unsigned) -> Vec[Field2]:
+    bits = []
+    for i in range(length):
+        bits.append(Field2(
+            (packed_bits[i // 8] >> (i % 8)) & 1
+        ))
+    return bits
 
 
 if __name__ == '__main__':
