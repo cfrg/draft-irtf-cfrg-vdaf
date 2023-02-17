@@ -1280,8 +1280,6 @@ muliple parties need to agree on. We call this input the "binder string".
 
 # Prio3 {#prio3}
 
-> NOTE This construction has not undergone significant security analysis.
-
 This section describes Prio3, a VDAF for Prio {{CGB17}}. Prio is suitable for
 a wide variety of aggregation functions, including (but not limited to) sum,
 mean, standard deviation, estimation of quantiles (e.g., median), and linear
@@ -2421,8 +2419,6 @@ sharded. This is provided to the FLP by Prio3.
 
 # Poplar1 {#poplar1}
 
-> NOTE This construction has not undergone significant security analysis.
-
 This section specifies Poplar1, a VDAF for the following task. Each Client holds
 a string of length `BITS` and the Aggregators hold a set of `l`-bit strings,
 where `l <= BITS`. We will refer to the latter as the set of "candidate
@@ -3187,10 +3183,6 @@ Test vectors can be found in {{test-vectors}}.
 
 # Security Considerations {#security}
 
-> NOTE: This is a brief outline of the security considerations.  This section
-> will be filled out more as the draft matures and security analyses are
-> completed.
-
 VDAFs have two essential security goals:
 
 1. Privacy: An attacker that controls the network, the Collector, and a subset
@@ -3201,17 +3193,22 @@ VDAFs have two essential security goals:
    cannot cause the Collector to compute anything other than the aggregate of
    the measurements of honest Clients.
 
-A VDAF is the core cryptographic primitive of a protocol that achieves
-the above privacy and robustness goals. It is not sufficient on its own,
-however. The application will need to assure a few security properties,
-for example:
+Formal defintions of privacy and robustness can be found in {{DPRS23}}. A VDAF
+is the core cryptographic primitive of a protocol that achieves the above
+privacy and robustness goals. It is not sufficient on its own, however. The
+application will need to assure a few security properties, for example:
 
-* Securely distributing the long-lived parameters.
+* Securely distributing the long-lived parameters, in particular the
+  verification key.
+
 * Establishing secure channels:
+
   * Confidential and authentic channels among Aggregators, and between the
     Aggregators and the Collector; and
+
   * Confidential and Aggregator-authenticated channels between Clients and
     Aggregators.
+
 * Enforcing the non-collusion properties required of the specific VDAF in use.
 
 In such an environment, a VDAF provides the high-level privacy property
@@ -3225,9 +3222,9 @@ their role in the VDAF.
 On their own, VDAFs do not mitigate Sybil attacks {{Dou02}}. In this attack, the
 adversary observes a subset of input shares transmitted by a Client it is
 interested in. It allows the input shares to be processed, but corrupts and
-picks bogus inputs for the remaining Clients.  Applications can guard against
-these risks by adding additional controls on measurement submission, such as
-client authentication and rate limits.
+picks bogus measurements for the remaining Clients.  Applications can guard
+against these risks by adding additional controls on report submission,
+such as client authentication and rate limits.
 
 VDAFs do not inherently provide differential privacy {{Dwo06}}.  The VDAF approach
 to private measurement can be viewed as complementary to differential privacy,
@@ -3321,6 +3318,10 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 
 # Acknowledgments
 {:numbered="false"}
+
+The security considerations in {{security}} are based largely on the security
+analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
+time to developing definitions and security proofs.
 
 Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon Friedberger, Tim
 Geoghegan, Mariana Raykova, Jacob Rothstein, and Christopher Wood for useful
