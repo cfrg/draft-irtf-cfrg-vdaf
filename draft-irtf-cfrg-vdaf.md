@@ -3166,23 +3166,15 @@ def decode_public_share(IdpfPoplar, encoded):
     if leftover_bits != 0 or len(encoded) != 0:
         raise ERR_DECODE
     return correction_words
-
-def pack_bits(bits: Vec[Field2]) -> Bytes:
-    byte_len = (len(bits) + 7) // 8
-    packed = [int(0)] * byte_len
-    for i, bit in enumerate(bits):
-        packed[i // 8] |= bit.as_unsigned() << (i % 8)
-    return Bytes(packed)
-
-def unpack_bits(packed_bits: Bytes, length: Unsigned) -> Vec[Field2]:
-    bits = []
-    for i in range(length):
-        bits.append(Field2(
-            (packed_bits[i // 8] >> (i % 8)) & 1
-        ))
-    return bits
 ~~~
 {: #idpf-poplar-helpers title="Helper functions for IdpfPoplar."}
+
+Here, `pack_bits()` takes a list of bits, packs each group of eight bits into a
+byte, in LSB to MSB order, padding the most significant bits of the last byte
+with zeros as necessary, and returns the byte array. `unpack_bits()` performs
+the reverse operation: it takes in a byte array and a number of bits, and
+returns a list of bits, extracting eight bits from each byte in turn, in LSB to
+MSB order, and stopping after the requested number of bits.
 
 ## Instantiation {#poplar1-inst}
 
