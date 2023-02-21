@@ -3174,7 +3174,9 @@ byte, in LSB to MSB order, padding the most significant bits of the last byte
 with zeros as necessary, and returns the byte array. `unpack_bits()` performs
 the reverse operation: it takes in a byte array and a number of bits, and
 returns a list of bits, extracting eight bits from each byte in turn, in LSB to
-MSB order, and stopping after the requested number of bits.
+MSB order, and stopping after the requested number of bits. If the byte array
+has an incorrect length, or if unused bits in the last bytes are not zero, it
+throws an error.
 
 ## Instantiation {#poplar1-inst}
 

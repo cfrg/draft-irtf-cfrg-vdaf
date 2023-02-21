@@ -202,10 +202,7 @@ class IdpfPoplar(Idpf):
             encoded_w_cw, encoded = encoded[:l], encoded[l:]
             w_cw = Field.decode_vec(encoded_w_cw)
             correction_words.append((seed_cw, ctrl_cw, w_cw))
-        leftover_bits = encoded_ctrl[-1] >> (
-            ((IdpfPoplar.BITS + 3) % 4 + 1) * 2
-        )
-        if leftover_bits != 0 or len(encoded) != 0:
+        if len(encoded) != 0:
             raise ERR_DECODE
         return correction_words
 
@@ -247,6 +244,11 @@ def unpack_bits(packed_bits: Bytes, length: Unsigned) -> Vec[Field2]:
         bits.append(Field2(
             (packed_bits[i // 8] >> (i % 8)) & 1
         ))
+    leftover_bits = packed_bits[-1] >> (
+        (length + 7) % 8 + 1
+    )
+    if (length + 7) // 8 != len(packed_bits) or leftover_bits != 0:
+        raise ERR_DECODE
     return bits
 
 
