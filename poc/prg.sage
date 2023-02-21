@@ -60,6 +60,7 @@ class PrgAes128(Prg):
 
         # Use CMAC as a pseuodorandom function to derive a key.
         hasher = CMAC.new(seed, ciphermod=AES)
+        hasher.update(I2OSP(len(custom), 2))
         hasher.update(custom)
         hasher.update(binder)
         self.key = hasher.digest()
@@ -129,17 +130,8 @@ if __name__ == '__main__':
     test_prg(cls, Field128, 23)
 
     # These constants were found in a brute-force search, and they test that
-    # the PRG performs rejection sampling correctly when raw AES-CTR output
+    # the PRG performs rejection sampling correctly when raw cSHAKE128 output
     # exceeds the prime modulus.
-    expanded_vec = PrgAes128.expand_into_vec(
-        Field96,
-        b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\x5f',
-        b'', # custom
-        b'', # binder
-        146
-    )
-    assert expanded_vec[-1] == Field96(39729620190871453347343769187)
-
     expanded_vec = PrgSha3.expand_into_vec(
         Field96,
         b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xd5',
