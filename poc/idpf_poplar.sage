@@ -2,11 +2,11 @@
 
 from copy import deepcopy
 import itertools
-from sagelib.common import ERR_DECODE, ERR_INPUT, VERSION, Bytes, Error, \
-                           Unsigned, Vec, byte, format_custom, gen_rand, \
+from sagelib.common import ERR_DECODE, ERR_INPUT, TEST_VECTOR, VERSION, Bytes, \
+                           Error, Unsigned, Vec, byte, format_custom, gen_rand, \
                            vec_add, vec_neg, vec_sub, xor
 from sagelib.field import Field2
-from sagelib.idpf import Idpf, test_idpf, test_idpf_exhaustive
+from sagelib.idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
 import sagelib.prg as prg
 
@@ -256,6 +256,8 @@ if __name__ == '__main__':
     cls = IdpfPoplar \
                 .with_prg(prg.PrgSha3) \
                 .with_value_len(2)
+    if TEST_VECTOR:
+        gen_test_vec(cls.with_bits(10), 0, 0)
     test_idpf(cls.with_bits(16), 0b1111000011110000, 15, [0b1111000011110000])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 14, [0b111100001111000])
     test_idpf(cls.with_bits(16), 0b1111000011110000, 13, [0b11110000111100])
