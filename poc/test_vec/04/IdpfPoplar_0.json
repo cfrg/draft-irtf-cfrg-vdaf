@@ -1,0 +1,51 @@
+{
+    "alpha": "0",
+    "beta_inner": [
+        [
+            "0",
+            "0"
+        ],
+        [
+            "1",
+            "1"
+        ],
+        [
+            "2",
+            "2"
+        ],
+        [
+            "3",
+            "3"
+        ],
+        [
+            "4",
+            "4"
+        ],
+        [
+            "5",
+            "5"
+        ],
+        [
+            "6",
+            "6"
+        ],
+        [
+            "7",
+            "7"
+        ],
+        [
+            "8",
+            "8"
+        ]
+    ],
+    "beta_leaf": [
+        "9",
+        "9"
+    ],
+    "bits": 10,
+    "keys": [
+        "01010101010101010101010101010101",
+        "02020202020202020202020202020202"
+    ],
+    "public_share": "36370134f3c77ed73b9a0fc758600d54df5bb578695c9f52361941755f85322f4c7686d0825ec8ba435dbe215a8f168e76e904ed643e3c2826ebd55991598c5dc741ea02ce642f3e13282b652b274c106cdb91824ef56093f05680d1fec08a5f32a4fec3e739d6df0e0af0fabf97f497b546b5806537812f12232a0a2e944ef6741dc4859162bad5d2ea2d19d3a3e869b1b2b06dd67f9243a971c83aad8ac6a07e72481ede54c78d96a682bf5ba8270bb62c9f81260c7e804a3a9b293ff83a0aa3b462beed3654db65a7e3d016f4b81400ad3bd36053ad82ccc500cc83316246eff2c2c787099c6cf541877beef8731bd72f5b0e94ddd8a162da25acf662ed512d5da7774ee18d4f119f145627d01fb6a6b6ad0231374ba486db54490f6af71360dd6210348d898a8a869359311025a28b613761aaeada61f1cd86bc9428aa18e8f0a38509a86addedf9dc7522e3227f7b7baf374d510e9c0e6cebbb3e8f0dcbc1b8448733b7f1db915209de6d5893fdc57abb"
+}
