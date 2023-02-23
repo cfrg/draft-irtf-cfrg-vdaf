@@ -30,6 +30,7 @@ DST_VERIFY_RAND = 4
 class Poplar1(Vdaf):
     # Types provided by a concrete instadce of `Poplar1`.
     Idpf = idpf.Idpf
+    Prg = prg.Prg
 
     # Parameters required by `Vdaf`.
     ID = 0x00001000
@@ -55,7 +56,7 @@ class Poplar1(Vdaf):
 
     @classmethod
     def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
-        l = Poplar1.Idpf.Prg.SEED_SIZE
+        l = Poplar1.Prg.SEED_SIZE
 
         # Split the coins into coins for IDPF key generation,
         # correlated randomness, and sharding.
@@ -66,7 +67,7 @@ class Poplar1(Vdaf):
         corr_seed, seeds = front(2, seeds)
         (k_shard,), seeds = front(1, seeds)
 
-        prg = Poplar1.Idpf.Prg(k_shard,
+        prg = Poplar1.Prg(k_shard,
                                Poplar1.custom(DST_SHARD_RAND), b'')
 
         # Construct the IDPF values for each level of the IDPF tree.
@@ -85,6 +86,7 @@ class Poplar1(Vdaf):
         (public_share, keys) = Poplar1.Idpf.gen(measurement,
                                                 beta_inner,
                                                 beta_leaf,
+                                                nonce,
                                                 idpf_rand)
 
         # Generate correlated randomness used by the Aggregators to
@@ -92,14 +94,14 @@ class Poplar1(Vdaf):
         # used to encode shares of the `(a, b, c)` triples.
         # (See [BBCGGI21, Appendix C.4].)
         corr_offsets = vec_add(
-            Poplar1.Idpf.Prg.expand_into_vec(
+            Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
                 corr_seed[0],
                 Poplar1.custom(DST_CORR_INNER),
                 byte(0) + nonce,
                 3 * (Poplar1.Idpf.BITS-1),
             ),
-            Poplar1.Idpf.Prg.expand_into_vec(
+            Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
                 corr_seed[1],
                 Poplar1.custom(DST_CORR_INNER),
@@ -108,14 +110,14 @@ class Poplar1(Vdaf):
             ),
         )
         corr_offsets += vec_add(
-            Poplar1.Idpf.Prg.expand_into_vec(
+            Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[0],
                 Poplar1.custom(DST_CORR_LEAF),
                 byte(0) + nonce,
                 3,
             ),
-            Poplar1.Idpf.Prg.expand_into_vec(
+            Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[1],
                 Poplar1.custom(DST_CORR_LEAF),
@@ -174,19 +176,19 @@ class Poplar1(Vdaf):
 
         # Evaluate the IDPF key at the given set of prefixes.
         value = Poplar1.Idpf.eval(
-            agg_id, public_share, key, level, prefixes)
+            agg_id, public_share, key, level, prefixes, nonce)
 
         # Get shares of the correlated randomness for computing the
         # Aggregator's share of the sketch for the given level of the IDPF
         # tree.
         if level < Poplar1.Idpf.BITS - 1:
-            corr_prg = Poplar1.Idpf.Prg(corr_seed,
+            corr_prg = Poplar1.Prg(corr_seed,
                                         Poplar1.custom(DST_CORR_INNER),
                                         byte(agg_id) + nonce)
             # Fast-forward the PRG state to the current level.
             corr_prg.next_vec(Field, 3 * level)
         else:
-            corr_prg = Poplar1.Idpf.Prg(corr_seed,
+            corr_prg = Poplar1.Prg(corr_seed,
                                         Poplar1.custom(DST_CORR_LEAF),
                                         byte(agg_id) + nonce)
         (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
@@ -195,7 +197,7 @@ class Poplar1(Vdaf):
 
         # Compute the Aggregator's first round of the sketch. These are
         # called the "masked input values" [BBCGGI21, Appendix C.4].
-        verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
+        verify_rand_prg = Poplar1.Prg(verify_key,
             Poplar1.custom(DST_VERIFY_RAND),
             nonce + to_be_bytes(level, 2))
         verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
@@ -311,7 +313,7 @@ class Poplar1(Vdaf):
     def decode_input_share(Poplar1, encoded):
         l = Poplar1.Idpf.KEY_SIZE
         key, encoded = encoded[:l], encoded[l:]
-        l = Poplar1.Idpf.Prg.SEED_SIZE
+        l = Poplar1.Prg.SEED_SIZE
         corr_seed, encoded = encoded[:l], encoded[l:]
         l = Poplar1.Idpf.FieldInner.ENCODED_SIZE \
             * 2 * (Poplar1.Idpf.BITS - 1)
@@ -362,13 +364,14 @@ class Poplar1(Vdaf):
     @classmethod
     def with_bits(Poplar1, bits: Unsigned):
         TheIdpf = idpf_poplar.IdpfPoplar \
-                .with_prg(prg.PrgSha3) \
                 .with_value_len(2) \
                 .with_bits(bits)
+        ThePrg = prg.PrgSha3
         class Poplar1WithBits(Poplar1):
             Idpf = TheIdpf
-            VERIFY_KEY_SIZE = TheIdpf.Prg.SEED_SIZE
-            RAND_SIZE = 3*TheIdpf.Prg.SEED_SIZE + TheIdpf.RAND_SIZE
+            Prg = ThePrg
+            VERIFY_KEY_SIZE = ThePrg.SEED_SIZE
+            RAND_SIZE = 3*ThePrg.SEED_SIZE + TheIdpf.RAND_SIZE
             test_vec_name = 'Poplar1'
         return Poplar1WithBits
 

@@ -8,7 +8,7 @@ from Cryptodome.Util.number import bytes_to_long
 from sagelib.common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
                            format_custom, zeros, from_le_bytes, gen_rand, \
                            next_power_of_2, print_wrapped_line, to_be_bytes, \
-                           to_le_bytes
+                           to_le_bytes, xor, concat
 
 # The base class for PRGs.
 class Prg:
@@ -99,6 +99,51 @@ class PrgSha3(Prg):
     def next(self, length: Unsigned) -> Bytes:
         return self.shake.read(length)
 
+# PRG based on a circular collision-resistant hash function from fixed-key AES.
+class PrgFixedKeyAes128(Prg):
+    # Associated parameters
+    SEED_SIZE = 16
+
+    def __init__(self, seed, custom, binder):
+        self.length_consumed = 0
+
+        # Use SHA-3 to derive a key from the binder and customization
+        # strings. Note that the AES key does not need to be kept
+        # secret from any party. However, when used with IpdfPoplar,
+        # we require the binder to be a random nonce.
+        #
+        # Implementation note: This step can be cached across PRG
+        # evaluations with many different seeds.
+        shake = cSHAKE128.new(custom=custom)
+        shake.update(binder)
+        fixed_key = shake.read(16)
+        self.cipher = AES.new(fixed_key, AES.MODE_ECB)
+        # Save seed to be used in `next`.
+        self.seed = seed
+
+    def next(self, length: Unsigned) -> Bytes:
+        offset = self.length_consumed % 16
+        new_length = self.length_consumed + length
+        block_range = range(
+            int(self.length_consumed / 16),
+            int(new_length / 16) + 1)
+        self.length_consumed = new_length
+
+        hashed_blocks = [
+            self.hash_block(xor(self.seed, to_le_bytes(i, 16))) \
+                         for i in block_range
+        ]
+        return concat(hashed_blocks)[offset:offset+length]
+
+    # The multi-instance tweakable circular correlation-robust hash function of
+    # [GKWWY20] (Section 4.2).
+    def hash_block(self, block):
+        lo, hi = block[:8], block[8:]
+        sigma = hi + xor(hi, lo)
+        return xor(self.cipher.encrypt(sigma), sigma)
+
+
+
 ##
 # TESTS
 #
@@ -143,7 +188,7 @@ if __name__ == '__main__':
     )
     assert expanded_vec[-1] == Field64(13681157193520586550)
 
-    for cls in (PrgAes128, PrgSha3):
+    for cls in (PrgAes128, PrgSha3, PrgFixedKeyAes128):
         test_prg(cls, Field128, 23)
 
         if TEST_VECTOR:

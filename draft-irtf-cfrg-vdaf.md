@@ -138,6 +138,18 @@ informative:
     seriesinfo: EUROCRYPT 2014
     target: https://link.springer.com/chapter/10.1007/978-3-642-55220-5_35
 
+  GKWWY20:
+    title: Better concrete security for half-gates garbling (in the multi-instance setting)
+    authors:
+      - ins: C. Guo
+      - ins: J. Katz
+      - ins: X. Wang
+      - ins: C. Weng
+      - ins: Y. Yu
+    date: 2020
+    seriesinfo: CRYPTO 2020
+    target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_28
+
   OriginTelemetry:
     title: "Origin Telemetry"
     date: 2020
@@ -1337,6 +1349,7 @@ def expand_into_vec(Prg,
 
 This section describes PrgSha3, a PRG based on the Keccak permutation of SHA-3
 {{FIPS202}}. Keccak is used in the cSHAKE128 mode of operation {{SP800-185}}.
+This Prg is RECOMMENDED for all use cases within VDAFs.
 
 ~~~
 class PrgSha3(Prg):
@@ -1362,6 +1375,57 @@ class PrgSha3(Prg):
         return stream[-length:]
 ~~~
 {: title="Definition of PRG PrgSha3."}
+
+### PrgFixedKeyAes128 {#prg-fixed-key-aes128}
+
+While PrgSha3 as described above can be securely used in all cases where a Prg
+is needed in the VDAFs described in this document, there are some cases where
+a more efficient instantiation based on fixed-key AES is possible. For now, this
+is limited to the Prg used inside the Idpf {{idpf}} implementation in Poplar1
+{{idpf-poplar}}. It is NOT RECOMMENDED to use this Prg anywhere else.
+See Security Considerations {{security}} for a more detailed discussion.
+
+~~~
+class PrgFixedKeyAes128(Prg):
+    # Associated parameters
+    SEED_SIZE = 16
+
+    def __init__(self, seed, custom, binder):
+        self.length_consumed = 0
+
+        # Use SHA-3 to derive a key from the binder and customization
+        # strings. Note that the AES key does not need to be kept
+        # secret from any party. However, when used with IpdfPoplar,
+        # we require the binder to be a random nonce.
+        #
+        # Implementation note: This step can be cached across PRG
+        # evaluations with many different seeds.
+        self.fixed_key = cSHAKE128(binder, 16, b'', custom)
+        self.seed = seed
+
+    def next(self, length: Unsigned) -> Bytes:
+        offset = self.length_consumed % 16
+        new_length = self.length_consumed + length
+        block_range = range(
+            int(self.length_consumed / 16),
+            int(new_length / 16) + 1)
+        self.length_consumed = new_length
+
+        hashed_blocks = [
+            self.hash_block(xor(self.seed, to_le_bytes(i, 16))) \
+                         for i in block_range
+        ]
+        return concat(hashed_blocks)[offset:offset+length]
+
+    # The multi-instance tweakable circular correlation-robust hash function of
+    # [GKWWY20] (Section 4.2).
+    #
+    # Function `AES128(key, block)` is the AES-128 blockcipher.
+    def hash_block(self, block):
+        lo, hi = block[:8], block[8:]
+        sigma = hi + xor(hi, lo)
+        return xor(AES128(self.fixed_key, sigma), sigma)
+~~~
 
 ### The Customization and Binder Strings
 
@@ -2669,20 +2733,21 @@ either a vector of inner node field elements or leaf node field elements.) The
 scheme is comprised of the following algorithms:
 
 * `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf:
-  Vec[Idpf.FieldLeaf], rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes, Vec[Bytes])` is
-  the randomized IDPF-key generation algorithm. (Input `rand` consists of the
-  random coins it consumes.) Its inputs are the index `alpha` and the values
-  `beta`. The value of `alpha` MUST be in range `[0, 2^BITS)`. The output is a
-  public part that is sent to all Aggregators and a vector of private IDPF keys,
-  one for each aggregator.
+  Vec[Idpf.FieldLeaf], binder: Bytes, rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes,
+  Vec[Bytes])` is the randomized IDPF-key generation algorithm. (Input `rand`
+  consists of the random coins it consumes.) Its inputs are the index `alpha`
+  the values `beta`, and a binder string. The value of `alpha` MUST be in range
+  `[0, 2^BITS)`. The output is a public part that is sent to all Aggregators
+  and a vector of private IDPF keys, one for each aggregator.
 
-* `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned,
-  prefixes: Vec[Unsigned]) -> Idpf.Vec` is the deterministic, stateless
-  IDPF-key evaluation algorithm run by each Aggregator. Its inputs are the
-  Aggregator's unique identifier, the public share distributed to all of the
-  Aggregators, the Aggregator's IDPF key, the "level" at which to evaluate the
-  IDPF, and the sequence of candidate prefixes. It returns the share of the
-  value corresponding to each candidate prefix.
+* `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level:
+  Unsigned, prefixes: Vec[Unsigned], binder: Bytes) -> Idpf.Vec` is the
+  deterministic, stateless IDPF-key evaluation algorithm run by each
+  Aggregator. Its inputs are the Aggregator's unique identifier, the public
+  share distributed to all of the Aggregators, the Aggregator's IDPF key, the
+  "level" at which to evaluate the IDPF, the sequence of candidate prefixes,
+  and a binder string. It returns the share of the value corresponding to each
+  candidate prefix.
 
   The output type depends on the value of `level`: If `level < Idpf.BITS-1`, the
   output is the value for an inner node, which has type
@@ -2721,22 +2786,21 @@ state across evaluations. See {{idpf-poplar}} for details.
 | KEY_SIZE   | Size in bytes of each IDPF key |
 | FieldInner | Implementation of `Field` ({{field}}) used for values of inner nodes |
 | FieldLeaf  | Implementation of `Field` used for values of leaf nodes |
-| Prg        | Implementation of `Prg` ({{prg}}) |
 {: #idpf-param title="Constants and types defined by a concrete IDPF."}
 
 ## Construction {#poplar1-construction}
 
 This section specifies `Poplar1`, an implementation of the `Vdaf` interface
 ({{vdaf}}). It is defined in terms of any `Idpf` ({{idpf}}) for which
-`Idpf.SHARES == 2` and `Idpf.VALUE_LEN == 2`. The associated constants and types
-required by the `Vdaf` interface are defined in {{poplar1-param}}. The methods
-required for sharding, preparation, aggregation, and unsharding are described in
-the remaining subsections. These methods make use of constants defined in
-{{poplar1-const}}.
+`Idpf.SHARES == 2` and `Idpf.VALUE_LEN == 2` and an implementation of `Prg`
+({{prg}}). The associated constants and types required by the `Vdaf` interface
+are defined in {{poplar1-param}}. The methods required for sharding,
+preparation, aggregation, and unsharding are described in the remaining
+subsections. These methods make use of constants defined in {{poplar1-const}}.
 
 | Parameter         | Value             |
 |:------------------|:------------------|
-| `VERIFY_KEY_SIZE` | `Idpf.Prg.SEED_SIZE` |
+| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE` |
 | `NONCE_SIZE`      | `16` |
 | `ROUNDS`          | `2` |
 | `SHARES`          | `2` |
@@ -2777,7 +2841,7 @@ follows. Function `encode_input_shares` is defined in {{poplar1-auxiliary}}.
 
 ~~~
 def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
-    l = Poplar1.Idpf.Prg.SEED_SIZE
+    l = Poplar1.Prg.SEED_SIZE
 
     # Split the coins into coins for IDPF key generation,
     # correlated randomness, and sharding.
@@ -2788,8 +2852,8 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
     corr_seed, seeds = front(2, seeds)
     (k_shard,), seeds = front(1, seeds)
 
-    prg = Poplar1.Idpf.Prg(k_shard,
-                           Poplar1.custom(DST_SHARD_RAND), b'')
+    prg = Poplar1.Prg(k_shard,
+                      Poplar1.custom(DST_SHARD_RAND), b'')
 
     # Construct the IDPF values for each level of the IDPF tree.
     # Each "data" value is 1; in addition, the Client generates
@@ -2814,14 +2878,14 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
     # used to encode shares of the `(a, b, c)` triples.
     # (See [BBCGGI21, Appendix C.4].)
     corr_offsets = vec_add(
-        Poplar1.Idpf.Prg.expand_into_vec(
+        Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldInner,
             corr_seed[0],
             Poplar1.custom(DST_CORR_INNER),
             byte(0) + nonce,
             3 * (Poplar1.Idpf.BITS-1),
         ),
-        Poplar1.Idpf.Prg.expand_into_vec(
+        Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldInner,
             corr_seed[1],
             Poplar1.custom(DST_CORR_INNER),
@@ -2830,14 +2894,14 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
         ),
     )
     corr_offsets += vec_add(
-        Poplar1.Idpf.Prg.expand_into_vec(
+        Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldLeaf,
             corr_seed[0],
             Poplar1.custom(DST_CORR_LEAF),
             byte(0) + nonce,
             3,
         ),
-        Poplar1.Idpf.Prg.expand_into_vec(
+        Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldLeaf,
             corr_seed[1],
             Poplar1.custom(DST_CORR_LEAF),
@@ -2915,13 +2979,13 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # Aggregator's share of the sketch for the given level of the IDPF
     # tree.
     if level < Poplar1.Idpf.BITS - 1:
-        corr_prg = Poplar1.Idpf.Prg(corr_seed,
+        corr_prg = Poplar1.Prg(corr_seed,
                                     Poplar1.custom(DST_CORR_INNER),
                                     byte(agg_id) + nonce)
         # Fast-forward the PRG state to the current level.
         corr_prg.next_vec(Field, 3 * level)
     else:
-        corr_prg = Poplar1.Idpf.Prg(corr_seed,
+        corr_prg = Poplar1.Prg(corr_seed,
                                     Poplar1.custom(DST_CORR_LEAF),
                                     byte(agg_id) + nonce)
     (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
@@ -2930,7 +2994,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
 
     # Compute the Aggregator's first round of the sketch. These are
     # called the "masked input values" [BBCGGI21, Appendix C.4].
-    verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
+    verify_rand_prg = Poplar1.Prg(verify_key,
         Poplar1.custom(DST_VERIFY_RAND),
         nonce + to_be_bytes(level, 2))
     verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
@@ -3091,7 +3155,7 @@ def encode_input_shares(Poplar1, keys,
 def decode_input_share(Poplar1, encoded):
     l = Poplar1.Idpf.KEY_SIZE
     key, encoded = encoded[:l], encoded[l:]
-    l = Poplar1.Idpf.Prg.SEED_SIZE
+    l = Poplar1.Prg.SEED_SIZE
     corr_seed, encoded = encoded[:l], encoded[l:]
     l = Poplar1.Idpf.FieldInner.ENCODED_SIZE \
         * 2 * (Poplar1.Idpf.BITS - 1)
@@ -3156,6 +3220,11 @@ instantiating Poplar1. The scheme gets its name from the name of the protocol of
 The constant and type definitions required by the `Idpf` interface are given in
 {{idpf-poplar-param}}.
 
+IdpfPoplar requires a PRG for deriving the output shares, as well as a variety
+of other artifacts used internally. For performance reasons, we instantiate
+this object using PrgFixedKeyAes128 ({{prg-fixed-key-aes128}}). See
+{{prg-vs-ro}} for justification of this choice.
+
 | Parameter  | Value                   |
 |:-----------|:------------------------|
 | SHARES     | `2`                     |
@@ -3164,7 +3233,6 @@ The constant and type definitions required by the `Idpf` interface are given in
 | KEY_SIZE   | `Prg.SEED_SIZE`         |
 | FieldInner | `Field64` ({{fields}})  |
 | FieldLeaf  | `Field255` ({{fields}}) |
-| Prg        | any implementation of `Prg` ({{prg}}) |
 {: #idpf-poplar-param title="Constants and type definitions for IdpfPoplar."}
 
 ### Key Generation
@@ -3178,7 +3246,7 @@ functions `extend()`, `convert()`, and `encode_public_share()` defined in
 field `GF(2)`.
 
 ~~~
-def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
+def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
     if alpha >= 2^IdpfPoplar.BITS:
         raise ERR_INPUT # alpha too long
     if len(beta_inner) != IdpfPoplar.BITS - 1:
@@ -3187,8 +3255,8 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
         raise ERR_INPUT # unexpected length for random coins
 
     init_seed = [
-        rand[:IdpfPoplar.Prg.SEED_SIZE],
-        rand[IdpfPoplar.Prg.SEED_SIZE:],
+        rand[:PrgFixedKeyAes128.SEED_SIZE],
+        rand[PrgFixedKeyAes128.SEED_SIZE:],
     ]
 
     seed = init_seed.copy()
@@ -3200,8 +3268,8 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
         lose = 1 - keep
         bit = Field2(keep)
 
-        (s0, t0) = IdpfPoplar.extend(seed[0])
-        (s1, t1) = IdpfPoplar.extend(seed[1])
+        (s0, t0) = IdpfPoplar.extend(seed[0], binder)
+        (s1, t1) = IdpfPoplar.extend(seed[1], binder)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
             t0[0] + t1[0] + bit + Field2(1),
@@ -3210,8 +3278,8 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
 
         x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
         x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
-        (seed[0], w0) = IdpfPoplar.convert(level, x0)
-        (seed[1], w1) = IdpfPoplar.convert(level, x1)
+        (seed[0], w0) = IdpfPoplar.convert(level, x0, binder)
+        (seed[1], w1) = IdpfPoplar.convert(level, x1, binder)
         ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
         ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
@@ -3245,7 +3313,7 @@ functions `extend()`, `convert()`, and `decode_public_share()` defined in
 
 ~~~
 def eval(IdpfPoplar, agg_id, public_share, init_seed,
-         level, prefixes):
+         level, prefixes, binder):
     if agg_id >= IdpfPoplar.SHARES:
         raise ERR_INPUT # invalid aggregator ID
     if level >= IdpfPoplar.BITS:
@@ -3284,7 +3352,7 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
             # complexity by caching nodes (i.e., `(seed, ctrl)`
             # pairs) output by previous calls to `eval_next()`.
             (seed, ctrl, y) = IdpfPoplar.eval_next(seed, ctrl,
-                correction_words[current_level], current_level, bit)
+                correction_words[current_level], current_level, bit, binder)
         out_share.append(y if agg_id == 0 else vec_neg(y))
     return out_share
 
@@ -3296,17 +3364,17 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
 # discussed at the end of [BBCGGI21, Appendix C.2]. This could on
 # average reduce the number of AES calls by a constant factor.
 def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
-              correction_word, level, bit):
+              correction_word, level, bit, binder):
     Field = IdpfPoplar.current_field(level)
     (seed_cw, ctrl_cw, w_cw) = correction_word
-    (s, t) = IdpfPoplar.extend(prev_seed)
+    (s, t) = IdpfPoplar.extend(prev_seed, binder)
     s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
     s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
     t[0] += ctrl_cw[0] * prev_ctrl
     t[1] += ctrl_cw[1] * prev_ctrl
 
     next_ctrl = t[bit]
-    (next_seed, y) = IdpfPoplar.convert(level, s[bit])
+    (next_seed, y) = IdpfPoplar.convert(level, s[bit], binder)
     # Implementation note: Here we add the correction word to the
     # output if `next_ctrl` is set. We avoid branching on the value of
     # the control bit in order to reduce side channel leakage.
@@ -3321,19 +3389,19 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 ### Auxiliary Functions {#idpf-poplar-helper-functions}
 
 ~~~
-def extend(IdpfPoplar, seed):
-    prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 0), b'')
+def extend(IdpfPoplar, seed, binder):
+    prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 0), binder)
     s = [
-        prg.next(IdpfPoplar.Prg.SEED_SIZE),
-        prg.next(IdpfPoplar.Prg.SEED_SIZE),
+        prg.next(PrgFixedKeyAes128.SEED_SIZE),
+        prg.next(PrgFixedKeyAes128.SEED_SIZE),
     ]
     b = prg.next(1)[0]
     t = [Field2(b & 1), Field2((b >> 1) & 1)]
     return (s, t)
 
-def convert(IdpfPoplar, level, seed):
-    prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 1), b'')
-    next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
+def convert(IdpfPoplar, level, seed, binder):
+    prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 1), binder)
+    next_seed = prg.next(PrgFixedKeyAes128.SEED_SIZE)
     Field = IdpfPoplar.current_field(level)
     w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
     return (next_seed, w)
@@ -3362,16 +3430,13 @@ def decode_public_share(IdpfPoplar, encoded):
             control_bits[level * 2],
             control_bits[level * 2 + 1],
         )
-        l = IdpfPoplar.Prg.SEED_SIZE
+        l = PrgFixedKeyAes128.SEED_SIZE
         seed_cw, encoded = encoded[:l], encoded[l:]
         l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
         encoded_w_cw, encoded = encoded[:l], encoded[l:]
         w_cw = Field.decode_vec(encoded_w_cw)
         correction_words.append((seed_cw, ctrl_cw, w_cw))
-    leftover_bits = encoded_ctrl[-1] >> (
-        ((IdpfPoplar.BITS + 3) % 4 + 1) * 2
-    )
-    if leftover_bits != 0 or len(encoded) != 0:
+    if len(encoded) != 0:
         raise ERR_DECODE
     return correction_words
 ~~~
@@ -3538,6 +3603,24 @@ differential privacy.
 > TODO(issue #94) Describe (or point to some description of) the central DP
 > mechanism for Poplar described in {{BBCGGI21}}.
 
+## Pseudorandom Generators and random oracles {#prg-vs-ro}
+
+The objects we describe in {{prg}} share a common interface, which we have
+called Prg. However, these are not necessarily all modeled as cryptographic
+Pseudorandom Generators in the security analyses of our protocols. Instead, most
+of them are modeled as random oracles. For these use cases, we want to be
+conservative in our assumptions, and hence prescribe PrgSha3 as the only
+RECOMMENDED Prg instantiation.
+
+The one exception is the PRG used in the Idpf implementation IdpfPoplar
+{{idpf-poplar}}. Here, a random oracle is not needed to prove security, and
+hence a construction based on fixed-key AES {{prg-fixed-key-aes128}} can be
+used. However, as PrgFixedKeyAes128 has been shown to be differentiable from
+a random oracle {{GKWWY20}}, it is NOT RECOMMENDED to use it anywhere else.
+
+> OPEN ISSUE: We may want to drop the common interface for PRGs and random
+> oracles. See issue #159.
+
 # IANA Considerations
 
 A codepoint for each (V)DAF in this document is defined in the table below. Note
@@ -3565,8 +3648,8 @@ analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
 time to developing definitions and security proofs.
 
 Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon Friedberger, Tim
-Geoghegan, Mariana Raykova, Jacob Rothstein, and Christopher Wood for useful
-feedback on and contributions to the spec.
+Geoghegan, Mariana Raykova, Jacob Rothstein, Xiao Wang, and Christopher Wood for
+useful feedback on and contributions to the spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}
