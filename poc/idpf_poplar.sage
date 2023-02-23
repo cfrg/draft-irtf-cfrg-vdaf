@@ -19,19 +19,17 @@ from sagelib.common import \
 from sagelib.field import Field2
 from sagelib.idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
-import sagelib.prg as prg
+from sagelib.prg import PrgFixedKeyAes128
 
 
 # An IDPF based on the construction of [BBCGI21, Section 6]. It is identical
 # except that the output shares may be tuples rather than single field elements.
 # In particular, the value of `VALUE_LEN` may be any positive integer.
 class IdpfPoplar(Idpf):
-    # Generic parameters set by a concrete instance of this IDPF.
-    Prg: prg.Prg = None
-
     # Parameters required by `Vdaf`.
     SHARES = 2
-    RAND_SIZE = None # Set by `Prg`
+    KEY_SIZE = PrgFixedKeyAes128.SEED_SIZE
+    RAND_SIZE = 2 * PrgFixedKeyAes128.SEED_SIZE
     FieldInner = field.Field64
     FieldLeaf = field.Field255
 
@@ -39,7 +37,7 @@ class IdpfPoplar(Idpf):
     test_vec_name = 'IdpfPoplar'
 
     @classmethod
-    def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
+    def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
         if alpha >= 2^IdpfPoplar.BITS:
             raise ERR_INPUT # alpha too long
         if len(beta_inner) != IdpfPoplar.BITS - 1:
@@ -48,8 +46,8 @@ class IdpfPoplar(Idpf):
             raise ERR_INPUT # unexpected length for random coins
 
         init_seed = [
-            rand[:IdpfPoplar.Prg.SEED_SIZE],
-            rand[IdpfPoplar.Prg.SEED_SIZE:],
+            rand[:PrgFixedKeyAes128.SEED_SIZE],
+            rand[PrgFixedKeyAes128.SEED_SIZE:],
         ]
 
         seed = init_seed.copy()
@@ -61,8 +59,8 @@ class IdpfPoplar(Idpf):
             lose = 1 - keep
             bit = Field2(keep)
 
-            (s0, t0) = IdpfPoplar.extend(seed[0])
-            (s1, t1) = IdpfPoplar.extend(seed[1])
+            (s0, t0) = IdpfPoplar.extend(seed[0], binder)
+            (s1, t1) = IdpfPoplar.extend(seed[1], binder)
             seed_cw = xor(s0[lose], s1[lose])
             ctrl_cw = (
                 t0[0] + t1[0] + bit + Field2(1),
@@ -71,8 +69,8 @@ class IdpfPoplar(Idpf):
 
             x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
             x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
-            (seed[0], w0) = IdpfPoplar.convert(level, x0)
-            (seed[1], w1) = IdpfPoplar.convert(level, x1)
+            (seed[0], w0) = IdpfPoplar.convert(level, x0, binder)
+            (seed[1], w1) = IdpfPoplar.convert(level, x1, binder)
             ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
             ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
@@ -96,7 +94,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def eval(IdpfPoplar, agg_id, public_share, init_seed,
-             level, prefixes):
+             level, prefixes, binder):
         if agg_id >= IdpfPoplar.SHARES:
             raise ERR_INPUT # invalid aggregator ID
         if level >= IdpfPoplar.BITS:
@@ -135,7 +133,7 @@ class IdpfPoplar(Idpf):
                 # complexity by caching nodes (i.e., `(seed, ctrl)`
                 # pairs) output by previous calls to `eval_next()`.
                 (seed, ctrl, y) = IdpfPoplar.eval_next(seed, ctrl,
-                    correction_words[current_level], current_level, bit)
+                    correction_words[current_level], current_level, bit, binder)
             out_share.append(y if agg_id == 0 else vec_neg(y))
         return out_share
 
@@ -148,17 +146,17 @@ class IdpfPoplar(Idpf):
     # average reduce the number of AES calls by a constant factor.
     @classmethod
     def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
-                  correction_word, level, bit):
+                  correction_word, level, bit, binder):
         Field = IdpfPoplar.current_field(level)
         (seed_cw, ctrl_cw, w_cw) = correction_word
-        (s, t) = IdpfPoplar.extend(prev_seed)
+        (s, t) = IdpfPoplar.extend(prev_seed, binder)
         s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
         s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
         t[0] += ctrl_cw[0] * prev_ctrl
         t[1] += ctrl_cw[1] * prev_ctrl
 
         next_ctrl = t[bit]
-        (next_seed, y) = IdpfPoplar.convert(level, s[bit])
+        (next_seed, y) = IdpfPoplar.convert(level, s[bit], binder)
         # Implementation note: Here we add the correction word to the
         # output if `next_ctrl` is set. We avoid branching on the value of
         # the control bit in order to reduce side channel leakage.
@@ -169,20 +167,20 @@ class IdpfPoplar(Idpf):
         return (next_seed, next_ctrl, y)
 
     @classmethod
-    def extend(IdpfPoplar, seed):
-        prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 0), b'')
+    def extend(IdpfPoplar, seed, binder):
+        prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 0), binder)
         s = [
-            prg.next(IdpfPoplar.Prg.SEED_SIZE),
-            prg.next(IdpfPoplar.Prg.SEED_SIZE),
+            prg.next(PrgFixedKeyAes128.SEED_SIZE),
+            prg.next(PrgFixedKeyAes128.SEED_SIZE),
         ]
         b = prg.next(1)[0]
         t = [Field2(b & 1), Field2((b >> 1) & 1)]
         return (s, t)
 
     @classmethod
-    def convert(IdpfPoplar, level, seed):
-        prg = IdpfPoplar.Prg(seed, format_custom(1, 0, 1), b'')
-        next_seed = prg.next(IdpfPoplar.Prg.SEED_SIZE)
+    def convert(IdpfPoplar, level, seed, binder):
+        prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 1), binder)
+        next_seed = prg.next(PrgFixedKeyAes128.SEED_SIZE)
         Field = IdpfPoplar.current_field(level)
         w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
         return (next_seed, w)
@@ -213,7 +211,7 @@ class IdpfPoplar(Idpf):
                 control_bits[level * 2],
                 control_bits[level * 2 + 1],
             )
-            l = IdpfPoplar.Prg.SEED_SIZE
+            l = PrgFixedKeyAes128.SEED_SIZE
             seed_cw, encoded = encoded[:l], encoded[l:]
             l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
             encoded_w_cw, encoded = encoded[:l], encoded[l:]
@@ -222,14 +220,6 @@ class IdpfPoplar(Idpf):
         if len(encoded) != 0:
             raise ERR_DECODE
         return correction_words
-
-    @classmethod
-    def with_prg(IdpfPoplar, ThePrg):
-        class IdpfPoplarWithPrg(IdpfPoplar):
-            Prg = ThePrg
-            KEY_SIZE = ThePrg.SEED_SIZE
-            RAND_SIZE = 2*ThePrg.SEED_SIZE
-        return IdpfPoplarWithPrg
 
     @classmethod
     def with_bits(IdpfPoplar, bits: Unsigned):
@@ -272,7 +262,6 @@ def unpack_bits(packed_bits: Bytes, length: Unsigned) -> Vec[Field2]:
 
 if __name__ == '__main__':
     cls = IdpfPoplar \
-                .with_prg(prg.PrgSha3) \
                 .with_value_len(2)
     if TEST_VECTOR:
         gen_test_vec(cls.with_bits(10), 0, 0)

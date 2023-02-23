@@ -43,7 +43,7 @@ class Idpf:
     # Generates an IDPF public share and sequence of IDPF-keys of length
     # `SHARES`. Value `alpha` is the input to encode. Values `beta_inner` and
     # `beta_leaf` are assigned to the values of the nodes on the non-zero path
-    # of the IDPF tree.
+    # of the IDPF tree. String `binder` is a binder string.
     #
     # An error is raised if integer `alpha` is larger than or equal to `2^BITS`,
     # any elment of `beta_inner` has length other than `VALUE_LEN`, or if
@@ -53,13 +53,15 @@ class Idpf:
             alpha: Unsigned,
             beta_inner: Vec[Vec[Idpf.FieldInner]],
             beta_leaf: Vec[Idpf.FieldLeaf],
+            binder: Bytes,
             rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
     # Evaluate an IDPF key at a given level of the tree and with the given set
     # of prefixes. The output is a vector where each element is a vector of
     # length `VALUE_LEN`. The output field is `FieldLeaf` if `level == BITS` and
-    # `FieldInner` otherwise.
+    # `FieldInner` otherwise. `binder` must match the binder string passed by
+    # the client to `gen`.
     #
     # Let `LSB(x, N)` denote the least significant `N` bits of positive integer
     # `x`. By definition, a positive integer `x` is said to be the length-`L`
@@ -83,8 +85,9 @@ class Idpf:
              public_share: Bytes,
              key: Bytes,
              level: Unsigned,
-             prefixes: Vec[Unsigned]) -> Union[Vec[Vec[Idpf.FieldInner]],
-                                               Vec[Vec[Idpf.FieldLeaf]]]:
+             prefixes: Vec[Unsigned],
+             binder: Bytes) -> Union[Vec[Vec[Idpf.FieldInner]],
+                                     Vec[Vec[Idpf.FieldLeaf]]]:
         raise Error('not implemented')
 
     @classmethod
@@ -106,12 +109,13 @@ def test_idpf(Idpf, alpha, level, prefixes):
 
     # Generate the IDPF keys.
     rand = gen_rand(Idpf.RAND_SIZE)
-    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, rand)
+    binder = b'some nonce'
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
 
     out = [Idpf.current_field(level).zeros(Idpf.VALUE_LEN)] * len(prefixes)
     for agg_id in range(Idpf.SHARES):
         out_share = Idpf.eval(
-            agg_id, public_share, keys[agg_id], level, prefixes)
+            agg_id, public_share, keys[agg_id], level, prefixes, binder)
         for i in range(len(prefixes)):
             out[i] = vec_add(out[i], out_share[i])
 
@@ -138,7 +142,8 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
         beta_inner.append([Idpf.FieldInner(level)] * Idpf.VALUE_LEN)
     beta_leaf = [Idpf.FieldLeaf(Idpf.BITS-1)] * Idpf.VALUE_LEN
     rand = gen_rand(Idpf.RAND_SIZE)
-    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, rand)
+    binder = b'some nonce'
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
 
     printable_beta_inner = [
         [ str(elem.as_unsigned()) for elem in value ] for value in beta_inner
@@ -172,7 +177,8 @@ def test_idpf_exhaustive(Idpf, alpha):
 
     # Generate the IDPF keys.
     rand = gen_rand(Idpf.RAND_SIZE)
-    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, rand)
+    binder = b"some nonce"
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
 
     # Evaluate the IDPF at every node of the tree.
     for level in range(Idpf.BITS):
@@ -183,7 +189,7 @@ def test_idpf_exhaustive(Idpf, alpha):
         for agg_id in range(Idpf.SHARES):
             out_shares.append(
                 Idpf.eval(agg_id, public_share,
-                          keys[agg_id], level, prefixes))
+                          keys[agg_id], level, prefixes, binder))
 
         # Check that each set of output shares for each prefix sums up to the
         # correct value.
