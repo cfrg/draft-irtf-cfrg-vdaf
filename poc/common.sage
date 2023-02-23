@@ -11,7 +11,7 @@ import struct
 TEST_VECTOR = False
 
 # Document version, reved with each draft that contains breaking changes.
-VERSION = 3
+VERSION = 4
 
 # Primitive types
 Bool = bool
