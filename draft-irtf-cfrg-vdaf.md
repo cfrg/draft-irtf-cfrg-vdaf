@@ -316,6 +316,70 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+04:
+
+* Align security considerations with the security analysis of {{DPRS23}}.
+
+* Vdaf: Pass the nonce to the sharding algorithm.
+
+* Vdaf: Rather than allow the application to choose the nonce length, have each
+  implementation of the Vdaf interface specify the expected nonce length. (\*)
+
+* Prg: Split "info string" into two components: the "customization string",
+  intended for domain separation; and the "binder string", used to bind the
+  output to ephemeral values, like the nonce, associated with execution of a
+  (V)DAF.
+
+* Replace PrgAes128 with PrgSha3, an implementation of the Prg interface based
+  on SHA-3, and use the new scheme as the default. Accordingly, replace
+  Prio3Aes128Count with Prio3Count, Poplar1Aes128 with Poplar1, and so on. SHA-3
+  is a safer choice for instantiating a random oracle, which is used in the
+  analysis of Prio3 of {{DPRS23}}. (\*)
+
+* Prio3, Poplar1: Ensure each invocation of the Prg uses a distinct
+  customization string, as suggested by {{DPRS23}}. This is intended to make
+  domain separation clearer, thereby simplifying security analysis. (\*)
+
+* Prio3: Replace "joint randomness hints" sent in each input share with "joint
+  randomness parts" sent in the public share. This reduces communication
+  overhead when the number of shares exceeds two. (\*)
+
+* Prio3: Bind nonce to joint randomness parts. This is intended to address
+  birthday attacks on robustness pointed out by {{DPRS23}}. (\*)
+
+* Poplar1: Use different Prg invoations for producing the correlated randomness
+  for inner and leaf nodes of the IDPF tree. This is intended to simplify
+  implementations. (\*)
+
+* Poplar1: Don't bind the candidate prefixes to the verifier randomness. This is
+  intended to improve performance, while not impacting security. According to
+  the analysis of {{DPRS23}}, it is necessary to restrict Poplar1 usage such
+  that no report is aggregated more than once at a given level of the IDPF tree;
+  otherwise, attacks on privacy may be possible. In light of this restriction,
+  there is no added benefit of binding to the prefixes themselves. (\*)
+
+* Poplar1: During prepartion, assert that all candidate prefixes are unique
+  and appear in order. Uniqueness is required to avoid erroneously rejecting a
+  valid report; the ordering constraint ensures the uniqueness check can be
+  performed efficiently. (\*)
+
+* Poplar1: Increae the maximum candidate prefix count in the encoding of the
+  aggregation parameter. (\*)
+
+* Poplar1: Bind the nonce to the correlated randomness derivation. This is
+  intended to provide defense-in-depth by ensuring the Aggregators reject the
+  report if the nonce does not match what the Client used for sharding. (\*)
+
+* Poplar1: Clarify that the aggregation parameter encoding is OPTIONAL.
+  Accordingly, update implementation considerations around cross-aggregation
+  state.
+
+* IdpfPoplar: Add implementation considerations around branching on the values
+  of control bits.
+
+* IdpfPoplar: When decoding the the control bits in the public share, assert
+  that the trailing bits of the final byte are all zero. (\*)
+
 03:
 
 * Define codepoints for (V)DAFs and use them for domain separation in Prio3 and
@@ -1251,7 +1315,7 @@ class PrgSha3(Prg):
 ~~~
 {: title="Definition of PRG PrgSha3."}
 
-### The Context and Binder Strings
+### The Customization and Binder Strings
 
 PRGs are used to map a seed to a finite domain, e.g., a fresh seed or a vector
 of field elements. To ensure domain separation, the derivation is needs to be
