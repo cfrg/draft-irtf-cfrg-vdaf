@@ -590,6 +590,13 @@ The protocol in which the DAF is used MUST ensure that the Aggregator's
 identifier is equal to the integer in range `[0, SHARES)` that matches the index
 of `input_share` in the sequence of input shares output by the Client.
 
+Concrete DAFs implementations MAY also specify a *validity scope* for
+aggregation parameters. Protocols using a DAF MUST ensure that for each input
+share and each validity scope, `Daf.prep` is called at most once with an
+aggregation parameter of that validity scope. If no validity scope is specified,
+each aggregation parameter MUST NOT be used more than once with each input
+share.
+
 ## Aggregation {#sec-daf-aggregate}
 
 Once an Aggregator holds output shares for a batch of measurements (where
@@ -2712,6 +2719,11 @@ but this does allow uniqueness to be determined more efficiently.
 
 The algorithms below make use of the auxiliary function `decode_input_share()`
 defined in {{poplar1-auxiliary}}.
+
+The *validity scope* of an aggregation parameter for Poplar1 is its first
+component, i.e., the level. As described in {{sec-daf-prepare}}, the whole
+preparation phase MUST NOT be run more than once for a given combination of
+input share and level.
 
 ~~~
 def prep_init(Poplar1, verify_key, agg_id, agg_param,
