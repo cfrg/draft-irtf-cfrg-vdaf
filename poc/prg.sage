@@ -143,9 +143,6 @@ if __name__ == '__main__':
     import json
     from sagelib.field import Field128, Field64, Field96
 
-    cls = PrgAes128
-    test_prg(cls, Field128, 23)
-
     # Parameters match output of: probe_for_rejection(PrgSha3, Field96)
     expanded_vec = PrgSha3.expand_into_vec(
         Field96,
@@ -156,37 +153,38 @@ if __name__ == '__main__':
     )
     assert expanded_vec[-1] == Field96(55625305487129755078517911529)
 
-    if TEST_VECTOR:
-        seed = gen_rand(cls.SEED_SIZE)
-        custom = b'custom string'
-        binder = b'binder string'
-        length = 40
+    for cls in (PrgAes128, PrgSha3):
+        test_prg(cls, Field128, 23)
 
-        test_vector = {
-            'seed': seed.hex(),
-            'custom': custom.hex(),
-            'binder': binder.hex(),
-            'length': int(length),
-            'derived_seed': None, # set below
-            'expanded_vec_field128': None, # set below
-        }
+        if TEST_VECTOR:
+            seed = gen_rand(cls.SEED_SIZE)
+            custom = b'custom string'
+            binder = b'binder string'
+            length = 40
 
-        test_vector['derived_seed'] = cls.derive_seed(seed, custom, binder).hex()
-        test_vector['expanded_vec_field128'] = Field128.encode_vec(
-                cls.expand_into_vec(Field128, seed, custom, binder, length)).hex()
+            test_vector = {
+                'seed': seed.hex(),
+                'custom': custom.hex(),
+                'binder': binder.hex(),
+                'length': int(length),
+                'derived_seed': None, # set below
+                'expanded_vec_field128': None, # set below
+            }
 
-        print('{}:'.format(cls.__name__))
-        print('  seed: "{}"'.format(test_vector['seed']))
-        print('  custom: "{}"'.format(test_vector['custom']))
-        print('  binder: "{}"'.format(test_vector['binder']))
-        print('  length: {}'.format(test_vector['length']))
-        print('  derived_seed: "{}"'.format(test_vector['derived_seed']))
-        print('  expanded_vec_field128: >-')
-        print_wrapped_line(test_vector['expanded_vec_field128'], tab=4)
+            test_vector['derived_seed'] = cls.derive_seed(seed, custom, binder).hex()
+            test_vector['expanded_vec_field128'] = Field128.encode_vec(
+                    cls.expand_into_vec(Field128, seed, custom, binder, length)).hex()
 
-        os.system('mkdir -p test_vec/{:02}'.format(VERSION))
-        with open('test_vec/{:02}/{}.json'.format(VERSION, cls.__name__), 'w') as f:
-            json.dump(test_vector, f, indent=4, sort_keys=True)
-            f.write('\n')
+            print('{}:'.format(cls.__name__))
+            print('  seed: "{}"'.format(test_vector['seed']))
+            print('  custom: "{}"'.format(test_vector['custom']))
+            print('  binder: "{}"'.format(test_vector['binder']))
+            print('  length: {}'.format(test_vector['length']))
+            print('  derived_seed: "{}"'.format(test_vector['derived_seed']))
+            print('  expanded_vec_field128: >-')
+            print_wrapped_line(test_vector['expanded_vec_field128'], tab=4)
 
-    test_prg(PrgSha3, Field128, 23)
+            os.system('mkdir -p test_vec/{:02}'.format(VERSION))
+            with open('test_vec/{:02}/{}.json'.format(VERSION, cls.__name__), 'w') as f:
+                json.dump(test_vector, f, indent=4, sort_keys=True)
+                f.write('\n')
