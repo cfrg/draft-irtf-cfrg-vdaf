@@ -140,8 +140,9 @@ def run_vdaf(Vdaf,
 
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
-        # REMOVE ME
         assert len(nonce) == Vdaf.NONCE_SIZE
+
+        # REMOVE ME
         prep_test_vec = {
             'measurement': int(measurement),
             'nonce': nonce.hex(),
@@ -194,8 +195,13 @@ def run_vdaf(Vdaf,
 
         # REMOVE ME
         for out_share in outbound:
-            prep_test_vec['out_shares'].append(
-                list(map(lambda x: "{:x}".format(x.as_unsigned()), out_share)))
+            prep_test_vec['out_shares'].append([
+                "{:0{width}x}".format(
+                    x.as_unsigned(),
+                    width=2 * x.ENCODED_SIZE,
+                )
+                for x in out_share
+            ])
         test_vec['prep'].append(prep_test_vec)
 
         # The final outputs of prepare phase are the output shares.
