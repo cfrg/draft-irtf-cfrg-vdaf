@@ -130,9 +130,11 @@ class Poplar1(Vdaf):
     # Checks if the level of `agg_param` appears anywhere in
     # `previous_agg_params`. Returns `False` if it does, and `True` otherwise.
     def is_valid(agg_param, previous_agg_params):
-        return len(list(filter(lambda previous_agg_param: \
-                                 previous_agg_param[0] == agg_param[0], \
-                               previous_agg_params))) == 0
+        (level, _) = agg_param
+        return all(
+            level != other_level
+            for (other_level, _) in previous_agg_params
+        )
 
     @classmethod
     def prep_init(Poplar1, verify_key, agg_id, agg_param,
