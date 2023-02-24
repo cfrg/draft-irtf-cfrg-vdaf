@@ -594,7 +594,7 @@ of `input_share` in the sequence of input shares output by the Client.
 ## Validity of Aggregation Parameters {#sec-daf-validity-scopes}
 
 Concrete DAFs implementations MAY impose certain restrictions for input shares
-and aggregation parameters. Protocols using a DAF MUST ensure that for each 
+and aggregation parameters. Protocols using a DAF MUST ensure that for each
 input share and aggregation parameter `agg_param`, `Daf.prep` is only called if
 `Daf.is_valid(agg_param, previous_agg_params)` returns True, where
 `previous_agg_params` contains all aggregation parameters that have previously
@@ -602,7 +602,7 @@ been used with the same input share.
 
 DAFs MUST implement the following function:
 
-* `Daf.is_valid(agg_param: AggParam, previous_agg_params: Vec[AggParam]) -> 
+* `Daf.is_valid(agg_param: AggParam, previous_agg_params: Vec[AggParam]) ->
   Bool`: Checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
@@ -955,7 +955,7 @@ privacy).
 Similar to DAFs (see {{sec-vdaf-validity-scopes}}), VDAFs MAY impose
 restrictions for input shares and aggregation parameters. Protocols using a VDAF
 MUST ensure that for each input share and aggregation parameter `agg_param`, The
-preparation phase (including `Vdaf.prep_init`, `Vdaf.prep_next`, and 
+preparation phase (including `Vdaf.prep_init`, `Vdaf.prep_next`, and
 `Vdaf.prep_shares_to_prep`; see {{sec-vdaf-prepare}}) is only called if
 `Vdaf.is_valid(agg_param, previous_agg_params)` returns True, where
 `previous_agg_params` contains all aggregation parameters that have previously
@@ -963,7 +963,7 @@ been used with the same input share.
 
 VDAFs MUST implement the following function:
 
-* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: Vec[AggParam]) -> 
+* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: Vec[AggParam]) ->
   Bool`: Checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
