@@ -590,7 +590,7 @@ The protocol in which the DAF is used MUST ensure that the Aggregator's
 identifier is equal to the integer in range `[0, SHARES)` that matches the index
 of `input_share` in the sequence of input shares output by the Client.
 
-Concrete DAFs implementations MAY also specify a *validity scope* for
+Concrete DAFs implementations MAY also specify a "validity scope" for
 aggregation parameters. Protocols using a DAF MUST ensure that for each input
 share and each validity scope, `Daf.prep` is called at most once with an
 aggregation parameter of that validity scope. If no validity scope is specified,
