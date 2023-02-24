@@ -954,7 +954,7 @@ privacy).
 
 Similar to DAFs (see {{sec-daf-validity-scopes}}), VDAFs MAY impose
 restrictions for input shares and aggregation parameters. Protocols using a VDAF
-MUST ensure that for each input share and aggregation parameter `agg_param`, The
+MUST ensure that for each input share and aggregation parameter `agg_param`, the
 preparation phase (including `Vdaf.prep_init`, `Vdaf.prep_next`, and
 `Vdaf.prep_shares_to_prep`; see {{sec-vdaf-prepare}}) is only called if
 `Vdaf.is_valid(agg_param, previous_agg_params)` returns True, where
