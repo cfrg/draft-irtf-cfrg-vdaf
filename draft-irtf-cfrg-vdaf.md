@@ -2879,9 +2879,11 @@ combination of input share and level.
 
 ~~~
 def is_valid(agg_param, previous_agg_params):
-    return len(list(filter(lambda previous_agg_param: \
-                             previous_agg_param[0] == agg_param[0], \
-                           previous_agg_params))) == 0
+    (level, _) = agg_param
+    return all(
+        level != other_level
+        for (other_level, _) in previous_agg_params
+    )
 ~~~
 {: #poplar1-validity-scope title="Validity of aggregation parameters for
 Poplar1."}
