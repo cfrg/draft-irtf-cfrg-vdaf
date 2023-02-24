@@ -952,7 +952,7 @@ privacy).
 
 ## Validity of Aggregation Parameters {#sec-vdaf-validity-scopes}
 
-Similar to DAFs (see {{sec-vdaf-validity-scopes}}), VDAFs MAY impose
+Similar to DAFs (see {{sec-daf-validity-scopes}}), VDAFs MAY impose
 restrictions for input shares and aggregation parameters. Protocols using a VDAF
 MUST ensure that for each input share and aggregation parameter `agg_param`, The
 preparation phase (including `Vdaf.prep_init`, `Vdaf.prep_next`, and
