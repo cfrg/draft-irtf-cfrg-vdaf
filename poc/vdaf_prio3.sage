@@ -125,6 +125,11 @@ class Prio3(Vdaf):
         public_share = Prio3.encode_public_share(k_joint_rand_parts)
         return (public_share, input_shares)
 
+    # Checks if `previous_agg_params` is empty, as input shares in Prio3 may
+    # only be used once.
+    def is_valid(agg_param, previous_agg_params):
+        return len(previous_agg_params) == 0
+
     @classmethod
     def prep_init(Prio3, verify_key, agg_id, _agg_param,
                   nonce, public_share, input_share):
@@ -489,3 +494,8 @@ if __name__ == '__main__':
 
     cls = TestPrio3Average.with_shares(num_shares).with_bits(3)
     test_vdaf(cls, None, [1, 5, 1, 1, 4, 1, 3, 2], 2)
+
+    # Test `is_valid` returns True on empty previous_agg_params, and False
+    # otherwise.
+    assert cls.is_valid(b"", [])
+    assert not cls.is_valid(b"", [b""])
