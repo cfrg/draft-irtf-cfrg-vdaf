@@ -127,6 +127,13 @@ class Poplar1(Vdaf):
                 Poplar1.encode_input_shares(
                     keys, corr_seed, corr_inner, corr_leaf))
 
+    # Checks if the level of `agg_param` appears anywhere in
+    # `previous_agg_params`. Returns `False` if it does, and `True` otherwise.
+    def is_valid(agg_param, previous_agg_params):
+        return len(list(filter(lambda previous_agg_param: \
+                                 previous_agg_param[0] == agg_param[0], \
+                               previous_agg_params))) == 0
+
     @classmethod
     def prep_init(Poplar1, verify_key, agg_id, agg_param,
                   nonce, public_share, input_share):
@@ -401,6 +408,13 @@ if __name__ == '__main__':
         ],
         [0, 2],
     )
+
+    # Test `is_valid` returns False on repeated levels, and True otherwise.
+    cls = Poplar1.with_bits(256)
+    agg_params = [(0, []), (1, [0]), (1, [0, 1])]
+    assert cls.is_valid(agg_params[0], [])
+    assert cls.is_valid(agg_params[1], agg_params[:1])
+    assert not cls.is_valid(agg_params[2], agg_params[:2])
 
     # Test aggregation parameter encoding.
     cls = Poplar1.with_bits(256)

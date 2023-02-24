@@ -52,6 +52,13 @@ class Vdaf:
                                     ) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
+    # Check if `agg_param` is valid for use with an input share that has
+    # previously been used with all `previous_agg_params`.
+    @classmethod
+    def is_valid(Vdaf, agg_param: AggParam,
+                 previous_agg_params: Vec[AggParam]) -> Bool:
+        raise Error('not implemented')
+
     # Initialize the Prepare state for the given input share. This method is run
     # by an Aggregator. Along with the the public share and its input share, the
     # inputs include the verification key shared by all of the Aggregators, the
