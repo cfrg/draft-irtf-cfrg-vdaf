@@ -347,7 +347,7 @@ security considerations for VDAFs.
 * Prio3: Bind nonce to joint randomness parts. This is intended to address
   birthday attacks on robustness pointed out by {{DPRS23}}. (\*)
 
-* Poplar1: Use different Prg invoations for producing the correlated randomness
+* Poplar1: Use different Prg invocations for producing the correlated randomness
   for inner and leaf nodes of the IDPF tree. This is intended to simplify
   implementations. (\*)
 
@@ -358,12 +358,12 @@ security considerations for VDAFs.
   otherwise, attacks on privacy may be possible. In light of this restriction,
   there is no added benefit of binding to the prefixes themselves. (\*)
 
-* Poplar1: During prepartion, assert that all candidate prefixes are unique
+* Poplar1: During preparation, assert that all candidate prefixes are unique
   and appear in order. Uniqueness is required to avoid erroneously rejecting a
   valid report; the ordering constraint ensures the uniqueness check can be
   performed efficiently. (\*)
 
-* Poplar1: Increae the maximum candidate prefix count in the encoding of the
+* Poplar1: Increase the maximum candidate prefix count in the encoding of the
   aggregation parameter. (\*)
 
 * Poplar1: Bind the nonce to the correlated randomness derivation. This is
@@ -1189,7 +1189,7 @@ discrete Fourier transform, as this allows for fast polynomial interpolation.
 {{field}}, it implements the following method:
 
 * `Field.gen() -> Field` returns the generator of a large subgroup of the
-  multiplicative group. To be FFT-friendly, the order of this subgroup NUST be a
+  multiplicative group. To be FFT-friendly, the order of this subgroup MUST be a
   power of 2. In addition, the size of the subgroup dictates how large
   interpolated polynomials can be. It is RECOMMENDED that a generator is chosen
   with order at least `2^20`.
@@ -1340,7 +1340,7 @@ def format_custom(algo_class: Unsigned, algo: Unsigned, usage: Unsigned):
 ~~~
 
 It is also sometimes necessary to bind the output to some ephemeral value that
-muliple parties need to agree on. We call this input the "binder string".
+multiple parties need to agree on. We call this input the "binder string".
 
 # Prio3 {#prio3}
 
@@ -2214,7 +2214,7 @@ follows:
 
 1. For each `i` in `[H]` create an empty table `wire_i`.
 
-1. Partition the prover randomness `prove_rand` into subvectors `seed_1, ...,
+1. Partition the prover randomness `prove_rand` into sub-vectors `seed_1, ...,
    seed_H` where `len(seed_i) == L_i` for all `i` in `[H]`. Let us call these
    the "wire seeds" of each gadget.
 
@@ -2255,7 +2255,7 @@ is generated as follows:
 
 1. For every `i` in `[H]` create an empty table `wire_i`.
 
-1. Partition `proof` into the subvectors `seed_1`, `coeff_1`, ..., `seed_H`,
+1. Partition `proof` into the sub-vectors `seed_1`, `coeff_1`, ..., `seed_H`,
    `coeff_H` defined in {{flp-generic-construction-prove}}.
 
 1. Evaluate `Valid` on input of `inp` and `joint_rand`, recording the inputs of
@@ -3152,7 +3152,7 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
     return out_share
 
 # Compute the next node in the IDPF tree along the path determined by
-# a candidiate prefix. The next node is determined by `bit`, the bit
+# a candidate prefix. The next node is determined by `bit`, the bit
 # of the prefix corresponding to the next level of the tree.
 #
 # TODO Consider implementing some version of the optimization
@@ -3267,7 +3267,7 @@ VDAFs have two essential security goals:
    cannot cause the Collector to compute anything other than the aggregate of
    the measurements of honest Clients.
 
-Formal defintions of privacy and robustness can be found in {{DPRS23}}. A VDAF
+Formal definitions of privacy and robustness can be found in {{DPRS23}}. A VDAF
 is the core cryptographic primitive of a protocol that achieves the above
 privacy and robustness goals. It is not sufficient on its own, however. The
 application will need to assure a few security properties, for example:
