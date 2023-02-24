@@ -3370,7 +3370,7 @@ shares. This is to ensure that correlated randomness provided by the Client
 through the input share is not used more than once, which might compromise
 confidentiality of the Client's measurements.
 
-Protocols that make use of VDAFs therefore MUST ensure to call `Vdaf.is_valid`
+Protocols that make use of VDAFs therefore MUST call `Vdaf.is_valid`
 on the set of all aggregation parameters used for a Client's input share, and
 only proceed with the preparation and aggregation phases if that function call
 returns `True`.
