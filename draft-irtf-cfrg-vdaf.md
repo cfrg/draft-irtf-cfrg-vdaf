@@ -2872,7 +2872,7 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
 
 ### Validity of Aggregation Parameters
 
-Aggregation parameters are valid for a given input share, if no aggregation
+Aggregation parameters are valid for a given input share if no aggregation
 parameter with the same level has been used with the same input share before.
 The whole preparation phase MUST NOT be run more than once for a given
 combination of input share and level.
