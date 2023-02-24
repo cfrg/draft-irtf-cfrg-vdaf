@@ -1754,7 +1754,7 @@ parameters used.
 
 ~~~
 def is_valid(agg_param, previous_agg_params):
-    return (len(previous_agg_params) == 0)
+    return len(previous_agg_params) == 0
 ~~~
 {: #prio3-validity-scope title="Validity of aggregation parameters for Prio3."}
 
@@ -2880,8 +2880,8 @@ combination of input share and level.
 ~~~
 def is_valid(agg_param, previous_agg_params):
     (level, _) = agg_param
-    return (len(filter(lambda (other_level, _): other_level == level, \
-                       previous_agg_params)) == 0)
+    return len(filter(lambda (other_level, _): other_level == level, \
+                     previous_agg_params)) == 0
 ~~~
 {: #poplar1-validity-scope title="Validity of aggregation parameters for
 Poplar1."}
@@ -3364,10 +3364,11 @@ Client be used by the Aggregators for replay protection.
 
 ## Requirements for the Aggregation Parameters
 
-As described in {{sec-daf-validity-scopes}} and {{sec-vdaf-validity-scopes}} respectively, DAFs and VDAFs may impose
-restrictions on the re-use of input shares. This is to ensure that correlated
-randomness provided by the Client through the input share is not used more than
-once, which might compromise confidentiality of the Client's measurements.
+As described in {{sec-daf-validity-scopes}} and {{sec-vdaf-validity-scopes}}
+respectively, DAFs and VDAFs may impose restrictions on the re-use of input
+shares. This is to ensure that correlated randomness provided by the Client
+through the input share is not used more than once, which might compromise
+confidentiality of the Client's measurements.
 
 Protocols that make use of VDAFs therefore MUST ensure to call `Vdaf.is_valid`
 on the set of all aggregation parameters used for a Client's input share, and
