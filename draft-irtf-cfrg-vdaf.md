@@ -3448,11 +3448,6 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 
 > TODO Add IANA considerations for the codepoints summarized in {{codepoints}}.
 
-> OPEN ISSUE Currently the scheme includes the PRG. This means that we need bits
-> of the codepoint to differentiate between PRGs. We could instead make the PRG
-> generic (e.g., Prio3Count(Aes128) instead of Prio3Aes128Count) and define a
-> separate codepoint.
-
 --- back
 
 # Acknowledgments
