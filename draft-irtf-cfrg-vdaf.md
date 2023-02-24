@@ -3364,7 +3364,7 @@ Client be used by the Aggregators for replay protection.
 
 ## Requirements for the Aggregation Parameters
 
-As described in {{sec-daf-validity-scopes}}, DAFs and VDAFs may impose
+As described in {{sec-daf-validity-scopes}} and {{sec-vdaf-validity-scopes}} respectively, DAFs and VDAFs may impose
 restrictions on the re-use of input shares. This is to ensure that correlated
 randomness provided by the Client through the input share is not used more than
 once, which might compromise confidentiality of the Client's measurements.
