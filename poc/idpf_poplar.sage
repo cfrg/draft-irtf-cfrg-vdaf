@@ -123,7 +123,7 @@ class IdpfPoplar(Idpf):
         return out_share
 
     # Compute the next node in the IDPF tree along the path determined by
-    # a candidiate prefix. The next node is determined by `bit`, the bit
+    # a candidate prefix. The next node is determined by `bit`, the bit
     # of the prefix corresponding to the next level of the tree.
     #
     # TODO Consider implementing some version of the optimization
