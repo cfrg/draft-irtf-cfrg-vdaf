@@ -1559,6 +1559,7 @@ methods refer to constants enumerated in {{prio3-const}}.
 | Parameter         | Value             |
 |:------------------|:------------------|
 | `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`   |
+| `NONCE_SIZE`      | `16`              |
 | `ROUNDS`          | `1`               |
 | `SHARES`          | in `[2, 256)`     |
 | `Measurement`     | `Flp.Measurement` |
@@ -2662,6 +2663,7 @@ the remaining subsections. These methods make use of constants defined in
 | Parameter         | Value             |
 |:------------------|:------------------|
 | `VERIFY_KEY_SIZE` | `Idpf.Prg.SEED_SIZE` |
+| `NONCE_SIZE`      | `16` |
 | `ROUNDS`          | `2` |
 | `SHARES`          | `2` |
 | `Measurement`     | `Unsigned` |
