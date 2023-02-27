@@ -1236,27 +1236,13 @@ FFT-friendly fields also define the following parameter:
 
 The tables below define finite fields used in the remainder of this document.
 
-| Parameter       | Value   |
-|:----------------|:--------|
-| MODULUS         | 2^32 * 4294967295 + 1 |
-| ENCODED_SIZE    | 8 |
-| Generator       | 7^4294967295 |
-| GEN_ORDER       | 2^32 |
-{: #field64 title="Field64, an FFT-friendly field."}
-
-| Parameter       | Value   |
-|:----------------|:--------|
-| MODULUS         | 2^66 * 4611686018427387897 + 1 |
-| ENCODED_SIZE    | 16 |
-| Generator       | 7^4611686018427387897 |
-| GEN_ORDER       | 2^66 |
-{: #field128 title="Field128, an FFT-friendly field."}
-
-| Parameter       | Value   |
-|:----------------|:--------|
-| MODULUS         | 2^255 - 19 |
-| ENCODED_SIZE    | 32 |
-{: #field255 title="Field255."}
+| Parameter    | Field64               | Field128                       | Field255   |
+|:-------------|:----------------------|:-------------------------------|:-----------|
+| MODULUS      | 2^32 * 4294967295 + 1 | 2^66 * 4611686018427387897 + 1 | 2^255 - 19 |
+| ENCODED_SIZE | 8                     | 16                             | 32         |
+| Generator    | 7^4294967295          | 7^4611686018427387897          | n/a        |
+| GEN_ORDER    | 2^32                  | 2^66                           | n/a        |
+{: #fields title="Paramaters for the finite fields used in this document."}
 
 > OPEN ISSUE We currently use big-endian for encoding field elements. However,
 > for implementations of `GF(2^255-19)`, little endian is more common. See
@@ -2365,7 +2351,7 @@ Our first instance of Prio3 is for a simple counter: Each measurement is either
 one or zero and the aggregate result is the sum of the measurements.
 
 This instance uses PrgSha3 ({{prg-sha3}) as its PRG. Its validity
-circuit, denoted `Count`, uses `Field64` ({{field64}}) as its finite field. Its
+circuit, denoted `Count`, uses `Field64` ({{fields}}) as its finite field. Its
 gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
 ~~~
@@ -2392,7 +2378,7 @@ way. The parameters for this circuit are summarized below.
 | `JOINT_RAND_LEN` | `0`                          |
 | `Measurement`    | `Unsigned`, in range `[0,2)` |
 | `AggResult`      | `Unsigned`                   |
-| `Field`          | `Field64` ({{field64}})      |
+| `Field`          | `Field64` ({{fields}})       |
 {: title="Parameters of validity circuit Count."}
 
 ### Prio3Sum
@@ -2402,7 +2388,7 @@ range. Each measurement is an integer in range `[0, 2^bits)`, where `bits` is an
 associated parameter.
 
 This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
-circuit, denoted `Sum`, uses `Field128` ({{field128}}) as its finite field. The
+circuit, denoted `Sum`, uses `Field128` ({{fields}}) as its finite field. The
 measurement is encoded as a length-`bits` vector of field elements, where the
 `l`th element of the vector represents the `l`th bit of the summand:
 
@@ -2447,16 +2433,16 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
     return out
 ~~~
 
-| Parameter        | Value                        |
-|:-----------------|:-----------------------------|
-| `GADGETS`        | `[Range2]`                   |
-| `GADGET_CALLS`   | `[bits]`                     |
-| `INPUT_LEN`      | `bits`                       |
-| `OUTPUT_LEN`     | `1`                          |
-| `JOINT_RAND_LEN` | `1`                          |
+| Parameter        | Value                    |
+|:-----------------|:-------------------------|
+| `GADGETS`        | `[Range2]`               |
+| `GADGET_CALLS`   | `[bits]`                 |
+| `INPUT_LEN`      | `bits`                   |
+| `OUTPUT_LEN`     | `1`                      |
+| `JOINT_RAND_LEN` | `1`                      |
 | `Measurement`    | `Unsigned`, in range `[0, 2^bits)` |
-| `AggResult`      | `Unsigned`                   |
-| `Field`          | `Field128` ({{field128}})    |
+| `AggResult`      | `Unsigned`               |
+| `Field`          | `Field128` ({{fields}})  |
 {: title="Parameters of validity circuit Sum."}
 
 ### Prio3Histogram
@@ -2467,7 +2453,7 @@ integer and the aggregate result counts the number of measurements that fall in
 a set of fixed buckets.
 
 This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
-circuit, denoted `Histogram`, uses `Field128` ({{field128}}) as its finite
+circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite
 field. The measurement is encoded as a one-hot vector representing the bucket
 into which the measurement falls (let `bucket` denote a sequence of
 monotonically increasing integers):
@@ -2515,16 +2501,16 @@ def Histogram(inp: Vec[Field128],
 Note that this circuit depends on the number of shares into which the input is
 sharded. This is provided to the FLP by Prio3.
 
-| Parameter        | Value                     |
-|:-----------------|:--------------------------|
-| `GADGETS`        | `[Range2]`                |
-| `GADGET_CALLS`   | `[buckets + 1]`           |
-| `INPUT_LEN`      | `buckets + 1`             |
-| `OUTPUT_LEN`     | `buckets + 1`             |
-| `JOINT_RAND_LEN` | `2`                       |
-| `Measurement`    | `Integer`                 |
-| `AggResult`      | `Vec[Unsigned]`           |
-| `Field`          | `Field128` ({{field128}}) |
+| Parameter        | Value                   |
+|:-----------------|:------------------------|
+| `GADGETS`        | `[Range2]`              |
+| `GADGET_CALLS`   | `[buckets + 1]`         |
+| `INPUT_LEN`      | `buckets + 1`           |
+| `OUTPUT_LEN`     | `buckets + 1`           |
+| `JOINT_RAND_LEN` | `2`                     |
+| `Measurement`    | `Integer`               |
+| `AggResult`      | `Vec[Unsigned]`         |
+| `Field`          | `Field128` ({{fields}}) |
 {: title="Parameters of validity circuit Histogram."}
 
 # Poplar1 {#poplar1}
@@ -3085,14 +3071,14 @@ instantiating Poplar1. The scheme gets its name from the name of the protocol of
 The constant and type definitions required by the `Idpf` interface are given in
 {{idpf-poplar-param}}.
 
-| Parameter  | Value                     |
-|:-----------|:--------------------------|
-| SHARES     | `2`                       |
-| BITS       | any positive integer      |
-| VALUE_LEN  | any positive integer      |
-| KEY_SIZE   | `Prg.SEED_SIZE`           |
-| FieldInner | `Field64` ({{field64}})   |
-| FieldLeaf  | `Field255` ({{field255}}) |
+| Parameter  | Value                   |
+|:-----------|:------------------------|
+| SHARES     | `2`                     |
+| BITS       | any positive integer    |
+| VALUE_LEN  | any positive integer    |
+| KEY_SIZE   | `Prg.SEED_SIZE`         |
+| FieldInner | `Field64` ({{fields}})  |
+| FieldLeaf  | `Field255` ({{fields}}) |
 | Prg        | any implementation of `Prg` ({{prg}}) |
 {: #idpf-poplar-param title="Constants and type definitions for IdpfPoplar."}
 
