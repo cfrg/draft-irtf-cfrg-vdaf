@@ -1365,7 +1365,9 @@ The following algorithm is used in the remainder of this document in order to
 format the customization string:
 
 ~~~
-def format_custom(algo_class: Unsigned, algo: Unsigned, usage: Unsigned):
+def format_custom(algo_class: Unsigned,
+                  algo: Unsigned,
+                  usage: Unsigned) -> Bytes:
     return I2OSP(VERSION, 1) + \
            I2OSP(algo_class, 1) + \
            I2OSP(algo, 4) + \
