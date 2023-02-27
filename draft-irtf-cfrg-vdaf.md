@@ -837,7 +837,7 @@ listed in {{vdaf-param}} are defined by each concrete VDAF.
 |:------------------|:-------------------------|
 | `ID`              | Algorithm identifier for this VDAF |
 | `VERIFY_KEY_SIZE` | Size (in bytes) of the verification key ({{sec-vdaf-prepare}}) |
-| `NONCE_SIZE`    ` | Size (in bytes) of the nonce |
+| `NONCE_SIZE`      | Size (in bytes) of the nonce |
 | `ROUNDS`          | Number of rounds of communication during the Preparation stage ({{sec-vdaf-prepare}}) |
 | `SHARES`          | Number of input shares into which each measurement is sharded ({{sec-vdaf-shard}}) |
 | `Measurement`     | Type of each measurement |
