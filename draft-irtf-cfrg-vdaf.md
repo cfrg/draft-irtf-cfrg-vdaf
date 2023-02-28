@@ -2558,7 +2558,8 @@ where `l <= BITS`. We will refer to the latter as the set of "candidate
 prefixes". The Aggregators' goal is to count how many inputs are prefixed by
 each candidate prefix.
 
-This functionality is the core component of the Poplar protocol {{BBCGGI21}}. At
+This functionality is the core component of the Poplar protocol {{BBCGGI21}},
+which was designed to compute the heavy hitters over a set of input strings. At
 a high level, the protocol works as follows.
 
 1. Each Client splits its input string into input shares and sends one share to
@@ -2572,9 +2573,9 @@ a high level, the protocol works as follows.
    them to recover the counts of each candidate prefix.
 5. Let `H` denote the set of prefixes that occurred at least `t` times. If the
    prefixes all have length `BITS`, then `H` is the set of `t`-heavy-hitters.
-   Otherwise compute the next set of candidate prefixes as follows. For each `p`
-   in `H`, add add `p || 0` and `p || 1` to the set. Repeat step 3 with the new
-   set of candidate prefixes.
+   Otherwise compute the next set of candidate prefixes, e.g., for each `p` in
+   `H`, add `p || 0` and `p || 1` to the set. Repeat step 3 with the new set of
+   candidate prefixes.
 
 Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)",
 a primitive described by {{BBCGGI21}} that generalizes the notion of a
@@ -2585,10 +2586,20 @@ such a way that no one party knows either the point or what it evaluates to.
 
 An IDPF generalizes this "point" to a path on a full binary tree from the root
 to one of the leaves. It is evaluated on an "index" representing a unique node
-of the tree. If the node is on the programmed path, then function evaluates to
+of the tree. If the node is on the programmed path, then the function evaluates
 to a non-zero value; otherwise it evaluates to zero. This structure allows an
-IDPF to provide the functionality required for the above protocol, while at the
-same time ensuring the same degree of privacy as a DPF.
+IDPF to provide the functionality required for the above protocol: To compute
+the hit count for an index, just evaluate each set of IDPF shares at that index
+and add up the results.
+
+Consider the sub-tree constructed from a set of input strings and a target
+threshold `t` by including all indices that prefix at least `t` of the input
+strings. We shall refer to this structure as the "prefix tree" for the batch of
+inputs and target threshold. To compute the `t`-heavy hitters for a set of
+inputs, the Aggregators and Collector first compute the prefix tree, then
+extract the heavy hitters from the leaves of this tree. (Note that the prefix
+tree may leak more information about the set than the heavy hitters themselves;
+see {{agg-param-privacy}} for details.)
 
 Poplar1 composes an IDPF with the "secure sketching" protocol of {{BBCGGI21}}.
 This protocol ensures that evaluating a set of input shares on a unique set of
@@ -3479,6 +3490,28 @@ Protocols that make use of VDAFs therefore MUST call `Vdaf.is_valid`
 on the set of all aggregation parameters used for a Client's input share, and
 only proceed with the preparation and aggregation phases if that function call
 returns `True`.
+
+## Additional Privacy Considerations for Aggregation Paramters {#agg-param-privacy}
+
+Aggregating a batch of reports multiple times, each time with a different
+aggregation parameter, could result in information leakage beyond what is used
+by the application.
+
+For example, when Poplar1 is used for heavy hitters, the Aggregators learn not
+only the heavy hitters themselves, but also the prefix tree (as defined in
+{{poplar1}}) computed along the way. Indeed, this leakage is inherent to any
+construction that uses an IDPF ({{idpf}}) in the same way. Depending on the
+distribution of the measurments, the prefix tree can leak a significant amount
+of information about unpopular inputs. For instance, it is possible (though
+perhaps unlikely) for a large set of non-heavy-hitter values to share a common
+prefix, which would be leaked by a prefix tree with a sufficiently small
+threshold.
+
+The only known, general-purpose appraoch to mitigating this leakage is via
+differential privacy.
+
+> TODO(issue #94) Describe (or point to some description of) the central DP
+> mechanism for Poplar described in {{BBCGGI21}}.
 
 # IANA Considerations
 
