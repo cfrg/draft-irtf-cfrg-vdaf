@@ -5,9 +5,10 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Hash import CMAC, cSHAKE128
 from Cryptodome.Util import Counter
 from Cryptodome.Util.number import bytes_to_long
-from sagelib.common import I2OSP, OS2IP, TEST_VECTOR, VERSION, Bytes, Error, \
-                           Unsigned, format_custom, zeros, gen_rand, \
-                           next_power_of_2, print_wrapped_line
+from sagelib.common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
+                           format_custom, zeros, from_le_bytes, gen_rand, \
+                           next_power_of_2, print_wrapped_line, to_be_bytes, \
+                           to_le_bytes
 
 # The base class for PRGs.
 class Prg:
@@ -33,7 +34,7 @@ class Prg:
         m = next_power_of_2(Field.MODULUS) - 1
         vec = []
         while len(vec) < length:
-            x = OS2IP(self.next(Field.ENCODED_SIZE))
+            x = from_le_bytes(self.next(Field.ENCODED_SIZE))
             x &= m
             if x < Field.MODULUS:
                 vec.append(Field(x))
@@ -60,7 +61,7 @@ class PrgAes128(Prg):
 
         # Use CMAC as a pseuodorandom function to derive a key.
         hasher = CMAC.new(seed, ciphermod=AES)
-        hasher.update(I2OSP(len(custom), 2))
+        hasher.update(to_be_bytes(len(custom), 2))
         hasher.update(custom)
         hasher.update(binder)
         self.key = hasher.digest()
@@ -121,25 +122,39 @@ def test_prg(Prg, F, expanded_len):
     assert len(expanded_vec) == expanded_len
 
 
+# Find seeds for `Prg` for which, when expanded into a vector of `Field`
+# elements, an output larger than the field modulus is generated. The output is
+# used to write tests for proper rejection sampling in `Prg` implementations.
+def probe_for_rejection(Prg, Field, start_seed_int=0):
+    custom = b''
+    binder = b''
+    mask = next_power_of_2(Field.MODULUS) - 1
+    for seed_int in range(start_seed_int, start_seed_int+1_000_000):
+        seed = to_le_bytes(seed_int, Prg.SEED_SIZE)
+        prg = Prg(seed, custom, binder)
+        for offset in range(1024):
+            value = from_le_bytes(prg.next(Field.ENCODED_SIZE))
+            value &= mask
+            if value >= Field.MODULUS:
+                print('Rejection! field = {} seed = {}, offset = {}, next_value = {}'
+                      .format(Field.__name__, seed, offset, prg.next_vec(Field, 1)))
+
 if __name__ == '__main__':
     import json
-    from sagelib.field import Field128
-    from sagelib.field import Field96
+    from sagelib.field import Field128, Field64, Field96
 
     cls = PrgAes128
     test_prg(cls, Field128, 23)
 
-    # These constants were found in a brute-force search, and they test that
-    # the PRG performs rejection sampling correctly when raw cSHAKE128 output
-    # exceeds the prime modulus.
+    # Parameters match output of: probe_for_rejection(PrgSha3, Field96)
     expanded_vec = PrgSha3.expand_into_vec(
         Field96,
-        b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xd5',
+        b'@\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
         b'', # custom
         b'', # binder
-        10
+        328,
     )
-    assert expanded_vec[-1] == Field96(74403028385650568506271441532)
+    assert expanded_vec[-1] == Field96(55625305487129755078517911529)
 
     if TEST_VECTOR:
         seed = gen_rand(cls.SEED_SIZE)

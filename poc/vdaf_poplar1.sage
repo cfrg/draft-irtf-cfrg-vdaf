@@ -4,9 +4,9 @@ from __future__ import annotations
 from copy import deepcopy
 from collections import namedtuple
 from typing import Tuple, Union
-from sagelib.common import ERR_INPUT, ERR_VERIFY, I2OSP, OS2IP, TEST_VECTOR, \
-                           Bytes, Error, Unsigned, Vec, byte, gen_rand, \
-                           vec_add, vec_sub
+from sagelib.common import ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes, Error, \
+                           Unsigned, Vec, byte, from_be_bytes, gen_rand, \
+                           to_be_bytes, vec_add, vec_sub
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.idpf as idpf
 import sagelib.idpf_poplar as idpf_poplar
@@ -175,7 +175,7 @@ class Poplar1(Vdaf):
         # called the "masked input values" [BBCGGI21, Appendix C.4].
         verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
             Poplar1.custom(DST_VERIFY_RAND),
-            nonce + I2OSP(level, 2))
+            nonce + to_be_bytes(level, 2))
         verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
         sketch_share = [a_share, b_share, c_share]
         out_share = []
@@ -311,24 +311,24 @@ class Poplar1(Vdaf):
         if len(prefixes) > 2^32 - 1:
             raise ERR_INPUT # too many prefixes
         encoded = Bytes()
-        encoded += I2OSP(level, 2)
-        encoded += I2OSP(len(prefixes), 4)
+        encoded += to_be_bytes(level, 2)
+        encoded += to_be_bytes(len(prefixes), 4)
         packed = 0
         for (i, prefix) in enumerate(prefixes):
             packed |= prefix << ((level+1) * i)
         l = floor(((level+1) * len(prefixes) + 7) / 8)
-        encoded += I2OSP(packed, l)
+        encoded += to_be_bytes(packed, l)
         return encoded
 
     @classmethod
     def decode_agg_param(Poplar1, encoded):
         encoded_level, encoded = encoded[:2], encoded[2:]
-        level = OS2IP(encoded_level)
+        level = from_be_bytes(encoded_level)
         encoded_prefix_count, encoded = encoded[:4], encoded[4:]
-        prefix_count = OS2IP(encoded_prefix_count)
+        prefix_count = from_be_bytes(encoded_prefix_count)
         l = floor(((level+1) * prefix_count + 7) / 8)
         encoded_packed, encoded = encoded[:l], encoded[l:]
-        packed = OS2IP(encoded_packed)
+        packed = from_be_bytes(encoded_packed)
         prefixes = []
         m = 2^(level+1) - 1
         for i in range(prefix_count):
@@ -390,10 +390,10 @@ if __name__ == '__main__':
     test_vdaf(Poplar1.with_bits(128),
         (
             127,
-            [OS2IP(b'0123456789abcdef')],
+            [from_be_bytes(b'0123456789abcdef')],
         ),
         [
-            OS2IP(b'0123456789abcdef'),
+            from_be_bytes(b'0123456789abcdef'),
         ],
         [1],
     )
@@ -401,13 +401,13 @@ if __name__ == '__main__':
         (
             63,
             [
-                OS2IP(b'00000000'),
-                OS2IP(b'01234567'),
+                from_be_bytes(b'00000000'),
+                from_be_bytes(b'01234567'),
             ],
         ),
         [
-            OS2IP(b'0123456789abcdef0123456789abcdef'),
-            OS2IP(b'01234567890000000000000000000000'),
+            from_be_bytes(b'0123456789abcdef0123456789abcdef'),
+            from_be_bytes(b'01234567890000000000000000000000'),
         ],
         [0, 2],
     )

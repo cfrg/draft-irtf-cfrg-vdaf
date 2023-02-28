@@ -75,38 +75,30 @@ def vec_add(left, right):
 def vec_neg(vec):
     return list(map(lambda x: -x, vec))
 
-# As defined in {{!RFC3447}}, Section 4.1.
-#
-# TODO This was copy-pasted from the hash-to-curve reference implementation.
-# Instead of copy-pasting it, add hash-to-curve as a git submodule and import
-# it, similar to what the voprf draft does.
-def I2OSP(val, length):
+# Convert unsigned integer `val` in range `[0, 2^(8*length))` to a little-endian
+# byte string.
+def to_le_bytes(val, length):
     val = int(val)
     if val < 0 or val >= (1 << (8 * length)):
-        raise ValueError('bad I2OSP call: val=%d length=%d' % (val, length))
-    ret = [0] * length
-    val_ = val
-    for idx in reversed(range(0, length)):
-        ret[idx] = val_ & 0xff
-        val_ = val_ >> 8
-    ret = struct.pack('=' + 'B' * length, *ret)
-    assert OS2IP(ret, True) == val
-    return ret
+        raise ValueError('bad to_le_bytes call: val=%d length=%d' % (val, length))
+    return val.to_bytes(length, byteorder='little')
 
+# Parse an unsigned integer from a little-endian byte string.
+def from_le_bytes(encoded):
+    return int.from_bytes(encoded, byteorder='little')
 
-# As defined in {{!RFC3447}}, Section 4.2.
-#
-# TODO This was copy-pasted from the hash-to-curve reference implementation.
-# Instead of copy-pasting it, add hash-to-curve as a git submodule and import
-# it, similar to what the voprf draft does.
-def OS2IP(octets, skip_assert=False):
-    ret = 0
-    for octet in struct.unpack('=' + 'B' * len(octets), octets):
-        ret = ret << 8
-        ret += octet
-    if not skip_assert:
-        assert octets == I2OSP(ret, len(octets))
-    return ret
+# Convert unsigned integer `val` in range `[0, 2^(8*length))` to a big-endian
+# byte string.
+def to_be_bytes(val, length):
+    val = int(val)
+    if val < 0 or val >= (1 << (8 * length)):
+        raise ValueError('bad to_be_bytes call: val=%d length=%d' % (val, length))
+    return val.to_bytes(length, byteorder='big')
+
+# Parse an unsigned integer from a big-endian byte string.
+def from_be_bytes(encoded):
+    return int.from_bytes(encoded, byteorder='big')
+
 
 # Return the concatenated byte strings.
 def concat(parts: Vec[Bytes]) -> Bytes:
@@ -116,10 +108,10 @@ def concat(parts: Vec[Bytes]) -> Bytes:
 def format_custom(algo_class: Unsigned,
                   algo: Unsigned,
                   usage: Unsigned) -> Bytes:
-    return I2OSP(VERSION, 1) + \
-           I2OSP(algo_class, 1) + \
-           I2OSP(algo, 4) + \
-           I2OSP(usage, 2)
+    return to_be_bytes(VERSION, 1) + \
+           to_be_bytes(algo_class, 1) + \
+           to_be_bytes(algo, 4) + \
+           to_be_bytes(usage, 2)
 
 def print_wrapped_line(line, tab):
     width=72
