@@ -654,7 +654,6 @@ The protocol in which the DAF is used MUST ensure that the Aggregator's
 identifier is equal to the integer in range `[0, SHARES)` that matches the index
 of `input_share` in the sequence of input shares output by the Client.
 
-
 ## Validity of Aggregation Parameters {#sec-daf-validity-scopes}
 
 Concrete DAFs implementations MAY impose certain restrictions for input shares
@@ -705,8 +704,13 @@ For simplicity, we have written this algorithm in a "one-shot" form, where all
 output shares for a batch are provided at the same time. Many DAFs may also
 support a "streaming" form, where shares are processed one at a time.
 
-> OPEN ISSUE It may be worthwhile to explicitly define the "streaming" API. See
-> issue#47.
+Implementation note: For most natural DAFs (and VDAFs) it is not necesesary for
+an Aggregator to store all output shares individually before aggregating.
+Typically it is possible to merge output shares into aggregate shares as they
+arrive, merge these into other aggregate shares, and so on. In particular, this
+is the case when the output shares are vectors over some finite field and
+aggregating them involves merely adding up the vectors element-wise. Such is the
+case for Prio3 {{prio3}} and Poplar1 {{poplar1}}.
 
 ## Unsharding {#sec-daf-unshard}
 
