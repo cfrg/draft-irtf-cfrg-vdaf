@@ -223,14 +223,10 @@ class Poplar1(Vdaf):
                     Field.encode_vec(sketch_share))
 
         elif step == b'sketch round 2' and opt_sketch != None:
-            prev_sketch = Field.decode_vec(opt_sketch)
-            if len(prev_sketch) == 0:
-                prev_sketch = Field.zeros(1)
-            elif len(prev_sketch) != 1:
+            if len(opt_sketch) == 0:
+                return prep_mem # Output shares
+            else:
                 raise ERR_INPUT # prep message malformed
-            if prev_sketch[0] != Field(0):
-                raise ERR_VERIFY
-            return prep_mem # Output shares
 
         raise ERR_INPUT # unexpected input
 
@@ -242,12 +238,17 @@ class Poplar1(Vdaf):
         Field = Poplar1.Idpf.current_field(level)
         sketch = vec_add(Field.decode_vec(prep_shares[0]),
                          Field.decode_vec(prep_shares[1]))
-        if sketch == Field.zeros(len(sketch)):
-            # In order to reduce communication overhead, let the
-            # empty string denote the zero vector of the required
-            # length.
-            return b''
-        return Field.encode_vec(sketch)
+        if len(sketch) == 3:
+            return Field.encode_vec(sketch)
+        elif len(sketch) == 1:
+            if sketch == Field.zeros(1):
+                # In order to reduce communication overhead, let the
+                # empty string denote a successful sketch verification.
+                return b''
+            else:
+                raise ERR_VERIFY # sketch verification failed
+        else:
+            raise ERR_INPUT # unexpected input length
 
     @classmethod
     def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
