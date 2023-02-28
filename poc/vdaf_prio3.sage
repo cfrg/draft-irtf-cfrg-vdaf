@@ -2,9 +2,9 @@
 
 from copy import deepcopy
 from typing import Tuple
-from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, I2OSP, \
-                           TEST_VECTOR, Bytes, Unsigned, Vec, byte, concat, \
-                           gen_rand, vec_add, vec_sub, zeros
+from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, TEST_VECTOR, \
+                           Bytes, Unsigned, Vec, byte, concat, gen_rand, \
+                           vec_add, vec_sub, zeros
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.flp as flp
 import sagelib.flp_generic as flp_generic

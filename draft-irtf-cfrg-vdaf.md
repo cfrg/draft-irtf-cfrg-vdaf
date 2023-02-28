@@ -469,9 +469,13 @@ Some common functionalities:
 * `xor(left: Bytes, right: Bytes) -> Bytes` returns the bitwise XOR of `left`
   and `right`. An exception is raised if the inputs are not the same length.
 
-* `I2OSP` and `OS2IP` from {{!RFC8017}}, which are used, respectively, to
-  convert a non-negative integer to a byte string and convert a byte string to a
-  non-negative integer.
+* `to_be_bytes(val: Unsigned, length: Unsigned) -> Bytes` converts `val` to
+  big-endian bytes; its value MUST be in range `[0, 2^(8*length))`. Function
+  `from_be_bytes(encoded: Bytes) -> Unsigned` computes the inverse.
+
+* `to_le_bytes(val: Unsigned, length: Unsigned) -> Bytes` converts `val` to
+  little-endian bytes; its value MUST be in range `[0, 2^(8*length))`. Function
+  `from_le_bytes(encoded: Bytes) -> Unsigned` computes the inverse.
 
 * `next_power_of_2(n: Unsigned) -> Unsigned` returns the smallest integer
   greater than or equal to `n` that is also a power of two.
@@ -1172,7 +1176,7 @@ field elements.
 def encode_vec(Field, data: Vec[Field]) -> Bytes:
     encoded = Bytes()
     for x in data:
-        encoded += I2OSP(x.as_unsigned(), Field.ENCODED_SIZE)
+        encoded += to_le_bytes(x.as_unsigned(), Field.ENCODED_SIZE)
     return encoded
 
 def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
@@ -1183,7 +1187,7 @@ def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
     vec = []
     for i in range(0, len(encoded), L):
         encoded_x = encoded[i:i+L]
-        x = OS2IP(encoded_x)
+        x = from_le_bytes(encoded_x)
         if x >= Field.MODULUS:
             raise ERR_DECODE # Integer is larger than modulus
         vec.append(Field(x))
@@ -1286,7 +1290,7 @@ def next_vec(self, Field, length: Unsigned):
     m = next_power_of_2(Field.MODULUS) - 1
     vec = []
     while len(vec) < length:
-        x = OS2IP(self.next(Field.ENCODED_SIZE))
+        x = from_le_bytes(self.next(Field.ENCODED_SIZE))
         x &= m
         if x < Field.MODULUS:
             vec.append(Field(x))
@@ -1354,10 +1358,10 @@ format the customization string:
 def format_custom(algo_class: Unsigned,
                   algo: Unsigned,
                   usage: Unsigned) -> Bytes:
-    return I2OSP(VERSION, 1) + \
-           I2OSP(algo_class, 1) + \
-           I2OSP(algo, 4) + \
-           I2OSP(usage, 2)
+    return to_be_bytes(VERSION, 1) + \
+           to_be_bytes(algo_class, 1) + \
+           to_be_bytes(algo, 4) + \
+           to_be_bytes(usage, 2)
 ~~~
 
 It is also sometimes necessary to bind the output to some ephemeral value that
@@ -2850,7 +2854,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # called the "masked input values" [BBCGGI21, Appendix C.4].
     verify_rand_prg = Poplar1.Idpf.Prg(verify_key,
         Poplar1.custom(DST_VERIFY_RAND),
-        nonce + I2OSP(level, 2))
+        nonce + to_be_bytes(level, 2))
     verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
     sketch_share = [a_share, b_share, c_share]
     out_share = []
@@ -3029,23 +3033,23 @@ def encode_agg_param(Poplar1, level, prefixes):
     if len(prefixes) > 2^32 - 1:
         raise ERR_INPUT # too many prefixes
     encoded = Bytes()
-    encoded += I2OSP(level, 2)
-    encoded += I2OSP(len(prefixes), 4)
+    encoded += to_be_bytes(level, 2)
+    encoded += to_be_bytes(len(prefixes), 4)
     packed = 0
     for (i, prefix) in enumerate(prefixes):
         packed |= prefix << ((level+1) * i)
     l = floor(((level+1) * len(prefixes) + 7) / 8)
-    encoded += I2OSP(packed, l)
+    encoded += to_be_bytes(packed, l)
     return encoded
 
 def decode_agg_param(Poplar1, encoded):
     encoded_level, encoded = encoded[:2], encoded[2:]
-    level = OS2IP(encoded_level)
+    level = from_be_bytes(encoded_level)
     encoded_prefix_count, encoded = encoded[:4], encoded[4:]
-    prefix_count = OS2IP(encoded_prefix_count)
+    prefix_count = from_be_bytes(encoded_prefix_count)
     l = floor(((level+1) * prefix_count + 7) / 8)
     encoded_packed, encoded = encoded[:l], encoded[l:]
-    packed = OS2IP(encoded_packed)
+    packed = from_be_bytes(encoded_packed)
     prefixes = []
     m = 2^(level+1) - 1
     for i in range(prefix_count):
@@ -3242,7 +3246,7 @@ def extend(IdpfPoplar, seed):
         prg.next(IdpfPoplar.Prg.SEED_SIZE),
         prg.next(IdpfPoplar.Prg.SEED_SIZE),
     ]
-    b = OS2IP(prg.next(1))
+    b = prg.next(1)[0]
     t = [Field2(b & 1), Field2((b >> 1) & 1)]
     return (s, t)
 

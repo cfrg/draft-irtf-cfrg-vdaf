@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 from sage.all import GF
-from sagelib.common import ERR_DECODE, I2OSP, OS2IP, Bytes, Error, Unsigned, \
-                           Vec, byte
+from sagelib.common import ERR_DECODE, to_le_bytes, from_le_bytes, Bytes, \
+                           Error, Unsigned, Vec, byte
 
 
 # The base class for finite fields.
@@ -33,7 +33,7 @@ class Field:
     def encode_vec(Field, data: Vec[Field]) -> Bytes:
         encoded = Bytes()
         for x in data:
-            encoded += I2OSP(x.as_unsigned(), Field.ENCODED_SIZE)
+            encoded += to_le_bytes(x.as_unsigned(), Field.ENCODED_SIZE)
         return encoded
 
     @classmethod
@@ -45,7 +45,7 @@ class Field:
         vec = []
         for i in range(0, len(encoded), L):
             encoded_x = encoded[i:i+L]
-            x = OS2IP(encoded_x)
+            x = from_le_bytes(encoded_x)
             if x >= Field.MODULUS:
                 raise ERR_DECODE # Integer is larger than modulus
             vec.append(Field(x))

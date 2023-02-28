@@ -2,9 +2,9 @@
 
 from copy import deepcopy
 import itertools
-from sagelib.common import ERR_DECODE, ERR_INPUT, I2OSP, OS2IP, VERSION, \
-                           Bytes, Error, Unsigned, Vec, byte, format_custom, \
-                           gen_rand, vec_add, vec_neg, vec_sub, xor
+from sagelib.common import ERR_DECODE, ERR_INPUT, VERSION, Bytes, Error, \
+                           Unsigned, Vec, byte, format_custom, gen_rand, \
+                           vec_add, vec_neg, vec_sub, xor
 from sagelib.field import Field2
 from sagelib.idpf import Idpf, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
@@ -158,7 +158,7 @@ class IdpfPoplar(Idpf):
             prg.next(IdpfPoplar.Prg.SEED_SIZE),
             prg.next(IdpfPoplar.Prg.SEED_SIZE),
         ]
-        b = OS2IP(prg.next(1))
+        b = prg.next(1)[0]
         t = [Field2(b & 1), Field2((b >> 1) & 1)]
         return (s, t)
 
