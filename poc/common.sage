@@ -99,10 +99,14 @@ def to_be_bytes(val, length):
 def from_be_bytes(encoded):
     return int.from_bytes(encoded, byteorder='big')
 
-
 # Return the concatenated byte strings.
 def concat(parts: Vec[Bytes]) -> Bytes:
     return reduce(lambda x, y: x + y, parts)
+
+# Split list `vec` in two and return the front and remainder as a tuple. The
+# length of the front is `length`.
+def front(length, vec):
+    return (vec[:length], vec[length:])
 
 # Format PRG context for use with a (V)DAF.
 def format_custom(algo_class: Unsigned,

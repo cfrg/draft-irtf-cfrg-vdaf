@@ -3,9 +3,20 @@
 from __future__ import annotations
 from collections import namedtuple
 from typing import Tuple, Union
-from sagelib.common import ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes, Error, \
-                           Unsigned, Vec, byte, from_be_bytes, gen_rand, \
-                           to_be_bytes, vec_add, vec_sub
+from sagelib.common import \
+    ERR_INPUT, \
+    ERR_VERIFY, \
+    TEST_VECTOR, \
+    Bytes, \
+    Error, \
+    Unsigned, \
+    Vec, \
+    byte, \
+    from_be_bytes, \
+    front, \
+    to_be_bytes, \
+    vec_add, \
+    vec_sub
 from sagelib.vdaf import Vdaf, test_vdaf
 import sagelib.idpf as idpf
 import sagelib.idpf_poplar as idpf_poplar
@@ -23,6 +34,7 @@ class Poplar1(Vdaf):
     # Parameters required by `Vdaf`.
     ID = 0x00001000
     VERIFY_KEY_SIZE = None # Set by Idpf.Prg
+    RAND_SIZE = None # Set by Idpf.Prg
     NONCE_SIZE = 16
     SHARES = 2
     ROUNDS = 2
@@ -39,8 +51,19 @@ class Poplar1(Vdaf):
     AggResult = Vec[Unsigned]
 
     @classmethod
-    def measurement_to_input_shares(Poplar1, measurement, nonce):
-        prg = Poplar1.Idpf.Prg(gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
+    def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
+        l = Poplar1.Idpf.Prg.SEED_SIZE
+
+        # Split the coins into coins for IDPF key generation,
+        # correlated randomness, and sharding.
+        if len(rand) != Poplar1.RAND_SIZE:
+            raise ERR_INPUT # unexpected length for random coins
+        idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
+        seeds = [rand[i:i+l] for i in range(0,3*l,l)]
+        corr_seed, seeds = front(2, seeds)
+        (k_shard,), seeds = front(1, seeds)
+
+        prg = Poplar1.Idpf.Prg(k_shard,
                                Poplar1.custom(DST_SHARD_RAND), b'')
 
         # Construct the IDPF values for each level of the IDPF tree.
@@ -56,18 +79,15 @@ class Poplar1(Vdaf):
             prg.next_vec(Poplar1.Idpf.FieldLeaf, 1)
 
         # Generate the IDPF keys.
-        (public_share, keys) = \
-            Poplar1.Idpf.gen(measurement, beta_inner, beta_leaf)
+        (public_share, keys) = Poplar1.Idpf.gen(measurement,
+                                                beta_inner,
+                                                beta_leaf,
+                                                idpf_rand)
 
         # Generate correlated randomness used by the Aggregators to
         # compute a sketch over their output shares. PRG seeds are
         # used to encode shares of the `(a, b, c)` triples.
         # (See [BBCGGI21, Appendix C.4].)
-        corr_seed = [
-            gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
-            gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
-        ]
-
         corr_offsets = vec_add(
             Poplar1.Idpf.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
@@ -345,6 +365,7 @@ class Poplar1(Vdaf):
         class Poplar1WithBits(Poplar1):
             Idpf = TheIdpf
             VERIFY_KEY_SIZE = TheIdpf.Prg.SEED_SIZE
+            RAND_SIZE = 3*TheIdpf.Prg.SEED_SIZE + TheIdpf.RAND_SIZE
         return Poplar1WithBits
 
     @classmethod

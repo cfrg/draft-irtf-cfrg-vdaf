@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 from functools import reduce
-from sagelib.common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
-                           format_custom, gen_rand, print_wrapped_line
-from typing import Optional, Tuple, Union
-import sagelib.field as field
 import json
 import os
+from sagelib.common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
+                           format_custom, gen_rand, print_wrapped_line
+import sagelib.field as field
+from sagelib.prg import PrgSha3
+from typing import Optional, Tuple, Union
 
 
 # A VDAF.
@@ -21,6 +22,9 @@ class Vdaf:
 
     # Length of the nonce.
     NONCE_SIZE = None
+
+    # Number of random bytes consumed by `measurement_to_input_shares()`.
+    RAND_SIZE = None
 
     # The number of Aggregators.
     SHARES: Unsigned = None
@@ -48,7 +52,8 @@ class Vdaf:
     @classmethod
     def measurement_to_input_shares(Vdaf,
                                     measurement: Measurement,
-                                    nonce: Bytes[Vdaf.NONCE_SIZE]
+                                    nonce: Bytes[Vdaf.NONCE_SIZE],
+                                    rand: Bytes[Vdaf.RAND_SIZE],
                                     ) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
@@ -161,8 +166,9 @@ def run_vdaf(Vdaf,
         }
 
         # Each Client shards its measurement into input shares.
+        rand = gen_rand(Vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            Vdaf.measurement_to_input_shares(measurement, nonce)
+            Vdaf.measurement_to_input_shares(measurement, nonce, rand)
 
         # REMOVE ME
         prep_test_vec['public_share'] = public_share.hex()
@@ -301,6 +307,7 @@ class TestVdaf(Vdaf):
     ID = 0xFFFFFFFF
     VERIFY_KEY_SIZE = 0
     NONCE_SIZE = 13
+    RAND_SIZE = 16
     SHARES = 2
     ROUNDS = 1
 
@@ -322,8 +329,12 @@ class TestVdaf(Vdaf):
         return (None, [None for _ in range(cls.SHARES)])
 
     @classmethod
-    def measurement_to_input_shares(cls, measurement, nonce):
-        helper_shares = cls.Field.rand_vec(cls.SHARES-1)
+    def measurement_to_input_shares(cls, measurement, nonce, rand):
+        helper_shares = PrgSha3.expand_into_vec(cls.Field,
+                                                rand,
+                                                b'',
+                                                b'',
+                                                cls.SHARES-1)
         leader_share = cls.Field(measurement)
         for helper_share in helper_shares:
             leader_share -= helper_share

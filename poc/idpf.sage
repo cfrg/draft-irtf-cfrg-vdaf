@@ -2,7 +2,15 @@
 
 from __future__ import annotations
 from typing import Union
-from sagelib.common import VERSION, Bool, Bytes, Error, Unsigned, Vec, vec_add
+from sagelib.common import \
+    VERSION, \
+    Bool, \
+    Bytes, \
+    Error, \
+    Unsigned, \
+    Vec, \
+    gen_rand, \
+    vec_add
 import json
 import os
 import sagelib.field as field
@@ -23,6 +31,9 @@ class Idpf:
     # Size in bytes of each IDPF key share.
     KEY_SIZE: Unsigned = None
 
+    # Number of random bytes consumed by the `gen()` algorithm.
+    RAND_SIZE: Unsigned = None
+
     # The finite field used to represent the inner nodes of the IDPF tree.
     FieldInner: field.Field = None
 
@@ -41,7 +52,8 @@ class Idpf:
     def gen(Idpf,
             alpha: Unsigned,
             beta_inner: Vec[Vec[Idpf.FieldInner]],
-            beta_leaf: Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes]):
+            beta_leaf: Vec[Idpf.FieldLeaf],
+            rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
     # Evaluate an IDPF key at a given level of the tree and with the given set
@@ -93,7 +105,8 @@ def test_idpf(Idpf, alpha, level, prefixes):
     beta_leaf = [Idpf.FieldLeaf(1)] * Idpf.VALUE_LEN
 
     # Generate the IDPF keys.
-    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
+    rand = gen_rand(Idpf.RAND_SIZE)
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, rand)
 
     out = [Idpf.current_field(level).zeros(Idpf.VALUE_LEN)] * len(prefixes)
     for agg_id in range(Idpf.SHARES):
@@ -124,7 +137,8 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
     for level in range(Idpf.BITS-1):
         beta_inner.append([Idpf.FieldInner(level)] * Idpf.VALUE_LEN)
     beta_leaf = [Idpf.FieldLeaf(Idpf.BITS-1)] * Idpf.VALUE_LEN
-    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
+    rand = gen_rand(Idpf.RAND_SIZE)
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, rand)
 
     printable_beta_inner = [
         [ str(elem.as_unsigned()) for elem in value ] for value in beta_inner
@@ -157,7 +171,8 @@ def test_idpf_exhaustive(Idpf, alpha):
     beta_leaf = Idpf.FieldLeaf.rand_vec(Idpf.VALUE_LEN)
 
     # Generate the IDPF keys.
-    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf)
+    rand = gen_rand(Idpf.RAND_SIZE)
+    (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, rand)
 
     # Evaluate the IDPF at every node of the tree.
     for level in range(Idpf.BITS):
