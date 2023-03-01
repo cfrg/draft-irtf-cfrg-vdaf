@@ -143,15 +143,16 @@ if __name__ == '__main__':
     import json
     from sagelib.field import Field128, Field64, Field96
 
-    # Parameters match output of: probe_for_rejection(PrgSha3, Field96)
+    # This test case was found through brute-force search using this tool:
+    # https://github.com/divergentdave/vdaf-rejection-sampling-search
     expanded_vec = PrgSha3.expand_into_vec(
-        Field96,
-        b'@\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+        Field64,
+        b'\x23\x1c\x40\x0d\xcb\xaf\xce\x34\x5e\xfd\x3c\xa7\x79\x65\xee\x06',
         b'', # custom
         b'', # binder
-        328,
+        5,
     )
-    assert expanded_vec[-1] == Field96(55625305487129755078517911529)
+    assert expanded_vec[-1] == Field64(13681157193520586550)
 
     for cls in (PrgAes128, PrgSha3):
         test_prg(cls, Field128, 23)
