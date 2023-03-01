@@ -122,23 +122,6 @@ def test_prg(Prg, F, expanded_len):
     assert len(expanded_vec) == expanded_len
 
 
-# Find seeds for `Prg` for which, when expanded into a vector of `Field`
-# elements, an output larger than the field modulus is generated. The output is
-# used to write tests for proper rejection sampling in `Prg` implementations.
-def probe_for_rejection(Prg, Field, start_seed_int=0):
-    custom = b''
-    binder = b''
-    mask = next_power_of_2(Field.MODULUS) - 1
-    for seed_int in range(start_seed_int, start_seed_int+1_000_000):
-        seed = to_le_bytes(seed_int, Prg.SEED_SIZE)
-        prg = Prg(seed, custom, binder)
-        for offset in range(1024):
-            value = from_le_bytes(prg.next(Field.ENCODED_SIZE))
-            value &= mask
-            if value >= Field.MODULUS:
-                print('Rejection! field = {} seed = {}, offset = {}, next_value = {}'
-                      .format(Field.__name__, seed, offset, prg.next_vec(Field, 1)))
-
 if __name__ == '__main__':
     import json
     from sagelib.field import Field128, Field64, Field96
