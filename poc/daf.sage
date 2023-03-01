@@ -1,8 +1,9 @@
 # Definition of DAFs.
 
 from __future__ import annotations
-from sagelib.common import Unsigned, Vec
+from sagelib.common import Unsigned, Vec, gen_rand
 import sagelib.field as field
+from sagelib.prg import PrgSha3
 import json
 
 
@@ -14,6 +15,9 @@ class Daf:
 
     # The number of Aggregators.
     SHARES: Unsigned = None
+
+    # Number of random bytes consumed by `measurement_to_input_shares()`.
+    RAND_SIZE = None
 
     # The measurement type.
     Measurement = None
@@ -31,8 +35,9 @@ class Daf:
     # one for each Aggregator. This method is run by the Client.
     @classmethod
     def measurement_to_input_shares(Daf,
-                                    measurement: Measurement) -> (Bytes,
-                                                                  Vec[Bytes]):
+                                    measurement: Measurement,
+                                    rand: Bytes[Vdaf.RAND_SIZE],
+                                    ) -> (Bytes, Vec[Bytes]):
         raise Error('not implemented')
 
     # Check if `agg_param` is valid for use with an input share that has
@@ -88,8 +93,9 @@ def run_daf(Daf,
     for measurement in measurements:
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.
+        rand = gen_rand(Daf.RAND_SIZE)
         (public_share, input_shares) = \
-            Daf.measurement_to_input_shares(measurement)
+            Daf.measurement_to_input_shares(measurement, rand)
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(Daf.SHARES):
@@ -123,6 +129,7 @@ class TestDaf(Daf):
     # Associated parameters
     ID = 0xFFFFFFFF
     SHARES = 2
+    RAND_SIZE = 16
 
     # Associated types
     OutShare = Vec[Field]
@@ -130,8 +137,12 @@ class TestDaf(Daf):
     AggResult = Vec[Unsigned]
 
     @classmethod
-    def measurement_to_input_shares(cls, measurement):
-        helper_shares = cls.Field.rand_vec(cls.SHARES-1)
+    def measurement_to_input_shares(cls, measurement, rand):
+        helper_shares = PrgSha3.expand_into_vec(cls.Field,
+                                                rand,
+                                                b'',
+                                                b'',
+                                                cls.SHARES-1)
         leader_share = cls.Field(measurement)
         for helper_share in helper_shares:
             leader_share -= helper_share

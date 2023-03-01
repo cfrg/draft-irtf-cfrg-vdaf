@@ -1,9 +1,21 @@
 # An IDPF based on the construction of [BBCGGI21, Section 6].
 
 import itertools
-from sagelib.common import ERR_DECODE, ERR_INPUT, TEST_VECTOR, VERSION, Bytes, \
-                           Error, Unsigned, Vec, byte, format_custom, gen_rand, \
-                           vec_add, vec_neg, vec_sub, xor
+from sagelib.common import \
+    ERR_DECODE, \
+    ERR_INPUT, \
+    TEST_VECTOR, \
+    VERSION, \
+    Bytes, \
+    Error, \
+    Unsigned, \
+    Vec, \
+    byte, \
+    format_custom, \
+    vec_add, \
+    vec_neg, \
+    vec_sub, \
+    xor
 from sagelib.field import Field2
 from sagelib.idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
@@ -19,19 +31,22 @@ class IdpfPoplar(Idpf):
 
     # Parameters required by `Vdaf`.
     SHARES = 2
+    RAND_SIZE = None # Set by `Prg`
     FieldInner = field.Field64
     FieldLeaf = field.Field255
 
     @classmethod
-    def gen(IdpfPoplar, alpha, beta_inner, beta_leaf):
+    def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
         if alpha >= 2^IdpfPoplar.BITS:
             raise ERR_INPUT # alpha too long
         if len(beta_inner) != IdpfPoplar.BITS - 1:
             raise ERR_INPUT # beta_inner vector is the wrong size
+        if len(rand) != IdpfPoplar.RAND_SIZE:
+            raise ERR_INPUT # unexpected length for random coins
 
         init_seed = [
-            gen_rand(IdpfPoplar.Prg.SEED_SIZE),
-            gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+            rand[:IdpfPoplar.Prg.SEED_SIZE],
+            rand[IdpfPoplar.Prg.SEED_SIZE:],
         ]
 
         seed = init_seed.copy()
@@ -210,6 +225,7 @@ class IdpfPoplar(Idpf):
         class IdpfPoplarWithPrg(IdpfPoplar):
             Prg = ThePrg
             KEY_SIZE = ThePrg.SEED_SIZE
+            RAND_SIZE = 2*ThePrg.SEED_SIZE
         return IdpfPoplarWithPrg
 
     @classmethod
