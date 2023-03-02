@@ -48,7 +48,10 @@ def zeros(length):
 # Return the requested number of random bytes.
 def gen_rand(length):
     if TEST_VECTOR:
-        return bytes([0x01] * length)
+        out = []
+        for i in range(length):
+            out.append(i % 256)
+        return bytes(out)
     return os.urandom(length)
 
 
@@ -59,6 +62,7 @@ def byte(number) -> bytes:
 
 # Return the bitwise XOR of the inputs.
 def xor(left, right):
+    # NOTE Sage overloads the `^` operator, hence calling `__xor__()` directly.
     return bytes(map(lambda x: x[0].__xor__(x[1]), zip(left, right)))
 
 
