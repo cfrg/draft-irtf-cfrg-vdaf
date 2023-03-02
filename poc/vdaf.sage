@@ -243,7 +243,7 @@ def run_vdaf(Vdaf,
 
         os.system('mkdir -p test_vec/{:02}'.format(VERSION))
         with open('test_vec/{:02}/{}_{}.json'.format(
-            VERSION, Vdaf.__name__, test_vec_instance), 'w') as f:
+            VERSION, Vdaf.test_vec_name, test_vec_instance), 'w') as f:
             json.dump(test_vec, f, indent=4, sort_keys=True)
             f.write('\n')
 
@@ -251,7 +251,7 @@ def run_vdaf(Vdaf,
 
 
 def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
-    print('---------- {} ---------------'.format(Vdaf.__name__))
+    print('---------- {} ---------------'.format(Vdaf.test_vec_name))
     if type_param != None:
         print('{}: {}'.format(type_param, test_vec[type_param]))
     print('verify_key: "{}"'.format(test_vec['verify_key']))
@@ -410,7 +410,7 @@ def test_vdaf(Vdaf,
                           test_vec_instance)
     if agg_result != expected_agg_result:
         print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'.format(
-            Vdaf.__name__, measurements, agg_result, expected_agg_result))
+            Vdaf.test_vec_name, measurements, agg_result, expected_agg_result))
 
 
 if __name__ == '__main__':

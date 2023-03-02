@@ -430,6 +430,9 @@ class Prio3Count(Prio3):
     ID = 0x00000000
     VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
 
+    # Operational parameters.
+    test_vec_name = 'Prio3Count'
+
 class Prio3Sum(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgSha3
@@ -437,6 +440,9 @@ class Prio3Sum(Prio3):
     # Associated parameters.
     VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
     ID = 0x00000001
+
+    # Operational parameters.
+    test_vec_name = 'Prio3Sum'
 
     @classmethod
     def with_bits(Prio3Sum, bits: Unsigned):
@@ -452,6 +458,9 @@ class Prio3Histogram(Prio3):
     # Associated parameters.
     VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
     ID = 0x00000002
+
+    # Operational parameters.
+    test_vec_name = 'Prio3Histogram'
 
     @classmethod
     def with_buckets(Prio3Histogram, buckets: Vec[Unsigned]):

@@ -35,6 +35,9 @@ class IdpfPoplar(Idpf):
     FieldInner = field.Field64
     FieldLeaf = field.Field255
 
+    # Operational parameters.
+    test_vec_name = 'IdpfPoplar'
+
     @classmethod
     def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
         if alpha >= 2^IdpfPoplar.BITS:
