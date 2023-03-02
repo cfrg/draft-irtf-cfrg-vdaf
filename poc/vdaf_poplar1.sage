@@ -1,7 +1,6 @@
 # The Poplar1 VDAF.
 
 from __future__ import annotations
-from copy import deepcopy
 from collections import namedtuple
 from typing import Tuple, Union
 from sagelib.common import ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes, Error, \
@@ -338,19 +337,15 @@ class Poplar1(Vdaf):
         return (level, prefixes)
 
     @classmethod
-    def with_idpf(cls, Idpf):
-        new_cls = deepcopy(cls)
-        new_cls.Idpf = Idpf
-        new_cls.VERIFY_KEY_SIZE = Idpf.Prg.SEED_SIZE
-        return new_cls
-
-    @classmethod
-    def with_bits(cls, bits):
-        return cls.with_idpf(
-            idpf_poplar.IdpfPoplar \
+    def with_bits(Poplar1, bits: Unsigned):
+        TheIdpf = idpf_poplar.IdpfPoplar \
                 .with_prg(prg.PrgSha3) \
                 .with_value_len(2) \
-                .with_bits(bits))
+                .with_bits(bits)
+        class Poplar1WithBits(Poplar1):
+            Idpf = TheIdpf
+            VERIFY_KEY_SIZE = TheIdpf.Prg.SEED_SIZE
+        return Poplar1WithBits
 
     @classmethod
     def test_vec_set_type_param(cls, test_vec):

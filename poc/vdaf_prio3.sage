@@ -1,6 +1,5 @@
 # The prio3 VDAF.
 
-from copy import deepcopy
 from typing import Tuple
 from sagelib.common import ERR_DECODE, ERR_INPUT, ERR_VERIFY, TEST_VECTOR, \
                            Bytes, Unsigned, Vec, byte, concat, gen_rand, \
@@ -367,25 +366,25 @@ class Prio3(Vdaf):
         return k_joint_rand_check
 
     @classmethod
-    def with_shares(cls, num_shares: Unsigned):
+    def with_shares(Prio3, num_shares):
         if num_shares < 2 or num_shares > 256:
             raise ERR_INPUT
-        new_cls = deepcopy(cls)
-        new_cls.SHARES = num_shares
-        return new_cls
+        class Prio3WithShares(Prio3):
+            SHARES = num_shares
+        return Prio3WithShares
 
     @classmethod
-    def with_prg(cls, Prg):
-        new_cls = deepcopy(cls)
-        new_cls.Prg = Prg
-        new_cls.VERIFY_KEY_SIZE = Prg.SEED_SIZE
-        return new_cls
+    def with_prg(Prio3, ThePrg):
+        class Prio3WithPrg(Prio3):
+            Prg = ThePrg
+            VERIFY_KEY_SIZE = ThePrg.SEED_SIZE
+        return Prio3WithPrg
 
     @classmethod
-    def with_flp(cls, Flp):
-        new_cls = deepcopy(cls)
-        new_cls.Flp = Flp
-        return new_cls
+    def with_flp(Prio3, TheFlp):
+        class Prio3WithFlp(Prio3):
+            Flp = TheFlp
+        return Prio3WithFlp
 
     @classmethod
     def test_vec_set_type_param(Prio3, test_vec):
@@ -403,51 +402,61 @@ class Prio3Count(Prio3):
 
     # Associated parameters.
     ID = 0x00000000
+    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
 
 class Prio3Sum(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgSha3
 
+    # Associated parameters.
+    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    ID = 0x00000001
+
     @classmethod
-    def with_bits(cls, bits: Unsigned):
-        new_cls = deepcopy(cls)
-        new_cls.Flp = flp_generic.FlpGeneric \
-            .with_valid(flp_generic.Sum.with_bits(bits))
-        new_cls.ID = 0x00000001
-        return new_cls
+    def with_bits(Prio3Sum, bits: Unsigned):
+        class Prio3SumWithBits(Prio3Sum):
+            Flp = flp_generic.FlpGeneric \
+                    .with_valid(flp_generic.Sum.with_bits(bits))
+        return Prio3SumWithBits
 
 class Prio3Histogram(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgSha3
 
+    # Associated parameters.
+    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    ID = 0x00000002
+
     @classmethod
-    def with_buckets(cls, buckets: Vec[Unsigned]):
-        new_cls = deepcopy(cls)
-        new_cls.Flp = flp_generic.FlpGeneric \
-            .with_valid(flp_generic.Histogram.with_buckets(buckets))
-        new_cls.ID = 0x00000002
-        return new_cls
+    def with_buckets(Prio3Histogram, buckets: Vec[Unsigned]):
+        class Prio3HistogramWithBuckets(Prio3Histogram):
+            Flp = flp_generic.FlpGeneric \
+                    .with_valid(flp_generic.Histogram.with_buckets(buckets))
+        return Prio3HistogramWithBuckets
 
 
 ##
 # TESTS
 #
 
-class TestPrio3Average(Prio3Sum):
+class TestPrio3Average(Prio3):
     '''
     A Prio3 instantiation to test use of num_measurements in the Valid
     class's decode() method.
     '''
 
+    Prg = prg.PrgSha3
+    # NOTE 0xFFFFFFFF is reserved for testing. If we decide to standardize this
+    # Prio3 variant, then we'll need to pick a real codepoint for it.
+    ID = 0xFFFFFFFF
+    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+
     @classmethod
     def with_bits(cls, bits: Unsigned):
-        new_cls = deepcopy(cls)
-        new_cls.Flp = flp_generic.FlpGeneric \
-            .with_valid(flp_generic.TestAverage.with_bits(bits))
-        # NOTE 0xFFFFFFFF is reserved for testing. If we decide to standardize this
-        # Prio3 variant, then we'll need to pick a real codepoint for it.
-        new_cls.ID = 0xFFFFFFFF
-        return new_cls
+        class TestPrio3AverageWithBits(TestPrio3Average):
+            Flp = flp_generic.FlpGeneric \
+                    .with_valid(flp_generic.TestAverage.with_bits(bits))
+        return TestPrio3AverageWithBits
 
 
 if __name__ == '__main__':
@@ -492,7 +501,7 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [0, 1, 5, 10, 15, 100, 101, 101], [2, 2, 2, 2])
     test_vdaf(cls, None, [50], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
 
-    cls = TestPrio3Average.with_shares(num_shares).with_bits(3)
+    cls = TestPrio3Average.with_bits(3).with_shares(num_shares)
     test_vdaf(cls, None, [1, 5, 1, 1, 4, 1, 3, 2], 2)
 
     # Test `is_valid` returns True on empty previous_agg_params, and False

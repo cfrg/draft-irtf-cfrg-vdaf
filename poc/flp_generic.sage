@@ -1,6 +1,5 @@
 # A generic FLP based on {{BBCGGI19}}, Theorem 4.3.
 
-from copy import deepcopy
 from sagelib.common import ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, \
                            Unsigned, Vec, next_power_of_2
 from sagelib.field import poly_eval, poly_interp, poly_mul, poly_strip
@@ -193,20 +192,20 @@ def query_wrapped(Valid, proof):
 class FlpGeneric(Flp):
     # Instantiate thie generic FLP the given validity circuit.
     @classmethod
-    def with_valid(FlpGeneric, Valid):
-        new_cls = deepcopy(FlpGeneric)
-        new_cls.Valid = Valid
-        new_cls.Measurement = Valid.Measurement
-        new_cls.AggResult = Valid.AggResult
-        new_cls.Field = Valid.Field
-        new_cls.PROVE_RAND_LEN = Valid.prove_rand_len()
-        new_cls.QUERY_RAND_LEN = Valid.query_rand_len()
-        new_cls.JOINT_RAND_LEN = Valid.JOINT_RAND_LEN
-        new_cls.INPUT_LEN = Valid.INPUT_LEN
-        new_cls.OUTPUT_LEN = Valid.OUTPUT_LEN
-        new_cls.PROOF_LEN = Valid.proof_len()
-        new_cls.VERIFIER_LEN = Valid.verifier_len()
-        return new_cls
+    def with_valid(FlpGeneric, TheValid):
+        class NewFlpGeneric(FlpGeneric):
+            Valid = TheValid
+            Measurement = TheValid.Measurement
+            AggResult = TheValid.AggResult
+            Field = TheValid.Field
+            PROVE_RAND_LEN = TheValid.prove_rand_len()
+            QUERY_RAND_LEN = TheValid.query_rand_len()
+            JOINT_RAND_LEN = TheValid.JOINT_RAND_LEN
+            INPUT_LEN = TheValid.INPUT_LEN
+            OUTPUT_LEN = TheValid.OUTPUT_LEN
+            PROOF_LEN = TheValid.proof_len()
+            VERIFIER_LEN = TheValid.verifier_len()
+        return NewFlpGeneric
 
     @classmethod
     def prove(FlpGeneric, inp, prove_rand, joint_rand):
@@ -472,20 +471,19 @@ class Sum(Valid):
         return [decoded]
 
     @classmethod
-    def decode(Count, output, _num_measurements):
+    def decode(Sum, output, _num_measurements):
         return output[0].as_unsigned()
 
     # Instantiate an instace of the `Sum` circuit for inputs in range `[0,
     # 2^bits)`.
     @classmethod
-    def with_bits(cls, bits):
-        if 2^bits >= cls.Field.MODULUS:
+    def with_bits(Sum, bits):
+        if 2^bits >= Sum.Field.MODULUS:
             raise Error('bit size exceeds field modulus')
-
-        new_cls = deepcopy(cls)
-        new_cls.GADGET_CALLS = [bits]
-        new_cls.INPUT_LEN = bits
-        return new_cls
+        class SumWithBits(Sum):
+            GADGET_CALLS = [bits]
+            INPUT_LEN = bits
+        return SumWithBits
 
     @classmethod
     def test_vec_set_type_param(cls, test_vec):
@@ -547,13 +545,13 @@ class Histogram(Valid):
 
     # Instantiate an instace of the `Histogram` circuit with the given buckets.
     @classmethod
-    def with_buckets(cls, buckets):
-        new_cls = deepcopy(cls)
-        new_cls.buckets = buckets
-        new_cls.GADGET_CALLS = [len(buckets) + 1]
-        new_cls.INPUT_LEN = len(buckets) + 1
-        new_cls.OUTPUT_LEN = len(buckets) + 1
-        return new_cls
+    def with_buckets(Histogram, the_buckets):
+        class HistogramWithBuckets(Histogram):
+            buckets = the_buckets
+            GADGET_CALLS = [len(the_buckets) + 1]
+            INPUT_LEN = len(the_buckets) + 1
+            OUTPUT_LEN = len(the_buckets) + 1
+        return HistogramWithBuckets
 
     @classmethod
     def test_vec_set_type_param(cls, test_vec):
