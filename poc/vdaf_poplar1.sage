@@ -50,6 +50,9 @@ class Poplar1(Vdaf):
                      Vec[Vec[Idpf.FieldLeaf]]]
     AggResult = Vec[Unsigned]
 
+    # Operational parameters.
+    test_vec_name = 'Poplar1'
+
     @classmethod
     def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
         l = Poplar1.Idpf.Prg.SEED_SIZE
@@ -366,6 +369,7 @@ class Poplar1(Vdaf):
             Idpf = TheIdpf
             VERIFY_KEY_SIZE = TheIdpf.Prg.SEED_SIZE
             RAND_SIZE = 3*TheIdpf.Prg.SEED_SIZE + TheIdpf.RAND_SIZE
+            test_vec_name = 'Poplar1'
         return Poplar1WithBits
 
     @classmethod

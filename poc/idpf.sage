@@ -156,7 +156,7 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
 
     os.system('mkdir -p test_vec/{:02}'.format(VERSION))
     with open('test_vec/{:02}/{}_{}.json'.format(
-        VERSION, Idpf.__name__, test_vec_instance), 'w') as f:
+        VERSION, Idpf.test_vec_name, test_vec_instance), 'w') as f:
         json.dump(test_vec, f, indent=4, sort_keys=True)
         f.write('\n')
 

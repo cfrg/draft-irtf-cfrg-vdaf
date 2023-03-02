@@ -56,6 +56,9 @@ class PrgAes128(Prg):
     # Associated parameters
     SEED_SIZE = 16
 
+    # Operational parameters.
+    test_vec_name = 'PrgAes128'
+
     def __init__(self, seed, custom, binder):
         self.length_consumed = 0
 
@@ -82,6 +85,9 @@ class PrgAes128(Prg):
 class PrgSha3(Prg):
     # Associated parameters
     SEED_SIZE = 16
+
+    # Operational parameters.
+    test_vec_name = 'PrgSha3'
 
     def __init__(self, seed, custom, binder):
         # `custom` is used as the customization string; `seed || binder` is
@@ -159,7 +165,7 @@ if __name__ == '__main__':
             test_vector['expanded_vec_field128'] = Field128.encode_vec(
                     cls.expand_into_vec(Field128, seed, custom, binder, length)).hex()
 
-            print('{}:'.format(cls.__name__))
+            print('{}:'.format(cls.test_vec_name))
             print('  seed: "{}"'.format(test_vector['seed']))
             print('  custom: "{}"'.format(test_vector['custom']))
             print('  binder: "{}"'.format(test_vector['binder']))
