@@ -1,6 +1,5 @@
 # An IDPF based on the construction of [BBCGGI21, Section 6].
 
-from copy import deepcopy
 import itertools
 from sagelib.common import ERR_DECODE, ERR_INPUT, TEST_VECTOR, VERSION, Bytes, \
                            Error, Unsigned, Vec, byte, format_custom, gen_rand, \
@@ -207,27 +206,27 @@ class IdpfPoplar(Idpf):
         return correction_words
 
     @classmethod
-    def with_prg(IdpfPoplar, Prg):
-        new_cls = deepcopy(IdpfPoplar)
-        new_cls.Prg = Prg
-        new_cls.KEY_SIZE = Prg.SEED_SIZE
-        return new_cls
+    def with_prg(IdpfPoplar, ThePrg):
+        class IdpfPoplarWithPrg(IdpfPoplar):
+            Prg = ThePrg
+            KEY_SIZE = ThePrg.SEED_SIZE
+        return IdpfPoplarWithPrg
 
     @classmethod
     def with_bits(IdpfPoplar, bits: Unsigned):
         if bits == 0:
             raise ERR_INPUT # number of bits must be positive
-        new_cls = deepcopy(IdpfPoplar)
-        new_cls.BITS = bits
-        return new_cls
+        class IdpfPoplarWithBits(IdpfPoplar):
+            BITS = bits
+        return IdpfPoplarWithBits
 
     @classmethod
     def with_value_len(IdpfPoplar, value_len: Unsigned):
         if value_len == 0:
             raise ERR_INPUT # value length must be positive
-        new_cls = deepcopy(IdpfPoplar)
-        new_cls.VALUE_LEN = value_len
-        return new_cls
+        class IdpfPoplarWithValueLen(IdpfPoplar):
+            VALUE_LEN = value_len
+        return IdpfPoplarWithValueLen
 
 
 def pack_bits(bits: Vec[Field2]) -> Bytes:
