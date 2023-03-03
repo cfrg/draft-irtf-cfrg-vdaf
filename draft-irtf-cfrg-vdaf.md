@@ -590,6 +590,7 @@ types enumerated in the following table.
 |:-------------------|:-------------------------|
 | `ID`          | Algorithm identifier for this DAF. |
 | `SHARES`      | Number of input shares into which each measurement is sharded |
+| `RAND_SIZE`   | Size of the random byte string passed to sharding algorithm |
 | `Measurement` | Type of each measurement      |
 | `AggParam`    | Type of aggregation parameter |
 | `OutShare`    | Type of each output share     |
@@ -616,11 +617,13 @@ In order to protect the privacy of its measurements, a DAF Client shards its
 measurements into a sequence of input shares. The `measurement_to_input_shares`
 method is used for this purpose.
 
-* `Daf.measurement_to_input_shares(input: Measurement) -> (Bytes, Vec[Bytes])`
-  is the randomized input-distribution algorithm run by each Client. It consumes
-  the measurement and produces a "public share", distributed to each of the
-  Aggregators, and a corresponding sequence of input shares, one for each
-  Aggregator. The length of the output vector MUST be `SHARES`.
+* `Daf.measurement_to_input_shares(input: Measurement, rand:
+  Bytes[Daf.RAND_SIZE]) -> (Bytes, Vec[Bytes])` is the randomized sharding
+  algorithm run by each Client. (The input `rand` consists of the random coins
+  consumed by the algorithm.) It consumes the measurement and produces a "public
+  share", distributed to each of the Aggregators, and a corresponding sequence
+  of input shares, one for each Aggregator. The length of the output vector MUST
+  be `SHARES`.
 
 ~~~~
     Client
@@ -772,8 +775,9 @@ def run_daf(Daf,
     for measurement in measurements:
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.
+        rand = gen_rand(Daf.RAND_SIZE)
         (public_share, input_shares) = \
-            Daf.measurement_to_input_shares(measurement)
+            Daf.measurement_to_input_shares(measurement, rand)
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(Daf.SHARES):
@@ -845,6 +849,7 @@ listed in {{vdaf-param}} are defined by each concrete VDAF.
 |:------------------|:-------------------------|
 | `ID`              | Algorithm identifier for this VDAF |
 | `VERIFY_KEY_SIZE` | Size (in bytes) of the verification key ({{sec-vdaf-prepare}}) |
+| `RAND_SIZE`       | Size of the random byte string passed to sharding algorithm |
 | `NONCE_SIZE`      | Size (in bytes) of the nonce |
 | `ROUNDS`          | Number of rounds of communication during the Preparation stage ({{sec-vdaf-prepare}}) |
 | `SHARES`          | Number of input shares into which each measurement is sharded ({{sec-vdaf-shard}}) |
@@ -881,13 +886,14 @@ Sharding transforms a measurement into input shares as it does in DAFs
 produces a public share:
 
 * `Vdaf.measurement_to_input_shares(measurement: Measurement, nonce:
-  Bytes[Vdaf.NONCE_SIZE]) -> (Bytes, Vec[Bytes])` is the randomized
-  input-distribution algorithm run by each Client. It consumes the measurement
-  and the nonce and produces a public share, distributed to each of Aggregators,
-  and the corresponding sequence of input shares, one for each Aggregator.
-  Depending on the VDAF, the input shares may encode additional information used
-  to verify the recovered output shares (e.g., the "proof shares" in Prio3
-  {{prio3}}). The length of the output vector MUST be `SHARES`.
+  Bytes[Vdaf.NONCE_SIZE], rand: Bytes[Vdaf.RAND_SIZE]) -> (Bytes, Vec[Bytes])`
+  is the randomized sharding algorithm run by each Client. (Input `rand`
+  consists of the random coins consumed by the algorithm.) It consumes the
+  measurement and the nonce and produces a public share, distributed to each of
+  Aggregators, and the corresponding sequence of input shares, one for each
+  Aggregator. Depending on the VDAF, the input shares may encode additional
+  information used to verify the recovered output shares (e.g., the "proof
+  shares" in Prio3 {{prio3}}). The length of the output vector MUST be `SHARES`.
 
 In order to ensure privacy of the measurement, the Client MUST generate the
 nonce using a cryptographically secure pseudorandom number generator (CSPRNG).
@@ -1079,8 +1085,9 @@ def run_vdaf(Vdaf,
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
         # Each Client shards its measurement into input shares.
+        rand = gen_rand(Vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            Vdaf.measurement_to_input_shares(measurement, nonce)
+            Vdaf.measurement_to_input_shares(measurement, nonce, rand)
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
@@ -1597,7 +1604,7 @@ input in a way that allows the Aggregators to reconstruct it from their input
 shares. (This idea is based on the Fiat-Shamir heuristic and is described in
 Section 6.2.3 of {{BBCGGI19}}.)
 
-The input-distribution algorithm involves the following steps:
+The sharding algorithm involves the following steps:
 
 1. Encode the Client's raw measurement as an input for the FLP
 1. Shard the input into a sequence of input shares
@@ -1614,67 +1621,74 @@ The definitions of constants and a few auxiliary functions are defined in
 {{prio3-auxiliary}}.
 
 ~~~
-def measurement_to_input_shares(Prio3, measurement, nonce):
-    inp = Prio3.Flp.encode(measurement)
+def measurement_to_input_shares(Prio3, measurement, nonce, rand):
+    l = Prio3.Prg.SEED_SIZE
+    use_joint_rand = Prio3.Flp.JOINT_RAND_LEN > 0
 
-    # Generate measurement shares.
+    # Split the coins into the various seeds we'll need.
+    if len(rand) != Prio3.RAND_SIZE:
+        raise ERR_INPUT # unexpected length for random coins
+    seeds = [rand[i:i+l] for i in range(0,Prio3.RAND_SIZE,l)]
+    k_helper_meas_shares, seeds = front(Prio3.SHARES-1, seeds)
+    k_helper_proof_shares, seeds = front(Prio3.SHARES-1, seeds)
+    (k_prove,), seeds = front(1, seeds)
+    if use_joint_rand:
+        k_blinds, seeds = front(Prio3.SHARES, seeds)
+    else:
+        k_blinds = [None for _ in range(Prio3.SHARES)]
+
+    # Finish measurement shares and joint randomness parts.
+    inp = Prio3.Flp.encode(measurement)
     leader_meas_share = inp
-    k_helper_meas_shares = []
-    k_helper_blinds = []
     k_joint_rand_parts = []
     for j in range(Prio3.SHARES-1):
-        k_blind = gen_rand(Prio3.Prg.SEED_SIZE)
-        k_share = gen_rand(Prio3.Prg.SEED_SIZE)
         helper_meas_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
-            k_share,
+            k_helper_meas_shares[j],
             Prio3.custom(DST_MEASUREMENT_SHARE),
             byte(j+1),
             Prio3.Flp.INPUT_LEN
         )
         leader_meas_share = vec_sub(leader_meas_share,
                                     helper_meas_share)
-        encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
-        k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
+        if use_joint_rand:
+            encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
+            k_joint_rand_part = Prio3.Prg.derive_seed(k_blinds[j+1],
+                Prio3.custom(DST_JOINT_RAND_PART),
+                byte(j+1) + nonce + encoded)
+            k_joint_rand_parts.append(k_joint_rand_part)
+
+    # Finish joint randomness.
+    if use_joint_rand:
+        encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
+        k_joint_rand_part = Prio3.Prg.derive_seed(k_blinds[0],
             Prio3.custom(DST_JOINT_RAND_PART),
-            byte(j+1) + nonce + encoded)
-        k_helper_meas_shares.append(k_share)
-        k_helper_blinds.append(k_blind)
-        k_joint_rand_parts.append(k_joint_rand_part)
-    k_leader_blind = gen_rand(Prio3.Prg.SEED_SIZE)
-    encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
-    k_leader_joint_rand_part = Prio3.Prg.derive_seed(k_leader_blind,
-        Prio3.custom(DST_JOINT_RAND_PART),
-        byte(0) + nonce + encoded)
-    k_joint_rand_parts.insert(0, k_leader_joint_rand_part)
+            byte(0) + nonce + encoded)
+        k_joint_rand_parts.insert(0, k_joint_rand_part)
+        joint_rand = Prio3.Prg.expand_into_vec(
+            Prio3.Flp.Field,
+            Prio3.joint_rand(k_joint_rand_parts),
+            Prio3.custom(DST_JOINT_RANDOMNESS),
+            b'',
+            Prio3.Flp.JOINT_RAND_LEN,
+        )
+    else:
+        joint_rand = []
 
-    # Compute joint randomness seed.
-    k_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
-
-    # Generate the proof shares.
+    # Finish the proof shares.
     prove_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
-        gen_rand(Prio3.Prg.SEED_SIZE),
+        k_prove,
         Prio3.custom(DST_PROVE_RANDOMNESS),
         b'',
         Prio3.Flp.PROVE_RAND_LEN,
     )
-    joint_rand = Prio3.Prg.expand_into_vec(
-        Prio3.Flp.Field,
-        k_joint_rand,
-        Prio3.custom(DST_JOINT_RANDOMNESS),
-        b'',
-        Prio3.Flp.JOINT_RAND_LEN,
-    )
     proof = Prio3.Flp.prove(inp, prove_rand, joint_rand)
     leader_proof_share = proof
-    k_helper_proof_shares = []
     for j in range(Prio3.SHARES-1):
-        k_share = gen_rand(Prio3.Prg.SEED_SIZE)
-        k_helper_proof_shares.append(k_share)
         helper_proof_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
-            k_share,
+            k_helper_proof_shares[j],
             Prio3.custom(DST_PROOF_SHARE),
             byte(j+1),
             Prio3.Flp.PROOF_LEN,
@@ -1689,13 +1703,13 @@ def measurement_to_input_shares(Prio3, measurement, nonce):
     input_shares.append(Prio3.encode_leader_share(
         leader_meas_share,
         leader_proof_share,
-        k_leader_blind,
+        k_blinds[0],
     ))
     for j in range(Prio3.SHARES-1):
         input_shares.append(Prio3.encode_helper_share(
             k_helper_meas_shares[j],
             k_helper_proof_shares[j],
-            k_helper_blinds[j],
+            k_blinds[j+1],
         ))
     public_share = Prio3.encode_public_share(k_joint_rand_parts)
     return (public_share, input_shares)
@@ -2605,11 +2619,12 @@ either a vector of inner node field elements or leaf node field elements.) The
 scheme is comprised of the following algorithms:
 
 * `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf:
-  Vec[Idpf.FieldLeaf]) -> (Bytes, Vec[Bytes])` is the randomized IDPF-key
-  generation algorithm. Its inputs are the index `alpha` and the values `beta`.
-  The value of `alpha` MUST be in range `[0, 2^BITS)`. The output is a public
-  part that is sent to all Aggregators and a vector of private IDPF keys, one
-  for each aggregator.
+  Vec[Idpf.FieldLeaf], rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes, Vec[Bytes])` is
+  the randomized IDPF-key generation algorithm. (Input `rand` consists of the
+  random coins it consumes.) Its inputs are the index `alpha` and the values
+  `beta`. The value of `alpha` MUST be in range `[0, 2^BITS)`. The output is a
+  public part that is sent to all Aggregators and a vector of private IDPF keys,
+  one for each aggregator.
 
 * `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level: Unsigned,
   prefixes: Vec[Unsigned]) -> Idpf.Vec` is the deterministic, stateless
@@ -2652,6 +2667,7 @@ state across evaluations. See {{idpf-poplar}} for details.
 | SHARES     | Number of IDPF keys output by IDPF-key generator |
 | BITS       | Length in bits of each input string |
 | VALUE_LEN  | Number of field elements of each output value |
+| RAND_SIZE  | Size of the random string consumed by the IDPF-key generator |
 | KEY_SIZE   | Size in bytes of each IDPF key |
 | FieldInner | Implementation of `Field` ({{field}}) used for values of inner nodes |
 | FieldLeaf  | Implementation of `Field` used for values of leaf nodes |
@@ -2706,12 +2722,23 @@ tree, the prover generates random elements `a`, `b`, and `c` and computes
 ~~~
 
 and sends additive shares of `a`, `b`, `c`, `A` and `B` to the Aggregators.
-Putting everything together, the input-distribution algorithm is defined as
+Putting everything together, the sharding algorithm is defined as
 follows. Function `encode_input_shares` is defined in {{poplar1-auxiliary}}.
 
 ~~~
-def measurement_to_input_shares(Poplar1, measurement, nonce):
-    prg = Poplar1.Idpf.Prg(gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
+def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
+    l = Poplar1.Idpf.Prg.SEED_SIZE
+
+    # Split the coins into coins for IDPF key generation,
+    # correlated randomness, and sharding.
+    if len(rand) != Poplar1.RAND_SIZE:
+        raise ERR_INPUT # unexpected length for random coins
+    idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
+    seeds = [rand[i:i+l] for i in range(0,3*l,l)]
+    corr_seed, seeds = front(2, seeds)
+    (k_shard,), seeds = front(1, seeds)
+
+    prg = Poplar1.Idpf.Prg(k_shard,
                            Poplar1.custom(DST_SHARD_RAND), b'')
 
     # Construct the IDPF values for each level of the IDPF tree.
@@ -2727,18 +2754,15 @@ def measurement_to_input_shares(Poplar1, measurement, nonce):
         prg.next_vec(Poplar1.Idpf.FieldLeaf, 1)
 
     # Generate the IDPF keys.
-    (public_share, keys) = \
-        Poplar1.Idpf.gen(measurement, beta_inner, beta_leaf)
+    (public_share, keys) = Poplar1.Idpf.gen(measurement,
+                                            beta_inner,
+                                            beta_leaf,
+                                            idpf_rand)
 
     # Generate correlated randomness used by the Aggregators to
     # compute a sketch over their output shares. PRG seeds are
     # used to encode shares of the `(a, b, c)` triples.
     # (See [BBCGGI21, Appendix C.4].)
-    corr_seed = [
-        gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
-        gen_rand(Poplar1.Idpf.Prg.SEED_SIZE),
-    ]
-
     corr_offsets = vec_add(
         Poplar1.Idpf.Prg.expand_into_vec(
             Poplar1.Idpf.FieldInner,
@@ -2797,7 +2821,7 @@ def measurement_to_input_shares(Poplar1, measurement, nonce):
             Poplar1.encode_input_shares(
                 keys, corr_seed, corr_inner, corr_leaf))
 ~~~
-{: #poplar1-mes2inp title="The input-distribution algorithm for Poplar1."}
+{: #poplar1-mes2inp title="The sharding algorithm for Poplar1."}
 
 ### Preparation
 
@@ -3104,15 +3128,17 @@ functions `extend()`, `convert()`, and `encode_public_share()` defined in
 field `GF(2)`.
 
 ~~~
-def gen(IdpfPoplar, alpha, beta_inner, beta_leaf):
+def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, rand):
     if alpha >= 2^IdpfPoplar.BITS:
         raise ERR_INPUT # alpha too long
     if len(beta_inner) != IdpfPoplar.BITS - 1:
         raise ERR_INPUT # beta_inner vector is the wrong size
+    if len(rand) != IdpfPoplar.RAND_SIZE:
+        raise ERR_INPUT # unexpected length for random coins
 
     init_seed = [
-        gen_rand(IdpfPoplar.Prg.SEED_SIZE),
-        gen_rand(IdpfPoplar.Prg.SEED_SIZE),
+        rand[:IdpfPoplar.Prg.SEED_SIZE],
+        rand[IdpfPoplar.Prg.SEED_SIZE:],
     ]
 
     seed = init_seed.copy()
@@ -3482,9 +3508,13 @@ aggregation parameter, and any parameters needed to construct the VDAF. (For
 example, for `Prio3Sum`, the user specifies the number of bits for representing
 each summand.)
 
-Byte strings are encoded in hexadecimal To make the tests deterministic,
-`gen_rand()` was replaced with a function that returns the requested number of
-`0x01` octets.
+Byte strings are encoded in hexadecimal. To make the tests deterministic, the
+random inputs of randomized algorithms were fixed to the byte sequence starting
+with `0`, incrementing by `1`, and wrapping at `256`:
+
+~~~
+0, 1, 2, ..., 255, 0, 1, 2, ...
+~~~
 
 ## Prio3Count {#testvec-prio3count}
 {:numbered="false"}
