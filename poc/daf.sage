@@ -103,7 +103,7 @@ def run_daf(Daf,
                 Daf.prep(j, agg_param, public_share, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
-    # share and it to the Collector.
+    # share and sends it to the Collector.
     agg_shares = []
     for j in range(Daf.SHARES):
         agg_share_j = Daf.out_shares_to_agg_share(agg_param,
