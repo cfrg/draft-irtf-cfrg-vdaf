@@ -316,6 +316,20 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+05:
+
+* Plumb random coins through the interface of randomized algorithms.
+  Specifically, add a random input to (V)DAF sharding algorihtm and IDPF
+  key-generation algorithm and require implementations to specify the length of
+  the random input. Accordingly, update Prio3, Poplar1, and IdpfPoplar to match
+  the new interface. This change is intended to improve coverage of test
+  vectors.
+
+* Use little-endian byte-order for field element encoding. (\*)
+
+* Poplar1: Move the last step of sketch evaluation from `prep_next()` to
+  `prep_shares_to_prep()`.
+
 04:
 
 * Align security considerations with the security analysis of {{DPRS23}}.
