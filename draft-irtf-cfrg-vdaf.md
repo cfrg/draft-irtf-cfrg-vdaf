@@ -319,7 +319,7 @@ security considerations for VDAFs.
 05:
 
 * Plumb random coins through the interface of randomized algorithms.
-  Specifically, add a random input to (V)DAF sharding algorihtm and IDPF
+  Specifically, add a random input to (V)DAF sharding algorithm and IDPF
   key-generation algorithm and require implementations to specify the length of
   the random input. Accordingly, update Prio3, Poplar1, and IdpfPoplar to match
   the new interface. This change is intended to improve coverage of test
@@ -725,7 +725,7 @@ For simplicity, we have written this algorithm in a "one-shot" form, where all
 output shares for a batch are provided at the same time. Many DAFs may also
 support a "streaming" form, where shares are processed one at a time.
 
-Implementation note: For most natural DAFs (and VDAFs) it is not necesesary for
+Implementation note: For most natural DAFs (and VDAFs) it is not necessary for
 an Aggregator to store all output shares individually before aggregating.
 Typically it is possible to merge output shares into aggregate shares as they
 arrive, merge these into other aggregate shares, and so on. In particular, this
@@ -1271,7 +1271,7 @@ The tables below define finite fields used in the remainder of this document.
 | ENCODED_SIZE | 8                     | 16                             | 32         |
 | Generator    | 7^4294967295          | 7^4611686018427387897          | n/a        |
 | GEN_ORDER    | 2^32                  | 2^66                           | n/a        |
-{: #fields title="Paramaters for the finite fields used in this document."}
+{: #fields title="Parameters for the finite fields used in this document."}
 
 > OPEN ISSUE We currently use big-endian for encoding field elements. However,
 > for implementations of `GF(2^255-19)`, little endian is more common. See
