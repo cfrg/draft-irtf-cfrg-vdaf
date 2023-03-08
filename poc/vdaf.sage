@@ -5,7 +5,8 @@ from functools import reduce
 import json
 import os
 from sagelib.common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
-                           format_custom, gen_rand, print_wrapped_line
+                           format_custom, gen_rand, to_le_bytes, \
+                           print_wrapped_line
 import sagelib.field as field
 from sagelib.prg import PrgSha3
 from typing import Optional, Tuple, Union
@@ -209,10 +210,7 @@ def run_vdaf(Vdaf,
         # REMOVE ME
         for out_share in outbound:
             prep_test_vec['out_shares'].append([
-                "{:0{width}x}".format(
-                    x.as_unsigned(),
-                    width=2 * x.ENCODED_SIZE,
-                )
+                to_le_bytes(x.as_unsigned(), x.ENCODED_SIZE).hex()
                 for x in out_share
             ])
         test_vec['prep'].append(prep_test_vec)
