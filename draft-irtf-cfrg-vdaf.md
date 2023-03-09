@@ -1643,13 +1643,34 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
     if len(rand) != Prio3.RAND_SIZE:
         raise ERR_INPUT # unexpected length for random coins
     seeds = [rand[i:i+l] for i in range(0,Prio3.RAND_SIZE,l)]
-    k_helper_meas_shares, seeds = front(Prio3.SHARES-1, seeds)
-    k_helper_proof_shares, seeds = front(Prio3.SHARES-1, seeds)
-    (k_prove,), seeds = front(1, seeds)
     if use_joint_rand:
-        k_blinds, seeds = front(Prio3.SHARES, seeds)
+        k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
+        k_helper_meas_shares = [
+            k_helper_seeds[i]
+            for i in range(0, (Prio3.SHARES-1) * 3, 3)
+        ]
+        k_helper_proof_shares = [
+            k_helper_seeds[i]
+            for i in range(1, (Prio3.SHARES-1) * 3, 3)
+        ]
+        k_helper_blinds = [
+            k_helper_seeds[i]
+            for i in range(2, (Prio3.SHARES-1) * 3, 3)
+        ]
+        (k_leader_blind,), seeds = front(1, seeds)
     else:
-        k_blinds = [None for _ in range(Prio3.SHARES)]
+        k_helper_seeds, seeds = front((Prio3.SHARES-1) * 2, seeds)
+        k_helper_meas_shares = [
+            k_helper_seeds[i]
+            for i in range(0, (Prio3.SHARES-1) * 2, 2)
+        ]
+        k_helper_proof_shares = [
+            k_helper_seeds[i]
+            for i in range(1, (Prio3.SHARES-1) * 2, 2)
+        ]
+        k_helper_blinds = [None] * (Prio3.SHARES-1)
+        k_leader_blind = None
+    (k_prove,), seeds = front(1, seeds)
 
     # Finish measurement shares and joint randomness parts.
     inp = Prio3.Flp.encode(measurement)
@@ -1667,17 +1688,21 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
                                     helper_meas_share)
         if use_joint_rand:
             encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
-            k_joint_rand_part = Prio3.Prg.derive_seed(k_blinds[j+1],
+            k_joint_rand_part = Prio3.Prg.derive_seed(
+                k_helper_blinds[j],
                 Prio3.custom(DST_JOINT_RAND_PART),
-                byte(j+1) + nonce + encoded)
+                byte(j+1) + nonce + encoded,
+            )
             k_joint_rand_parts.append(k_joint_rand_part)
 
     # Finish joint randomness.
     if use_joint_rand:
         encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
-        k_joint_rand_part = Prio3.Prg.derive_seed(k_blinds[0],
+        k_joint_rand_part = Prio3.Prg.derive_seed(
+            k_leader_blind,
             Prio3.custom(DST_JOINT_RAND_PART),
-            byte(0) + nonce + encoded)
+            byte(0) + nonce + encoded,
+        )
         k_joint_rand_parts.insert(0, k_joint_rand_part)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
@@ -1717,13 +1742,13 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
     input_shares.append(Prio3.encode_leader_share(
         leader_meas_share,
         leader_proof_share,
-        k_blinds[0],
+        k_leader_blind,
     ))
     for j in range(Prio3.SHARES-1):
         input_shares.append(Prio3.encode_helper_share(
             k_helper_meas_shares[j],
             k_helper_proof_shares[j],
-            k_blinds[j+1],
+            k_helper_blinds[j],
         ))
     public_share = Prio3.encode_public_share(k_joint_rand_parts)
     return (public_share, input_shares)
