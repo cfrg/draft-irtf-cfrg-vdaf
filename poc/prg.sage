@@ -104,6 +104,9 @@ class PrgFixedKeyAes128(Prg):
     # Associated parameters
     SEED_SIZE = 16
 
+    # Operational parameters
+    test_vec_name = 'PrgFixedKeyAes128'
+
     def __init__(self, seed, custom, binder):
         self.length_consumed = 0
 
