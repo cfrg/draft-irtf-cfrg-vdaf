@@ -1403,7 +1403,7 @@ class PrgFixedKeyAes128(Prg):
 
         # Use SHA-3 to derive a key from the binder and customization
         # strings. Note that the AES key does not need to be kept
-        # secret from any party. However, when used with IpdfPoplar,
+        # secret from any party. However, when used with IdpfPoplar,
         # we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across PRG
