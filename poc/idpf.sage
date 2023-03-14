@@ -155,6 +155,7 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
         'alpha': str(alpha),
         'beta_inner': printable_beta_inner,
         'beta_leaf': printable_beta_leaf,
+        'binder': binder.hex(),
         'public_share': public_share.hex(),
         'keys': printable_keys,
     }
