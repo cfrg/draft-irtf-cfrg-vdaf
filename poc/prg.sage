@@ -139,11 +139,12 @@ class PrgFixedKeyAes128(Prg):
         return concat(hashed_blocks)[offset:offset+length]
 
     # The multi-instance tweakable circular correlation-robust hash function of
-    # [GKWWY20] (Section 4.2).
+    # [GKWWY20] (Section 4.2). The tweak here is the key that stays constant for
+    # all PRG evaluations of the same client, but differs between clients.
     def hash_block(self, block):
         lo, hi = block[:8], block[8:]
-        sigma = hi + xor(hi, lo)
-        return xor(self.cipher.encrypt(sigma), sigma)
+        sigma_block = concat([hi, xor(hi, lo)])
+        return xor(self.cipher.encrypt(sigma_block), sigma_block)
 
 
 
