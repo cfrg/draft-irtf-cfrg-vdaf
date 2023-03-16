@@ -1,0 +1,16 @@
+name: "Lint Document"
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: "Lint document"
+    runs-on: ubuntu-latest
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@v2
+
+    - name: "Check for typos"
+      run: "bash -c '! git grep IPDF -- draft-irtf-cfrg-vdaf.md'"
