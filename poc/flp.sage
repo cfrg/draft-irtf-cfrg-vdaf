@@ -159,9 +159,9 @@ class FlpTestField128(FlpTest):
 
     @classmethod
     def with_joint_rand_len(cls, joint_rand_len):
-        new_cls = deepcopy(cls)
-        new_cls.JOINT_RAND_LEN = joint_rand_len
-        return new_cls
+        class NewFlpTestField128(FlpTestField128):
+            JOINT_RAND_LEN = joint_rand_len
+        return NewFlpTestField128
 
 
 if __name__ == '__main__':
