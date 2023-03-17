@@ -1,7 +1,7 @@
 # Fully linear proof (FLP) systems.
 
 from copy import deepcopy
-from sagelib.common import ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec
+from common import ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec
 
 import sagelib.field as field
 

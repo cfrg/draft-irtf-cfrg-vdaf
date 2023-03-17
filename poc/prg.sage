@@ -5,10 +5,10 @@ from Cryptodome.Cipher import AES
 from Cryptodome.Hash import CMAC, cSHAKE128
 from Cryptodome.Util import Counter
 from Cryptodome.Util.number import bytes_to_long
-from sagelib.common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
-                           format_custom, zeros, from_le_bytes, gen_rand, \
-                           next_power_of_2, print_wrapped_line, to_be_bytes, \
-                           to_le_bytes, xor, concat
+from common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
+                   format_custom, zeros, from_le_bytes, gen_rand, \
+                   next_power_of_2, print_wrapped_line, to_be_bytes, \
+                   to_le_bytes, xor, concat
 
 # The base class for PRGs.
 class Prg:

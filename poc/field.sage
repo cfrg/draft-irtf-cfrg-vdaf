@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 from sage.all import GF
-from sagelib.common import ERR_DECODE, to_le_bytes, from_le_bytes, Bytes, \
-                           Error, Unsigned, Vec, byte
+from common import ERR_DECODE, to_le_bytes, from_le_bytes, Bytes, \
+                   Error, Unsigned, Vec, byte
 
 
 # The base class for finite fields.

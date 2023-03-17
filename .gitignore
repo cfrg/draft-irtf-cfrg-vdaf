@@ -17,3 +17,6 @@ venv/
 sagelib
 *.sage.py
 *.bak
+*.pyc
+*.pyo
+__pycache__

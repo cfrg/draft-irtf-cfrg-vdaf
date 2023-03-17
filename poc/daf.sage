@@ -1,7 +1,7 @@
 # Definition of DAFs.
 
 from __future__ import annotations
-from sagelib.common import Unsigned, Vec, gen_rand
+from common import Unsigned, Vec, gen_rand
 import sagelib.field as field
 from sagelib.prg import PrgSha3
 import json

@@ -1,7 +1,7 @@
 # The prio3 VDAF.
 
 from typing import Tuple
-from sagelib.common import \
+from common import \
     ERR_DECODE, \
     ERR_INPUT, \
     ERR_VERIFY, \

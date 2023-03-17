@@ -1,7 +1,7 @@
 # An IDPF based on the construction of [BBCGGI21, Section 6].
 
 import itertools
-from sagelib.common import \
+from common import \
     ERR_DECODE, \
     ERR_INPUT, \
     TEST_VECTOR, \

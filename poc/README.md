@@ -17,7 +17,7 @@ sage --pip install pycryptodomex
 
 ## Generating test vectors
 
-To generate test vectors, set the value of `TEST_VECTOR` in `common.sage` to
+To generate test vectors, set the value of `TEST_VECTOR` in `common.py` to
 `True` and run `make test`.
 
 > TODO Make this an environment variable.
