@@ -13,4 +13,4 @@ jobs:
       uses: actions/checkout@v2
 
     - name: "Check for typos"
-      run: "bash -c '! git grep IPDF -- draft-irtf-cfrg-vdaf.md poc'"
+      run: "bash -c '! grep -r --file=rejected_dictionary draft-irtf-cfrg-vdaf.md poc'"
