@@ -3213,13 +3213,6 @@ def decode_agg_param(Poplar1, encoded):
 
 ## The IDPF scheme of {{BBCGGI21}} {#idpf-poplar}
 
-> TODO(issue#32) Consider replacing the generic `Prg` object here with some
-> fixed-key mode for AES (something along the lines of ia.cr/2019/074). This
-> would allow us to take advantage of hardware acceleration, which would
-> significantly improve performance. We use SHA-3 primarily to instantiate
-> random oracles, but the random oracle model may not be required for IDPF. More
-> investigation is needed.
-
 In this section we specify a concrete IDPF, called IdpfPoplar, suitable for
 instantiating Poplar1. The scheme gets its name from the name of the protocol of
 {{BBCGGI21}}.
