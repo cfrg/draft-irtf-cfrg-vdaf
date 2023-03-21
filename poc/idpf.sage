@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from typing import Union
-from sagelib.common import \
+from common import \
     VERSION, \
     Bool, \
     Bytes, \

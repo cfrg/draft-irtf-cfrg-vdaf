@@ -15,7 +15,7 @@ sagelib/%.py: %.sage
 	@mv $<.py $@
 
 test: pyfiles
-	sage common.sage
+	sage -python common.py
 	sage field.sage
 	sage prg.sage
 	sage flp.sage

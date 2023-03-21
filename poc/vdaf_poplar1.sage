@@ -3,7 +3,7 @@
 from __future__ import annotations
 from collections import namedtuple
 from typing import Tuple, Union
-from sagelib.common import \
+from common import \
     ERR_INPUT, \
     ERR_VERIFY, \
     TEST_VECTOR, \

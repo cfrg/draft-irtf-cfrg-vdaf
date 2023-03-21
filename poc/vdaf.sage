@@ -4,9 +4,9 @@ from __future__ import annotations
 from functools import reduce
 import json
 import os
-from sagelib.common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
-                           format_custom, gen_rand, to_le_bytes, \
-                           print_wrapped_line
+from common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
+                   format_custom, gen_rand, to_le_bytes, \
+                   print_wrapped_line
 import sagelib.field as field
 from sagelib.prg import PrgSha3
 from typing import Optional, Tuple, Union
