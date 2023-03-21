@@ -3590,7 +3590,7 @@ on the set of all aggregation parameters used for a Client's input share, and
 only proceed with the preparation and aggregation phases if that function call
 returns `True`.
 
-## Additional Privacy Considerations for Aggregation Parameters {#agg-param-privacy}
+### Additional Privacy Considerations {#agg-param-privacy}
 
 Aggregating a batch of reports multiple times, each time with a different
 aggregation parameter, could result in information leakage beyond what is used
@@ -3612,7 +3612,7 @@ differential privacy.
 > TODO(issue #94) Describe (or point to some description of) the central DP
 > mechanism for Poplar described in {{BBCGGI21}}.
 
-## Pseudorandom Generators and random oracles {#prg-vs-ro}
+## Pseudorandom Generators and Random Oracles {#prg-vs-ro}
 
 The objects we describe in {{prg}} share a common interface, which we have
 called Prg. However, these are not necessarily all modeled as cryptographic
