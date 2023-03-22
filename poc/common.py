@@ -109,7 +109,7 @@ def from_be_bytes(encoded):
 
 # Return the concatenated byte strings.
 def concat(parts: Vec[Bytes]) -> Bytes:
-    return reduce(lambda x, y: x + y, parts)
+    return b"".join(parts)
 
 
 # Split list `vec` in two and return the front and remainder as a tuple. The
@@ -122,10 +122,12 @@ def front(length, vec):
 def format_custom(algo_class: Unsigned,
                   algo: Unsigned,
                   usage: Unsigned) -> Bytes:
-    return to_be_bytes(VERSION, 1) + \
-           to_be_bytes(algo_class, 1) + \
-           to_be_bytes(algo, 4) + \
-           to_be_bytes(usage, 2)
+    return b"".join([
+        to_be_bytes(VERSION, 1),
+        to_be_bytes(algo_class, 1),
+        to_be_bytes(algo, 4),
+        to_be_bytes(usage, 2),
+    ])
 
 
 def print_wrapped_line(line, tab):
