@@ -23,7 +23,7 @@ jobs:
     - name: Install Sage
       run: |
         sudo apt-get update
-        sudo apt-get install -y sagemath python3-pycryptodome
+        sudo apt-get install -y sagemath python3-pycryptodome python3-cffi
 
     - name: Run tests
       working-directory: poc
