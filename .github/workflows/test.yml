@@ -2,18 +2,28 @@ name: Test
 
 on:
   push:
+    branches:
+    - main
+    paths:
+    - '.github/workflows/test.yml'
+    - 'poc/**'
   pull_request:
+    paths:
+    - '.github/workflows/test.yml'
+    - 'poc/**'
 
 jobs:
-  build:
+  test:
     name: "Run Sage tests"
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Install Sage
-      run: "sudo apt-get install -y sagemath"
+      run: |
+        brew update
+        brew install sage
 
     - name: Run tests
       working-directory: poc
