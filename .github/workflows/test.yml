@@ -1,0 +1,30 @@
+name: Test
+
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - '.github/workflows/test.yml'
+    - 'poc/**'
+  pull_request:
+    paths:
+    - '.github/workflows/test.yml'
+    - 'poc/**'
+
+jobs:
+  test:
+    name: "Run unit tests for reference code"
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Install Sage
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sagemath python3-pycryptodome python3-cffi
+
+    - name: Run tests
+      working-directory: poc
+      run: make test
