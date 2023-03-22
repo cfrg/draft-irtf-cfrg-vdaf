@@ -22,8 +22,8 @@ jobs:
 
     - name: Install Sage
       run: |
-        brew update
-        brew install sage
+        sudo apt-get update
+        sudo apt-get install -y sagemath
 
     - name: Run tests
       working-directory: poc
