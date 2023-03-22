@@ -14,7 +14,7 @@ on:
 
 jobs:
   test:
-    name: "Run Sage tests"
+    name: "Run unit tests for reference code"
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
