@@ -1456,10 +1456,12 @@ format the customization string:
 def format_custom(algo_class: Unsigned,
                   algo: Unsigned,
                   usage: Unsigned) -> Bytes:
-    return to_be_bytes(VERSION, 1) + \
-           to_be_bytes(algo_class, 1) + \
-           to_be_bytes(algo, 4) + \
-           to_be_bytes(usage, 2)
+    return concat([
+        to_be_bytes(VERSION, 1),
+        to_be_bytes(algo_class, 1),
+        to_be_bytes(algo, 4),
+        to_be_bytes(usage, 2),
+    ])
 ~~~
 
 It is also sometimes necessary to bind the output to some ephemeral value that
