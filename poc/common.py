@@ -20,7 +20,7 @@ Vec = List
 
 
 # Base class for errors.
-class Error(BaseException):
+class Error(Exception):
     def __init__(self, msg):
         self.msg = msg
 
