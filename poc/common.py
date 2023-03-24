@@ -1,4 +1,4 @@
-# Functionalities used by other modules.
+"""Functionalities used by other modules."""
 
 from functools import reduce
 from typing import List, TypeVar
@@ -19,8 +19,8 @@ Unsigned = int
 Vec = List
 
 
-# Base class for errors.
 class Error(Exception):
+    """Base class for errors."""
     def __init__(self, msg):
         self.msg = msg
 
@@ -33,19 +33,19 @@ ERR_INPUT = Error('invalid input parameter')
 ERR_VERIFY = Error('verification of the user\'s input failed')
 
 
-# Return the smallest power of 2 that is larger than or equal to n.
 def next_power_of_2(n):
+    """Return the smallest power of 2 that is larger than or equal to n."""
     assert n > 0
     return 2 ** ((n - 1).nbits())
 
 
-# Return the requested number of zero bytes.
 def zeros(length):
+    """Return the requested number of zero bytes."""
     return bytes(bytearray(length))
 
 
-# Return the requested number of random bytes.
 def gen_rand(length):
+    """Return the requested number of random bytes."""
     if TEST_VECTOR:
         out = []
         for i in range(length):
@@ -54,74 +54,80 @@ def gen_rand(length):
     return os.urandom(length)
 
 
-# Return the encoding of the input as a byte.
 def byte(number) -> bytes:
+    """Return the encoding of the input as a byte."""
     return int(number).to_bytes(1, 'big')
 
 
-# Return the bitwise XOR of the inputs.
 def xor(left, right):
+    """Return the bitwise XOR of the inputs."""
     return bytes(map(lambda x: x[0] ^ x[1], zip(left, right)))
 
 
-# Subtract the right operand from the left and return the result.
 def vec_sub(left, right):
+    """Subtract the right operand from the left and return the result."""
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
 
-# Add the right operand to the left and return the result.
 def vec_add(left, right):
+    """Add the right operand to the left and return the result."""
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
 
 
-# Negate the input vector.
 def vec_neg(vec):
+    """Negate the input vector."""
     return list(map(lambda x: -x, vec))
 
 
-# Convert unsigned integer `val` in range `[0, 2^(8*length))` to a little-endian
-# byte string.
 def to_le_bytes(val, length):
+    """
+    Convert unsigned integer `val` in range `[0, 2^(8*length))` to a
+    little-endian byte string.
+    """
     val = int(val)
     if val < 0 or val >= (1 << (8 * length)):
         raise ValueError('bad to_le_bytes call: val=%d length=%d' % (val, length))
     return val.to_bytes(length, byteorder='little')
 
 
-# Parse an unsigned integer from a little-endian byte string.
 def from_le_bytes(encoded):
+    """Parse an unsigned integer from a little-endian byte string."""
     return int.from_bytes(encoded, byteorder='little')
 
 
-# Convert unsigned integer `val` in range `[0, 2^(8*length))` to a big-endian
-# byte string.
 def to_be_bytes(val, length):
+    """
+    Convert unsigned integer `val` in range `[0, 2^(8*length))` to a big-endian
+    byte string.
+    """
     val = int(val)
     if val < 0 or val >= (1 << (8 * length)):
         raise ValueError('bad to_be_bytes call: val=%d length=%d' % (val, length))
     return val.to_bytes(length, byteorder='big')
 
 
-# Parse an unsigned integer from a big-endian byte string.
 def from_be_bytes(encoded):
+    """Parse an unsigned integer from a big-endian byte string."""
     return int.from_bytes(encoded, byteorder='big')
 
 
-# Return the concatenated byte strings.
 def concat(parts: Vec[Bytes]) -> Bytes:
+    """Return the concatenated byte strings."""
     return b''.join(parts)
 
 
-# Split list `vec` in two and return the front and remainder as a tuple. The
-# length of the front is `length`.
 def front(length, vec):
+    """
+    Split list `vec` in two and return the front and remainder as a tuple. The
+    length of the front is `length`.
+    """
     return (vec[:length], vec[length:])
 
 
-# Format PRG context for use with a (V)DAF.
 def format_custom(algo_class: Unsigned,
                   algo: Unsigned,
                   usage: Unsigned) -> Bytes:
+    """Format PRG context for use with a (V)DAF."""
     return concat([
         to_be_bytes(VERSION, 1),
         to_be_bytes(algo_class, 1),
