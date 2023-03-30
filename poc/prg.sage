@@ -1,4 +1,4 @@
-# Pseudorandom number generators (PRGs).
+"""Pseudorandom number generators (PRGs)."""
 
 from __future__ import annotations
 from Cryptodome.Cipher import AES
@@ -10,27 +10,34 @@ from common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
                    next_power_of_2, print_wrapped_line, to_be_bytes, \
                    to_le_bytes, xor, concat
 
-# The base class for PRGs.
 class Prg:
+    """The base class for PRGs."""
+
     # Size of the seed.
     SEED_SIZE: Unsigned
 
-    # Construct a new instnace of this PRG from the given seed and info string.
     def __init__(self, seed: Bytes[Prg.SEED_SIZE], custom: Bytes, binder: Bytes):
+        """
+        Construct a new instnace of this PRG from the given seed and info
+        string.
+        """
         raise Error('not implemented')
 
-    # Output the next `length` bytes of the PRG stream.
     def next(self, length: Unsigned) -> Bytes:
+        """Output the next `length` bytes of the PRG stream."""
         raise Error('not implemented')
 
-    # Derive a new seed.
     @classmethod
-    def derive_seed(Prg, seed: Bytes[Prg.SEED_SIZE], custom: Bytes, binder: Bytes):
+    def derive_seed(Prg,
+                    seed: Bytes[Prg.SEED_SIZE],
+                    custom: Bytes,
+                    binder: Bytes):
+        """Derive a new seed."""
         prg = Prg(seed, custom, binder)
         return prg.next(Prg.SEED_SIZE)
 
-    # Output the next `length` pseudorandom elements of `Field`.
     def next_vec(self, Field, length: Unsigned):
+        """Output the next `length` pseudorandom elements of `Field`."""
         m = next_power_of_2(Field.MODULUS) - 1
         vec = []
         while len(vec) < length:
@@ -40,7 +47,6 @@ class Prg:
                 vec.append(Field(x))
         return vec
 
-    # Expand the input `seed` into vector of `length` field elements.
     @classmethod
     def expand_into_vec(Prg,
                         Field,
@@ -48,11 +54,15 @@ class Prg:
                         custom: Bytes,
                         binder: Bytes,
                         length: Unsigned):
+        """
+        Expand the input `seed` into vector of `length` field elements.
+        """
         prg = Prg(seed, custom, binder)
         return prg.next_vec(Field, length)
 
-# WARNING `PrgAes128` has been deprecated in favor of `PrgSha3`.
 class PrgAes128(Prg):
+    """WARNING `PrgAes128` has been deprecated in favor of `PrgSha3`."""
+
     # Associated parameters
     SEED_SIZE = 16
 
@@ -81,8 +91,9 @@ class PrgAes128(Prg):
         stream = cipher.encrypt(zeros(offset + length))
         return stream[-length:]
 
-# PRG based on SHA-3 (cSHAKE128).
 class PrgSha3(Prg):
+    """PRG based on SHA-3 (cSHAKE128)."""
+
     # Associated parameters
     SEED_SIZE = 16
 
@@ -99,8 +110,12 @@ class PrgSha3(Prg):
     def next(self, length: Unsigned) -> Bytes:
         return self.shake.read(length)
 
-# PRG based on a circular collision-resistant hash function from fixed-key AES.
 class PrgFixedKeyAes128(Prg):
+    """
+    PRG based on a circular collision-resistant hash function from
+    fixed-key AES.
+    """
+
     # Associated parameters
     SEED_SIZE = 16
 
@@ -138,10 +153,15 @@ class PrgFixedKeyAes128(Prg):
         ]
         return concat(hashed_blocks)[offset:offset+length]
 
-    # The multi-instance tweakable circular correlation-robust hash function of
-    # [GKWWY20] (Section 4.2). The tweak here is the key that stays constant for
-    # all PRG evaluations of the same client, but differs between clients.
     def hash_block(self, block):
+        """
+        The multi-instance tweakable circular correlation-robust hash
+        function of [GKWWY20] (Section 4.2). The tweak here is the key
+        that stays constant for all PRG evaluations of the same client,
+        but differs between clients.
+
+        Function `AES128(key, block)` is the AES-128 blockcipher.
+        """
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])
         return xor(self.cipher.encrypt(sigma_block), sigma_block)

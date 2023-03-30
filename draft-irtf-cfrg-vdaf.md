@@ -1247,16 +1247,14 @@ remainder of this document. Note that an exception is raised by each function if
 the operands are not the same length.
 
 ~~~
-# Compute the inner product of the operands.
-def inner_product(left: Vec[Field], right: Vec[Field]) -> Field:
-    return sum(map(lambda x: x[0] * x[1], zip(left, right)))
-
-# Subtract the right operand from the left and return the result.
 def vec_sub(left: Vec[Field], right: Vec[Field]):
+    """
+    Subtract the right operand from the left and return the result.
+    """
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
-# Add the right operand to the left and return the result.
 def vec_add(left: Vec[Field], right: Vec[Field]):
+    """Add the right operand to the left and return the result."""
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
 ~~~
 {: #field-helper-functions title="Common functions for finite fields."}
@@ -1325,13 +1323,16 @@ pseudorandom field elements. For each method, the seed MUST be of length
 `gen_rand` or a previous invocation of the PRG).
 
 ~~~
-# Derive a new seed.
-def derive_seed(Prg, seed: Bytes[Prg.SEED_SIZE], custom: Bytes, binder: Bytes):
+def derive_seed(Prg,
+                seed: Bytes[Prg.SEED_SIZE],
+                custom: Bytes,
+                binder: Bytes):
+    """Derive a new seed."""
     prg = Prg(seed, custom, binder)
     return prg.next(Prg.SEED_SIZE)
 
-# Output the next `length` pseudorandom elements of `Field`.
 def next_vec(self, Field, length: Unsigned):
+    """Output the next `length` pseudorandom elements of `Field`."""
     m = next_power_of_2(Field.MODULUS) - 1
     vec = []
     while len(vec) < length:
@@ -1341,13 +1342,15 @@ def next_vec(self, Field, length: Unsigned):
             vec.append(Field(x))
     return vec
 
-# Expand the input `seed` into vector of `length` field elements.
 def expand_into_vec(Prg,
                     Field,
                     seed: Bytes[Prg.SEED_SIZE],
                     custom: Bytes,
                     binder: Bytes,
                     length: Unsigned):
+    """
+    Expand the input `seed` into vector of `length` field elements.
+    """
     prg = Prg(seed, custom, binder)
     return prg.next_vec(Field, length)
 ~~~
@@ -1361,6 +1364,8 @@ This Prg is RECOMMENDED for all use cases within VDAFs.
 
 ~~~
 class PrgSha3(Prg):
+    """PRG based on SHA-3 (cSHAKE128)."""
+
     # Associated parameters
     SEED_SIZE = 16
 
@@ -1395,6 +1400,11 @@ See Security Considerations {{security}} for a more detailed discussion.
 
 ~~~
 class PrgFixedKeyAes128(Prg):
+    """
+    PRG based on a circular collision-resistant hash function from
+    fixed-key AES.
+    """
+
     # Associated parameters
     SEED_SIZE = 16
 
@@ -1425,12 +1435,15 @@ class PrgFixedKeyAes128(Prg):
         ]
         return concat(hashed_blocks)[offset:offset+length]
 
-    # The multi-instance tweakable circular correlation-robust hash function of
-    # [GKWWY20] (Section 4.2). The tweak here is the key that stays constant for
-    # all PRG evaluations of the same client, but differs between clients.
-    #
-    # Function `AES128(key, block)` is the AES-128 blockcipher.
     def hash_block(self, block):
+        """
+        The multi-instance tweakable circular correlation-robust hash
+        function of [GKWWY20] (Section 4.2). The tweak here is the key
+        that stays constant for all PRG evaluations of the same client,
+        but differs between clients.
+
+        Function `AES128(key, block)` is the AES-128 blockcipher.
+        """
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])
         return xor(AES128(self.fixed_key, sigma_block), sigma_block)
@@ -2314,24 +2327,24 @@ output, and converting an aggregated output to an aggregate result:
 Finally, the following class methods are derived for each concrete `Valid`:
 
 ~~~
-# Length of the prover randomness.
 def prove_rand_len(Valid):
+    """Length of the prover randomness."""
     return sum(map(lambda g: g.ARITY, Valid.GADGETS))
 
-# Length of the query randomness.
 def query_rand_len(Valid):
+    """Length of the query randomness."""
     return len(Valid.GADGETS)
 
-# Length of the proof.
 def proof_len(Valid):
+    """Length of the proof."""
     length = 0
     for (g, g_calls) in zip(Valid.GADGETS, Valid.GADGET_CALLS):
         P = next_power_of_2(1 + g_calls)
         length += g.ARITY + g.DEGREE * (P - 1) + 1
     return length
 
-# Length of the verifier message.
 def verifier_len(Valid):
+    """Length of the verifier message."""
     length = 1
     for g in Valid.GADGETS:
         length += g.ARITY + 1
@@ -2487,7 +2500,7 @@ each can be found in {{test-vectors}}.
 Our first instance of Prio3 is for a simple counter: Each measurement is either
 one or zero and the aggregate result is the sum of the measurements.
 
-This instance uses PrgSha3 ({{prg-sha3}) as its PRG. Its validity
+This instance uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
 circuit, denoted `Count`, uses `Field64` ({{fields}}) as its finite field. Its
 gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
@@ -3355,20 +3368,29 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
             # wasteful. Implementations can eliminate this added
             # complexity by caching nodes (i.e., `(seed, ctrl)`
             # pairs) output by previous calls to `eval_next()`.
-            (seed, ctrl, y) = IdpfPoplar.eval_next(seed, ctrl,
-                correction_words[current_level], current_level, bit, binder)
+            (seed, ctrl, y) = IdpfPoplar.eval_next(
+                seed,
+                ctrl,
+                correction_words[current_level],
+                current_level,
+                bit,
+                binder,
+            )
         out_share.append(y if agg_id == 0 else vec_neg(y))
     return out_share
 
-# Compute the next node in the IDPF tree along the path determined by
-# a candidate prefix. The next node is determined by `bit`, the bit
-# of the prefix corresponding to the next level of the tree.
-#
-# TODO Consider implementing some version of the optimization
-# discussed at the end of [BBCGGI21, Appendix C.2]. This could on
-# average reduce the number of AES calls by a constant factor.
 def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
               correction_word, level, bit, binder):
+    """
+    Compute the next node in the IDPF tree along the path determined by
+    a candidate prefix. The next node is determined by `bit`, the bit of
+    the prefix corresponding to the next level of the tree.
+
+    TODO Consider implementing some version of the optimization
+    discussed at the end of [BBCGGI21, Appendix C.2]. This could on
+    average reduce the number of AES calls by a constant factor.
+    """
+
     Field = IdpfPoplar.current_field(level)
     (seed_cw, ctrl_cw, w_cw) = correction_word
     (s, t) = IdpfPoplar.extend(prev_seed, binder)

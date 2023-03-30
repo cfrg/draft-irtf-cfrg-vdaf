@@ -1,4 +1,4 @@
-# Definition of VDAFs.
+"""Definition of VDAFs."""
 
 from __future__ import annotations
 from functools import reduce
@@ -12,8 +12,8 @@ from sagelib.prg import PrgSha3
 from typing import Optional, Tuple, Union
 
 
-# A VDAF.
 class Vdaf:
+    """A VDAF."""
 
     # Algorithm identifier for this VDAF, a 32-bit integer.
     ID: Unsigned = None
@@ -48,28 +48,27 @@ class Vdaf:
     # The aggregate result type.
     AggResult = None
 
-    # Shard a measurement into a "public share" and a sequence of input shares,
-    # one for each Aggregator. This method is run by the Client.
     @classmethod
     def measurement_to_input_shares(Vdaf,
                                     measurement: Measurement,
                                     nonce: Bytes[Vdaf.NONCE_SIZE],
                                     rand: Bytes[Vdaf.RAND_SIZE],
                                     ) -> (Bytes, Vec[Bytes]):
+        """
+        Shard a measurement into a "public share" and a sequence of input
+        shares, one for each Aggregator. This method is run by the Client.
+        """
         raise Error('not implemented')
 
-    # Check if `agg_param` is valid for use with an input share that has
-    # previously been used with all `previous_agg_params`.
     @classmethod
     def is_valid(Vdaf, agg_param: AggParam,
                  previous_agg_params: Vec[AggParam]) -> Bool:
+        """
+        Check if `agg_param` is valid for use with an input share that has
+        previously been used with all `previous_agg_params`.
+        """
         raise Error('not implemented')
 
-    # Initialize the Prepare state for the given input share. This method is run
-    # by an Aggregator. Along with the the public share and its input share, the
-    # inputs include the verification key shared by all of the Aggregators, the
-    # Aggregator's ID (a unique integer in range `[0, SHARES)`, and the
-    # aggregation parameter and nonce agreed upon by all of the Aggregators.
     @classmethod
     def prep_init(Vdaf,
                   verify_key: Bytes,
@@ -78,61 +77,79 @@ class Vdaf:
                   nonce: Bytes,
                   public_share: Byhtes,
                   input_share: Bytes) -> Prep:
+        """
+        Initialize the Prepare state for the given input share. This method is
+        run by an Aggregator. Along with the the public share and its input
+        share, the inputs include the verification key shared by all of the
+        Aggregators, the Aggregator's ID (a unique integer in range `[0,
+        SHARES)`, and the aggregation parameter and nonce agreed upon by all of
+        the Aggregators.
+        """
         raise Error('not implemented')
 
-    # Consume the inbound message from the previous round (or `None` if this is
-    # the first round) and return the aggregator's share of the next round (or
-    # the aggregator's output share if this is the last round).
     @classmethod
     def prep_next(Vdaf,
                   prep: Prep,
                   inbound: Optional[Bytes],
                   ) -> Union[Tuple[Prep, Bytes], Vdaf.OutShare]:
+        """
+        Consume the inbound message from the previous round (or `None` if this
+        is the first round) and return the aggregator's share of the next round
+        (or the aggregator's output share if this is the last round).
+        """
         raise Error('not implemented')
 
-    # Unshard the Prepare message shares from the previous round of the Prapare
-    # computation. This is called by an aggregator after receiving all of the
-    # message shares from the previous round. The output is passed to
-    # Prep.next().
     @classmethod
     def prep_shares_to_prep(Vdaf,
                             agg_param: AggParam,
                             prep_shares: Vec[Bytes]) -> Bytes:
+        """
+        Unshard the Prepare message shares from the previous round of the
+        Prapare computation. This is called by an aggregator after receiving all
+        of the message shares from the previous round. The output is passed to
+        Prep.next().
+        """
         raise Error('not implemented')
 
-    # Merge a list of output shares into an aggregate share, encoded as a byte
-    # string. This is called by an aggregator after recovering a batch of
-    # output shares.
     @classmethod
     def out_shares_to_agg_share(Vdaf,
                                 agg_param: AggParam,
                                 out_shares: Vec[OutShare]) -> Bytes:
+        """
+        Merge a list of output shares into an aggregate share, encoded as a byte
+        string. This is called by an aggregator after recovering a batch of
+        output shares.
+        """
         raise Error('not implemented')
 
-    # Unshard the aggregate shares (encoded as byte strings) and compute the
-    # aggregate result. This is called by the Collector.
     @classmethod
     def agg_shares_to_result(Vdaf,
                              agg_param: AggParam,
                              agg_shares: Vec[Bytes],
                              num_measurements: Unsigned) -> AggResult:
+        """
+        Unshard the aggregate shares (encoded as byte strings) and compute the
+        aggregate result. This is called by the Collector.
+        """
         raise Error('not implemented')
 
-    # Format customization string for this VDAF with the given usage.
     @classmethod
     def custom(Vdaf, usage: Unsigned) -> Bytes:
+        """
+        Format customization string for this VDAF with the given usage.
+        """
         return format_custom(0, Vdaf.ID, usage)
 
-    # Add any parameters to `test_vec` that are required to construct this
-    # class. Return the key that was set or `None` if `test_vec` was not
-    # modified.
     @classmethod
     def test_vec_set_type_param(Vdaf, test_vec):
+        """
+        Add any parameters to `test_vec` that are required to construct this
+        class. Return the key that was set or `None` if `test_vec` was not
+        modified.
+        """
         return None
 
 
-# Run the VDAF on a list of measurements.
-#
 # NOTE This is used to generate {{run-vdaf}}.
 def run_vdaf(Vdaf,
              verify_key: Bytes[Vdaf.VERIFY_KEY_SIZE],
@@ -141,6 +158,8 @@ def run_vdaf(Vdaf,
              measurements: Vec[Vdaf.Measurement],
              print_test_vec=False,
              test_vec_instance=0):
+    """Run the VDAF on a list of measurements."""
+
     # REMOVE ME
     test_vec = {
         'verify_key': verify_key.hex(),
@@ -296,8 +315,8 @@ def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
 # TESTS
 #
 
-# An insecure VDAF used only for testing purposes.
 class TestVdaf(Vdaf):
+    """An insecure VDAF used only for testing purposes."""
     # Operational parameters
     Field = field.Field128
 

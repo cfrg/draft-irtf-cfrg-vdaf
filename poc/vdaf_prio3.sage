@@ -1,4 +1,4 @@
-# The prio3 VDAF.
+"""The prio3 VDAF."""
 
 from typing import Tuple
 from common import \
@@ -28,8 +28,9 @@ DST_QUERY_RANDOMNESS = 5
 DST_JOINT_RAND_SEED = 6
 DST_JOINT_RAND_PART = 7
 
-# Base class for VDAFs based on prio3.
 class Prio3(Vdaf):
+    """Base class for VDAFs based on prio3."""
+
     # Generic types provided by a concrete instance of `Prio3`
     Flp = flp.Flp
     Prg = prg.Prg
@@ -169,9 +170,11 @@ class Prio3(Vdaf):
         public_share = Prio3.encode_public_share(k_joint_rand_parts)
         return (public_share, input_shares)
 
-    # Checks if `previous_agg_params` is empty, as input shares in Prio3 may
-    # only be used once.
     def is_valid(agg_param, previous_agg_params):
+        """
+        Checks if `previous_agg_params` is empty, as input shares in Prio3 may
+        only be used once.
+        """
         return len(previous_agg_params) == 0
 
     @classmethod
@@ -268,9 +271,9 @@ class Prio3(Vdaf):
             agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
         return Prio3.Flp.decode(agg, num_measurements)
 
-    # Derive the joint randomness seed from its parts.
     @classmethod
     def joint_rand(Prio3, k_joint_rand_parts):
+        """Derive the joint randomness seed from its parts."""
         return Prio3.Prg.derive_seed(
             zeros(Prio3.Prg.SEED_SIZE),
             Prio3.custom(DST_JOINT_RAND_SEED),
@@ -500,10 +503,10 @@ class Prio3Histogram(Prio3):
 #
 
 class TestPrio3Average(Prio3):
-    '''
+    """
     A Prio3 instantiation to test use of num_measurements in the Valid
     class's decode() method.
-    '''
+    """
 
     Prg = prg.PrgSha3
     # NOTE 0xFFFFFFFF is reserved for testing. If we decide to standardize this

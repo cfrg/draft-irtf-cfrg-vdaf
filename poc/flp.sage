@@ -1,4 +1,4 @@
-# Fully linear proof (FLP) systems.
+"""Fully linear proof (FLP) systems."""
 
 from copy import deepcopy
 from common import ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec
@@ -6,8 +6,9 @@ from common import ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec
 import sagelib.field as field
 
 
-# The base class for FLPs.
 class Flp:
+    """The base class for FLPs."""
+
     # Generic paraemters
     Measurement = None
     AggResult = None
@@ -34,20 +35,19 @@ class Flp:
     # Length of the verifier message.
     VERIFIER_LEN: Unsigned
 
-    # Encode a measurement as an input.
     @classmethod
     def encode(Flp, measurement: Measurement) -> Vec[Field]:
+        """Encode a measurement as an input."""
         raise Error('encode() not implemented')
 
-    # Generate a proof of an input's validity.
     @classmethod
     def prove(Flp,
               inp: Vec[Field],
               prove_rand: Vec[Field],
               joint_rand: Vec[Field]) -> Vec[Field]:
+        """Generate a proof of an input's validity."""
         raise Error('prove() not implemented')
 
-    # Generate a verifier message for an input and proof.
     @classmethod
     def query(Flp,
               inp: Vec[Field],
@@ -55,35 +55,38 @@ class Flp:
               query_rand: Vec[Field],
               joint_rand: Vec[Field],
               num_shares: Unsigned) -> Vec[Field]:
+        """Generate a verifier message for an input and proof."""
         raise Error('query() not implemented')
 
-    # Decide if a verifier message was generated from a valid input.
     @classmethod
     def decide(Flp, verifier: Vec[Field]) -> Bool:
+        """Decide if a verifier message was generated from a valid input."""
         raise Error('decide() not implemented')
 
-    # Map an input to an aggregatable output.
     @classmethod
     def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
+        """Map an input to an aggregatable output."""
         raise Error('truncate() not implemented')
 
-    # Decode an aggregate result.
     @classmethod
     def decode(output: Vec[Field], num_measurements: Unsigned) -> AggResult:
+        """Decode an aggregate result."""
         raise Error('decode() not implemented')
 
-    # Add any parameters to `test_vec` that are required to construct this
-    # class. Return the key that was set or `None` if `test_vec` was not
-    # modified.
     @classmethod
     def test_vec_set_type_param(Vdaf, test_vec):
+        """
+        Add any parameters to `test_vec` that are required to construct this
+        class. Return the key that was set or `None` if `test_vec` was not
+        modified.
+        """
         return None
 
 
-# Run the FLP on an input.
-#
 # NOTE This is used to generate {{run-flp}}.
 def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
+    """Run the FLP on an input."""
+
     joint_rand = Flp.Field.rand_vec(Flp.JOINT_RAND_LEN)
     prove_rand = Flp.Field.rand_vec(Flp.PROVE_RAND_LEN)
     query_rand = Flp.Field.rand_vec(Flp.QUERY_RAND_LEN)
@@ -103,8 +106,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 #
 
 
-# An insecure FLP used only for testing.
 class FlpTest(Flp):
+    """An insecure FLP used only for testing."""
     # Associated parameters
     JOINT_RAND_LEN = 1
     PROVE_RAND_LEN = 2
@@ -136,9 +139,9 @@ class FlpTest(Flp):
     def query(cls, inp, proof, query_rand, joint_rand, _num_shares):
         return deepcopy(proof)
 
-    # Decide if a verifier message was generated from a valid input.
     @classmethod
     def decide(cls, verifier):
+        """Decide if a verifier message was generated from a valid input."""
         if len(verifier) != 2 or \
                 verifier[0] != verifier[1] or \
                 verifier[0].as_unsigned() not in cls.input_range:

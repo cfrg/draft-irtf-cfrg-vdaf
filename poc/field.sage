@@ -1,4 +1,4 @@
-# Definitions of finite fields used in this spec.
+"""Definitions of finite fields used in this spec."""
 
 from __future__ import annotations
 from sage.all import GF
@@ -6,8 +6,8 @@ from common import ERR_DECODE, to_le_bytes, from_le_bytes, Bytes, \
                    Error, Unsigned, Vec, byte
 
 
-# The base class for finite fields.
 class Field:
+    """The base class for finite fields."""
 
     # The prime modulus that defines arithmetic in the field.
     MODULUS: Unsigned
@@ -94,20 +94,24 @@ class FftField(Field):
         raise Error('not implemented')
 
 
-# the finite field GF(2).
 class Field2(Field):
+    """The finite field GF(2)."""
+
     MODULUS = 2
     ENCODED_SIZE = 1
 
     # Operational parameters
     gf = GF(MODULUS)
 
-    # Return `inp` unmodified if `self == 1`; otherwise return the
-    # all-zero string of the same length.
-    #
-    # Implementation note: To protect the code from timing side channels,
-    # it is important to implement this algorithm in constant time.
     def conditional_select(self, inp: Bytes) -> Bytes:
+        """
+        Return `inp` unmodified if `self == 1`; otherwise return the all-zero
+        string of the same length.
+
+        Implementation note: To protect the code from timing side channels, it
+        is important to implement this algorithm in constant time.
+        """
+
         # Convert the element into a bitmask such that `m == 255` if
         # `self == 1` and `m == 0` otherwise.
         m = 0
@@ -116,8 +120,9 @@ class Field2(Field):
             m |= v << i
         return bytes(map(lambda x: m & x, inp))
 
-# The finite field GF(2^32 * 4294967295 + 1).
 class Field64(FftField):
+    """The finite field GF(2^32 * 4294967295 + 1)."""
+
     MODULUS = 2^32 * 4294967295 + 1
     GEN_ORDER = 2^32
     ENCODED_SIZE = 8
@@ -130,8 +135,9 @@ class Field64(FftField):
         return cls(7)^4294967295
 
 
-# The finite field GF(2^64 * 4294966555 + 1).
 class Field96(FftField):
+    """The finite field GF(2^64 * 4294966555 + 1)."""
+
     MODULUS = 2^64 * 4294966555 + 1
     GEN_ORDER = 2^64
     ENCODED_SIZE = 12
@@ -144,8 +150,9 @@ class Field96(FftField):
         return cls(3)^4294966555
 
 
-# The finite field GF(2^66 * 4611686018427387897 + 1).
 class Field128(FftField):
+    """The finite field GF(2^66 * 4611686018427387897 + 1)."""
+
     MODULUS = 2^66 * 4611686018427387897 + 1
     GEN_ORDER = 2^66
     ENCODED_SIZE = 16
@@ -157,11 +164,9 @@ class Field128(FftField):
     def gen(cls):
         return cls(7)^4611686018427387897
 
-# the finite field GF(2^255 - 19).
-#
-# TODO Decide if this encoding scheme is convenient for existing implementations
-# of this field.
 class Field255(Field):
+    """The finite field GF(2^255 - 19)."""
+
     MODULUS = 2^255 - 19
     ENCODED_SIZE = 32
 
@@ -174,16 +179,16 @@ class Field255(Field):
 #
 
 
-# Remove leading zeros from the input polynomial.
 def poly_strip(Field, p):
+    """Remove leading zeros from the input polynomial."""
     for i in reversed(range(len(p))):
         if p[i] != Field(0):
             return p[:i+1]
     return []
 
 
-# Multiply two polynomials.
 def poly_mul(Field, p, q):
+    """Multiply two polynomials."""
     r = [Field(0) for _ in range(len(p) + len(q))]
     for i in range(len(p)):
         for j in range(len(q)):
@@ -191,8 +196,8 @@ def poly_mul(Field, p, q):
     return poly_strip(Field, r)
 
 
-# Evaluate a polynomial at a point.
 def poly_eval(Field, p, eval_at):
+    """Evaluate a polynomial at a point."""
     if len(p) == 0:
         return Field(0)
 
@@ -205,8 +210,8 @@ def poly_eval(Field, p, eval_at):
     return result
 
 
-# Compute the Lagrange interpolation polynomial for the given points.
 def poly_interp(Field, xs, ys):
+    """Compute the Lagrange interpolation polynomial for the given points."""
     R = PolynomialRing(Field.gf, 'x')
     p = R.lagrange_polynomial([(x.val, y.val) for (x, y) in zip(xs, ys)])
     return poly_strip(Field, list(map(lambda x: Field(x), p.coefficients())))

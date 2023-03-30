@@ -65,7 +65,9 @@ def xor(left, right):
 
 
 def vec_sub(left, right):
-    """Subtract the right operand from the left and return the result."""
+    """
+    Subtract the right operand from the left and return the result.
+    """
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
 
