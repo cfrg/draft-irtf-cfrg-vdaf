@@ -1,4 +1,4 @@
-# An IDPF based on the construction of [BBCGGI21, Section 6].
+"""An IDPF based on the construction of [BBCGGI21, Section 6]."""
 
 import itertools
 from common import \
@@ -22,10 +22,14 @@ import sagelib.field as field
 from sagelib.prg import PrgFixedKeyAes128
 
 
-# An IDPF based on the construction of [BBCGI21, Section 6]. It is identical
-# except that the output shares may be tuples rather than single field elements.
-# In particular, the value of `VALUE_LEN` may be any positive integer.
 class IdpfPoplar(Idpf):
+    """
+    An IDPF based on the construction of [BBCGI21, Section 6]. It is identical
+    except that the output shares may be tuples rather than single field
+    elements. In particular, the value of `VALUE_LEN` may be any positive
+    integer.
+    """
+
     # Parameters required by `Vdaf`.
     SHARES = 2
     KEY_SIZE = PrgFixedKeyAes128.SEED_SIZE
@@ -132,21 +136,30 @@ class IdpfPoplar(Idpf):
                 # wasteful. Implementations can eliminate this added
                 # complexity by caching nodes (i.e., `(seed, ctrl)`
                 # pairs) output by previous calls to `eval_next()`.
-                (seed, ctrl, y) = IdpfPoplar.eval_next(seed, ctrl,
-                    correction_words[current_level], current_level, bit, binder)
+                (seed, ctrl, y) = IdpfPoplar.eval_next(
+                    seed,
+                    ctrl,
+                    correction_words[current_level],
+                    current_level,
+                    bit,
+                    binder,
+                )
             out_share.append(y if agg_id == 0 else vec_neg(y))
         return out_share
 
-    # Compute the next node in the IDPF tree along the path determined by
-    # a candidate prefix. The next node is determined by `bit`, the bit
-    # of the prefix corresponding to the next level of the tree.
-    #
-    # TODO Consider implementing some version of the optimization
-    # discussed at the end of [BBCGGI21, Appendix C.2]. This could on
-    # average reduce the number of AES calls by a constant factor.
     @classmethod
     def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
                   correction_word, level, bit, binder):
+        """
+        Compute the next node in the IDPF tree along the path determined by
+        a candidate prefix. The next node is determined by `bit`, the bit of
+        the prefix corresponding to the next level of the tree.
+
+        TODO Consider implementing some version of the optimization
+        discussed at the end of [BBCGGI21, Appendix C.2]. This could on
+        average reduce the number of AES calls by a constant factor.
+        """
+
         Field = IdpfPoplar.current_field(level)
         (seed_cw, ctrl_cw, w_cw) = correction_word
         (s, t) = IdpfPoplar.extend(prev_seed, binder)

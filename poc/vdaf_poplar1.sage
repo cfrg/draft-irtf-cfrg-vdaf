@@ -1,4 +1,4 @@
-# The Poplar1 VDAF.
+"""The Poplar1 VDAF."""
 
 from __future__ import annotations
 from collections import namedtuple
@@ -151,9 +151,11 @@ class Poplar1(Vdaf):
                 Poplar1.encode_input_shares(
                     keys, corr_seed, corr_inner, corr_leaf))
 
-    # Checks if the level of `agg_param` appears anywhere in
-    # `previous_agg_params`. Returns `False` if it does, and `True` otherwise.
     def is_valid(agg_param, previous_agg_params):
+        """
+        Checks if the level of `agg_param` appears anywhere in
+        `previous_agg_params`. Returns `False` if it does, and `True` otherwise.
+        """
         (level, _) = agg_param
         return all(
             level != other_level
