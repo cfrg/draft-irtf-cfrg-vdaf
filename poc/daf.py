@@ -1,7 +1,8 @@
 """Definition of DAFs."""
 
 from __future__ import annotations
-from common import Unsigned, Vec, gen_rand
+from common import Bool, Bytes, Error, Unsigned, Vec, gen_rand
+from functools import reduce
 import sagelib.field as field
 from sagelib.prg import PrgSha3
 import json
@@ -34,8 +35,8 @@ class Daf:
     @classmethod
     def measurement_to_input_shares(Daf,
                                     measurement: Measurement,
-                                    rand: Bytes[Vdaf.RAND_SIZE],
-                                    ) -> (Bytes, Vec[Bytes]):
+                                    rand: Bytes["Daf.RAND_SIZE"],
+                                    ) -> tuple[Bytes, Vec[Bytes]]:
         """
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
@@ -179,7 +180,7 @@ def test_daf(Daf,
              measurements,
              expected_agg_result):
     # Test that the algorithm identifier is in the correct range.
-    assert 0 <= Daf.ID and Daf.ID < 2^32
+    assert 0 <= Daf.ID and Daf.ID < 2 ** 32
 
     # Run the DAF on the set of measurements.
     agg_result = run_daf(Daf,

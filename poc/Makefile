@@ -22,7 +22,7 @@ test: pyfiles
 	sage flp_generic.sage
 	sage idpf.sage
 	sage idpf_poplar.sage
-	sage daf.sage
-	sage vdaf.sage
+	sage -python daf.py
+	sage -python vdaf.py
 	sage vdaf_prio3.sage
 	sage vdaf_poplar1.sage

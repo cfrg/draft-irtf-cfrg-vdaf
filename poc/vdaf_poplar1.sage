@@ -17,7 +17,7 @@ from common import \
     to_be_bytes, \
     vec_add, \
     vec_sub
-from sagelib.vdaf import Vdaf, test_vdaf
+from vdaf import Vdaf, test_vdaf
 import sagelib.idpf as idpf
 import sagelib.idpf_poplar as idpf_poplar
 import sagelib.prg as prg
