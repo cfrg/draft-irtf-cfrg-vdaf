@@ -88,14 +88,6 @@ class Daf:
         """
         raise Error('not implemented')
 
-    @classmethod
-    def test_vector_verify_params(Daf, verify_params: Vec[VerifyParam]):
-        """
-        Returns a printable version of the verification parameters. This is used
-        for test vector generation.
-        """
-        raise Error('not implemented')
-
 
 def run_daf(Daf,
             agg_param: Daf.AggParam,
@@ -180,10 +172,6 @@ class TestDaf(Daf):
         return [reduce(lambda x, y: [x[0] + y[0]],
             map(lambda encoded: cls.Field.decode_vec(encoded),
                 agg_shares))[0].as_unsigned()]
-
-    @classmethod
-    def test_vector_verify_params(cls, verify_params: Vec[VerifyParam]):
-        pass
 
 
 def test_daf(Daf,
