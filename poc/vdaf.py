@@ -4,9 +4,9 @@ from __future__ import annotations
 from functools import reduce
 import json
 import os
-from common import ERR_VERIFY, VERSION, Bytes, Error, Unsigned, Vec, \
-                   format_custom, gen_rand, to_le_bytes, \
-                   print_wrapped_line
+from common import ERR_VERIFY, VERSION, Bool, Bytes, Error, \
+                   Unsigned, Vec, format_custom, gen_rand, \
+                   to_le_bytes, print_wrapped_line
 import sagelib.field as field
 from sagelib.prg import PrgSha3
 from typing import Optional, Tuple, Union
@@ -51,9 +51,9 @@ class Vdaf:
     @classmethod
     def measurement_to_input_shares(Vdaf,
                                     measurement: Measurement,
-                                    nonce: Bytes[Vdaf.NONCE_SIZE],
-                                    rand: Bytes[Vdaf.RAND_SIZE],
-                                    ) -> (Bytes, Vec[Bytes]):
+                                    nonce: Bytes["Vdaf.NONCE_SIZE"],
+                                    rand: Bytes["Vdaf.RAND_SIZE"],
+                                    ) -> tuple[Bytes, Vec[Bytes]]:
         """
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
@@ -75,7 +75,7 @@ class Vdaf:
                   agg_id: Unsigned,
                   agg_param: AggParam,
                   nonce: Bytes,
-                  public_share: Byhtes,
+                  public_share: Bytes,
                   input_share: Bytes) -> Prep:
         """
         Initialize the Prepare state for the given input share. This method is
@@ -413,7 +413,7 @@ def test_vdaf(Vdaf,
               print_test_vec=False,
               test_vec_instance=0):
     # Test that the algorithm identifier is in the correct range.
-    assert 0 <= Vdaf.ID and Vdaf.ID < 2^32
+    assert 0 <= Vdaf.ID and Vdaf.ID < 2 ** 32
 
     # Run the VDAF on the set of measurmenets.
     nonces = [gen_rand(Vdaf.NONCE_SIZE) for _ in range(len(measurements))]
