@@ -652,7 +652,7 @@ measurements into a sequence of input shares. The `measurement_to_input_shares`
 method is used for this purpose.
 
 * `Daf.measurement_to_input_shares(input: Measurement, rand:
-  Bytes[Daf.RAND_SIZE]) -> (Bytes, Vec[Bytes])` is the randomized sharding
+  Bytes[Daf.RAND_SIZE]) -> tuple[Bytes, Vec[Bytes]]` is the randomized sharding
   algorithm run by each Client. (The input `rand` consists of the random coins
   consumed by the algorithm.) It consumes the measurement and produces a "public
   share", distributed to each of the Aggregators, and a corresponding sequence
@@ -920,11 +920,11 @@ Sharding transforms a measurement into input shares as it does in DAFs
 produces a public share:
 
 * `Vdaf.measurement_to_input_shares(measurement: Measurement, nonce:
-  Bytes[Vdaf.NONCE_SIZE], rand: Bytes[Vdaf.RAND_SIZE]) -> (Bytes, Vec[Bytes])`
-  is the randomized sharding algorithm run by each Client. (Input `rand`
-  consists of the random coins consumed by the algorithm.) It consumes the
-  measurement and the nonce and produces a public share, distributed to each of
-  Aggregators, and the corresponding sequence of input shares, one for each
+  Bytes[Vdaf.NONCE_SIZE], rand: Bytes[Vdaf.RAND_SIZE]) -> tuple[Bytes,
+  Vec[Bytes]]` is the randomized sharding algorithm run by each Client. (Input
+  `rand` consists of the random coins consumed by the algorithm.) It consumes
+  the measurement and the nonce and produces a public share, distributed to each
+  of Aggregators, and the corresponding sequence of input shares, one for each
   Aggregator. Depending on the VDAF, the input shares may encode additional
   information used to verify the recovered output shares (e.g., the "proof
   shares" in Prio3 {{prio3}}). The length of the output vector MUST be `SHARES`.
