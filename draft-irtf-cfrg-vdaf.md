@@ -224,12 +224,12 @@ subset of the servers executes the protocol honestly, VDAFs guarantee that no
 input is ever accessible to any party besides the client that submitted it. At
 the same time, VDAFs are "verifiable" in the sense that malformed inputs that
 would otherwise garble the output of the computation can be detected and removed
-from the set of input measurements.
+from the set of input measurements. We refer to this property as "robustness".
 
-In addition to these MPC-style security goals, VDAFs can be composed with
-various mechanisms for differential privacy, thereby providing the added
-assurance that the aggregate result itself does not leak too much information
-about any one measurement.
+In addition to these MPC-style security goals of privacy and robustness, VDAFs
+can be composed with various mechanisms for differential privacy, thereby
+providing the added assurance that the aggregate result itself does not leak
+too much information about any one measurement.
 
 > TODO(issue #94) Provide guidance for local and central DP and point to it
 > here.
@@ -246,13 +246,13 @@ and others {{ENPA}}.
 
 The VDAF abstraction laid out in {{vdaf}} represents a class of multi-party
 protocols for privacy-preserving measurement proposed in the literature. These
-protocols vary in their operational and security considerations, sometimes in
+protocols vary in their operational and security requirements, sometimes in
 subtle but consequential ways. This document therefore has two important goals:
 
- 1. Providing higher-level protocols like {{?DAP=I-D.draft-ietf-ppm-dap}} with a
-    simple, uniform interface for accessing privacy-preserving measurement
-    schemes, and documenting relevant operational and security bounds for that
-    interface:
+ 1. Providing higher-level protocols like {{?DAP=I-D.draft-ietf-ppm-dap}} with
+    a simple, uniform interface for accessing privacy-preserving measurement
+    schemes, documenting relevant operational and security requirements, and
+    specifying constraints for safe usage:
 
     1. General patterns of communications among the various actors involved in
        the system (clients, aggregation servers, and the collector of the
@@ -500,6 +500,10 @@ Some common functionalities:
 * `concat(parts: Vec[Bytes]) -> Bytes` returns the concatenation of the input
   byte strings, i.e., `parts[0] || ... || parts[len(parts)-1]`.
 
+* `front(length: Unsigned, vec: Vec[Any]) -> (Vec[Any], Vec[Any])` splits `vec`
+  into two vectors, where the first vector is made up of the first `length`
+  elements of the input. I.e., `(vec[:length], vec[length:])`.
+
 * `xor(left: Bytes, right: Bytes) -> Bytes` returns the bitwise XOR of `left`
   and `right`. An exception is raised if the inputs are not the same length.
 
@@ -550,8 +554,8 @@ measurement process is as follows:
   refer to this sequence of input shares collectively as the Client's "report".
 * The Aggregators convert their input shares into "output shares".
     * Output shares are in one-to-one correspondence with the input shares.
-    * Just as each Aggregator receives one input share of each input, at the end
-      of this process, each aggregator holds one output share.
+    * Just as each Aggregator receives one input share of each measurement, if
+      this process succeeds, then each aggregator holds one output share.
     * In VDAFs, Aggregators will need to exchange information among themselves
       as part of the validation process.
 * Each Aggregator combines the output shares across inputs in the batch to
@@ -620,15 +624,15 @@ these stages. The interface of each algorithm is defined in the remainder of
 this section. In addition, a concrete DAF defines the associated constants and
 types enumerated in the following table.
 
-| Parameter          | Description              |
-|:-------------------|:-------------------------|
-| `ID`          | Algorithm identifier for this DAF. |
-| `SHARES`      | Number of input shares into which each measurement is sharded |
-| `RAND_SIZE`   | Size of the random byte string passed to sharding algorithm |
-| `Measurement` | Type of each measurement      |
-| `AggParam`    | Type of aggregation parameter |
-| `OutShare`    | Type of each output share     |
-| `AggResult`   | Type of the aggregate result  |
+| Parameter     | Description                                                    |
+|:--------------|:---------------------------------------------------------------|
+| `ID`          | Algorithm identifier for this DAF. A 32-bit, unsigned integer. |
+| `SHARES`      | Number of input shares into which each measurement is sharded. |
+| `RAND_SIZE`   | Size of the random byte string passed to sharding algorithm.   |
+| `Measurement` | Type of each measurement.                                      |
+| `AggParam`    | Type of aggregation parameter.                                 |
+| `OutShare`    | Type of each output share.                                     |
+| `AggResult`   | Type of the aggregate result.                                  |
 {: #daf-param title="Constants and types defined by each concrete DAF."}
 
 These types define some of the inputs and outputs of DAF methods at various
@@ -653,11 +657,12 @@ method is used for this purpose.
 
 * `Daf.measurement_to_input_shares(input: Measurement, rand:
   Bytes[Daf.RAND_SIZE]) -> tuple[Bytes, Vec[Bytes]]` is the randomized sharding
-  algorithm run by each Client. (The input `rand` consists of the random coins
-  consumed by the algorithm.) It consumes the measurement and produces a "public
-  share", distributed to each of the Aggregators, and a corresponding sequence
-  of input shares, one for each Aggregator. The length of the output vector MUST
-  be `SHARES`.
+  algorithm run by each Client. The input `rand` consists of the random bytes
+  consumed by the algorithm. This value MUST be generated using a
+  cryptographically secure pseudorandom number generator (CSPRNG). It consumes
+  the measurement and produces a "public share", distributed to each of the
+  Aggregators, and a corresponding sequence of input shares, one for each
+  Aggregator. The length of the output vector MUST be `SHARES`.
 
 ~~~~
     Client
@@ -669,15 +674,18 @@ method is used for this purpose.
     +----------------------------------------------+
     | measurement_to_input_shares                  |
     +----------------------------------------------+
-      |              |              ...  |
-      V              V                   V
-     input_share_0  input_share_1       input_share_[SHARES-1]
-      |              |              ...  |
-      V              V                   V
-    Aggregator 0   Aggregator 1        Aggregator SHARES-1
+      |              |              |     |
+      |              |         ...  |    public_share
+      |              |              |     |
+      |    +---------|-----+--------|-----+
+      |    |         |     |        |     |
+      V    |         V     |        V     |
+     input_share_0  input_share_1  input_share_[SHARES-1]
+      |    |         |     |   ...  |     |
+      V    V         V     V        V     V
+    Aggregator 0   Aggregator 1    Aggregator SHARES-1
 ~~~~
-{: #shard-flow title="The Client divides its measurement into input shares and
-distributes them to the Aggregators."}
+{: #shard-flow title="The Client divides its measurement into input shares and distributes them to the Aggregators. The public share is broadcast to all Aggregators."}
 
 ## Preparation {#sec-daf-prepare}
 
@@ -921,8 +929,8 @@ produces a public share:
 
 * `Vdaf.measurement_to_input_shares(measurement: Measurement, nonce:
   Bytes[Vdaf.NONCE_SIZE], rand: Bytes[Vdaf.RAND_SIZE]) -> tuple[Bytes,
-  Vec[Bytes]]` is the randomized sharding algorithm run by each Client. (Input
-  `rand` consists of the random coins consumed by the algorithm.) It consumes
+  Vec[Bytes]]` is the randomized sharding algorithm run by each Client. Input
+  `rand` consists of the random bytes consumed by the algorithm. It consumes
   the measurement and the nonce and produces a public share, distributed to each
   of Aggregators, and the corresponding sequence of input shares, one for each
   Aggregator. Depending on the VDAF, the input shares may encode additional
@@ -930,8 +938,7 @@ produces a public share:
   shares" in Prio3 {{prio3}}). The length of the output vector MUST be `SHARES`.
 
 In order to ensure privacy of the measurement, the Client MUST generate the
-nonce using a cryptographically secure pseudorandom number generator (CSPRNG).
-(See {{security}} for details.)
+random bytes and nonce using a CSPRNG. (See {{security}} for details.)
 
 ## Preparation {#sec-vdaf-prepare}
 
@@ -1012,8 +1019,7 @@ class methods:
   in the sequence of input shares output by the Client.
 
   Protocols MUST ensure that public share consumed by each of the Aggregators is
-  identical. This is security critical for VDAFs such as Poplar1 that require an
-  extractable distributed point function. (See {{poplar1}} for details.)
+  identical. This is security critical for VDAFs such as Poplar1.
 
 * `Vdaf.prep_next(prep: Prep, inbound: Optional[Bytes]) -> Union[Tuple[Prep,
   Bytes], OutShare]` is the deterministic preparation-state update algorithm run
@@ -1291,10 +1297,6 @@ The tables below define finite fields used in the remainder of this document.
 | GEN_ORDER    | 2^32                  | 2^66                           | n/a        |
 {: #fields title="Parameters for the finite fields used in this document."}
 
-> OPEN ISSUE We currently use big-endian for encoding field elements. However,
-> for implementations of `GF(2^255-19)`, little endian is more common. See
-> issue#90.
-
 ## Pseudorandom Generators {#prg}
 
 A pseudorandom generator (PRG) is used to expand a short, (pseudo)random seed
@@ -1503,8 +1505,8 @@ secret shares and sending a share to each Aggregator. Next, in the preparation
 phase, the Aggregators carry out a multi-party computation to determine if their
 shares correspond to a valid input (as determined by the arithmetic circuit).
 This computation involves a "proof" of validity generated by the Client. Next,
-each Aggregator sums up its input shares locally. Finally, the Collector sums up
-the aggregate shares and computes the aggregate result.
+each Aggregator sums up its shares locally. Finally, the Collector sums up the
+aggregate shares and computes the aggregate result.
 
 This VDAF does not have an aggregation parameter. Instead, the output share is
 derived from the input share by applying a fixed map. See {{poplar1}} for an
@@ -1587,11 +1589,11 @@ validity (encoding is described below in {{flp-encode}}):
 Our application requires that the FLP is "fully linear" in the sense defined in
 {{BBCGGI19}}. As a practical matter, what this property implies is that, when
 run on a share of the input and proof, the query-generation algorithm outputs a
-share of the verifier message. Furthermore, the "strong zero-knowledge" property
-of the FLP system ensures that the verifier message reveals nothing about the
-input's validity. Therefore, to decide if an input is valid, the Aggregators
-will run the query-generation algorithm locally, exchange verifier shares,
-combine them to recover the verifier message, and run the decision algorithm.
+share of the verifier message. Furthermore, the privacy property of the FLP
+system ensures that the verifier message reveals nothing about the input's
+validity. Therefore, to decide if an input is valid, the Aggregators will run
+the query-generation algorithm locally, exchange verifier shares, combine them
+to recover the verifier message, and run the decision algorithm.
 
 The query-generation algorithm includes a parameter `num_shares` that specifies
 the number of shares of the input and proof that were generated. If these data
@@ -1621,8 +1623,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
 ~~~
 {: #run-flp title="Execution of an FLP."}
 
-The proof system is constructed so that, if `input` is a valid input, then
-`run_flp(Flp, input, 1)` always returns `True`. On the other hand, if `input` is
+The proof system is constructed so that, if `inp` is a valid input, then
+`run_flp(Flp, inp, 1)` always returns `True`. On the other hand, if `inp` is
 invalid, then as long as `joint_rand` and `query_rand` are generated uniform
 randomly, the output is `False` with overwhelming probability.
 
@@ -1639,17 +1641,19 @@ elements:
 * `Flp.encode(measurement: Measurement) -> Vec[Field]` encodes a raw measurement
   as a vector of field elements. The return value MUST be of length `INPUT_LEN`.
 
-For some FLPs, the encoded input also includes redundant field elements that are
-useful for checking the proof, but which are not needed after the proof has been
-checked. An example is the "integer sum" data type from {{CGB17}} in which an
-integer in range `[0, 2^k)` is encoded as a vector of `k` field elements (this
-type is also defined in {{prio3sum}}). After consuming this vector, all that is
-needed is the integer it represents. Thus the FLP defines an algorithm for
-truncating the input to the length of the aggregated output:
+For some FLPs, the encoded input also includes redundant field elements that
+are useful for checking the proof, but which are not needed after the proof has
+been checked. An example is the "integer sum" data type from {{CGB17}} in which
+an integer in range `[0, 2^k)` is encoded as a vector of `k` field elements,
+each representing a bit of the integer (this type is also defined in
+{{prio3sum}}). After consuming this vector, all that is needed is the integer
+it represents. Thus the FLP defines an algorithm for truncating the input to
+the length of the aggregated output:
 
-* `Flp.truncate(input: Vec[Field]) -> Vec[Field]` maps an encoded input to an
-  aggregatable output. The length of the input MUST be `INPUT_LEN` and the length
-  of the output MUST be `OUTPUT_LEN`.
+* `Flp.truncate(input: Vec[Field]) -> Vec[Field]` maps an encoded input (e.g.,
+  the bit-encoding of the input) to an aggregatable output (e.g., the singleton
+  vector containing the input). The length of the input MUST be `INPUT_LEN` and
+  the length of the output MUST be `OUTPUT_LEN`.
 
 Once the aggregate shares have been computed and combined together, their sum
 can be converted into the aggregate result. This could be a projection from
@@ -1709,10 +1713,13 @@ Section 6.2.3 of {{BBCGGI19}}.)
 The sharding algorithm involves the following steps:
 
 1. Encode the Client's raw measurement as an input for the FLP
-1. Shard the input into a sequence of input shares
-1. Derive the joint randomness from the input shares and nonce
+1. Shard the measurement into a sequence of measurement shares
+1. Derive the joint randomness from the measurement shares and nonce
 1. Run the FLP proof-generation algorithm using the derived joint randomness
 1. Shard the proof into a sequence of proof shares
+1. Return the public share, consisting of the joint randomness parts, and the
+   input shares, each consisting of the measurement share, proof share, and
+   blind of one of the Aggregators
 
 The algorithm is specified below. Notice that only one set of input and proof
 shares (called the "leader" shares below) are vectors of field elements. The
@@ -1727,9 +1734,9 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
     l = Prio3.Prg.SEED_SIZE
     use_joint_rand = Prio3.Flp.JOINT_RAND_LEN > 0
 
-    # Split the coins into the various seeds we'll need.
+    # Split the random input into the various seeds we'll need.
     if len(rand) != Prio3.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random coins
+        raise ERR_INPUT # unexpected length for random input
     seeds = [rand[i:i+l] for i in range(0,Prio3.RAND_SIZE,l)]
     if use_joint_rand:
         k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
@@ -1991,6 +1998,12 @@ def agg_shares_to_result(Prio3, _agg_param,
 
 ### Auxiliary Functions {#prio3-auxiliary}
 
+This section defines a number of auxiliary functions referenced by the main
+algorithms for Prio3 in the preceding sections.
+
+The following method is called by the sharding and preparation algorithms to
+derive the joint randomness.
+
 ~~~
 def joint_rand(Prio3, k_joint_rand_parts):
     return Prio3.Prg.derive_seed(
@@ -2001,6 +2014,10 @@ def joint_rand(Prio3, k_joint_rand_parts):
 ~~~
 
 #### Message Serialization
+
+The following methods are used for encoding and decoding the leader's (i.e.,
+the Aggregator with ID `0`) VDAF input share. The leader's share consists of
+the full-length measurement and proof shares.
 
 ~~~
 def encode_leader_share(Prio3,
@@ -2030,7 +2047,13 @@ def decode_leader_share(Prio3, encoded):
     if len(encoded) != 0:
         raise ERR_DECODE
     return (meas_share, proof_share, k_blind)
+~~~
 
+Next, the methods below are used for encoding and decoding the helpers' (i.e.,
+non-leader) VDAF input shares. Each consists of PRG seeds that are expanded
+into the measurement and proof shares.
+
+~~~
 def encode_helper_share(Prio3,
                         k_meas_share,
                         k_proof_share,
@@ -2066,7 +2089,11 @@ def decode_helper_share(Prio3, agg_id, encoded):
     if len(encoded) != 0:
         raise ERR_DECODE
     return (meas_share, proof_share, k_blind)
+~~~
 
+Next, the methods below are used for encoding and decoding the VDAF public share.
+
+~~~
 def encode_public_share(Prio3,
                         k_joint_rand_parts):
     encoded = Bytes()
@@ -2087,7 +2114,12 @@ def decode_public_share(Prio3, encoded):
     if len(encoded) != 0:
         raise ERR_DECODE
     return k_joint_rand_parts
+~~~
 
+Finally, the methods below are used for encoding and decoding the values
+transmitted during VDAF preparation.
+
+~~~
 def encode_prep_share(Prio3, verifier, k_joint_rand):
     encoded = Bytes()
     encoded += Prio3.Flp.Field.encode_vec(verifier)
@@ -2759,7 +2791,7 @@ scheme is comprised of the following algorithms:
 * `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf:
   Vec[Idpf.FieldLeaf], binder: Bytes, rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes,
   Vec[Bytes])` is the randomized IDPF-key generation algorithm. (Input `rand`
-  consists of the random coins it consumes.) Its inputs are the index `alpha`
+  consists of the random bytes it consumes.) Its inputs are the index `alpha`
   the values `beta`, and a binder string. The value of `alpha` MUST be in range
   `[0, 2^BITS)`. The output is a public part that is sent to all Aggregators
   and a vector of private IDPF keys, one for each aggregator.
@@ -2867,10 +2899,10 @@ follows. Function `encode_input_shares` is defined in {{poplar1-auxiliary}}.
 def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
     l = Poplar1.Prg.SEED_SIZE
 
-    # Split the coins into coins for IDPF key generation,
-    # correlated randomness, and sharding.
+    # Split the random input into random input for IDPF key
+    # generation, correlated randomness, and sharding.
     if len(rand) != Poplar1.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random coins
+        raise ERR_INPUT # unexpected length for random input
     idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
     seeds = [rand[i:i+l] for i in range(0,3*l,l)]
     corr_seed, seeds = front(2, seeds)
@@ -3269,7 +3301,7 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
     if len(beta_inner) != IdpfPoplar.BITS - 1:
         raise ERR_INPUT # beta_inner vector is the wrong size
     if len(rand) != IdpfPoplar.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random coins
+        raise ERR_INPUT # unexpected length for random input
 
     init_seed = [
         rand[:PrgFixedKeyAes128.SEED_SIZE],

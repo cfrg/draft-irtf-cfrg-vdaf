@@ -56,9 +56,9 @@ class Prio3(Vdaf):
         l = Prio3.Prg.SEED_SIZE
         use_joint_rand = Prio3.Flp.JOINT_RAND_LEN > 0
 
-        # Split the coins into the various seeds we'll need.
+        # Split the random input into the various seeds we'll need.
         if len(rand) != Prio3.RAND_SIZE:
-            raise ERR_INPUT # unexpected length for random coins
+            raise ERR_INPUT # unexpected length for random input
         seeds = [rand[i:i+l] for i in range(0,Prio3.RAND_SIZE,l)]
         if use_joint_rand:
             k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
