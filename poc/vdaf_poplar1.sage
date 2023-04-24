@@ -58,10 +58,10 @@ class Poplar1(Vdaf):
     def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
         l = Poplar1.Prg.SEED_SIZE
 
-        # Split the coins into coins for IDPF key generation,
-        # correlated randomness, and sharding.
+        # Split the random input into the random input for IDPF key
+        # generation, correlated randomness, and sharding.
         if len(rand) != Poplar1.RAND_SIZE:
-            raise ERR_INPUT # unexpected length for random coins
+            raise ERR_INPUT # unexpected length for random input
         idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
         seeds = [rand[i:i+l] for i in range(0,3*l,l)]
         corr_seed, seeds = front(2, seeds)

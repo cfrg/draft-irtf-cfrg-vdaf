@@ -47,7 +47,7 @@ class IdpfPoplar(Idpf):
         if len(beta_inner) != IdpfPoplar.BITS - 1:
             raise ERR_INPUT # beta_inner vector is the wrong size
         if len(rand) != IdpfPoplar.RAND_SIZE:
-            raise ERR_INPUT # unexpected length for random coins
+            raise ERR_INPUT # unexpected length for random input
 
         init_seed = [
             rand[:PrgFixedKeyAes128.SEED_SIZE],
