@@ -1677,17 +1677,18 @@ are defined in {{prio3-param}}. The methods required for sharding, preparation,
 aggregation, and unsharding are described in the remaining subsections. These
 methods refer to constants enumerated in {{prio3-const}}.
 
-| Parameter         | Value             |
-|:------------------|:------------------|
-| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`   |
-| `NONCE_SIZE`      | `16`              |
-| `ROUNDS`          | `1`               |
-| `SHARES`          | in `[2, 256)`     |
-| `Measurement`     | `Flp.Measurement` |
-| `AggParam`        | `None`            |
+| Parameter         | Value                                           |
+|:------------------|:------------------------------------------------|
+| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`                                 |
+| `RAND_SIZE`       | `Prg.SEED_SIZE * (1 + 2 * (SHARES - 1))`        |
+| `NONCE_SIZE`      | `16`                                            |
+| `ROUNDS`          | `1`                                             |
+| `SHARES`          | in `[2, 256)`                                   |
+| `Measurement`     | `Flp.Measurement`                               |
+| `AggParam`        | `None`                                          |
 | `Prep`            | `Tuple[Vec[Flp.Field], Optional[Bytes], Bytes]` |
-| `OutShare`        | `Vec[Flp.Field]`  |
-| `AggResult`       | `Flp.AggResult`   |
+| `OutShare`        | `Vec[Flp.Field]`                                |
+| `AggResult`       | `Flp.AggResult`                                 |
 {: #prio3-param title="VDAF parameters for Prio3."}
 
 | Variable                          | Value |
@@ -2838,7 +2839,7 @@ state across evaluations. See {{idpf-poplar}} for details.
 | SHARES     | Number of IDPF keys output by IDPF-key generator |
 | BITS       | Length in bits of each input string |
 | VALUE_LEN  | Number of field elements of each output value |
-| RAND_SIZE  | Size of the random string consumed by the IDPF-key generator |
+| RAND_SIZE  | Size of the random string consumed by the IDPF-key generator. Equal to twice the PRG's seed size. |
 | KEY_SIZE   | Size in bytes of each IDPF key |
 | FieldInner | Implementation of `Field` ({{field}}) used for values of inner nodes |
 | FieldLeaf  | Implementation of `Field` used for values of leaf nodes |
@@ -2854,17 +2855,18 @@ are defined in {{poplar1-param}}. The methods required for sharding,
 preparation, aggregation, and unsharding are described in the remaining
 subsections. These methods make use of constants defined in {{poplar1-const}}.
 
-| Parameter         | Value             |
-|:------------------|:------------------|
-| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE` |
-| `NONCE_SIZE`      | `16` |
-| `ROUNDS`          | `2` |
-| `SHARES`          | `2` |
-| `Measurement`     | `Unsigned` |
-| `AggParam`        | `Tuple[Unsigned, Vec[Unsigned]]` |
-| `Prep`            | `Tuple[Bytes, Unsigned, Idpf.Vec]` |
-| `OutShare`        | `Idpf.Vec` |
-| `AggResult`       | `Vec[Unsigned]` |
+| Parameter         | Value                                |
+|:------------------|:-------------------------------------|
+| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`                      |
+| `RAND_SIZE`       | `Prg.SEED_SIZE * 3 + Idpf.RAND_SIZE` |
+| `NONCE_SIZE`      | `16`                                 |
+| `ROUNDS`          | `2`                                  |
+| `SHARES`          | `2`                                  |
+| `Measurement`     | `Unsigned`                           |
+| `AggParam`        | `Tuple[Unsigned, Vec[Unsigned]]`     |
+| `Prep`            | `Tuple[Bytes, Unsigned, Idpf.Vec]`   |
+| `OutShare`        | `Idpf.Vec`                           |
+| `AggResult`       | `Vec[Unsigned]`                      |
 {: #poplar1-param title="VDAF parameters for Poplar1."}
 
 | Variable                  | Value |
