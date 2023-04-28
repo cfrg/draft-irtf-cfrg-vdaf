@@ -1680,7 +1680,7 @@ methods refer to constants enumerated in {{prio3-const}}.
 | Parameter         | Value                                           |
 |:------------------|:------------------------------------------------|
 | `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`                                 |
-| `RAND_SIZE`       | `Prg.SEED_SIZE * (1 + 2 * (SHARES - 1))`        |
+| `RAND_SIZE`       | `Prg.SEED_SIZE * (1 + 2 * (SHARES - 1)) if Flp.JOINT_RAND_LEN == 0 else Prg.SEED_SIZE * (1 + 2 * (SHARES - 1) + SHARES)` |
 | `NONCE_SIZE`      | `16`                                            |
 | `ROUNDS`          | `1`                                             |
 | `SHARES`          | in `[2, 256)`                                   |
