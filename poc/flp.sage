@@ -1,7 +1,9 @@
 """Fully linear proof (FLP) systems."""
 
 from copy import deepcopy
-from common import ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec
+from common import (
+    ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec, vec_add, vec_sub,
+)
 
 import sagelib.field as field
 
@@ -83,6 +85,18 @@ class Flp:
         return None
 
 
+def linear_secret_share(vec: Vec[Field], num_shares: Unsigned, field: type) -> Vec[Vec[Field]]:
+    shares = [
+        field.rand_vec(len(vec))
+        for _ in range(num_shares - 1)
+    ]
+    last_share = vec
+    for other_share in shares:
+        last_share = vec_sub(last_share, other_share)
+    shares.append(last_share)
+    return shares
+
+
 # NOTE This is used to generate {{run-flp}}.
 def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     """Run the FLP on an input."""
@@ -94,8 +108,26 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     # Prover generates the proof.
     proof = Flp.prove(inp, prove_rand, joint_rand)
 
-    # Verifier queries the input and proof.
-    verifier = Flp.query(inp, proof, query_rand, joint_rand, num_shares)
+    # Shard the input and the proof.
+    input_shares = linear_secret_share(inp, num_shares, Flp.Field)
+    proof_shares = linear_secret_share(proof, num_shares, Flp.Field)
+
+    # Verifier queries the input shares and proof shares.
+    verifier_shares = [
+        Flp.query(
+            input_share,
+            proof_share,
+            query_rand,
+            joint_rand,
+            num_shares,
+        )
+        for input_share, proof_share in zip(input_shares, proof_shares)
+    ]
+
+    # Combine the verifier shares into the verifier.
+    verifier = Flp.Field.zeros(len(verifier_shares[0]))
+    for verifier_share in verifier_shares:
+        verifier = vec_add(verifier, verifier_share)
 
     # Verifier decides if the input is valid.
     return Flp.decide(verifier)
@@ -169,6 +201,6 @@ class FlpTestField128(FlpTest):
 
 if __name__ == '__main__':
     cls = FlpTestField128
-    assert run_flp(cls, cls.encode(0), 1) == True
-    assert run_flp(cls, cls.encode(4), 1) == True
-    assert run_flp(cls, [field.Field128(1337)], 1) == False
+    assert run_flp(cls, cls.encode(0), 3) == True
+    assert run_flp(cls, cls.encode(4), 3) == True
+    assert run_flp(cls, [field.Field128(1337)], 3) == False
