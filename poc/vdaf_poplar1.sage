@@ -22,10 +22,10 @@ import sagelib.idpf as idpf
 import sagelib.idpf_poplar as idpf_poplar
 import sagelib.prg as prg
 
-DST_SHARD_RAND = 1
-DST_CORR_INNER = 2
-DST_CORR_LEAF = 3
-DST_VERIFY_RAND = 4
+USAGE_SHARD_RAND = 1
+USAGE_CORR_INNER = 2
+USAGE_CORR_LEAF = 3
+USAGE_VERIFY_RAND = 4
 
 class Poplar1(Vdaf):
     # Types provided by a concrete instadce of `Poplar1`.
@@ -67,8 +67,11 @@ class Poplar1(Vdaf):
         corr_seed, seeds = front(2, seeds)
         (k_shard,), seeds = front(1, seeds)
 
-        prg = Poplar1.Prg(k_shard,
-                               Poplar1.custom(DST_SHARD_RAND), b'')
+        prg = Poplar1.Prg(
+            k_shard,
+            Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
+            b'',
+        )
 
         # Construct the IDPF values for each level of the IDPF tree.
         # Each "data" value is 1; in addition, the Client generates
@@ -97,14 +100,14 @@ class Poplar1(Vdaf):
             Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
                 corr_seed[0],
-                Poplar1.custom(DST_CORR_INNER),
+                Poplar1.domain_separation_tag(USAGE_CORR_INNER),
                 byte(0) + nonce,
                 3 * (Poplar1.Idpf.BITS-1),
             ),
             Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
                 corr_seed[1],
-                Poplar1.custom(DST_CORR_INNER),
+                Poplar1.domain_separation_tag(USAGE_CORR_INNER),
                 byte(1) + nonce,
                 3 * (Poplar1.Idpf.BITS-1),
             ),
@@ -113,14 +116,14 @@ class Poplar1(Vdaf):
             Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[0],
-                Poplar1.custom(DST_CORR_LEAF),
+                Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
                 byte(0) + nonce,
                 3,
             ),
             Poplar1.Prg.expand_into_vec(
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[1],
-                Poplar1.custom(DST_CORR_LEAF),
+                Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
                 byte(1) + nonce,
                 3,
             ),
@@ -184,24 +187,30 @@ class Poplar1(Vdaf):
         # Aggregator's share of the sketch for the given level of the IDPF
         # tree.
         if level < Poplar1.Idpf.BITS - 1:
-            corr_prg = Poplar1.Prg(corr_seed,
-                                        Poplar1.custom(DST_CORR_INNER),
-                                        byte(agg_id) + nonce)
+            corr_prg = Poplar1.Prg(
+                corr_seed,
+                Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+                byte(agg_id) + nonce,
+            )
             # Fast-forward the PRG state to the current level.
             corr_prg.next_vec(Field, 3 * level)
         else:
-            corr_prg = Poplar1.Prg(corr_seed,
-                                        Poplar1.custom(DST_CORR_LEAF),
-                                        byte(agg_id) + nonce)
+            corr_prg = Poplar1.Prg(
+                corr_seed,
+                Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+                byte(agg_id) + nonce,
+            )
         (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
         (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
             if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
         # Compute the Aggregator's first round of the sketch. These are
         # called the "masked input values" [BBCGGI21, Appendix C.4].
-        verify_rand_prg = Poplar1.Prg(verify_key,
-            Poplar1.custom(DST_VERIFY_RAND),
-            nonce + to_be_bytes(level, 2))
+        verify_rand_prg = Poplar1.Prg(
+            verify_key,
+            Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
+            nonce + to_be_bytes(level, 2),
+        )
         verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
         sketch_share = [a_share, b_share, c_share]
         out_share = []

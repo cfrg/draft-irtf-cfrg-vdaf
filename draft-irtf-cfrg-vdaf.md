@@ -914,11 +914,14 @@ Each VDAF is identified by a unique, 32-bit integer `ID`. Identifiers for each
 method is defined for every VDAF:
 
 ~~~
-def custom(Vdaf, usage: Unsigned) -> Bytes:
-    return format_custom(0, Vdaf.ID, usage)
+def domain_separation_tag(Vdaf, usage: Unsigned) -> Bytes:
+    """
+    Format domain separation tag for this VDAF with the given usage.
+    """
+    return format_dst(0, Vdaf.ID, usage)
 ~~~
 
-It is used to construct a customization string for an instance of `Prg` used by
+It is used to construct a domain separation tag for an instance of `Prg` used by
 the VDAF. (See {{prg}}.)
 
 ## Sharding {#sec-vdaf-shard}
@@ -1309,11 +1312,11 @@ PRGs are defined by a class `Prg` with the following associated parameter:
 
 A concrete `Prg` implements the following class method:
 
-* `Prg(seed: Bytes[Prg.SEED_SIZE], custom: Bytes, binder: Bytes)` constructs an
-  instance of `Prg` from the given seed and customization and binder strings.
-  (See below for definitions of these.) The seed MUST be of length `SEED_SIZE`
-  and MUST be generated securely (i.e., it is either the output of `gen_rand` or
-  a previous invocation of the PRG).
+* `Prg(seed: Bytes[Prg.SEED_SIZE], dst: Bytes, binder: Bytes)` constructs an
+  instance of `Prg` from the given seed, domain separation tag, and binder
+  string. (See below for definitions of these.) The seed MUST be of length
+  `SEED_SIZE` and MUST be generated securely (i.e., it is either the output of
+  `gen_rand` or a previous invocation of the PRG).
 
 * `prg.next(length: Unsigned)` returns the next `length` bytes of output of PRG.
   If the seed was securely generated, the output can be treated as pseudorandom.
@@ -1327,10 +1330,10 @@ pseudorandom field elements. For each method, the seed MUST be of length
 ~~~
 def derive_seed(Prg,
                 seed: Bytes[Prg.SEED_SIZE],
-                custom: Bytes,
+                dst: Bytes,
                 binder: Bytes):
     """Derive a new seed."""
-    prg = Prg(seed, custom, binder)
+    prg = Prg(seed, dst, binder)
     return prg.next(Prg.SEED_SIZE)
 
 def next_vec(self, Field, length: Unsigned):
@@ -1347,13 +1350,13 @@ def next_vec(self, Field, length: Unsigned):
 def expand_into_vec(Prg,
                     Field,
                     seed: Bytes[Prg.SEED_SIZE],
-                    custom: Bytes,
+                    dst: Bytes,
                     binder: Bytes,
                     length: Unsigned):
     """
     Expand the input `seed` into vector of `length` field elements.
     """
-    prg = Prg(seed, custom, binder)
+    prg = Prg(seed, dst, binder)
     return prg.next_vec(Field, length)
 ~~~
 {: #prg-derived-methods title="Derived class methods for PRGs."}
@@ -1371,10 +1374,10 @@ class PrgSha3(Prg):
     # Associated parameters
     SEED_SIZE = 16
 
-    def __init__(self, seed, custom, binder):
+    def __init__(self, seed, dst, binder):
         self.l = 0
         self.x = seed + binder
-        self.s = custom
+        self.s = dst
 
     def next(self, length: Unsigned) -> Bytes:
         self.l += length
@@ -1410,17 +1413,17 @@ class PrgFixedKeyAes128(Prg):
     # Associated parameters
     SEED_SIZE = 16
 
-    def __init__(self, seed, custom, binder):
+    def __init__(self, seed, dst, binder):
         self.length_consumed = 0
 
-        # Use SHA-3 to derive a key from the binder and customization
-        # strings. Note that the AES key does not need to be kept
-        # secret from any party. However, when used with IdpfPoplar,
-        # we require the binder to be a random nonce.
+        # Use SHA-3 to derive a key from the binder string and domain
+        # separation tag. Note that the AES key does not need to be
+        # kept secret from any party. However, when used with
+        # IdpfPoplar, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across PRG
         # evaluations with many different seeds.
-        self.fixed_key = cSHAKE128(binder, 16, b'', custom)
+        self.fixed_key = cSHAKE128(binder, 16, b'', dst)
         self.seed = seed
 
     def next(self, length: Unsigned) -> Bytes:
@@ -1451,11 +1454,11 @@ class PrgFixedKeyAes128(Prg):
         return xor(AES128(self.fixed_key, sigma_block), sigma_block)
 ~~~
 
-### The Customization and Binder Strings
+### The Domain Separation Tag and Binder String
 
 PRGs are used to map a seed to a finite domain, e.g., a fresh seed or a vector
 of field elements. To ensure domain separation, the derivation is needs to be
-bound to some distinguished "customization string". The customization string
+bound to some distinguished domain separation tag. The domain separation tag
 encodes the following values:
 
 1. The document version (i.e.,`VERSION`);
@@ -1465,12 +1468,13 @@ encodes the following values:
    shares in Prio3 {{prio3}}).
 
 The following algorithm is used in the remainder of this document in order to
-format the customization string:
+format the domain separation tag:
 
 ~~~
-def format_custom(algo_class: Unsigned,
-                  algo: Unsigned,
-                  usage: Unsigned) -> Bytes:
+def format_dst(algo_class: Unsigned,
+               algo: Unsigned,
+               usage: Unsigned) -> Bytes:
+    """Format PRG domain separation tag for use within a (V)DAF."""
     return concat([
         to_be_bytes(VERSION, 1),
         to_be_bytes(algo_class, 1),
@@ -1692,13 +1696,13 @@ methods refer to constants enumerated in {{prio3-const}}.
 
 | Variable                          | Value |
 |:----------------------------------|:------|
-| `DST_MEASUREMENT_SHARE: Unsigned` | 1     |
-| `DST_PROOF_SHARE: Unsigned`       | 2     |
-| `DST_JOINT_RANDOMNESS: Unsigned`  | 3     |
-| `DST_PROVE_RANDOMNESS: Unsigned`  | 4     |
-| `DST_QUERY_RANDOMNESS: Unsigned`  | 5     |
-| `DST_JOINT_RAND_SEED: Unsigned`   | 6     |
-| `DST_JOINT_RAND_PART: Unsigned`   | 7     |
+| `USAGE_MEASUREMENT_SHARE: Unsigned` | 1     |
+| `USAGE_PROOF_SHARE: Unsigned`       | 2     |
+| `USAGE_JOINT_RANDOMNESS: Unsigned`  | 3     |
+| `USAGE_PROVE_RANDOMNESS: Unsigned`  | 4     |
+| `USAGE_QUERY_RANDOMNESS: Unsigned`  | 5     |
+| `USAGE_JOINT_RAND_SEED: Unsigned`   | 6     |
+| `USAGE_JOINT_RAND_PART: Unsigned`   | 7     |
 {: #prio3-const title="Constants used by Prio3."}
 
 ### Sharding
@@ -1775,7 +1779,7 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
         helper_meas_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_helper_meas_shares[j],
-            Prio3.custom(DST_MEASUREMENT_SHARE),
+            Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE),
             byte(j+1),
             Prio3.Flp.INPUT_LEN
         )
@@ -1785,7 +1789,7 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
             encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(
                 k_helper_blinds[j],
-                Prio3.custom(DST_JOINT_RAND_PART),
+                Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
                 byte(j+1) + nonce + encoded,
             )
             k_joint_rand_parts.append(k_joint_rand_part)
@@ -1795,14 +1799,14 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
         encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
         k_joint_rand_part = Prio3.Prg.derive_seed(
             k_leader_blind,
-            Prio3.custom(DST_JOINT_RAND_PART),
+            Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
             byte(0) + nonce + encoded,
         )
         k_joint_rand_parts.insert(0, k_joint_rand_part)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             Prio3.joint_rand(k_joint_rand_parts),
-            Prio3.custom(DST_JOINT_RANDOMNESS),
+            Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
             b'',
             Prio3.Flp.JOINT_RAND_LEN,
         )
@@ -1813,7 +1817,7 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
     prove_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_prove,
-        Prio3.custom(DST_PROVE_RANDOMNESS),
+        Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
         b'',
         Prio3.Flp.PROVE_RAND_LEN,
     )
@@ -1823,7 +1827,7 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
         helper_proof_share = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_helper_proof_shares[j],
-            Prio3.custom(DST_PROOF_SHARE),
+            Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
             byte(j+1),
             Prio3.Flp.PROOF_LEN,
         )
@@ -1892,14 +1896,14 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
     if Prio3.Flp.JOINT_RAND_LEN > 0:
         encoded = Prio3.Flp.Field.encode_vec(meas_share)
         k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-            Prio3.custom(DST_JOINT_RAND_PART),
+            Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
             byte(agg_id) + nonce + encoded)
         k_joint_rand_parts[agg_id] = k_joint_rand_part
         k_corrected_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
         joint_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_corrected_joint_rand,
-            Prio3.custom(DST_JOINT_RANDOMNESS),
+            Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
             b'',
             Prio3.Flp.JOINT_RAND_LEN,
         )
@@ -1908,7 +1912,7 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
     query_rand = Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         verify_key,
-        Prio3.custom(DST_QUERY_RANDOMNESS),
+        Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
         nonce,
         Prio3.Flp.QUERY_RAND_LEN,
     )
@@ -2008,7 +2012,7 @@ derive the joint randomness.
 def joint_rand(Prio3, k_joint_rand_parts):
     return Prio3.Prg.derive_seed(
         zeros(Prio3.Prg.SEED_SIZE),
-        Prio3.custom(DST_JOINT_RAND_SEED),
+        Prio3.domain_separation_tag(USAGE_JOINT_RAND_SEED),
         concat(k_joint_rand_parts),
     )
 ~~~
@@ -2066,8 +2070,8 @@ def encode_helper_share(Prio3,
     return encoded
 
 def decode_helper_share(Prio3, agg_id, encoded):
-    c_meas_share = Prio3.custom(DST_MEASUREMENT_SHARE)
-    c_proof_share = Prio3.custom(DST_PROOF_SHARE)
+    c_meas_share = Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE)
+    c_proof_share = Prio3.domain_separation_tag(USAGE_PROOF_SHARE)
     l = Prio3.Prg.SEED_SIZE
     k_meas_share, encoded = encoded[:l], encoded[l:]
     meas_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
@@ -2869,10 +2873,10 @@ subsections. These methods make use of constants defined in {{poplar1-const}}.
 
 | Variable                  | Value |
 |:--------------------------|:------|
-| DST_SHARD_RAND: Unsigned  | 1     |
-| DST_CORR_INNER: Unsigned  | 2     |
-| DST_CORR_LEAF: Unsigned   | 3     |
-| DST_VERIFY_RAND: Unsigned | 4     |
+| USAGE_SHARD_RAND: Unsigned  | 1     |
+| USAGE_CORR_INNER: Unsigned  | 2     |
+| USAGE_CORR_LEAF: Unsigned   | 3     |
+| USAGE_VERIFY_RAND: Unsigned | 4     |
 {: #poplar1-const title="Constants used by Poplar1."}
 
 
@@ -2908,8 +2912,11 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
     corr_seed, seeds = front(2, seeds)
     (k_shard,), seeds = front(1, seeds)
 
-    prg = Poplar1.Prg(k_shard,
-                      Poplar1.custom(DST_SHARD_RAND), b'')
+    prg = Poplar1.Prg(
+        k_shard,
+        Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
+        b'',
+    )
 
     # Construct the IDPF values for each level of the IDPF tree.
     # Each "data" value is 1; in addition, the Client generates
@@ -2937,14 +2944,14 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
         Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldInner,
             corr_seed[0],
-            Poplar1.custom(DST_CORR_INNER),
+            Poplar1.domain_separation_tag(USAGE_CORR_INNER),
             byte(0) + nonce,
             3 * (Poplar1.Idpf.BITS-1),
         ),
         Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldInner,
             corr_seed[1],
-            Poplar1.custom(DST_CORR_INNER),
+            Poplar1.domain_separation_tag(USAGE_CORR_INNER),
             byte(1) + nonce,
             3 * (Poplar1.Idpf.BITS-1),
         ),
@@ -2953,14 +2960,14 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
         Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldLeaf,
             corr_seed[0],
-            Poplar1.custom(DST_CORR_LEAF),
+            Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
             byte(0) + nonce,
             3,
         ),
         Poplar1.Prg.expand_into_vec(
             Poplar1.Idpf.FieldLeaf,
             corr_seed[1],
-            Poplar1.custom(DST_CORR_LEAF),
+            Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
             byte(1) + nonce,
             3,
         ),
@@ -3035,24 +3042,30 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # Aggregator's share of the sketch for the given level of the IDPF
     # tree.
     if level < Poplar1.Idpf.BITS - 1:
-        corr_prg = Poplar1.Prg(corr_seed,
-                                    Poplar1.custom(DST_CORR_INNER),
-                                    byte(agg_id) + nonce)
+        corr_prg = Poplar1.Prg(
+            corr_seed,
+            Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+            byte(agg_id) + nonce,
+        )
         # Fast-forward the PRG state to the current level.
         corr_prg.next_vec(Field, 3 * level)
     else:
-        corr_prg = Poplar1.Prg(corr_seed,
-                                    Poplar1.custom(DST_CORR_LEAF),
-                                    byte(agg_id) + nonce)
+        corr_prg = Poplar1.Prg(
+            corr_seed,
+            Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+            byte(agg_id) + nonce,
+        )
     (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
     (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
         if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
     # Compute the Aggregator's first round of the sketch. These are
     # called the "masked input values" [BBCGGI21, Appendix C.4].
-    verify_rand_prg = Poplar1.Prg(verify_key,
-        Poplar1.custom(DST_VERIFY_RAND),
-        nonce + to_be_bytes(level, 2))
+    verify_rand_prg = Poplar1.Prg(
+        verify_key,
+        Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
+        nonce + to_be_bytes(level, 2),
+    )
     verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
     sketch_share = [a_share, b_share, c_share]
     out_share = []
@@ -3448,7 +3461,7 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
 ~~~
 def extend(IdpfPoplar, seed, binder):
-    prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 0), binder)
+    prg = PrgFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
     s = [
         prg.next(PrgFixedKeyAes128.SEED_SIZE),
         prg.next(PrgFixedKeyAes128.SEED_SIZE),
@@ -3458,7 +3471,7 @@ def extend(IdpfPoplar, seed, binder):
     return (s, t)
 
 def convert(IdpfPoplar, level, seed, binder):
-    prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 1), binder)
+    prg = PrgFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
     next_seed = prg.next(PrgFixedKeyAes128.SEED_SIZE)
     Field = IdpfPoplar.current_field(level)
     w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)

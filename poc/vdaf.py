@@ -5,7 +5,7 @@ from functools import reduce
 import json
 import os
 from common import ERR_VERIFY, VERSION, Bool, Bytes, Error, \
-                   Unsigned, Vec, format_custom, gen_rand, \
+                   Unsigned, Vec, format_dst, gen_rand, \
                    to_le_bytes, print_wrapped_line
 import sagelib.field as field
 from sagelib.prg import PrgSha3
@@ -134,11 +134,11 @@ class Vdaf:
         raise Error('not implemented')
 
     @classmethod
-    def custom(Vdaf, usage: Unsigned) -> Bytes:
+    def domain_separation_tag(Vdaf, usage: Unsigned) -> Bytes:
         """
-        Format customization string for this VDAF with the given usage.
+        Format domain separation tag for this VDAF with the given usage.
         """
-        return format_custom(0, Vdaf.ID, usage)
+        return format_dst(0, Vdaf.ID, usage)
 
     @classmethod
     def test_vec_set_type_param(Vdaf, test_vec):

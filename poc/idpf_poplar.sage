@@ -11,7 +11,7 @@ from common import \
     Unsigned, \
     Vec, \
     byte, \
-    format_custom, \
+    format_dst, \
     vec_add, \
     vec_neg, \
     vec_sub, \
@@ -181,7 +181,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def extend(IdpfPoplar, seed, binder):
-        prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 0), binder)
+        prg = PrgFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
         s = [
             prg.next(PrgFixedKeyAes128.SEED_SIZE),
             prg.next(PrgFixedKeyAes128.SEED_SIZE),
@@ -192,7 +192,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def convert(IdpfPoplar, level, seed, binder):
-        prg = PrgFixedKeyAes128(seed, format_custom(1, 0, 1), binder)
+        prg = PrgFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
         next_seed = prg.next(PrgFixedKeyAes128.SEED_SIZE)
         Field = IdpfPoplar.current_field(level)
         w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
