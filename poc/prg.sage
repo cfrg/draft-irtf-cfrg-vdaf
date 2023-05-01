@@ -157,8 +157,8 @@ class PrgFixedKeyAes128(Prg):
         """
         The multi-instance tweakable circular correlation-robust hash
         function of [GKWWY20] (Section 4.2). The tweak here is the key
-        that stays constant for all PRG evaluations of the same client,
-        but differs between clients.
+        that stays constant for all PRG evaluations of the same Client,
+        but differs between Clients.
 
         Function `AES128(key, block)` is the AES-128 blockcipher.
         """

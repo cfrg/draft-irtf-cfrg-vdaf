@@ -74,7 +74,7 @@ class Idpf:
         of prefixes. The output is a vector where each element is a vector of
         length `VALUE_LEN`. The output field is `FieldLeaf` if `level == BITS`
         and `FieldInner` otherwise. `binder` must match the binder string passed
-        by the client to `gen`.
+        by the Client to `gen`.
 
         Let `LSB(x, N)` denote the least significant `N` bits of positive
         integer `x`. By definition, a positive integer `x` is said to be the
