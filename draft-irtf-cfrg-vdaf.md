@@ -521,7 +521,7 @@ Some common functionalities:
 * `additive_secret_share(vec: Vec[Field], num_shares: Unsigned, field: type)
   -> Vec[Vec[Field]]` takes a vector of field elements and returns multiple
   vectors of the same length, such that they all add up to the input vector,
-  and each vector on its own is indistinguishable from uniform randomness.
+  and each proper subset of the vectors are indistinguishable from random.
 
 # Overview
 
