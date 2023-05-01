@@ -518,6 +518,11 @@ Some common functionalities:
 * `next_power_of_2(n: Unsigned) -> Unsigned` returns the smallest integer
   greater than or equal to `n` that is also a power of two.
 
+* `additive_secret_share(vec: Vec[Field], num_shares: Unsigned, field: type)
+  -> Vec[Vec[Field]]` takes a vector of field elements and returns multiple
+  vectors of the same length, such that they all add up to the input vector,
+  and each proper subset of the vectors are indistinguishable from random.
+
 # Overview
 
 ~~~
@@ -1615,8 +1620,26 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     # Prover generates the proof.
     proof = Flp.prove(inp, prove_rand, joint_rand)
 
-    # Verifier queries the input and proof.
-    verifier = Flp.query(inp, proof, query_rand, joint_rand, num_shares)
+    # Shard the input and the proof.
+    input_shares = additive_secret_share(inp, num_shares, Flp.Field)
+    proof_shares = additive_secret_share(proof, num_shares, Flp.Field)
+
+    # Verifier queries the input shares and proof shares.
+    verifier_shares = [
+        Flp.query(
+            input_share,
+            proof_share,
+            query_rand,
+            joint_rand,
+            num_shares,
+        )
+        for input_share, proof_share in zip(input_shares, proof_shares)
+    ]
+
+    # Combine the verifier shares into the verifier.
+    verifier = Flp.Field.zeros(len(verifier_shares[0]))
+    for verifier_share in verifier_shares:
+        verifier = vec_add(verifier, verifier_share)
 
     # Verifier decides if the input is valid.
     return Flp.decide(verifier)

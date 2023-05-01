@@ -647,7 +647,7 @@ def test_flp_generic(cls, test_cases):
                 cls.Valid.__name__, i, v))
 
         # Run the FLP.
-        decision = run_flp(cls, inp, 1)
+        decision = run_flp(cls, inp, 2)
         if decision != expected_decision:
             print('{}: test {} failed: proof evaluation resulted in {}; want {}'.format(
                 cls.Valid.__name__, i, decision, expected_decision))
