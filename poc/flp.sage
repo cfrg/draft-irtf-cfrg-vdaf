@@ -85,7 +85,9 @@ class Flp:
         return None
 
 
-def linear_secret_share(vec: Vec[Field], num_shares: Unsigned, field: type) -> Vec[Vec[Field]]:
+def additive_secret_share(vec: Vec[Field],
+                          num_shares: Unsigned,
+                          field: type) -> Vec[Vec[Field]]:
     shares = [
         field.rand_vec(len(vec))
         for _ in range(num_shares - 1)
@@ -109,8 +111,8 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     proof = Flp.prove(inp, prove_rand, joint_rand)
 
     # Shard the input and the proof.
-    input_shares = linear_secret_share(inp, num_shares, Flp.Field)
-    proof_shares = linear_secret_share(proof, num_shares, Flp.Field)
+    input_shares = additive_secret_share(inp, num_shares, Flp.Field)
+    proof_shares = additive_secret_share(proof, num_shares, Flp.Field)
 
     # Verifier queries the input shares and proof shares.
     verifier_shares = [
