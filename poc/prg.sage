@@ -6,7 +6,7 @@ from Cryptodome.Hash import CMAC, cSHAKE128
 from Cryptodome.Util import Counter
 from Cryptodome.Util.number import bytes_to_long
 from common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
-                   format_custom, zeros, from_le_bytes, gen_rand, \
+                   format_dst, zeros, from_le_bytes, gen_rand, \
                    next_power_of_2, print_wrapped_line, to_be_bytes, \
                    to_le_bytes, xor, concat
 
@@ -16,10 +16,10 @@ class Prg:
     # Size of the seed.
     SEED_SIZE: Unsigned
 
-    def __init__(self, seed: Bytes[Prg.SEED_SIZE], custom: Bytes, binder: Bytes):
+    def __init__(self, seed: Bytes[Prg.SEED_SIZE], dst: Bytes, binder: Bytes):
         """
-        Construct a new instnace of this PRG from the given seed and info
-        string.
+        Construct a new instance of this PRG from the given seed, domain
+        separation tag, and binder string.
         """
         raise Error('not implemented')
 
@@ -30,10 +30,10 @@ class Prg:
     @classmethod
     def derive_seed(Prg,
                     seed: Bytes[Prg.SEED_SIZE],
-                    custom: Bytes,
+                    dst: Bytes,
                     binder: Bytes):
         """Derive a new seed."""
-        prg = Prg(seed, custom, binder)
+        prg = Prg(seed, dst, binder)
         return prg.next(Prg.SEED_SIZE)
 
     def next_vec(self, Field, length: Unsigned):
@@ -51,13 +51,13 @@ class Prg:
     def expand_into_vec(Prg,
                         Field,
                         seed: Bytes[Prg.SEED_SIZE],
-                        custom: Bytes,
+                        dst: Bytes,
                         binder: Bytes,
                         length: Unsigned):
         """
         Expand the input `seed` into vector of `length` field elements.
         """
-        prg = Prg(seed, custom, binder)
+        prg = Prg(seed, dst, binder)
         return prg.next_vec(Field, length)
 
 class PrgAes128(Prg):
@@ -69,13 +69,13 @@ class PrgAes128(Prg):
     # Operational parameters.
     test_vec_name = 'PrgAes128'
 
-    def __init__(self, seed, custom, binder):
+    def __init__(self, seed, dst, binder):
         self.length_consumed = 0
 
         # Use CMAC as a pseuodorandom function to derive a key.
         hasher = CMAC.new(seed, ciphermod=AES)
-        hasher.update(to_be_bytes(len(custom), 2))
-        hasher.update(custom)
+        hasher.update(to_be_bytes(len(dst), 2))
+        hasher.update(dst)
         hasher.update(binder)
         self.key = hasher.digest()
 
@@ -100,10 +100,10 @@ class PrgSha3(Prg):
     # Operational parameters.
     test_vec_name = 'PrgSha3'
 
-    def __init__(self, seed, custom, binder):
-        # `custom` is used as the customization string; `seed || binder` is
+    def __init__(self, seed, dst, binder):
+        # `dst` is used as the customization string; `seed || binder` is
         # used as the main input string.
-        self.shake = cSHAKE128.new(custom=custom)
+        self.shake = cSHAKE128.new(custom=dst)
         self.shake.update(seed)
         self.shake.update(binder)
 
@@ -122,17 +122,17 @@ class PrgFixedKeyAes128(Prg):
     # Operational parameters
     test_vec_name = 'PrgFixedKeyAes128'
 
-    def __init__(self, seed, custom, binder):
+    def __init__(self, seed, dst, binder):
         self.length_consumed = 0
 
-        # Use SHA-3 to derive a key from the binder and customization
-        # strings. Note that the AES key does not need to be kept
-        # secret from any party. However, when used with IdpfPoplar,
-        # we require the binder to be a random nonce.
+        # Use SHA-3 to derive a key from the binder string and domain
+        # separation tag. Note that the AES key does not need to be
+        # kept secret from any party. However, when used with
+        # IdpfPoplar, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across PRG
         # evaluations with many different seeds.
-        shake = cSHAKE128.new(custom=custom)
+        shake = cSHAKE128.new(custom=dst)
         shake.update(binder)
         fixed_key = shake.read(16)
         self.cipher = AES.new(fixed_key, AES.MODE_ECB)
@@ -173,27 +173,27 @@ class PrgFixedKeyAes128(Prg):
 #
 
 def test_prg(Prg, F, expanded_len):
-    custom = format_custom(7, 1337, 2)
+    dst = format_dst(7, 1337, 2)
     binder = b'a string that binds some protocol artifact to the output'
     seed = gen_rand(Prg.SEED_SIZE)
 
     # Test next
-    expanded_data = Prg(seed, custom, binder).next(expanded_len)
+    expanded_data = Prg(seed, dst, binder).next(expanded_len)
     assert len(expanded_data) == expanded_len
 
-    want = Prg(seed, custom, binder).next(700)
+    want = Prg(seed, dst, binder).next(700)
     got = b''
-    prg = Prg(seed, custom, binder)
+    prg = Prg(seed, dst, binder)
     for i in range(0, 700, 7):
         got += prg.next(7)
     assert got == want
 
     # Test derive
-    derived_seed = Prg.derive_seed(seed, custom, binder)
+    derived_seed = Prg.derive_seed(seed, dst, binder)
     assert len(derived_seed) == Prg.SEED_SIZE
 
     # Test expand_into_vec
-    expanded_vec = Prg.expand_into_vec(F, seed, custom, binder, expanded_len)
+    expanded_vec = Prg.expand_into_vec(F, seed, dst, binder, expanded_len)
     assert len(expanded_vec) == expanded_len
 
 
@@ -206,7 +206,7 @@ if __name__ == '__main__':
     expanded_vec = PrgSha3.expand_into_vec(
         Field64,
         b'\x23\x1c\x40\x0d\xcb\xaf\xce\x34\x5e\xfd\x3c\xa7\x79\x65\xee\x06',
-        b'', # custom
+        b'', # domain separation tag
         b'', # binder
         5,
     )
@@ -217,26 +217,26 @@ if __name__ == '__main__':
 
         if TEST_VECTOR:
             seed = gen_rand(cls.SEED_SIZE)
-            custom = b'custom string'
+            dst = b'domain separation tag'
             binder = b'binder string'
             length = 40
 
             test_vector = {
                 'seed': seed.hex(),
-                'custom': custom.hex(),
+                'dst': dst.hex(),
                 'binder': binder.hex(),
                 'length': int(length),
                 'derived_seed': None, # set below
                 'expanded_vec_field128': None, # set below
             }
 
-            test_vector['derived_seed'] = cls.derive_seed(seed, custom, binder).hex()
+            test_vector['derived_seed'] = cls.derive_seed(seed, dst, binder).hex()
             test_vector['expanded_vec_field128'] = Field128.encode_vec(
-                    cls.expand_into_vec(Field128, seed, custom, binder, length)).hex()
+                    cls.expand_into_vec(Field128, seed, dst, binder, length)).hex()
 
             print('{}:'.format(cls.test_vec_name))
             print('  seed: "{}"'.format(test_vector['seed']))
-            print('  custom: "{}"'.format(test_vector['custom']))
+            print('  dst: "{}"'.format(test_vector['dst']))
             print('  binder: "{}"'.format(test_vector['binder']))
             print('  length: {}'.format(test_vector['length']))
             print('  derived_seed: "{}"'.format(test_vector['derived_seed']))

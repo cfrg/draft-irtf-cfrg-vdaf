@@ -20,13 +20,13 @@ import sagelib.flp as flp
 import sagelib.flp_generic as flp_generic
 import sagelib.prg as prg
 
-DST_MEASUREMENT_SHARE = 1
-DST_PROOF_SHARE = 2
-DST_JOINT_RANDOMNESS = 3
-DST_PROVE_RANDOMNESS = 4
-DST_QUERY_RANDOMNESS = 5
-DST_JOINT_RAND_SEED = 6
-DST_JOINT_RAND_PART = 7
+USAGE_MEASUREMENT_SHARE = 1
+USAGE_PROOF_SHARE = 2
+USAGE_JOINT_RANDOMNESS = 3
+USAGE_PROVE_RANDOMNESS = 4
+USAGE_QUERY_RANDOMNESS = 5
+USAGE_JOINT_RAND_SEED = 6
+USAGE_JOINT_RAND_PART = 7
 
 class Prio3(Vdaf):
     """Base class for VDAFs based on prio3."""
@@ -97,7 +97,7 @@ class Prio3(Vdaf):
             helper_meas_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_helper_meas_shares[j],
-                Prio3.custom(DST_MEASUREMENT_SHARE),
+                Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE),
                 byte(j+1),
                 Prio3.Flp.INPUT_LEN
             )
@@ -107,7 +107,7 @@ class Prio3(Vdaf):
                 encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
                 k_joint_rand_part = Prio3.Prg.derive_seed(
                     k_helper_blinds[j],
-                    Prio3.custom(DST_JOINT_RAND_PART),
+                    Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
                     byte(j+1) + nonce + encoded,
                 )
                 k_joint_rand_parts.append(k_joint_rand_part)
@@ -117,14 +117,14 @@ class Prio3(Vdaf):
             encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(
                 k_leader_blind,
-                Prio3.custom(DST_JOINT_RAND_PART),
+                Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
                 byte(0) + nonce + encoded,
             )
             k_joint_rand_parts.insert(0, k_joint_rand_part)
             joint_rand = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 Prio3.joint_rand(k_joint_rand_parts),
-                Prio3.custom(DST_JOINT_RANDOMNESS),
+                Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
                 b'',
                 Prio3.Flp.JOINT_RAND_LEN,
             )
@@ -135,7 +135,7 @@ class Prio3(Vdaf):
         prove_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_prove,
-            Prio3.custom(DST_PROVE_RANDOMNESS),
+            Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
             b'',
             Prio3.Flp.PROVE_RAND_LEN,
         )
@@ -145,7 +145,7 @@ class Prio3(Vdaf):
             helper_proof_share = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_helper_proof_shares[j],
-                Prio3.custom(DST_PROOF_SHARE),
+                Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
                 byte(j+1),
                 Prio3.Flp.PROOF_LEN,
             )
@@ -192,14 +192,14 @@ class Prio3(Vdaf):
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             encoded = Prio3.Flp.Field.encode_vec(meas_share)
             k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-                Prio3.custom(DST_JOINT_RAND_PART),
+                Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
                 byte(agg_id) + nonce + encoded)
             k_joint_rand_parts[agg_id] = k_joint_rand_part
             k_corrected_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
             joint_rand = Prio3.Prg.expand_into_vec(
                 Prio3.Flp.Field,
                 k_corrected_joint_rand,
-                Prio3.custom(DST_JOINT_RANDOMNESS),
+                Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
                 b'',
                 Prio3.Flp.JOINT_RAND_LEN,
             )
@@ -208,7 +208,7 @@ class Prio3(Vdaf):
         query_rand = Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             verify_key,
-            Prio3.custom(DST_QUERY_RANDOMNESS),
+            Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
             nonce,
             Prio3.Flp.QUERY_RAND_LEN,
         )
@@ -276,7 +276,7 @@ class Prio3(Vdaf):
         """Derive the joint randomness seed from its parts."""
         return Prio3.Prg.derive_seed(
             zeros(Prio3.Prg.SEED_SIZE),
-            Prio3.custom(DST_JOINT_RAND_SEED),
+            Prio3.domain_separation_tag(USAGE_JOINT_RAND_SEED),
             concat(k_joint_rand_parts),
         )
 
@@ -324,8 +324,8 @@ class Prio3(Vdaf):
 
     @classmethod
     def decode_helper_share(Prio3, agg_id, encoded):
-        c_meas_share = Prio3.custom(DST_MEASUREMENT_SHARE)
-        c_proof_share = Prio3.custom(DST_PROOF_SHARE)
+        c_meas_share = Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE)
+        c_proof_share = Prio3.domain_separation_tag(USAGE_PROOF_SHARE)
         l = Prio3.Prg.SEED_SIZE
         k_meas_share, encoded = encoded[:l], encoded[l:]
         meas_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,

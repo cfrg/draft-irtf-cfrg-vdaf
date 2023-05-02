@@ -126,10 +126,10 @@ def front(length, vec):
     return (vec[:length], vec[length:])
 
 
-def format_custom(algo_class: Unsigned,
-                  algo: Unsigned,
-                  usage: Unsigned) -> Bytes:
-    """Format PRG context for use with a (V)DAF."""
+def format_dst(algo_class: Unsigned,
+               algo: Unsigned,
+               usage: Unsigned) -> Bytes:
+    """Format PRG domain separation tag for use within a (V)DAF."""
     return concat([
         to_be_bytes(VERSION, 1),
         to_be_bytes(algo_class, 1),
