@@ -16,7 +16,7 @@ from common import \
     vec_sub, \
     zeros
 from vdaf import Vdaf, test_vdaf
-import sagelib.flp as flp
+import flp as flp
 import sagelib.flp_generic as flp_generic
 import sagelib.prg as prg
 

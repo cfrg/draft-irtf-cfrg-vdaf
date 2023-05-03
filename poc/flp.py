@@ -2,10 +2,10 @@
 
 from copy import deepcopy
 from common import (
-    ERR_ENCODE, ERR_INPUT, Bool, Error, Unsigned, Vec, vec_add, vec_sub,
+    ERR_ENCODE, Bool, Error, Unsigned, Vec, vec_add, vec_sub,
 )
-
-import sagelib.field as field
+from sagelib import field
+from sagelib.field import Field
 
 
 class Flp:
