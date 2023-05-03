@@ -2817,12 +2817,12 @@ either a vector of inner node field elements or leaf node field elements.) The
 scheme is comprised of the following algorithms:
 
 * `Idpf.gen(alpha: Unsigned, beta_inner: Vec[Vec[Idpf.FieldInner]], beta_leaf:
-  Vec[Idpf.FieldLeaf], binder: Bytes, rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes,
-  Vec[Bytes])` is the randomized IDPF-key generation algorithm. (Input `rand`
-  consists of the random bytes it consumes.) Its inputs are the index `alpha`
-  the values `beta`, and a binder string. The value of `alpha` MUST be in range
-  `[0, 2^BITS)`. The output is a public part that is sent to all Aggregators
-  and a vector of private IDPF keys, one for each aggregator.
+  Vec[Idpf.FieldLeaf], binder: Bytes, rand: Bytes["Idpf.RAND_SIZE"]) -> Tuple[
+  Bytes, Vec[Bytes]]` is the randomized IDPF-key generation algorithm. (Input
+  `rand` consists of the random bytes it consumes.) Its inputs are the index
+  `alpha` the values `beta`, and a binder string. The value of `alpha` MUST be
+  in range `[0, 2^BITS)`. The output is a public part that is sent to all
+  Aggregators and a vector of private IDPF keys, one for each aggregator.
 
 * `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level:
   Unsigned, prefixes: Vec[Unsigned], binder: Bytes) -> Idpf.Vec` is the
