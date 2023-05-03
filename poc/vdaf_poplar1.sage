@@ -18,7 +18,7 @@ from common import \
     vec_add, \
     vec_sub
 from vdaf import Vdaf, test_vdaf
-import sagelib.idpf as idpf
+import idpf
 import sagelib.idpf_poplar as idpf_poplar
 import sagelib.prg as prg
 

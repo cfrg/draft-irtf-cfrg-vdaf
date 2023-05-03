@@ -17,7 +17,7 @@ from common import \
     vec_sub, \
     xor
 from sagelib.field import Field2
-from sagelib.idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
+from idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
 from sagelib.prg import PrgFixedKeyAes128
 

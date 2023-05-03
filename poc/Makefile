@@ -18,9 +18,9 @@ test: pyfiles
 	sage -python common.py
 	sage field.sage
 	sage prg.sage
-	sage flp.sage
+	sage -python flp.py
 	sage flp_generic.sage
-	sage idpf.sage
+	sage -python idpf.py
 	sage idpf_poplar.sage
 	sage -python daf.py
 	sage -python vdaf.py

@@ -3,7 +3,7 @@
 from common import ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, \
                    Unsigned, Vec, next_power_of_2
 from sagelib.field import poly_eval, poly_interp, poly_mul, poly_strip
-from sagelib.flp import Flp, run_flp
+from flp import Flp, run_flp
 import sagelib.field as field
 
 

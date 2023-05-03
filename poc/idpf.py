@@ -1,7 +1,7 @@
 """Definition of IDPFs."""
 
 from __future__ import annotations
-from typing import Union
+from typing import Union, Tuple
 from common import \
     VERSION, \
     Bool, \
@@ -11,10 +11,12 @@ from common import \
     Vec, \
     gen_rand, \
     vec_add
+from functools import reduce
 import json
 import os
 import sagelib.field as field
 import sagelib.prg as prg
+
 
 class Idpf:
     """An Incremental Distributed Point Function (IDPF)."""
@@ -47,7 +49,7 @@ class Idpf:
             beta_inner: Vec[Vec[Idpf.FieldInner]],
             beta_leaf: Vec[Idpf.FieldLeaf],
             binder: Bytes,
-            rand: Bytes[Idpf.RAND_SIZE]) -> (Bytes, Vec[Bytes]):
+            rand: Bytes["Idpf.RAND_SIZE"]) -> Tuple[Bytes, Vec[Bytes]]:
         """
         Generates an IDPF public share and sequence of IDPF-keys of length
         `SHARES`. Value `alpha` is the input to encode. Values `beta_inner` and
@@ -127,9 +129,6 @@ def test_idpf(Idpf, alpha, level, prefixes):
             out[i] = vec_add(out[i], out_share[i])
 
     for (got, prefix) in zip(out, prefixes):
-        #print('debug: {0:b} {1:b}: got {2}'.format(
-        #    alpha, prefix, got))
-
         if Idpf.is_prefix(prefix, alpha, level+1):
             if level < Idpf.BITS-1:
                 want = beta_inner[level]
@@ -174,7 +173,6 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
         f.write('\n')
 
 
-
 def test_idpf_exhaustive(Idpf, alpha):
     """Generate a set of IDPF keys and test every possible output."""
 
@@ -191,8 +189,7 @@ def test_idpf_exhaustive(Idpf, alpha):
 
     # Evaluate the IDPF at every node of the tree.
     for level in range(Idpf.BITS):
-        #print('debug: level {0}'.format(level))
-        prefixes = list(range(2^level))
+        prefixes = list(range(2 ** level))
 
         out_shares = []
         for agg_id in range(Idpf.SHARES):
@@ -205,8 +202,6 @@ def test_idpf_exhaustive(Idpf, alpha):
         for prefix in prefixes:
             got = reduce(lambda x, y: vec_add(x,y),
                 map(lambda x: x[prefix], out_shares))
-            #print('debug: {0:b} {1:b}: got {2}'.format(
-            #    alpha, prefix, got))
 
             if Idpf.is_prefix(prefix, alpha, level+1):
                 if level < Idpf.BITS-1:
