@@ -719,7 +719,7 @@ been used with the same input share.
 
 DAFs MUST implement the following function:
 
-* `Daf.is_valid(agg_param: AggParam, previous_agg_params: Vec[AggParam]) ->
+* `Daf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) ->
   Bool`: Checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
@@ -1089,7 +1089,7 @@ been used with the same input share.
 
 VDAFs MUST implement the following function:
 
-* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: Vec[AggParam]) ->
+* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) ->
   Bool`: Checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
@@ -2825,7 +2825,7 @@ scheme is comprised of the following algorithms:
   Aggregators and a vector of private IDPF keys, one for each aggregator.
 
 * `Idpf.eval(agg_id: Unsigned, public_share: Bytes, key: Bytes, level:
-  Unsigned, prefixes: Vec[Unsigned], binder: Bytes) -> Idpf.Vec` is the
+  Unsigned, prefixes: Tuple[Unsigned, ...], binder: Bytes) -> Idpf.Vec` is the
   deterministic, stateless IDPF-key evaluation algorithm run by each
   Aggregator. Its inputs are the Aggregator's unique identifier, the public
   share distributed to all of the Aggregators, the Aggregator's IDPF key, the
@@ -2882,18 +2882,18 @@ are defined in {{poplar1-param}}. The methods required for sharding,
 preparation, aggregation, and unsharding are described in the remaining
 subsections. These methods make use of constants defined in {{poplar1-const}}.
 
-| Parameter         | Value                                |
-|:------------------|:-------------------------------------|
-| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`                      |
-| `RAND_SIZE`       | `Prg.SEED_SIZE * 3 + Idpf.RAND_SIZE` |
-| `NONCE_SIZE`      | `16`                                 |
-| `ROUNDS`          | `2`                                  |
-| `SHARES`          | `2`                                  |
-| `Measurement`     | `Unsigned`                           |
-| `AggParam`        | `Tuple[Unsigned, Vec[Unsigned]]`     |
-| `Prep`            | `Tuple[Bytes, Unsigned, Idpf.Vec]`   |
-| `OutShare`        | `Idpf.Vec`                           |
-| `AggResult`       | `Vec[Unsigned]`                      |
+| Parameter         | Value                                   |
+|:------------------|:----------------------------------------|
+| `VERIFY_KEY_SIZE` | `Prg.SEED_SIZE`                         |
+| `RAND_SIZE`       | `Prg.SEED_SIZE * 3 + Idpf.RAND_SIZE`    |
+| `NONCE_SIZE`      | `16`                                    |
+| `ROUNDS`          | `2`                                     |
+| `SHARES`          | `2`                                     |
+| `Measurement`     | `Unsigned`                              |
+| `AggParam`        | `Tuple[Unsigned, Tuple[Unsigned, ...]]` |
+| `Prep`            | `Tuple[Bytes, Unsigned, Idpf.Vec]`      |
+| `OutShare`        | `Idpf.Vec`                              |
+| `AggResult`       | `Vec[Unsigned]`                         |
 {: #poplar1-param title="VDAF parameters for Poplar1."}
 
 | Variable                  | Value |
@@ -3293,7 +3293,7 @@ def decode_agg_param(Poplar1, encoded):
         prefixes.append(packed >> ((level+1) * i) & m)
     if len(encoded) != 0:
         raise ERR_INPUT
-    return (level, prefixes)
+    return (level, tuple(prefixes))
 ~~~
 
 ## The IDPF scheme of {{BBCGGI21}} {#idpf-poplar}
@@ -3943,7 +3943,7 @@ upload_0:
 
 ~~~
 verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (0, [0, 1])
+agg_param: (0, (0, 1))
 upload_0:
   round_0:
     prep_share_0: >-
@@ -3973,7 +3973,7 @@ agg_result: [0, 1]
 
 ~~~
 verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (1, [0, 1, 2, 3])
+agg_param: (1, (0, 1, 2, 3))
 upload_0:
   round_0:
     prep_share_0: >-
@@ -4007,7 +4007,7 @@ agg_result: [0, 0, 0, 1]
 
 ~~~
 verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (2, [0, 2, 4, 6])
+agg_param: (2, (0, 2, 4, 6))
 upload_0:
   round_0:
     prep_share_0: >-
@@ -4041,7 +4041,7 @@ agg_result: [0, 0, 0, 1]
 
 ~~~
 verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (3, [1, 3, 5, 7, 9, 13, 15])
+agg_param: (3, (1, 3, 5, 7, 9, 13, 15))
 upload_0:
   round_0:
     prep_share_0: >-

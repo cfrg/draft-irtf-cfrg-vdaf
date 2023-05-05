@@ -42,7 +42,7 @@ class Poplar1(Vdaf):
 
     # Types required by `Vdaf`.
     Measurement = Unsigned
-    AggParam = Tuple[Unsigned, Vec[Unsigned]]
+    AggParam = Tuple[Unsigned, Tuple[Unsigned, ...]]
     Prep = Tuple[Bytes,
                  Unsigned,
                  Union[Vec[Vec[Idpf.FieldInner]],
@@ -370,7 +370,7 @@ class Poplar1(Vdaf):
             prefixes.append(packed >> ((level+1) * i) & m)
         if len(encoded) != 0:
             raise ERR_INPUT
-        return (level, prefixes)
+        return (level, tuple(prefixes))
 
     @classmethod
     def with_bits(Poplar1, bits: Unsigned):
@@ -393,25 +393,29 @@ class Poplar1(Vdaf):
 
 
 if __name__ == '__main__':
-    test_vdaf(Poplar1.with_bits(15), (15, []), [], [])
-    test_vdaf(Poplar1.with_bits(2), (1, [0b11]), [], [0])
-    test_vdaf(Poplar1.with_bits(2),
-        (0, [0b0, 0b1]),
+    test_vdaf(Poplar1.with_bits(15), (15, ()), [], [])
+    test_vdaf(Poplar1.with_bits(2), (1, (0b11,)), [], [0])
+    test_vdaf(
+        Poplar1.with_bits(2),
+        (0, (0b0, 0b1)),
         [0b10, 0b00, 0b11, 0b01, 0b11],
         [2, 3],
     )
-    test_vdaf(Poplar1.with_bits(2),
-        (1, [0b00, 0b01]),
+    test_vdaf(
+        Poplar1.with_bits(2),
+        (1, (0b00, 0b01)),
         [0b10, 0b00, 0b11, 0b01, 0b01],
         [1, 2],
     )
-    test_vdaf(Poplar1.with_bits(16),
-        (15, [0b1111000011110000]),
+    test_vdaf(
+        Poplar1.with_bits(16),
+        (15, (0b1111000011110000,)),
         [0b1111000011110000],
         [1],
     )
-    test_vdaf(Poplar1.with_bits(16),
-        (14, [0b111100001111000]),
+    test_vdaf(
+        Poplar1.with_bits(16),
+        (14, (0b111100001111000,)),
         [
             0b1111000011110000,
             0b1111000011110001,
@@ -421,23 +425,25 @@ if __name__ == '__main__':
         ],
         [2],
     )
-    test_vdaf(Poplar1.with_bits(128),
+    test_vdaf(
+        Poplar1.with_bits(128),
         (
             127,
-            [from_be_bytes(b'0123456789abcdef')],
+            (from_be_bytes(b'0123456789abcdef'),),
         ),
         [
             from_be_bytes(b'0123456789abcdef'),
         ],
         [1],
     )
-    test_vdaf(Poplar1.with_bits(256),
+    test_vdaf(
+        Poplar1.with_bits(256),
         (
             63,
-            [
+            (
                 from_be_bytes(b'00000000'),
                 from_be_bytes(b'01234567'),
-            ],
+            ),
         ),
         [
             from_be_bytes(b'0123456789abcdef0123456789abcdef'),
@@ -448,22 +454,22 @@ if __name__ == '__main__':
 
     # Test `is_valid` returns False on repeated levels, and True otherwise.
     cls = Poplar1.with_bits(256)
-    agg_params = [(0, []), (1, [0]), (1, [0, 1])]
-    assert cls.is_valid(agg_params[0], [])
-    assert cls.is_valid(agg_params[1], agg_params[:1])
-    assert not cls.is_valid(agg_params[2], agg_params[:2])
+    agg_params = [(0, ()), (1, (0,)), (1, (0, 1))]
+    assert cls.is_valid(agg_params[0], set([]))
+    assert cls.is_valid(agg_params[1], set(agg_params[:1]))
+    assert not cls.is_valid(agg_params[2], set(agg_params[:2]))
 
     # Test aggregation parameter encoding.
     cls = Poplar1.with_bits(256)
-    want = (0, [])
+    want = (0, ())
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
-    want = (0, [0, 1])
+    want = (0, (0, 1))
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
-    want = (2, [0, 1, 2, 3])
+    want = (2, (0, 1, 2, 3))
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
-    want = (17, [0, 1, 1233, 2^18 - 1])
+    want = (17, (0, 1, 1233, 2^18 - 1))
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
-    want = (255, [0, 1, 1233, 2^256 - 1])
+    want = (255, (0, 1, 1233, 2^256 - 1))
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
 
     # Generate test vectors.
@@ -478,6 +484,6 @@ if __name__ == '__main__':
         (3, [1, 3, 5, 7, 9, 13, 15], [0, 0, 0, 0, 0, 1, 0]),
     ]
     for (level, prefixes, expected_result) in tests:
-        agg_param = (int(level), list(map(int, prefixes)))
+        agg_param = (int(level), tuple(map(int, prefixes)))
         test_vdaf(cls, agg_param, measurements, expected_result,
                   print_test_vec=TEST_VECTOR, test_vec_instance=level)
