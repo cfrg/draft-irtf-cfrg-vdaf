@@ -10,13 +10,14 @@ from common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
                    next_power_of_2, print_wrapped_line, to_be_bytes, \
                    to_le_bytes, xor, concat
 
+
 class Prg:
     """The base class for PRGs."""
 
     # Size of the seed.
     SEED_SIZE: Unsigned
 
-    def __init__(self, seed: Bytes[Prg.SEED_SIZE], dst: Bytes, binder: Bytes):
+    def __init__(self, seed: Bytes["Prg.SEED_SIZE"], dst: Bytes, binder: Bytes):
         """
         Construct a new instance of this PRG from the given seed, domain
         separation tag, and binder string.
@@ -29,7 +30,7 @@ class Prg:
 
     @classmethod
     def derive_seed(Prg,
-                    seed: Bytes[Prg.SEED_SIZE],
+                    seed: Bytes["Prg.SEED_SIZE"],
                     dst: Bytes,
                     binder: Bytes):
         """Derive a new seed."""
@@ -41,7 +42,7 @@ class Prg:
         m = next_power_of_2(Field.MODULUS) - 1
         vec = []
         while len(vec) < length:
-            x = from_le_bytes(self.next(Field.ENCODED_SIZE))
+            x = from_le_bytes(self.next(int(Field.ENCODED_SIZE)))
             x &= m
             if x < Field.MODULUS:
                 vec.append(Field(x))
@@ -50,7 +51,7 @@ class Prg:
     @classmethod
     def expand_into_vec(Prg,
                         Field,
-                        seed: Bytes[Prg.SEED_SIZE],
+                        seed: Bytes["Prg.SEED_SIZE"],
                         dst: Bytes,
                         binder: Bytes,
                         length: Unsigned):
@@ -59,6 +60,7 @@ class Prg:
         """
         prg = Prg(seed, dst, binder)
         return prg.next_vec(Field, length)
+
 
 class PrgAes128(Prg):
     """WARNING `PrgAes128` has been deprecated in favor of `PrgSha3`."""
@@ -80,16 +82,17 @@ class PrgAes128(Prg):
         self.key = hasher.digest()
 
     def next(self, length: Unsigned) -> Bytes:
-        block = int(self.length_consumed / 16)
+        block = self.length_consumed // 16
         offset = self.length_consumed % 16
         self.length_consumed += length
 
         # CTR-mode encryption of the all-zero string of the desired
         # length and using a fixed, all-zero IV.
-        counter = Counter.new(int(128), initial_value=block)
+        counter = Counter.new(128, initial_value=block)
         cipher = AES.new(self.key, AES.MODE_CTR, counter=counter)
         stream = cipher.encrypt(zeros(offset + length))
         return stream[-length:]
+
 
 class PrgSha3(Prg):
     """PRG based on SHA-3 (cSHAKE128)."""
@@ -109,6 +112,7 @@ class PrgSha3(Prg):
 
     def next(self, length: Unsigned) -> Bytes:
         return self.shake.read(length)
+
 
 class PrgFixedKeyAes128(Prg):
     """
@@ -143,13 +147,14 @@ class PrgFixedKeyAes128(Prg):
         offset = self.length_consumed % 16
         new_length = self.length_consumed + length
         block_range = range(
-            int(self.length_consumed / 16),
-            int(new_length / 16) + 1)
+            self.length_consumed // 16,
+            new_length // 16 + 1
+        )
         self.length_consumed = new_length
 
         hashed_blocks = [
-            self.hash_block(xor(self.seed, to_le_bytes(i, 16))) \
-                         for i in block_range
+            self.hash_block(xor(self.seed, to_le_bytes(i, 16)))
+            for i in block_range
         ]
         return concat(hashed_blocks)[offset:offset+length]
 
@@ -165,7 +170,6 @@ class PrgFixedKeyAes128(Prg):
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])
         return xor(self.cipher.encrypt(sigma_block), sigma_block)
-
 
 
 ##
@@ -199,7 +203,8 @@ def test_prg(Prg, F, expanded_len):
 
 if __name__ == '__main__':
     import json
-    from sagelib.field import Field128, Field64, Field96
+    import os
+    from sagelib.field import Field128, Field64
 
     # This test case was found through brute-force search using this tool:
     # https://github.com/divergentdave/vdaf-rejection-sampling-search
@@ -225,7 +230,7 @@ if __name__ == '__main__':
                 'seed': seed.hex(),
                 'dst': dst.hex(),
                 'binder': binder.hex(),
-                'length': int(length),
+                'length': length,
                 'derived_seed': None, # set below
                 'expanded_vec_field128': None, # set below
             }

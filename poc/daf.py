@@ -4,7 +4,7 @@ from __future__ import annotations
 from common import Bool, Bytes, Error, Unsigned, Vec, gen_rand
 from functools import reduce
 import sagelib.field as field
-from sagelib.prg import PrgSha3
+from prg import PrgSha3
 import json
 
 
