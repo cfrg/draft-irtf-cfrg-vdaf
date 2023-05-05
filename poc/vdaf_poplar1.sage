@@ -20,7 +20,7 @@ from common import \
 from vdaf import Vdaf, test_vdaf
 import idpf
 import sagelib.idpf_poplar as idpf_poplar
-import sagelib.prg as prg
+import prg
 
 USAGE_SHARD_RAND = 1
 USAGE_CORR_INNER = 2

@@ -15,7 +15,7 @@ from functools import reduce
 import json
 import os
 import sagelib.field as field
-import sagelib.prg as prg
+import prg
 
 
 class Idpf:

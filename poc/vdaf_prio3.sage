@@ -18,7 +18,7 @@ from common import \
 from vdaf import Vdaf, test_vdaf
 import flp
 import sagelib.flp_generic as flp_generic
-import sagelib.prg as prg
+import prg
 
 USAGE_MEASUREMENT_SHARE = 1
 USAGE_PROOF_SHARE = 2

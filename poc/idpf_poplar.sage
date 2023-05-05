@@ -19,7 +19,7 @@ from common import \
 from sagelib.field import Field2
 from idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
 import sagelib.field as field
-from sagelib.prg import PrgFixedKeyAes128
+from prg import PrgFixedKeyAes128
 
 
 class IdpfPoplar(Idpf):
