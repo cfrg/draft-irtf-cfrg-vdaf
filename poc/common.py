@@ -36,7 +36,7 @@ ERR_VERIFY = Error('verification of the user\'s input failed')
 def next_power_of_2(n):
     """Return the smallest power of 2 that is larger than or equal to n."""
     assert n > 0
-    return 2 ** ((n - 1).nbits())
+    return 2 ** (int(n - 1).bit_length())
 
 
 def zeros(length):

@@ -4,8 +4,8 @@ from copy import deepcopy
 from common import (
     ERR_ENCODE, Bool, Error, Unsigned, Vec, vec_add, vec_sub,
 )
-from sagelib import field
-from sagelib.field import Field
+import field
+from field import Field
 
 
 class Flp:

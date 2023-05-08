@@ -3,7 +3,7 @@
 from __future__ import annotations
 from common import Bool, Bytes, Error, Unsigned, Vec, gen_rand
 from functools import reduce
-import sagelib.field as field
+import field
 from prg import PrgSha3
 import json
 

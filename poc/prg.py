@@ -42,7 +42,7 @@ class Prg:
         m = next_power_of_2(Field.MODULUS) - 1
         vec = []
         while len(vec) < length:
-            x = from_le_bytes(self.next(int(Field.ENCODED_SIZE)))
+            x = from_le_bytes(self.next(Field.ENCODED_SIZE))
             x &= m
             if x < Field.MODULUS:
                 vec.append(Field(x))
@@ -204,7 +204,7 @@ def test_prg(Prg, F, expanded_len):
 if __name__ == '__main__':
     import json
     import os
-    from sagelib.field import Field128, Field64
+    from field import Field128, Field64
 
     # This test case was found through brute-force search using this tool:
     # https://github.com/divergentdave/vdaf-rejection-sampling-search

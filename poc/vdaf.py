@@ -7,7 +7,7 @@ import os
 from common import ERR_VERIFY, VERSION, Bool, Bytes, Error, \
                    Unsigned, Vec, format_dst, gen_rand, \
                    to_le_bytes, print_wrapped_line
-import sagelib.field as field
+import field
 from prg import PrgSha3
 from typing import Optional, Tuple, Union
 
