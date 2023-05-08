@@ -14,7 +14,7 @@ from common import \
 from functools import reduce
 import json
 import os
-import sagelib.field as field
+import field
 import prg
 
 

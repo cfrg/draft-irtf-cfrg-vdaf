@@ -1,7 +1,7 @@
 """Definitions of finite fields used in this spec."""
 
 from __future__ import annotations
-from sage.all import GF
+from sage.all import GF, PolynomialRing
 from common import ERR_DECODE, to_le_bytes, from_le_bytes, Bytes, \
                    Error, Unsigned, Vec, byte
 
@@ -61,7 +61,7 @@ class Field:
         return self.__class__(self.val * other.val)
 
     def inv(self) -> Field:
-        return self.__class__(self.val^-1)
+        return self.__class__(self.val**-1)
 
     def __eq__(self, other: Field) -> Field:
         return self.val == other.val
@@ -73,7 +73,7 @@ class Field:
         return self * other.inv()
 
     def __pow__(self, n: Unsigned) -> Field:
-        return self.__class__(self.val ^ n)
+        return self.__class__(self.val ** n)
 
     def __str__(self):
         return str(self.val)
@@ -120,11 +120,12 @@ class Field2(Field):
             m |= v << i
         return bytes(map(lambda x: m & x, inp))
 
+
 class Field64(FftField):
     """The finite field GF(2^32 * 4294967295 + 1)."""
 
-    MODULUS = 2^32 * 4294967295 + 1
-    GEN_ORDER = 2^32
+    MODULUS = 2**32 * 4294967295 + 1
+    GEN_ORDER = 2**32
     ENCODED_SIZE = 8
 
     # Operational parameters
@@ -132,14 +133,14 @@ class Field64(FftField):
 
     @classmethod
     def gen(cls):
-        return cls(7)^4294967295
+        return cls(7)**4294967295
 
 
 class Field96(FftField):
     """The finite field GF(2^64 * 4294966555 + 1)."""
 
-    MODULUS = 2^64 * 4294966555 + 1
-    GEN_ORDER = 2^64
+    MODULUS = 2**64 * 4294966555 + 1
+    GEN_ORDER = 2**64
     ENCODED_SIZE = 12
 
     # Operational parameters
@@ -147,14 +148,14 @@ class Field96(FftField):
 
     @classmethod
     def gen(cls):
-        return cls(3)^4294966555
+        return cls(3)**4294966555
 
 
 class Field128(FftField):
     """The finite field GF(2^66 * 4611686018427387897 + 1)."""
 
-    MODULUS = 2^66 * 4611686018427387897 + 1
-    GEN_ORDER = 2^66
+    MODULUS = 2**66 * 4611686018427387897 + 1
+    GEN_ORDER = 2**66
     ENCODED_SIZE = 16
 
     # Operational parameters
@@ -162,12 +163,13 @@ class Field128(FftField):
 
     @classmethod
     def gen(cls):
-        return cls(7)^4611686018427387897
+        return cls(7)**4611686018427387897
+
 
 class Field255(Field):
     """The finite field GF(2^255 - 19)."""
 
-    MODULUS = 2^255 - 19
+    MODULUS = 2**255 - 19
     ENCODED_SIZE = 32
 
     # Operational parameters
@@ -242,7 +244,7 @@ def test_field(cls):
     assert x - y == cls(x.val - y.val)
     assert -x == cls(-x.val)
     assert x * y == cls(x.val * y.val)
-    assert x.inv() == cls(x.val^-1)
+    assert x.inv() == cls(x.val**-1)
 
     # Test serialization.
     want = cls.rand_vec(10)
@@ -254,7 +256,8 @@ def test_fft_field(cls):
     test_field(cls)
 
     # Test generator.
-    assert cls.gen()^cls.GEN_ORDER == cls(1)
+    assert cls.gen()**cls.GEN_ORDER == cls(1)
+
 
 if __name__ == '__main__':
     test_fft_field(Field64)

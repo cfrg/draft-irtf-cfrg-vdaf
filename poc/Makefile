@@ -16,7 +16,7 @@ sagelib/%.py: %.sage
 
 test: pyfiles
 	sage -python common.py
-	sage field.sage
+	sage -python field.py
 	sage -python prg.py
 	sage -python flp.py
 	sage flp_generic.sage
