@@ -68,7 +68,7 @@ class Idpf:
              public_share: Bytes,
              key: Bytes,
              level: Unsigned,
-             prefixes: Vec[Unsigned],
+             prefixes: Tuple[Unsigned, ...],
              binder: Bytes) -> Union[Vec[Vec[Idpf.FieldInner]],
                                      Vec[Vec[Idpf.FieldLeaf]]]:
         """
@@ -189,7 +189,7 @@ def test_idpf_exhaustive(Idpf, alpha):
 
     # Evaluate the IDPF at every node of the tree.
     for level in range(Idpf.BITS):
-        prefixes = list(range(2 ** level))
+        prefixes = tuple(range(2 ** level))
 
         out_shares = []
         for agg_id in range(Idpf.SHARES):

@@ -45,7 +45,7 @@ class Daf:
 
     @classmethod
     def is_valid(Daf, agg_param: AggParam,
-                 previous_agg_params: Vec[AggParam]) -> Bool:
+                 previous_agg_params: set[AggParam]) -> Bool:
         """
         Check if `agg_param` is valid for use with an input share that has
         previously been used with all `previous_agg_params`.

@@ -569,5 +569,5 @@ if __name__ == '__main__':
 
     # Test `is_valid` returns True on empty previous_agg_params, and False
     # otherwise.
-    assert cls.is_valid(b"", [])
-    assert not cls.is_valid(b"", [b""])
+    assert cls.is_valid(None, set([]))
+    assert not cls.is_valid(None, set([None]))
