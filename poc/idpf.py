@@ -60,7 +60,7 @@ class Idpf:
         `2^BITS`, any elment of `beta_inner` has length other than `VALUE_LEN`,
         or if `beta_leaf` has length other than `VALUE_LEN`.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def eval(Idpf,
@@ -95,7 +95,7 @@ class Idpf:
         An error is raised if any element of `prefixes` is larger than or equal
         to `2^level` or if `level` is greater than `BITS`.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def current_field(Idpf, level):

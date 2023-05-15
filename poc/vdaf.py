@@ -58,7 +58,7 @@ class Vdaf:
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def is_valid(Vdaf, agg_param: AggParam,
@@ -67,7 +67,7 @@ class Vdaf:
         Check if `agg_param` is valid for use with an input share that has
         previously been used with all `previous_agg_params`.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def prep_init(Vdaf,
@@ -85,7 +85,7 @@ class Vdaf:
         SHARES)`, and the aggregation parameter and nonce agreed upon by all of
         the Aggregators.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def prep_next(Vdaf,
@@ -97,7 +97,7 @@ class Vdaf:
         is the first round) and return the aggregator's share of the next round
         (or the aggregator's output share if this is the last round).
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def prep_shares_to_prep(Vdaf,
@@ -109,7 +109,7 @@ class Vdaf:
         of the message shares from the previous round. The output is passed to
         Prep.next().
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def out_shares_to_agg_share(Vdaf,
@@ -120,7 +120,7 @@ class Vdaf:
         string. This is called by an aggregator after recovering a batch of
         output shares.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def agg_shares_to_result(Vdaf,
@@ -131,7 +131,7 @@ class Vdaf:
         Unshard the aggregate shares (encoded as byte strings) and compute the
         aggregate result. This is called by the Collector.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def domain_separation_tag(Vdaf, usage: Unsigned) -> Bytes:
