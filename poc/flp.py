@@ -40,7 +40,7 @@ class Flp:
     @classmethod
     def encode(Flp, measurement: Measurement) -> Vec[Field]:
         """Encode a measurement as an input."""
-        raise Error('encode() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def prove(Flp,
@@ -48,7 +48,7 @@ class Flp:
               prove_rand: Vec[Field],
               joint_rand: Vec[Field]) -> Vec[Field]:
         """Generate a proof of an input's validity."""
-        raise Error('prove() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def query(Flp,
@@ -58,22 +58,22 @@ class Flp:
               joint_rand: Vec[Field],
               num_shares: Unsigned) -> Vec[Field]:
         """Generate a verifier message for an input and proof."""
-        raise Error('query() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def decide(Flp, verifier: Vec[Field]) -> Bool:
         """Decide if a verifier message was generated from a valid input."""
-        raise Error('decide() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
         """Map an input to an aggregatable output."""
-        raise Error('truncate() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def decode(output: Vec[Field], num_measurements: Unsigned) -> AggResult:
         """Decode an aggregate result."""
-        raise Error('decode() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def test_vec_set_type_param(Vdaf, test_vec):

@@ -41,7 +41,7 @@ class Daf:
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def is_valid(Daf, agg_param: AggParam,
@@ -50,7 +50,7 @@ class Daf:
         Check if `agg_param` is valid for use with an input share that has
         previously been used with all `previous_agg_params`.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def prep(Daf,
@@ -65,7 +65,7 @@ class Daf:
         corresponding to the index of `input_share` in the Client's output), and
         an aggreation parameter and returns the corresponding output share.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def out_shares_to_agg_share(Daf,
@@ -76,7 +76,7 @@ class Daf:
         string. This is called by an Aggregator after recovering a batch of
         output shares.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def agg_shares_to_result(Daf,
@@ -87,7 +87,7 @@ class Daf:
         Unshard the aggregate shares (encoded as byte strings) and compute the
         aggregate result. This is called by the Collector.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
 
 def run_daf(Daf,
