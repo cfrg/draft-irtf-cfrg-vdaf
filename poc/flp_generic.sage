@@ -18,11 +18,11 @@ class Gadget:
 
     def eval(self, Field, inp):
         """Evaluate the gadget on a sequence of field elements."""
-        raise Error('eval() not implemented')
+        raise NotImplementedError()
 
     def eval_poly(self, Field, inp_poly):
         """Evaluate the gadget on a sequence of polynomials over a field."""
-        raise Error('eval_poly() not implemented')
+        raise NotImplementedError()
 
 class Valid:
     """
@@ -81,25 +81,25 @@ class Valid:
     @classmethod
     def encode(Valid, measurement: Measurement) -> Vec[Field]:
         """Encode a measurement as an input."""
-        raise Error('encode() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def truncate(Valid, inp: Vec[Field]) -> Vec[Field]:
         """Truncate an input to the length of an aggregatable output."""
-        raise Error('truncate() not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def decode(Valid, output: Vec[Field],
                num_measurements: Unsigned) -> AggResult:
         """Decode an aggregate result."""
-        raise Error('decode() not implemented')
+        raise NotImplementedError()
 
     def eval(self,
              inp: Vec[Field],
              joint_rand: Vec[Field],
              num_shares: Unsigned):
         """Evaluate the circuit on the provided input and joint randomness."""
-        raise Error('eval() not implemented')
+        raise NotImplementedError()
 
 
     @classmethod
@@ -391,7 +391,7 @@ class PolyEval(Gadget):
                 break
 
         if len(p) < 1:
-            raise Error('invalid polynomial: zero length')
+            raise ValueError('invalid polynomial: zero length')
 
         self.p = p
         self.DEGREE = len(p) - 1
@@ -493,7 +493,7 @@ class Sum(Valid):
         """
 
         if 2^bits >= Sum.Field.MODULUS:
-            raise Error('bit size exceeds field modulus')
+            raise ValueError('bit size exceeds field modulus')
         class SumWithBits(Sum):
             GADGET_CALLS = [bits]
             INPUT_LEN = bits

@@ -91,7 +91,7 @@ class FftField(Field):
 
     @classmethod
     def gen(cls) -> Field:
-        raise Error('not implemented')
+        raise NotImplementedError()
 
 
 class Field2(Field):

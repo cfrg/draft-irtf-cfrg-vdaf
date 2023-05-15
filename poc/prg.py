@@ -22,11 +22,11 @@ class Prg:
         Construct a new instance of this PRG from the given seed, domain
         separation tag, and binder string.
         """
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     def next(self, length: Unsigned) -> Bytes:
         """Output the next `length` bytes of the PRG stream."""
-        raise Error('not implemented')
+        raise NotImplementedError()
 
     @classmethod
     def derive_seed(Prg,
