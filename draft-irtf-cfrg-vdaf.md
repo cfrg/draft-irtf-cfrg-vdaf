@@ -1190,6 +1190,252 @@ how the nonces are chosen, but security requires that the nonces be unique. See
 execution of a VDAF requires the application to instantiate secure channels
 between each of the protocol participants.
 
+## Communication Patterns for Preparation {#vdaf-prep-comm}
+
+In each round of preparation, each Aggregator writes a prep share to the
+channel, which is then processed into the prep message using the public
+`prep_shares_to_prep()` algorithm and broadcast to the Aggregators to start the
+next round. In this section we describe some approaches to realizing this
+broadcast channel functionality in protocols that use VDAFs with at least one
+round of preparation.
+
+The state machine of each Aggregator for VDAF preparation is shown in
+{{vdaf-prep-state-machine}}.
+
+~~~ state
+               +----------------+
+               |                |
+               v                |
+Start ------> Continued(prep_state) --> Finished(out_share)
+ |                |
+ |                |
+ +--> Rejected <--+
+~~~
+{: #vdaf-prep-state-machine title="State machine for VDAF preparation."}
+
+State transitions are made when the state is acted upon by the host's local
+inputs and/or messages sent by the peers. The initial state is `Start`. The
+terminal states are `Rejected`, indicating that the report was rejected and
+cannot be processed any further, and `Finished(out_share)`, indicating that
+the Aggregator has recovered an output share `out_share`.
+
+## Ping-Pong Topology (Only Two Aggregators)
+
+For VDAFs with precisely two Aggregators (i.e., `Vdaf.SHARES == 2`), the
+following "ping pong" communication pattern can be used. It is compatible with
+any request/response transport protocol, such as HTTP.
+
+The first state transition, from `Start` to `Continued` or `Rejected`, is
+induced by the following transition rule. No messages are sent or received
+during this transition.
+
+~~~ transition
+def ping_pong_start(Vdaf,
+                    vdaf_verify_key: bytes[Vdaf.VERIFY_KEY_SIZE],
+                    is_leader: bool,
+                    agg_param: Vdaf.AggParam,
+                    nonce: bytes[Vdaf.NONCE_SIZE],
+                    public_share: bytes,
+                    host_input_share: bytes) -> State:
+    try:
+        prep_state = Vdaf.prep_init(
+            vdaf_verify_key,
+            0 if is_leader else 1,
+            agg_param,
+            nonce,
+            public_share,
+            host_input_share,
+        )
+        return Continue(prep_state)
+    except:
+        return Rejected()
+~~~
+
+If the state is `Rejected`, then processing halts. Otherwise, if the state is
+`Continued`, then processing continues using the following transition rule until
+a terminal state is reached.
+
+Let us call the initiating party the "Leader" and the responding party the
+"Helper". The high-level idea is that the Leader and Helper will take turns
+running the computation locally until input from their peer is required:
+
+* For a 1-round VDAF (e.g., Prio3 ({{prio3}})), the Leader sends its prep share
+  to the Helper, who computes the prep message locally, computes its output
+  share, then sends the prep message to the Leader. Preparation requires just
+  one round trip between the Leader and the Helper.
+
+* For a 2-round VDAF (e.g., Poplar1 ({{poplar1}})), the Leader sends its
+  first-round prep share to the Helper, who replies with the first-round prep
+  message and its second-round prep share. In the next request, the Leader
+  computes its second-round prep share locally, computes its output share, and
+  sends the second-round prep message to the Helper. Finally, the Helper
+  computes its own output share.
+
+* In general, each request includes the Leader's prep share for the previous
+  round and/or the prep message for the current round; correspondingly, each
+  response consists of the prep message for the current round and the Helper's
+  prep share for the next round.
+
+The Aggregators proceed in this ping-ponging fashion until a step of the
+computation fails, indicating the report is invalid and should be rejected, or
+preparation is completed. All told there there are `ceil((Vdaf.ROUNDS+1)/2)`
+requests sent.
+
+Each message in the ping-pong protocol is structured as follows (expressed in
+TLS syntax {{Section 3 of !RFC8446}}):
+
+~~~
+enum {
+  initialize(0),
+  continue(1),
+  finish(2),
+  (255)
+} MessageType;
+
+struct {
+  MessageType type;
+  select (Message.type) {
+    case initialize:
+      opaque prep_share<0..2^32-1>;
+    case continue:
+      opaque prep_msg<0..2^32-1>;
+      opaque prep_share<0..2^32-1>;
+    case finish:
+      opaque prep_msg<0..2^32-1>;
+  };
+} Message;
+~~~
+
+The Leader computes each state transition according to the following algorithm:
+
+~~~ transition
+def ping_pong_req(Vdaf,
+                  agg_param: Vdaf.AggParam,
+                  state: State,
+                  inbound: Optional[Message],
+                  ) -> (State, Optional[Message]):
+    if inbound == None:
+        prep_msg = None
+        peer_prep_share = None
+    elif inbound.type == 1: # continue
+        prep_msg = inbound.prep_msg
+        peer_prep_share = inbound.prep_share
+    elif inbound.type == 2: # finish
+        prep_msg = inbound.prep_msg
+        peer_prep_share = None
+    else:
+        return (Rejected(), None)
+
+    return Vdaf.ping_pong_transition(
+        agg_param,
+        prep_msg,
+        peer_prep_share,
+        state.prep_state,
+    )
+~~~
+
+(The auxiliary function `ping_pong_transition()` is defined at the end of this
+section.) The input `inbound` denotes the last message received from the Helper. This
+parameter is optional since initially there is no inbound message.
+
+Likewise, the Helper computes each state transition according to the following
+algorithm:
+
+~~~ transition
+def ping_pong_resp(Vdaf,
+                   agg_param: Vdaf.AggParam,
+                   state: State,
+                   inbound: Message,
+                   ) -> (State, Optional[bytes]):
+    if inbound.type == 0: # initialize
+        prep_msg = None
+        peer_prep_share = inbound.prep_share
+    elif inbound.type == 1: # continue
+        prep_msg = inbound.prep_msg
+        peer_prep_share = inbound.prep_share
+    else: # finish
+        prep_msg = inbound.prep_msg
+        peer_prep_share = None
+
+    return Vdaf.ping_pong_transition(
+        agg_param,
+        prep_msg,
+        peer_prep_share,
+        state.prep_state,
+    )
+~~~
+
+At the start of each request/response cycle, the Leader runs:
+
+~~~
+(state, outbound) = Vdaf.ping_pong_req(agg_param, state, inbound)
+~~~
+
+with `state == Continued(leader_prep_state)` and, if `outbound != None`, sends
+`outbound` to the Helper. For the initial request, `inbound == None`. To
+respond to the Leader, the Helper runs
+
+~~~
+(state, outbound) = Vdaf.ping_pong_resp(agg_param, state, inbound)
+~~~
+
+with `state == Continued(helper_prep_state)`, where `inbound` is the message it
+received from the Leader, and sends `outbound` to the Leader.
+
+If `state == Finished(out_share)` at the end of a request/response cycle, then
+processing is complete. Note that, depending on the number of rounds of
+preparation that are required, there may be one more message to send before the
+peer can also finish processing (i.e., `outbound != None`).
+
+The core state transition logic is the same for both Aggregators:
+
+~~~
+def ping_pong_transition(Vdaf,
+                         agg_param: Vdaf.AggParam,
+                         prep_msg: Optional[bytes],
+                         peer_prep_share: Optional[bytes],
+                         host_prep_state: Vdaf.Prep,
+                         ) -> (State, Optional[Message]):
+    try:
+        # If `prep_msg == None` then this is the start of the
+        # first round. Otherwise, `prep_msg` is the prep message
+        # from the end of the previous round.
+        out = Vdaf.prep_next(host_prep_state, prep_msg)
+        if type(out) == Vdaf.OutShare:
+            return (Finished(out), None)
+        (host_prep_state, host_prep_share) = out
+
+        if peer_prep_share != None:
+            prep_shares = [peer_prep_share, host_prep_share]
+            if is_leader:
+                prep_shares.reverse()
+            prep_msg = Vdaf.prep_shares_to_prep(
+                agg_param,
+                prep_shares,
+            )
+            out = Vdaf.prep_next(host_prep_state, prep_msg)
+            if type(out) == Vdaf.OutShare:
+                outbound = Message.finish(prep_msg)
+                return (Finished(out), outbound)
+            (host_prep_state, host_prep_share) = out
+            outbound = Message.continue(prep_msg, host_prep_share)
+        else:
+            outbound = Message.initialize(host_prep_share)
+        return (Continued(host_prep_state), outbound)
+    except:
+        return (Rejected(), None)
+~~~
+
+## Star Topology (Any Number of Aggregators)
+
+The ping-pong topology of the previous section is only suitable for VDAFs
+involving exactly two Aggregators. If more Aggregators are required, the star
+topology described in this section can be used instead.
+
+> TODO Describe the Leader-emulated broadcast channel architecture that was
+> originally envisioned for DAP. (As of DAP-05 we are going with the ping pong
+> architecture described in the previous section.)
+
 # Preliminaries {#prelim}
 
 This section describes the primitives that are common to the VDAFs specified in
@@ -3743,8 +3989,8 @@ analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
 time to developing definitions and security proofs.
 
 Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon Friedberger, Tim
-Geoghegan, Mariana Raykova, Jacob Rothstein, Xiao Wang, and Christopher Wood for
-useful feedback on and contributions to the spec.
+Geoghegan, Brandon Pitman, Mariana Raykova, Jacob Rothstein, Xiao Wang, and
+Christopher Wood for useful feedback on and contributions to the spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}
