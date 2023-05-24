@@ -19,7 +19,7 @@ test: pyfiles
 	sage -python field.py
 	sage -python prg.py
 	sage -python flp.py
-	sage flp_generic.sage
+	sage -python flp_generic.py
 	sage -python idpf.py
 	sage idpf_poplar.sage
 	sage -python daf.py
