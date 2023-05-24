@@ -2419,7 +2419,7 @@ This section specifies `FlpGeneric`, an implementation of the `Flp` interface
 the interface defined in {{flp-generic-valid}}.
 
 > NOTE A reference implementation can be found in
-> https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/flp_generic.sage.
+> https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/flp_generic.py.
 
 The FLP parameters for `FlpGeneric` are defined in {{flp-generic-param}}. The
 required methods for generating the proof, generating the verifier, and deciding
@@ -2604,7 +2604,7 @@ measurement is encoded as a length-`bits` vector of field elements, where the
 
 ~~~
 def encode(Sum, measurement: Integer):
-    if 0 > measurement or measurement >= 2^Sum.INPUT_LEN:
+    if 0 > measurement or measurement >= 2 ** Sum.INPUT_LEN:
         raise ERR_INPUT
 
     encoded = []
@@ -2670,7 +2670,7 @@ monotonically increasing integers):
 
 ~~~
 def encode(Histogram, measurement: Integer):
-    boundaries = buckets + [Infinity]
+    boundaries = buckets + [math.inf]
     encoded = [Field128(0) for _ in range(len(boundaries))]
     for i in range(len(boundaries)):
         if measurement <= boundaries[i]:
@@ -2703,8 +2703,8 @@ def Histogram(inp: Vec[Field128],
     for b in inp:
         sum_check += b
 
-    out = joint_rand[1]   * range_check + \
-          joint_rand[1]^2 * sum_check
+    out = joint_rand[1] * range_check + \
+          joint_rand[1] ** 2 * sum_check
     return out
 ~~~
 

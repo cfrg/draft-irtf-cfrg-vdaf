@@ -5,6 +5,7 @@ from common import ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, \
 from field import poly_eval, poly_interp, poly_mul, poly_strip
 from flp import Flp, run_flp
 import field
+import math
 
 
 class Gadget:
@@ -23,6 +24,7 @@ class Gadget:
     def eval_poly(self, Field, inp_poly):
         """Evaluate the gadget on a sequence of polynomials over a field."""
         raise NotImplementedError()
+
 
 class Valid:
     """
@@ -113,7 +115,6 @@ class Valid:
 
 
 class ProveGadget:
-
     def __init__(self, Field, wire_seeds, g, g_calls):
         self.inner = g
         self.ARITY = g.ARITY
@@ -151,7 +152,6 @@ def prove_wrapped(Valid, prove_rand):
 
 
 class QueryGadget:
-
     def __init__(self, Field, wire_seeds, gadget_poly, g, g_calls):
         self.inner = g
         self.ARITY = g.ARITY
@@ -162,14 +162,15 @@ class QueryGadget:
         for j in range(g.ARITY):
             self.wire.append(Field.zeros(P))
             self.wire[j][0] = wire_seeds[j]
-        self.alpha = Field.gen() ^ (Field.GEN_ORDER / P)
+        assert Field.GEN_ORDER % P == 0
+        self.alpha = Field.gen() ** (Field.GEN_ORDER // P)
         self.k = 0
 
     def eval(self, Field, inp):
         self.k += 1
         for j in range(len(inp)):
             self.wire[j][self.k] = inp[j]
-        return poly_eval(Field, self.gadget_poly, self.alpha^self.k)
+        return poly_eval(Field, self.gadget_poly, self.alpha ** self.k)
 
 
 def query_wrapped(Valid, proof):
@@ -233,8 +234,9 @@ class FlpGeneric(Flp):
             # can use FFT for interpolating the wire polynomials. Perhaps there
             # is some clever math for picking `wire_inp` in a way that avoids
             # having to pad.
-            alpha = FlpGeneric.Field.gen()^(FlpGeneric.Field.GEN_ORDER / P)
-            wire_inp = [alpha^k for k in range(P)]
+            assert FlpGeneric.Field.GEN_ORDER % P == 0
+            alpha = FlpGeneric.Field.gen() ** (FlpGeneric.Field.GEN_ORDER // P)
+            wire_inp = [alpha ** k for k in range(P)]
             wire_polys = []
             for j in range(g.ARITY):
                 wire_poly = poly_interp(FlpGeneric.Field, wire_inp, g.wire[j])
@@ -270,12 +272,12 @@ class FlpGeneric(Flp):
             # A degenerate point is one that was used as an input for
             # constructing the gadget polynomial. Using such a point would leak
             # an output of the gadget to the verifier.
-            if t^P == FlpGeneric.Field(1):
+            if t ** P == FlpGeneric.Field(1):
                 raise ERR_ABORT
 
             # Compute the well-formedness test for the gadget polynomial.
             x = []
-            wire_inp = [g.alpha^k for k in range(P)]
+            wire_inp = [g.alpha ** k for k in range(P)]
             for j in range(g.ARITY):
                 wire_poly = poly_interp(FlpGeneric.Field, wire_inp, g.wire[j])
                 x.append(poly_eval(FlpGeneric.Field, wire_poly, t))
@@ -407,6 +409,7 @@ def check_valid_eval(Valid, inp, joint_rand):
     if len(joint_rand) != Valid.JOINT_RAND_LEN:
         raise ERR_INPUT
 
+
 class Count(Valid):
     # Associated types
     Measurement = Unsigned
@@ -465,7 +468,7 @@ class Sum(Valid):
 
     @classmethod
     def encode(Sum, measurement):
-        if 0 > measurement or measurement >= 2^Sum.INPUT_LEN:
+        if 0 > measurement or measurement >= 2 ** Sum.INPUT_LEN:
             raise ERR_INPUT
 
         encoded = []
@@ -492,7 +495,7 @@ class Sum(Valid):
         2^bits)`.
         """
 
-        if 2^bits >= Sum.Field.MODULUS:
+        if 2 ** bits >= Sum.Field.MODULUS:
             raise ValueError('bit size exceeds field modulus')
         class SumWithBits(Sum):
             GADGET_CALLS = [bits]
@@ -536,13 +539,13 @@ class Histogram(Valid):
         for b in inp:
             sum_check += b
 
-        out = joint_rand[1]   * range_check + \
-              joint_rand[1]^2 * sum_check
+        out = joint_rand[1] * range_check + \
+              joint_rand[1] ** 2 * sum_check
         return out
 
     @classmethod
     def encode(Histogram, measurement):
-        boundaries = Histogram.buckets + [Infinity]
+        boundaries = Histogram.buckets + [math.inf]
         encoded = [Histogram.Field(0) for _ in range(len(boundaries))]
         for i in range(len(boundaries)):
             if measurement <= boundaries[i]:
@@ -577,7 +580,6 @@ class Histogram(Valid):
         return 'buckets'
 
 
-
 ##
 # TESTS
 #
@@ -596,7 +598,7 @@ class TestMultiGadget(Valid):
 
     def eval(self, inp, joint_rand, _num_shares):
         check_valid_eval(self, inp, joint_rand)
-        # Not a very useful circuit, obviously. We just wnat to do something.
+        # Not a very useful circuit, obviously. We just want to do something.
         x = self.GADGETS[0].eval(self.Field, [inp[0], inp[0]])
         y = self.GADGETS[1].eval(self.Field, [inp[0], x])
         z = self.GADGETS[1].eval(self.Field, [x, y])
@@ -613,6 +615,7 @@ class TestMultiGadget(Valid):
         if len(inp) != 1:
             raise ERR_INPUT
         return inp
+
 
 def test_gadget(g, Field, test_length):
     """
@@ -682,7 +685,7 @@ if __name__ == '__main__':
     test_flp_generic(cls, [
         (cls.encode(0), True),
         (cls.encode(100), True),
-        (cls.encode(2^10 - 1), True),
+        (cls.encode(2 ** 10 - 1), True),
         (cls.Field.rand_vec(10), False),
     ])
 
@@ -690,7 +693,7 @@ if __name__ == '__main__':
     test_flp_generic(cls, [
         (cls.encode(0), True),
         (cls.encode(13), True),
-        (cls.encode(2^10 - 1), True),
+        (cls.encode(2 ** 10 - 1), True),
         (cls.Field.rand_vec(4), False),
     ])
 

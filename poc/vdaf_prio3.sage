@@ -17,7 +17,7 @@ from common import \
     zeros
 from vdaf import Vdaf, test_vdaf
 import flp
-import sagelib.flp_generic as flp_generic
+import flp_generic
 import prg
 
 USAGE_MEASUREMENT_SHARE = 1
