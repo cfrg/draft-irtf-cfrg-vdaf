@@ -21,7 +21,7 @@ test: pyfiles
 	sage -python flp.py
 	sage -python flp_generic.py
 	sage -python idpf.py
-	sage idpf_poplar.sage
+	sage -python idpf_poplar.py
 	sage -python daf.py
 	sage -python vdaf.py
 	sage vdaf_prio3.sage

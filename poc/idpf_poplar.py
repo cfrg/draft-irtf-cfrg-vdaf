@@ -42,7 +42,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
-        if alpha >= 2^IdpfPoplar.BITS:
+        if alpha >= 2 ** IdpfPoplar.BITS:
             raise ERR_INPUT # alpha too long
         if len(beta_inner) != IdpfPoplar.BITS - 1:
             raise ERR_INPUT # beta_inner vector is the wrong size
@@ -109,7 +109,7 @@ class IdpfPoplar(Idpf):
         correction_words = IdpfPoplar.decode_public_share(public_share)
         out_share = []
         for prefix in prefixes:
-            if prefix >= 2^(level+1):
+            if prefix >= 2 ** (level+1):
                 raise ERR_INPUT # prefix too long
 
             # The Aggregator's output share is the value of a node of
@@ -214,7 +214,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def decode_public_share(IdpfPoplar, encoded):
-        l = floor((2*IdpfPoplar.BITS + 7) / 8)
+        l = (2*IdpfPoplar.BITS + 7) // 8
         encoded_ctrl, encoded = encoded[:l], encoded[l:]
         control_bits = unpack_bits(encoded_ctrl, 2 * IdpfPoplar.BITS)
         correction_words = []

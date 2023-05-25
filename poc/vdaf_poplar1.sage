@@ -19,7 +19,7 @@ from common import \
     vec_sub
 from vdaf import Vdaf, test_vdaf
 import idpf
-import sagelib.idpf_poplar as idpf_poplar
+import idpf_poplar
 import prg
 
 USAGE_SHARD_RAND = 1
