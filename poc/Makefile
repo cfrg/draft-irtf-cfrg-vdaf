@@ -25,4 +25,4 @@ test: pyfiles
 	sage -python daf.py
 	sage -python vdaf.py
 	sage vdaf_prio3.sage
-	sage vdaf_poplar1.sage
+	sage -python vdaf_poplar1.py
