@@ -510,7 +510,7 @@ class Sum(Valid):
 
 class Histogram(Valid):
     # Operational parameters
-    buckets = None # Set by 'Histogram.with_buckets()`
+    length = None # Set by 'Histogram.with_length()`
 
     # Associated types
     Measurement = Unsigned
@@ -519,10 +519,10 @@ class Histogram(Valid):
 
     # Associated parametrs
     GADGETS = [PolyEval([0, -1, 1])]
-    GADGET_CALLS = None # Set by `Histogram.with_buckets()`
-    INPUT_LEN = None # Set by `Histogram.with_buckets()`
+    GADGET_CALLS = None # Set by `Histogram.with_length()`
+    INPUT_LEN = None # Set by `Histogram.with_length()`
     JOINT_RAND_LEN = 2
-    OUTPUT_LEN = None # Set by `Histogram.with_buckets()`
+    OUTPUT_LEN = None # Set by `Histogram.with_length()`
 
     def eval(self, inp, joint_rand, num_shares):
         check_valid_eval(self, inp, joint_rand)
@@ -545,12 +545,9 @@ class Histogram(Valid):
 
     @classmethod
     def encode(Histogram, measurement):
-        boundaries = Histogram.buckets + [math.inf]
-        encoded = [Histogram.Field(0) for _ in range(len(boundaries))]
-        for i in range(len(boundaries)):
-            if measurement <= boundaries[i]:
-                encoded[i] = Histogram.Field(1)
-                return encoded
+        encoded = [Histogram.Field(0)] * Histogram.length
+        encoded[measurement] = Histogram.Field(1)
+        return encoded
 
     @classmethod
     def truncate(Histogram, inp):
@@ -561,23 +558,23 @@ class Histogram(Valid):
         return [bucket_count.as_unsigned() for bucket_count in output]
 
     @classmethod
-    def with_buckets(Histogram, the_buckets):
+    def with_length(Histogram, the_length):
         """
         Instantiate an instace of the `Histogram` circuit with the given
-        buckets.
+        length.
         """
 
-        class HistogramWithBuckets(Histogram):
-            buckets = the_buckets
-            GADGET_CALLS = [len(the_buckets) + 1]
-            INPUT_LEN = len(the_buckets) + 1
-            OUTPUT_LEN = len(the_buckets) + 1
-        return HistogramWithBuckets
+        class HistogramWithLength(Histogram):
+            length = the_length
+            GADGET_CALLS = [the_length]
+            INPUT_LEN = the_length
+            OUTPUT_LEN = the_length
+        return HistogramWithLength
 
     @classmethod
     def test_vec_set_type_param(cls, test_vec):
-        test_vec['buckets'] = list(map(lambda x: int(x), cls.buckets))
-        return 'buckets'
+        test_vec['length'] = int(cls.length)
+        return 'length'
 
 
 ##
@@ -689,11 +686,14 @@ if __name__ == '__main__':
         (cls.Field.rand_vec(10), False),
     ])
 
-    cls = FlpGeneric.with_valid(Histogram.with_buckets([0, 10, 20]))
+    cls = FlpGeneric.with_valid(Histogram.with_length(4))
     test_flp_generic(cls, [
         (cls.encode(0), True),
-        (cls.encode(13), True),
-        (cls.encode(2 ** 10 - 1), True),
+        (cls.encode(1), True),
+        (cls.encode(2), True),
+        (cls.encode(3), True),
+        ([cls.Field(0)] * 4, False),
+        ([cls.Field(1)] * 4, False),
         (cls.Field.rand_vec(4), False),
     ])
 

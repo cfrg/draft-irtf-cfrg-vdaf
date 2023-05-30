@@ -493,11 +493,11 @@ class Prio3Histogram(Prio3):
     test_vec_name = 'Prio3Histogram'
 
     @classmethod
-    def with_buckets(Prio3Histogram, buckets: Vec[Unsigned]):
-        class Prio3HistogramWithBuckets(Prio3Histogram):
+    def with_length(Prio3Histogram, length: Unsigned):
+        class Prio3HistogramWithLength(Prio3Histogram):
             Flp = flp_generic.FlpGeneric \
-                    .with_valid(flp_generic.Histogram.with_buckets(buckets))
-        return Prio3HistogramWithBuckets
+                    .with_valid(flp_generic.Histogram.with_length(length))
+        return Prio3HistogramWithLength
 
 
 ##
@@ -554,17 +554,15 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [100], 100, print_test_vec=TEST_VECTOR)
 
     cls = Prio3Histogram \
-            .with_buckets([1, 10, 100]) \
+            .with_length(4) \
             .with_shares(num_shares)
     assert cls.ID == 0x00000002
     test_vdaf(cls, None, [0], [1, 0, 0, 0])
-    test_vdaf(cls, None, [5], [0, 1, 0, 0])
-    test_vdaf(cls, None, [10], [0, 1, 0, 0])
-    test_vdaf(cls, None, [15], [0, 0, 1, 0])
-    test_vdaf(cls, None, [100], [0, 0, 1, 0])
-    test_vdaf(cls, None, [101], [0, 0, 0, 1])
-    test_vdaf(cls, None, [0, 1, 5, 10, 15, 100, 101, 101], [2, 2, 2, 2])
-    test_vdaf(cls, None, [50], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
+    test_vdaf(cls, None, [1], [0, 1, 0, 0])
+    test_vdaf(cls, None, [2], [0, 0, 1, 0])
+    test_vdaf(cls, None, [3], [0, 0, 0, 1])
+    test_vdaf(cls, None, [0, 0, 1, 1, 2, 2, 3, 3], [2, 2, 2, 2])
+    test_vdaf(cls, None, [2], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
 
     cls = TestPrio3Average.with_bits(3).with_shares(num_shares)
     test_vdaf(cls, None, [1, 5, 1, 1, 4, 1, 3, 2], 2)
