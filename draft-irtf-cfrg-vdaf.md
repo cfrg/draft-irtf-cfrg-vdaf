@@ -2949,9 +2949,10 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
     # compute the sketch during preparation. This sketch is used
     # to verify the one-hotness of their output shares.
     beta_inner = [
-        [Poplar1.Idpf.FieldInner(1), k] \
-            for k in prg.next_vec(Poplar1.Idpf.FieldInner,
-                                  Poplar1.Idpf.BITS - 1) ]
+        [Poplar1.Idpf.FieldInner(1), k]
+        for k in prg.next_vec(Poplar1.Idpf.FieldInner,
+                              Poplar1.Idpf.BITS - 1)
+    ]
     beta_leaf = [Poplar1.Idpf.FieldLeaf(1)] + \
         prg.next_vec(Poplar1.Idpf.FieldLeaf, 1)
 
@@ -3008,7 +3009,7 @@ def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
             else beta_leaf[1]
         (a, b, c), corr_offsets = corr_offsets[:3], corr_offsets[3:]
         A = -Field(2) * a + k
-        B = a^2 + b - a * k + c
+        B = a ** 2 + b - a * k + c
         corr1 = prg.next_vec(Field, 2)
         corr0 = vec_sub([A, B], corr1)
         if level < Poplar1.Idpf.BITS - 1:
@@ -3097,7 +3098,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     for (i, r) in enumerate(verify_rand):
         (data_share, auth_share) = value[i]
         sketch_share[0] += data_share * r
-        sketch_share[1] += data_share * r^2
+        sketch_share[1] += data_share * r ** 2
         sketch_share[2] += auth_share * r
         out_share.append(data_share)
 
@@ -3127,10 +3128,10 @@ def prep_next(Poplar1, prep_state, opt_sketch):
         (A_share, B_share, agg_id), prep_mem = \
             prep_mem[:3], prep_mem[3:]
         sketch_share = [
-            agg_id * (prev_sketch[0]^2 \
+            agg_id * (prev_sketch[0] ** 2
                         - prev_sketch[1]
-                        - prev_sketch[2]) \
-                + A_share * prev_sketch[0] \
+                        - prev_sketch[2])
+                + A_share * prev_sketch[0]
                 + B_share
         ]
         return ((b'sketch round 2', level, prep_mem),
@@ -3265,9 +3266,9 @@ def decode_input_share(Poplar1, encoded):
     return (key, corr_seed, corr_inner, corr_leaf)
 
 def encode_agg_param(Poplar1, level, prefixes):
-    if level > 2^16 - 1:
+    if level > 2 ** 16 - 1:
         raise ERR_INPUT # level too deep
-    if len(prefixes) > 2^32 - 1:
+    if len(prefixes) > 2 ** 32 - 1:
         raise ERR_INPUT # too many prefixes
     encoded = Bytes()
     encoded += to_be_bytes(level, 2)
@@ -3275,7 +3276,7 @@ def encode_agg_param(Poplar1, level, prefixes):
     packed = 0
     for (i, prefix) in enumerate(prefixes):
         packed |= prefix << ((level+1) * i)
-    l = floor(((level+1) * len(prefixes) + 7) / 8)
+    l = ((level+1) * len(prefixes) + 7) // 8
     encoded += to_be_bytes(packed, l)
     return encoded
 
@@ -3284,11 +3285,11 @@ def decode_agg_param(Poplar1, encoded):
     level = from_be_bytes(encoded_level)
     encoded_prefix_count, encoded = encoded[:4], encoded[4:]
     prefix_count = from_be_bytes(encoded_prefix_count)
-    l = floor(((level+1) * prefix_count + 7) / 8)
+    l = ((level+1) * prefix_count + 7) // 8
     encoded_packed, encoded = encoded[:l], encoded[l:]
     packed = from_be_bytes(encoded_packed)
     prefixes = []
-    m = 2^(level+1) - 1
+    m = 2 ** (level+1) - 1
     for i in range(prefix_count):
         prefixes.append(packed >> ((level+1) * i) & m)
     if len(encoded) != 0:
@@ -3334,7 +3335,7 @@ field `GF(2)`.
 
 ~~~
 def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
-    if alpha >= 2^IdpfPoplar.BITS:
+    if alpha >= 2 ** IdpfPoplar.BITS:
         raise ERR_INPUT # alpha too long
     if len(beta_inner) != IdpfPoplar.BITS - 1:
         raise ERR_INPUT # beta_inner vector is the wrong size
@@ -3411,7 +3412,7 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
     correction_words = IdpfPoplar.decode_public_share(public_share)
     out_share = []
     for prefix in prefixes:
-        if prefix >= 2^(level+1):
+        if prefix >= 2 ** (level+1):
             raise ERR_INPUT # prefix too long
 
         # The Aggregator's output share is the value of a node of
@@ -3516,7 +3517,7 @@ def encode_public_share(IdpfPoplar, correction_words):
     return encoded
 
 def decode_public_share(IdpfPoplar, encoded):
-    l = floor((2*IdpfPoplar.BITS + 7) / 8)
+    l = (2*IdpfPoplar.BITS + 7) // 8
     encoded_ctrl, encoded = encoded[:l], encoded[l:]
     control_bits = unpack_bits(encoded_ctrl, 2 * IdpfPoplar.BITS)
     correction_words = []

@@ -19,7 +19,7 @@ from common import \
     vec_sub
 from vdaf import Vdaf, test_vdaf
 import idpf
-import sagelib.idpf_poplar as idpf_poplar
+import idpf_poplar
 import prg
 
 USAGE_SHARD_RAND = 1
@@ -79,9 +79,10 @@ class Poplar1(Vdaf):
         # compute the sketch during preparation. This sketch is used
         # to verify the one-hotness of their output shares.
         beta_inner = [
-            [Poplar1.Idpf.FieldInner(1), k] \
-                for k in prg.next_vec(Poplar1.Idpf.FieldInner,
-                                      Poplar1.Idpf.BITS - 1) ]
+            [Poplar1.Idpf.FieldInner(1), k]
+            for k in prg.next_vec(Poplar1.Idpf.FieldInner,
+                                  Poplar1.Idpf.BITS - 1)
+        ]
         beta_leaf = [Poplar1.Idpf.FieldLeaf(1)] + \
             prg.next_vec(Poplar1.Idpf.FieldLeaf, 1)
 
@@ -139,7 +140,7 @@ class Poplar1(Vdaf):
                 else beta_leaf[1]
             (a, b, c), corr_offsets = corr_offsets[:3], corr_offsets[3:]
             A = -Field(2) * a + k
-            B = a^2 + b - a * k + c
+            B = a ** 2 + b - a * k + c
             corr1 = prg.next_vec(Field, 2)
             corr0 = vec_sub([A, B], corr1)
             if level < Poplar1.Idpf.BITS - 1:
@@ -217,7 +218,7 @@ class Poplar1(Vdaf):
         for (i, r) in enumerate(verify_rand):
             (data_share, auth_share) = value[i]
             sketch_share[0] += data_share * r
-            sketch_share[1] += data_share * r^2
+            sketch_share[1] += data_share * r ** 2
             sketch_share[2] += auth_share * r
             out_share.append(data_share)
 
@@ -248,10 +249,10 @@ class Poplar1(Vdaf):
             (A_share, B_share, agg_id), prep_mem = \
                 prep_mem[:3], prep_mem[3:]
             sketch_share = [
-                agg_id * (prev_sketch[0]^2 \
+                agg_id * (prev_sketch[0] ** 2
                             - prev_sketch[1]
-                            - prev_sketch[2]) \
-                    + A_share * prev_sketch[0] \
+                            - prev_sketch[2])
+                    + A_share * prev_sketch[0]
                     + B_share
             ]
             return ((b'sketch round 2', level, prep_mem),
@@ -341,9 +342,9 @@ class Poplar1(Vdaf):
 
     @classmethod
     def encode_agg_param(Poplar1, level, prefixes):
-        if level > 2^16 - 1:
+        if level > 2 ** 16 - 1:
             raise ERR_INPUT # level too deep
-        if len(prefixes) > 2^32 - 1:
+        if len(prefixes) > 2 ** 32 - 1:
             raise ERR_INPUT # too many prefixes
         encoded = Bytes()
         encoded += to_be_bytes(level, 2)
@@ -351,7 +352,7 @@ class Poplar1(Vdaf):
         packed = 0
         for (i, prefix) in enumerate(prefixes):
             packed |= prefix << ((level+1) * i)
-        l = floor(((level+1) * len(prefixes) + 7) / 8)
+        l = ((level+1) * len(prefixes) + 7) // 8
         encoded += to_be_bytes(packed, l)
         return encoded
 
@@ -361,11 +362,11 @@ class Poplar1(Vdaf):
         level = from_be_bytes(encoded_level)
         encoded_prefix_count, encoded = encoded[:4], encoded[4:]
         prefix_count = from_be_bytes(encoded_prefix_count)
-        l = floor(((level+1) * prefix_count + 7) / 8)
+        l = ((level+1) * prefix_count + 7) // 8
         encoded_packed, encoded = encoded[:l], encoded[l:]
         packed = from_be_bytes(encoded_packed)
         prefixes = []
-        m = 2^(level+1) - 1
+        m = 2 ** (level+1) - 1
         for i in range(prefix_count):
             prefixes.append(packed >> ((level+1) * i) & m)
         if len(encoded) != 0:
@@ -467,9 +468,9 @@ if __name__ == '__main__':
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
     want = (2, (0, 1, 2, 3))
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
-    want = (17, (0, 1, 1233, 2^18 - 1))
+    want = (17, (0, 1, 1233, 2 ** 18 - 1))
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
-    want = (255, (0, 1, 1233, 2^256 - 1))
+    want = (255, (0, 1, 1233, 2 ** 256 - 1))
     assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
 
     # Generate test vectors.

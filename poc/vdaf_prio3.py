@@ -28,6 +28,7 @@ USAGE_QUERY_RANDOMNESS = 5
 USAGE_JOINT_RAND_SEED = 6
 USAGE_JOINT_RAND_PART = 7
 
+
 class Prio3(Vdaf):
     """Base class for VDAFs based on prio3."""
 
@@ -41,7 +42,6 @@ class Prio3(Vdaf):
     RAND_SIZE = None # Computed from `Prg.SEED_SIZE` and `SHARES`
     ROUNDS = 1
     SHARES = None  # A number between `[2, 256)` set later
-
 
     # Types required by `Vdaf`
     Measurement = Flp.Measurement
@@ -461,6 +461,7 @@ class Prio3Count(Prio3):
     # Operational parameters.
     test_vec_name = 'Prio3Count'
 
+
 class Prio3Sum(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgSha3
@@ -478,6 +479,7 @@ class Prio3Sum(Prio3):
             Flp = flp_generic.FlpGeneric \
                     .with_valid(flp_generic.Sum.with_bits(bits))
         return Prio3SumWithBits
+
 
 class Prio3Histogram(Prio3):
     # Generic types required by `Prio3`
