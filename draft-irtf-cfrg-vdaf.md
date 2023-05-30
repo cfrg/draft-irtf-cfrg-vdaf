@@ -2657,25 +2657,21 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
 
 ### Prio3Histogram
 
-This instance of Prio3 allows for estimating the distribution of the
-measurements by computing a simple histogram. Each measurement is an arbitrary
-integer and the aggregate result counts the number of measurements that fall in
-a set of fixed buckets.
+This instance of Prio3 allows for estimating a distribution of measurements by
+computing a simple histogram. Each measurement increments one histogram bucket,
+out of a set of fixed buckets. The aggregate result counts the number of
+measurements in each bucket.
 
 This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
-circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite
-field. The measurement is encoded as a one-hot vector representing the bucket
-into which the measurement falls (let `bucket` denote a sequence of
-monotonically increasing integers):
+circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite field.
+Let `length` be the number of histogram buckets. The measurement is encoded as a
+one-hot vector representing the bucket into which the measurement falls:
 
 ~~~
 def encode(Histogram, measurement: Integer):
-    boundaries = buckets + [math.inf]
-    encoded = [Field128(0) for _ in range(len(boundaries))]
-    for i in range(len(boundaries)):
-        if measurement <= boundaries[i]:
-            encoded[i] = Field128(1)
-            return encoded
+    encoded = [Field128(0)] * length
+    encoded[measurement] = Field128(1)
+    return encoded
 
 def truncate(Histogram, inp: Vec[Field128]):
     return inp
@@ -2714,9 +2710,9 @@ sharded. This is provided to the FLP by Prio3.
 | Parameter        | Value                   |
 |:-----------------|:------------------------|
 | `GADGETS`        | `[Range2]`              |
-| `GADGET_CALLS`   | `[buckets + 1]`         |
-| `INPUT_LEN`      | `buckets + 1`           |
-| `OUTPUT_LEN`     | `buckets + 1`           |
+| `GADGET_CALLS`   | `[length]`              |
+| `INPUT_LEN`      | `length`                |
+| `OUTPUT_LEN`     | `length`                |
 | `JOINT_RAND_LEN` | `2`                     |
 | `Measurement`    | `Integer`               |
 | `AggResult`      | `Vec[Unsigned]`         |
@@ -3858,10 +3854,10 @@ agg_result: 100
 {:numbered="false"}
 
 ~~~
-buckets: [1, 10, 100]
+length: 4
 verify_key: "000102030405060708090a0b0c0d0e0f"
 upload_0:
-  measurement: 50
+  measurement: 2
   nonce: "000102030405060708090a0b0c0d0e0f"
   public_share: >-
     5e015517900cfc204138c24f808ddf4ee85eca87ba246cd715d116195172e500
