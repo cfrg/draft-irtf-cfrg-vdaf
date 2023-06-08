@@ -192,6 +192,7 @@ def run_vdaf(Vdaf,
             Vdaf.measurement_to_input_shares(measurement, nonce, rand)
 
         # REMOVE ME
+        prep_test_vec['rand'] = rand.hex()
         prep_test_vec['public_share'] = public_share.hex()
         for input_share in input_shares:
             prep_test_vec['input_shares'].append(input_share.hex())
