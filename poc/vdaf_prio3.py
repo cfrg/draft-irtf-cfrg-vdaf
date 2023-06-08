@@ -547,11 +547,17 @@ if __name__ == '__main__':
     assert cls.ID == 0x00000000
     test_vdaf(cls, None, [0, 1, 1, 0, 1], 3)
     test_vdaf(cls, None, [1], 1, print_test_vec=TEST_VECTOR)
+    cls = Prio3Count.with_shares(3)
+    test_vdaf(cls, None, [1], 1, print_test_vec=TEST_VECTOR,
+              test_vec_instance=1)
 
     cls = Prio3Sum.with_bits(8).with_shares(num_shares)
     assert cls.ID == 0x00000001
     test_vdaf(cls, None, [0, 147, 1, 0, 11, 0], 159)
     test_vdaf(cls, None, [100], 100, print_test_vec=TEST_VECTOR)
+    cls = Prio3Sum.with_bits(8).with_shares(3)
+    test_vdaf(cls, None, [100], 100, print_test_vec=TEST_VECTOR,
+              test_vec_instance=1)
 
     cls = Prio3Histogram \
             .with_length(4) \
@@ -563,6 +569,9 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [3], [0, 0, 0, 1])
     test_vdaf(cls, None, [0, 0, 1, 1, 2, 2, 3, 3], [2, 2, 2, 2])
     test_vdaf(cls, None, [2], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
+    cls = Prio3Histogram.with_length(4).with_shares(3)
+    test_vdaf(cls, None, [2], [0, 0, 1, 0], print_test_vec=TEST_VECTOR,
+              test_vec_instance=1)
 
     cls = TestPrio3Average.with_bits(3).with_shares(num_shares)
     test_vdaf(cls, None, [1, 5, 1, 1, 4, 1, 3, 2], 2)
