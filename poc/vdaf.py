@@ -162,6 +162,7 @@ def run_vdaf(Vdaf,
 
     # REMOVE ME
     test_vec = {
+        'shares': Vdaf.SHARES,
         'verify_key': verify_key.hex(),
         'agg_param': agg_param,
         'prep': [],
