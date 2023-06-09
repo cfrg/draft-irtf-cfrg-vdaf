@@ -1,14 +1,15 @@
 """Pseudorandom number generators (PRGs)."""
 
 from __future__ import annotations
+
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import CMAC, cSHAKE128
 from Cryptodome.Util import Counter
 from Cryptodome.Util.number import bytes_to_long
-from common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
-    format_dst, zeros, from_le_bytes, gen_rand, \
-    next_power_of_2, print_wrapped_line, to_be_bytes, \
-    to_le_bytes, xor, concat
+
+from common import (TEST_VECTOR, VERSION, Bytes, Error, Unsigned, concat,
+                    format_dst, from_le_bytes, gen_rand, next_power_of_2,
+                    print_wrapped_line, to_be_bytes, to_le_bytes, xor, zeros)
 
 
 class Prg:
@@ -204,7 +205,8 @@ def test_prg(Prg, F, expanded_len):
 if __name__ == '__main__':
     import json
     import os
-    from field import Field128, Field64
+
+    from field import Field64, Field128
 
     # This test case was found through brute-force search using this tool:
     # https://github.com/divergentdave/vdaf-rejection-sampling-search

@@ -1,24 +1,13 @@
 """An IDPF based on the construction of [BBCGGI21, Section 6]."""
 
 import itertools
-from common import \
-    ERR_DECODE, \
-    ERR_INPUT, \
-    TEST_VECTOR, \
-    VERSION, \
-    Bytes, \
-    Error, \
-    Unsigned, \
-    Vec, \
-    byte, \
-    format_dst, \
-    vec_add, \
-    vec_neg, \
-    vec_sub, \
-    xor
+
+import field
+from common import (ERR_DECODE, ERR_INPUT, TEST_VECTOR, VERSION, Bytes, Error,
+                    Unsigned, Vec, byte, format_dst, vec_add, vec_neg, vec_sub,
+                    xor)
 from field import Field2
 from idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
-import field
 from prg import PrgFixedKeyAes128
 
 

@@ -1,24 +1,14 @@
 """The prio3 VDAF."""
 
 from typing import Tuple
-from common import \
-    ERR_DECODE, \
-    ERR_INPUT, \
-    ERR_VERIFY, \
-    TEST_VECTOR, \
-    Bytes, \
-    Unsigned, \
-    Vec, \
-    byte, \
-    concat, \
-    front, \
-    vec_add, \
-    vec_sub, \
-    zeros
-from vdaf import Vdaf, test_vdaf
+
 import flp
 import flp_generic
 import prg
+from common import (ERR_DECODE, ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes,
+                    Unsigned, Vec, byte, concat, front, vec_add, vec_sub,
+                    zeros)
+from vdaf import Vdaf, test_vdaf
 
 USAGE_MEASUREMENT_SHARE = 1
 USAGE_PROOF_SHARE = 2

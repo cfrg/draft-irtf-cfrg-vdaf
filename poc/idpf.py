@@ -1,21 +1,16 @@
 """Definition of IDPFs."""
 
 from __future__ import annotations
-from typing import Union, Tuple
-from common import \
-    VERSION, \
-    Bool, \
-    Bytes, \
-    Error, \
-    Unsigned, \
-    Vec, \
-    gen_rand, \
-    vec_add
-from functools import reduce
+
 import json
 import os
+from functools import reduce
+from typing import Tuple, Union
+
 import field
 import prg
+from common import (VERSION, Bool, Bytes, Error, Unsigned, Vec, gen_rand,
+                    vec_add)
 
 
 class Idpf:

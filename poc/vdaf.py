@@ -1,15 +1,16 @@
 """Definition of VDAFs."""
 
 from __future__ import annotations
-from functools import reduce
+
 import json
 import os
-from common import ERR_VERIFY, VERSION, Bool, Bytes, Error, \
-    Unsigned, Vec, format_dst, gen_rand, \
-    to_le_bytes, print_wrapped_line
-import field
-from prg import PrgSha3
+from functools import reduce
 from typing import Optional, Tuple, Union
+
+import field
+from common import (ERR_VERIFY, VERSION, Bool, Bytes, Error, Unsigned, Vec,
+                    format_dst, gen_rand, print_wrapped_line, to_le_bytes)
+from prg import PrgSha3
 
 
 class Vdaf:

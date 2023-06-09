@@ -1,10 +1,9 @@
 """Fully linear proof (FLP) systems."""
 
 from copy import deepcopy
-from common import (
-    ERR_ENCODE, Bool, Error, Unsigned, Vec, vec_add, vec_sub,
-)
+
 import field
+from common import ERR_ENCODE, Bool, Error, Unsigned, Vec, vec_add, vec_sub
 from field import Field
 
 

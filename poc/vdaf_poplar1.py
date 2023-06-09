@@ -1,26 +1,17 @@
 """The Poplar1 VDAF."""
 
 from __future__ import annotations
+
 from collections import namedtuple
 from typing import Tuple, Union
-from common import \
-    ERR_INPUT, \
-    ERR_VERIFY, \
-    TEST_VECTOR, \
-    Bytes, \
-    Error, \
-    Unsigned, \
-    Vec, \
-    byte, \
-    from_be_bytes, \
-    front, \
-    to_be_bytes, \
-    vec_add, \
-    vec_sub
-from vdaf import Vdaf, test_vdaf
+
 import idpf
 import idpf_poplar
 import prg
+from common import (ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes, Error, Unsigned,
+                    Vec, byte, from_be_bytes, front, to_be_bytes, vec_add,
+                    vec_sub)
+from vdaf import Vdaf, test_vdaf
 
 USAGE_SHARD_RAND = 1
 USAGE_CORR_INNER = 2
