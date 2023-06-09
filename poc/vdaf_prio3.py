@@ -37,9 +37,9 @@ class Prio3(Vdaf):
     Prg = prg.Prg
 
     # Parameters required by `Vdaf`
-    VERIFY_KEY_SIZE = None # Set by the PRG
+    VERIFY_KEY_SIZE = None  # Set by the PRG
     NONCE_SIZE = 16
-    RAND_SIZE = None # Computed from `Prg.SEED_SIZE` and `SHARES`
+    RAND_SIZE = None  # Computed from `Prg.SEED_SIZE` and `SHARES`
     ROUNDS = 1
     SHARES = None  # A number between `[2, 256)` set later
 
@@ -58,8 +58,8 @@ class Prio3(Vdaf):
 
         # Split the random input into the various seeds we'll need.
         if len(rand) != Prio3.RAND_SIZE:
-            raise ERR_INPUT # unexpected length for random input
-        seeds = [rand[i:i+l] for i in range(0,Prio3.RAND_SIZE,l)]
+            raise ERR_INPUT  # unexpected length for random input
+        seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
         if use_joint_rand:
             k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
             k_helper_meas_shares = [
@@ -191,8 +191,10 @@ class Prio3(Vdaf):
         k_corrected_joint_rand, k_joint_rand_part = None, None
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             encoded = Prio3.Flp.Field.encode_vec(meas_share)
-            k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-                Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
+            k_joint_rand_part = Prio3.Prg.derive_seed(
+                k_blind,
+                Prio3.domain_separation_tag(
+                    USAGE_JOINT_RAND_PART),
                 byte(agg_id) + nonce + encoded)
             k_joint_rand_parts[agg_id] = k_joint_rand_part
             k_corrected_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
@@ -231,7 +233,7 @@ class Prio3(Vdaf):
 
         k_joint_rand_check = Prio3.decode_prep_msg(inbound)
         if k_joint_rand_check != k_corrected_joint_rand:
-            raise ERR_VERIFY # joint randomness check failed
+            raise ERR_VERIFY  # joint randomness check failed
 
         return out_share
 
@@ -249,7 +251,7 @@ class Prio3(Vdaf):
                 k_joint_rand_parts.append(k_joint_rand_part)
 
         if not Prio3.Flp.decide(verifier):
-            raise ERR_VERIFY # proof verifier check failed
+            raise ERR_VERIFY  # proof verifier check failed
 
         k_joint_rand_check = None
         if Prio3.Flp.JOINT_RAND_LEN > 0:
@@ -422,6 +424,7 @@ class Prio3(Vdaf):
         rand_size = (1+2*(num_shares-1)) * Prio3.Prg.SEED_SIZE
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             rand_size += num_shares * Prio3.Prg.SEED_SIZE
+
         class Prio3WithShares(Prio3):
             SHARES = num_shares
             RAND_SIZE = rand_size
@@ -477,7 +480,7 @@ class Prio3Sum(Prio3):
     def with_bits(Prio3Sum, bits: Unsigned):
         class Prio3SumWithBits(Prio3Sum):
             Flp = flp_generic.FlpGeneric \
-                    .with_valid(flp_generic.Sum.with_bits(bits))
+                .with_valid(flp_generic.Sum.with_bits(bits))
         return Prio3SumWithBits
 
 
@@ -496,7 +499,7 @@ class Prio3Histogram(Prio3):
     def with_length(Prio3Histogram, length: Unsigned):
         class Prio3HistogramWithLength(Prio3Histogram):
             Flp = flp_generic.FlpGeneric \
-                    .with_valid(flp_generic.Histogram.with_length(length))
+                .with_valid(flp_generic.Histogram.with_length(length))
         return Prio3HistogramWithLength
 
 
@@ -520,12 +523,12 @@ class TestPrio3Average(Prio3):
     def with_bits(cls, bits: Unsigned):
         class TestPrio3AverageWithBits(TestPrio3Average):
             Flp = flp_generic.FlpGeneric \
-                    .with_valid(flp_generic.TestAverage.with_bits(bits))
+                .with_valid(flp_generic.TestAverage.with_bits(bits))
         return TestPrio3AverageWithBits
 
 
 if __name__ == '__main__':
-    num_shares = 2 # Must be in range `[2, 256)`
+    num_shares = 2  # Must be in range `[2, 256)`
 
     cls = Prio3 \
         .with_prg(prg.PrgSha3) \
@@ -560,8 +563,8 @@ if __name__ == '__main__':
               test_vec_instance=1)
 
     cls = Prio3Histogram \
-            .with_length(4) \
-            .with_shares(num_shares)
+        .with_length(4) \
+        .with_shares(num_shares)
     assert cls.ID == 0x00000002
     test_vdaf(cls, None, [0], [1, 0, 0, 0])
     test_vdaf(cls, None, [1], [0, 1, 0, 0])

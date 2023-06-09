@@ -6,9 +6,9 @@ from Cryptodome.Hash import CMAC, cSHAKE128
 from Cryptodome.Util import Counter
 from Cryptodome.Util.number import bytes_to_long
 from common import TEST_VECTOR, VERSION, Bytes, Error, Unsigned, \
-                   format_dst, zeros, from_le_bytes, gen_rand, \
-                   next_power_of_2, print_wrapped_line, to_be_bytes, \
-                   to_le_bytes, xor, concat
+    format_dst, zeros, from_le_bytes, gen_rand, \
+    next_power_of_2, print_wrapped_line, to_be_bytes, \
+    to_le_bytes, xor, concat
 
 
 class Prg:
@@ -211,8 +211,8 @@ if __name__ == '__main__':
     expanded_vec = PrgSha3.expand_into_vec(
         Field64,
         b'\x23\x1c\x40\x0d\xcb\xaf\xce\x34\x5e\xfd\x3c\xa7\x79\x65\xee\x06',
-        b'', # domain separation tag
-        b'', # binder
+        b'',  # domain separation tag
+        b'',  # binder
         5,
     )
     assert expanded_vec[-1] == Field64(13681157193520586550)
@@ -231,13 +231,14 @@ if __name__ == '__main__':
                 'dst': dst.hex(),
                 'binder': binder.hex(),
                 'length': length,
-                'derived_seed': None, # set below
-                'expanded_vec_field128': None, # set below
+                'derived_seed': None,  # set below
+                'expanded_vec_field128': None,  # set below
             }
 
-            test_vector['derived_seed'] = cls.derive_seed(seed, dst, binder).hex()
+            test_vector['derived_seed'] = cls.derive_seed(
+                seed, dst, binder).hex()
             test_vector['expanded_vec_field128'] = Field128.encode_vec(
-                    cls.expand_into_vec(Field128, seed, dst, binder, length)).hex()
+                cls.expand_into_vec(Field128, seed, dst, binder, length)).hex()
 
             print('{}:'.format(cls.test_vec_name))
             print('  seed: "{}"'.format(test_vector['seed']))

@@ -21,6 +21,7 @@ Vec = List
 
 class Error(Exception):
     """Base class for errors."""
+
     def __init__(self, msg):
         self.msg = msg
 
@@ -88,7 +89,8 @@ def to_le_bytes(val, length):
     """
     val = int(val)
     if val < 0 or val >= (1 << (8 * length)):
-        raise ValueError('bad to_le_bytes call: val=%d length=%d' % (val, length))
+        raise ValueError(
+            'bad to_le_bytes call: val=%d length=%d' % (val, length))
     return val.to_bytes(length, byteorder='little')
 
 
@@ -104,7 +106,8 @@ def to_be_bytes(val, length):
     """
     val = int(val)
     if val < 0 or val >= (1 << (8 * length)):
-        raise ValueError('bad to_be_bytes call: val=%d length=%d' % (val, length))
+        raise ValueError(
+            'bad to_be_bytes call: val=%d length=%d' % (val, length))
     return val.to_bytes(length, byteorder='big')
 
 
