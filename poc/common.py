@@ -10,7 +10,7 @@ from typing import List, TypeVar
 TEST_VECTOR = False
 
 # Document version, reved with each draft that contains breaking changes.
-VERSION = 5
+VERSION = 6
 
 # Primitive types
 Bool = bool
