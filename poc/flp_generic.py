@@ -1,11 +1,12 @@
 """A generic FLP based on {{BBCGGI19}}, Theorem 4.3."""
 
-from common import ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, \
-                   Unsigned, Vec, next_power_of_2
+import math
+
+import field
+from common import (ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, Unsigned,
+                    Vec, next_power_of_2)
 from field import poly_eval, poly_interp, poly_mul, poly_strip
 from flp import Flp, run_flp
-import field
-import math
 
 
 class Gadget:
@@ -102,7 +103,6 @@ class Valid:
              num_shares: Unsigned):
         """Evaluate the circuit on the provided input and joint randomness."""
         raise NotImplementedError()
-
 
     @classmethod
     def test_vec_set_type_param(Valid, test_vec):
@@ -335,6 +335,7 @@ def check_gadget_eval(Gadget, inp):
     if len(inp) != Gadget.ARITY:
         raise ERR_INPUT
 
+
 def check_gadget_eval_poly(Gadget, inp_poly):
     if len(inp_poly) != Gadget.ARITY:
         raise ERR_INPUT
@@ -361,7 +362,7 @@ class PolyEval(Gadget):
     p = None
 
     ARITY = 1
-    DEGREE = None # Set by constructor
+    DEGREE = None  # Set by constructor
 
     def eval(self, Field, inp):
         check_gadget_eval(PolyEval, inp)
@@ -452,7 +453,7 @@ class Sum(Valid):
 
     # Associated parametrs
     GADGETS = [PolyEval([0, -1, 1])]
-    GADGET_CALLS = None # Set by Sum.with_bits()
+    GADGET_CALLS = None  # Set by Sum.with_bits()
     INPUT_LEN = None    # Set by Sum.with_bits()
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
@@ -497,6 +498,7 @@ class Sum(Valid):
 
         if 2 ** bits >= Sum.Field.MODULUS:
             raise ValueError('bit size exceeds field modulus')
+
         class SumWithBits(Sum):
             GADGET_CALLS = [bits]
             INPUT_LEN = bits
@@ -510,7 +512,7 @@ class Sum(Valid):
 
 class Histogram(Valid):
     # Operational parameters
-    length = None # Set by 'Histogram.with_length()`
+    length = None  # Set by 'Histogram.with_length()`
 
     # Associated types
     Measurement = Unsigned
@@ -519,10 +521,10 @@ class Histogram(Valid):
 
     # Associated parametrs
     GADGETS = [PolyEval([0, -1, 1])]
-    GADGET_CALLS = None # Set by `Histogram.with_length()`
-    INPUT_LEN = None # Set by `Histogram.with_length()`
+    GADGET_CALLS = None  # Set by `Histogram.with_length()`
+    INPUT_LEN = None  # Set by `Histogram.with_length()`
     JOINT_RAND_LEN = 2
-    OUTPUT_LEN = None # Set by `Histogram.with_length()`
+    OUTPUT_LEN = None  # Set by `Histogram.with_length()`
 
     def eval(self, inp, joint_rand, num_shares):
         check_valid_eval(self, inp, joint_rand)
@@ -540,7 +542,7 @@ class Histogram(Valid):
             sum_check += b
 
         out = joint_rand[1] * range_check + \
-              joint_rand[1] ** 2 * sum_check
+            joint_rand[1] ** 2 * sum_check
         return out
 
     @classmethod

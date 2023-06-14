@@ -1,15 +1,16 @@
 """Definition of VDAFs."""
 
 from __future__ import annotations
-from functools import reduce
+
 import json
 import os
-from common import ERR_VERIFY, VERSION, Bool, Bytes, Error, \
-                   Unsigned, Vec, format_dst, gen_rand, \
-                   to_le_bytes, print_wrapped_line
-import field
-from prg import PrgSha3
+from functools import reduce
 from typing import Optional, Tuple, Union
+
+import field
+from common import (ERR_VERIFY, VERSION, Bool, Bytes, Error, Unsigned, Vec,
+                    format_dst, gen_rand, print_wrapped_line, to_le_bytes)
+from prg import PrgSha3
 
 
 class Vdaf:
@@ -167,7 +168,7 @@ def run_vdaf(Vdaf,
         'agg_param': agg_param,
         'prep': [],
         'agg_shares': [],
-        'agg_result': None, # set below
+        'agg_result': None,  # set below
     }
     type_param = Vdaf.test_vec_set_type_param(test_vec)
 
@@ -179,7 +180,7 @@ def run_vdaf(Vdaf,
         prep_test_vec = {
             'measurement': int(measurement),
             'nonce': nonce.hex(),
-            'public_share': None, # set below
+            'public_share': None,  # set below
             'input_shares': [],
             'prep_shares': [[] for _ in range(Vdaf.ROUNDS)],
             'prep_messages': [],
@@ -262,7 +263,7 @@ def run_vdaf(Vdaf,
 
         os.system('mkdir -p test_vec/{:02}'.format(VERSION))
         with open('test_vec/{:02}/{}_{}.json'.format(
-            VERSION, Vdaf.test_vec_name, test_vec_instance), 'w') as f:
+                VERSION, Vdaf.test_vec_name, test_vec_instance), 'w') as f:
             json.dump(test_vec, f, indent=4, sort_keys=True)
             f.write('\n')
 
@@ -404,8 +405,8 @@ class TestVdaf(Vdaf):
     @classmethod
     def agg_shares_to_result(cls, _agg_param, agg_shares, _num_measurements):
         return reduce(lambda x, y: [x[0] + y[0]],
-            map(lambda encoded: cls.Field.decode_vec(encoded),
-                agg_shares))[0].as_unsigned()
+                      map(lambda encoded: cls.Field.decode_vec(encoded),
+                          agg_shares))[0].as_unsigned()
 
 
 def test_vdaf(Vdaf,

@@ -1,11 +1,13 @@
 """Definition of DAFs."""
 
 from __future__ import annotations
-from common import Bool, Bytes, Error, Unsigned, Vec, gen_rand
-from functools import reduce
-import field
-from prg import PrgSha3
+
 import json
+from functools import reduce
+
+import field
+from common import Bool, Bytes, Error, Unsigned, Vec, gen_rand
+from prg import PrgSha3
 
 
 class Daf:
@@ -94,7 +96,7 @@ def run_daf(Daf,
             agg_param: Daf.AggParam,
             measurements: Vec[Daf.Measurement]):
     """Run a DAF on a list of measurements."""
-    out_shares = [ [] for j in range(Daf.SHARES) ]
+    out_shares = [[] for j in range(Daf.SHARES)]
     for measurement in measurements:
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.
@@ -171,7 +173,7 @@ class TestDaf(Daf):
     @classmethod
     def agg_shares_to_result(cls, _agg_param, agg_shares, _num_measurements):
         return [reduce(lambda x, y: [x[0] + y[0]],
-            map(lambda encoded: cls.Field.decode_vec(encoded),
+                       map(lambda encoded: cls.Field.decode_vec(encoded),
                 agg_shares))[0].as_unsigned()]
 
 

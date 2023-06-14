@@ -1,21 +1,16 @@
 """Definition of IDPFs."""
 
 from __future__ import annotations
-from typing import Union, Tuple
-from common import \
-    VERSION, \
-    Bool, \
-    Bytes, \
-    Error, \
-    Unsigned, \
-    Vec, \
-    gen_rand, \
-    vec_add
-from functools import reduce
+
 import json
 import os
+from functools import reduce
+from typing import Tuple, Union
+
 import field
 import prg
+from common import (VERSION, Bool, Bytes, Error, Unsigned, Vec, gen_rand,
+                    vec_add)
 
 
 class Idpf:
@@ -100,7 +95,7 @@ class Idpf:
     @classmethod
     def current_field(Idpf, level):
         return Idpf.FieldInner if level < Idpf.BITS-1 \
-                    else Idpf.FieldLeaf
+            else Idpf.FieldLeaf
 
     @classmethod
     def is_prefix(Idpf, x: Unsigned, y: Unsigned, L: Unsigned) -> Bool:
@@ -152,10 +147,10 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
     (public_share, keys) = Idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
 
     printable_beta_inner = [
-        [ str(elem.as_unsigned()) for elem in value ] for value in beta_inner
+        [str(elem.as_unsigned()) for elem in value] for value in beta_inner
     ]
-    printable_beta_leaf = [ str(elem.as_unsigned()) for elem in beta_leaf ]
-    printable_keys = [ key.hex() for key in keys ]
+    printable_beta_leaf = [str(elem.as_unsigned()) for elem in beta_leaf]
+    printable_keys = [key.hex() for key in keys]
     test_vec = {
         'bits': int(Idpf.BITS),
         'alpha': str(alpha),
@@ -168,7 +163,7 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
 
     os.system('mkdir -p test_vec/{:02}'.format(VERSION))
     with open('test_vec/{:02}/{}_{}.json'.format(
-        VERSION, Idpf.test_vec_name, test_vec_instance), 'w') as f:
+            VERSION, Idpf.test_vec_name, test_vec_instance), 'w') as f:
         json.dump(test_vec, f, indent=4, sort_keys=True)
         f.write('\n')
 
@@ -200,8 +195,8 @@ def test_idpf_exhaustive(Idpf, alpha):
         # Check that each set of output shares for each prefix sums up to the
         # correct value.
         for prefix in prefixes:
-            got = reduce(lambda x, y: vec_add(x,y),
-                map(lambda x: x[prefix], out_shares))
+            got = reduce(lambda x, y: vec_add(x, y),
+                         map(lambda x: x[prefix], out_shares))
 
             if Idpf.is_prefix(prefix, alpha, level+1):
                 if level < Idpf.BITS-1:

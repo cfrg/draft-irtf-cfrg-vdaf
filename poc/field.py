@@ -1,9 +1,11 @@
 """Definitions of finite fields used in this spec."""
 
 from __future__ import annotations
+
 from sage.all import GF, PolynomialRing
-from common import ERR_DECODE, to_le_bytes, from_le_bytes, Bytes, \
-                   Error, Unsigned, Vec, byte
+
+from common import (ERR_DECODE, Bytes, Error, Unsigned, Vec, byte,
+                    from_le_bytes, to_le_bytes)
 
 
 class Field:
@@ -47,7 +49,7 @@ class Field:
             encoded_x = encoded[i:i+L]
             x = from_le_bytes(encoded_x)
             if x >= Field.MODULUS:
-                raise ERR_DECODE # Integer is larger than modulus
+                raise ERR_DECODE  # Integer is larger than modulus
             vec.append(Field(x))
         return vec
 

@@ -1,31 +1,23 @@
 """The Poplar1 VDAF."""
 
 from __future__ import annotations
+
 from collections import namedtuple
 from typing import Tuple, Union
-from common import \
-    ERR_INPUT, \
-    ERR_VERIFY, \
-    TEST_VECTOR, \
-    Bytes, \
-    Error, \
-    Unsigned, \
-    Vec, \
-    byte, \
-    from_be_bytes, \
-    front, \
-    to_be_bytes, \
-    vec_add, \
-    vec_sub
-from vdaf import Vdaf, test_vdaf
+
 import idpf
 import idpf_poplar
 import prg
+from common import (ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes, Error, Unsigned,
+                    Vec, byte, from_be_bytes, front, to_be_bytes, vec_add,
+                    vec_sub)
+from vdaf import Vdaf, test_vdaf
 
 USAGE_SHARD_RAND = 1
 USAGE_CORR_INNER = 2
 USAGE_CORR_LEAF = 3
 USAGE_VERIFY_RAND = 4
+
 
 class Poplar1(Vdaf):
     # Types provided by a concrete instadce of `Poplar1`.
@@ -34,8 +26,8 @@ class Poplar1(Vdaf):
 
     # Parameters required by `Vdaf`.
     ID = 0x00001000
-    VERIFY_KEY_SIZE = None # Set by Idpf.Prg
-    RAND_SIZE = None # Set by Idpf.Prg
+    VERIFY_KEY_SIZE = None  # Set by Idpf.Prg
+    RAND_SIZE = None  # Set by Idpf.Prg
     NONCE_SIZE = 16
     SHARES = 2
     ROUNDS = 2
@@ -61,9 +53,9 @@ class Poplar1(Vdaf):
         # Split the random input into the random input for IDPF key
         # generation, correlated randomness, and sharding.
         if len(rand) != Poplar1.RAND_SIZE:
-            raise ERR_INPUT # unexpected length for random input
+            raise ERR_INPUT  # unexpected length for random input
         idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
-        seeds = [rand[i:i+l] for i in range(0,3*l,l)]
+        seeds = [rand[i:i+l] for i in range(0, 3*l, l)]
         corr_seed, seeds = front(2, seeds)
         (k_shard,), seeds = front(1, seeds)
 
@@ -176,9 +168,9 @@ class Poplar1(Vdaf):
 
         # Ensure that candidate prefixes are all unique and appear in
         # lexicographic order.
-        for i in range(1,len(prefixes)):
+        for i in range(1, len(prefixes)):
             if prefixes[i-1] >= prefixes[i]:
-                raise ERR_INPUT # out-of-order prefix
+                raise ERR_INPUT  # out-of-order prefix
 
         # Evaluate the IDPF key at the given set of prefixes.
         value = Poplar1.Idpf.eval(
@@ -223,8 +215,8 @@ class Poplar1(Vdaf):
             out_share.append(data_share)
 
         prep_mem = sketch_share \
-                    + [A_share, B_share, Field(agg_id)] \
-                    + out_share
+            + [A_share, B_share, Field(agg_id)] \
+            + out_share
         return (b'ready', level, prep_mem)
 
     @classmethod
@@ -245,31 +237,31 @@ class Poplar1(Vdaf):
             if len(prev_sketch) == 0:
                 prev_sketch = Field.zeros(3)
             elif len(prev_sketch) != 3:
-                raise ERR_INPUT # prep message malformed
+                raise ERR_INPUT  # prep message malformed
             (A_share, B_share, agg_id), prep_mem = \
                 prep_mem[:3], prep_mem[3:]
             sketch_share = [
                 agg_id * (prev_sketch[0] ** 2
-                            - prev_sketch[1]
-                            - prev_sketch[2])
-                    + A_share * prev_sketch[0]
-                    + B_share
+                          - prev_sketch[1]
+                          - prev_sketch[2])
+                + A_share * prev_sketch[0]
+                + B_share
             ]
             return ((b'sketch round 2', level, prep_mem),
                     Field.encode_vec(sketch_share))
 
         elif step == b'sketch round 2' and opt_sketch != None:
             if len(opt_sketch) == 0:
-                return prep_mem # Output shares
+                return prep_mem  # Output shares
             else:
-                raise ERR_INPUT # prep message malformed
+                raise ERR_INPUT  # prep message malformed
 
-        raise ERR_INPUT # unexpected input
+        raise ERR_INPUT  # unexpected input
 
     @classmethod
     def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
         if len(prep_shares) != 2:
-            raise ERR_INPUT # unexpected number of prep shares
+            raise ERR_INPUT  # unexpected number of prep shares
         (level, _) = agg_param
         Field = Poplar1.Idpf.current_field(level)
         sketch = vec_add(Field.decode_vec(prep_shares[0]),
@@ -282,9 +274,9 @@ class Poplar1(Vdaf):
                 # empty string denote a successful sketch verification.
                 return b''
             else:
-                raise ERR_VERIFY # sketch verification failed
+                raise ERR_VERIFY  # sketch verification failed
         else:
-            raise ERR_INPUT # unexpected input length
+            raise ERR_INPUT  # unexpected input length
 
     @classmethod
     def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
@@ -343,9 +335,9 @@ class Poplar1(Vdaf):
     @classmethod
     def encode_agg_param(Poplar1, level, prefixes):
         if level > 2 ** 16 - 1:
-            raise ERR_INPUT # level too deep
+            raise ERR_INPUT  # level too deep
         if len(prefixes) > 2 ** 32 - 1:
-            raise ERR_INPUT # too many prefixes
+            raise ERR_INPUT  # too many prefixes
         encoded = Bytes()
         encoded += to_be_bytes(level, 2)
         encoded += to_be_bytes(len(prefixes), 4)
@@ -376,9 +368,10 @@ class Poplar1(Vdaf):
     @classmethod
     def with_bits(Poplar1, bits: Unsigned):
         TheIdpf = idpf_poplar.IdpfPoplar \
-                .with_value_len(2) \
-                .with_bits(bits)
+            .with_value_len(2) \
+            .with_bits(bits)
         ThePrg = prg.PrgSha3
+
         class Poplar1WithBits(Poplar1):
             Idpf = TheIdpf
             Prg = ThePrg

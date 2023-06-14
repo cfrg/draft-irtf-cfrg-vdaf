@@ -1,24 +1,13 @@
 """An IDPF based on the construction of [BBCGGI21, Section 6]."""
 
 import itertools
-from common import \
-    ERR_DECODE, \
-    ERR_INPUT, \
-    TEST_VECTOR, \
-    VERSION, \
-    Bytes, \
-    Error, \
-    Unsigned, \
-    Vec, \
-    byte, \
-    format_dst, \
-    vec_add, \
-    vec_neg, \
-    vec_sub, \
-    xor
+
+import field
+from common import (ERR_DECODE, ERR_INPUT, TEST_VECTOR, VERSION, Bytes, Error,
+                    Unsigned, Vec, byte, format_dst, vec_add, vec_neg, vec_sub,
+                    xor)
 from field import Field2
 from idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
-import field
 from prg import PrgFixedKeyAes128
 
 
@@ -43,11 +32,11 @@ class IdpfPoplar(Idpf):
     @classmethod
     def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
         if alpha >= 2 ** IdpfPoplar.BITS:
-            raise ERR_INPUT # alpha too long
+            raise ERR_INPUT  # alpha too long
         if len(beta_inner) != IdpfPoplar.BITS - 1:
-            raise ERR_INPUT # beta_inner vector is the wrong size
+            raise ERR_INPUT  # beta_inner vector is the wrong size
         if len(rand) != IdpfPoplar.RAND_SIZE:
-            raise ERR_INPUT # unexpected length for random input
+            raise ERR_INPUT  # unexpected length for random input
 
         init_seed = [
             rand[:PrgFixedKeyAes128.SEED_SIZE],
@@ -79,9 +68,9 @@ class IdpfPoplar(Idpf):
             ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
             b = beta_inner[level] if level < IdpfPoplar.BITS-1 \
-                    else beta_leaf
+                else beta_leaf
             if len(b) != IdpfPoplar.VALUE_LEN:
-                raise ERR_INPUT # beta too long or too short
+                raise ERR_INPUT  # beta too long or too short
 
             w_cw = vec_add(vec_sub(b, w0), w1)
             # Implementation note: Here we negate the correction word if
@@ -100,17 +89,17 @@ class IdpfPoplar(Idpf):
     def eval(IdpfPoplar, agg_id, public_share, init_seed,
              level, prefixes, binder):
         if agg_id >= IdpfPoplar.SHARES:
-            raise ERR_INPUT # invalid aggregator ID
+            raise ERR_INPUT  # invalid aggregator ID
         if level >= IdpfPoplar.BITS:
-            raise ERR_INPUT # level too deep
+            raise ERR_INPUT  # level too deep
         if len(set(prefixes)) != len(prefixes):
-            raise ERR_INPUT # candidate prefixes are non-unique
+            raise ERR_INPUT  # candidate prefixes are non-unique
 
         correction_words = IdpfPoplar.decode_public_share(public_share)
         out_share = []
         for prefix in prefixes:
             if prefix >= 2 ** (level+1):
-                raise ERR_INPUT # prefix too long
+                raise ERR_INPUT  # prefix too long
 
             # The Aggregator's output share is the value of a node of
             # the IDPF tree at the given `level`. The node's value is
@@ -206,7 +195,7 @@ class IdpfPoplar(Idpf):
         ))
         encoded += pack_bits(control_bits)
         for (level, (seed_cw, _, w_cw)) \
-            in enumerate(correction_words):
+                in enumerate(correction_words):
             Field = IdpfPoplar.current_field(level)
             encoded += seed_cw
             encoded += Field.encode_vec(w_cw)
@@ -237,7 +226,8 @@ class IdpfPoplar(Idpf):
     @classmethod
     def with_bits(IdpfPoplar, bits: Unsigned):
         if bits == 0:
-            raise ERR_INPUT # number of bits must be positive
+            raise ERR_INPUT  # number of bits must be positive
+
         class IdpfPoplarWithBits(IdpfPoplar):
             BITS = bits
         return IdpfPoplarWithBits
@@ -245,7 +235,8 @@ class IdpfPoplar(Idpf):
     @classmethod
     def with_value_len(IdpfPoplar, value_len: Unsigned):
         if value_len == 0:
-            raise ERR_INPUT # value length must be positive
+            raise ERR_INPUT  # value length must be positive
+
         class IdpfPoplarWithValueLen(IdpfPoplar):
             VALUE_LEN = value_len
         return IdpfPoplarWithValueLen
@@ -275,7 +266,7 @@ def unpack_bits(packed_bits: Bytes, length: Unsigned) -> Vec[Field2]:
 
 if __name__ == '__main__':
     cls = IdpfPoplar \
-                .with_value_len(2)
+        .with_value_len(2)
     if TEST_VECTOR:
         gen_test_vec(cls.with_bits(10), 0, 0)
     test_idpf(cls.with_bits(16), 0b1111000011110000, 15, (0b1111000011110000,))
