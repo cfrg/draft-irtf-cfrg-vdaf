@@ -2905,10 +2905,11 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
 
 This instance of Prio3 allows for estimating the distribution of some quantity
 by computing a simple histogram. Each measurement increments one histogram
-bucket, out of a set of fixed buckets. For example, the buckets might quantize
-the real numbers, and each measurement would report the bucket that the
-corresponding client's real-numbered value falls into. The aggregate result
-counts the number of measurements in each bucket.
+bucket, out of a set of fixed buckets. (Bucket indexing begins at `0`.) For
+example, the buckets might quantize the real numbers, and each measurement
+would report the bucket that the corresponding client's real-numbered value
+falls into. The aggregate result counts the number of measurements in each
+bucket.
 
 This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
 circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite field.
@@ -2962,7 +2963,7 @@ sharded. This is provided to the FLP by Prio3.
 | `INPUT_LEN`      | `length`                |
 | `OUTPUT_LEN`     | `length`                |
 | `JOINT_RAND_LEN` | `2`                     |
-| `Measurement`    | `Integer`               |
+| `Measurement`    | `Unsigned`              |
 | `AggResult`      | `Vec[Unsigned]`         |
 | `Field`          | `Field128` ({{fields}}) |
 {: title="Parameters of validity circuit Histogram."}
