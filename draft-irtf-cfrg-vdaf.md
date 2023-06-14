@@ -328,6 +328,24 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+06:
+
+* Vdaf: Define a wrapper interface for preparation that is suitable for the
+  "ping-pong" topology in which two Aggregators exchange messages over a
+  request/response protocol, like HTTP, and take turns executing the
+  computation until input from the peer is required.
+
+* Prio3Histogram: Generalize the measurement type so that the histogram can be
+  used more easily with discrete domains. (\*)
+
+* Daf, Vdaf: Change the aggregation parameter validation algorithm to take the
+  set of previous parameters rather than a list. (The order of the parameters
+  is irrelevant.)
+
+* Daf, Vdaf, Idpf: Add parameter `RAND_SIZE` that specifies the number of
+  random bytes consumed by the randomized algorithm (`shard()` for Daf and Vdaf
+  and `gen()` for Idpf).
+
 05:
 
 * IdpfPoplar: Replace PrgSha3 with PrgFixedKeyAes128, a fixed-key mode for
