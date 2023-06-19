@@ -1364,7 +1364,7 @@ def ping_pong_resp(Vdaf,
                    agg_param: Vdaf.AggParam,
                    state: State,
                    inbound: Message,
-                   ) -> (State, Optional[bytes]):
+                   ) -> (State, Optional[Message]):
     if inbound.type == 0: # initialize
         prep_msg = None
         peer_prep_share = inbound.prep_share
