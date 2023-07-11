@@ -2005,122 +2005,151 @@ Section 6.2.3 of {{BBCGGI19}}.)
 The sharding algorithm involves the following steps:
 
 1. Encode the Client's raw measurement as an input for the FLP
-1. Shard the measurement into a sequence of measurement shares
-1. Derive the joint randomness from the measurement shares and nonce
-1. Run the FLP proof-generation algorithm using the derived joint randomness
-1. Shard the proof into a sequence of proof shares
-1. Return the public share, consisting of the joint randomness parts, and the
+2. Shard the measurement into a sequence of measurement shares
+3. Derive the joint randomness from the measurement shares and nonce
+4. Run the FLP proof-generation algorithm using the derived joint randomness
+5. Shard the proof into a sequence of proof shares
+6. Return the public share, consisting of the joint randomness parts, and the
    input shares, each consisting of the measurement share, proof share, and
    blind of one of the Aggregators
 
-The algorithm is specified below. Notice that only one set of input and proof
-shares (called the "leader" shares below) are vectors of field elements. The
-other shares (called the "helper" shares) are represented instead by PRG seeds,
-which are expanded into vectors of field elements.
-
-The definitions of constants and a few auxiliary functions are defined in
-{{prio3-auxiliary}}.
+Depending on the FLP, joint randomness may not be required. In particular, when
+`Flp.JOINT_RAND_LEN == 0`, the Client does not derive the joint randomness
+(Step 3). The sharding algorithm is specified below.
 
 ~~~
 def measurement_to_input_shares(Prio3, measurement, nonce, rand):
     l = Prio3.Prg.SEED_SIZE
-    use_joint_rand = Prio3.Flp.JOINT_RAND_LEN > 0
+    seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
 
-    # Split the random input into the various seeds we'll need.
-    if len(rand) != Prio3.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random input
-    seeds = [rand[i:i+l] for i in range(0,Prio3.RAND_SIZE,l)]
-    if use_joint_rand:
-        k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
-        k_helper_meas_shares = [
-            k_helper_seeds[i]
-            for i in range(0, (Prio3.SHARES-1) * 3, 3)
-        ]
-        k_helper_proof_shares = [
-            k_helper_seeds[i]
-            for i in range(1, (Prio3.SHARES-1) * 3, 3)
-        ]
-        k_helper_blinds = [
-            k_helper_seeds[i]
-            for i in range(2, (Prio3.SHARES-1) * 3, 3)
-        ]
-        (k_leader_blind,), seeds = front(1, seeds)
+    inp = Prio3.Flp.encode(measurement)
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        return Prio3.shard_with_joint_rand(inp, nonce, seeds)
     else:
-        k_helper_seeds, seeds = front((Prio3.SHARES-1) * 2, seeds)
-        k_helper_meas_shares = [
-            k_helper_seeds[i]
-            for i in range(0, (Prio3.SHARES-1) * 2, 2)
-        ]
-        k_helper_proof_shares = [
-            k_helper_seeds[i]
-            for i in range(1, (Prio3.SHARES-1) * 2, 2)
-        ]
-        k_helper_blinds = [None] * (Prio3.SHARES-1)
-        k_leader_blind = None
+        return Prio3.shard_without_joint_rand(inp, seeds)
+~~~
+{: #prio3-eval-input title="Input-distribution algorithm for Prio3."}
+
+It starts by splitting the randomness into seeds. It then encodes the
+measurement as prescribed by the FLP and calls one of two methods, depending on
+whether joint randomness is required by the FLP. The methods are defined in the
+subsections below.
+
+#### FLPs without joint randomness
+
+The following method is used for FLPs that do not require joint randomness,
+i.e., when `Flp.JOINT_RAND_LEN == 0`:
+
+~~~
+def shard_without_joint_rand(Prio3, inp, seeds):
+    k_helper_seeds, seeds = front((Prio3.SHARES-1) * 2, seeds)
+    k_helper_meas_shares = [
+        k_helper_seeds[i]
+        for i in range(0, (Prio3.SHARES-1) * 2, 2)
+    ]
+    k_helper_proof_shares = [
+        k_helper_seeds[i]
+        for i in range(1, (Prio3.SHARES-1) * 2, 2)
+    ]
     (k_prove,), seeds = front(1, seeds)
 
-    # Finish measurement shares and joint randomness parts.
-    inp = Prio3.Flp.encode(measurement)
+    # Shard the encoded measurement (`inp`) into measurement shares.
+    leader_meas_share = inp
+    for j in range(Prio3.SHARES-1):
+        leader_meas_share = vec_sub(
+            leader_meas_share,
+            Prio3.helper_meas_share(j+1, k_helper_meas_shares[j]),
+        )
+
+    # Generate the proof and shard it into proof shares.
+    prove_rand = Prio3.prove_rand(k_prove)
+    leader_proof_share = Prio3.Flp.prove(inp, prove_rand, [])
+    for j in range(Prio3.SHARES-1):
+        leader_proof_share = vec_sub(
+            leader_proof_share,
+            Prio3.helper_proof_share(j+1, k_helper_proof_shares[j]),
+        )
+
+    # Each Aggregator's input share contains its measurement share
+    # and proof share.
+    input_shares = []
+    input_shares.append(Prio3.encode_leader_share(
+        leader_meas_share,
+        leader_proof_share,
+        None,
+    ))
+    for j in range(Prio3.SHARES-1):
+        input_shares.append(Prio3.encode_helper_share(
+            k_helper_meas_shares[j],
+            k_helper_proof_shares[j],
+            None,
+        ))
+    return (b'', input_shares)
+~~~
+{: #prio3-shard-without-joint-rand title="Sharding an encoded measurement without joint randomness."}
+
+The steps in this method are as follows:
+
+1. Shard the encoded measurement into shares
+1. Generate the proof and shard the proof into shares
+1. Encode each measurement and proof share into an input share
+
+Notice that only one pair of measurement and proof shares (called the "leader"
+shares above) are vectors of field elements. The other shares (called the
+"helper" shares) are represented instead by PRG seeds, which are expanded into
+vectors of field elements.
+
+The methods on `Prio3` for deriving the prover randomness, measurement shares,
+and proof shares and the methods for encoding the input shares are defined in
+{{prio3-auxiliary}}.
+
+#### FLPs with joint randomness
+
+The following method is used for FLPs that require joint randomness,
+i.e., for which `Flp.JOINT_RAND_LEN > 0`:
+
+~~~
+def shard_with_joint_rand(Prio3, inp, nonce, seeds):
+    k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
+    k_helper_meas_shares = [
+        k_helper_seeds[i]
+        for i in range(0, (Prio3.SHARES-1) * 3, 3)
+    ]
+    k_helper_proof_shares = [
+        k_helper_seeds[i]
+        for i in range(1, (Prio3.SHARES-1) * 3, 3)
+    ]
+    k_helper_blinds = [
+        k_helper_seeds[i]
+        for i in range(2, (Prio3.SHARES-1) * 3, 3)
+    ]
+    (k_leader_blind,), seeds = front(1, seeds)
+    (k_prove,), seeds = front(1, seeds)
+
+    # Shard the encoded measurement (`inp`) into measurement
+    # shares and compute the joint randomness parts.
     leader_meas_share = inp
     k_joint_rand_parts = []
     for j in range(Prio3.SHARES-1):
-        helper_meas_share = Prio3.Prg.expand_into_vec(
-            Prio3.Flp.Field,
-            k_helper_meas_shares[j],
-            Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE),
-            byte(j+1),
-            Prio3.Flp.INPUT_LEN
-        )
+        helper_meas_share = Prio3.helper_meas_share(
+            j+1, k_helper_meas_shares[j])
         leader_meas_share = vec_sub(leader_meas_share,
                                     helper_meas_share)
-        if use_joint_rand:
-            encoded = Prio3.Flp.Field.encode_vec(helper_meas_share)
-            k_joint_rand_part = Prio3.Prg.derive_seed(
-                k_helper_blinds[j],
-                Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
-                byte(j+1) + nonce + encoded,
-            )
-            k_joint_rand_parts.append(k_joint_rand_part)
+        k_joint_rand_parts.append(Prio3.joint_rand_part(
+            j+1, k_helper_blinds[j], helper_meas_share, nonce))
+    k_joint_rand_parts.insert(0, Prio3.joint_rand_part(
+        0, k_leader_blind, leader_meas_share, nonce))
 
-    # Finish joint randomness.
-    if use_joint_rand:
-        encoded = Prio3.Flp.Field.encode_vec(leader_meas_share)
-        k_joint_rand_part = Prio3.Prg.derive_seed(
-            k_leader_blind,
-            Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
-            byte(0) + nonce + encoded,
-        )
-        k_joint_rand_parts.insert(0, k_joint_rand_part)
-        joint_rand = Prio3.Prg.expand_into_vec(
-            Prio3.Flp.Field,
-            Prio3.joint_rand(k_joint_rand_parts),
-            Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
-            b'',
-            Prio3.Flp.JOINT_RAND_LEN,
-        )
-    else:
-        joint_rand = []
-
-    # Finish the proof shares.
-    prove_rand = Prio3.Prg.expand_into_vec(
-        Prio3.Flp.Field,
-        k_prove,
-        Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
-        b'',
-        Prio3.Flp.PROVE_RAND_LEN,
-    )
-    proof = Prio3.Flp.prove(inp, prove_rand, joint_rand)
-    leader_proof_share = proof
+    # Generate the proof and shard it into proof shares.
+    prove_rand = Prio3.prove_rand(k_prove)
+    joint_rand = Prio3.joint_rand(
+        Prio3.joint_rand_seed(k_joint_rand_parts))
+    leader_proof_share = Prio3.Flp.prove(inp, prove_rand, joint_rand)
     for j in range(Prio3.SHARES-1):
-        helper_proof_share = Prio3.Prg.expand_into_vec(
-            Prio3.Flp.Field,
-            k_helper_proof_shares[j],
-            Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
-            byte(j+1),
-            Prio3.Flp.PROOF_LEN,
+        leader_proof_share = vec_sub(
+            leader_proof_share,
+            Prio3.helper_proof_share(j+1, k_helper_proof_shares[j]),
         )
-        leader_proof_share = vec_sub(leader_proof_share,
-                                     helper_proof_share)
 
     # Each Aggregator's input share contains its measurement share,
     # proof share, and blind. The public share contains the
@@ -2140,9 +2169,30 @@ def measurement_to_input_shares(Prio3, measurement, nonce, rand):
     public_share = Prio3.encode_public_share(k_joint_rand_parts)
     return (public_share, input_shares)
 ~~~
-{: #prio3-eval-input title="Input-distribution algorithm for Prio3."}
+{: #prio3-shard-with-joint-rand title="Sharding an encoded measurement with joint
+randomness."}
 
-### Preparation
+The difference between this procedure and previous one is that here we compute
+joint randomness `joint_rand` and pass it to the proof generationg algorithm.
+(In {{prio3-shard-without-joint-rand}} the joint randomness is the empty
+vector, `[]`.) This requires generating an additional value, called the
+"blind", that is incorporated into each input share.
+
+The joint randomness computation involves the following steps:
+
+1. Compute a "joint randomness part" from each measurement share and blind
+1. Compute a "joint randomness seed" from the joint randomness parts
+1. Compute the joint randomness from the joint randomness seed
+
+This three-step process is designed to ensure that the joint randomness does
+not leak the measurement to the Aggregators while preventing a malicious Client
+from tampering with the joint randomness in a way that allows it to break
+robustness. To bootstrap the required check, the Client encodes the joint
+randomness parts in the public share. (See {{prio3-preparation}} for details.)
+
+The methods used in this computation are defined in {{prio3-auxiliary}}.
+
+### Preparation {#prio3-preparation}
 
 This section describes the process of recovering output shares from the input
 shares. The high-level idea is that each Aggregator first queries its input and
@@ -2150,21 +2200,18 @@ proof share locally, then exchanges its verifier share with the other
 Aggregators. The verifier shares are then combined into the verifier message,
 which is used to decide whether to accept.
 
-In addition, the Aggregators must ensure that they have all used the same joint
-randomness for the query-generation algorithm. The joint randomness is generated
-by a PRG seed. Each Aggregator derives a "part" of this seed from its input
-share and the "blind" generated by the Client. The seed is derived by hashing
-together the parts, so before running the query-generation algorithm, it must
-first gather the parts derived by the other Aggregators.
+In addition, for FLPs that require joint randomness, the Aggregators must
+ensure that they have all used the same joint randomness for the
+query-generation algorithm. To do so, they collectively re-derive the joint
+randomness from their input shares just as the Client did during sharding.
 
-In order to avoid extra round of communication, the Client sends each Aggregator
-a "hint" consisting of the other Aggregators' parts of the joint randomness
-seed. This leaves open the possibility that the Client cheated by, say, forcing
-the Aggregators to use joint randomness that biases the proof check procedure
-some way in its favor. To mitigate this, the Aggregators also check that they
-have all computed the same joint randomness seed before accepting their output
-shares. To do so, they exchange their parts of the joint randomness along with
-their verifier shares.
+In order to avoid extra round of communication, the Client sends each
+Aggregator a "hint" consisting of the joint randomness parts. This leaves open
+the possibility that the Client cheated by, say, forcing the Aggregators to use
+joint randomness that biases the proof check procedure some way in its favor.
+To mitigate this, the Aggregators also check that they have all computed the
+same joint randomness seed before accepting their output shares. To do so, they
+exchange their parts of the joint randomness along with their verifier shares.
 
 The definitions of constants and a few auxiliary functions are defined in
 {{prio3-auxiliary}}.
@@ -2178,32 +2225,19 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
         Prio3.decode_helper_share(agg_id, input_share)
     out_share = Prio3.Flp.truncate(meas_share)
 
-    # Compute joint randomness.
+    # Compute the joint randomness.
     joint_rand = []
     k_corrected_joint_rand, k_joint_rand_part = None, None
     if Prio3.Flp.JOINT_RAND_LEN > 0:
-        encoded = Prio3.Flp.Field.encode_vec(meas_share)
-        k_joint_rand_part = Prio3.Prg.derive_seed(k_blind,
-            Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
-            byte(agg_id) + nonce + encoded)
+        k_joint_rand_part = Prio3.joint_rand_part(
+            agg_id, k_blind, meas_share, nonce)
         k_joint_rand_parts[agg_id] = k_joint_rand_part
-        k_corrected_joint_rand = Prio3.joint_rand(k_joint_rand_parts)
-        joint_rand = Prio3.Prg.expand_into_vec(
-            Prio3.Flp.Field,
-            k_corrected_joint_rand,
-            Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
-            b'',
-            Prio3.Flp.JOINT_RAND_LEN,
-        )
+        k_corrected_joint_rand = Prio3.joint_rand_seed(
+            k_joint_rand_parts)
+        joint_rand = Prio3.joint_rand(k_corrected_joint_rand)
 
     # Query the measurement and proof share.
-    query_rand = Prio3.Prg.expand_into_vec(
-        Prio3.Flp.Field,
-        verify_key,
-        Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
-        nonce,
-        Prio3.Flp.QUERY_RAND_LEN,
-    )
+    query_rand = Prio3.query_rand(verify_key, nonce)
     verifier_share = Prio3.Flp.query(meas_share,
                                      proof_share,
                                      query_rand,
@@ -2220,9 +2254,11 @@ def prep_next(Prio3, prep, inbound):
     if inbound is None:
         return (prep, prep_msg)
 
+    # Check that the joint randomness used to compute the verifier
+    # share was correct.
     k_joint_rand_check = Prio3.decode_prep_msg(inbound)
     if k_joint_rand_check != k_corrected_joint_rand:
-        raise ERR_VERIFY # joint randomness check failed
+        raise ERR_VERIFY  # joint randomness check failed
 
     return out_share
 
@@ -2293,15 +2329,68 @@ def agg_shares_to_result(Prio3, _agg_param,
 This section defines a number of auxiliary functions referenced by the main
 algorithms for Prio3 in the preceding sections.
 
-The following method is called by the sharding and preparation algorithms to
-derive the joint randomness.
+The following methods are called by the sharding and preparation algorithms.
 
 ~~~
-def joint_rand(Prio3, k_joint_rand_parts):
+def helper_meas_share(Prio3, agg_id, k_share):
+    return Prio3.Prg.expand_into_vec(
+        Prio3.Flp.Field,
+        k_share,
+        Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE),
+        byte(agg_id),
+        Prio3.Flp.INPUT_LEN
+    )
+
+def helper_proof_share(Prio3, agg_id, k_share):
+    return Prio3.Prg.expand_into_vec(
+        Prio3.Flp.Field,
+        k_share,
+        Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
+        byte(agg_id),
+        Prio3.Flp.PROOF_LEN,
+    )
+
+def prove_rand(Prio3, k_prove):
+    return Prio3.Prg.expand_into_vec(
+        Prio3.Flp.Field,
+        k_prove,
+        Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
+        b'',
+        Prio3.Flp.PROVE_RAND_LEN,
+    )
+
+def query_rand(Prio3, verify_key, nonce):
+    return Prio3.Prg.expand_into_vec(
+        Prio3.Flp.Field,
+        verify_key,
+        Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
+        nonce,
+        Prio3.Flp.QUERY_RAND_LEN,
+    )
+
+def joint_rand_part(Prio3, agg_id, k_blind, meas_share, nonce):
+    return Prio3.Prg.derive_seed(
+        k_blind,
+        Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
+        byte(agg_id) + nonce + Prio3.Flp.Field.encode_vec(meas_share),
+    )
+
+def joint_rand_seed(Prio3, k_joint_rand_parts):
+    """Derive the joint randomness seed from its parts."""
     return Prio3.Prg.derive_seed(
         zeros(Prio3.Prg.SEED_SIZE),
         Prio3.domain_separation_tag(USAGE_JOINT_RAND_SEED),
         concat(k_joint_rand_parts),
+    )
+
+def joint_rand(Prio3, k_joint_rand_seed):
+    """Derive the joint randomness from its seed."""
+    return Prio3.Prg.expand_into_vec(
+        Prio3.Flp.Field,
+        k_joint_rand_seed,
+        Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
+        b'',
+        Prio3.Flp.JOINT_RAND_LEN,
     )
 ~~~
 
@@ -2362,17 +2451,9 @@ def decode_helper_share(Prio3, agg_id, encoded):
     c_proof_share = Prio3.domain_separation_tag(USAGE_PROOF_SHARE)
     l = Prio3.Prg.SEED_SIZE
     k_meas_share, encoded = encoded[:l], encoded[l:]
-    meas_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
-                                           k_meas_share,
-                                           c_meas_share,
-                                           byte(agg_id),
-                                           Prio3.Flp.INPUT_LEN)
+    meas_share = Prio3.helper_meas_share(agg_id, k_meas_share)
     k_proof_share, encoded = encoded[:l], encoded[l:]
-    proof_share = Prio3.Prg.expand_into_vec(Prio3.Flp.Field,
-                                            k_proof_share,
-                                            c_proof_share,
-                                            byte(agg_id),
-                                            Prio3.Flp.PROOF_LEN)
+    proof_share = Prio3.helper_proof_share(agg_id, k_proof_share)
     if Prio3.Flp.JOINT_RAND_LEN == 0:
         if len(encoded) != 0:
             raise ERR_DECODE
