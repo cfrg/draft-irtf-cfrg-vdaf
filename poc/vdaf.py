@@ -4,13 +4,10 @@ from __future__ import annotations
 
 import json
 import os
-from functools import reduce
-from typing import Optional, Tuple, Union
+from typing import Tuple, Union
 
-import field
-from common import (ERR_VERIFY, VERSION, Bool, Bytes, Unsigned, Vec,
-                    format_dst, gen_rand, print_wrapped_line, to_le_bytes)
-from prg import PrgSha3
+from common import (VERSION, Bool, Bytes, Unsigned, Vec, format_dst, gen_rand,
+                    print_wrapped_line, to_le_bytes)
 
 
 class Vdaf:
@@ -34,7 +31,7 @@ class Vdaf:
     # The number of rounds of communication during the Prepare phase.
     ROUNDS: Unsigned = None
 
-    # The meeasurement type.
+    # The measurement type.
     Measurement = None
 
     # The aggregation parameter type.
@@ -77,21 +74,21 @@ class Vdaf:
                   agg_param: AggParam,
                   nonce: Bytes,
                   public_share: Bytes,
-                  input_share: Bytes) -> Prep:
+                  input_share: Bytes) -> tuple[Prep, Bytes]:
         """
-        Initialize the Prepare state for the given input share. This method is
-        run by an Aggregator. Along with the the public share and its input
-        share, the inputs include the verification key shared by all of the
-        Aggregators, the Aggregator's ID (a unique integer in range `[0,
-        SHARES)`, and the aggregation parameter and nonce agreed upon by all of
-        the Aggregators.
+        Initialize the prep state for the given input share and return the
+        initial prep share. This method is run by an Aggregator. Along with the
+        public share and its input share, the inputs include the verification
+        key shared by all of the Aggregators, the Aggregator's ID (a unique
+        integer in range `[0, SHARES)`, and the aggregation parameter and nonce
+        agreed upon by all of the Aggregators.
         """
         raise NotImplementedError()
 
     @classmethod
     def prep_next(Vdaf,
-                  prep: Prep,
-                  inbound: Optional[Bytes],
+                  prep_state: Prep,
+                  prep_msg: Bytes,
                   ) -> Union[Tuple[Prep, Bytes], Vdaf.OutShare]:
         """
         Consume the inbound message from the previous round (or `None` if this
@@ -200,34 +197,33 @@ def run_vdaf(Vdaf,
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
+        outbound = []
         for j in range(Vdaf.SHARES):
-            state = Vdaf.prep_init(verify_key, j,
-                                   agg_param,
-                                   nonce,
-                                   public_share,
-                                   input_shares[j])
+            (state, share) = Vdaf.prep_init(verify_key, j,
+                                            agg_param,
+                                            nonce,
+                                            public_share,
+                                            input_shares[j])
             prep_states.append(state)
+            outbound.append(share)
 
         # Aggregators recover their output shares.
-        inbound = None
-        for i in range(Vdaf.ROUNDS+1):
+        for i in range(Vdaf.ROUNDS):
+            # REMOVE ME
+            for prep_share in outbound:
+                prep_test_vec['prep_shares'][i].append(prep_share.hex())
+
+            prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+                                                outbound)
+            # REMOVE ME
+            prep_test_vec['prep_messages'].append(prep_msg.hex())
+
             outbound = []
             for j in range(Vdaf.SHARES):
-                out = Vdaf.prep_next(prep_states[j], inbound)
-                if i < Vdaf.ROUNDS:
+                out = Vdaf.prep_next(prep_states[j], prep_msg)
+                if i < Vdaf.ROUNDS - 1:
                     (prep_states[j], out) = out
                 outbound.append(out)
-            # This is where we would send messages over the
-            # network in a distributed VDAF computation.
-            if i < Vdaf.ROUNDS:
-                # REMOVE ME
-                for prep_share in outbound:
-                    prep_test_vec['prep_shares'][i].append(prep_share.hex())
-
-                inbound = Vdaf.prep_shares_to_prep(agg_param,
-                                                   outbound)
-                # REMOVE ME
-                prep_test_vec['prep_messages'].append(inbound.hex())
 
         # REMOVE ME
         for out_share in outbound:
@@ -314,101 +310,6 @@ def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
     print()
 
 
-##
-# TESTS
-#
-
-class TestVdaf(Vdaf):
-    """An insecure VDAF used only for testing purposes."""
-    # Operational parameters
-    Field = field.Field128
-
-    # Associated parameters
-    ID = 0xFFFFFFFF
-    VERIFY_KEY_SIZE = 0
-    NONCE_SIZE = 13
-    RAND_SIZE = 16
-    SHARES = 2
-    ROUNDS = 1
-
-    # Associated types
-    OutShare = Vec[Field]
-    Measurement = Unsigned
-    AggResult = Unsigned
-
-    # Operational parameters
-    input_range = range(5)
-
-    class Prep:
-        def __init__(self, input_range, encoded_input_share):
-            self.input_range = input_range
-            self.encoded_input_share = encoded_input_share
-
-    @classmethod
-    def setup(cls):
-        return (None, [None for _ in range(cls.SHARES)])
-
-    @classmethod
-    def measurement_to_input_shares(cls, measurement, nonce, rand):
-        helper_shares = PrgSha3.expand_into_vec(cls.Field,
-                                                rand,
-                                                b'',
-                                                b'',
-                                                cls.SHARES-1)
-        leader_share = cls.Field(measurement)
-        for helper_share in helper_shares:
-            leader_share -= helper_share
-        input_shares = [cls.Field.encode_vec([leader_share])]
-        for helper_share in helper_shares:
-            input_shares.append(cls.Field.encode_vec([helper_share]))
-        public_share = b'dummy public share'
-        return (public_share, input_shares)
-
-    @classmethod
-    def prep_init(cls,
-                  _verify_key,
-                  _agg_id,
-                  _agg_param,
-                  _nonce,
-                  _public_share,
-                  input_share):
-        return TestVdaf.Prep(cls.input_range, input_share)
-
-    @classmethod
-    def prep_next(cls, prep, inbound):
-        if inbound is None:
-            # Our prepare-message share is just our input share. This is
-            # trivially insecure since the recipient can now reconstruct
-            # the input.
-            return (prep, prep.encoded_input_share)
-
-        # The unsharded prepare message is the plaintext measurement.
-        # Check that it is in the specified range.
-        measurement = cls.Field.decode_vec(inbound)[0].as_unsigned()
-        if measurement not in prep.input_range:
-            raise ERR_VERIFY
-
-        return cls.Field.decode_vec(prep.encoded_input_share)
-
-    @classmethod
-    def prep_shares_to_prep(cls, _agg_param, prep_shares):
-        prep_msg = reduce(lambda x, y: [x[0] + y[0]],
-                          map(lambda encoded: cls.Field.decode_vec(encoded),
-                              prep_shares))
-        return cls.Field.encode_vec(prep_msg)
-
-    @classmethod
-    def out_shares_to_agg_share(cls, _agg_param, out_shares):
-        return cls.Field.encode_vec(
-            reduce(lambda x, y: [x[0] + y[0]], out_shares))
-
-    @classmethod
-    def agg_shares_to_result(cls, _agg_param, agg_shares, _num_measurements):
-        return reduce(lambda x, y: [x[0] + y[0]],
-                      map(lambda encoded: cls.Field.decode_vec(encoded),
-                          agg_shares))[0].as_unsigned()
-
-
 def test_vdaf(Vdaf,
               agg_param,
               measurements,
@@ -431,7 +332,3 @@ def test_vdaf(Vdaf,
     if agg_result != expected_agg_result:
         print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'.format(
             Vdaf.test_vec_name, measurements, agg_result, expected_agg_result))
-
-
-if __name__ == '__main__':
-    test_vdaf(TestVdaf, None, [1, 2, 3, 4], 10)
