@@ -212,26 +212,17 @@ class Poplar1(Vdaf):
             sketch_share[2] += auth_share * r
             out_share.append(data_share)
 
-        prep_mem = sketch_share \
-            + [A_share, B_share, Field(agg_id)] \
-            + out_share
-        return (b'ready', level, prep_mem)
+        prep_mem = [A_share, B_share, Field(agg_id)] + out_share
+        return ((b'sketch round 1', level, prep_mem),
+                Field.encode_vec(sketch_share))
 
     @classmethod
-    def prep_next(Poplar1, prep_state, opt_sketch):
+    def prep_next(Poplar1, prep_state, prep_msg):
         (step, level, prep_mem) = prep_state
         Field = Poplar1.Idpf.current_field(level)
 
-        # Aggregators exchange masked input values (step (3.)
-        # of [BBCGGI21, Appendix C.4]).
-        if step == b'ready' and opt_sketch == None:
-            sketch_share, prep_mem = prep_mem[:3], prep_mem[3:]
-            return ((b'sketch round 1', level, prep_mem),
-                    Field.encode_vec(sketch_share))
-
-        # Aggregators exchange evaluated shares (step (4.)).
-        elif step == b'sketch round 1' and opt_sketch != None:
-            prev_sketch = Field.decode_vec(opt_sketch)
+        if step == b'sketch round 1':
+            prev_sketch = Field.decode_vec(prep_msg)
             if len(prev_sketch) == 0:
                 prev_sketch = Field.zeros(3)
             elif len(prev_sketch) != 3:
@@ -248,8 +239,8 @@ class Poplar1(Vdaf):
             return ((b'sketch round 2', level, prep_mem),
                     Field.encode_vec(sketch_share))
 
-        elif step == b'sketch round 2' and opt_sketch != None:
-            if len(opt_sketch) == 0:
+        elif step == b'sketch round 2':
+            if len(prep_msg) == 0:
                 return prep_mem  # Output shares
             else:
                 raise ERR_INPUT  # prep message malformed
