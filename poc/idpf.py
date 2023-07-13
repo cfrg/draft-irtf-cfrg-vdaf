@@ -8,9 +8,7 @@ from functools import reduce
 from typing import Tuple, Union
 
 import field
-import prg
-from common import (VERSION, Bool, Bytes, Error, Unsigned, Vec, gen_rand,
-                    vec_add)
+from common import VERSION, Bool, Bytes, Unsigned, Vec, gen_rand, vec_add
 
 
 class Idpf:

@@ -2447,8 +2447,6 @@ def encode_helper_share(Prio3,
     return encoded
 
 def decode_helper_share(Prio3, agg_id, encoded):
-    c_meas_share = Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE)
-    c_proof_share = Prio3.domain_separation_tag(USAGE_PROOF_SHARE)
     l = Prio3.Prg.SEED_SIZE
     k_meas_share, encoded = encoded[:l], encoded[l:]
     meas_share = Prio3.helper_meas_share(agg_id, k_meas_share)

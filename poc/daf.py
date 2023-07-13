@@ -2,11 +2,10 @@
 
 from __future__ import annotations
 
-import json
 from functools import reduce
 
 import field
-from common import Bool, Bytes, Error, Unsigned, Vec, gen_rand
+from common import Bool, Bytes, Unsigned, Vec, gen_rand
 from prg import PrgSha3
 
 

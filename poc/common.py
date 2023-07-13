@@ -1,9 +1,7 @@
 """Functionalities used by other modules."""
 
 import os
-import struct
-from functools import reduce
-from typing import List, TypeVar
+from typing import List
 
 # If set, then test vectors will be generated. A fixed source of randomness is
 # used for `gen_rand()`.

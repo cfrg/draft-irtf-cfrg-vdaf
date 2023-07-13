@@ -3,7 +3,7 @@
 from copy import deepcopy
 
 import field
-from common import ERR_ENCODE, Bool, Error, Unsigned, Vec, vec_add, vec_sub
+from common import ERR_ENCODE, Bool, Unsigned, Vec, vec_add, vec_sub
 from field import Field
 
 

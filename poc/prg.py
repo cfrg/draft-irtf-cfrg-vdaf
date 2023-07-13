@@ -5,10 +5,9 @@ from __future__ import annotations
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import CMAC, cSHAKE128
 from Cryptodome.Util import Counter
-from Cryptodome.Util.number import bytes_to_long
 
-from common import (TEST_VECTOR, VERSION, Bytes, Error, Unsigned, concat,
-                    format_dst, from_le_bytes, gen_rand, next_power_of_2,
+from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
+                    from_le_bytes, gen_rand, next_power_of_2,
                     print_wrapped_line, to_be_bytes, to_le_bytes, xor, zeros)
 
 
