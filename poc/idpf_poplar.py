@@ -3,9 +3,8 @@
 import itertools
 
 import field
-from common import (ERR_DECODE, ERR_INPUT, TEST_VECTOR, VERSION, Bytes, Error,
-                    Unsigned, Vec, byte, format_dst, vec_add, vec_neg, vec_sub,
-                    xor)
+from common import (ERR_DECODE, ERR_INPUT, TEST_VECTOR, Bytes, Unsigned, Vec,
+                    format_dst, vec_add, vec_neg, vec_sub, xor)
 from field import Field2
 from idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
 from prg import PrgFixedKeyAes128

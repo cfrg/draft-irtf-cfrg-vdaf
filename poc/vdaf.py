@@ -8,7 +8,7 @@ from functools import reduce
 from typing import Optional, Tuple, Union
 
 import field
-from common import (ERR_VERIFY, VERSION, Bool, Bytes, Error, Unsigned, Vec,
+from common import (ERR_VERIFY, VERSION, Bool, Bytes, Unsigned, Vec,
                     format_dst, gen_rand, print_wrapped_line, to_le_bytes)
 from prg import PrgSha3
 

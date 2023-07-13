@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from sage.all import GF, PolynomialRing
 
-from common import (ERR_DECODE, Bytes, Error, Unsigned, Vec, byte,
-                    from_le_bytes, to_le_bytes)
+from common import ERR_DECODE, Bytes, Unsigned, Vec, from_le_bytes, to_le_bytes
 
 
 class Field:

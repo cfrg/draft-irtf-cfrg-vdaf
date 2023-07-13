@@ -1,10 +1,7 @@
 """A generic FLP based on {{BBCGGI19}}, Theorem 4.3."""
 
-import math
-
 import field
-from common import (ERR_ABORT, ERR_INPUT, ERR_VERIFY, Bool, Error, Unsigned,
-                    Vec, next_power_of_2)
+from common import ERR_ABORT, ERR_INPUT, Unsigned, Vec, next_power_of_2
 from field import poly_eval, poly_interp, poly_mul, poly_strip
 from flp import Flp, run_flp
 
