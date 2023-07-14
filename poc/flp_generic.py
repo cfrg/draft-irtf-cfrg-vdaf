@@ -35,13 +35,13 @@ class Valid:
     AggResult = None
     Field: field.FftField = None
 
-    # Length of the input to the validity circuit.
-    INPUT_LEN: Unsigned
+    # Length of the encoded measurement input to the validity circuit.
+    MEAS_LEN: Unsigned
 
     # Length of the random input of the validity circuit.
     JOINT_RAND_LEN: Unsigned
 
-    # Length of the aggregateable output for this type.
+    # Length of the aggregatable output for this type.
     OUTPUT_LEN: Unsigned
 
     # The sequence of gadgets for this validity circuit.
@@ -80,12 +80,12 @@ class Valid:
 
     @classmethod
     def encode(Valid, measurement: Measurement) -> Vec[Field]:
-        """Encode a measurement as an input."""
+        """Encode a measurement."""
         raise NotImplementedError()
 
     @classmethod
-    def truncate(Valid, inp: Vec[Field]) -> Vec[Field]:
-        """Truncate an input to the length of an aggregatable output."""
+    def truncate(Valid, measurement: Vec[Field]) -> Vec[Field]:
+        """Truncate a measurement to the length of an aggregatable output."""
         raise NotImplementedError()
 
     @classmethod
@@ -95,10 +95,10 @@ class Valid:
         raise NotImplementedError()
 
     def eval(self,
-             inp: Vec[Field],
+             meas: Vec[Field],
              joint_rand: Vec[Field],
              num_shares: Unsigned):
-        """Evaluate the circuit on the provided input and joint randomness."""
+        """Evaluate the circuit on the provided measurement and joint randomness."""
         raise NotImplementedError()
 
     @classmethod
@@ -207,18 +207,18 @@ class FlpGeneric(Flp):
             PROVE_RAND_LEN = TheValid.prove_rand_len()
             QUERY_RAND_LEN = TheValid.query_rand_len()
             JOINT_RAND_LEN = TheValid.JOINT_RAND_LEN
-            INPUT_LEN = TheValid.INPUT_LEN
+            MEAS_LEN = TheValid.MEAS_LEN
             OUTPUT_LEN = TheValid.OUTPUT_LEN
             PROOF_LEN = TheValid.proof_len()
             VERIFIER_LEN = TheValid.verifier_len()
         return NewFlpGeneric
 
     @classmethod
-    def prove(FlpGeneric, inp, prove_rand, joint_rand):
+    def prove(FlpGeneric, meas, prove_rand, joint_rand):
         # Evaluate the validity circuit, recording the values of the input wires
         # for each call to each gadget.
         valid = prove_wrapped(FlpGeneric.Valid, prove_rand)
-        valid.eval(inp, joint_rand, 1)
+        valid.eval(meas, joint_rand, 1)
 
         # Construct the proof.
         proof = []
@@ -249,12 +249,12 @@ class FlpGeneric(Flp):
         return proof
 
     @classmethod
-    def query(FlpGeneric, inp, proof, query_rand, joint_rand, num_shares):
+    def query(FlpGeneric, meas, proof, query_rand, joint_rand, num_shares):
         # Evaluate the validity circuit, recording the values of the input wires
         # for each call to each gadget. The gadget output is computed by
         # evaluating the gadget polynomial.
         valid = query_wrapped(FlpGeneric.Valid, proof)
-        v = valid.eval(inp, joint_rand, num_shares)
+        v = valid.eval(meas, joint_rand, num_shares)
 
         if len(query_rand) != FlpGeneric.Valid.query_rand_len():
             raise ERR_INPUT
@@ -312,8 +312,8 @@ class FlpGeneric(Flp):
         return FlpGeneric.Valid.encode(measurement)
 
     @classmethod
-    def truncate(FlpGeneric, inp):
-        return FlpGeneric.Valid.truncate(inp)
+    def truncate(FlpGeneric, meas):
+        return FlpGeneric.Valid.truncate(meas)
 
     @classmethod
     def decode(FlpGeneric, output, num_measurements):
@@ -401,8 +401,8 @@ class PolyEval(Gadget):
 # TYPES
 #
 
-def check_valid_eval(Valid, inp, joint_rand):
-    if len(inp) != Valid.INPUT_LEN:
+def check_valid_eval(Valid, meas, joint_rand):
+    if len(meas) != Valid.MEAS_LEN:
         raise ERR_INPUT
     if len(joint_rand) != Valid.JOINT_RAND_LEN:
         raise ERR_INPUT
@@ -417,13 +417,13 @@ class Count(Valid):
     # Associated parameters
     GADGETS = [Mul()]
     GADGET_CALLS = [1]
-    INPUT_LEN = 1
+    MEAS_LEN = 1
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
 
-    def eval(self, inp, joint_rand, _num_shares):
-        check_valid_eval(self, inp, joint_rand)
-        return self.GADGETS[0].eval(self.Field, [inp[0], inp[0]]) - inp[0]
+    def eval(self, meas, joint_rand, _num_shares):
+        check_valid_eval(self, meas, joint_rand)
+        return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) - meas[0]
 
     @classmethod
     def encode(Count, measurement):
@@ -432,10 +432,10 @@ class Count(Valid):
         return [Count.Field(measurement)]
 
     @classmethod
-    def truncate(Count, inp):
-        if len(inp) != 1:
+    def truncate(Count, meas):
+        if len(meas) != 1:
             raise ERR_INPUT
-        return inp
+        return meas
 
     @classmethod
     def decode(Count, output, _num_measurements):
@@ -451,33 +451,33 @@ class Sum(Valid):
     # Associated parametrs
     GADGETS = [PolyEval([0, -1, 1])]
     GADGET_CALLS = None  # Set by Sum.with_bits()
-    INPUT_LEN = None    # Set by Sum.with_bits()
+    MEAS_LEN = None    # Set by Sum.with_bits()
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
 
-    def eval(self, inp, joint_rand, _num_shares):
-        check_valid_eval(self, inp, joint_rand)
+    def eval(self, meas, joint_rand, _num_shares):
+        check_valid_eval(self, meas, joint_rand)
         out = self.Field(0)
         r = joint_rand[0]
-        for b in inp:
+        for b in meas:
             out += r * self.GADGETS[0].eval(self.Field, [b])
             r *= joint_rand[0]
         return out
 
     @classmethod
     def encode(Sum, measurement):
-        if 0 > measurement or measurement >= 2 ** Sum.INPUT_LEN:
+        if 0 > measurement or measurement >= 2 ** Sum.MEAS_LEN:
             raise ERR_INPUT
 
         encoded = []
-        for l in range(Sum.INPUT_LEN):
+        for l in range(Sum.MEAS_LEN):
             encoded.append(Sum.Field((measurement >> l) & 1))
         return encoded
 
     @classmethod
-    def truncate(Sum, inp):
+    def truncate(Sum, meas):
         decoded = Sum.Field(0)
-        for (l, b) in enumerate(inp):
+        for (l, b) in enumerate(meas):
             w = Sum.Field(1 << l)
             decoded += w * b
         return [decoded]
@@ -489,7 +489,7 @@ class Sum(Valid):
     @classmethod
     def with_bits(Sum, bits):
         """
-        Instantiate an instace of the `Sum` circuit for inputs in range `[0,
+        Instantiate an instace of the `Sum` circuit for measurements in range `[0,
         2^bits)`.
         """
 
@@ -498,12 +498,12 @@ class Sum(Valid):
 
         class SumWithBits(Sum):
             GADGET_CALLS = [bits]
-            INPUT_LEN = bits
+            MEAS_LEN = bits
         return SumWithBits
 
     @classmethod
     def test_vec_set_type_param(cls, test_vec):
-        test_vec['bits'] = int(cls.INPUT_LEN)
+        test_vec['bits'] = int(cls.MEAS_LEN)
         return 'bits'
 
 
@@ -519,23 +519,23 @@ class Histogram(Valid):
     # Associated parametrs
     GADGETS = [PolyEval([0, -1, 1])]
     GADGET_CALLS = None  # Set by `Histogram.with_length()`
-    INPUT_LEN = None  # Set by `Histogram.with_length()`
+    MEAS_LEN = None  # Set by `Histogram.with_length()`
     JOINT_RAND_LEN = 2
     OUTPUT_LEN = None  # Set by `Histogram.with_length()`
 
-    def eval(self, inp, joint_rand, num_shares):
-        check_valid_eval(self, inp, joint_rand)
+    def eval(self, meas, joint_rand, num_shares):
+        check_valid_eval(self, meas, joint_rand)
 
         # Check that each bucket is one or zero.
         range_check = self.Field(0)
         r = joint_rand[0]
-        for b in inp:
+        for b in meas:
             range_check += r * self.GADGETS[0].eval(self.Field, [b])
             r *= joint_rand[0]
 
         # Check that the buckets sum to 1.
         sum_check = -self.Field(1) * self.Field(num_shares).inv()
-        for b in inp:
+        for b in meas:
             sum_check += b
 
         out = joint_rand[1] * range_check + \
@@ -549,8 +549,8 @@ class Histogram(Valid):
         return encoded
 
     @classmethod
-    def truncate(Histogram, inp):
-        return inp
+    def truncate(Histogram, meas):
+        return meas
 
     @classmethod
     def decode(Histogram, output, _num_measurements):
@@ -566,7 +566,7 @@ class Histogram(Valid):
         class HistogramWithLength(Histogram):
             length = the_length
             GADGET_CALLS = [the_length]
-            INPUT_LEN = the_length
+            MEAS_LEN = the_length
             OUTPUT_LEN = the_length
         return HistogramWithLength
 
@@ -588,15 +588,15 @@ class TestMultiGadget(Valid):
     # Associated parameters
     GADGETS = [Mul(), Mul()]
     GADGET_CALLS = [1, 2]
-    INPUT_LEN = 1
+    MEAS_LEN = 1
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
 
-    def eval(self, inp, joint_rand, _num_shares):
-        check_valid_eval(self, inp, joint_rand)
+    def eval(self, meas, joint_rand, _num_shares):
+        check_valid_eval(self, meas, joint_rand)
         # Not a very useful circuit, obviously. We just want to do something.
-        x = self.GADGETS[0].eval(self.Field, [inp[0], inp[0]])
-        y = self.GADGETS[1].eval(self.Field, [inp[0], x])
+        x = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]])
+        y = self.GADGETS[1].eval(self.Field, [meas[0], x])
         z = self.GADGETS[1].eval(self.Field, [x, y])
         return z
 
@@ -607,25 +607,25 @@ class TestMultiGadget(Valid):
         return [Count.Field(measurement)]
 
     @classmethod
-    def truncate(Count, inp):
-        if len(inp) != 1:
+    def truncate(Count, meas):
+        if len(meas) != 1:
             raise ERR_INPUT
-        return inp
+        return meas
 
 
 def test_gadget(g, Field, test_length):
     """
     Test for equivalence of `Gadget.eval()` and `Gadget.eval_poly()`.
     """
-    inp_poly = []
-    inp = []
+    meas_poly = []
+    meas = []
     eval_at = Field.rand_vec(1)[0]
     for _ in range(g.ARITY):
-        inp_poly.append(Field.rand_vec(test_length))
-        inp.append(poly_eval(Field, inp_poly[-1], eval_at))
-    out_poly = g.eval_poly(Field, inp_poly)
+        meas_poly.append(Field.rand_vec(test_length))
+        meas.append(poly_eval(Field, meas_poly[-1], eval_at))
+    out_poly = g.eval_poly(Field, meas_poly)
 
-    want = g.eval(Field, inp)
+    want = g.eval(Field, meas)
     got = poly_eval(Field, out_poly, eval_at)
     assert got == want
 
@@ -634,19 +634,19 @@ def test_flp_generic(cls, test_cases):
     for (g, g_calls) in zip(cls.Valid.GADGETS, cls.Valid.GADGET_CALLS):
         test_gadget(g, cls.Field, next_power_of_2(g_calls + 1))
 
-    for (i, (inp, expected_decision)) in enumerate(test_cases):
-        assert len(inp) == cls.INPUT_LEN
-        assert len(cls.truncate(inp)) == cls.OUTPUT_LEN
+    for (i, (meas, expected_decision)) in enumerate(test_cases):
+        assert len(meas) == cls.MEAS_LEN
+        assert len(cls.truncate(meas)) == cls.OUTPUT_LEN
 
         # Evaluate validity circuit.
         joint_rand = cls.Field.rand_vec(cls.JOINT_RAND_LEN)
-        v = cls.Valid().eval(inp, joint_rand, 1)
+        v = cls.Valid().eval(meas, joint_rand, 1)
         if (v == cls.Field(0)) != expected_decision:
             print('{}: test {} failed: validity circuit returned {}'.format(
                 cls.Valid.__name__, i, v))
 
         # Run the FLP.
-        decision = run_flp(cls, inp, 2)
+        decision = run_flp(cls, meas, 2)
         if decision != expected_decision:
             print('{}: test {} failed: proof evaluation resulted in {}; want {}'.format(
                 cls.Valid.__name__, i, decision, expected_decision))
