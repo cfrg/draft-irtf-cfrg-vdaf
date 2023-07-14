@@ -38,7 +38,7 @@ class Vdaf:
     AggParam = None
 
     # The state of an aggregator during the Prepare computation.
-    Prep = None
+    PrepState = None
 
     # The output share type.
     OutShare = None
@@ -74,7 +74,7 @@ class Vdaf:
                   agg_param: AggParam,
                   nonce: Bytes,
                   public_share: Bytes,
-                  input_share: Bytes) -> tuple[Prep, Bytes]:
+                  input_share: Bytes) -> tuple[PrepState, Bytes]:
         """
         Initialize the prep state for the given input share and return the
         initial prep share. This method is run by an Aggregator. Along with the
@@ -87,9 +87,9 @@ class Vdaf:
 
     @classmethod
     def prep_next(Vdaf,
-                  prep_state: Prep,
+                  prep_state: PrepState,
                   prep_msg: Bytes,
-                  ) -> Union[Tuple[Prep, Bytes], Vdaf.OutShare]:
+                  ) -> Union[Tuple[PrepState, Bytes], Vdaf.OutShare]:
         """
         Consume the inbound message from the previous round (or `None` if this
         is the first round) and return the aggregator's share of the next round

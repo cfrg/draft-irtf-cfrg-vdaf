@@ -1,6 +1,6 @@
 """The prio3 VDAF."""
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import flp
 import flp_generic
@@ -37,8 +37,8 @@ class Prio3(Vdaf):
     Measurement = Flp.Measurement
     OutShare = Vec[Flp.Field]
     AggResult = Flp.AggResult
-    Prep = Tuple[Vec[Flp.Field],  # output share
-                 Bytes]           # k_joint_rand
+    PrepState = Tuple[Vec[Flp.Field],  # output share
+                      Optional[Bytes]]  # k_joint_rand
 
     @classmethod
     def shard(Prio3, measurement, nonce, rand):
