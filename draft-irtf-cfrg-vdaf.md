@@ -923,7 +923,7 @@ listed in {{vdaf-param}} are defined by each concrete VDAF.
 | `SHARES`          | Number of input shares into which each measurement is sharded ({{sec-vdaf-shard}}) |
 | `Measurement`     | Type of each measurement |
 | `AggParam`        | Type of aggregation parameter |
-| `Prep`            | State of each Aggregator during Preparation ({{sec-vdaf-prepare}}) |
+| `PrepState`       | State of each Aggregator during Preparation ({{sec-vdaf-prepare}}) |
 | `OutShare`        | Type of each output share |
 | `AggResult`       | Type of the aggregate result |
 {: #vdaf-param title="Constants and types defined by each concrete VDAF."}
@@ -1024,7 +1024,7 @@ class methods:
 
 * `Vdaf.prep_init(verify_key: Bytes[Vdaf.VERIFY_KEY_SIZE], agg_id: Unsigned,
   agg_param: AggParam, nonce: Bytes[Vdaf.NONCE_SIZE], public_share: Bytes,
-  input_share: Bytes) -> tuple[Prep, Bytes]` is the deterministic
+  input_share: Bytes) -> tuple[PrepState, Bytes]` is the deterministic
   preparation-state initialization algorithm run by each Aggregator to begin
   processing its input share into an output share. Its inputs are the shared
   verification key (`verify_key`), the Aggregator's unique identifier
@@ -1045,13 +1045,14 @@ class methods:
   Protocols MUST ensure that public share consumed by each of the Aggregators is
   identical. This is security critical for VDAFs such as Poplar1.
 
-* `Vdaf.prep_next(prep_state: Prep, prep_msg: Bytes) -> Union[Tuple[Prep,
-  Bytes], OutShare]` is the deterministic preparation-state update algorithm
-  run by each Aggregator. It updates the Aggregator's preparation state
-  (`prep_state`) and returns either its next preparation state and its message
-  share for the current round or, if this is the last round, its output share.
-  An exception is raised if a valid output share could not be recovered. The
-  input of this algorithm is the inbound preparation message.
+* `Vdaf.prep_next(prep_state: PrepState, prep_msg: Bytes) ->
+  Union[tuple[PrepState, Bytes], OutShare]` is the deterministic
+  preparation-state update algorithm run by each Aggregator. It updates the
+  Aggregator's preparation state (`prep_state`) and returns either its next
+  preparation state and its message share for the current round or, if this is
+  the last round, its output share. An exception is raised if a valid output
+  share could not be recovered. The input of this algorithm is the inbound
+  preparation message.
 
 * `Vdaf.prep_shares_to_prep(agg_param: AggParam, prep_shares: Vec[Bytes]) ->
   Bytes` is the deterministic preparation-message pre-processing algorithm. It
@@ -1358,7 +1359,7 @@ def ping_pong_transition(
             Vdaf,
             agg_param: Vdaf.AggParam,
             prep_shares: Vec[bytes],
-            prep_state: Vdaf.Prep,
+            prep_state: Vdaf.PrepState,
          ) -> (State, Optional[Message]):
     prep_msg = Vdaf.prep_shares_to_prep(agg_param,
                                         prep_shares)
@@ -1391,7 +1392,7 @@ def ping_pong_continued(
             return (Rejected(), None)
 
         out = Vdaf.prep_next(state.prep_state, inbound.prep_msg)
-        if type(out) == tuple[Vdaf.Prep, Bytes] and inbound.type == 1:
+        if type(out) == tuple[Vdaf.PrepState, Bytes] and inbound.type == 1:
             # continue
             (prep_state, prep_share) = out
             prep_shares = [inbound.prep_share, prep_share]
@@ -1956,7 +1957,7 @@ methods refer to constants enumerated in {{prio3-const}}.
 | `SHARES`          | in `[2, 256)`                                   |
 | `Measurement`     | `Flp.Measurement`                               |
 | `AggParam`        | `None`                                          |
-| `Prep`            | `Tuple[Vec[Flp.Field], Optional[Bytes]`         |
+| `PrepState`       | `tuple[Vec[Flp.Field], Optional[Bytes]]`        |
 | `OutShare`        | `Vec[Flp.Field]`                                |
 | `AggResult`       | `Flp.AggResult`                                 |
 {: #prio3-param title="VDAF parameters for Prio3."}
@@ -3219,7 +3220,7 @@ subsections. These methods make use of constants defined in {{poplar1-const}}.
 | `SHARES`          | `2`                                     |
 | `Measurement`     | `Unsigned`                              |
 | `AggParam`        | `Tuple[Unsigned, Tuple[Unsigned, ...]]` |
-| `Prep`            | `Tuple[Bytes, Unsigned, Idpf.Vec]`      |
+| `PrepState`       | `Tuple[Bytes, Unsigned, Idpf.Vec]`      |
 | `OutShare`        | `Idpf.Vec`                              |
 | `AggResult`       | `Vec[Unsigned]`                         |
 {: #poplar1-param title="VDAF parameters for Poplar1."}

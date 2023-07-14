@@ -33,10 +33,10 @@ class Poplar1(Vdaf):
     # Types required by `Vdaf`.
     Measurement = Unsigned
     AggParam = Tuple[Unsigned, Tuple[Unsigned, ...]]
-    Prep = Tuple[Bytes,
-                 Unsigned,
-                 Union[Vec[Vec[Idpf.FieldInner]],
-                       Vec[Vec[Idpf.FieldLeaf]]]]
+    PrepState = Tuple[Bytes,
+                      Unsigned,
+                      Union[Vec[Vec[Idpf.FieldInner]],
+                            Vec[Vec[Idpf.FieldLeaf]]]]
     OutShare = Union[Vec[Vec[Idpf.FieldInner]],
                      Vec[Vec[Idpf.FieldLeaf]]]
     AggResult = Vec[Unsigned]
