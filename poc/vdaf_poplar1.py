@@ -45,7 +45,7 @@ class Poplar1(Vdaf):
     test_vec_name = 'Poplar1'
 
     @classmethod
-    def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
+    def shard(Poplar1, measurement, nonce, rand):
         l = Poplar1.Prg.SEED_SIZE
 
         # Split the random input into the random input for IDPF key
@@ -268,7 +268,7 @@ class Poplar1(Vdaf):
             raise ERR_INPUT  # unexpected input length
 
     @classmethod
-    def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
+    def aggregate(Poplar1, agg_param, out_shares):
         (level, prefixes) = agg_param
         Field = Poplar1.Idpf.current_field(level)
         agg_share = Field.zeros(len(prefixes))
@@ -277,8 +277,8 @@ class Poplar1(Vdaf):
         return Field.encode_vec(agg_share)
 
     @classmethod
-    def agg_shares_to_result(Poplar1, agg_param,
-                             agg_shares, _num_measurements):
+    def unshard(Poplar1, agg_param,
+                agg_shares, _num_measurements):
         (level, prefixes) = agg_param
         Field = Poplar1.Idpf.current_field(level)
         agg = Field.zeros(len(prefixes))

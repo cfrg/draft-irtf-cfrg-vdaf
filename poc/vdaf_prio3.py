@@ -41,7 +41,7 @@ class Prio3(Vdaf):
                  Bytes]           # k_joint_rand
 
     @classmethod
-    def measurement_to_input_shares(Prio3, measurement, nonce, rand):
+    def shard(Prio3, measurement, nonce, rand):
         l = Prio3.Prg.SEED_SIZE
         seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
 
@@ -129,15 +129,15 @@ class Prio3(Vdaf):
         return Prio3.encode_prep_msg(k_joint_rand_check)
 
     @classmethod
-    def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
+    def aggregate(Prio3, _agg_param, out_shares):
         agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
         for out_share in out_shares:
             agg_share = vec_add(agg_share, out_share)
         return Prio3.Flp.Field.encode_vec(agg_share)
 
     @classmethod
-    def agg_shares_to_result(Prio3, _agg_param,
-                             agg_shares, num_measurements):
+    def unshard(Prio3, _agg_param,
+                agg_shares, num_measurements):
         agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
         for agg_share in agg_shares:
             agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
