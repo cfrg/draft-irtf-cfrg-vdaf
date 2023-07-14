@@ -2623,7 +2623,7 @@ the gadget polynomial, are described in detail in {{flp-generic-construction}}.
 
 #### Extensions {#flp-generic-overview-extensions}
 
-The FLP described in the next section extends the proof system {{BBCGGI19}},
+The FLP described in the next section extends the proof system of {{BBCGGI19}},
 Section 4.2 in three ways.
 
 First, the validity circuit in our construction includes an additional, random
@@ -2650,14 +2650,19 @@ probability.
 
 The second extension implemented by our FLP allows the validity circuit to
 contain multiple gadget types. (This generalization was suggested in
-{{BBCGGI19}}, Remark 4.5.) For example, the following circuit is allowed, where
-`Mul` and `Range2` are the gadgets defined above (the input has length `N+1`):
+{{BBCGGI19}}, Remark 4.5.) This provides additional flexibility for designing
+circuits by allowing multiple, non-affine sub-components. For example, the
+following circuit is allowed:
 
 ~~~
-C(inp, r) = r * Range2(inp[0]) + ... + r^N * Range2(inp[N-1]) + \
-            2^0 * inp[0]       + ... + 2^(N-1) * inp[N-1]     - \
-            Mul(inp[N], inp[N])
+C(inp, r) = r * Range2(inp[0]) + ... + r^L * Range2(inp[L-1]) + \
+            r^(L+1) * Range3(inp[L]) + ... + r^N * Range3(inp[N-1])
 ~~~
+
+where `Range3(x) = x^3 - 3x^2 + 2x`. This circuit checks that the first `L`
+inputs are in range `[0,2)` and the last `N-L` inputs are in range `[0,3)`. Of
+course, the same circuit can be expressed using a sub-component that the
+gadgets have in common, namely `Mul`, but the resulting proof would be longer.
 
 Finally, {{BBCGGI19}}, Theorem 4.3 makes no restrictions on the choice of the
 fixed points `alpha[0], ..., alpha[M-1]`, other than to require that the points
