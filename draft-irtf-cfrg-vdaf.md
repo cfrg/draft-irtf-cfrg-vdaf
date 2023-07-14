@@ -675,17 +675,17 @@ Each DAF is identified by a unique, 32-bit integer `ID`. Identifiers for each
 ## Sharding {#sec-daf-shard}
 
 In order to protect the privacy of its measurements, a DAF Client shards its
-measurements into a sequence of input shares. The `measurement_to_input_shares`
+measurements into a sequence of input shares. The `shard`
 method is used for this purpose.
 
-* `Daf.measurement_to_input_shares(input: Measurement, rand:
-  Bytes[Daf.RAND_SIZE]) -> tuple[Bytes, Vec[Bytes]]` is the randomized sharding
-  algorithm run by each Client. The input `rand` consists of the random bytes
-  consumed by the algorithm. This value MUST be generated using a
-  cryptographically secure pseudorandom number generator (CSPRNG). It consumes
-  the measurement and produces a "public share", distributed to each of the
-  Aggregators, and a corresponding sequence of input shares, one for each
-  Aggregator. The length of the output vector MUST be `SHARES`.
+* `Daf.shard(input: Measurement, rand: Bytes[Daf.RAND_SIZE]) -> tuple[Bytes,
+  Vec[Bytes]]` is the randomized sharding algorithm run by each Client. The
+  input `rand` consists of the random bytes consumed by the algorithm. This
+  value MUST be generated using a cryptographically secure pseudorandom number
+  generator (CSPRNG). It consumes the measurement and produces a "public
+  share", distributed to each of the Aggregators, and a corresponding sequence
+  of input shares, one for each Aggregator. The length of the output vector
+  MUST be `SHARES`.
 
 ~~~~
     Client
@@ -695,7 +695,7 @@ method is used for this purpose.
       |
       V
     +----------------------------------------------+
-    | measurement_to_input_shares                  |
+    | shard                                        |
     +----------------------------------------------+
       |              |              |     |
       |              |         ...  |    public_share
@@ -747,9 +747,9 @@ Once an Aggregator holds output shares for a batch of measurements (where
 batches are defined by the application), it combines them into a share of the
 desired aggregate result:
 
-* `Daf.out_shares_to_agg_share(agg_param: AggParam, out_shares: Vec[OutShare])
-  -> agg_share: Bytes` is the deterministic aggregation algorithm. It is run by
-  each Aggregator a set of recovered output shares.
+* `Daf.aggregate(agg_param: AggParam, out_shares: Vec[OutShare]) -> agg_share:
+  Bytes` is the deterministic aggregation algorithm. It is run by each
+  Aggregator a set of recovered output shares.
 
 ~~~~
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
@@ -763,7 +763,7 @@ desired aggregate result:
       |               |                   |
       V               V                   V
     +-----------+   +-----------+       +-----------+
-    | out2agg   |   | out2agg   |   ... | out2agg   |
+    | aggregate |   | aggregate |   ... | aggregate |
     +-----------+   +-----------+       +-----------+
       |               |                   |
       V               V                   V
@@ -790,12 +790,11 @@ After the Aggregators have aggregated a sufficient number of output shares, each
 sends its aggregate share to the Collector, who runs the following algorithm to
 recover the following output:
 
-* `Daf.agg_shares_to_result(agg_param: AggParam,
-  agg_shares: Vec[Bytes], num_measurements: Unsigned) -> AggResult` is
-  run by the Collector in order to compute the aggregate result from
-  the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
-  `num_measurements` is the number of measurements that contributed to
-  each of the aggregate shares. This algorithm is deterministic.
+* `Daf.unshard(agg_param: AggParam, agg_shares: Vec[Bytes], num_measurements:
+  Unsigned) -> AggResult` is run by the Collector in order to compute the
+  aggregate result from the Aggregators' shares. The length of `agg_shares`
+  MUST be `SHARES`. `num_measurements` is the number of measurements that
+  contributed to each of the aggregate shares. This algorithm is deterministic.
 
 ~~~~
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
@@ -805,7 +804,7 @@ recover the following output:
       |               |                   |
       V               V                   V
     +-----------------------------------------------+
-    | agg_shares_to_result                          |
+    | unshard                                       |
     +-----------------------------------------------+
       |
       V
@@ -842,7 +841,7 @@ def run_daf(Daf,
         # distributes them among the Aggregators.
         rand = gen_rand(Daf.RAND_SIZE)
         (public_share, input_shares) = \
-            Daf.measurement_to_input_shares(measurement, rand)
+            Daf.shard(measurement, rand)
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(Daf.SHARES):
@@ -853,14 +852,13 @@ def run_daf(Daf,
     # share and sends it to the Collector.
     agg_shares = []
     for j in range(Daf.SHARES):
-        agg_share_j = Daf.out_shares_to_agg_share(agg_param,
-                                                  out_shares[j])
+        agg_share_j = Daf.aggregate(agg_param, out_shares[j])
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate result.
     num_measurements = len(measurements)
-    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares,
-                                          num_measurements)
+    agg_result = Daf.unshard(agg_param, agg_shares,
+                             num_measurements)
     return agg_result
 ~~~
 {: #run-daf title="Execution of a DAF."}
@@ -953,15 +951,15 @@ Sharding transforms a measurement into input shares as it does in DAFs
 (cf. {{sec-daf-shard}}); in addition, it takes a nonce as input and
 produces a public share:
 
-* `Vdaf.measurement_to_input_shares(measurement: Measurement, nonce:
-  Bytes[Vdaf.NONCE_SIZE], rand: Bytes[Vdaf.RAND_SIZE]) -> tuple[Bytes,
-  Vec[Bytes]]` is the randomized sharding algorithm run by each Client. Input
-  `rand` consists of the random bytes consumed by the algorithm. It consumes
-  the measurement and the nonce and produces a public share, distributed to each
-  of Aggregators, and the corresponding sequence of input shares, one for each
-  Aggregator. Depending on the VDAF, the input shares may encode additional
-  information used to verify the recovered output shares (e.g., the "proof
-  shares" in Prio3 {{prio3}}). The length of the output vector MUST be `SHARES`.
+* `Vdaf.shard(measurement: Measurement, nonce: Bytes[Vdaf.NONCE_SIZE], rand:
+  Bytes[Vdaf.RAND_SIZE]) -> tuple[Bytes, Vec[Bytes]]` is the randomized
+  sharding algorithm run by each Client. Input `rand` consists of the random
+  bytes consumed by the algorithm. It consumes the measurement and the nonce
+  and produces a public share, distributed to each of Aggregators, and the
+  corresponding sequence of input shares, one for each Aggregator. Depending on
+  the VDAF, the input shares may encode additional information used to verify
+  the recovered output shares (e.g., the "proof shares" in Prio3 {{prio3}}).
+  The length of the output vector MUST be `SHARES`.
 
 In order to ensure privacy of the measurement, the Client MUST generate the
 random bytes and nonce using a CSPRNG. (See {{security}} for details.)
@@ -1108,10 +1106,10 @@ VDAFs MUST implement the following function:
 
 VDAF Aggregation is identical to DAF Aggregation (cf. {{sec-daf-aggregate}}):
 
-* `Vdaf.out_shares_to_agg_share(agg_param: AggParam, out_shares: Vec[OutShare])
-  -> agg_share: Bytes` is the deterministic aggregation algorithm. It is run by
-  each Aggregator over the output shares it has computed over a batch of
-  measurement inputs.
+* `Vdaf.aggregate(agg_param: AggParam, out_shares: Vec[OutShare]) -> agg_share:
+  Bytes` is the deterministic aggregation algorithm. It is run by each
+  Aggregator over the output shares it has computed over a batch of measurement
+  inputs.
 
 The data flow for this stage is illustrated in {{aggregate-flow}}. Here again,
 we have the aggregation algorithm in a "one-shot" form, where all shares for a
@@ -1122,12 +1120,11 @@ form, where shares are processed one at a time.
 
 VDAF Unsharding is identical to DAF Unsharding (cf. {{sec-daf-unshard}}):
 
-* `Vdaf.agg_shares_to_result(agg_param: AggParam,
-  agg_shares: Vec[Bytes], num_measurements: Unsigned) -> AggResult` is
-  run by the Collector in order to compute the aggregate result from
-  the Aggregators' shares. The length of `agg_shares` MUST be `SHARES`.
-  `num_measurements` is the number of measurements that contributed to
-  each of the aggregate shares. This algorithm is deterministic.
+* `Vdaf.unshard(agg_param: AggParam, agg_shares: Vec[Bytes], num_measurements:
+  Unsigned) -> AggResult` is run by the Collector in order to compute the
+  aggregate result from the Aggregators' shares. The length of `agg_shares`
+  MUST be `SHARES`. `num_measurements` is the number of measurements that
+  contributed to each of the aggregate shares. This algorithm is deterministic.
 
 The data flow for this stage is illustrated in {{unshard-flow}}.
 
@@ -1146,7 +1143,7 @@ def run_vdaf(Vdaf,
         # Each Client shards its measurement into input shares.
         rand = gen_rand(Vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            Vdaf.measurement_to_input_shares(measurement, nonce, rand)
+            Vdaf.shard(measurement, nonce, rand)
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
@@ -1181,14 +1178,13 @@ def run_vdaf(Vdaf,
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = Vdaf.out_shares_to_agg_share(agg_param,
-                                                   out_shares_j)
+        agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
-    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares,
-                                           num_measurements)
+    agg_result = Vdaf.unshard(agg_param, agg_shares,
+                              num_measurements)
     return agg_result
 ~~~
 {: #run-vdaf title="Execution of a VDAF."}
@@ -1996,7 +1992,7 @@ Depending on the FLP, joint randomness may not be required. In particular, when
 (Step 3). The sharding algorithm is specified below.
 
 ~~~
-def measurement_to_input_shares(Prio3, measurement, nonce, rand):
+def shard(Prio3, measurement, nonce, rand):
     l = Prio3.Prg.SEED_SIZE
     seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
 
@@ -2281,7 +2277,7 @@ Aggregating a set of output shares is simply a matter of adding up the vectors
 element-wise.
 
 ~~~
-def out_shares_to_agg_share(Prio3, _agg_param, out_shares):
+def aggregate(Prio3, _agg_param, out_shares):
     agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for out_share in out_shares:
         agg_share = vec_add(agg_share, out_share)
@@ -2295,8 +2291,8 @@ To unshard a set of aggregate shares, the Collector first adds up the vectors
 element-wise. It then converts each element of the vector into an integer.
 
 ~~~
-def agg_shares_to_result(Prio3, _agg_param,
-                         agg_shares, num_measurements):
+def unshard(Prio3, _agg_param,
+            agg_shares, num_measurements):
     agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
     for agg_share in agg_shares:
         agg = vec_add(agg, Prio3.Flp.Field.decode_vec(agg_share))
@@ -3247,7 +3243,7 @@ Putting everything together, the sharding algorithm is defined as
 follows. Function `encode_input_shares` is defined in {{poplar1-auxiliary}}.
 
 ~~~
-def measurement_to_input_shares(Poplar1, measurement, nonce, rand):
+def shard(Poplar1, measurement, nonce, rand):
     l = Poplar1.Prg.SEED_SIZE
 
     # Split the random input into random input for IDPF key
@@ -3502,7 +3498,7 @@ Poplar1."}
 Aggregation involves simply adding up the output shares.
 
 ~~~
-def out_shares_to_agg_share(Poplar1, agg_param, out_shares):
+def aggregate(Poplar1, agg_param, out_shares):
     (level, prefixes) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     agg_share = Field.zeros(len(prefixes))
@@ -3518,8 +3514,8 @@ Finally, the Collector unshards the aggregate result by adding up the aggregate
 shares.
 
 ~~~
-def agg_shares_to_result(Poplar1, agg_param,
-                         agg_shares, _num_measurements):
+def unshard(Poplar1, agg_param,
+            agg_shares, _num_measurements):
     (level, prefixes) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     agg = Field.zeros(len(prefixes))

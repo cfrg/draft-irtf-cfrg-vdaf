@@ -22,7 +22,7 @@ class Vdaf:
     # Length of the nonce.
     NONCE_SIZE = None
 
-    # Number of random bytes consumed by `measurement_to_input_shares()`.
+    # Number of random bytes consumed by `shard()`.
     RAND_SIZE = None
 
     # The number of Aggregators.
@@ -47,11 +47,11 @@ class Vdaf:
     AggResult = None
 
     @classmethod
-    def measurement_to_input_shares(Vdaf,
-                                    measurement: Measurement,
-                                    nonce: Bytes["Vdaf.NONCE_SIZE"],
-                                    rand: Bytes["Vdaf.RAND_SIZE"],
-                                    ) -> tuple[Bytes, Vec[Bytes]]:
+    def shard(Vdaf,
+              measurement: Measurement,
+              nonce: Bytes["Vdaf.NONCE_SIZE"],
+              rand: Bytes["Vdaf.RAND_SIZE"],
+              ) -> tuple[Bytes, Vec[Bytes]]:
         """
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
@@ -110,9 +110,9 @@ class Vdaf:
         raise NotImplementedError()
 
     @classmethod
-    def out_shares_to_agg_share(Vdaf,
-                                agg_param: AggParam,
-                                out_shares: Vec[OutShare]) -> Bytes:
+    def aggregate(Vdaf,
+                  agg_param: AggParam,
+                  out_shares: Vec[OutShare]) -> Bytes:
         """
         Merge a list of output shares into an aggregate share, encoded as a byte
         string. This is called by an aggregator after recovering a batch of
@@ -121,10 +121,10 @@ class Vdaf:
         raise NotImplementedError()
 
     @classmethod
-    def agg_shares_to_result(Vdaf,
-                             agg_param: AggParam,
-                             agg_shares: Vec[Bytes],
-                             num_measurements: Unsigned) -> AggResult:
+    def unshard(Vdaf,
+                agg_param: AggParam,
+                agg_shares: Vec[Bytes],
+                num_measurements: Unsigned) -> AggResult:
         """
         Unshard the aggregate shares (encoded as byte strings) and compute the
         aggregate result. This is called by the Collector.
@@ -187,7 +187,7 @@ def run_vdaf(Vdaf,
         # Each Client shards its measurement into input shares.
         rand = gen_rand(Vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            Vdaf.measurement_to_input_shares(measurement, nonce, rand)
+            Vdaf.shard(measurement, nonce, rand)
 
         # REMOVE ME
         prep_test_vec['rand'] = rand.hex()
@@ -242,16 +242,15 @@ def run_vdaf(Vdaf,
     agg_shares = []
     for j in range(Vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = Vdaf.out_shares_to_agg_share(agg_param,
-                                                   out_shares_j)
+        agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
         agg_shares.append(agg_share_j)
         # REMOVE ME
         test_vec['agg_shares'].append(agg_share_j.hex())
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
-    agg_result = Vdaf.agg_shares_to_result(agg_param, agg_shares,
-                                           num_measurements)
+    agg_result = Vdaf.unshard(agg_param, agg_shares,
+                              num_measurements)
     # REMOVE ME
     test_vec['agg_result'] = agg_result
     if print_test_vec:

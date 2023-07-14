@@ -18,7 +18,7 @@ class Daf:
     # The number of Aggregators.
     SHARES: Unsigned = None
 
-    # Number of random bytes consumed by `measurement_to_input_shares()`.
+    # Number of random bytes consumed by `shard()`.
     RAND_SIZE = None
 
     # The measurement type.
@@ -34,10 +34,10 @@ class Daf:
     AggResult = None
 
     @classmethod
-    def measurement_to_input_shares(Daf,
-                                    measurement: Measurement,
-                                    rand: Bytes["Daf.RAND_SIZE"],
-                                    ) -> tuple[Bytes, Vec[Bytes]]:
+    def shard(Daf,
+              measurement: Measurement,
+              rand: Bytes["Daf.RAND_SIZE"],
+              ) -> tuple[Bytes, Vec[Bytes]]:
         """
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
@@ -69,9 +69,9 @@ class Daf:
         raise NotImplementedError()
 
     @classmethod
-    def out_shares_to_agg_share(Daf,
-                                agg_param: AggParam,
-                                out_shares: Vec[OutShare]) -> Bytes:
+    def aggregate(Daf,
+                  agg_param: AggParam,
+                  out_shares: Vec[OutShare]) -> Bytes:
         """
         Merge a list of output shares into an aggregate share, encoded as a byte
         string. This is called by an Aggregator after recovering a batch of
@@ -80,10 +80,10 @@ class Daf:
         raise NotImplementedError()
 
     @classmethod
-    def agg_shares_to_result(Daf,
-                             agg_param: AggParam,
-                             agg_shares: Vec[Bytes],
-                             num_measurements: Unsigned) -> AggResult:
+    def unshard(Daf,
+                agg_param: AggParam,
+                agg_shares: Vec[Bytes],
+                num_measurements: Unsigned) -> AggResult:
         """
         Unshard the aggregate shares (encoded as byte strings) and compute the
         aggregate result. This is called by the Collector.
@@ -101,7 +101,7 @@ def run_daf(Daf,
         # distributes them among the Aggregators.
         rand = gen_rand(Daf.RAND_SIZE)
         (public_share, input_shares) = \
-            Daf.measurement_to_input_shares(measurement, rand)
+            Daf.shard(measurement, rand)
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(Daf.SHARES):
@@ -112,14 +112,14 @@ def run_daf(Daf,
     # share and sends it to the Collector.
     agg_shares = []
     for j in range(Daf.SHARES):
-        agg_share_j = Daf.out_shares_to_agg_share(agg_param,
-                                                  out_shares[j])
+        agg_share_j = Daf.aggregate(agg_param,
+                                    out_shares[j])
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate result.
     num_measurements = len(measurements)
-    agg_result = Daf.agg_shares_to_result(agg_param, agg_shares,
-                                          num_measurements)
+    agg_result = Daf.unshard(agg_param, agg_shares,
+                             num_measurements)
     return agg_result
 
 
@@ -144,7 +144,7 @@ class TestDaf(Daf):
     AggResult = Vec[Unsigned]
 
     @classmethod
-    def measurement_to_input_shares(cls, measurement, rand):
+    def shard(cls, measurement, rand):
         helper_shares = PrgSha3.expand_into_vec(cls.Field,
                                                 rand,
                                                 b'',
@@ -165,12 +165,12 @@ class TestDaf(Daf):
         return cls.Field.decode_vec(input_share)
 
     @classmethod
-    def out_shares_to_agg_share(cls, _agg_param, out_shares):
+    def aggregate(cls, _agg_param, out_shares):
         return cls.Field.encode_vec(
             reduce(lambda x, y: [x[0] + y[0]], out_shares))
 
     @classmethod
-    def agg_shares_to_result(cls, _agg_param, agg_shares, _num_measurements):
+    def unshard(cls, _agg_param, agg_shares, _num_measurements):
         return [reduce(lambda x, y: [x[0] + y[0]],
                        map(lambda encoded: cls.Field.decode_vec(encoded),
                 agg_shares))[0].as_unsigned()]
