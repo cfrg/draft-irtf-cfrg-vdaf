@@ -24,8 +24,8 @@ class Flp:
     # Length of the randomness consumed by the verifier.
     QUERY_RAND_LEN: Unsigned
 
-    # Length of the encoded input.
-    INPUT_LEN: Unsigned
+    # Length of the encoded measurement.
+    MEAS_LEN: Unsigned
 
     # Length of aggregatable output.
     OUTPUT_LEN: Unsigned
@@ -38,35 +38,35 @@ class Flp:
 
     @classmethod
     def encode(Flp, measurement: Measurement) -> Vec[Field]:
-        """Encode a measurement as an input."""
+        """Encode a measurement."""
         raise NotImplementedError()
 
     @classmethod
     def prove(Flp,
-              inp: Vec[Field],
+              meas: Vec[Field],
               prove_rand: Vec[Field],
               joint_rand: Vec[Field]) -> Vec[Field]:
-        """Generate a proof of an input's validity."""
+        """Generate a proof of a measurement's validity."""
         raise NotImplementedError()
 
     @classmethod
     def query(Flp,
-              inp: Vec[Field],
+              meas: Vec[Field],
               proof: Vec[Field],
               query_rand: Vec[Field],
               joint_rand: Vec[Field],
               num_shares: Unsigned) -> Vec[Field]:
-        """Generate a verifier message for an input and proof."""
+        """Generate a verifier message for a measurement and proof."""
         raise NotImplementedError()
 
     @classmethod
     def decide(Flp, verifier: Vec[Field]) -> Bool:
-        """Decide if a verifier message was generated from a valid input."""
+        """Decide if a verifier message was generated from a valid measurement."""
         raise NotImplementedError()
 
     @classmethod
     def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
-        """Map an input to an aggregatable output."""
+        """Map an encoded measurement to an aggregatable output."""
         raise NotImplementedError()
 
     @classmethod
@@ -99,30 +99,30 @@ def additive_secret_share(vec: Vec[Field],
 
 
 # NOTE This is used to generate {{run-flp}}.
-def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
-    """Run the FLP on an input."""
+def run_flp(Flp, meas: Vec[Flp.Field], num_shares: Unsigned):
+    """Run the FLP on an encoded measurement."""
 
     joint_rand = Flp.Field.rand_vec(Flp.JOINT_RAND_LEN)
     prove_rand = Flp.Field.rand_vec(Flp.PROVE_RAND_LEN)
     query_rand = Flp.Field.rand_vec(Flp.QUERY_RAND_LEN)
 
     # Prover generates the proof.
-    proof = Flp.prove(inp, prove_rand, joint_rand)
+    proof = Flp.prove(meas, prove_rand, joint_rand)
 
-    # Shard the input and the proof.
-    input_shares = additive_secret_share(inp, num_shares, Flp.Field)
+    # Shard the measurement and the proof.
+    meas_shares = additive_secret_share(meas, num_shares, Flp.Field)
     proof_shares = additive_secret_share(proof, num_shares, Flp.Field)
 
-    # Verifier queries the input shares and proof shares.
+    # Verifier queries the meas shares and proof shares.
     verifier_shares = [
         Flp.query(
-            input_share,
+            meas_share,
             proof_share,
             query_rand,
             joint_rand,
             num_shares,
         )
-        for input_share, proof_share in zip(input_shares, proof_shares)
+        for meas_share, proof_share in zip(meas_shares, proof_shares)
     ]
 
     # Combine the verifier shares into the verifier.
@@ -130,7 +130,7 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     for verifier_share in verifier_shares:
         verifier = vec_add(verifier, verifier_share)
 
-    # Verifier decides if the input is valid.
+    # Verifier decides if the measurement is valid.
     return Flp.decide(verifier)
 
 
@@ -145,7 +145,7 @@ class FlpTest(Flp):
     JOINT_RAND_LEN = 1
     PROVE_RAND_LEN = 2
     QUERY_RAND_LEN = 3
-    INPUT_LEN = 2
+    MEAS_LEN = 2
     OUTPUT_LEN = 1
     PROOF_LEN = 2
     VERIFIER_LEN = 2
@@ -155,29 +155,30 @@ class FlpTest(Flp):
     AggResult = Unsigned
 
     # Operational parameters
-    input_range = range(5)
+    meas_range = range(5)
 
     @classmethod
     def encode(cls, measurement):
-        if measurement not in cls.input_range:
+        if measurement not in cls.meas_range:
             raise ERR_ENCODE
         return [cls.Field(measurement)] * 2
 
     @classmethod
-    def prove(cls, inp, prove_rand, joint_rand):
-        # The proof is the input itself for this trivially insecure FLP.
-        return deepcopy(inp)
+    def prove(cls, meas, prove_rand, joint_rand):
+        # The proof is the measurement itself for this trivially insecure FLP.
+        return deepcopy(meas)
 
     @classmethod
-    def query(cls, inp, proof, query_rand, joint_rand, _num_shares):
+    def query(cls, meas, proof, query_rand, joint_rand, _num_shares):
         return deepcopy(proof)
 
     @classmethod
     def decide(cls, verifier):
-        """Decide if a verifier message was generated from a valid input."""
+        """Decide if a verifier message was generated from a valid
+        measurement."""
         if len(verifier) != 2 or \
                 verifier[0] != verifier[1] or \
-                verifier[0].as_unsigned() not in cls.input_range:
+                verifier[0].as_unsigned() not in cls.meas_range:
             return False
         return True
 

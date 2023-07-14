@@ -10,7 +10,7 @@ from common import (ERR_DECODE, ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes,
                     zeros)
 from vdaf import Vdaf, test_vdaf
 
-USAGE_MEASUREMENT_SHARE = 1
+USAGE_MEAS_SHARE = 1
 USAGE_PROOF_SHARE = 2
 USAGE_JOINT_RANDOMNESS = 3
 USAGE_PROVE_RANDOMNESS = 4
@@ -45,11 +45,11 @@ class Prio3(Vdaf):
         l = Prio3.Prg.SEED_SIZE
         seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
 
-        inp = Prio3.Flp.encode(measurement)
+        meas = Prio3.Flp.encode(measurement)
         if Prio3.Flp.JOINT_RAND_LEN > 0:
-            return Prio3.shard_with_joint_rand(inp, nonce, seeds)
+            return Prio3.shard_with_joint_rand(meas, nonce, seeds)
         else:
-            return Prio3.shard_without_joint_rand(inp, seeds)
+            return Prio3.shard_without_joint_rand(meas, seeds)
 
     def is_valid(agg_param, previous_agg_params):
         """
@@ -146,7 +146,7 @@ class Prio3(Vdaf):
     # Auxiliary functions
 
     @classmethod
-    def shard_without_joint_rand(Prio3, inp, seeds):
+    def shard_without_joint_rand(Prio3, meas, seeds):
         k_helper_seeds, seeds = front((Prio3.SHARES-1) * 2, seeds)
         k_helper_meas_shares = [
             k_helper_seeds[i]
@@ -158,8 +158,8 @@ class Prio3(Vdaf):
         ]
         (k_prove,), seeds = front(1, seeds)
 
-        # Shard the encoded measurement (`inp`) into measurement shares.
-        leader_meas_share = inp
+        # Shard the encoded measurement into shares.
+        leader_meas_share = meas
         for j in range(Prio3.SHARES-1):
             leader_meas_share = vec_sub(
                 leader_meas_share,
@@ -168,7 +168,7 @@ class Prio3(Vdaf):
 
         # Generate the proof and shard it into proof shares.
         prove_rand = Prio3.prove_rand(k_prove)
-        leader_proof_share = Prio3.Flp.prove(inp, prove_rand, [])
+        leader_proof_share = Prio3.Flp.prove(meas, prove_rand, [])
         for j in range(Prio3.SHARES-1):
             leader_proof_share = vec_sub(
                 leader_proof_share,
@@ -192,7 +192,7 @@ class Prio3(Vdaf):
         return (b'', input_shares)
 
     @classmethod
-    def shard_with_joint_rand(Prio3, inp, nonce, seeds):
+    def shard_with_joint_rand(Prio3, meas, nonce, seeds):
         k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
         k_helper_meas_shares = [
             k_helper_seeds[i]
@@ -209,9 +209,9 @@ class Prio3(Vdaf):
         (k_leader_blind,), seeds = front(1, seeds)
         (k_prove,), seeds = front(1, seeds)
 
-        # Shard the encoded measurement (`inp`) into measurement
-        # shares and compute the joint randomness parts.
-        leader_meas_share = inp
+        # Shard the encoded measurement into shares and compute the
+        # joint randomness parts.
+        leader_meas_share = meas
         k_joint_rand_parts = []
         for j in range(Prio3.SHARES-1):
             helper_meas_share = Prio3.helper_meas_share(
@@ -227,7 +227,7 @@ class Prio3(Vdaf):
         prove_rand = Prio3.prove_rand(k_prove)
         joint_rand = Prio3.joint_rand(
             Prio3.joint_rand_seed(k_joint_rand_parts))
-        leader_proof_share = Prio3.Flp.prove(inp, prove_rand, joint_rand)
+        leader_proof_share = Prio3.Flp.prove(meas, prove_rand, joint_rand)
         for j in range(Prio3.SHARES-1):
             leader_proof_share = vec_sub(
                 leader_proof_share,
@@ -257,9 +257,9 @@ class Prio3(Vdaf):
         return Prio3.Prg.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
-            Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE),
+            Prio3.domain_separation_tag(USAGE_MEAS_SHARE),
             byte(agg_id),
-            Prio3.Flp.INPUT_LEN
+            Prio3.Flp.MEAS_LEN,
         )
 
     @classmethod
@@ -334,7 +334,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def decode_leader_share(Prio3, encoded):
-        l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.INPUT_LEN
+        l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.MEAS_LEN
         encoded_meas_share, encoded = encoded[:l], encoded[l:]
         meas_share = Prio3.Flp.Field.decode_vec(encoded_meas_share)
         l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.PROOF_LEN

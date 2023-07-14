@@ -170,7 +170,7 @@ measurements. These protocols are designed to ensure that, as long as at least
 one aggregation server executes the protocol honestly, individual measurements
 are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
-input that would result in an incorrect aggregate result.
+measurement that would result in an invalid aggregate result.
 
 --- middle
 
@@ -198,33 +198,34 @@ privacy (DP)" {{Dwo06}}. Roughly speaking, a data aggregation system that is
 differentially private ensures that the degree to which any individual
 measurement influences the value of the aggregate result can be precisely
 controlled. For example, in systems like RAPPOR {{EPK14}}, each user samples
-noise from a well-known distribution and adds it to their input before
+noise from a well-known distribution and adds it to their measurement before
 submitting to the aggregation server. The aggregation server then adds up the
-noisy inputs, and because it knows the distribution from whence the noise was
-sampled, it can estimate the true sum with reasonable precision.
+noisy measurements, and because it knows the distribution from whence the noise
+was sampled, it can estimate the true sum with reasonable precision.
 
 Differentially private systems like RAPPOR are easy to deploy and provide a
 useful guarantee. On its own, however, DP falls short of the strongest privacy
 property one could hope for. Specifically, depending on the "amount" of noise a
-client adds to its input, it may be possible for a curious aggregator to make a
-reasonable guess of the input's true value. Indeed, the more noise the clients
-add, the less reliable will be the server's estimate of the output. Thus systems
-employing DP techniques alone must strike a delicate balance between privacy and
-utility.
+client adds to its measurement, it may be possible for a curious aggregator to
+make a reasonable guess of the measurement's true value. Indeed, the more noise
+the clients add, the less reliable will be the server's estimate of the output.
+Thus systems employing DP techniques alone must strike a delicate balance
+between privacy and utility.
 
 The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation (MPC): No participant in the protocol should learn
-anything about an individual input beyond what it can deduce from the aggregate.
-In this document, we describe Verifiable Distributed Aggregation Functions
-(VDAFs) as a general class of protocols that achieve this goal.
+anything about an individual measurement beyond what it can deduce from the
+aggregate. In this document, we describe Verifiable Distributed Aggregation
+Functions (VDAFs) as a general class of protocols that achieve this goal.
 
 VDAF schemes achieve their privacy goal by distributing the computation of the
 aggregate among a number of non-colluding aggregation servers. As long as a
 subset of the servers executes the protocol honestly, VDAFs guarantee that no
-input is ever accessible to any party besides the client that submitted it. At
-the same time, VDAFs are "verifiable" in the sense that malformed inputs that
-would otherwise garble the output of the computation can be detected and removed
-from the set of input measurements. We refer to this property as "robustness".
+measurement is ever accessible to any party besides the client that submitted
+it. At the same time, VDAFs are "verifiable" in the sense that malformed
+measurements that would otherwise garble the result of the computation can be
+detected and removed from the set of measurements. We refer to this property as
+"robustness".
 
 In addition to these MPC-style security goals of privacy and robustness, VDAFs
 can be composed with various mechanisms for differential privacy, thereby
@@ -279,8 +280,9 @@ from the literature.
      collector, who combines them to obtain the aggregate result.
 
   The difficult part of this system is ensuring that the servers hold shares of
-  a valid input, e.g., the input is an integer in a specific range. Thus Prio
-  specifies a multi-party protocol for accomplishing this task.
+  a valid, aggregatable value, e.g., the measurement is an integer in a
+  specific range. Thus Prio specifies a multi-party protocol for accomplishing
+  this task.
 
   In {{prio3}} we describe Prio3, a VDAF that follows the same overall framework
   as the original Prio protocol, but incorporates techniques introduced in
@@ -289,14 +291,14 @@ from the literature.
 * More recently, Boneh et al. {{BBCGGI21}} described a protocol called Poplar
   for solving the `t`-heavy-hitters problem in a privacy-preserving manner. Here
   each client holds a bit-string of length `n`, and the goal of the aggregation
-  servers is to compute the set of inputs that occur at least `t` times. The
+  servers is to compute the set of strings that occur at least `t` times. The
   core primitive used in their protocol is a specialized Distributed Point
   Function (DPF) {{GI14}} that allows the servers to "query" their DPF shares on
   any bit-string of length shorter than or equal to `n`. As a result of this
   query, each of the servers has an additive share of a bit indicating whether
-  the string is a prefix of the client's input. The protocol also specifies a
+  the string is a prefix of the client's string. The protocol also specifies a
   multi-party computation for verifying that at most one string among a set of
-  candidates is a prefix of the client's input.
+  candidates is a prefix of the client's string.
 
   In {{poplar1}} we describe a VDAF called Poplar1 that implements this
   functionality.
@@ -575,15 +577,15 @@ measurement process is as follows:
 * To submit an individual measurement, the Client shards the measurement into
   "input shares" and sends one input share to each Aggregator. We sometimes
   refer to this sequence of input shares collectively as the Client's "report".
-* The Aggregators convert their input shares into "output shares".
+* The Aggregators refine their input shares into "output shares".
     * Output shares are in one-to-one correspondence with the input shares.
     * Just as each Aggregator receives one input share of each measurement, if
       this process succeeds, then each aggregator holds one output share.
     * In VDAFs, Aggregators will need to exchange information among themselves
       as part of the validation process.
-* Each Aggregator combines the output shares across inputs in the batch to
-  compute the "aggregate share" for that batch, i.e., its share of the desired
-  aggregate result.
+* Each Aggregator combines the output shares in the batch to compute the
+  "aggregate share" for that batch, i.e., its share of the desired aggregate
+  result.
 * The Aggregators submit their aggregate shares to the Collector, who combines
   them to obtain the aggregate result over the batch.
 
@@ -679,7 +681,7 @@ In order to protect the privacy of its measurements, a DAF Client shards its
 measurements into a sequence of input shares. The `shard`
 method is used for this purpose.
 
-* `Daf.shard(input: Measurement, nonce: Bytes[Daf.NONCE_SIZE], rand:
+* `Daf.shard(measurement: Measurement, nonce: Bytes[Daf.NONCE_SIZE], rand:
   Bytes[Daf.RAND_SIZE]) -> tuple[Bytes, Vec[Bytes]]` is the randomized sharding
   algorithm run by each Client. The input `rand` consists of the random bytes
   consumed by the algorithm. This value MUST be generated using a
@@ -986,7 +988,7 @@ share.
 
 This process involves a value called the "aggregation parameter" used to map the
 input shares to output shares. The Aggregators need to agree on this parameter
-before they can begin preparing inputs for aggregation.
+before they can begin preparing the measurement shares for aggregation.
 
 ~~~~
     Aggregator 0   Aggregator 1        Aggregator SHARES-1
@@ -1114,8 +1116,7 @@ VDAF Aggregation is identical to DAF Aggregation (cf. {{sec-daf-aggregate}}):
 
 * `Vdaf.aggregate(agg_param: AggParam, out_shares: Vec[OutShare]) -> agg_share:
   Bytes` is the deterministic aggregation algorithm. It is run by each
-  Aggregator over the output shares it has computed over a batch of measurement
-  inputs.
+  Aggregator over the output shares it has computed for a batch of measurements.
 
 The data flow for this stage is illustrated in {{aggregate-flow}}. Here again,
 we have the aggregation algorithm in a "one-shot" form, where all shares for a
@@ -1748,26 +1749,26 @@ regression. In fact, the scheme described in this section is compatible with any
 aggregation function that has the following structure:
 
 * Each measurement is encoded as a vector over some finite field.
-* Input validity is determined by an arithmetic circuit evaluated over the
-  encoded input. (An "arithmetic circuit" is a function comprised of arithmetic
-  operations in the field.) The circuit's output is a single field element: if
-  zero, then the input is said to be "valid"; otherwise, if the output is
-  non-zero, then the input is said to be "invalid".
-* The aggregate result is obtained by summing up the encoded input vectors and
-  computing some function of the sum.
+* Measurement validity is determined by an arithmetic circuit evaluated over
+  the encoded measurement. (An "arithmetic circuit" is a function comprised of
+  arithmetic operations in the field.) The circuit's output is a single field
+  element: if zero, then the measurement is said to be "valid"; otherwise, if
+  the output is non-zero, then the measurement is said to be "invalid".
+* The aggregate result is obtained by summing up the encoded measurement
+  vectors and computing some function of the sum.
 
 At a high level, Prio3 distributes this computation as follows. Each Client
 first shards its measurement by first encoding it, then splitting the vector into
 secret shares and sending a share to each Aggregator. Next, in the preparation
 phase, the Aggregators carry out a multi-party computation to determine if their
-shares correspond to a valid input (as determined by the arithmetic circuit).
-This computation involves a "proof" of validity generated by the Client. Next,
-each Aggregator sums up its shares locally. Finally, the Collector sums up the
-aggregate shares and computes the aggregate result.
+shares correspond to a valid measurement (as determined by the arithmetic
+circuit). This computation involves a "proof" of validity generated by the
+Client. Next, each Aggregator sums up its shares locally. Finally, the
+Collector sums up the aggregate shares and computes the aggregate result.
 
 This VDAF does not have an aggregation parameter. Instead, the output share is
-derived from the input share by applying a fixed map. See {{poplar1}} for an
-example of a VDAF that makes meaningful use of the aggregation parameter.
+derived from the measurement share by applying a fixed map. See {{poplar1}} for
+an example of a VDAF that makes meaningful use of the aggregation parameter.
 
 As the name implies, Prio3 is a descendant of the original Prio construction.
 A second iteration was deployed in the {{ENPA}} system, and like the VDAF
@@ -1778,7 +1779,7 @@ provide the same level of generality as the original construction.
 
 The core component of Prio3 is a "Fully Linear Proof (FLP)" system. Introduced
 by {{BBCGGI19}}, the FLP encapsulates the functionality required for encoding
-and validating inputs. Prio3 can be thought of as a transformation of a
+and validating measurements. Prio3 can be thought of as a transformation of a
 particular class of FLPs into a VDAF.
 
 The remainder of this section is structured as follows. The syntax for FLPs is
@@ -1791,13 +1792,14 @@ Prio3 for various types of measurements are specified in
 ## Fully Linear Proof (FLP) Systems {#flp}
 
 Conceptually, an FLP is a two-party protocol executed by a prover and a
-verifier. In actual use, however, the prover's computation is carried out by the
-Client, and the verifier's computation is distributed among the Aggregators. The
-Client generates a "proof" of its input's validity and distributes shares of the
-proof to the Aggregators. Each Aggregator then performs some a computation on
-its input share and proof share locally and sends the result to the other
-Aggregators. Combining the exchanged messages allows each Aggregator to decide
-if it holds a share of a valid input. (See {{prio3-construction}} for details.)
+verifier. In actual use, however, the prover's computation is carried out by
+the Client, and the verifier's computation is distributed among the
+Aggregators. The Client generates a "proof" of its measurement's validity and
+distributes shares of the proof to the Aggregators. Each Aggregator then
+performs some computation on its measurement share and proof share locally and
+sends the result to the other Aggregators. Combining the exchanged messages
+allows each Aggregator to decide if it holds a share of a valid measurement.
+(See {{prio3-construction}} for details.)
 
 As usual, we will describe the interface implemented by a concrete FLP in terms
 of an abstract base class `Flp` that specifies the set of methods and parameters
@@ -1810,10 +1812,10 @@ The parameters provided by a concrete FLP are listed in {{flp-param}}.
 | `PROVE_RAND_LEN` | Length of the prover randomness, the number of random field elements consumed by the prover when generating a proof |
 | `QUERY_RAND_LEN` | Length of the query randomness, the number of random field elements consumed by the verifier |
 | `JOINT_RAND_LEN` | Length of the joint randomness, the number of random field elements consumed by both the prover and verifier |
-| `INPUT_LEN`      | Length of the encoded measurement ({{flp-encode}}) |
+| `MEAS_LEN`       | Length of the encoded measurement ({{flp-encode}}) |
 | `OUTPUT_LEN`     | Length of the aggregatable output ({{flp-encode}}) |
 | `PROOF_LEN`      | Length of the proof       |
-| `VERIFIER_LEN`   | Length of the verifier message generated by querying the input and proof |
+| `VERIFIER_LEN`   | Length of the verifier message generated by querying the measurement and proof |
 | `Measurement`    | Type of the measurement   |
 | `AggResult`      | Type of the aggregate result |
 | `Field`          | As defined in ({{field}}) |
@@ -1822,70 +1824,70 @@ The parameters provided by a concrete FLP are listed in {{flp-param}}.
 An FLP specifies the following algorithms for generating and verifying proofs of
 validity (encoding is described below in {{flp-encode}}):
 
-* `Flp.prove(input: Vec[Field], prove_rand: Vec[Field], joint_rand: Vec[Field])
+* `Flp.prove(meas: Vec[Field], prove_rand: Vec[Field], joint_rand: Vec[Field])
   -> Vec[Field]` is the deterministic proof-generation algorithm run by the
-  prover. Its inputs are the encoded input, the "prover randomness"
-  `prove_rand`, and the "joint randomness" `joint_rand`. The prover randomness is
-  used only by the prover, but the joint randomness is shared by both the prover
-  and verifier.
+  prover. Its inputs are the encoded measurement, the "prover randomness"
+  `prove_rand`, and the "joint randomness" `joint_rand`. The prover randomness
+  is used only by the prover, but the joint randomness is shared by both the
+  prover and verifier.
 
-* `Flp.query(input: Vec[Field], proof: Vec[Field], query_rand: Vec[Field],
+* `Flp.query(meas: Vec[Field], proof: Vec[Field], query_rand: Vec[Field],
   joint_rand: Vec[Field], num_shares: Unsigned) -> Vec[Field]` is the
   query-generation algorithm run by the verifier. This is used to "query" the
-  input and proof. The result of the query (i.e., the output of this function)
-  is called the "verifier message". In addition to the input and proof, this
-  algorithm takes as input the query randomness `query_rand` and the joint
-  randomness `joint_rand`. The former is used only by the verifier. `num_shares`
-  specifies how many input and proof shares were generated.
+  measurement and proof. The result of the query (i.e., the output of this
+  function) is called the "verifier message". In addition to the measurement
+  and proof, this algorithm takes as input the query randomness `query_rand`
+  and the joint randomness `joint_rand`. The former is used only by the
+  verifier. `num_shares` specifies how many shares were generated.
 
 * `Flp.decide(verifier: Vec[Field]) -> Bool` is the deterministic decision
   algorithm run by the verifier. It takes as input the verifier message and
-  outputs a boolean indicating if the input from which it was generated is
-  valid.
+  outputs a boolean indicating if the measurement from which it was generated
+  is valid.
 
 Our application requires that the FLP is "fully linear" in the sense defined in
 {{BBCGGI19}}. As a practical matter, what this property implies is that, when
-run on a share of the input and proof, the query-generation algorithm outputs a
-share of the verifier message. Furthermore, the privacy property of the FLP
-system ensures that the verifier message reveals nothing about the input's
-validity. Therefore, to decide if an input is valid, the Aggregators will run
-the query-generation algorithm locally, exchange verifier shares, combine them
-to recover the verifier message, and run the decision algorithm.
+run on a share of the measurement and proof, the query-generation algorithm
+outputs a share of the verifier message. Furthermore, the privacy property of
+the FLP system ensures that the verifier message reveals nothing about the measurement
+other than whether it is valid. Therefore, to decide if a measurement is valid, the
+Aggregators will run the query-generation algorithm locally, exchange verifier
+shares, combine them to recover the verifier message, and run the decision
+algorithm.
 
 The query-generation algorithm includes a parameter `num_shares` that specifies
-the number of shares of the input and proof that were generated. If these data
-are not secret shared, then `num_shares == 1`. This parameter is useful for
-certain FLP constructions. For example, the FLP in {{flp-generic}} is defined in
-terms of an arithmetic circuit; when the circuit contains constants, it is
-sometimes necessary to normalize those constants to ensure that the circuit's
-output, when run on a valid input, is the same regardless of the number of
-shares.
+the number of shares that were generated. If these data are not secret shared,
+then `num_shares == 1`. This parameter is useful for certain FLP constructions.
+For example, the FLP in {{flp-generic}} is defined in terms of an arithmetic
+circuit; when the circuit contains constants, it is sometimes necessary to
+normalize those constants to ensure that the circuit's output, when run on a
+valid measurement, is the same regardless of the number of shares.
 
 An FLP is executed by the prover and verifier as follows:
 
 ~~~
-def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
+def run_flp(Flp, meas: Vec[Flp.Field], num_shares: Unsigned):
     joint_rand = Flp.Field.rand_vec(Flp.JOINT_RAND_LEN)
     prove_rand = Flp.Field.rand_vec(Flp.PROVE_RAND_LEN)
     query_rand = Flp.Field.rand_vec(Flp.QUERY_RAND_LEN)
 
     # Prover generates the proof.
-    proof = Flp.prove(inp, prove_rand, joint_rand)
+    proof = Flp.prove(meas, prove_rand, joint_rand)
 
-    # Shard the input and the proof.
-    input_shares = additive_secret_share(inp, num_shares, Flp.Field)
+    # Shard the measurement and the proof.
+    meas_shares = additive_secret_share(meas, num_shares, Flp.Field)
     proof_shares = additive_secret_share(proof, num_shares, Flp.Field)
 
-    # Verifier queries the input shares and proof shares.
+    # Verifier queries the meas shares and proof shares.
     verifier_shares = [
         Flp.query(
-            input_share,
+            meas_share,
             proof_share,
             query_rand,
             joint_rand,
             num_shares,
         )
-        for input_share, proof_share in zip(input_shares, proof_shares)
+        for meas_share, proof_share in zip(meas_shares, proof_shares)
     ]
 
     # Combine the verifier shares into the verifier.
@@ -1893,15 +1895,16 @@ def run_flp(Flp, inp: Vec[Flp.Field], num_shares: Unsigned):
     for verifier_share in verifier_shares:
         verifier = vec_add(verifier, verifier_share)
 
-    # Verifier decides if the input is valid.
+    # Verifier decides if the measurement is valid.
     return Flp.decide(verifier)
+
 ~~~
 {: #run-flp title="Execution of an FLP."}
 
-The proof system is constructed so that, if `inp` is a valid input, then
-`run_flp(Flp, inp, 1)` always returns `True`. On the other hand, if `inp` is
-invalid, then as long as `joint_rand` and `query_rand` are generated uniform
-randomly, the output is `False` with overwhelming probability.
+The proof system is constructed so that, if `meas` is valid, then `run_flp(Flp,
+meas, 1)` always returns `True`. On the other hand, if `meas` is invalid, then
+as long as `joint_rand` and `query_rand` are generated uniform randomly, the
+output is `False` with overwhelming probability.
 
 We remark that {{BBCGGI19}} defines a much larger class of fully linear proof
 systems than we consider here. In particular, what is called an "FLP" here is
@@ -1914,21 +1917,21 @@ also specifies a method of encoding raw measurements as a vector of field
 elements:
 
 * `Flp.encode(measurement: Measurement) -> Vec[Field]` encodes a raw measurement
-  as a vector of field elements. The return value MUST be of length `INPUT_LEN`.
+  as a vector of field elements. The return value MUST be of length `MEAS_LEN`.
 
-For some FLPs, the encoded input also includes redundant field elements that
-are useful for checking the proof, but which are not needed after the proof has
-been checked. An example is the "integer sum" data type from {{CGB17}} in which
-an integer in range `[0, 2^k)` is encoded as a vector of `k` field elements,
-each representing a bit of the integer (this type is also defined in
-{{prio3sum}}). After consuming this vector, all that is needed is the integer
-it represents. Thus the FLP defines an algorithm for truncating the input to
-the length of the aggregated output:
+For some FLPs, the encoded measurement also includes redundant field elements
+that are useful for checking the proof, but which are not needed after the
+proof has been checked. An example is the "integer sum" data type from
+{{CGB17}} in which an integer in range `[0, 2^k)` is encoded as a vector of `k`
+field elements, each representing a bit of the integer (this type is also
+defined in {{prio3sum}}). After consuming this vector, all that is needed is
+the integer it represents. Thus the FLP defines an algorithm for truncating the
+encoded measurement to the length of the aggregated output:
 
-* `Flp.truncate(input: Vec[Field]) -> Vec[Field]` maps an encoded input (e.g.,
-  the bit-encoding of the input) to an aggregatable output (e.g., the singleton
-  vector containing the input). The length of the input MUST be `INPUT_LEN` and
-  the length of the output MUST be `OUTPUT_LEN`.
+* `Flp.truncate(meas: Vec[Field]) -> Vec[Field]` maps an encoded measurement
+  (e.g., the bit-encoding of the measurement) to an aggregatable output (e.g.,
+  the singleton vector containing the measurement). The length of the input
+  MUST be `MEAS_LEN` and the length of the output MUST be `OUTPUT_LEN`.
 
 Once the aggregate shares have been computed and combined together, their sum
 can be converted into the aggregate result. This could be a projection from
@@ -1966,15 +1969,15 @@ methods refer to constants enumerated in {{prio3-const}}.
 | `AggResult`       | `Flp.AggResult`                                 |
 {: #prio3-param title="VDAF parameters for Prio3."}
 
-| Variable                          | Value |
-|:----------------------------------|:------|
-| `USAGE_MEASUREMENT_SHARE: Unsigned` | 1     |
-| `USAGE_PROOF_SHARE: Unsigned`       | 2     |
-| `USAGE_JOINT_RANDOMNESS: Unsigned`  | 3     |
-| `USAGE_PROVE_RANDOMNESS: Unsigned`  | 4     |
-| `USAGE_QUERY_RANDOMNESS: Unsigned`  | 5     |
-| `USAGE_JOINT_RAND_SEED: Unsigned`   | 6     |
-| `USAGE_JOINT_RAND_PART: Unsigned`   | 7     |
+| Variable                           | Value |
+|:-----------------------------------|:------|
+| `USAGE_MEAS_SHARE: Unsigned`       | 1     |
+| `USAGE_PROOF_SHARE: Unsigned`      | 2     |
+| `USAGE_JOINT_RANDOMNESS: Unsigned` | 3     |
+| `USAGE_PROVE_RANDOMNESS: Unsigned` | 4     |
+| `USAGE_QUERY_RANDOMNESS: Unsigned` | 5     |
+| `USAGE_JOINT_RAND_SEED: Unsigned`  | 6     |
+| `USAGE_JOINT_RAND_PART: Unsigned`  | 7     |
 {: #prio3-const title="Constants used by Prio3."}
 
 ### Sharding
@@ -1982,13 +1985,13 @@ methods refer to constants enumerated in {{prio3-const}}.
 Recall from {{flp}} that the FLP syntax calls for "joint randomness" shared by
 the prover (i.e., the Client) and the verifier (i.e., the Aggregators). VDAFs
 have no such notion. Instead, the Client derives the joint randomness from its
-input in a way that allows the Aggregators to reconstruct it from their input
+measurement in a way that allows the Aggregators to reconstruct it from their
 shares. (This idea is based on the Fiat-Shamir heuristic and is described in
 Section 6.2.3 of {{BBCGGI19}}.)
 
 The sharding algorithm involves the following steps:
 
-1. Encode the Client's raw measurement as an input for the FLP
+1. Encode the Client's measurement for the FLP
 2. Shard the measurement into a sequence of measurement shares
 3. Derive the joint randomness from the measurement shares and nonce
 4. Run the FLP proof-generation algorithm using the derived joint randomness
@@ -2006,11 +2009,11 @@ def shard(Prio3, measurement, nonce, rand):
     l = Prio3.Prg.SEED_SIZE
     seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
 
-    inp = Prio3.Flp.encode(measurement)
+    meas = Prio3.Flp.encode(measurement)
     if Prio3.Flp.JOINT_RAND_LEN > 0:
-        return Prio3.shard_with_joint_rand(inp, nonce, seeds)
+        return Prio3.shard_with_joint_rand(meas, nonce, seeds)
     else:
-        return Prio3.shard_without_joint_rand(inp, seeds)
+        return Prio3.shard_without_joint_rand(meas, seeds)
 ~~~
 {: #prio3-eval-input title="Input-distribution algorithm for Prio3."}
 
@@ -2025,7 +2028,7 @@ The following method is used for FLPs that do not require joint randomness,
 i.e., when `Flp.JOINT_RAND_LEN == 0`:
 
 ~~~
-def shard_without_joint_rand(Prio3, inp, seeds):
+def shard_without_joint_rand(Prio3, meas, seeds):
     k_helper_seeds, seeds = front((Prio3.SHARES-1) * 2, seeds)
     k_helper_meas_shares = [
         k_helper_seeds[i]
@@ -2037,8 +2040,8 @@ def shard_without_joint_rand(Prio3, inp, seeds):
     ]
     (k_prove,), seeds = front(1, seeds)
 
-    # Shard the encoded measurement (`inp`) into measurement shares.
-    leader_meas_share = inp
+    # Shard the encoded measurement into shares.
+    leader_meas_share = meas
     for j in range(Prio3.SHARES-1):
         leader_meas_share = vec_sub(
             leader_meas_share,
@@ -2047,7 +2050,7 @@ def shard_without_joint_rand(Prio3, inp, seeds):
 
     # Generate the proof and shard it into proof shares.
     prove_rand = Prio3.prove_rand(k_prove)
-    leader_proof_share = Prio3.Flp.prove(inp, prove_rand, [])
+    leader_proof_share = Prio3.Flp.prove(meas, prove_rand, [])
     for j in range(Prio3.SHARES-1):
         leader_proof_share = vec_sub(
             leader_proof_share,
@@ -2093,7 +2096,7 @@ The following method is used for FLPs that require joint randomness,
 i.e., for which `Flp.JOINT_RAND_LEN > 0`:
 
 ~~~
-def shard_with_joint_rand(Prio3, inp, nonce, seeds):
+def shard_with_joint_rand(Prio3, meas, nonce, seeds):
     k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
     k_helper_meas_shares = [
         k_helper_seeds[i]
@@ -2110,9 +2113,9 @@ def shard_with_joint_rand(Prio3, inp, nonce, seeds):
     (k_leader_blind,), seeds = front(1, seeds)
     (k_prove,), seeds = front(1, seeds)
 
-    # Shard the encoded measurement (`inp`) into measurement
-    # shares and compute the joint randomness parts.
-    leader_meas_share = inp
+    # Shard the encoded measurement into shares and compute the
+    # joint randomness parts.
+    leader_meas_share = meas
     k_joint_rand_parts = []
     for j in range(Prio3.SHARES-1):
         helper_meas_share = Prio3.helper_meas_share(
@@ -2128,7 +2131,7 @@ def shard_with_joint_rand(Prio3, inp, nonce, seeds):
     prove_rand = Prio3.prove_rand(k_prove)
     joint_rand = Prio3.joint_rand(
         Prio3.joint_rand_seed(k_joint_rand_parts))
-    leader_proof_share = Prio3.Flp.prove(inp, prove_rand, joint_rand)
+    leader_proof_share = Prio3.Flp.prove(meas, prove_rand, joint_rand)
     for j in range(Prio3.SHARES-1):
         leader_proof_share = vec_sub(
             leader_proof_share,
@@ -2179,15 +2182,16 @@ The methods used in this computation are defined in {{prio3-auxiliary}}.
 ### Preparation {#prio3-preparation}
 
 This section describes the process of recovering output shares from the input
-shares. The high-level idea is that each Aggregator first queries its input and
-proof share locally, then exchanges its verifier share with the other
-Aggregators. The verifier shares are then combined into the verifier message,
-which is used to decide whether to accept.
+shares. The high-level idea is that each Aggregator first queries its
+measurement and proof share locally, then exchanges its verifier share with the
+other Aggregators. The verifier shares are then combined into the verifier
+message, which is used to decide whether to accept.
 
 In addition, for FLPs that require joint randomness, the Aggregators must
 ensure that they have all used the same joint randomness for the
 query-generation algorithm. To do so, they collectively re-derive the joint
-randomness from their input shares just as the Client did during sharding.
+randomness from their measurement shares just as the Client did during
+sharding.
 
 In order to avoid extra round of communication, the Client sends each
 Aggregator a "hint" consisting of the joint randomness parts. This leaves open
@@ -2322,9 +2326,9 @@ def helper_meas_share(Prio3, agg_id, k_share):
     return Prio3.Prg.expand_into_vec(
         Prio3.Flp.Field,
         k_share,
-        Prio3.domain_separation_tag(USAGE_MEASUREMENT_SHARE),
+        Prio3.domain_separation_tag(USAGE_MEAS_SHARE),
         byte(agg_id),
-        Prio3.Flp.INPUT_LEN
+        Prio3.Flp.MEAS_LEN,
     )
 
 def helper_proof_share(Prio3, agg_id, k_share):
@@ -2399,7 +2403,7 @@ def encode_leader_share(Prio3,
     return encoded
 
 def decode_leader_share(Prio3, encoded):
-    l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.INPUT_LEN
+    l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.MEAS_LEN
     encoded_meas_share, encoded = encoded[:l], encoded[l:]
     meas_share = Prio3.Flp.Field.decode_vec(encoded_meas_share)
     l = Prio3.Flp.Field.ENCODED_SIZE * Prio3.Flp.PROOF_LEN
@@ -2543,20 +2547,21 @@ specified in {{flp-generic-construction}}.
 ### Overview {#flp-generic-overview}
 
 In the proof system of {{BBCGGI19}}, validity is defined via an arithmetic
-circuit evaluated over the input: If the circuit output is zero, then the input
-is deemed valid; otherwise, if the circuit output is non-zero, then the input is
-deemed invalid. Thus the goal of the proof system is merely to allow the
-verifier to evaluate the validity circuit over the input. For our application
-({{prio3}}), this computation is distributed among multiple Aggregators, each of
-which has only a share of the input.
+circuit evaluated over the encoded measurement: If the circuit output is zero,
+then the measurement is deemed valid; otherwise, if the circuit output is
+non-zero, then the measurement is deemed invalid. Thus the goal of the proof
+system is merely to allow the verifier to evaluate the validity circuit over
+the measurement. For our application ({{prio3}}), this computation is
+distributed among multiple Aggregators, each of which has only a share of the
+measurement.
 
 Suppose for a moment that the validity circuit `C` is affine, meaning its only
 operations are addition and multiplication-by-constant. In particular, suppose
 the circuit does not contain a multiplication gate whose operands are both
-non-constant. Then to decide if an input `x` is valid, each Aggregator could
-evaluate `C` on its share of `x` locally, broadcast the output share to its
-peers, then combine the output shares locally to recover `C(x)`. This is true
-because for any `SHARES`-way secret sharing of `x` it holds that
+non-constant. Then to decide if a measurement `x` is valid, each Aggregator
+could evaluate `C` on its share of `x` locally, broadcast the output share to
+its peers, then combine the output shares locally to recover `C(x)`. This is
+true because for any `SHARES`-way secret sharing of `x` it holds that
 
 ~~~
 C(x_shares[0] + ... + x_shares[SHARES-1]) =
@@ -2568,7 +2573,7 @@ constants in the circuit by `SHARES`.) However this is not the case if `C` is
 not-affine (i.e., it contains at least one multiplication gate whose operands
 are non-constant). In the proof system of {{BBCGGI19}}, the proof is designed to
 allow the (distributed) verifier to compute the non-affine operations using only
-linear operations on (its share of) the input and proof.
+linear operations on (its share of) the measurement and proof.
 
 To make this work, the proof system is restricted to validity circuits that
 exhibit a special structure. Specifically, an arithmetic circuit with "G-gates"
@@ -2603,12 +2608,12 @@ C(x[0]) = Mul(x[0], x[0]) - x[0]
 
 The proof system of {{BBCGGI19}} allows the verifier to evaluate each instance
 of the gadget (i.e., `Mul(x[0], x[0])` in our example) using a linear function
-of the input and proof. The proof is constructed roughly as follows. Let `C` be
-the validity circuit and suppose the gadget is arity-`L` (i.e., it has `L` input
-wires.). Let `wire[j-1,k-1]` denote the value of the `j`th wire of the `k`th
-call to the gadget during the evaluation of `C(x)`. Suppose there are `M` such
-calls and fix distinct field elements `alpha[0], ..., alpha[M-1]`. (We will
-require these points to have a special property, as we'll discuss in
+of the measurement and proof. The proof is constructed roughly as follows. Let
+`C` be the validity circuit and suppose the gadget is arity-`L` (i.e., it has
+`L` input wires.). Let `wire[j-1,k-1]` denote the value of the `j`th wire of
+the `k`th call to the gadget during the evaluation of `C(x)`. Suppose there are
+`M` such calls and fix distinct field elements `alpha[0], ..., alpha[M-1]`. (We
+will require these points to have a special property, as we'll discuss in
 {{flp-generic-overview-extensions}}; but for the moment it is only important
 that they are distinct.)
 
@@ -2622,7 +2627,7 @@ locally.
 
 There is one more wrinkle, however: It is still possible for a malicious prover
 to produce a gadget polynomial that would result in `C(x)` being computed
-incorrectly, potentially resulting in an invalid input being accepted. To
+incorrectly, potentially resulting in an invalid measurement being accepted. To
 prevent this, the verifier performs a probabilistic test to check that the
 gadget polynomial is well-formed. This test, and the procedure for constructing
 the gadget polynomial, are described in detail in {{flp-generic-construction}}.
@@ -2633,26 +2638,27 @@ The FLP described in the next section extends the proof system of {{BBCGGI19}},
 Section 4.2 in three ways.
 
 First, the validity circuit in our construction includes an additional, random
-input (this is the "joint randomness" derived from the input shares in Prio3;
-see {{prio3-construction}}). This allows for circuit optimizations that trade a
-small soundness error for a shorter proof. For example, consider a circuit that
-recognizes the set of length-`N` vectors for which each element is either one or
-zero. A deterministic circuit could be constructed for this language, but it
-would involve a large number of multiplications that would result in a large
-proof. (See the discussion in {{BBCGGI19}}, Section 5.2 for details). A much
-shorter proof can be constructed for the following randomized circuit:
+input (this is the "joint randomness" derived from the measurement shares in
+Prio3; see {{prio3-construction}}). This allows for circuit optimizations that
+trade a small soundness error for a shorter proof. For example, consider a
+circuit that recognizes the set of length-`N` vectors for which each element is
+either one or zero. A deterministic circuit could be constructed for this
+language, but it would involve a large number of multiplications that would
+result in a large proof. (See the discussion in {{BBCGGI19}}, Section 5.2 for
+details). A much shorter proof can be constructed for the following randomized
+circuit:
 
 ~~~
-C(inp, r) = r * Range2(inp[0]) + ... + r^N * Range2(inp[N-1])
+C(meas, r) = r * Range2(meas[0]) + ... + r^N * Range2(meas[N-1])
 ~~~
 
-(Note that this is a special case of {{BBCGGI19}}, Theorem 5.2.) Here `inp` is
+(Note that this is a special case of {{BBCGGI19}}, Theorem 5.2.) Here `meas` is
 the length-`N` input and `r` is a random field element. The gadget circuit
-`Range2` is the "range-check" polynomial described above, i.e., `Range2(x) = x^2 -
-x`. The idea is that, if `inp` is valid (i.e., each `inp[j]` is in `[0,2)`),
-then the circuit will evaluate to 0 regardless of the value of `r`; but if
-`inp[j]` is not in `[0,2)` for some `j`, the output will be non-zero with high
-probability.
+`Range2` is the "range-check" polynomial described above, i.e., `Range2(x) =
+x^2 - x`. The idea is that, if `meas` is valid (i.e., each `meas[j]` is in
+`[0,2)`), then the circuit will evaluate to 0 regardless of the value of `r`;
+but if `meas[j]` is not in `[0,2)` for some `j`, the output will be non-zero
+with high probability.
 
 The second extension implemented by our FLP allows the validity circuit to
 contain multiple gadget types. (This generalization was suggested in
@@ -2661,8 +2667,8 @@ circuits by allowing multiple, non-affine sub-components. For example, the
 following circuit is allowed:
 
 ~~~
-C(inp, r) = r * Range2(inp[0]) + ... + r^L * Range2(inp[L-1]) + \
-            r^(L+1) * Range3(inp[L]) + ... + r^N * Range3(inp[N-1])
+C(meas, r) = r * Range2(meas[0]) + ... + r^L * Range2(meas[L-1]) + \
+            r^(L+1) * Range3(meas[L]) + ... + r^N * Range3(meas[N-1])
 ~~~
 
 where `Range3(x) = x^3 - 3x^2 + 2x`. This circuit checks that the first `L`
@@ -2684,16 +2690,16 @@ validity circuit `Valid` that implements the interface described here.
 
 A concrete `Valid` defines the following parameters:
 
-| Parameter      | Description                           |
-|:---------------|:--------------------------------------|
-| `GADGETS`      | A list of gadgets                     |
-| `GADGET_CALLS` | Number of times each gadget is called |
-| `INPUT_LEN`    | Length of the input                   |
-| `OUTPUT_LEN`   | Length of the aggregatable output     |
-| `JOINT_RAND_LEN` | Length of the random input          |
-| `Measurement`  | The type of measurement               |
-| `AggResult`    | Type of the aggregate result          |
-| `Field`        | An FFT-friendly finite field as defined in {{field-fft-friendly}} |
+| Parameter        | Description                           |
+|:-----------------|:--------------------------------------|
+| `GADGETS`        | A list of gadgets                     |
+| `GADGET_CALLS`   | Number of times each gadget is called |
+| `MEAS_LEN`       | Length of the measurement             |
+| `OUTPUT_LEN`     | Length of the aggregatable output     |
+| `JOINT_RAND_LEN` | Length of the random input            |
+| `Measurement`    | The type of measurement               |
+| `AggResult`      | Type of the aggregate result          |
+| `Field`          | An FFT-friendly finite field as defined in {{field-fft-friendly}} |
 {: title="Validity circuit parameters."}
 
 Each gadget `G` in `GADGETS` defines a constant `DEGREE` that specifies the
@@ -2710,9 +2716,9 @@ an input vector, truncating an input vector to the length of an aggregatable
 output, and converting an aggregated output to an aggregate result:
 
 * `Valid.encode(measurement: Measurement) -> Vec[Field]` returns a vector of
-  length `INPUT_LEN` representing a measurement.
+  length `MEAS_LEN` representing a measurement.
 
-* `Valid.truncate(input: Vec[Field]) -> Vec[Field]` returns a vector of length
+* `Valid.truncate(meas: Vec[Field]) -> Vec[Field]` returns a vector of length
   `OUTPUT_LEN` representing an aggregatable output.
 
 * `Valid.decode(output: Vec[Field], num_measurements: Unsigned) -> AggResult`
@@ -2775,7 +2781,7 @@ In the remainder, we let `[n]` denote the set `{1, ..., n}` for positive integer
 | `PROVE_RAND_LEN` | `Valid.prove_rand_len()` (see {{flp-generic-valid}}) |
 | `QUERY_RAND_LEN` | `Valid.query_rand_len()` (see {{flp-generic-valid}}) |
 | `JOINT_RAND_LEN` | `Valid.JOINT_RAND_LEN` |
-| `INPUT_LEN`      | `Valid.INPUT_LEN`   |
+| `MEAS_LEN`      | `Valid.MEAS_LEN`   |
 | `OUTPUT_LEN`     | `Valid.OUTPUT_LEN`  |
 | `PROOF_LEN`      | `Valid.proof_len()` (see {{flp-generic-valid}}) |
 | `VERIFIER_LEN`   | `Valid.verifier_len()` (see {{flp-generic-valid}}) |
@@ -2785,7 +2791,7 @@ In the remainder, we let `[n]` denote the set `{1, ..., n}` for positive integer
 
 #### Proof Generation {#flp-generic-construction-prove}
 
-On input `inp`, `prove_rand`, and `joint_rand`, the proof is computed as
+On input of `meas`, `prove_rand`, and `joint_rand`, the proof is computed as
 follows:
 
 1. For each `i` in `[H]` create an empty table `wire_i`.
@@ -2794,10 +2800,10 @@ follows:
    seed_H` where `len(seed_i) == L_i` for all `i` in `[H]`. Let us call these
    the "wire seeds" of each gadget.
 
-1. Evaluate `Valid` on input of `inp` and `joint_rand`, recording the inputs of
-   each gadget in the corresponding table. Specifically, for every `i` in `[H]`,
-   set `wire_i[j-1,k-1]` to the value on the `j`th wire into the `k`th call to
-   gadget `G_i`.
+1. Evaluate `Valid` on input of `meas` and `joint_rand`, recording the inputs
+   of each gadget in the corresponding table. Specifically, for every `i` in
+   `[H]`, set `wire_i[j-1,k-1]` to the value on the `j`th wire into the `k`th
+   call to gadget `G_i`.
 
 1. Compute the "wire polynomials". That is, for every `i` in `[H]` and `j` in
    `[L_i]`, construct `poly_wire_i[j-1]`, the `j`th wire polynomial for the
@@ -2826,7 +2832,7 @@ where `coeff_i` is the vector of coefficients of `poly_gadget_i` for each `i` in
 
 #### Query Generation {#flp-generic-construction-query}
 
-On input of `inp`, `proof`, `query_rand`, and `joint_rand`, the verifier message
+On input of `meas`, `proof`, `query_rand`, and `joint_rand`, the verifier message
 is generated as follows:
 
 1. For every `i` in `[H]` create an empty table `wire_i`.
@@ -2834,10 +2840,10 @@ is generated as follows:
 1. Partition `proof` into the sub-vectors `seed_1`, `coeff_1`, ..., `seed_H`,
    `coeff_H` defined in {{flp-generic-construction-prove}}.
 
-1. Evaluate `Valid` on input of `inp` and `joint_rand`, recording the inputs of
-   each gadget in the corresponding table. This step is similar to the prover's
-   step (3.) except the verifier does not evaluate the gadgets. Instead, it
-   computes the output of the `k`th call to `G_i` by evaluating
+1. Evaluate `Valid` on input of `meas` and `joint_rand`, recording the inputs
+   of each gadget in the corresponding table. This step is similar to the
+   prover's step (3.) except the verifier does not evaluate the gadgets.
+   Instead, it computes the output of the `k`th call to `G_i` by evaluating
    `poly_gadget_i(alpha_i^k)`. Let `v` denote the output of the circuit
    evaluation.
 
@@ -2859,8 +2865,8 @@ The verifier message is the vector `verifier = [v] + x_1 + [y_1] + ... + x_H +
 
 #### Decision
 
-On input of vector `verifier`, the verifier decides if the input is valid as
-follows:
+On input of vector `verifier`, the verifier decides if the measurement is valid
+as follows:
 
 1. Parse `verifier` into `v`, `x_1`, `y_1`, ..., `x_H`, `y_H` as defined in
    {{flp-generic-construction-query}}.
@@ -2906,8 +2912,8 @@ def Mul(x, y):
 The validity circuit is defined as
 
 ~~~
-def Count(inp: Vec[Field64]):
-    return Mul(inp[0], inp[0]) - inp[0]
+def Count(meas: Vec[Field64]):
+    return Mul(meas[0], meas[0]) - meas[0]
 ~~~
 
 The measurement is encoded and decoded as a singleton vector in the natural
@@ -2917,7 +2923,7 @@ way. The parameters for this circuit are summarized below.
 |:-----------------|:-----------------------------|
 | `GADGETS`        | `[Mul]`                      |
 | `GADGET_CALLS`   | `[1]`                        |
-| `INPUT_LEN`      | `1`                          |
+| `MEAS_LEN`       | `1`                          |
 | `OUTPUT_LEN`     | `1`                          |
 | `JOINT_RAND_LEN` | `0`                          |
 | `Measurement`    | `Unsigned`, in range `[0,2)` |
@@ -2938,17 +2944,17 @@ measurement is encoded as a length-`bits` vector of field elements, where the
 
 ~~~
 def encode(Sum, measurement: Integer):
-    if 0 > measurement or measurement >= 2 ** Sum.INPUT_LEN:
+    if 0 > measurement or measurement >= 2 ** Sum.MEAS_LEN:
         raise ERR_INPUT
 
     encoded = []
-    for l in range(Sum.INPUT_LEN):
+    for l in range(Sum.MEAS_LEN):
         encoded.append(Sum.Field((measurement >> l) & 1))
     return encoded
 
-def truncate(Sum, inp):
+def truncate(Sum, meas):
     decoded = Sum.Field(0)
-    for (l, b) in enumerate(inp):
+    for (l, b) in enumerate(meas):
         w = Sum.Field(1 << l)
         decoded += w * b
     return [decoded]
@@ -2968,10 +2974,10 @@ def Range2(x):
 The validity circuit is defined as
 
 ~~~
-def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
+def Sum(meas: Vec[Field128], joint_rand: Vec[Field128]):
     out = Field128(0)
     r = joint_rand[0]
-    for x in inp:
+    for x in meas:
         out += r * Range2(x)
         r *= joint_rand[0]
     return out
@@ -2981,7 +2987,7 @@ def Sum(inp: Vec[Field128], joint_rand: Vec[Field128]):
 |:-----------------|:-------------------------|
 | `GADGETS`        | `[Range2]`               |
 | `GADGET_CALLS`   | `[bits]`                 |
-| `INPUT_LEN`      | `bits`                   |
+| `MEAS_LEN`       | `bits`                   |
 | `OUTPUT_LEN`     | `1`                      |
 | `JOINT_RAND_LEN` | `1`                      |
 | `Measurement`    | `Unsigned`, in range `[0, 2^bits)` |
@@ -3010,8 +3016,8 @@ def encode(Histogram, measurement: Integer):
     encoded[measurement] = Field128(1)
     return encoded
 
-def truncate(Histogram, inp: Vec[Field128]):
-    return inp
+def truncate(Histogram, meas: Vec[Field128]):
+    return meas
 
 def decode(Histogram, output: Vec[Field128], _num_measurements):
     return [bucket_count.as_unsigned() for bucket_count in output]
@@ -3021,19 +3027,19 @@ The validity circuit uses `Range2` (see {{prio3sum}}) as its single gadget. It
 checks for one-hotness in two steps, as follows:
 
 ~~~
-def Histogram(inp: Vec[Field128],
+def Histogram(meas: Vec[Field128],
               joint_rand: Vec[Field128],
               num_shares: Unsigned):
     # Check that each bucket is one or zero.
     range_check = Field128(0)
     r = joint_rand[0]
-    for x in inp:
+    for x in meas:
         range_check += r * Range2(x)
         r *= joint_rand[0]
 
     # Check that the buckets sum to 1.
     sum_check = -Field128(1) * Field128(num_shares).inv()
-    for b in inp:
+    for b in meas:
         sum_check += b
 
     out = joint_rand[1] * range_check + \
@@ -3041,14 +3047,14 @@ def Histogram(inp: Vec[Field128],
     return out
 ~~~
 
-Note that this circuit depends on the number of shares into which the input is
-sharded. This is provided to the FLP by Prio3.
+Note that this circuit depends on the number of shares into which the
+measurement is sharded. This is provided to the FLP by Prio3.
 
 | Parameter        | Value                   |
 |:-----------------|:------------------------|
 | `GADGETS`        | `[Range2]`              |
 | `GADGET_CALLS`   | `[length]`              |
-| `INPUT_LEN`      | `length`                |
+| `MEAS_LEN`       | `length`                |
 | `OUTPUT_LEN`     | `length`                |
 | `JOINT_RAND_LEN` | `2`                     |
 | `Measurement`    | `Unsigned`              |
@@ -3061,15 +3067,15 @@ sharded. This is provided to the FLP by Prio3.
 This section specifies Poplar1, a VDAF for the following task. Each Client holds
 a string of length `BITS` and the Aggregators hold a set of `l`-bit strings,
 where `l <= BITS`. We will refer to the latter as the set of "candidate
-prefixes". The Aggregators' goal is to count how many inputs are prefixed by
-each candidate prefix.
+prefixes". The Aggregators' goal is to count how many measurements are prefixed
+by each candidate prefix.
 
 This functionality is the core component of the Poplar protocol {{BBCGGI21}},
 which was designed to compute the heavy hitters over a set of input strings. At
 a high level, the protocol works as follows.
 
-1. Each Client splits its input string into input shares and sends one share to
-   each Aggregator.
+1. Each Client splits its string into input shares and sends one share to each
+   Aggregator.
 2. The Aggregators agree on an initial set of candidate prefixes, say `0` and
    `1`.
 3. The Aggregators evaluate the VDAF on each set of input shares and aggregate
@@ -3240,13 +3246,14 @@ subsections. These methods make use of constants defined in {{poplar1-const}}.
 
 ### Client
 
-The Client's input is an IDPF index, denoted `alpha`. The programmed IDPF values
-are pairs of field elements `(1, k)` where each `k` is chosen at random. This
-random value is used as part of the secure sketching protocol of {{BBCGGI21}},
-Appendix C.4. After evaluating their IDPF key shares on a given sequence of
-candidate prefixes, the sketching protocol is used by the Aggregators to verify
-that they hold shares of a one-hot vector. In addition, for each level of the
-tree, the prover generates random elements `a`, `b`, and `c` and computes
+The Client's measurement is interpreted as an IDPF index, denoted `alpha`. The
+programmed IDPF values are pairs of field elements `(1, k)` where each `k` is
+chosen at random. This random value is used as part of the secure sketching
+protocol of {{BBCGGI21}}, Appendix C.4. After evaluating their IDPF key shares
+on a given sequence of candidate prefixes, the sketching protocol is used by
+the Aggregators to verify that they hold shares of a one-hot vector. In
+addition, for each level of the tree, the prover generates random elements `a`,
+`b`, and `c` and computes
 
 ~~~
     A = -2*a + k
