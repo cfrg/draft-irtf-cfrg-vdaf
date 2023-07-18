@@ -206,13 +206,12 @@ def run_vdaf(Vdaf,
                                             input_shares[j])
             prep_states.append(state)
             outbound.append(share)
+        # REMOVE ME
+        for prep_share in outbound:
+            prep_test_vec['prep_shares'][0].append(prep_share.hex())
 
         # Aggregators recover their output shares.
-        for i in range(Vdaf.ROUNDS):
-            # REMOVE ME
-            for prep_share in outbound:
-                prep_test_vec['prep_shares'][i].append(prep_share.hex())
-
+        for i in range(Vdaf.ROUNDS-1):
             prep_msg = Vdaf.prep_shares_to_prep(agg_param,
                                                 outbound)
             # REMOVE ME
@@ -221,9 +220,21 @@ def run_vdaf(Vdaf,
             outbound = []
             for j in range(Vdaf.SHARES):
                 out = Vdaf.prep_next(prep_states[j], prep_msg)
-                if i < Vdaf.ROUNDS - 1:
-                    (prep_states[j], out) = out
+                (prep_states[j], out) = out
                 outbound.append(out)
+            # REMOVE ME
+            for prep_share in outbound:
+                prep_test_vec['prep_shares'][i+1].append(prep_share.hex())
+
+        # The final outputs of the prepare phase are the output shares.
+        prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+                                            outbound)
+        # REMOVE ME
+        prep_test_vec['prep_messages'].append(prep_msg.hex())
+        outbound = []
+        for j in range(Vdaf.SHARES):
+            out_share = Vdaf.prep_next(prep_states[j], prep_msg)
+            outbound.append(out_share)
 
         # REMOVE ME
         for out_share in outbound:
@@ -233,7 +244,6 @@ def run_vdaf(Vdaf,
             ])
         test_vec['prep'].append(prep_test_vec)
 
-        # The final outputs of prepare phase are the output shares.
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an

@@ -1164,18 +1164,22 @@ def run_vdaf(Vdaf,
             outbound.append(share)
 
         # Aggregators recover their output shares.
-        for i in range(Vdaf.ROUNDS):
+        for i in range(Vdaf.ROUNDS-1):
             prep_msg = Vdaf.prep_shares_to_prep(agg_param,
                                                 outbound)
-
             outbound = []
             for j in range(Vdaf.SHARES):
                 out = Vdaf.prep_next(prep_states[j], prep_msg)
-                if i < Vdaf.ROUNDS - 1:
-                    (prep_states[j], out) = out
+                (prep_states[j], out) = out
                 outbound.append(out)
 
-        # The final outputs of prepare phase are the output shares.
+        # The final outputs of the prepare phase are the output shares.
+        prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+                                            outbound)
+        outbound = []
+        for j in range(Vdaf.SHARES):
+            out_share = Vdaf.prep_next(prep_states[j], prep_msg)
+            outbound.append(out_share)
         out_shares.append(outbound)
 
     # Each Aggregator aggregates its output shares into an
