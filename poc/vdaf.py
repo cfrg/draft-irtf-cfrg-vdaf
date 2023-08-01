@@ -6,7 +6,7 @@ import json
 import os
 from typing import Tuple, Union
 
-from common import (VERSION, Bool, Bytes, Unsigned, Vec, format_dst, gen_rand,
+from common import (VERSION, Bool, Bytes, Unsigned, format_dst, gen_rand,
                     print_wrapped_line, to_le_bytes)
 
 
@@ -37,21 +37,36 @@ class Vdaf:
     # The aggregation parameter type.
     AggParam = None
 
-    # The state of an aggregator during the Prepare computation.
-    PrepState = None
+    # The public share type.
+    PublicShare = None
+
+    # The input share type.
+    InputShare = None
 
     # The output share type.
     OutShare = None
 
+    # The aggregate share type.
+    AggShare = None
+
     # The aggregate result type.
     AggResult = None
+
+    # The state of an Aggregator during preparation.
+    PrepState = None
+
+    # The preparation share type.
+    PrepShare = None
+
+    # The preparation message type.
+    PrepMessage = None
 
     @classmethod
     def shard(Vdaf,
               measurement: Measurement,
-              nonce: Bytes["Vdaf.NONCE_SIZE"],
-              rand: Bytes["Vdaf.RAND_SIZE"],
-              ) -> tuple[Bytes, Vec[Bytes]]:
+              nonce: bytes["Vdaf.NONCE_SIZE"],
+              rand: bytes["Vdaf.RAND_SIZE"],
+              ) -> tuple[PublicShare, list[InputShare]]:
         """
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
@@ -73,8 +88,8 @@ class Vdaf:
                   agg_id: Unsigned,
                   agg_param: AggParam,
                   nonce: Bytes,
-                  public_share: Bytes,
-                  input_share: Bytes) -> tuple[PrepState, Bytes]:
+                  public_share: PublicShare,
+                  input_share: InputShare) -> tuple[PrepState, PrepShare]:
         """
         Initialize the prep state for the given input share and return the
         initial prep share. This method is run by an Aggregator. Along with the
@@ -88,31 +103,30 @@ class Vdaf:
     @classmethod
     def prep_next(Vdaf,
                   prep_state: PrepState,
-                  prep_msg: Bytes,
-                  ) -> Union[Tuple[PrepState, Bytes], Vdaf.OutShare]:
+                  prep_msg: PrepMessage,
+                  ) -> Union[Tuple[PrepState, PrepShare], OutShare]:
         """
-        Consume the inbound message from the previous round (or `None` if this
-        is the first round) and return the aggregator's share of the next round
-        (or the aggregator's output share if this is the last round).
+        Consume the inbound message from the previous round and return the
+        Aggregator's share of the next round (or the aggregator's output share
+        if this is the last round).
         """
         raise NotImplementedError()
 
     @classmethod
     def prep_shares_to_prep(Vdaf,
                             agg_param: AggParam,
-                            prep_shares: Vec[Bytes]) -> Bytes:
+                            prep_shares: list[PrepShare]) -> PrepMessage:
         """
-        Unshard the Prepare message shares from the previous round of the
-        Prapare computation. This is called by an aggregator after receiving all
-        of the message shares from the previous round. The output is passed to
-        Prep.next().
+        Unshard the prep shares from the previous round of preparation. This is
+        called by an Aggregator after receiving all of the message shares from
+        the previous round.
         """
         raise NotImplementedError()
 
     @classmethod
     def aggregate(Vdaf,
                   agg_param: AggParam,
-                  out_shares: Vec[OutShare]) -> Bytes:
+                  out_shares: list[OutShare]) -> AggShare:
         """
         Merge a list of output shares into an aggregate share, encoded as a byte
         string. This is called by an aggregator after recovering a batch of
@@ -123,7 +137,7 @@ class Vdaf:
     @classmethod
     def unshard(Vdaf,
                 agg_param: AggParam,
-                agg_shares: Vec[Bytes],
+                agg_shares: list[AggShare],
                 num_measurements: Unsigned) -> AggResult:
         """
         Unshard the aggregate shares (encoded as byte strings) and compute the
@@ -138,6 +152,8 @@ class Vdaf:
         """
         return format_dst(0, Vdaf.ID, usage)
 
+    # Methods for generating test vectors
+
     @classmethod
     def test_vec_set_type_param(Vdaf, test_vec):
         """
@@ -147,13 +163,33 @@ class Vdaf:
         """
         return None
 
+    @classmethod
+    def test_vec_encode_input_share(Vdaf, input_share):
+        raise NotImplementedError()
+
+    @classmethod
+    def test_vec_encode_public_share(Vdaf, public_share):
+        raise NotImplementedError()
+
+    @classmethod
+    def test_vec_encode_agg_share(Vdaf, agg_share):
+        raise NotImplementedError()
+
+    @classmethod
+    def test_vec_encode_prep_share(Vdaf, prep_share):
+        raise NotImplementedError()
+
+    @classmethod
+    def test_vec_encode_prep_msg(Vdaf, prep_message):
+        raise NotImplementedError()
+
 
 # NOTE This is used to generate {{run-vdaf}}.
 def run_vdaf(Vdaf,
-             verify_key: Bytes[Vdaf.VERIFY_KEY_SIZE],
+             verify_key: bytes[Vdaf.VERIFY_KEY_SIZE],
              agg_param: Vdaf.AggParam,
-             nonces: Vec[Bytes[Vdaf.NONCE_SIZE]],
-             measurements: Vec[Vdaf.Measurement],
+             nonces: list[bytes[Vdaf.NONCE_SIZE]],
+             measurements: list[Vdaf.Measurement],
              print_test_vec=False,
              test_vec_instance=0):
     """Run the VDAF on a list of measurements."""
@@ -191,9 +227,11 @@ def run_vdaf(Vdaf,
 
         # REMOVE ME
         prep_test_vec['rand'] = rand.hex()
-        prep_test_vec['public_share'] = public_share.hex()
+        prep_test_vec['public_share'] = \
+            Vdaf.test_vec_encode_public_share(public_share).hex()
         for input_share in input_shares:
-            prep_test_vec['input_shares'].append(input_share.hex())
+            prep_test_vec['input_shares'].append(
+                Vdaf.test_vec_encode_input_share(input_share).hex())
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
@@ -208,14 +246,16 @@ def run_vdaf(Vdaf,
             outbound.append(share)
         # REMOVE ME
         for prep_share in outbound:
-            prep_test_vec['prep_shares'][0].append(prep_share.hex())
+            prep_test_vec['prep_shares'][0].append(
+                Vdaf.test_vec_encode_prep_share(prep_share).hex())
 
         # Aggregators recover their output shares.
         for i in range(Vdaf.ROUNDS-1):
             prep_msg = Vdaf.prep_shares_to_prep(agg_param,
                                                 outbound)
             # REMOVE ME
-            prep_test_vec['prep_messages'].append(prep_msg.hex())
+            prep_test_vec['prep_messages'].append(
+                Vdaf.test_vec_encode_prep_msg(prep_msg).hex())
 
             outbound = []
             for j in range(Vdaf.SHARES):
@@ -224,13 +264,15 @@ def run_vdaf(Vdaf,
                 outbound.append(out)
             # REMOVE ME
             for prep_share in outbound:
-                prep_test_vec['prep_shares'][i+1].append(prep_share.hex())
+                prep_test_vec['prep_shares'][i+1].append(
+                    Vdaf.test_vec_encode_prep_share(prep_share).hex())
 
         # The final outputs of the prepare phase are the output shares.
         prep_msg = Vdaf.prep_shares_to_prep(agg_param,
                                             outbound)
         # REMOVE ME
-        prep_test_vec['prep_messages'].append(prep_msg.hex())
+        prep_test_vec['prep_messages'].append(
+            Vdaf.test_vec_encode_prep_msg(prep_msg).hex())
         outbound = []
         for j in range(Vdaf.SHARES):
             out_share = Vdaf.prep_next(prep_states[j], prep_msg)
@@ -255,7 +297,8 @@ def run_vdaf(Vdaf,
         agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
         agg_shares.append(agg_share_j)
         # REMOVE ME
-        test_vec['agg_shares'].append(agg_share_j.hex())
+        test_vec['agg_shares'].append(
+            Vdaf.test_vec_encode_agg_share(agg_share_j).hex())
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
