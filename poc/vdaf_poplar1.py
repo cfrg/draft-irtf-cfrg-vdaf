@@ -372,7 +372,7 @@ class Poplar1(Vdaf):
     @classmethod
     def test_vec_set_type_param(cls, test_vec):
         test_vec['bits'] = int(cls.Idpf.BITS)
-        return 'bits'
+        return ['bits']
 
 
 if __name__ == '__main__':

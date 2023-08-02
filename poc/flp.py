@@ -68,13 +68,12 @@ class Flp:
         """Decode an aggregate result."""
         raise NotImplementedError()
 
-    def test_vec_set_type_param(self, test_vec):
+    def test_vec_set_type_param(self, test_vec) -> list[str]:
         """
         Add any parameters to `test_vec` that are required to construct this
-        class. Return the key that was set or `None` if `test_vec` was not
-        modified.
+        class. Returns the keys that were set.
         """
-        return None
+        return []
 
 
 def additive_secret_share(vec: Vec[Field],

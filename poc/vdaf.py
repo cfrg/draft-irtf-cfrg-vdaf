@@ -139,13 +139,12 @@ class Vdaf:
         return format_dst(0, Vdaf.ID, usage)
 
     @classmethod
-    def test_vec_set_type_param(Vdaf, test_vec):
+    def test_vec_set_type_param(Vdaf, test_vec) -> list[str]:
         """
         Add any parameters to `test_vec` that are required to construct this
-        class. Return the key that was set or `None` if `test_vec` was not
-        modified.
+        class. Returns the keys that were set.
         """
-        return None
+        return []
 
 
 # NOTE This is used to generate {{run-vdaf}}.
@@ -167,7 +166,7 @@ def run_vdaf(Vdaf,
         'agg_shares': [],
         'agg_result': None,  # set below
     }
-    type_param = Vdaf.test_vec_set_type_param(test_vec)
+    type_params = Vdaf.test_vec_set_type_param(test_vec)
 
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
@@ -175,7 +174,7 @@ def run_vdaf(Vdaf,
 
         # REMOVE ME
         prep_test_vec = {
-            'measurement': int(measurement),
+            'measurement': measurement,
             'nonce': nonce.hex(),
             'public_share': None,  # set below
             'input_shares': [],
@@ -264,7 +263,7 @@ def run_vdaf(Vdaf,
     # REMOVE ME
     test_vec['agg_result'] = agg_result
     if print_test_vec:
-        pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param)
+        pretty_print_vdaf_test_vec(Vdaf, test_vec, type_params)
 
         os.system('mkdir -p test_vec/{:02}'.format(VERSION))
         with open('test_vec/{:02}/{}_{}.json'.format(
@@ -275,9 +274,9 @@ def run_vdaf(Vdaf,
     return agg_result
 
 
-def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_param):
+def pretty_print_vdaf_test_vec(Vdaf, test_vec, type_params):
     print('---------- {} ---------------'.format(Vdaf.test_vec_name))
-    if type_param != None:
+    for type_param in type_params:
         print('{}: {}'.format(type_param, test_vec[type_param]))
     print('verify_key: "{}"'.format(test_vec['verify_key']))
     if test_vec['agg_param'] != None:

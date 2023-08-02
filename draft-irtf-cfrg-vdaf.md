@@ -3072,6 +3072,127 @@ measurement is sharded. This is provided to the FLP by Prio3.
 | `Field`          | `Field128` ({{fields}}) |
 {: title="Parameters of validity circuit Histogram."}
 
+### Prio3SumVec
+
+This instance of Prio3 supports summing a vector of integers. It has three
+parameters, `length`, `bits`, and `chunk_length`. Each measurement is a vector
+of positive integers with length equal to the `length` parameter. Each element
+of the measurement is an integer in the range `[0, 2^bits)`. It is RECOMMENDED
+to set `chunk_length` to an integer near to the square root of `length * bits`.
+The optimal choice for any measurement size will vary slightly due to rounding.
+
+This instance uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity circuit,
+denoted `SumVec`, uses `Field128` ({{fields}}) as its finite field.
+
+Measurements are encoded as a vector of field elements with length
+`length * bits`. The field elements in the encoded vector represent all the bits
+of the measurement vector's elements, consecutively, in LSB to MSB order:
+
+~~~
+def encode(self, measurement: Vec[Unsigned]):
+    if len(measurement) != self.length:
+        raise ERR_INPUT
+
+    encoded = []
+    for val in measurement:
+        if 0 > val or val >= 2 ** self.bits:
+            raise ERR_INPUT
+
+        for l in range(self.bits):
+            encoded.append(self.Field((val >> l) & 1))
+
+    return encoded
+
+def truncate(self, meas):
+    truncated = [self.Field(0) for _ in range(self.length)]
+    for i in range(self.length):
+        for j in range(self.bits):
+            weight = self.Field(1 << j)
+            truncated[i] += weight * meas[i * self.bits + j]
+    return truncated
+
+def decode(self, output, _num_measurements):
+    return [x.as_unsigned() for x in output]
+~~~
+
+This validity circuit uses a `ParallelSum` gadget to achieve a smaller proof
+size. This optimization for "parallel-sum circuits" is described in
+{{BBCGGI19}}, section 4.4. Briefly, for circuits that add up the output of
+multiple identical subcircuits, it is possible to achieve smaller proof sizes
+(on the order of O(sqrt(n)) instead of O(n)) by packaging more than one such
+subcircuit into a gadget.
+
+The `ParallelSum` gadget is parameterized with an arithmetic subcircuit, and a
+`count` of how many times it evaluates that subcircuit. It takes in a list of
+inputs and passes them through to instances of the subcircuit in the same order.
+It returns the sum of the subcircuit outputs. Note that only the `ParallelSum`
+gadget itself, and not its subcircuit, participates in `FlpGeneric`'s wire
+recording during evaluation, gadget consistency proofs, and proof validation,
+even though the subcircuit is provided to `ParallelSum` as an implementation
+of the `Gadget` interface.
+
+~~~
+def eval(self, Field, inp):
+    self.check_gadget_eval(inp)
+    out = Field(0)
+    for i in range(self.count):
+        start_index = i * self.subcircuit.ARITY
+        end_index = (i + 1) * self.subcircuit.ARITY
+        out += self.subcircuit.eval(Field, inp[start_index:end_index])
+    return out
+~~~
+
+The validity circuit checks that the encoded measurement consists of ones and
+zeros. Rather than use the `Range2` gadget on each element, as in the `Sum`
+validity circuit, it instead uses a `Mul` subcircuit and "free" constant
+multiplication and addition gates to simultaneously evaluate the same range
+check polynomial on each element, and multiply by a constant. One of the two
+`Mul` subcircuit inputs is equal to a measurement element multiplied by a power
+of the joint randomness value, and the other is equal to the same measurement
+element minus one. These `Mul` subcircuits are evaluated by a `ParallelSum`
+gadget, and the results are added up both within the `ParallelSum` gadget and
+after it.
+
+~~~
+def eval(self, meas, joint_rand, num_shares):
+    self.check_valid_eval(meas, joint_rand)
+
+    out = Field128(0)
+    r = joint_rand[0]
+    r_power = r
+    shares_inv = self.Field(num_shares).inv()
+
+    for i in range(self.GADGET_CALLS[0]):
+        inputs = [None] * (2 * self.chunk_length)
+        for j in range(self.chunk_length):
+            index = i * self.chunk_length + j
+            if index < len(meas):
+                meas_elem = meas[index]
+            else:
+                meas_elem = self.Field(0)
+
+            inputs[j * 2] = r_power * meas_elem
+            inputs[j * 2 + 1] = meas_elem - shares_inv
+
+            r_power *= r
+
+        out += self.GADGETS[0].eval(self.Field, inputs)
+
+    return out
+~~~
+
+| Parameter        | Value                                                  |
+|:-----------------|:-------------------------------------------------------|
+| `GADGETS`        | `[ParallelSum(Mul(), chunk_length)]`                   |
+| `GADGET_CALLS`   | `[(length * bits + chunk_length - 1) // chunk_length]` |
+| `MEAS_LEN`       | `length * bits`                                        |
+| `OUTPUT_LEN`     | `length`                                               |
+| `JOINT_RAND_LEN` | `1`                                                    |
+| `Measurement`    | `Vec[Unsigned]`, each element in range `[0, 2^bits)`   |
+| `AggResult`      | `Vec[Unsigned]`                                        |
+| `Field`          | `Field128` ({{fields}})                                |
+{: title="Parameters of validity circuit SumVec."}
+
 # Poplar1 {#poplar1}
 
 This section specifies Poplar1, a VDAF for the following task. Each Client holds
@@ -4069,7 +4190,8 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 | `0x00000000`                 | Prio3Count         | VDAF | {{prio3count}}     |
 | `0x00000001`                 | Prio3Sum           | VDAF | {{prio3sum}}       |
 | `0x00000002`                 | Prio3Histogram     | VDAF | {{prio3histogram}} |
-| `0x00000003` to `0x00000FFF` | reserved for Prio3 | VDAF | n/a                |
+| `0x00000003`                 | Prio3SumVec        | VDAF | {{prio3sumvec}}    |
+| `0x00000004` to `0x00000FFF` | reserved for Prio3 | VDAF | n/a                |
 | `0x00001000`                 | Poplar1            | VDAF | {{poplar1-inst}}   |
 | `0xFFFF0000` to `0xFFFFFFFF` | reserved           | n/a  | n/a                |
 {: #codepoints title="Unique identifiers for (V)DAFs."}
