@@ -150,6 +150,17 @@ informative:
     seriesinfo: CRYPTO 2020
     target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_28
 
+  GKWY20:
+    title: Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers
+    authors:
+      - ins: C. Guo
+      - ins: J. Katz
+      - ins: X. Wang
+      - ins: Y. Yu
+    date: 2020
+    seriesinfo: S&P 2020
+    target: https://eprint.iacr.org/2019/074
+
   OriginTelemetry:
     title: "Origin Telemetry"
     date: 2020
@@ -4035,16 +4046,31 @@ differential privacy.
 
 The objects we describe in {{prg}} share a common interface, which we have
 called Prg. However, these are not necessarily all modeled as cryptographic
-Pseudorandom Generators in the security analyses of our protocols. Instead, most
-of them are modeled as random oracles. For these use cases, we want to be
-conservative in our assumptions, and hence prescribe PrgSha3 as the only
-RECOMMENDED Prg instantiation.
+Pseudorandom Generators (PRGs) in the security analyses of our protocols.
+Instead, most of them are modeled as random oracles. For these use cases, we
+want to be conservative in our assumptions, and hence prescribe PrgSha3 as the
+only RECOMMENDED Prg instantiation.
 
 The one exception is the PRG used in the Idpf implementation IdpfPoplar
-{{idpf-poplar}}. Here, a random oracle is not needed to prove security, and
-hence a construction based on fixed-key AES {{prg-fixed-key-aes128}} can be
-used. However, as PrgFixedKeyAes128 has been shown to be differentiable from
-a random oracle {{GKWWY20}}, it is NOT RECOMMENDED to use it anywhere else.
+{{idpf-poplar}}. Here, a random oracle is not needed to prove security, since
+the security analysis of {{BBCGGI21}}, Proposition 1, only requires a PRG.
+As observed in {{GKWY20}}, a PRG can be instantiated from a correlation-robust
+hash function `H`. Informally, correlation robustness requires that for a random
+`r`, `H(xor(r, x))` is indistinguishable from a random function for any `x`.
+A PRG can therefore be constructed as
+`PRG(r) = H(xor(r, 1)) || H(xor r, 2) || ...`,
+since each individual hash function evaluation is indistinguishable from a random
+function.
+
+Our construction at {{prg-fixed-key-aes128}} implements a correlation-robust
+hash function using fixed-key AES. For security, it assumes that AES with a
+fixed key can be modeled as a random permutation {{GKWY20}}. Additionally, we
+use a different AES key for every client, which in the ideal cipher model leads
+to better concrete security {{GKWWY20}}.
+
+We stress that, as PrgFixedKeyAes128 has been shown to be differentiable from a
+random oracle {{GKWWY20}}, it is NOT RECOMMENDED to use it anywhere else besides
+IdpfPoplar.
 
 > OPEN ISSUE: We may want to drop the common interface for PRGs and random
 > oracles. See issue #159.
