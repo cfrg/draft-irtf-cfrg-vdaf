@@ -1237,9 +1237,33 @@ terminal states are `Rejected`, which indicates that the report cannot be
 processed any further, and `Finished(out_share)`, which indicates that the
 Aggregator has recovered an output share `out_share`.
 
+~~~
+class State:
+    pass
+
+class Start(State):
+    pass
+
+class Continued(State):
+    def __init__(self, prep_state):
+        self.prep_state = prep_state
+
+class Finished(State):
+    def __init__(self, output_share):
+        self.output_share = output_share
+
+class Rejected(State):
+    def __init__(self):
+        pass
+~~~
+
+Note that there is no representation of the `Start` state as it is never
+instantiated in the ping-pong topology.
+
 For convenience, the methods described in this section are defined in terms of
 opaque byte strings. A compatible `Vdaf` MUST specify methods for encoding
-public shares, input shares, prep shares, and prep messages. Minimally:
+public shares, input shares, prep shares, prep messages, and aggregation
+parameters. Minimally:
 
 * `Vdaf.decode_public_share(encoded: bytes) -> Vdaf.PublicShare` decodes a
   public share.
@@ -1261,6 +1285,12 @@ public shares, input shares, prep shares, and prep messages. Minimally:
 * `Vdaf.decode_prep_msg(prep_state: Vdaf.PrepState, encoded: bytes) ->
   Vdaf.PrepMessage` decodes a prep message, using the prep state as optional
   decoding context.
+
+* `Vdaf.decode_agg_param(encoded: bytes) -> Vdaf.AggParam` decodes an
+  aggregation parameter.
+
+* `Vdaf.encode_agg_param(agg_param: Vdaf.AggParam) -> bytes` encodes an
+  aggregation parameter.
 
 Implementations of Prio3 and Poplar1 MUST use the encoding scheme specified in
 {{prio3-encode}} and {{poplar1-encode}} respectively.
@@ -1322,13 +1352,24 @@ struct {
 } Message;
 ~~~
 
+These messages are used to transition between the states described in
+{{vdaf-prep-comm}}. They are encoded and decoded to or from byte buffers as
+described {{Section 3 of !RFC8446}}) using the following routines:
+
+* `encode_ping_pong_message(message: Message) -> bytes` encodes a `Message` into
+  an opaque byte buffer.
+
+* `decode_pong_pong_message(encoded: bytes) -> Message` decodes an opaque byte
+  buffer into a `Message`, raising an error if the bytes are not a valid
+  encoding.
+
 The Leader's initial transition is computed with the following procedure:
 
 ~~~ transition
 def ping_pong_leader_init(
             Vdaf,
             vdaf_verify_key: bytes[Vdaf.VERIFY_KEY_SIZE],
-            agg_param: Vdaf.AggParam,
+            agg_param: bytes,
             nonce: bytes[Vdaf.NONCE_SIZE],
             public_share: bytes,
             input_share: bytes,
@@ -1337,43 +1378,46 @@ def ping_pong_leader_init(
         (prep_state, prep_share) = Vdaf.prep_init(
             vdaf_verify_key,
             0,
-            agg_param,
+            Vdaf.decode_agg_param(agg_param),
             nonce,
             Vdaf.decode_public_share(public_share),
             Vdaf.decode_input_share(0, input_share),
         )
         outbound = Message.initialize(
             Vdaf.encode_prep_share(prep_share))
-        return (Continued(prep_state), outbound)
+        return (Continued(prep_state), encode_ping_pong_message(outbound))
     except:
         return (Rejected(), None)
 ~~~
 
-If the Leader's state is `Rejected`, then processing halts. Otherwise, if the
-state is `Continued`, then processing continues.
+The output is the `State` to which the Leader has transitioned and an encoded
+`Message`. If the Leader's state is `Rejected`, then processing halts.
+Otherwise, if the state is `Continued`, then processing continues.
 
-The Leaders sends the outbound message to the Helper. The Helper's initial
+The Leader sends the outbound message to the Helper. The Helper's initial
 transition is computed using the following procedure:
 
 ~~~ transition
 def ping_pong_helper_init(
             Vdaf,
             vdaf_verify_key: bytes[Vdaf.VERIFY_KEY_SIZE],
-            agg_param: Vdaf.AggParam,
+            agg_param: bytes,
             nonce: bytes[Vdaf.NONCE_SIZE],
             public_share: bytes,
             input_share: bytes,
-            inbound: Message,
+            inbound_encoded: bytes,
         ) -> tuple[State, bytes]:
     try:
         (prep_state, prep_share) = Vdaf.prep_init(
             vdaf_verify_key,
             1,
-            agg_param,
+            Vdaf.decode_agg_param(agg_param),
             nonce,
             Vdaf.decode_public_share(public_share),
             Vdaf.decode_input_share(1, input_share),
         )
+
+        inbound = decode_ping_pong_message(inbound_encoded)
 
         if inbound.type != 0: # initialize
             return (Rejected(), None)
@@ -1400,38 +1444,56 @@ def ping_pong_transition(
             agg_param: Vdaf.AggParam,
             prep_shares: list[Vdaf.PrepShare],
             prep_state: Vdaf.PrepState,
-         ) -> (State, Optional[Message]):
+         ) -> (State, bytes):
     prep_msg = Vdaf.prep_shares_to_prep(agg_param,
                                         prep_shares)
     out = Vdaf.prep_next(prep_state, prep_msg)
     if type(out) == Vdaf.OutShare:
         outbound = Message.finish(Vdaf.encode_prep_msg(prep_msg))
-        return (Finished(out), outbound)
+        return (Finished(out), encode_ping_pong_message(outbound))
     (prep_state, prep_share) = out
     outbound = Message.continue(
         Vdaf.encode_prep_msg(prep_msg),
-        Vdaf.encdoe_prep_share(prep_share),
+        Vdaf.encode_prep_share(prep_share),
     )
-    return (Continued(prep_state), outbound)
+    return (Continued(prep_state), encode_ping_pong_message(outbound))
 ~~~
 
-If the Helper's state is `Finished` or `Rejected`, then processing halts.
-Otherwise, if the state is `Continued`, then processing continues.
+The output is the `State` to which the Helper has transitioned and an encoded
+`Message`. If the Helper's state is `Finished` or `Rejected`, then processing
+halts. Otherwise, if the state is `Continued`, then processing continues.
 
 Next, the Helper sends the outbound message to the Leader. The Leader computes
-its next state transition using the following algorithm, with `is_leader ==
-True`:
+its next state transition using the function `ping_pong_leader_continued`:
 
 ~~~ transition
+def ping_pong_leader_continued(
+            Vdaf,
+            agg_param: bytes,
+            state: State,
+            inbound_encoded: bytes,
+        ) -> (State, Optional[bytes]):
+    return Vdaf.ping_pong_continued(
+        True,
+        agg_param,
+        state,
+        inbound_encoded,
+    )
+
 def ping_pong_continued(
             Vdaf,
             is_leader: bool,
-            agg_param: Vdaf.AggParam,
+            agg_param: bytes,
             state: State,
-            inbound: Message,
-        ) -> (State, Optional[Message]):
+            inbound_encoded: bytes,
+        ) -> (State, Optional[bytes]):
     try:
+        inbound = decode_ping_pong_message(inbound_encoded)
+
         if inbound.type == 0: # initialize
+            return (Rejected(), None)
+
+        if !isinstance(state, Continued):
             return (Rejected(), None)
 
         prep_msg = Vdaf.decode_prep_msg(state.prep_state, inbound.prep_msg)
@@ -1447,9 +1509,8 @@ def ping_pong_continued(
             if is_leader:
                 prep_shares.reverse()
             return Vdaf.ping_pong_transition(
-                is_leader,
-                agg_param,
-                prep_shares
+                Vdaf.decode_agg_param(agg_param),
+                prep_shares,
                 prep_state,
             )
         elif type(out) == Vdaf.OutShare and inbound.type == 2:
@@ -1464,8 +1525,23 @@ def ping_pong_continued(
 
 If the Leader's state is `Finished` or `Rejected`, then processing halts.
 Otherwise, the Leader sends the outbound message to the Helper. The Helper
-computes its next state transition by calling `ping_pong_continued()` with
-`is_leader == False`.
+computes its next state transition using the function
+`ping_pong_helper_continued`:
+
+~~~ transition
+def ping_pong_helper_continued(
+            Vdaf,
+            agg_param: bytes,
+            state: State,
+            inbound_encoded: bytes,
+        ) -> (State, Optional[bytes]):
+    return Vdaf.ping_pong_continued(
+        False,
+        agg_param,
+        state,
+        inbound_encoded,
+    )
+~~~
 
 They continue in this way until processing halts. Note that, depending on the
 number of rounds of preparation that are required, there may be one more
@@ -3865,7 +3941,7 @@ The aggregation parameter is encoded as follows:
 > Decide whether to RECOMMEND this encoding, and if so, add it to test vectors.
 
 ~~~
-def encode_agg_param(Poplar1, level, prefixes):
+def encode_agg_param(Poplar1, (level, prefixes)):
     if level > 2 ** 16 - 1:
         raise ERR_INPUT # level too deep
     if len(prefixes) > 2 ** 32 - 1:
