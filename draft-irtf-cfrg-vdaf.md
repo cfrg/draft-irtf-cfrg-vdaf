@@ -4076,8 +4076,9 @@ analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
 time to developing definitions and security proofs.
 
 Thanks to Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon Friedberger, Tim
-Geoghegan, Brandon Pitman, Mariana Raykova, Jacob Rothstein, Xiao Wang, and
-Christopher Wood for useful feedback on and contributions to the spec.
+Geoghegan, Brandon Pitman, Mariana Raykova, Jacob Rothstein, Shan Wang, Xiao
+Wang, and Christopher Wood for useful feedback on and contributions to the
+spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}
