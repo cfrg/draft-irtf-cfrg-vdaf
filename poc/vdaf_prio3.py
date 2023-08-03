@@ -483,7 +483,7 @@ class Prio3(Vdaf):
 class Prio3Count(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgSha3
-    Flp = flp_generic.FlpGeneric.with_valid(flp_generic.Count)
+    Flp = flp_generic.FlpGeneric(flp_generic.Count())
 
     # Associated parameters.
     ID = 0x00000000
@@ -507,8 +507,7 @@ class Prio3Sum(Prio3):
     @classmethod
     def with_bits(Prio3Sum, bits: Unsigned):
         class Prio3SumWithBits(Prio3Sum):
-            Flp = flp_generic.FlpGeneric \
-                .with_valid(flp_generic.Sum.with_bits(bits))
+            Flp = flp_generic.FlpGeneric(flp_generic.Sum(bits))
         return Prio3SumWithBits
 
 
@@ -526,8 +525,7 @@ class Prio3Histogram(Prio3):
     @classmethod
     def with_length(Prio3Histogram, length: Unsigned):
         class Prio3HistogramWithLength(Prio3Histogram):
-            Flp = flp_generic.FlpGeneric \
-                .with_valid(flp_generic.Histogram.with_length(length))
+            Flp = flp_generic.FlpGeneric(flp_generic.Histogram(length))
         return Prio3HistogramWithLength
 
 
@@ -550,8 +548,7 @@ class TestPrio3Average(Prio3):
     @classmethod
     def with_bits(cls, bits: Unsigned):
         class TestPrio3AverageWithBits(TestPrio3Average):
-            Flp = flp_generic.FlpGeneric \
-                .with_valid(flp_generic.TestAverage.with_bits(bits))
+            Flp = flp_generic.FlpGeneric(flp_generic.TestAverage(bits))
         return TestPrio3AverageWithBits
 
 
@@ -560,7 +557,7 @@ if __name__ == '__main__':
 
     cls = Prio3 \
         .with_prg(prg.PrgSha3) \
-        .with_flp(flp.FlpTestField128) \
+        .with_flp(flp.FlpTestField128()) \
         .with_shares(num_shares)
     cls.ID = 0xFFFFFFFF
     test_vdaf(cls, None, [1, 2, 3, 4, 4], 14)
