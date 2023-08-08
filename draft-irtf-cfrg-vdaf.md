@@ -1022,7 +1022,7 @@ measurement. At the end of the computation, each Aggregator holds an output
 share or an error."}
 
 To facilitate the preparation process, a concrete VDAF implements the following
-class methods:
+methods:
 
 * `Vdaf.prep_init(verify_key: Bytes[Vdaf.VERIFY_KEY_SIZE], agg_id: Unsigned,
   agg_param: AggParam, nonce: Bytes[Vdaf.NONCE_SIZE], public_share: Bytes,
@@ -1564,7 +1564,7 @@ PRGs are defined by a class `Prg` with the following associated parameter:
 
 * `SEED_SIZE: Unsigned` is the size (in bytes) of a seed.
 
-A concrete `Prg` implements the following class method:
+A concrete `Prg` implements the following methods:
 
 * `Prg(seed: Bytes[Prg.SEED_SIZE], dst: Bytes, binder: Bytes)` constructs an
   instance of `Prg` from the given seed, domain separation tag, and binder
@@ -1575,11 +1575,11 @@ A concrete `Prg` implements the following class method:
 * `prg.next(length: Unsigned)` returns the next `length` bytes of output of PRG.
   If the seed was securely generated, the output can be treated as pseudorandom.
 
-Each `Prg` has two derived class methods. The first is used to derive a fresh
-seed from an existing one. The second is used to compute a sequence of
-pseudorandom field elements. For each method, the seed MUST be of length
-`SEED_SIZE` and MUST be generated securely (i.e., it is either the output of
-`gen_rand` or a previous invocation of the PRG).
+Each `Prg` has two derived methods. The first is used to derive a fresh seed
+from an existing one. The second is used to compute a sequence of pseudorandom
+field elements. For each method, the seed MUST be of length `SEED_SIZE` and MUST
+be generated securely (i.e., it is either the output of `gen_rand` or a previous
+invocation of the PRG).
 
 ~~~
 def derive_seed(Prg,
@@ -1613,7 +1613,7 @@ def expand_into_vec(Prg,
     prg = Prg(seed, dst, binder)
     return prg.next_vec(Field, length)
 ~~~
-{: #prg-derived-methods title="Derived class methods for PRGs."}
+{: #prg-derived-methods title="Derived methods for PRGs."}
 
 ### PrgSha3 {#prg-sha3}
 
@@ -1866,21 +1866,21 @@ valid measurement, is the same regardless of the number of shares.
 An FLP is executed by the prover and verifier as follows:
 
 ~~~
-def run_flp(Flp, meas: Vec[Flp.Field], num_shares: Unsigned):
-    joint_rand = Flp.Field.rand_vec(Flp.JOINT_RAND_LEN)
-    prove_rand = Flp.Field.rand_vec(Flp.PROVE_RAND_LEN)
-    query_rand = Flp.Field.rand_vec(Flp.QUERY_RAND_LEN)
+def run_flp(flp, meas: Vec[Flp.Field], num_shares: Unsigned):
+    joint_rand = flp.Field.rand_vec(flp.JOINT_RAND_LEN)
+    prove_rand = flp.Field.rand_vec(flp.PROVE_RAND_LEN)
+    query_rand = flp.Field.rand_vec(flp.QUERY_RAND_LEN)
 
     # Prover generates the proof.
-    proof = Flp.prove(meas, prove_rand, joint_rand)
+    proof = flp.prove(meas, prove_rand, joint_rand)
 
     # Shard the measurement and the proof.
-    meas_shares = additive_secret_share(meas, num_shares, Flp.Field)
-    proof_shares = additive_secret_share(proof, num_shares, Flp.Field)
+    meas_shares = additive_secret_share(meas, num_shares, flp.Field)
+    proof_shares = additive_secret_share(proof, num_shares, flp.Field)
 
     # Verifier queries the meas shares and proof shares.
     verifier_shares = [
-        Flp.query(
+        flp.query(
             meas_share,
             proof_share,
             query_rand,
@@ -1891,12 +1891,12 @@ def run_flp(Flp, meas: Vec[Flp.Field], num_shares: Unsigned):
     ]
 
     # Combine the verifier shares into the verifier.
-    verifier = Flp.Field.zeros(len(verifier_shares[0]))
+    verifier = flp.Field.zeros(len(verifier_shares[0]))
     for verifier_share in verifier_shares:
         verifier = vec_add(verifier, verifier_share)
 
     # Verifier decides if the measurement is valid.
-    return Flp.decide(verifier)
+    return flp.decide(verifier)
 
 ~~~
 {: #run-flp title="Execution of an FLP."}
@@ -2711,6 +2711,10 @@ has degree `2`. Hence, the arithmetic degree of this gadget is `2`.
 Each gadget also defines a parameter `ARITY` that specifies the circuit's arity
 (i.e., the number of input wires).
 
+Gadgets provide a method to evaluate their circuit on a list of inputs,
+`eval()`. The inputs can either belong to the validity circuit's field, or the
+polynomial ring over that field.
+
 A concrete `Valid` provides the following methods for encoding a measurement as
 an input vector, truncating an input vector to the length of an aggregatable
 output, and converting an aggregated output to an aggregate result:
@@ -2724,29 +2728,29 @@ output, and converting an aggregated output to an aggregate result:
 * `Valid.decode(output: Vec[Field], num_measurements: Unsigned) -> AggResult`
   returns an aggregate result.
 
-Finally, the following class methods are derived for each concrete `Valid`:
+Finally, the following methods are derived for each concrete `Valid`:
 
 ~~~
-def prove_rand_len(Valid):
+def prove_rand_len(self):
     """Length of the prover randomness."""
-    return sum(map(lambda g: g.ARITY, Valid.GADGETS))
+    return sum(g.ARITY for g in Valid.GADGETS)
 
-def query_rand_len(Valid):
+def query_rand_len(self):
     """Length of the query randomness."""
     return len(Valid.GADGETS)
 
-def proof_len(Valid):
+def proof_len(self):
     """Length of the proof."""
     length = 0
-    for (g, g_calls) in zip(Valid.GADGETS, Valid.GADGET_CALLS):
+    for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
         P = next_power_of_2(1 + g_calls)
         length += g.ARITY + g.DEGREE * (P - 1) + 1
     return length
 
-def verifier_len(Valid):
+def verifier_len(self):
     """Length of the verifier message."""
     length = 1
-    for g in Valid.GADGETS:
+    for g in self.GADGETS:
         length += g.ARITY + 1
     return length
 ~~~
@@ -2905,15 +2909,19 @@ circuit, denoted `Count`, uses `Field64` ({{fields}}) as its finite field. Its
 gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
 ~~~
-def Mul(x, y):
-    return x * y
+def eval(self, Field, inp):
+    self.check_gadget_eval(inp)
+    return inp[0] * inp[1]
 ~~~
 
-The validity circuit is defined as
+The call to `check_gadget_eval()` raises an error if the length of the input is
+not equal to the gadget's `ARITY` parameter.
+
+The `Count` validity circuit is defined as
 
 ~~~
-def Count(meas: Vec[Field64]):
-    return Mul(meas[0], meas[0]) - meas[0]
+def eval(self, meas, joint_rand, _num_shares):
+    return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) - meas[0]
 ~~~
 
 The measurement is encoded and decoded as a singleton vector in the natural
@@ -2943,23 +2951,23 @@ measurement is encoded as a length-`bits` vector of field elements, where the
 `l`th element of the vector represents the `l`th bit of the summand:
 
 ~~~
-def encode(Sum, measurement: Integer):
-    if 0 > measurement or measurement >= 2 ** Sum.MEAS_LEN:
+def encode(self, measurement):
+    if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
         raise ERR_INPUT
 
     encoded = []
-    for l in range(Sum.MEAS_LEN):
-        encoded.append(Sum.Field((measurement >> l) & 1))
+    for l in range(self.MEAS_LEN):
+        encoded.append(self.Field((measurement >> l) & 1))
     return encoded
 
-def truncate(Sum, meas):
-    decoded = Sum.Field(0)
+def truncate(self, meas):
+    decoded = self.Field(0)
     for (l, b) in enumerate(meas):
-        w = Sum.Field(1 << l)
+        w = self.Field(1 << l)
         decoded += w * b
     return [decoded]
 
-def decode(Sum, output, _num_measurements):
+def decode(self, output, _num_measurements):
     return output[0].as_unsigned()
 ~~~
 
@@ -2967,18 +2975,20 @@ The validity circuit checks that the input consists of ones and zeros. Its
 gadget, denoted `Range2`, is the degree-2, arity-1 gadget defined as
 
 ~~~
-def Range2(x):
-    return x^2 - x
+def eval(self, Field, inp):
+    self.check_gadget_eval(inp)
+    return inp[0] * inp[0] - inp[0]
 ~~~
 
-The validity circuit is defined as
+The `Sum` validity circuit is defined as
 
 ~~~
-def Sum(meas: Vec[Field128], joint_rand: Vec[Field128]):
-    out = Field128(0)
+def eval(self, meas, joint_rand, _num_shares):
+    self.check_valid_eval(meas, joint_rand)
+    out = self.Field(0)
     r = joint_rand[0]
-    for x in meas:
-        out += r * Range2(x)
+    for b in meas:
+        out += r * self.GADGETS[0].eval(self.Field, [b])
         r *= joint_rand[0]
     return out
 ~~~
@@ -3011,39 +3021,39 @@ Let `length` be the number of histogram buckets. The measurement is encoded as a
 one-hot vector representing the bucket into which the measurement falls:
 
 ~~~
-def encode(Histogram, measurement: Integer):
-    encoded = [Field128(0)] * length
-    encoded[measurement] = Field128(1)
+def encode(self, measurement):
+    encoded = [self.Field(0)] * self.length
+    encoded[measurement] = self.Field(1)
     return encoded
 
-def truncate(Histogram, meas: Vec[Field128]):
+def truncate(self, meas):
     return meas
 
-def decode(Histogram, output: Vec[Field128], _num_measurements):
+def decode(self, output, _num_measurements):
     return [bucket_count.as_unsigned() for bucket_count in output]
 ~~~
 
-The validity circuit uses `Range2` (see {{prio3sum}}) as its single gadget. It
-checks for one-hotness in two steps, as follows:
+The `Histogram` validity circuit uses `Range2` (see {{prio3sum}}) as its single
+gadget. It checks for one-hotness in two steps, as follows:
 
 ~~~
-def Histogram(meas: Vec[Field128],
-              joint_rand: Vec[Field128],
-              num_shares: Unsigned):
+def eval(self, meas, joint_rand, num_shares):
+    self.check_valid_eval(meas, joint_rand)
+
     # Check that each bucket is one or zero.
-    range_check = Field128(0)
+    range_check = self.Field(0)
     r = joint_rand[0]
-    for x in meas:
-        range_check += r * Range2(x)
+    for b in meas:
+        range_check += r * self.GADGETS[0].eval(self.Field, [b])
         r *= joint_rand[0]
 
     # Check that the buckets sum to 1.
-    sum_check = -Field128(1) * Field128(num_shares).inv()
+    sum_check = -self.Field(num_shares).inv()
     for b in meas:
         sum_check += b
 
     out = joint_rand[1] * range_check + \
-          joint_rand[1] ** 2 * sum_check
+        joint_rand[1] ** 2 * sum_check
     return out
 ~~~
 
