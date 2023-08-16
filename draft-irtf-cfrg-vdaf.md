@@ -3046,88 +3046,21 @@ def eval(self, meas, joint_rand, _num_shares):
 | `Field`          | `Field128` ({{fields}})  |
 {: title="Parameters of validity circuit Sum."}
 
-### Prio3Histogram
-
-This instance of Prio3 allows for estimating the distribution of some quantity
-by computing a simple histogram. Each measurement increments one histogram
-bucket, out of a set of fixed buckets. (Bucket indexing begins at `0`.) For
-example, the buckets might quantize the real numbers, and each measurement
-would report the bucket that the corresponding client's real-numbered value
-falls into. The aggregate result counts the number of measurements in each
-bucket.
-
-This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
-circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite field.
-Let `length` be the number of histogram buckets. The measurement is encoded as a
-one-hot vector representing the bucket into which the measurement falls:
-
-~~~
-def encode(self, measurement):
-    encoded = [self.Field(0)] * self.length
-    encoded[measurement] = self.Field(1)
-    return encoded
-
-def truncate(self, meas):
-    return meas
-
-def decode(self, output, _num_measurements):
-    return [bucket_count.as_unsigned() for bucket_count in output]
-~~~
-
-The `Histogram` validity circuit uses `Range2` (see {{prio3sum}}) as its single
-gadget. It checks for one-hotness in two steps, as follows:
-
-~~~
-def eval(self, meas, joint_rand, num_shares):
-    self.check_valid_eval(meas, joint_rand)
-
-    # Check that each bucket is one or zero.
-    range_check = self.Field(0)
-    r = joint_rand[0]
-    for b in meas:
-        range_check += r * self.GADGETS[0].eval(self.Field, [b])
-        r *= joint_rand[0]
-
-    # Check that the buckets sum to 1.
-    sum_check = -self.Field(num_shares).inv()
-    for b in meas:
-        sum_check += b
-
-    out = joint_rand[1] * range_check + \
-        joint_rand[1] ** 2 * sum_check
-    return out
-~~~
-
-Note that this circuit depends on the number of shares into which the
-measurement is sharded. This is provided to the FLP by Prio3.
-
-| Parameter        | Value                   |
-|:-----------------|:------------------------|
-| `GADGETS`        | `[Range2]`              |
-| `GADGET_CALLS`   | `[length]`              |
-| `MEAS_LEN`       | `length`                |
-| `OUTPUT_LEN`     | `length`                |
-| `JOINT_RAND_LEN` | `2`                     |
-| `Measurement`    | `Unsigned`              |
-| `AggResult`      | `Vec[Unsigned]`         |
-| `Field`          | `Field128` ({{fields}}) |
-{: title="Parameters of validity circuit Histogram."}
-
 ### Prio3SumVec
 
 This instance of Prio3 supports summing a vector of integers. It has three
 parameters, `length`, `bits`, and `chunk_length`. Each measurement is a vector
 of positive integers with length equal to the `length` parameter. Each element
 of the measurement is an integer in the range `[0, 2^bits)`. It is RECOMMENDED
-to set `chunk_length` to an integer near to the square root of `length * bits`.
-The optimal choice for any measurement size will vary slightly due to rounding.
+to set `chunk_length` to an integer near the square root of `length * bits`. The
+optimal choice for any measurement size will vary due to rounding.
 
 This instance uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity circuit,
 denoted `SumVec`, uses `Field128` ({{fields}}) as its finite field.
 
-Measurements are encoded as a vector of field elements with length
-`length * bits`. The field elements in the encoded vector represent all the bits
-of the measurement vector's elements, consecutively, in LSB to MSB order:
+Measurements are encoded as a vector of field elements with length `length *
+bits`. The field elements in the encoded vector represent all the bits of the
+measurement vector's elements, consecutively, in LSB to MSB order:
 
 ~~~
 def encode(self, measurement: Vec[Unsigned]):
@@ -3160,8 +3093,8 @@ This validity circuit uses a `ParallelSum` gadget to achieve a smaller proof
 size. This optimization for "parallel-sum circuits" is described in
 {{BBCGGI19}}, section 4.4. Briefly, for circuits that add up the output of
 multiple identical subcircuits, it is possible to achieve smaller proof sizes
-(on the order of O(sqrt(n)) instead of O(n)) by packaging more than one such
-subcircuit into a gadget.
+(on the order of O(sqrt(MEAS_LEN)) instead of O(MEAS_LEN)) by packaging more
+than one such subcircuit into a gadget.
 
 The `ParallelSum` gadget is parameterized with an arithmetic subcircuit, and a
 `count` of how many times it evaluates that subcircuit. It takes in a list of
@@ -3183,9 +3116,9 @@ def eval(self, Field, inp):
     return out
 ~~~
 
-The validity circuit checks that the encoded measurement consists of ones and
-zeros. Rather than use the `Range2` gadget on each element, as in the `Sum`
-validity circuit, it instead uses a `Mul` subcircuit and "free" constant
+The `SumVec` validity circuit checks that the encoded measurement consists of
+ones and zeros. Rather than use the `Range2` gadget on each element, as in the
+`Sum` validity circuit, it instead uses `Mul` subcircuits and "free" constant
 multiplication and addition gates to simultaneously evaluate the same range
 check polynomial on each element, and multiply by a constant. One of the two
 `Mul` subcircuit inputs is equal to a measurement element multiplied by a power
@@ -3233,6 +3166,103 @@ def eval(self, meas, joint_rand, num_shares):
 | `AggResult`      | `Vec[Unsigned]`                                        |
 | `Field`          | `Field128` ({{fields}})                                |
 {: title="Parameters of validity circuit SumVec."}
+
+### Prio3Histogram
+
+This instance of Prio3 allows for estimating the distribution of some quantity
+by computing a simple histogram. Each measurement increments one histogram
+bucket, out of a set of fixed buckets. (Bucket indexing begins at `0`.) For
+example, the buckets might quantize the real numbers, and each measurement would
+report the bucket that the corresponding client's real-numbered value falls
+into. The aggregate result counts the number of measurements in each bucket.
+
+This instance of Prio3 uses PrgSha3 ({{prg-sha3}}) as its PRG. Its validity
+circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite field.
+It has two parameters, `length`, the number of histogram buckets, and
+`chunk_length`, which is used by by a circuit optimization described below. It
+is RECOMMENDED to set `chunk_length` to an integer near the square root of
+`length`. The optimal choice for any measurement size will vary due to rounding.
+
+The measurement is encoded as a one-hot vector representing the bucket into
+which the measurement falls:
+
+~~~
+def encode(self, measurement):
+    encoded = [self.Field(0)] * self.length
+    encoded[measurement] = self.Field(1)
+    return encoded
+
+def truncate(self, meas):
+    return meas
+
+def decode(self, output, _num_measurements):
+    return [bucket_count.as_unsigned() for bucket_count in output]
+~~~
+
+The `Histogram` validity circuit checks for one-hotness in two steps, by
+checking that the encoded measurement consists of ones and zeros, and by
+checking that the sum of all elements in the encoded measurement is equal to
+one. All the individual checks are combined together in a random linear
+combination.
+
+As in the `SumVec` validity circuit ({{prio3sumvec}}), the first part of the
+validity circuit uses the `ParallelSum` gadget to perform range checks while
+achieving a smaller proof size. The `ParallelSum` gadget uses `Mul` subcircuits
+to evaluate a range check polynomial on each element, and includes an additional
+constant multiplication. One of the two `Mul` subcircuit inputs is equal to a
+measurement element multiplied by a power of the first joint randomness value,
+and the other is equal to the same measurement element minus one. The results
+are added up both within the `ParallelSum` gadget and after it.
+
+~~~
+def eval(self, meas, joint_rand, num_shares):
+    self.check_valid_eval(meas, joint_rand)
+
+    # Check that each bucket is one or zero.
+    range_check = self.Field(0)
+    r = joint_rand[0]
+    r_power = r
+    shares_inv = self.Field(num_shares).inv()
+    for i in range(self.GADGET_CALLS[0]):
+        inputs = [None] * (2 * self.chunk_length)
+        for j in range(self.chunk_length):
+            index = i * self.chunk_length + j
+            if index < len(meas):
+                meas_elem = meas[index]
+            else:
+                meas_elem = self.Field(0)
+
+            inputs[j * 2] = r_power * meas_elem
+            inputs[j * 2 + 1] = meas_elem - shares_inv
+
+            r_power *= r
+
+        range_check += r * self.GADGETS[0].eval(self.Field, inputs)
+
+    # Check that the buckets sum to 1.
+    sum_check = -shares_inv
+    for b in meas:
+        sum_check += b
+
+    out = joint_rand[1] * range_check + \
+        joint_rand[1] ** 2 * sum_check
+    return out
+~~~
+
+Note that this circuit depends on the number of shares into which the
+measurement is sharded. This is provided to the FLP by Prio3.
+
+| Parameter        | Value                                           |
+|:-----------------|:------------------------------------------------|
+| `GADGETS`        | `[ParallelSum(Mul(), chunk_length)]`            |
+| `GADGET_CALLS`   | `[(length + chunk_length - 1) // chunk_length]` |
+| `MEAS_LEN`       | `length`                                        |
+| `OUTPUT_LEN`     | `length`                                        |
+| `JOINT_RAND_LEN` | `2`                                             |
+| `Measurement`    | `Unsigned`                                      |
+| `AggResult`      | `Vec[Unsigned]`                                 |
+| `Field`          | `Field128` ({{fields}})                         |
+{: title="Parameters of validity circuit Histogram."}
 
 # Poplar1 {#poplar1}
 
@@ -4334,8 +4364,8 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 |:-----------------------------|:---------------------|:-----|:-------------------------|
 | `0x00000000`                 | Prio3Count         | VDAF | {{prio3count}}     |
 | `0x00000001`                 | Prio3Sum           | VDAF | {{prio3sum}}       |
-| `0x00000002`                 | Prio3Histogram     | VDAF | {{prio3histogram}} |
-| `0x00000003`                 | Prio3SumVec        | VDAF | {{prio3sumvec}}    |
+| `0x00000002`                 | Prio3SumVec        | VDAF | {{prio3sumvec}}    |
+| `0x00000003`                 | Prio3Histogram     | VDAF | {{prio3histogram}} |
 | `0x00000004` to `0x00000FFF` | reserved for Prio3 | VDAF | n/a                |
 | `0x00001000`                 | Poplar1            | VDAF | {{poplar1-inst}}   |
 | `0xFFFF0000` to `0xFFFFFFFF` | reserved           | n/a  | n/a                |
