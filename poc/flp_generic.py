@@ -107,13 +107,12 @@ class Valid:
         """Evaluate the circuit on the provided measurement and joint randomness."""
         raise NotImplementedError()
 
-    def test_vec_set_type_param(self, _test_vec):
+    def test_vec_set_type_param(self, _test_vec) -> list[str]:
         """
         Add any parameters to `test_vec` that are required to construct this
-        class. Return the key that was set or `None` if `test_vec` was not
-        modified.
+        class. Returns the keys that were set.
         """
-        return None
+        return []
 
     def check_valid_eval(self, meas, joint_rand):
         if len(meas) != self.MEAS_LEN:
@@ -411,6 +410,63 @@ class PolyEval(Gadget):
         return poly_strip(Field, out)
 
 
+class ParallelSum(Gadget):
+    """
+    Evaluates a subcircuit (represented by a Gadget) on multiple inputs, adds
+    the results, and returns the sum.
+
+    The `count` parameter determines how many times the `subcircuit` gadget will
+    be called. The arity of this gadget is equal to the arity of the subcircuit
+    multiplied by the `count` parameter, and the degree of this gadget is equal
+    to the degree of the subcircuit. Input wires will be sequentially mapped to
+    input wires of the subcircuit instances.
+
+    Section 4.4 of the BBCGGI19 paper outlines an optimization for circuits
+    fitting the parallel sum form, wherein a sum of n identical subcircuits can
+    be replaced with sqrt(n) parallel sum gadgets, each adding up sqrt(n)
+    subcircuit results. This results in smaller proofs, since the proof size
+    linearly depends on both the arity of gadgets and the number of times
+    gadgets are called.
+    """
+
+    # Operational parameters
+    subcircuit = None
+    count = None
+
+    ARITY = None  # Set by constructor
+    DEGREE = None  # Set by constructor
+
+    def __init__(self, subcircuit: Gadget, count: int):
+        self.subcircuit = subcircuit
+        self.count = count
+        self.ARITY = subcircuit.ARITY * count
+        self.DEGREE = subcircuit.DEGREE
+
+    def eval(self, Field, inp):
+        self.check_gadget_eval(inp)
+        out = Field(0)
+        for i in range(self.count):
+            start_index = i * self.subcircuit.ARITY
+            end_index = (i + 1) * self.subcircuit.ARITY
+            out += self.subcircuit.eval(Field, inp[start_index:end_index])
+        return out
+
+    def eval_poly(self, Field, inp_poly):
+        self.check_gadget_eval_poly(inp_poly)
+        output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
+        out_sum = [Field(0) for _ in range(output_poly_length)]
+        for i in range(self.count):
+            start_index = i * self.subcircuit.ARITY
+            end_index = (i + 1) * self.subcircuit.ARITY
+            out_current = self.subcircuit.eval_poly(
+                Field,
+                inp_poly[start_index:end_index]
+            )
+            for j in range(output_poly_length):
+                out_sum[j] += out_current[j]
+        return poly_strip(Field, out_sum)
+
+
 ##
 # TYPES
 #
@@ -501,7 +557,7 @@ class Sum(Valid):
 
     def test_vec_set_type_param(self, test_vec):
         test_vec['bits'] = int(self.MEAS_LEN)
-        return 'bits'
+        return ['bits']
 
 
 class Histogram(Valid):
@@ -563,7 +619,108 @@ class Histogram(Valid):
 
     def test_vec_set_type_param(self, test_vec):
         test_vec['length'] = int(self.length)
-        return 'length'
+        return ['length']
+
+
+class SumVec(Valid):
+    # Operational parameters
+    length = None  # Set by constructor
+    bits = None  # Set by constructor
+    chunk_length = None  # Set by constructor
+
+    # Associated types
+    Measurement = Vec[Unsigned]
+    AggResult = Vec[Unsigned]
+    Field = field.Field128
+
+    # Associated parameters
+    GADGETS = None  # Set by constructor
+    GADGET_CALLS = None  # Set by constructor
+    MEAS_LEN = None  # Set by constructor
+    JOINT_RAND_LEN = 1
+    OUTPUT_LEN = None  # Set by constructor
+
+    def __init__(self, length, bits, chunk_length):
+        """
+        Instantiate the `SumVec` circuit for measurements with `length`
+        elements, each in the range `[0, 2^bits)`.
+        """
+
+        if 2 ** bits >= Sum.Field.MODULUS:
+            raise ValueError('bit size exceeds field modulus')
+        if bits <= 0:
+            raise ValueError('invalid bits')
+        if length <= 0:
+            raise ValueError('invalid length')
+        if chunk_length <= 0:
+            raise ValueError('invalid chunk_length')
+
+        self.length = length
+        self.bits = bits
+        self.chunk_length = chunk_length
+        self.GADGETS = [ParallelSum(Mul(), chunk_length)]
+        self.GADGET_CALLS = [
+            (length * bits + chunk_length - 1) // chunk_length
+        ]
+        self.MEAS_LEN = length * bits
+        self.OUTPUT_LEN = length
+
+    def eval(self, meas, joint_rand, num_shares):
+        self.check_valid_eval(meas, joint_rand)
+
+        out = self.Field(0)
+        r = joint_rand[0]
+        r_power = r
+        shares_inv = self.Field(num_shares).inv()
+
+        for i in range(self.GADGET_CALLS[0]):
+            inputs = [None] * (2 * self.chunk_length)
+            for j in range(self.chunk_length):
+                index = i * self.chunk_length + j
+                if index < len(meas):
+                    meas_elem = meas[index]
+                else:
+                    meas_elem = self.Field(0)
+
+                inputs[j * 2] = r_power * meas_elem
+                inputs[j * 2 + 1] = meas_elem - shares_inv
+
+                r_power *= r
+
+            out += self.GADGETS[0].eval(self.Field, inputs)
+
+        return out
+
+    def encode(self, measurement: Vec[Unsigned]):
+        if len(measurement) != self.length:
+            raise ERR_INPUT
+
+        encoded = []
+        for val in measurement:
+            if val < 0 or val >= 2 ** self.bits:
+                raise ERR_INPUT
+
+            for l in range(self.bits):
+                encoded.append(self.Field((val >> l) & 1))
+
+        return encoded
+
+    def truncate(self, meas):
+        truncated = [self.Field(0) for _ in range(self.length)]
+        for i in range(self.length):
+            for j in range(self.bits):
+                weight = self.Field(1 << j)
+                truncated[i] += weight * meas[i * self.bits + j]
+        return truncated
+
+    def decode(self, output, _num_measurements):
+        return [x.as_unsigned() for x in output]
+
+    def test_vec_set_type_param(self, test_vec):
+        test_vec['length'] = self.length
+        test_vec['bits'] = self.bits
+        test_vec['chunk_length'] = self.chunk_length
+        return ['length', 'bits', 'chunk_length']
 
 
 ##

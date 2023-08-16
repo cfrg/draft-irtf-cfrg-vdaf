@@ -341,7 +341,7 @@ class Poplar1(Vdaf):
     @classmethod
     def test_vec_set_type_param(cls, test_vec):
         test_vec['bits'] = int(cls.Idpf.BITS)
-        return 'bits'
+        return ['bits']
 
     @classmethod
     def test_vec_encode_input_share(Poplar1, input_share):
