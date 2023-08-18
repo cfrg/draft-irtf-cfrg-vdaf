@@ -1661,12 +1661,14 @@ def expand_into_vec(Prg,
 ### PrgSha3 {#prg-sha3}
 
 This section describes PrgSha3, a PRG based on the Keccak permutation of SHA-3
-{{FIPS202}}. Keccak is used in the cSHAKE128 mode of operation {{SP800-185}}.
+{{FIPS202}}. Keccak is used in the SHAKE128 mode of operation {{FIPS202}}.
 This Prg is RECOMMENDED for all use cases within VDAFs.
+The length of the domain separation string `dst` passed to PrgSha3 MUST NOT
+exceed 255 bytes.
 
 ~~~
 class PrgSha3(Prg):
-    """PRG based on SHA-3 (cSHAKE128)."""
+    """PRG based on SHA-3 (SHAKE128)."""
 
     # Associated parameters
     SEED_SIZE = 16
@@ -1679,14 +1681,15 @@ class PrgSha3(Prg):
     def next(self, length: Unsigned) -> Bytes:
         self.l += length
 
-        # Function `cSHAKE128(x, l, n, s)` is as defined in
-        # [SP800-185, Section 3.3].
+        # Function `SHAKE128(x, l)` is as defined in
+        # [FIPS 202, Section 6.2].
         #
         # Implementation note: Rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
         # of SHA-3 will expose an "absorb-then-squeeze" API that
         # allows stateful handling of the stream.
-        stream = cSHAKE128(self.x, self.l, b'', self.s)
+        dst_length = to_le_bytes(len(self.s), 1)
+        stream = SHAKE128(dst_length + self.s + self.x, self.l)
         return stream[-length:]
 ~~~
 {: title="Definition of PRG PrgSha3."}
@@ -1698,6 +1701,8 @@ is needed in the VDAFs described in this document, there are some cases where
 a more efficient instantiation based on fixed-key AES is possible. For now, this
 is limited to the Prg used inside the Idpf {{idpf}} implementation in Poplar1
 {{idpf-poplar}}. It is NOT RECOMMENDED to use this Prg anywhere else.
+The length of the domain separation string `dst` passed to PrgFixedKeyAes128
+MUST NOT exceed 255 bytes.
 See Security Considerations {{security}} for a more detailed discussion.
 
 ~~~
@@ -1720,7 +1725,8 @@ class PrgFixedKeyAes128(Prg):
         #
         # Implementation note: This step can be cached across PRG
         # evaluations with many different seeds.
-        self.fixed_key = cSHAKE128(binder, 16, b'', dst)
+        dst_length = to_le_bytes(len(dst), 1)
+        self.fixed_key = SHAKE128(dst_length + dst + binder, 16)
         self.seed = seed
 
     def next(self, length: Unsigned) -> Bytes:
