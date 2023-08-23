@@ -442,31 +442,13 @@ class Prio3Sum(Prio3):
         return Prio3SumWithBits
 
 
-class Prio3Histogram(Prio3):
-    # Generic types required by `Prio3`
-    Prg = prg.PrgSha3
-
-    # Associated parameters.
-    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
-    ID = 0x00000002
-
-    # Operational parameters.
-    test_vec_name = 'Prio3Histogram'
-
-    @classmethod
-    def with_length(Prio3Histogram, length: Unsigned):
-        class Prio3HistogramWithLength(Prio3Histogram):
-            Flp = flp_generic.FlpGeneric(flp_generic.Histogram(length))
-        return Prio3HistogramWithLength
-
-
 class Prio3SumVec(Prio3):
     # Generic types required by `Prio3`
     Prg = prg.PrgSha3
 
     # Associated parameters.
     VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
-    ID = 0x00000003
+    ID = 0x00000002
 
     # Operational parameters.
     test_vec_name = 'Prio3SumVec'
@@ -479,6 +461,26 @@ class Prio3SumVec(Prio3):
                 flp_generic.SumVec(length, bits, chunk_length)
             )
         return Prio3SumVecWithParams
+
+
+class Prio3Histogram(Prio3):
+    # Generic types required by `Prio3`
+    Prg = prg.PrgSha3
+
+    # Associated parameters.
+    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    ID = 0x00000003
+
+    # Operational parameters.
+    test_vec_name = 'Prio3Histogram'
+
+    @classmethod
+    def with_params(Prio3Histogram, length: Unsigned, chunk_length: Unsigned):
+        class Prio3HistogramWithLength(Prio3Histogram):
+            Flp = flp_generic.FlpGeneric(
+                flp_generic.Histogram(length, chunk_length)
+            )
+        return Prio3HistogramWithLength
 
 
 ##
@@ -539,22 +541,8 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [100], 100, print_test_vec=TEST_VECTOR,
               test_vec_instance=1)
 
-    cls = Prio3Histogram \
-        .with_length(4) \
-        .with_shares(num_shares)
-    assert cls.ID == 0x00000002
-    test_vdaf(cls, None, [0], [1, 0, 0, 0])
-    test_vdaf(cls, None, [1], [0, 1, 0, 0])
-    test_vdaf(cls, None, [2], [0, 0, 1, 0])
-    test_vdaf(cls, None, [3], [0, 0, 0, 1])
-    test_vdaf(cls, None, [0, 0, 1, 1, 2, 2, 3, 3], [2, 2, 2, 2])
-    test_vdaf(cls, None, [2], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
-    cls = Prio3Histogram.with_length(4).with_shares(3)
-    test_vdaf(cls, None, [2], [0, 0, 1, 0], print_test_vec=TEST_VECTOR,
-              test_vec_instance=1)
-
     cls = Prio3SumVec.with_params(10, 8, 9).with_shares(2)
-    assert cls.ID == 0x00000003
+    assert cls.ID == 0x00000002
     test_vdaf(
         cls,
         None,
@@ -582,6 +570,26 @@ if __name__ == '__main__':
             [15986, 24671, 23910]
         ],
         [45328, 76286, 26980],
+        print_test_vec=TEST_VECTOR,
+        test_vec_instance=1,
+    )
+
+    cls = Prio3Histogram \
+        .with_params(4, 2) \
+        .with_shares(num_shares)
+    assert cls.ID == 0x00000003
+    test_vdaf(cls, None, [0], [1, 0, 0, 0])
+    test_vdaf(cls, None, [1], [0, 1, 0, 0])
+    test_vdaf(cls, None, [2], [0, 0, 1, 0])
+    test_vdaf(cls, None, [3], [0, 0, 0, 1])
+    test_vdaf(cls, None, [0, 0, 1, 1, 2, 2, 3, 3], [2, 2, 2, 2])
+    test_vdaf(cls, None, [2], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
+    cls = Prio3Histogram.with_params(11, 3).with_shares(3)
+    test_vdaf(
+        cls,
+        None,
+        [2],
+        [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
         print_test_vec=TEST_VECTOR,
         test_vec_instance=1,
     )

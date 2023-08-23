@@ -562,7 +562,8 @@ class Sum(Valid):
 
 class Histogram(Valid):
     # Operational parameters
-    length = None  # Set by 'Histogram.with_length()`
+    length = None  # Set by 'Histogram.with_params()`
+    chunk_length = None  # Set by 'Histogram.with_params()`
 
     # Associated types
     Measurement = Unsigned
@@ -570,20 +571,27 @@ class Histogram(Valid):
     Field = field.Field128
 
     # Associated parameters
-    GADGETS = [Range2()]
-    GADGET_CALLS = None  # Set by `Histogram.with_length()`
-    MEAS_LEN = None  # Set by `Histogram.with_length()`
+    GADGETS = None  # Set by `Histogram.with_params()`
+    GADGET_CALLS = None  # Set by `Histogram.with_params()`
+    MEAS_LEN = None  # Set by `Histogram.with_params()`
     JOINT_RAND_LEN = 2
-    OUTPUT_LEN = None  # Set by `Histogram.with_length()`
+    OUTPUT_LEN = None  # Set by `Histogram.with_params()`
 
-    def __init__(self, length):
+    def __init__(self, length, chunk_length):
         """
         Instantiate an instace of the `Histogram` circuit with the given
-        length.
+        length and chunk_length.
         """
 
+        if length <= 0:
+            raise ValueError('invalid length')
+        if chunk_length <= 0:
+            raise ValueError('invalid chunk_length')
+
         self.length = length
-        self.GADGET_CALLS = [self.length]
+        self.chunk_length = chunk_length
+        self.GADGETS = [ParallelSum(Mul(), chunk_length)]
+        self.GADGET_CALLS = [(length + chunk_length - 1) // chunk_length]
         self.MEAS_LEN = self.length
         self.OUTPUT_LEN = self.length
 
@@ -593,12 +601,26 @@ class Histogram(Valid):
         # Check that each bucket is one or zero.
         range_check = self.Field(0)
         r = joint_rand[0]
-        for b in meas:
-            range_check += r * self.GADGETS[0].eval(self.Field, [b])
-            r *= joint_rand[0]
+        r_power = r
+        shares_inv = self.Field(num_shares).inv()
+        for i in range(self.GADGET_CALLS[0]):
+            inputs = [None] * (2 * self.chunk_length)
+            for j in range(self.chunk_length):
+                index = i * self.chunk_length + j
+                if index < len(meas):
+                    meas_elem = meas[index]
+                else:
+                    meas_elem = self.Field(0)
+
+                inputs[j * 2] = r_power * meas_elem
+                inputs[j * 2 + 1] = meas_elem - shares_inv
+
+                r_power *= r
+
+            range_check += self.GADGETS[0].eval(self.Field, inputs)
 
         # Check that the buckets sum to 1.
-        sum_check = -self.Field(num_shares).inv()
+        sum_check = -shares_inv
         for b in meas:
             sum_check += b
 
@@ -619,7 +641,8 @@ class Histogram(Valid):
 
     def test_vec_set_type_param(self, test_vec):
         test_vec['length'] = int(self.length)
-        return ['length']
+        test_vec['chunk_length'] = int(self.chunk_length)
+        return ['length', 'chunk_length']
 
 
 class SumVec(Valid):
@@ -833,7 +856,7 @@ def test():
         (flp.Field.rand_vec(10), False),
     ])
 
-    flp = FlpGeneric(Histogram(4))
+    flp = FlpGeneric(Histogram(4, 2))
     test_flp_generic(flp, [
         (flp.encode(0), True),
         (flp.encode(1), True),
