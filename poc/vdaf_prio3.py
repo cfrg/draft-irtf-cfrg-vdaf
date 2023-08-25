@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 import flp
 import flp_generic
-import prg
+import xof
 from common import (ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Unsigned, byte, concat,
                     front, vec_add, vec_sub, zeros)
 from vdaf import Vdaf, test_vdaf
@@ -23,12 +23,12 @@ class Prio3(Vdaf):
 
     # Generic types provided by a concrete instance of `Prio3`
     Flp = flp.Flp
-    Prg = prg.Prg
+    Xof = xof.Xof
 
     # Parameters required by `Vdaf`
-    VERIFY_KEY_SIZE = None  # Set by the PRG
+    VERIFY_KEY_SIZE = None  # Set by `Xof`
     NONCE_SIZE = 16
-    RAND_SIZE = None  # Computed from `Prg.SEED_SIZE` and `SHARES`
+    RAND_SIZE = None  # Computed from `Xof.SEED_SIZE` and `SHARES`
     ROUNDS = 1
     SHARES = None  # A number between `[2, 256)` set later
 
@@ -53,7 +53,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def shard(Prio3, measurement, nonce, rand):
-        l = Prio3.Prg.SEED_SIZE
+        l = Prio3.Xof.SEED_SIZE
         seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
 
         meas = Prio3.Flp.encode(measurement)
@@ -259,7 +259,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def helper_meas_share(Prio3, agg_id, k_share):
-        return Prio3.Prg.expand_into_vec(
+        return Prio3.Xof.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
             Prio3.domain_separation_tag(USAGE_MEAS_SHARE),
@@ -269,7 +269,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def helper_proof_share(Prio3, agg_id, k_share):
-        return Prio3.Prg.expand_into_vec(
+        return Prio3.Xof.expand_into_vec(
             Prio3.Flp.Field,
             k_share,
             Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
@@ -287,7 +287,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def prove_rand(Prio3, k_prove):
-        return Prio3.Prg.expand_into_vec(
+        return Prio3.Xof.expand_into_vec(
             Prio3.Flp.Field,
             k_prove,
             Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
@@ -297,7 +297,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def query_rand(Prio3, verify_key, nonce):
-        return Prio3.Prg.expand_into_vec(
+        return Prio3.Xof.expand_into_vec(
             Prio3.Flp.Field,
             verify_key,
             Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
@@ -307,7 +307,7 @@ class Prio3(Vdaf):
 
     @classmethod
     def joint_rand_part(Prio3, agg_id, k_blind, meas_share, nonce):
-        return Prio3.Prg.derive_seed(
+        return Prio3.Xof.derive_seed(
             k_blind,
             Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
             byte(agg_id) + nonce + Prio3.Flp.Field.encode_vec(meas_share),
@@ -316,8 +316,8 @@ class Prio3(Vdaf):
     @classmethod
     def joint_rand_seed(Prio3, k_joint_rand_parts):
         """Derive the joint randomness seed from its parts."""
-        return Prio3.Prg.derive_seed(
-            zeros(Prio3.Prg.SEED_SIZE),
+        return Prio3.Xof.derive_seed(
+            zeros(Prio3.Xof.SEED_SIZE),
             Prio3.domain_separation_tag(USAGE_JOINT_RAND_SEED),
             concat(k_joint_rand_parts),
         )
@@ -325,7 +325,7 @@ class Prio3(Vdaf):
     @classmethod
     def joint_rand(Prio3, k_joint_rand_seed):
         """Derive the joint randomness from its seed."""
-        return Prio3.Prg.expand_into_vec(
+        return Prio3.Xof.expand_into_vec(
             Prio3.Flp.Field,
             k_joint_rand_seed,
             Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
@@ -335,13 +335,13 @@ class Prio3(Vdaf):
 
     @classmethod
     def with_shares(Prio3, num_shares):
-        assert Prio3.Prg is not None
+        assert Prio3.Xof is not None
         assert Prio3.Flp is not None
         if num_shares < 2 or num_shares > 256:
             raise ERR_INPUT
-        rand_size = (1+2*(num_shares-1)) * Prio3.Prg.SEED_SIZE
+        rand_size = (1+2*(num_shares-1)) * Prio3.Xof.SEED_SIZE
         if Prio3.Flp.JOINT_RAND_LEN > 0:
-            rand_size += num_shares * Prio3.Prg.SEED_SIZE
+            rand_size += num_shares * Prio3.Xof.SEED_SIZE
 
         class Prio3WithShares(Prio3):
             SHARES = num_shares
@@ -349,11 +349,11 @@ class Prio3(Vdaf):
         return Prio3WithShares
 
     @classmethod
-    def with_prg(Prio3, ThePrg):
-        class Prio3WithPrg(Prio3):
-            Prg = ThePrg
-            VERIFY_KEY_SIZE = ThePrg.SEED_SIZE
-        return Prio3WithPrg
+    def with_xof(Prio3, TheXof):
+        class Prio3WithXof(Prio3):
+            Xof = TheXof
+            VERIFY_KEY_SIZE = TheXof.SEED_SIZE
+        return Prio3WithXof
 
     @classmethod
     def with_flp(Prio3, TheFlp):
@@ -413,12 +413,12 @@ class Prio3(Vdaf):
 
 class Prio3Count(Prio3):
     # Generic types required by `Prio3`
-    Prg = prg.PrgSha3
+    Xof = xof.XofShake128
     Flp = flp_generic.FlpGeneric(flp_generic.Count())
 
     # Associated parameters.
     ID = 0x00000000
-    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
 
     # Operational parameters.
     test_vec_name = 'Prio3Count'
@@ -426,10 +426,10 @@ class Prio3Count(Prio3):
 
 class Prio3Sum(Prio3):
     # Generic types required by `Prio3`
-    Prg = prg.PrgSha3
+    Xof = xof.XofShake128
 
     # Associated parameters.
-    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
     ID = 0x00000001
 
     # Operational parameters.
@@ -444,10 +444,10 @@ class Prio3Sum(Prio3):
 
 class Prio3SumVec(Prio3):
     # Generic types required by `Prio3`
-    Prg = prg.PrgSha3
+    Xof = xof.XofShake128
 
     # Associated parameters.
-    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
     ID = 0x00000002
 
     # Operational parameters.
@@ -465,10 +465,10 @@ class Prio3SumVec(Prio3):
 
 class Prio3Histogram(Prio3):
     # Generic types required by `Prio3`
-    Prg = prg.PrgSha3
+    Xof = xof.XofShake128
 
     # Associated parameters.
-    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
     ID = 0x00000003
 
     # Operational parameters.
@@ -493,11 +493,11 @@ class TestPrio3Average(Prio3):
     class's decode() method.
     """
 
-    Prg = prg.PrgSha3
+    Xof = xof.XofShake128
     # NOTE 0xFFFFFFFF is reserved for testing. If we decide to standardize this
     # Prio3 variant, then we'll need to pick a real codepoint for it.
     ID = 0xFFFFFFFF
-    VERIFY_KEY_SIZE = prg.PrgSha3.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
 
     @classmethod
     def with_bits(cls, bits: Unsigned):
@@ -510,7 +510,7 @@ if __name__ == '__main__':
     num_shares = 2  # Must be in range `[2, 256)`
 
     cls = Prio3 \
-        .with_prg(prg.PrgSha3) \
+        .with_xof(xof.XofShake128) \
         .with_flp(flp.FlpTestField128()) \
         .with_shares(num_shares)
     cls.ID = 0xFFFFFFFF
@@ -519,7 +519,7 @@ if __name__ == '__main__':
     # If JOINT_RAND_LEN == 0, then Fiat-Shamir isn't needed and we can skip
     # generating the joint randomness.
     cls = Prio3 \
-        .with_prg(prg.PrgSha3) \
+        .with_xof(xof.XofShake128) \
         .with_flp(flp.FlpTestField128.with_joint_rand_len(0)) \
         .with_shares(num_shares)
     cls.ID = 0xFFFFFFFF

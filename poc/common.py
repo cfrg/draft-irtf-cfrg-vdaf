@@ -130,7 +130,7 @@ def front(length, vec):
 def format_dst(algo_class: Unsigned,
                algo: Unsigned,
                usage: Unsigned) -> Bytes:
-    """Format PRG domain separation tag for use within a (V)DAF."""
+    """Format XOF domain separation tag for use within a (V)DAF."""
     return concat([
         to_be_bytes(VERSION, 1),
         to_be_bytes(algo_class, 1),

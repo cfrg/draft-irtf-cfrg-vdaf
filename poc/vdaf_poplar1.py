@@ -6,7 +6,7 @@ from typing import Optional
 
 import idpf
 import idpf_poplar
-import prg
+import xof
 from common import (ERR_INPUT, ERR_VERIFY, TEST_VECTOR, Bytes, Unsigned, byte,
                     from_be_bytes, front, to_be_bytes, vec_add, vec_sub)
 from vdaf import Vdaf, test_vdaf
@@ -20,12 +20,12 @@ USAGE_VERIFY_RAND = 4
 class Poplar1(Vdaf):
     # Types provided by a concrete instadce of `Poplar1`.
     Idpf = idpf.Idpf
-    Prg = prg.Prg
+    Xof = xof.Xof
 
     # Parameters required by `Vdaf`.
     ID = 0x00001000
-    VERIFY_KEY_SIZE = None  # Set by Idpf.Prg
-    RAND_SIZE = None  # Set by Idpf.Prg
+    VERIFY_KEY_SIZE = None  # Set by Idpf.Xof
+    RAND_SIZE = None  # Set by Idpf.Xof
     NONCE_SIZE = 16
     SHARES = 2
     ROUNDS = 2
@@ -53,7 +53,7 @@ class Poplar1(Vdaf):
 
     @classmethod
     def shard(Poplar1, measurement, nonce, rand):
-        l = Poplar1.Prg.SEED_SIZE
+        l = Poplar1.Xof.SEED_SIZE
 
         # Split the random input into the random input for IDPF key
         # generation, correlated randomness, and sharding.
@@ -64,7 +64,7 @@ class Poplar1(Vdaf):
         corr_seed, seeds = front(2, seeds)
         (k_shard,), seeds = front(1, seeds)
 
-        prg = Poplar1.Prg(
+        xof = Poplar1.Xof(
             k_shard,
             Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
             b'',
@@ -77,11 +77,11 @@ class Poplar1(Vdaf):
         # to verify the one-hotness of their output shares.
         beta_inner = [
             [Poplar1.Idpf.FieldInner(1), k]
-            for k in prg.next_vec(Poplar1.Idpf.FieldInner,
+            for k in xof.next_vec(Poplar1.Idpf.FieldInner,
                                   Poplar1.Idpf.BITS - 1)
         ]
         beta_leaf = [Poplar1.Idpf.FieldLeaf(1)] + \
-            prg.next_vec(Poplar1.Idpf.FieldLeaf, 1)
+            xof.next_vec(Poplar1.Idpf.FieldLeaf, 1)
 
         # Generate the IDPF keys.
         (public_share, keys) = Poplar1.Idpf.gen(measurement,
@@ -91,18 +91,18 @@ class Poplar1(Vdaf):
                                                 idpf_rand)
 
         # Generate correlated randomness used by the Aggregators to
-        # compute a sketch over their output shares. PRG seeds are
-        # used to encode shares of the `(a, b, c)` triples.
-        # (See [BBCGGI21, Appendix C.4].)
+        # compute a sketch over their output shares. Seeds are used to
+        # encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
+        # Appendix C.4].)
         corr_offsets = vec_add(
-            Poplar1.Prg.expand_into_vec(
+            Poplar1.Xof.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
                 corr_seed[0],
                 Poplar1.domain_separation_tag(USAGE_CORR_INNER),
                 byte(0) + nonce,
                 3 * (Poplar1.Idpf.BITS-1),
             ),
-            Poplar1.Prg.expand_into_vec(
+            Poplar1.Xof.expand_into_vec(
                 Poplar1.Idpf.FieldInner,
                 corr_seed[1],
                 Poplar1.domain_separation_tag(USAGE_CORR_INNER),
@@ -111,14 +111,14 @@ class Poplar1(Vdaf):
             ),
         )
         corr_offsets += vec_add(
-            Poplar1.Prg.expand_into_vec(
+            Poplar1.Xof.expand_into_vec(
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[0],
                 Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
                 byte(0) + nonce,
                 3,
             ),
-            Poplar1.Prg.expand_into_vec(
+            Poplar1.Xof.expand_into_vec(
                 Poplar1.Idpf.FieldLeaf,
                 corr_seed[1],
                 Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
@@ -138,7 +138,7 @@ class Poplar1(Vdaf):
             (a, b, c), corr_offsets = corr_offsets[:3], corr_offsets[3:]
             A = -Field(2) * a + k
             B = a ** 2 + b - a * k + c
-            corr1 = prg.next_vec(Field, 2)
+            corr1 = xof.next_vec(Field, 2)
             corr0 = vec_sub([A, B], corr1)
             if level < Poplar1.Idpf.BITS - 1:
                 corr_inner[0] += corr0
@@ -183,31 +183,31 @@ class Poplar1(Vdaf):
         # Aggregator's share of the sketch for the given level of the IDPF
         # tree.
         if level < Poplar1.Idpf.BITS - 1:
-            corr_prg = Poplar1.Prg(
+            corr_xof = Poplar1.Xof(
                 corr_seed,
                 Poplar1.domain_separation_tag(USAGE_CORR_INNER),
                 byte(agg_id) + nonce,
             )
-            # Fast-forward the PRG state to the current level.
-            corr_prg.next_vec(Field, 3 * level)
+            # Fast-forward the XOF state to the current level.
+            corr_xof.next_vec(Field, 3 * level)
         else:
-            corr_prg = Poplar1.Prg(
+            corr_xof = Poplar1.Xof(
                 corr_seed,
                 Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
                 byte(agg_id) + nonce,
             )
-        (a_share, b_share, c_share) = corr_prg.next_vec(Field, 3)
+        (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
         (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
             if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
         # Compute the Aggregator's first round of the sketch. These are
         # called the "masked input values" [BBCGGI21, Appendix C.4].
-        verify_rand_prg = Poplar1.Prg(
+        verify_rand_xof = Poplar1.Xof(
             verify_key,
             Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
             nonce + to_be_bytes(level, 2),
         )
-        verify_rand = verify_rand_prg.next_vec(Field, len(prefixes))
+        verify_rand = verify_rand_xof.next_vec(Field, len(prefixes))
         sketch_share = [a_share, b_share, c_share]
         out_share = []
         for (i, r) in enumerate(verify_rand):
@@ -328,13 +328,13 @@ class Poplar1(Vdaf):
         TheIdpf = idpf_poplar.IdpfPoplar \
             .with_value_len(2) \
             .with_bits(bits)
-        ThePrg = prg.PrgSha3
+        TheXof = xof.XofShake128
 
         class Poplar1WithBits(Poplar1):
             Idpf = TheIdpf
-            Prg = ThePrg
-            VERIFY_KEY_SIZE = ThePrg.SEED_SIZE
-            RAND_SIZE = 3*ThePrg.SEED_SIZE + TheIdpf.RAND_SIZE
+            Xof = TheXof
+            VERIFY_KEY_SIZE = TheXof.SEED_SIZE
+            RAND_SIZE = 3*TheXof.SEED_SIZE + TheIdpf.RAND_SIZE
             test_vec_name = 'Poplar1'
         return Poplar1WithBits
 

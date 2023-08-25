@@ -6,7 +6,7 @@ from functools import reduce
 
 import field
 from common import Bool, Unsigned, gen_rand
-from prg import PrgSha3
+from xof import XofShake128
 
 
 class Daf:
@@ -166,11 +166,11 @@ class TestDaf(Daf):
 
     @classmethod
     def shard(cls, measurement, _nonce, rand):
-        helper_shares = PrgSha3.expand_into_vec(cls.Field,
-                                                rand,
-                                                b'',
-                                                b'',
-                                                cls.SHARES-1)
+        helper_shares = XofShake128.expand_into_vec(cls.Field,
+                                                    rand,
+                                                    b'',
+                                                    b'',
+                                                    cls.SHARES-1)
         leader_share = cls.Field(measurement)
         for helper_share in helper_shares:
             leader_share -= helper_share
