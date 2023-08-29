@@ -3092,7 +3092,8 @@ The `Count` validity circuit is defined as
 
 ~~~
 def eval(self, meas, joint_rand, _num_shares):
-    return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) - meas[0]
+    return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+        - meas[0]
 ~~~
 
 The measurement is encoded and decoded as a singleton vector in the natural
@@ -3838,8 +3839,8 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
         return sketch
     elif len(sketch) == 1:
         if sketch == Field.zeros(1):
-            # In order to reduce communication overhead, let `None` denote
-            # a successful sketch verification.
+            # In order to reduce communication overhead, let `None`
+            # denote a successful sketch verification.
             return None
         else:
             raise ERR_VERIFY  # sketch verification failed

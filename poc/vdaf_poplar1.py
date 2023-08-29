@@ -263,8 +263,8 @@ class Poplar1(Vdaf):
             return sketch
         elif len(sketch) == 1:
             if sketch == Field.zeros(1):
-                # In order to reduce communication overhead, let `None` denote
-                # a successful sketch verification.
+                # In order to reduce communication overhead, let `None`
+                # denote a successful sketch verification.
                 return None
             else:
                 raise ERR_VERIFY  # sketch verification failed
