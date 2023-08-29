@@ -486,7 +486,8 @@ class Count(Valid):
 
     def eval(self, meas, joint_rand, _num_shares):
         self.check_valid_eval(meas, joint_rand)
-        return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) - meas[0]
+        return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+            - meas[0]
 
     def encode(self, measurement):
         if measurement not in [0, 1]:
