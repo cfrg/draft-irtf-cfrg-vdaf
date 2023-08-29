@@ -355,6 +355,37 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+07:
+
+* Rename PRG to XOF ("eXtendable Output Function"). Accordingly, rename PrgSha3
+  to XofShake128 and PrgFixedKeyAes128 to XofFixedKeyAes128. "PRG" is a misnomer
+  since we don't actually treat this object as a pseudorandom generator in
+  existing security analysis.
+
+* Replace cSHAKE128 with SHAKE128, re-implementing domain separation for the
+  customization string using a simpler scheme. This change addresses the
+  reality that implementations of cSHAKE128 are less common. (\*)
+
+* Define a new VDAF, called Prio3SumVec, that generalizes Prio3Sum to a vector
+  of summands.
+
+* Prio3Histogram: Update the codepoint and use the parallel sum optimization
+  introduced by Prio3SumVec to reduce the proof size. (\*)
+
+* Daf, Vdaf: Rename interface methods to match verbiage in the draft.
+
+* Daf: Align with Vdaf by adding a nonce to `shard()` and `prep()`.
+
+* Vdaf: Have `prep_init()` compute the first prep share. This change is
+  intended to simplify the interface by making the input to `prep_next()` not
+  optional.
+
+* Prio3: Split sharding into two auxiliary functions, one for sharding with
+  joint randomness and another without. This change is intended to improve
+  readability.
+
+* Fix bugs in the ping-pong interface discovered after implementing it.
+
 06:
 
 * Vdaf: Define a wrapper interface for preparation that is suitable for the
