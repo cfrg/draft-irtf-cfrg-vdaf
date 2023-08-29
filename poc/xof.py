@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from Cryptodome.Cipher import AES
-from Cryptodome.Hash import CMAC, SHAKE128
-from Cryptodome.Util import Counter
+from Cryptodome.Hash import SHAKE128
 
 from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
                     from_le_bytes, gen_rand, next_power_of_2,
-                    print_wrapped_line, to_be_bytes, to_le_bytes, xor, zeros)
+                    print_wrapped_line, to_le_bytes, xor)
 
 
 class Xof:
@@ -60,38 +59,6 @@ class Xof:
         """
         xof = Xof(seed, dst, binder)
         return xof.next_vec(Field, length)
-
-
-class XofAes128(Xof):
-    """WARNING `XofAes128` has been deprecated in favor of `XofShake128`."""
-
-    # Associated parameters
-    SEED_SIZE = 16
-
-    # Operational parameters.
-    test_vec_name = 'XofAes128'
-
-    def __init__(self, seed, dst, binder):
-        self.length_consumed = 0
-
-        # Use CMAC as a pseuodorandom function to derive a key.
-        hasher = CMAC.new(seed, ciphermod=AES)
-        hasher.update(to_be_bytes(len(dst), 2))
-        hasher.update(dst)
-        hasher.update(binder)
-        self.key = hasher.digest()
-
-    def next(self, length: Unsigned) -> Bytes:
-        block = self.length_consumed // 16
-        offset = self.length_consumed % 16
-        self.length_consumed += length
-
-        # CTR-mode encryption of the all-zero string of the desired
-        # length and using a fixed, all-zero IV.
-        counter = Counter.new(128, initial_value=block)
-        cipher = AES.new(self.key, AES.MODE_CTR, counter=counter)
-        stream = cipher.encrypt(zeros(offset + length))
-        return stream[-length:]
 
 
 class XofShake128(Xof):
@@ -225,7 +192,7 @@ if __name__ == '__main__':
     # TODO: Update the test to account for the change from cSHAKE128 to SHAKE128.
     # assert expanded_vec[-1] == Field64(13681157193520586550)
 
-    for cls in (XofAes128, XofShake128, XofFixedKeyAes128):
+    for cls in (XofShake128, XofFixedKeyAes128):
         test_xof(cls, Field128, 23)
 
         if TEST_VECTOR:
