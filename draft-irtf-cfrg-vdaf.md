@@ -198,6 +198,9 @@ measurement that would result in an invalid aggregate result.
 
 # Introduction
 
+[TO BE REMOVED BY RFC EDITOR: The source for this draft and and the reference
+implementation can be found at https://github.com/cfrg/draft-irtf-cfrg-vdaf.]
+
 The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
 systems at scale. There is substantial overlap, however, between information
