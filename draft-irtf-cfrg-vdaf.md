@@ -33,11 +33,6 @@ author:
 
 normative:
 
-  SP800-185:
-    title: "SHA-3 Derived Functions: cSHAKE, KMAC, TupleHash and ParallelHash"
-    date: December 2016
-    seriesinfo: NIST Special Publication 800-185
-
   FIPS202:
     title: "SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions"
     date: August 2015
