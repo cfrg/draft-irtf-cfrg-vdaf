@@ -3862,6 +3862,7 @@ For the first round and leaf field:
 struct {
     Poplar1FieldLeaf sketch[Fl * 3];
 } Poplar1PrepMessageRoundOneLeaf;
+~~~
 
 Note that these messages have the same structures as the prep shares for the
 first round.
