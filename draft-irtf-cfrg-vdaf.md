@@ -4534,8 +4534,8 @@ spec.
 # Test Vectors {#test-vectors}
 {:numbered="false"}
 
-> NOTE Machine-readable test vectors can be found at
-> https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.
+[TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be found at
+https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.]
 
 Test vectors cover the generation of input shares and the conversion of input
 shares into output shares. Vectors specify the verification key, measurements,
@@ -4554,329 +4554,34 @@ with `0`, incrementing by `1`, and wrapping at `256`:
 ## Prio3Count {#testvec-prio3count}
 {:numbered="false"}
 
-~~~
-verify_key: "000102030405060708090a0b0c0d0e0f"
-upload_0:
-  measurement: 1
-  nonce: "000102030405060708090a0b0c0d0e0f"
-  public_share: >-
-  input_share_0: >-
-    3ead59ec98fe1c4f70171b7a5f0b5c731ae0c48b62f687b98e981a811540934d76db
-    271df5a3a6e97105856c18576573
-  input_share_1: >-
-    000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f
-  round_0:
-    prep_share_0: >-
-      4c151ee49ef43488213d8945b7aff36fc979166c714bd4b07676eea77634a432
-    prep_share_1: >-
-      b5eae11b600bcb77827a46303c1e0f073ebc46fcdc9c3fe9aeeb4a5f09e9c163
-    prep_message: >-
-  out_share_0:
-    - 3ead59ec98fe1c4f
-  out_share_1:
-    - c452a6136601e3b0
-agg_share_0: >-
-  3ead59ec98fe1c4f
-agg_share_1: >-
-  c452a6136601e3b0
-agg_result: 1
-~~~
+> TODO Copy the machine readable vectors from the source repository
+> (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
+> format them for humans.
 
 ## Prio3Sum {#testvec-prio3sum}
 {:numbered="false"}
 
-~~~
-bits: 8
-verify_key: "000102030405060708090a0b0c0d0e0f"
-upload_0:
-  measurement: 100
-  nonce: "000102030405060708090a0b0c0d0e0f"
-  public_share: >-
-    d6ba304b5e6fb668b98629cbaa51b5e780000a045a98af5f34a4d71abb6b7885
-  input_share_0: >-
-    c61ac8678ff4456241ff7d9f2182d8b4d007ae72f80d4e7fba171b7f17cfa14aedfd
-    10de4bb9180493872144743b8ac975d273e07b0a347f5f9af84a1573bcaa610f093d
-    013ead7503e6ac003975ae0d840333d65e7f62c70d271360bd404b17d4116ba46a3e
-    71edbddd6abc15c8aaedb1b8931350544a138497d10eaf77733800be917b08d87ed5
-    38e3812cd447335f46fb984e2779b3324bc602c31fe4745c34c7c5251f13dc402760
-    ce65c9a16fce5f171b98a1f3c33d8e44ea7ad1f02ab5fe7acc05187f160ef5692369
-    a105f9a6339249936563891682f8ffa5690a479f9876c49a753e3e982c7186f74a19
-    16ad2ad2b2f926fc47e6c9d1bdd5584e46d3b5d72f8f5a81b2a3fe181670bc75aafa
-    c4c56c189c913b3b32cb6d21b246738301568c7d5c323a7b0aaa28747364b1d1b42f
-    f9a01a13b40c1af75d7e965ec20e18ca729419dcb88b0428b329447ff0ab30337525
-    a58e2a28ea47579fa7b44d490c3d050ad253e8633fe972c689259a7807d7d149b231
-    69a26879be85183a23c00b58060fb09672a8d1197e30065d403d8578110ce5d9608f
-    cc2479f61a94e83d66e1493f77963700f4660aa8d16a51b47920c1e7b9b39ede9dc1
-    c4acad858bc1c66d2b813e2955a4a57106c7905cffd73cea619a58d339bd3e582280
-    9d154d0f9343f49d14c755cecbb770f38b18cdc6928bba24f5f5409527de57bb249e
-    fb5f673c18bd0481d87876e80b59a8805ff95d4d826162c511b54c91d62824c5af0d
-    c0ec1bf8debfec0e5ba26682ba7179ec7e68806170fb04821f6625063d6b1a12a6a8
-    423a6ee4b4561759978de0adce61db70a131840d3d52c1dd6c0e709c9c91236c15da
-    49b468ffbc4ebf0505756aced52055d811753e463e2f0fdceb0bcbfa303132333435
-    363738393a3b3c3d3e3f
-  input_share_1: >-
-    000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021
-    22232425262728292a2b2c2d2e2f
-  round_0:
-    prep_share_0: >-
-      5879339d691b9230058dd5b6fdcf804306454c963883a700ed8251ead70e6a6ddf
-      5c02433a304d03f0280080a6eab201d6ba304b5e6fb668b98629cbaa51b5e7
-    prep_share_1: >-
-      a986cc6296e46dcfde722a4902307fbcba25e7e7175787207014a8a1972756b0af
-      e901f95ba76723b68531c445e83d7680000a045a98af5f34a4d71abb6b7885
-    prep_message: >-
-      f6011479e21b4ef3146e0b849423e360
-  out_share_0:
-    - 6de9984430d882b37f9eb596feeee52e
-  out_share_1:
-    - f81667bbcf277d4c64614a6901111ad1
-agg_share_0: >-
-  6de9984430d882b37f9eb596feeee52e
-agg_share_1: >-
-  f81667bbcf277d4c64614a6901111ad1
-agg_result: 100
-~~~
+> TODO Copy the machine readable vectors from the source repository
+> (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
+> format them for humans.
+
+## Prio3SumVec {#testvec-prio3sumvec}
+{:numbered="false"}
+
+> TODO Copy the machine readable vectors from the source repository
+> (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
+> format them for humans.
 
 ## Prio3Histogram {#testvec-prio3histogram}
 {:numbered="false"}
 
-~~~
-length: 4
-verify_key: "000102030405060708090a0b0c0d0e0f"
-upload_0:
-  measurement: 2
-  nonce: "000102030405060708090a0b0c0d0e0f"
-  public_share: >-
-    1a84cd1f7c84b403ef8471cc15158c84b21b5733b6f53176ed5b8d8174a288e9
-  input_share_0: >-
-    fb788fb4dd1ada7c27fa1c6bd2f3ba3de3ea9c976900e67a80152e8d81603d516d08
-    98cddce70a38bc5e6228b1bc4b67b0c779b2b93e73b4da90cab872f0f51ccf5b5bbc
-    e30773cb5b0227b1c52cb2de52087f365317fa8bb1e6c15c809096b02104cc2a4680
-    88ec6c8ad9dd1289a98e750ee469d1c78fbc1796d9b7d225f7b9410596d0bf27a093
-    14d240d91f8bd194d24fff76524c5044d0939b53ceb724b49d417fe853d707617baa
-    0c75e2d107bfa90725d50bbd691ed65e0e93f946091dff046e2cdf2fef9a4586a3f0
-    d4b69177b290d3e7cbea8f5d70dfc5376537f1952339366a834e97363f8e5a9fb0ab
-    08ea5902d19e64aa4bef980fb007928cc319fbd2e7254df43c5b803bf0b9656b9484
-    aa1f4354166af16282ba51722a5768ce718c895f7a0ed3b4cad2c23fe954d62d564f
-    23f30388da09f1641be3efccff94303132333435363738393a3b3c3d3e3f
-  input_share_1: >-
-    000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021
-    22232425262728292a2b2c2d2e2f
-  round_0:
-    prep_share_0: >-
-      960cec2ab69f328cc5e790b8a65852d2bac43ed54fb150d487415d2795383f406f
-      d58ffe957f8ee525b8f2407d3ce5d71a84cd1f7c84b403ef8471cc15158c84
-    prep_share_1: >-
-      6bf313d54960cd731e186f4759a7ad2d71916f8a508640739726528e260a458f22
-      a5cf556e866033059eb5e147c974a8b21b5733b6f53176ed5b8d8174a288e9
-    prep_message: >-
-      6af47a4b7d91c14993d2a4d40c8d62d7
-  out_share_0:
-    - fb788fb4dd1ada7c27fa1c6bd2f3ba3d
-    - e3ea9c976900e67a80152e8d81603d51
-    - 6d0898cddce70a38bc5e6228b1bc4b67
-    - b0c779b2b93e73b4da90cab872f0f51c
-  out_share_1:
-    - 0687704b22e52583bc05e3942d0c45c2
-    - 1e15636896ff198563ead1727e9fc2ae
-    - 95f767322318f5c727a19dd74e43b498
-    - 5138864d46c18c4b096f35478d0f0ae3
-agg_share_0: >-
-  fb788fb4dd1ada7c27fa1c6bd2f3ba3de3ea9c976900e67a80152e8d81603d516d0898
-  cddce70a38bc5e6228b1bc4b67b0c779b2b93e73b4da90cab872f0f51c
-agg_share_1: >-
-  0687704b22e52583bc05e3942d0c45c21e15636896ff198563ead1727e9fc2ae95f767
-  322318f5c727a19dd74e43b4985138864d46c18c4b096f35478d0f0ae3
-agg_result: [0, 0, 1, 0]
-~~~
+> TODO Copy the machine readable vectors from the source repository
+> (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
+> format them for humans.
 
 ## Poplar1 {#testvec-poplar1}
 {:numbered="false"}
 
-### Sharding
-{:numbered="false"}
-
-~~~
-bits: 4
-upload_0:
-  measurement: 13
-  nonce: "000102030405060708090a0b0c0d0e0f"
-  public_share: >-
-    cd54d2e61e2c14720170a3d0748e06e0e4c840af1d8e0138ed00fb1de353014616a6
-    6a90d9354b159ab14f61f09acb60f5d3c1e2377edf5240b0fb106993aeff889dc28d
-    c4f4a46b28bf94d09eae4d50600400ef9f73f2cad7894ab244d99bf5f3c05ab13163
-    8160e01a201b4ac7e1b18f537d53eccea86864da5d27da48d2bca05bd663abd34490
-    7e7337ea6211566c41178170957627d356f228061c4c72eca34a3dcacf9cc85721db
-    a1810817f24f1c
-  input_share_0: >-
-    000102030405060708090a0b0c0d0e0f202122232425262728292a2b2c2d2e2f4b0b
-    a3a61241315702f3cde47fd8b5f4e0db66ed4ff3002ac48fd1fa1b2728e2a014b567
-    123ae545640b8719bd593ba44157b33f386d83b8f39e10db848e890073eaf40fc1b6
-    eb4b01d14199c7e0e21a84f33805453858c2c9860fd9a328331729b22e6fc4fa38f2
-    771ae81091410b3e
-  input_share_1: >-
-    101112131415161718191a1b1c1d1e1f303132333435363738393a3b3c3d3e3f64d7
-    572ab3849f73e2ff3ea5657411e5217df4b7b12d19328d71c8dd4e70badc909776eb
-    a6558717ac481ebacce4656d7aaeb7c37c251d5683c7eb83b5a3524801518da879a9
-    d5e5a22e68d8a3decf69fa10e0ca6aad9f3f539afe6fbd19c924386334e2d237f5d2
-    390805243ee3cc3e
-~~~
-
-### Preparation, Aggregation, and Unsharding
-{:numbered="false"}
-
-~~~
-verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (0, (0, 1))
-upload_0:
-  round_0:
-    prep_share_0: >-
-      4195a4c56e1260647413dc5fa0f1822844fb8750eea70573
-    prep_share_1: >-
-      7e530646b6adb0632367eb0b0eb39d1a79ec88f7bbc98f50
-    prep_message: >-
-      bfe8aa0b25c010c8977ac76baea42043bde71048aa7195c3
-  round_1:
-    prep_share_0: >-
-      24a5193d7d5bf285
-    prep_share_1: >-
-      dd5ae6c281a40d7a
-    prep_message: >-
-  out_share_0:
-    - e457b2981c956b15
-    - 79813da9034552cd
-  out_share_1:
-    - 1da84d67e26a94ea
-    - 897ec256fbbaad32
-agg_share_0: >-
-  e457b2981c956b1579813da9034552cd
-agg_share_1: >-
-  1da84d67e26a94ea897ec256fbbaad32
-agg_result: [0, 1]
-~~~
-
-~~~
-verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (1, (0, 1, 2, 3))
-upload_0:
-  round_0:
-    prep_share_0: >-
-      dda737bbd51e94c5a8ecd1b3276a402446ddcc2d21bbf6b7
-    prep_share_1: >-
-      74baf93771f3714c3b40466cb9cf19f180f48934c1f1db3d
-    prep_message: >-
-      506231f347120612e22c1820e2395a15c6d15662e2acd2f5
-  round_1:
-    prep_share_0: >-
-      a30e360c7d7e51fc
-    prep_share_1: >-
-      5ef1c9f38181ae03
-    prep_message: >-
-  out_share_0:
-    - 078e84648c4ae70c
-    - ac7a8371234c4540
-    - 69b3af8cdff3b459
-    - 91579ac64d319d58
-  out_share_1:
-    - fa717b9b72b518f3
-    - 55857c8edbb3babf
-    - 984c50731f0c4ba6
-    - 71a86539b1ce62a7
-agg_share_0: >-
-  078e84648c4ae70cac7a8371234c454069b3af8cdff3b45991579ac64d319d58
-agg_share_1: >-
-  fa717b9b72b518f355857c8edbb3babf984c50731f0c4ba671a86539b1ce62a7
-agg_result: [0, 0, 0, 1]
-~~~
-
-~~~
-verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (2, (0, 2, 4, 6))
-upload_0:
-  round_0:
-    prep_share_0: >-
-      675359765228af1fe557ab25196a1ad1399ad4c7c4affc66
-    prep_share_1: >-
-      c87431627147a136eac6fba1d3f4e6bcb57a9b2449f8fe21
-    prep_message: >-
-      2fc88ad8c36f5056ce1ea7c7ed5e018eee1470ec0da8fb88
-  round_1:
-    prep_share_0: >-
-      621b1271c1ec7b4a
-    prep_share_1: >-
-      9fe4ed8e3d1384b5
-    prep_message: >-
-  out_share_0:
-    - a05be48631d9376b
-    - 66cac23e03c7ca6d
-    - 882152745673ba29
-    - 1d096863ef00faf5
-  out_share_1:
-    - 61a41b79cd26c894
-    - 9b353dc1fb383592
-    - 79dead8ba88c45d6
-    - e5f6979c0fff050a
-agg_share_0: >-
-  a05be48631d9376b66cac23e03c7ca6d882152745673ba291d096863ef00faf5
-agg_share_1: >-
-  61a41b79cd26c8949b353dc1fb38359279dead8ba88c45d6e5f6979c0fff050a
-agg_result: [0, 0, 0, 1]
-~~~
-
-~~~
-verify_key: "000102030405060708090a0b0c0d0e0f"
-agg_param: (3, (1, 3, 5, 7, 9, 13, 15))
-upload_0:
-  round_0:
-    prep_share_0: >-
-      5d26d73b85e6c726830478fe973d8b4687dffaf324399a3e62962ab71a41841a12
-      93b70acb36828229dd8ee4fb0d437c2270472054dcef8fba9eb43fb3bb18387cf1
-      38d5e13f9a4207d7026e112fe3e51e9d88688e4cb3105308ec5a2cdd4364
-    prep_share_1: >-
-      9a8537c1e41bd3d693b03ec522278178bda4454014ba800f4bea45d9c500b51330
-      0a144b10fc37e3e5cfdda0f698519ae6301c8d0b41f623c19b125d6fe35c76143e
-      6ec8752a598cec3b5316a1782eac1584b8be9e15f93ad4ecd70c4061d77d
-    prep_message: >-
-      f7ab0efd69029bfd16b5b6c3ba640cbf4484403439f31a4ead807090e041392e55
-      9dcb55db32ba650fad6c85f2a6941609a163ad5f1de6b37b3ac79c229f752ea32f
-      a79d576af3cef3125684b2a71192342141272d62ac4b27f5c3676c3e1b62
-  round_1:
-    prep_share_0: >-
-      537a1a1fcdbbb4042dac5afb5c995abef6ffcbf2cb8375a357fd6b4697c84a47
-    prep_share_1: >-
-      9a85e5e032444bfbd253a504a366a5410900340d347c8a5ca80294b96837b538
-    prep_message: >-
-  out_share_0:
-    - 0f33eec522414e75f7094646ee1ca7c22baba5bac4a02ce4ab1e812e21a34211
-    - 013454e2f0b4046dac7287eac25ae1c398c30e2f1797507b546eaa36bc67a454
-    - e56e12917baff2b8eb367a2d9fca0fad3dfd86e24f320589202f23ce34816834
-    - af5d42b895abad21f05f3e73924b4d45533d5f9c63542c71a3343e1bd97fa61b
-    - 5a3348a91fc4111a88528cba84c009228b6a5817b6b541c077edfd801489ec38
-    - 0a511695baad2eb33150a7e13950e35a19abd5bf1bef81533f0229c9c45f0164
-    - 7dc5f3900c63255f1418d3af04abb642fc4f92b3cc25325bcc15e11caabf8038
-  out_share_1:
-    - decc113addbeb18a08f6b9b911e3583dd4545a453b5fd31b54e17ed1de5cbd6e
-    - eccbab1d0f4bfb92538d78153da51e3c673cf1d0e868af84ab9155c943985b2b
-    - 0891ed6e84500d4714c985d26035f052c202791db0cdfa76dfd0dc31cb7e974b
-    - 3ea2bd476a5452de0fa0c18c6db4b2baacc2a0639cabd38e5ccbc1e426805964
-    - 93ccb756e03beee577ad73457b3ff6dd7495a7e8494abe3f8812027feb761347
-    - e4aee96a4552d14cceaf581ec6af1ca5e6542a40e4107eacc0fdd6363ba0fe1b
-    - 703a0c6ff39cdaa0ebe72c50fb5449bd03b06d4c33dacda433ea1ee355407f47
-agg_share_0: >-
-  0f33eec522414e75f7094646ee1ca7c22baba5bac4a02ce4ab1e812e21a34211013454
-  e2f0b4046dac7287eac25ae1c398c30e2f1797507b546eaa36bc67a454e56e12917baf
-  f2b8eb367a2d9fca0fad3dfd86e24f320589202f23ce34816834af5d42b895abad21f0
-  5f3e73924b4d45533d5f9c63542c71a3343e1bd97fa61b5a3348a91fc4111a88528cba
-  84c009228b6a5817b6b541c077edfd801489ec380a511695baad2eb33150a7e13950e3
-  5a19abd5bf1bef81533f0229c9c45f01647dc5f3900c63255f1418d3af04abb642fc4f
-  92b3cc25325bcc15e11caabf8038
-agg_share_1: >-
-  decc113addbeb18a08f6b9b911e3583dd4545a453b5fd31b54e17ed1de5cbd6eeccbab
-  1d0f4bfb92538d78153da51e3c673cf1d0e868af84ab9155c943985b2b0891ed6e8450
-  0d4714c985d26035f052c202791db0cdfa76dfd0dc31cb7e974b3ea2bd476a5452de0f
-  a0c18c6db4b2baacc2a0639cabd38e5ccbc1e42680596493ccb756e03beee577ad7345
-  7b3ff6dd7495a7e8494abe3f8812027feb761347e4aee96a4552d14cceaf581ec6af1c
-  a5e6542a40e4107eacc0fdd6363ba0fe1b703a0c6ff39cdaa0ebe72c50fb5449bd03b0
-  6d4c33dacda433ea1ee355407f47
-agg_result: [0, 0, 0, 0, 0, 1, 0]
-~~~
+> TODO Copy the machine readable vectors from the source repository
+> (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
+> format them for humans.
