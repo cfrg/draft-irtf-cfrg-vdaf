@@ -3077,8 +3077,8 @@ This instance of Prio3 supports summing a vector of integers. It has three
 parameters, `length`, `bits`, and `chunk_length`. Each measurement is a vector
 of positive integers with length equal to the `length` parameter. Each element
 of the measurement is an integer in the range `[0, 2^bits)`. It is RECOMMENDED
-to set `chunk_length` to an integer near the square root of `length * bits`. The
-optimal choice for any measurement size will vary due to rounding.
+to set `chunk_length` to an integer near the square root of `length * bits`
+(see {{parallel-sum-chunk-length}}).
 
 This instance uses XofShake128 ({{xof-shake128}}) as its XOF. Its validity circuit,
 denoted `SumVec`, uses `Field128` ({{fields}}) as its finite field.
@@ -3192,6 +3192,21 @@ def eval(self, meas, joint_rand, num_shares):
 | `Field`          | `Field128` ({{fields}})                                |
 {: title="Parameters of validity circuit SumVec."}
 
+#### Selection of `ParallelSum` chunk length {#parallel-sum-chunk-length}
+
+The `chunk_length` parameter provides a trade-off between the arity of the
+`ParallelSum` gadget and the number of times the gadget is called. The proof
+length is asymptotically minimized when the chunk length is near the square root
+of the length of the measurement. However, the relationship between VDAF
+parameters and proof length is complicated, involving two forms of rounding (the
+circuit pads the inputs to its last `ParallelSum` gadget call, up to the chunk
+length, and FlpGeneric rounds the degree of wire polynomials -- determined by
+the number of times a gadget is called -- up to the next power of two).
+Therefore, the optimal choice of `chunk_length` for a concrete measurement size
+will vary, and must be found through trial and error. Setting `chunk_length`
+equal to the square root of the appropriate measurement length will result in
+proofs up to 50% larger than the optimal proof size.
+
 ### Prio3Histogram
 
 This instance of Prio3 allows for estimating the distribution of some quantity
@@ -3206,7 +3221,7 @@ circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite field.
 It has two parameters, `length`, the number of histogram buckets, and
 `chunk_length`, which is used by by a circuit optimization described below. It
 is RECOMMENDED to set `chunk_length` to an integer near the square root of
-`length`. The optimal choice for any measurement size will vary due to rounding.
+`length` (see {{parallel-sum-chunk-length}}).
 
 The measurement is encoded as a one-hot vector representing the bucket into
 which the measurement falls:
