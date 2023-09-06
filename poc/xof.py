@@ -184,13 +184,13 @@ if __name__ == '__main__':
     # https://github.com/divergentdave/vdaf-rejection-sampling-search
     expanded_vec = XofShake128.expand_into_vec(
         Field64,
-        b'\x23\x1c\x40\x0d\xcb\xaf\xce\x34\x5e\xfd\x3c\xa7\x79\x65\xee\x06',
+        bytes([0x29, 0xb2, 0x98, 0x64, 0xb4, 0xaa, 0x4e, 0x07, 0x2a, 0x44,
+               0x49, 0x24, 0xf6, 0x74, 0x0a, 0x3d]),
         b'',  # domain separation tag
         b'',  # binder
-        5,
+        33237,
     )
-    # TODO: Update the test to account for the change from cSHAKE128 to SHAKE128.
-    # assert expanded_vec[-1] == Field64(13681157193520586550)
+    assert expanded_vec[-1] == Field64(2035552711764301796)
 
     for cls in (XofShake128, XofFixedKeyAes128):
         test_xof(cls, Field128, 23)
