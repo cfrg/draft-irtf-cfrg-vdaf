@@ -541,17 +541,11 @@ class Sum(Valid):
         if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
             raise ERR_INPUT
 
-        encoded = []
-        for l in range(self.MEAS_LEN):
-            encoded.append(self.Field((measurement >> l) & 1))
-        return encoded
+        return self.Field.encode_into_bit_vector(measurement,
+                                                 self.MEAS_LEN)
 
     def truncate(self, meas):
-        decoded = self.Field(0)
-        for (l, b) in enumerate(meas):
-            w = self.Field(1 << l)
-            decoded += w * b
-        return [decoded]
+        return [self.Field.decode_from_bit_vector(meas)]
 
     def decode(self, output, _num_measurements):
         return output[0].as_unsigned()
@@ -724,17 +718,15 @@ class SumVec(Valid):
             if val < 0 or val >= 2 ** self.bits:
                 raise ERR_INPUT
 
-            for l in range(self.bits):
-                encoded.append(self.Field((val >> l) & 1))
-
+            encoded += self.Field.encode_into_bit_vector(val, self.bits)
         return encoded
 
     def truncate(self, meas):
-        truncated = [self.Field(0) for _ in range(self.length)]
+        truncated = []
         for i in range(self.length):
-            for j in range(self.bits):
-                weight = self.Field(1 << j)
-                truncated[i] += weight * meas[i * self.bits + j]
+            truncated.append(self.Field.decode_from_bit_vector(
+                meas[i * self.bits: (i + 1) * self.bits]
+            ))
         return truncated
 
     def decode(self, output, _num_measurements):
@@ -856,6 +848,9 @@ def test():
         (flp.encode(2 ** 10 - 1), True),
         (flp.Field.rand_vec(10), False),
     ])
+    # Roundtrip test with no proof generated.
+    for meas in [0, 100, 2 ** 10 - 1]:
+        assert meas == flp.decode(flp.truncate(flp.encode(meas)), 1)
 
     flp = FlpGeneric(Histogram(4, 2))
     test_flp_generic(flp, [
@@ -867,6 +862,12 @@ def test():
         ([flp.Field(1)] * 4, False),
         (flp.Field.rand_vec(4), False),
     ])
+
+    # SumVec with length 2, bits 4, chunk len 1.
+    flp = FlpGeneric(SumVec(2, 4, 1))
+    # Roundtrip test with no proof generated.
+    for meas in [[1, 2], [3, 4], [5, 6], [7, 8]]:
+        assert meas == flp.decode(flp.truncate(flp.encode(meas)), 1)
 
     flp = FlpGeneric(TestMultiGadget())
     test_flp_generic(flp, [

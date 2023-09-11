@@ -1646,7 +1646,7 @@ unsigned integer into a field element:
 * `Field(integer: Unsigned)` returns `integer` represented as a field element.
   The value of `integer` MUST be less than `Field.MODULUS`.
 
-Finally, each concrete `Field` has two derived class methods, one for encoding
+Each concrete `Field` has two derived class methods, one for encoding
 a vector of field elements as a byte string and another for decoding a vector of
 field elements.
 
@@ -1672,6 +1672,43 @@ def decode_vec(Field, encoded: Bytes) -> Vec[Field]:
     return vec
 ~~~
 {: #field-derived-methods title="Derived class methods for finite fields."}
+
+Finally, `Field` implements the following methods for representing a value as
+a sequence of field elements, each of which represents a bit of the input.
+
+~~~
+def encode_into_bit_vector(Field,
+                           val: Unsigned,
+                           bits: Unsigned) -> Vec[Field]:
+    """
+    Encode the bit representation of `val` with at most `bits` number
+    of bits, as a vector of field elements.
+    """
+    if val >= 2 ** bits:
+        # Sanity check we are able to represent `val` with `bits`
+        # number of bits.
+        raise ValueError("Number of bits is not enough to represent "
+                         "the input integer.")
+    encoded = []
+    for l in range(bits):
+        encoded.append(Field((val >> l) & 1))
+    return encoded
+
+def decode_from_bit_vector(Field, vec: Vec[Field]) -> Field:
+    """
+    Decode the field element from the bit representation, expressed
+    as a vector of field elements `vec`.
+    """
+    bits = len(vec)
+    if Field.MODULUS >> bits == 0:
+        raise ValueError("Number of bits is too large to be "
+                         "represented by field modulus.")
+    decoded = Field(0)
+    for (l, bit) in enumerate(vec):
+        decoded += Field(1 << l) * bit
+    return decoded
+~~~
+{: #field-bit-rep title="Derived class methods to encode integers into bit vector representation."}
 
 ### Auxiliary Functions
 
@@ -3127,17 +3164,11 @@ def encode(self, measurement):
     if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
         raise ERR_INPUT
 
-    encoded = []
-    for l in range(self.MEAS_LEN):
-        encoded.append(self.Field((measurement >> l) & 1))
-    return encoded
+    return self.Field.encode_into_bit_vector(measurement,
+                                             self.MEAS_LEN)
 
 def truncate(self, meas):
-    decoded = self.Field(0)
-    for (l, b) in enumerate(meas):
-        w = self.Field(1 << l)
-        decoded += w * b
-    return [decoded]
+    return [self.Field.decode_from_bit_vector(meas)]
 
 def decode(self, output, _num_measurements):
     return output[0].as_unsigned()
@@ -3203,17 +3234,15 @@ def encode(self, measurement: Vec[Unsigned]):
         if 0 > val or val >= 2 ** self.bits:
             raise ERR_INPUT
 
-        for l in range(self.bits):
-            encoded.append(self.Field((val >> l) & 1))
-
+        encoded += self.Field.encode_into_bit_vector(val, self.bits)
     return encoded
 
 def truncate(self, meas):
-    truncated = [self.Field(0) for _ in range(self.length)]
+    truncated = []
     for i in range(self.length):
-        for j in range(self.bits):
-            weight = self.Field(1 << j)
-            truncated[i] += weight * meas[i * self.bits + j]
+        truncated.append(self.Field.decode_from_bit_vector(
+            meas[i * self.bits: (i + 1) * self.bits]
+        ))
     return truncated
 
 def decode(self, output, _num_measurements):
