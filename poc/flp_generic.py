@@ -807,13 +807,13 @@ def test_flp_generic(flp, test_cases):
         v = flp.Valid.eval(meas, joint_rand, 1)
         if (v == flp.Field(0)) != expected_decision:
             print('{}: test {} failed: validity circuit returned {}'.format(
-                flp.Valid.__name__, i, v))
+                flp.Valid.__class__.__name__, i, v))
 
         # Run the FLP.
         decision = run_flp(flp, meas, 2)
         if decision != expected_decision:
             print('{}: test {} failed: proof evaluation resulted in {}; want {}'.format(
-                flp.Valid.__name__, i, decision, expected_decision))
+                flp.Valid.__class__.__name__, i, decision, expected_decision))
 
 
 class TestAverage(Sum):
