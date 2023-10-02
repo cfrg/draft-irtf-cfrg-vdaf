@@ -658,6 +658,12 @@ class SumVec(Valid):
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = None  # Set by constructor
 
+    @classmethod
+    def with_field(SumVec, field: field.FftField):
+        class SumVecWithField(SumVec):
+            Field = field
+        return SumVecWithField
+
     def __init__(self, length, bits, chunk_length):
         """
         Instantiate the `SumVec` circuit for measurements with `length`
@@ -829,6 +835,20 @@ class TestAverage(Sum):
         return total // num_measurements
 
 
+def _test_sumvec_with_field(f: field.FftField):
+    cls = SumVec.with_field(f)
+    assert cls.Field == f
+    flp = FlpGeneric(cls(2, 4, 1))
+    # Roundtrip test with no proof generated.
+    for meas in [[1, 2], [3, 4], [5, 6], [7, 8]]:
+        assert meas == flp.decode(flp.truncate(flp.encode(meas)), 1)
+
+
+def test_sumvec_with_field():
+    for f in [field.Field64, field.Field96, field.Field128]:
+        _test_sumvec_with_field(f)
+
+
 def test():
     flp = FlpGeneric(Count())
     test_flp_generic(flp, [
@@ -873,6 +893,8 @@ def test():
     test_flp_generic(flp, [
         (flp.encode(0), True),
     ])
+
+    test_sumvec_with_field()
 
 
 if __name__ == '__main__':
