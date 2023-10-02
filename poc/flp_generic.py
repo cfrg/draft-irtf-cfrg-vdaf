@@ -120,6 +120,12 @@ class Valid:
         if len(joint_rand) != self.JOINT_RAND_LEN:
             raise ERR_INPUT
 
+    @classmethod
+    def with_field(cls, field: field.FftField):
+        class _ValidWithField(cls):
+            Field = field
+        return _ValidWithField
+
 
 class ProveGadget:
     def __init__(self, Field, wire_seeds, g, g_calls):
@@ -829,6 +835,22 @@ class TestAverage(Sum):
         return total // num_measurements
 
 
+# Test encoding, truncation, then decoding.
+def test_encode_truncate_decode(flp, measurements):
+    for measurement in measurements:
+        assert measurement == flp.decode(
+            flp.truncate(flp.encode(measurement)), 1)
+
+
+def test_encode_truncate_decode_with_fft_fields(cls, measurements, *args):
+    for f in [field.Field64, field.Field96, field.Field128]:
+        cls_with_field = cls.with_field(f)
+        assert cls_with_field.Field == f
+        obj = cls_with_field(*args)
+        assert isinstance(obj, cls)
+        test_encode_truncate_decode(FlpGeneric(obj), measurements)
+
+
 def test():
     flp = FlpGeneric(Count())
     test_flp_generic(flp, [
@@ -848,9 +870,7 @@ def test():
         (flp.encode(2 ** 10 - 1), True),
         (flp.Field.rand_vec(10), False),
     ])
-    # Roundtrip test with no proof generated.
-    for meas in [0, 100, 2 ** 10 - 1]:
-        assert meas == flp.decode(flp.truncate(flp.encode(meas)), 1)
+    test_encode_truncate_decode(flp, [0, 100, 2 ** 10 - 1])
 
     flp = FlpGeneric(Histogram(4, 2))
     test_flp_generic(flp, [
@@ -864,10 +884,9 @@ def test():
     ])
 
     # SumVec with length 2, bits 4, chunk len 1.
-    flp = FlpGeneric(SumVec(2, 4, 1))
-    # Roundtrip test with no proof generated.
-    for meas in [[1, 2], [3, 4], [5, 6], [7, 8]]:
-        assert meas == flp.decode(flp.truncate(flp.encode(meas)), 1)
+    test_encode_truncate_decode_with_fft_fields(SumVec,
+                                                [[1, 2], [3, 4], [5, 6], [7, 8]],
+                                                2, 4, 1)
 
     flp = FlpGeneric(TestMultiGadget())
     test_flp_generic(flp, [
