@@ -52,6 +52,39 @@ class Field:
             vec.append(Field(x))
         return vec
 
+    @classmethod
+    def encode_into_bit_vector(Field,
+                               val: Unsigned,
+                               bits: Unsigned) -> Vec[Field]:
+        """
+        Encode the bit representation of `val` with at most `bits` number
+        of bits, as a vector of field elements.
+        """
+        if val >= 2 ** bits:
+            # Sanity check we are able to represent `val` with `bits`
+            # number of bits.
+            raise ValueError("Number of bits is not enough to represent "
+                             "the input integer.")
+        encoded = []
+        for l in range(bits):
+            encoded.append(Field((val >> l) & 1))
+        return encoded
+
+    @classmethod
+    def decode_from_bit_vector(Field, vec: Vec[Field]) -> Field:
+        """
+        Decode the field element from the bit representation, expressed
+        as a vector of field elements `vec`.
+        """
+        bits = len(vec)
+        if Field.MODULUS >> bits == 0:
+            raise ValueError("Number of bits is too large to be "
+                             "represented by field modulus.")
+        decoded = Field(0)
+        for (l, bit) in enumerate(vec):
+            decoded += Field(1 << l) * bit
+        return decoded
+
     def __add__(self, other: Field) -> Field:
         return self.__class__(self.val + other.val)
 
@@ -251,6 +284,13 @@ def test_field(cls):
     want = cls.rand_vec(10)
     got = cls.decode_vec(cls.encode_vec(want))
     assert got == want
+
+    # Test encoding integer as bit vector.
+    vals = [i for i in range(15)]
+    bits = 4
+    for val in vals:
+        encoded = cls.encode_into_bit_vector(val, bits)
+        assert cls.decode_from_bit_vector(encoded).as_unsigned() == val
 
 
 def test_fft_field(cls):

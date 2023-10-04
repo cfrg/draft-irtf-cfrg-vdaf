@@ -8,7 +8,7 @@ from functools import reduce
 from typing import Tuple, Union
 
 import field
-from common import VERSION, Bool, Bytes, Unsigned, Vec, gen_rand, vec_add
+from common import VERSION, Bool, Bytes, Unsigned, gen_rand, vec_add
 
 
 class Idpf:
@@ -36,13 +36,20 @@ class Idpf:
     # The finite field used to represent the leaf nodes of the IDPF tree.
     FieldLeaf: field.Field = None
 
+    # Type alias for the output of `eval()`.
+    Output = Union[list[list[FieldInner]],
+                   list[list[FieldLeaf]]]
+
+    # Type alias for a vector over the inner or leaf field.
+    FieldVec = Union[list[FieldInner], list[FieldLeaf]]
+
     @classmethod
     def gen(Idpf,
             alpha: Unsigned,
-            beta_inner: Vec[Vec[Idpf.FieldInner]],
-            beta_leaf: Vec[Idpf.FieldLeaf],
-            binder: Bytes,
-            rand: Bytes["Idpf.RAND_SIZE"]) -> Tuple[Bytes, Vec[Bytes]]:
+            beta_inner: list[list[Idpf.FieldInner]],
+            beta_leaf: list[Idpf.FieldLeaf],
+            binder: bytes,
+            rand: bytes["Idpf.RAND_SIZE"]) -> Tuple[bytes, list[bytes]]:
         """
         Generates an IDPF public share and sequence of IDPF-keys of length
         `SHARES`. Value `alpha` is the input to encode. Values `beta_inner` and
@@ -62,8 +69,7 @@ class Idpf:
              key: Bytes,
              level: Unsigned,
              prefixes: Tuple[Unsigned, ...],
-             binder: Bytes) -> Union[Vec[Vec[Idpf.FieldInner]],
-                                     Vec[Vec[Idpf.FieldLeaf]]]:
+             binder: Bytes) -> Output:
         """
         Evaluate an IDPF key at a given level of the tree and with the given set
         of prefixes. The output is a vector where each element is a vector of

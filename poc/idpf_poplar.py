@@ -7,7 +7,7 @@ from common import (ERR_DECODE, ERR_INPUT, TEST_VECTOR, Bytes, Unsigned, Vec,
                     format_dst, vec_add, vec_neg, vec_sub, xor)
 from field import Field2
 from idpf import Idpf, gen_test_vec, test_idpf, test_idpf_exhaustive
-from prg import PrgFixedKeyAes128
+from xof import XofFixedKeyAes128
 
 
 class IdpfPoplar(Idpf):
@@ -20,8 +20,8 @@ class IdpfPoplar(Idpf):
 
     # Parameters required by `Vdaf`.
     SHARES = 2
-    KEY_SIZE = PrgFixedKeyAes128.SEED_SIZE
-    RAND_SIZE = 2 * PrgFixedKeyAes128.SEED_SIZE
+    KEY_SIZE = XofFixedKeyAes128.SEED_SIZE
+    RAND_SIZE = 2 * XofFixedKeyAes128.SEED_SIZE
     FieldInner = field.Field64
     FieldLeaf = field.Field255
 
@@ -38,8 +38,8 @@ class IdpfPoplar(Idpf):
             raise ERR_INPUT  # unexpected length for random input
 
         init_seed = [
-            rand[:PrgFixedKeyAes128.SEED_SIZE],
-            rand[PrgFixedKeyAes128.SEED_SIZE:],
+            rand[:XofFixedKeyAes128.SEED_SIZE],
+            rand[XofFixedKeyAes128.SEED_SIZE:],
         ]
 
         seed = init_seed.copy()
@@ -169,21 +169,21 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def extend(IdpfPoplar, seed, binder):
-        prg = PrgFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
+        xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
         s = [
-            prg.next(PrgFixedKeyAes128.SEED_SIZE),
-            prg.next(PrgFixedKeyAes128.SEED_SIZE),
+            xof.next(XofFixedKeyAes128.SEED_SIZE),
+            xof.next(XofFixedKeyAes128.SEED_SIZE),
         ]
-        b = prg.next(1)[0]
+        b = xof.next(1)[0]
         t = [Field2(b & 1), Field2((b >> 1) & 1)]
         return (s, t)
 
     @classmethod
     def convert(IdpfPoplar, level, seed, binder):
-        prg = PrgFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
-        next_seed = prg.next(PrgFixedKeyAes128.SEED_SIZE)
+        xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
+        next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
         Field = IdpfPoplar.current_field(level)
-        w = prg.next_vec(Field, IdpfPoplar.VALUE_LEN)
+        w = xof.next_vec(Field, IdpfPoplar.VALUE_LEN)
         return (next_seed, w)
 
     @classmethod
@@ -212,7 +212,7 @@ class IdpfPoplar(Idpf):
                 control_bits[level * 2],
                 control_bits[level * 2 + 1],
             )
-            l = PrgFixedKeyAes128.SEED_SIZE
+            l = XofFixedKeyAes128.SEED_SIZE
             seed_cw, encoded = encoded[:l], encoded[l:]
             l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
             encoded_w_cw, encoded = encoded[:l], encoded[l:]

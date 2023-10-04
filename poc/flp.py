@@ -13,7 +13,7 @@ class Flp:
     # Generic paraemters
     Measurement = None
     AggResult = None
-    Field = field.Field
+    Field: field.Field = None
 
     # Length of the joint randomness shared by the prover and verifier.
     JOINT_RAND_LEN: Unsigned
@@ -36,21 +36,18 @@ class Flp:
     # Length of the verifier message.
     VERIFIER_LEN: Unsigned
 
-    @classmethod
-    def encode(Flp, measurement: Measurement) -> Vec[Field]:
+    def encode(self, measurement: Measurement) -> Vec[Field]:
         """Encode a measurement."""
         raise NotImplementedError()
 
-    @classmethod
-    def prove(Flp,
+    def prove(self,
               meas: Vec[Field],
               prove_rand: Vec[Field],
               joint_rand: Vec[Field]) -> Vec[Field]:
         """Generate a proof of a measurement's validity."""
         raise NotImplementedError()
 
-    @classmethod
-    def query(Flp,
+    def query(self,
               meas: Vec[Field],
               proof: Vec[Field],
               query_rand: Vec[Field],
@@ -59,29 +56,24 @@ class Flp:
         """Generate a verifier message for a measurement and proof."""
         raise NotImplementedError()
 
-    @classmethod
-    def decide(Flp, verifier: Vec[Field]) -> Bool:
+    def decide(self, verifier: Vec[Field]) -> Bool:
         """Decide if a verifier message was generated from a valid measurement."""
         raise NotImplementedError()
 
-    @classmethod
-    def truncate(Flp, inp: Vec[Field]) -> Vec[Field]:
+    def truncate(self, meas: Vec[Field]) -> Vec[Field]:
         """Map an encoded measurement to an aggregatable output."""
         raise NotImplementedError()
 
-    @classmethod
-    def decode(output: Vec[Field], num_measurements: Unsigned) -> AggResult:
+    def decode(self, output: Vec[Field], num_measurements: Unsigned) -> AggResult:
         """Decode an aggregate result."""
         raise NotImplementedError()
 
-    @classmethod
-    def test_vec_set_type_param(Vdaf, test_vec):
+    def test_vec_set_type_param(self, test_vec) -> list[str]:
         """
         Add any parameters to `test_vec` that are required to construct this
-        class. Return the key that was set or `None` if `test_vec` was not
-        modified.
+        class. Returns the keys that were set.
         """
-        return None
+        return []
 
 
 def additive_secret_share(vec: Vec[Field],
@@ -99,23 +91,23 @@ def additive_secret_share(vec: Vec[Field],
 
 
 # NOTE This is used to generate {{run-flp}}.
-def run_flp(Flp, meas: Vec[Flp.Field], num_shares: Unsigned):
+def run_flp(flp, meas: Vec[Flp.Field], num_shares: Unsigned):
     """Run the FLP on an encoded measurement."""
 
-    joint_rand = Flp.Field.rand_vec(Flp.JOINT_RAND_LEN)
-    prove_rand = Flp.Field.rand_vec(Flp.PROVE_RAND_LEN)
-    query_rand = Flp.Field.rand_vec(Flp.QUERY_RAND_LEN)
+    joint_rand = flp.Field.rand_vec(flp.JOINT_RAND_LEN)
+    prove_rand = flp.Field.rand_vec(flp.PROVE_RAND_LEN)
+    query_rand = flp.Field.rand_vec(flp.QUERY_RAND_LEN)
 
     # Prover generates the proof.
-    proof = Flp.prove(meas, prove_rand, joint_rand)
+    proof = flp.prove(meas, prove_rand, joint_rand)
 
     # Shard the measurement and the proof.
-    meas_shares = additive_secret_share(meas, num_shares, Flp.Field)
-    proof_shares = additive_secret_share(proof, num_shares, Flp.Field)
+    meas_shares = additive_secret_share(meas, num_shares, flp.Field)
+    proof_shares = additive_secret_share(proof, num_shares, flp.Field)
 
     # Verifier queries the meas shares and proof shares.
     verifier_shares = [
-        Flp.query(
+        flp.query(
             meas_share,
             proof_share,
             query_rand,
@@ -126,12 +118,12 @@ def run_flp(Flp, meas: Vec[Flp.Field], num_shares: Unsigned):
     ]
 
     # Combine the verifier shares into the verifier.
-    verifier = Flp.Field.zeros(len(verifier_shares[0]))
+    verifier = flp.Field.zeros(len(verifier_shares[0]))
     for verifier_share in verifier_shares:
         verifier = vec_add(verifier, verifier_share)
 
     # Verifier decides if the measurement is valid.
-    return Flp.decide(verifier)
+    return flp.decide(verifier)
 
 
 ##
@@ -157,52 +149,46 @@ class FlpTest(Flp):
     # Operational parameters
     meas_range = range(5)
 
-    @classmethod
-    def encode(cls, measurement):
-        if measurement not in cls.meas_range:
+    def encode(self, measurement):
+        if measurement not in self.meas_range:
             raise ERR_ENCODE
-        return [cls.Field(measurement)] * 2
+        return [self.Field(measurement)] * 2
 
-    @classmethod
-    def prove(cls, meas, prove_rand, joint_rand):
+    def prove(self, meas, prove_rand, joint_rand):
         # The proof is the measurement itself for this trivially insecure FLP.
         return deepcopy(meas)
 
-    @classmethod
-    def query(cls, meas, proof, query_rand, joint_rand, _num_shares):
+    def query(self, meas, proof, query_rand, joint_rand, _num_shares):
         return deepcopy(proof)
 
-    @classmethod
-    def decide(cls, verifier):
+    def decide(self, verifier):
         """Decide if a verifier message was generated from a valid
         measurement."""
         if len(verifier) != 2 or \
                 verifier[0] != verifier[1] or \
-                verifier[0].as_unsigned() not in cls.meas_range:
+                verifier[0].as_unsigned() not in self.meas_range:
             return False
         return True
 
-    @classmethod
-    def truncate(cls, inp):
-        return [inp[0]]
+    def truncate(self, meas):
+        return [meas[0]]
 
-    @classmethod
-    def decode(cls, output, _num_measurements):
+    def decode(self, output, _num_measurements):
         return output[0].as_unsigned()
 
 
 class FlpTestField128(FlpTest):
     Field = field.Field128
 
-    @classmethod
-    def with_joint_rand_len(cls, joint_rand_len):
-        class NewFlpTestField128(FlpTestField128):
-            JOINT_RAND_LEN = joint_rand_len
-        return NewFlpTestField128
+    @staticmethod
+    def with_joint_rand_len(joint_rand_len):
+        flp = FlpTestField128()
+        flp.JOINT_RAND_LEN = joint_rand_len
+        return flp
 
 
 if __name__ == '__main__':
-    cls = FlpTestField128
-    assert run_flp(cls, cls.encode(0), 3) == True
-    assert run_flp(cls, cls.encode(4), 3) == True
-    assert run_flp(cls, [field.Field128(1337)], 3) == False
+    flp = FlpTestField128()
+    assert run_flp(flp, flp.encode(0), 3) == True
+    assert run_flp(flp, flp.encode(4), 3) == True
+    assert run_flp(flp, [field.Field128(1337)], 3) == False

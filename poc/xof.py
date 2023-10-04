@@ -1,44 +1,43 @@
-"""Pseudorandom number generators (PRGs)."""
+"""Extendable output functions (XOFs)."""
 
 from __future__ import annotations
 
 from Cryptodome.Cipher import AES
-from Cryptodome.Hash import CMAC, cSHAKE128
-from Cryptodome.Util import Counter
+from Cryptodome.Hash import SHAKE128
 
 from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
                     from_le_bytes, gen_rand, next_power_of_2,
-                    print_wrapped_line, to_be_bytes, to_le_bytes, xor, zeros)
+                    print_wrapped_line, to_le_bytes, xor)
 
 
-class Prg:
-    """The base class for PRGs."""
+class Xof:
+    """The base class for XOFs."""
 
     # Size of the seed.
     SEED_SIZE: Unsigned
 
-    def __init__(self, seed: Bytes["Prg.SEED_SIZE"], dst: Bytes, binder: Bytes):
+    def __init__(self, seed: Bytes["Xof.SEED_SIZE"], dst: Bytes, binder: Bytes):
         """
-        Construct a new instance of this PRG from the given seed, domain
+        Construct a new instance of this XOF from the given seed, domain
         separation tag, and binder string.
         """
         raise NotImplementedError()
 
     def next(self, length: Unsigned) -> Bytes:
-        """Output the next `length` bytes of the PRG stream."""
+        """Output the next `length` bytes of the XOF stream."""
         raise NotImplementedError()
 
     @classmethod
-    def derive_seed(Prg,
-                    seed: Bytes["Prg.SEED_SIZE"],
+    def derive_seed(Xof,
+                    seed: Bytes["Xof.SEED_SIZE"],
                     dst: Bytes,
                     binder: Bytes):
         """Derive a new seed."""
-        prg = Prg(seed, dst, binder)
-        return prg.next(Prg.SEED_SIZE)
+        xof = Xof(seed, dst, binder)
+        return xof.next(Xof.SEED_SIZE)
 
     def next_vec(self, Field, length: Unsigned):
-        """Output the next `length` pseudorandom elements of `Field`."""
+        """Output the next `length` elements of `Field`."""
         m = next_power_of_2(Field.MODULUS) - 1
         vec = []
         while len(vec) < length:
@@ -49,64 +48,35 @@ class Prg:
         return vec
 
     @classmethod
-    def expand_into_vec(Prg,
+    def expand_into_vec(Xof,
                         Field,
-                        seed: Bytes["Prg.SEED_SIZE"],
+                        seed: Bytes["Xof.SEED_SIZE"],
                         dst: Bytes,
                         binder: Bytes,
                         length: Unsigned):
         """
         Expand the input `seed` into vector of `length` field elements.
         """
-        prg = Prg(seed, dst, binder)
-        return prg.next_vec(Field, length)
+        xof = Xof(seed, dst, binder)
+        return xof.next_vec(Field, length)
 
 
-class PrgAes128(Prg):
-    """WARNING `PrgAes128` has been deprecated in favor of `PrgSha3`."""
-
-    # Associated parameters
-    SEED_SIZE = 16
-
-    # Operational parameters.
-    test_vec_name = 'PrgAes128'
-
-    def __init__(self, seed, dst, binder):
-        self.length_consumed = 0
-
-        # Use CMAC as a pseuodorandom function to derive a key.
-        hasher = CMAC.new(seed, ciphermod=AES)
-        hasher.update(to_be_bytes(len(dst), 2))
-        hasher.update(dst)
-        hasher.update(binder)
-        self.key = hasher.digest()
-
-    def next(self, length: Unsigned) -> Bytes:
-        block = self.length_consumed // 16
-        offset = self.length_consumed % 16
-        self.length_consumed += length
-
-        # CTR-mode encryption of the all-zero string of the desired
-        # length and using a fixed, all-zero IV.
-        counter = Counter.new(128, initial_value=block)
-        cipher = AES.new(self.key, AES.MODE_CTR, counter=counter)
-        stream = cipher.encrypt(zeros(offset + length))
-        return stream[-length:]
-
-
-class PrgSha3(Prg):
-    """PRG based on SHA-3 (cSHAKE128)."""
+class XofShake128(Xof):
+    """XOF based on SHA-3 (SHAKE128)."""
 
     # Associated parameters
     SEED_SIZE = 16
 
     # Operational parameters.
-    test_vec_name = 'PrgSha3'
+    test_vec_name = 'XofShake128'
 
     def __init__(self, seed, dst, binder):
-        # `dst` is used as the customization string; `seed || binder` is
-        # used as the main input string.
-        self.shake = cSHAKE128.new(custom=dst)
+        # The input is composed of `dst`, the domain separation tag, the
+        # `seed`, and the `binder` string.
+        self.shake = SHAKE128.new()
+        dst_length = to_le_bytes(len(dst), 1)
+        self.shake.update(dst_length)
+        self.shake.update(dst)
         self.shake.update(seed)
         self.shake.update(binder)
 
@@ -114,9 +84,9 @@ class PrgSha3(Prg):
         return self.shake.read(length)
 
 
-class PrgFixedKeyAes128(Prg):
+class XofFixedKeyAes128(Xof):
     """
-    PRG based on a circular collision-resistant hash function from
+    XOF based on a circular collision-resistant hash function from
     fixed-key AES.
     """
 
@@ -124,7 +94,7 @@ class PrgFixedKeyAes128(Prg):
     SEED_SIZE = 16
 
     # Operational parameters
-    test_vec_name = 'PrgFixedKeyAes128'
+    test_vec_name = 'XofFixedKeyAes128'
 
     def __init__(self, seed, dst, binder):
         self.length_consumed = 0
@@ -134,9 +104,12 @@ class PrgFixedKeyAes128(Prg):
         # kept secret from any party. However, when used with
         # IdpfPoplar, we require the binder to be a random nonce.
         #
-        # Implementation note: This step can be cached across PRG
+        # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
-        shake = cSHAKE128.new(custom=dst)
+        shake = SHAKE128.new()
+        dst_length = to_le_bytes(len(dst), 1)
+        shake.update(dst_length)
+        shake.update(dst)
         shake.update(binder)
         fixed_key = shake.read(16)
         self.cipher = AES.new(fixed_key, AES.MODE_ECB)
@@ -162,7 +135,7 @@ class PrgFixedKeyAes128(Prg):
         """
         The multi-instance tweakable circular correlation-robust hash
         function of [GKWWY20] (Section 4.2). The tweak here is the key
-        that stays constant for all PRG evaluations of the same Client,
+        that stays constant for all XOF evaluations of the same Client,
         but differs between Clients.
 
         Function `AES128(key, block)` is the AES-128 blockcipher.
@@ -176,28 +149,28 @@ class PrgFixedKeyAes128(Prg):
 # TESTS
 #
 
-def test_prg(Prg, F, expanded_len):
+def test_xof(Xof, F, expanded_len):
     dst = format_dst(7, 1337, 2)
     binder = b'a string that binds some protocol artifact to the output'
-    seed = gen_rand(Prg.SEED_SIZE)
+    seed = gen_rand(Xof.SEED_SIZE)
 
     # Test next
-    expanded_data = Prg(seed, dst, binder).next(expanded_len)
+    expanded_data = Xof(seed, dst, binder).next(expanded_len)
     assert len(expanded_data) == expanded_len
 
-    want = Prg(seed, dst, binder).next(700)
+    want = Xof(seed, dst, binder).next(700)
     got = b''
-    prg = Prg(seed, dst, binder)
+    xof = Xof(seed, dst, binder)
     for i in range(0, 700, 7):
-        got += prg.next(7)
+        got += xof.next(7)
     assert got == want
 
     # Test derive
-    derived_seed = Prg.derive_seed(seed, dst, binder)
-    assert len(derived_seed) == Prg.SEED_SIZE
+    derived_seed = Xof.derive_seed(seed, dst, binder)
+    assert len(derived_seed) == Xof.SEED_SIZE
 
     # Test expand_into_vec
-    expanded_vec = Prg.expand_into_vec(F, seed, dst, binder, expanded_len)
+    expanded_vec = Xof.expand_into_vec(F, seed, dst, binder, expanded_len)
     assert len(expanded_vec) == expanded_len
 
 
@@ -209,17 +182,18 @@ if __name__ == '__main__':
 
     # This test case was found through brute-force search using this tool:
     # https://github.com/divergentdave/vdaf-rejection-sampling-search
-    expanded_vec = PrgSha3.expand_into_vec(
+    expanded_vec = XofShake128.expand_into_vec(
         Field64,
-        b'\x23\x1c\x40\x0d\xcb\xaf\xce\x34\x5e\xfd\x3c\xa7\x79\x65\xee\x06',
+        bytes([0x29, 0xb2, 0x98, 0x64, 0xb4, 0xaa, 0x4e, 0x07, 0x2a, 0x44,
+               0x49, 0x24, 0xf6, 0x74, 0x0a, 0x3d]),
         b'',  # domain separation tag
         b'',  # binder
-        5,
+        33237,
     )
-    assert expanded_vec[-1] == Field64(13681157193520586550)
+    assert expanded_vec[-1] == Field64(2035552711764301796)
 
-    for cls in (PrgAes128, PrgSha3, PrgFixedKeyAes128):
-        test_prg(cls, Field128, 23)
+    for cls in (XofShake128, XofFixedKeyAes128):
+        test_xof(cls, Field128, 23)
 
         if TEST_VECTOR:
             seed = gen_rand(cls.SEED_SIZE)
