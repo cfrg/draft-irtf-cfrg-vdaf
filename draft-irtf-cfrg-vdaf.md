@@ -4052,8 +4052,8 @@ want to be conservative in our assumptions, and hence prescribe PrgSha3 as the
 only RECOMMENDED Prg instantiation.
 
 The one exception is the PRG used in the Idpf implementation IdpfPoplar
-{{idpf-poplar}}. Here, a random oracle is not needed to prove security, since
-the security analysis of {{BBCGGI21}}, Proposition 1, only requires a PRG.
+{{idpf-poplar}}. Here, a random oracle is not needed to prove privacy, since
+the analysis of {{BBCGGI21}}, Proposition 1, only requires a PRG.
 As observed in {{GKWY20}}, a PRG can be instantiated from a correlation-robust
 hash function `H`. Informally, correlation robustness requires that for a random
 `r`, `H(xor(r, x))` is indistinguishable from a random function for any `x`.
@@ -4068,9 +4068,13 @@ fixed key can be modeled as a random permutation {{GKWY20}}. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security {{GKWWY20}}.
 
-We stress that, as PrgFixedKeyAes128 has been shown to be differentiable from a
-random oracle {{GKWWY20}}, it is NOT RECOMMENDED to use it anywhere else besides
-IdpfPoplar.
+We note that for robustness, the analysis of {{DPRS23}} still assumes a random
+oracle to make the Idpf *extractable*. While PrgFixedKeyAes128 has been shown
+to be differentiable from a random oracle {{GKWWY20}}, there are no known
+attacks exploiting this difference.
+We also stress that beven if the Idpf is not extractable, the Poplar1 guarantees
+that every client can contribute to at most one prefix among the ones being
+evaluated by the helpers.
 
 > OPEN ISSUE: We may want to drop the common interface for PRGs and random
 > oracles. See issue #159.
