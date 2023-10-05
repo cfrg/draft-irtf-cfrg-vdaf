@@ -4539,7 +4539,11 @@ As observed in {{GKWY20}}, a PRG can be instantiated from a correlation-robust
 hash function `H`. Informally, correlation robustness requires that for a random
 `r`, `H(xor(r, x))` is indistinguishable from a random function for any `x`.
 A PRG can therefore be constructed as
-`PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...`,
+
+~~~
+PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...`
+~~~
+
 since each individual hash function evaluation is indistinguishable from a random
 function.
 
