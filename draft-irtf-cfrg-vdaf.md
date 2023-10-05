@@ -4553,11 +4553,11 @@ fixed key can be modeled as a random permutation {{GKWY20}}. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security {{GKWWY20}}.
 
-We note that for robustness, the analysis of {{DPRS23}} still assumes a random
+We note that for robustness, the analysis of {{BBCGGI21}} still assumes a random
 oracle to make the Idpf extractable. While XofFixedKeyAes128 has been shown
 to be differentiable from a random oracle {{GKWWY20}}, there are no known
 attacks exploiting this difference.
-We also stress that beven if the Idpf is not extractable, the Poplar1 guarantees
+We also stress that even if the Idpf is not extractable, Poplar1 guarantees
 that every client can contribute to at most one prefix among the ones being
 evaluated by the helpers.
 
