@@ -4554,7 +4554,7 @@ use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security {{GKWWY20}}.
 
 We note that for robustness, the analysis of {{DPRS23}} still assumes a random
-oracle to make the Idpf *extractable*. While XofFixedKeyAes128 has been shown
+oracle to make the Idpf extractable. While XofFixedKeyAes128 has been shown
 to be differentiable from a random oracle {{GKWWY20}}, there are no known
 attacks exploiting this difference.
 We also stress that beven if the Idpf is not extractable, the Poplar1 guarantees
