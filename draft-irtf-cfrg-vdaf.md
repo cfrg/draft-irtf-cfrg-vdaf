@@ -4537,7 +4537,7 @@ Here, a random oracle is not needed to prove privacy, since the analysis of
 {{BBCGGI21}}, Proposition 1, only requires a Pseudorandom Generator (PRG).
 As observed in {{GKWY20}}, a PRG can be instantiated from a correlation-robust
 hash function `H`. Informally, correlation robustness requires that for a random
-`r`, `H(xor(r, x))` is indistinguishable from a random function for any `x`.
+`r`, `H(xor(r, x))` is computationally indistinguishable from a random function of `x`.
 A PRG can therefore be constructed as
 
 ~~~
