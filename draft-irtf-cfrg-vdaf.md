@@ -4528,7 +4528,7 @@ differential privacy.
 
 As described in {{xof}}, our constructions rely on an interface for eXtendable
 Output Functions (XOFs). In the security analyses of our protocols, these are
-mostly modelled as random oracles. XofShake128 is designed to be
+usually modeled as random oracles. XofShake128 is designed to be
 indifferentiable from a random oracle {{MRH04}}, making it a suitable choice
 for most situations.
 
