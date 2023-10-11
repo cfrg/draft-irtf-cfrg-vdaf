@@ -145,6 +145,17 @@ informative:
     seriesinfo: CRYPTO 2020
     target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_28
 
+  GKWY20:
+    title: Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers
+    authors:
+      - ins: C. Guo
+      - ins: J. Katz
+      - ins: X. Wang
+      - ins: Y. Yu
+    date: 2020
+    seriesinfo: S&P 2020
+    target: https://eprint.iacr.org/2019/074
+
   MRH04:
     title: "Indifferentiability, impossibility results on reductions, and applications to the random oracle methodology"
     seriesinfo:
@@ -4515,19 +4526,40 @@ differential privacy.
 
 ## Requirements for XOFs {#xof-vs-ro}
 
-XofShake128 is designed to be indifferentiable from a random oracle {{MRH04}},
-making it a suitable choice for most situations, in particular wherever the XOF
-is modeled as a random oracle in existing security analysis.
+As described in {{xof}}, our constructions rely on eXtendable
+Output Functions (XOFs). In the security analyses of our protocols, these are
+usually modeled as random oracles. XofShake128 is designed to be
+indifferentiable from a random oracle {{MRH04}}, making it a suitable choice
+for most situations.
 
-XofFixedKeyAes128 is known to be differentiable from a random oracle
-{{GKWWY20}} and is therefore NOT RECOMMENDED for general use. It is used only by
-IdpfPoplar ({{idpf-poplar}}) whose security analysis does not require a random
-oracle.
+The one exception is the Idpf implementation IdpfPoplar {{idpf-poplar}}.
+Here, a random oracle is not needed to prove privacy, since the analysis of
+{{BBCGGI21}}, Proposition 1, only requires a Pseudorandom Generator (PRG).
+As observed in {{GKWY20}}, a PRG can be instantiated from a correlation-robust
+hash function `H`. Informally, correlation robustness requires that for a random
+`r`, `H(xor(r, x))` is computationally indistinguishable from a random function of `x`.
+A PRG can therefore be constructed as
 
-> TODO(issue #216) Justify this claim.
+~~~
+PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...`
+~~~
 
-> OPEN ISSUE: We may want to drop the common interface for XOFs and random
-> oracles. See issue #159.
+since each individual hash function evaluation is indistinguishable from a random
+function.
+
+Our construction at {{xof-fixed-key-aes128}} implements a correlation-robust
+hash function using fixed-key AES. For security, it assumes that AES with a
+fixed key can be modeled as a random permutation {{GKWY20}}. Additionally, we
+use a different AES key for every client, which in the ideal cipher model leads
+to better concrete security {{GKWWY20}}.
+
+We note that for robustness, the analysis of {{BBCGGI21}} still assumes a random
+oracle to make the Idpf extractable. While XofFixedKeyAes128 has been shown
+to be differentiable from a random oracle {{GKWWY20}}, there are no known
+attacks exploiting this difference.
+We also stress that even if the Idpf is not extractable, Poplar1 guarantees
+that every client can contribute to at most one prefix among the ones being
+evaluated by the helpers.
 
 # IANA Considerations
 
