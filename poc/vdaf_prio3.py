@@ -550,6 +550,30 @@ class Prio3SumVecWithMultiproof(Prio3SumVec):
         return Prio3SumVecWithMultiproofAndParams
 
 
+class Prio3MultiHotHistogram(Prio3):
+    # Generic types required by `Prio3`
+    Xof = xof.XofShake128
+
+    # Associated parameters.
+    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
+    # Private codepoint just for testing.
+    ID = 0xFFFFFFFF
+
+    # Operational parameters.
+    test_vec_name = 'Prio3MultiHotHistogram'
+
+    @classmethod
+    def with_params(Prio3MultiHotHistogram,
+                    length: Unsigned,
+                    max_count: Unsigned,
+                    chunk_length: Unsigned):
+        class Prio3MultiHotHistogramWithParams(Prio3MultiHotHistogram):
+            Flp = flp_generic.FlpGeneric(flp_generic.MultiHotHistogram(
+                length, max_count, chunk_length
+            ))
+        return Prio3MultiHotHistogramWithParams
+
+
 ##
 # TESTS
 #
@@ -706,6 +730,29 @@ if __name__ == '__main__':
         None,
         [2],
         [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        print_test_vec=TEST_VECTOR,
+        test_vec_instance=1,
+    )
+
+    # Prio3MultiHotHistogram with length = 4, max_count = 2, chunk_length = 2.
+    cls = Prio3MultiHotHistogram \
+        .with_params(4, 2, 2) \
+        .with_shares(num_shares)
+    assert cls.ID == 0xFFFFFFFF
+    test_vdaf(cls, None, [[0, 0, 0, 0]], [0, 0, 0, 0])
+    test_vdaf(cls, None, [[0, 1, 0, 0]], [0, 1, 0, 0])
+    test_vdaf(cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0])
+    test_vdaf(cls, None, [[0, 1, 1, 0], [0, 1, 0, 1]], [0, 2, 1, 1])
+    test_vdaf(
+        cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0], print_test_vec=TEST_VECTOR
+    )
+    # Prio3MultiHotHistogram with length = 11, max_count = 5, chunk_length = 3.
+    cls = Prio3MultiHotHistogram.with_params(11, 5, 3).with_shares(3)
+    test_vdaf(
+        cls,
+        None,
+        [[1] * 5 + [0] * 6],
+        [1] * 5 + [0] * 6,
         print_test_vec=TEST_VECTOR,
         test_vec_instance=1,
     )
