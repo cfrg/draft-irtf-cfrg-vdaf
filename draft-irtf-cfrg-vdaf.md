@@ -3678,7 +3678,7 @@ def shard(Poplar1, measurement, nonce, rand):
     xof = Poplar1.Xof(
         k_shard,
         Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
-        b'',
+        nonce,
     )
 
     # Construct the IDPF values for each level of the IDPF tree.
@@ -3698,6 +3698,7 @@ def shard(Poplar1, measurement, nonce, rand):
     (public_share, keys) = Poplar1.Idpf.gen(measurement,
                                             beta_inner,
                                             beta_leaf,
+                                            nonce,
                                             idpf_rand)
 
     # Generate correlated randomness used by the Aggregators to
@@ -3795,7 +3796,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = Poplar1.Idpf.eval(
-        agg_id, public_share, key, level, prefixes)
+        agg_id, public_share, key, level, prefixes, nonce)
 
     # Get shares of the correlated randomness for computing the
     # Aggregator's share of the sketch for the given level of the IDPF
