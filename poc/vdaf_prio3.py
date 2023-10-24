@@ -136,7 +136,7 @@ class Prio3(Vdaf):
             if Prio3.Flp.JOINT_RAND_LEN > 0:
                 k_joint_rand_parts.append(k_joint_rand_part)
 
-        # Verify that each proof is well-formed and accepts the measurement.
+        # Verify that each proof is well-formed and input is valid
         for _ in range(Prio3.PROOFS):
             verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
             if not Prio3.Flp.decide(verifier):
@@ -188,7 +188,7 @@ class Prio3(Vdaf):
                 Prio3.helper_meas_share(j+1, k_helper_meas_shares[j]),
             )
 
-        # Generate the proofs and shard it into proof(s) shares.
+        # Generate and shard each proof into shares.
         prove_rands = Prio3.prove_rands(k_prove)
         leader_proofs_share = []
         for _ in range(Prio3.PROOFS):
@@ -202,7 +202,7 @@ class Prio3(Vdaf):
             )
 
         # Each Aggregator's input share contains its measurement share
-        # and proof share.
+        # and share of proof(s).
         input_shares = []
         input_shares.append((
             leader_meas_share,
@@ -268,7 +268,7 @@ class Prio3(Vdaf):
             )
 
         # Each Aggregator's input share contains its measurement share,
-        # proof share, and blind. The public share contains the
+        # share of proof(s), and blind. The public share contains the
         # Aggregators' joint randomness parts.
         input_shares = []
         input_shares.append((
