@@ -3552,7 +3552,7 @@ elements.) The scheme is comprised of the following algorithms:
   and a vector of private IDPF keys, one for each aggregator. The binder string
   is used to derive the key in the underlying XofFixedKeyAes128 XOF that is used
   for expanding seeds at each level. It MUST be chosen uniformly at random by
-  the client (see {{nonce-requirements}}).
+  the Client (see {{nonce-requirements}}).
 
   > TODO(issue #255) Decide whether to treat the public share as an opaque byte
   > string or to replace it with an explicit type.
