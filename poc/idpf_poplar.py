@@ -171,11 +171,15 @@ class IdpfPoplar(Idpf):
     def extend(IdpfPoplar, seed, binder):
         xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
         s = [
-            xof.next(XofFixedKeyAes128.SEED_SIZE),
-            xof.next(XofFixedKeyAes128.SEED_SIZE),
+            bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
+            bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
         ]
-        b = xof.next(1)[0]
-        t = [Field2(b & 1), Field2((b >> 1) & 1)]
+        # Use the least significant bits as the control bit correction,
+        # and then zero it out. This gives effectively 127 bits of
+        # security, but reduces the number of AES calls needed by 1/3.
+        t = [Field2(s[0][0] & 1), Field2(s[1][0] & 1)]
+        s[0][0] &= 0xFE
+        s[1][0] &= 0xFE
         return (s, t)
 
     @classmethod
