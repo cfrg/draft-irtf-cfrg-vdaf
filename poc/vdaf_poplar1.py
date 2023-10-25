@@ -67,7 +67,7 @@ class Poplar1(Vdaf):
         xof = Poplar1.Xof(
             k_shard,
             Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
-            b'',
+            nonce,
         )
 
         # Construct the IDPF values for each level of the IDPF tree.

@@ -3549,7 +3549,10 @@ elements.) The scheme is comprised of the following algorithms:
   consists of the random bytes it consumes.) Its inputs are the index `alpha`
   the values `beta`, and a binder string. The value of `alpha` MUST be in range
   `[0, 2^BITS)`. The output is a public part that is sent to all Aggregators
-  and a vector of private IDPF keys, one for each aggregator.
+  and a vector of private IDPF keys, one for each aggregator. The binder string
+  is used to derive the key in the underlying XofFixedKeyAes128 XOF that is used
+  for expanding seeds at each level. It MUST be chosen uniformly at random by
+  the Client (see {{nonce-requirements}}).
 
   > TODO(issue #255) Decide whether to treat the public share as an opaque byte
   > string or to replace it with an explicit type.
@@ -3678,7 +3681,7 @@ def shard(Poplar1, measurement, nonce, rand):
     xof = Poplar1.Xof(
         k_shard,
         Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
-        b'',
+        nonce,
     )
 
     # Construct the IDPF values for each level of the IDPF tree.
@@ -3698,6 +3701,7 @@ def shard(Poplar1, measurement, nonce, rand):
     (public_share, keys) = Poplar1.Idpf.gen(measurement,
                                             beta_inner,
                                             beta_leaf,
+                                            nonce,
                                             idpf_rand)
 
     # Generate correlated randomness used by the Aggregators to
@@ -3795,7 +3799,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = Poplar1.Idpf.eval(
-        agg_id, public_share, key, level, prefixes)
+        agg_id, public_share, key, level, prefixes, nonce)
 
     # Get shares of the correlated randomness for computing the
     # Aggregator's share of the sketch for the given level of the IDPF
