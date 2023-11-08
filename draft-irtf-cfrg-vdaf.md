@@ -31,13 +31,6 @@ author:
     organization: Google
     email: schoppmann@google.com
 
-normative:
-
-  FIPS202:
-    title: "SHA-3 Standard: Permutation-Based Hash and Extendable-Output Functions"
-    date: August 2015
-    seriesinfo: NIST FIPS PUB 202
-
 informative:
 
   AGJOP21:
@@ -1831,51 +1824,50 @@ def expand_into_vec(Xof,
 ~~~
 {: #xof-derived-methods title="Derived methods for XOFs."}
 
-### XofShake128 {#xof-shake128}
+### XofTurboShake128 {#xof-turboshake128}
 
-This section describes XofShake128, a XOF based on the SHAKE128 mode of
-operation for the Keccak permutation {{FIPS202}}. This XOF is RECOMMENDED for
-all use cases within VDAFs. The length of the domain separation string `dst`
-passed to XofShake128 MUST NOT exceed 255 bytes.
+This section describes XofTurboShake128, an XOF based on the
+TurboSHAKE128 {{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. This
+XOF is RECOMMENDED for all use cases within VDAFs. The length of the
+domain separation string `dst` passed to XofTurboShake128 MUST NOT
+exceed 255 bytes.
 
 ~~~
-class XofShake128(Xof):
-    """XOF based on SHA-3 (SHAKE128)."""
+class XofTurboShake128(Xof):
+    """XOF wrapper for TurboSHAKE128."""
 
     # Associated parameters
     SEED_SIZE = 16
 
     def __init__(self, seed, dst, binder):
         self.l = 0
-        self.x = seed + binder
-        self.s = dst
+        self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
 
     def next(self, length: Unsigned) -> Bytes:
         self.l += length
 
-        # Function `SHAKE128(x, l)` is as defined in
-        # [FIPS 202, Section 6.2].
+        # Function `TurboSHAKE128(M, D, L)` is as defined in
+        # Section 2.2 of [TurboSHAKE].
         #
         # Implementation note: Rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
-        # of SHA-3 will expose an "absorb-then-squeeze" API that
+        # of TurboSHAKE128 will expose an "absorb-then-squeeze" API that
         # allows stateful handling of the stream.
-        dst_length = to_le_bytes(len(self.s), 1)
-        stream = SHAKE128(dst_length + self.s + self.x, self.l)
+        stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
 ~~~
-{: title="Definition of XOF XofShake128."}
+{: title="Definition of XOF XofTurboShake128."}
 
 ### XofFixedKeyAes128 {#xof-fixed-key-aes128}
 
-While XofShake128 as described above can be securely used in all cases where a XOF
-is needed in the VDAFs described in this document, there are some cases where
-a more efficient instantiation based on fixed-key AES is possible. For now, this
-is limited to the XOF used inside the Idpf {{idpf}} implementation in Poplar1
-{{idpf-poplar}}. It is NOT RECOMMENDED to use this XOF anywhere else.
-The length of the domain separation string `dst` passed to XofFixedKeyAes128
-MUST NOT exceed 255 bytes. See Security Considerations {{security}} for a more
-detailed discussion.
+While XofTurboShake128 as described above can be securely used in all cases
+where a XOF is needed in the VDAFs described in this document, there are some
+cases where a more efficient instantiation based on fixed-key AES is possible.
+For now, this is limited to the XOF used inside the Idpf {{idpf}}
+implementation in Poplar1 {{idpf-poplar}}. It is NOT RECOMMENDED to use this
+XOF anywhere else. The length of the domain separation string `dst` passed to
+XofFixedKeyAes128 MUST NOT exceed 255 bytes. See Security Considerations
+{{security}} for a more detailed discussion.
 
 ~~~
 class XofFixedKeyAes128(Xof):
@@ -1890,15 +1882,15 @@ class XofFixedKeyAes128(Xof):
     def __init__(self, seed, dst, binder):
         self.length_consumed = 0
 
-        # Use SHA-3 to derive a key from the binder string and domain
-        # separation tag. Note that the AES key does not need to be
-        # kept secret from any party. However, when used with
+        # Use TurboSHAKE128 to derive a key from the binder string and
+        # domain separation tag. Note that the AES key does not need
+        # to be kept secret from any party. However, when used with
         # IdpfPoplar, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
         dst_length = to_le_bytes(len(dst), 1)
-        self.fixed_key = SHAKE128(dst_length + dst + binder, 16)
+        self.fixed_key = TurboSHAKE128(dst_length + dst + binder, 2, 16)
         self.seed = seed
 
     def next(self, length: Unsigned) -> Bytes:
@@ -3178,9 +3170,9 @@ each can be found in {{test-vectors}}.
 Our first instance of Prio3 is for a simple counter: Each measurement is either
 one or zero and the aggregate result is the sum of the measurements.
 
-This instance uses XofShake128 ({{xof-shake128}}) as its XOF. Its validity
-circuit, denoted `Count`, uses `Field64` ({{fields}}) as its finite field. Its
-gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
+This instance uses XofTurboShake128 ({{xof-turboshake128}}) as its XOF. Its
+validity circuit, denoted `Count`, uses `Field64` ({{fields}}) as its finite
+field. Its gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
 ~~~
 def eval(self, Field, inp):
@@ -3220,10 +3212,11 @@ The next instance of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in range `[0, 2^bits)`, where `bits` is an
 associated parameter.
 
-This instance of Prio3 uses XofShake128 ({{xof-shake128}}) as its XOF. Its validity
-circuit, denoted `Sum`, uses `Field128` ({{fields}}) as its finite field. The
-measurement is encoded as a length-`bits` vector of field elements, where the
-`l`th element of the vector represents the `l`th bit of the summand:
+This instance of Prio3 uses XofTurboShake128 ({{xof-turboshake128}}) as its
+XOF. Its validity circuit, denoted `Sum`, uses `Field128` ({{fields}}) as its
+finite field. The measurement is encoded as a length-`bits` vector of field
+elements, where the `l`th element of the vector represents the `l`th bit of the
+summand:
 
 ~~~
 def encode(self, measurement):
@@ -3283,8 +3276,9 @@ of the measurement is an integer in the range `[0, 2^bits)`. It is RECOMMENDED
 to set `chunk_length` to an integer near the square root of `length * bits`
 (see {{parallel-sum-chunk-length}}).
 
-This instance uses XofShake128 ({{xof-shake128}}) as its XOF. Its validity circuit,
-denoted `SumVec`, uses `Field128` ({{fields}}) as its finite field.
+This instance uses XofTurboShake128 ({{xof-turboshake128}}) as its XOF. Its
+validity circuit, denoted `SumVec`, uses `Field128` ({{fields}}) as its finite
+field.
 
 Measurements are encoded as a vector of field elements with length `length *
 bits`. The field elements in the encoded vector represent all the bits of the
@@ -3417,12 +3411,12 @@ example, the buckets might quantize the real numbers, and each measurement would
 report the bucket that the corresponding client's real-numbered value falls
 into. The aggregate result counts the number of measurements in each bucket.
 
-This instance of Prio3 uses XofShake128 ({{xof-shake128}}) as its XOF. Its validity
-circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as its finite field.
-It has two parameters, `length`, the number of histogram buckets, and
-`chunk_length`, which is used by by a circuit optimization described below. It
-is RECOMMENDED to set `chunk_length` to an integer near the square root of
-`length` (see {{parallel-sum-chunk-length}}).
+This instance of Prio3 uses XofTurboShake128 ({{xof-turboshake128}}) as its
+XOF. Its validity circuit, denoted `Histogram`, uses `Field128` ({{fields}}) as
+its finite field. It has two parameters, `length`, the number of histogram
+buckets, and `chunk_length`, which is used by by a circuit optimization
+described below. It is RECOMMENDED to set `chunk_length` to an integer near the
+square root of `length` (see {{parallel-sum-chunk-length}}).
 
 The measurement is encoded as a one-hot vector representing the bucket into
 which the measurement falls:
@@ -4438,8 +4432,8 @@ throws an error.
 ## Instantiation {#poplar1-inst}
 
 By default, Poplar1 is instantiated with IdpfPoplar (`VALUE_LEN == 2`) and
-XofShake128 ({{xof-shake128}}). This VDAF is suitable for any positive value of
-`BITS`. Test vectors can be found in {{test-vectors}}.
+XofTurboShake128 ({{xof-turboshake128}}). This VDAF is suitable for any
+positive value of `BITS`. Test vectors can be found in {{test-vectors}}.
 
 # Security Considerations {#security}
 
@@ -4591,7 +4585,7 @@ differential privacy.
 
 As described in {{xof}}, our constructions rely on eXtendable
 Output Functions (XOFs). In the security analyses of our protocols, these are
-usually modeled as random oracles. XofShake128 is designed to be
+usually modeled as random oracles. XofTurboShake128 is designed to be
 indifferentiable from a random oracle {{MRH04}}, making it a suitable choice
 for most situations.
 
