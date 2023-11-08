@@ -2,12 +2,23 @@
 
 from __future__ import annotations
 
+import os
+import sys
+
 from Cryptodome.Cipher import AES
-from Cryptodome.Hash import SHAKE128
+
+assert os.path.isdir('draft-irtf-cfrg-kangarootwelve/py')  # nopep8
+sys.path.append('draft-irtf-cfrg-kangarootwelve/py')  # nopep8
+from TurboSHAKE import TurboSHAKE128
 
 from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
                     from_le_bytes, gen_rand, next_power_of_2,
                     print_wrapped_line, to_le_bytes, xor)
+
+# Maximum XOF output length that will be requested by any test in this package.
+# Each time `XofTurboShake128` is constructed we call `TurboSHAKE128()` once
+# and fill a buffer with the output stream.
+MAX_XOF_OUT_STREAM_BYTES = 2000
 
 
 class Xof:
@@ -61,27 +72,28 @@ class Xof:
         return xof.next_vec(Field, length)
 
 
-class XofShake128(Xof):
+class XofTurboShake128(Xof):
     """XOF based on SHA-3 (SHAKE128)."""
 
     # Associated parameters
     SEED_SIZE = 16
 
     # Operational parameters.
-    test_vec_name = 'XofShake128'
+    test_vec_name = 'XofTurboShake128'
 
     def __init__(self, seed, dst, binder):
-        # The input is composed of `dst`, the domain separation tag, the
-        # `seed`, and the `binder` string.
-        self.shake = SHAKE128.new()
-        dst_length = to_le_bytes(len(dst), 1)
-        self.shake.update(dst_length)
-        self.shake.update(dst)
-        self.shake.update(seed)
-        self.shake.update(binder)
+        self.length_consumed = 0
+        self.stream = TurboSHAKE128(
+            to_le_bytes(len(dst), 1) + dst + seed + binder,
+            1,
+            MAX_XOF_OUT_STREAM_BYTES,
+        )
 
-    def next(self, length: Unsigned) -> Bytes:
-        return self.shake.read(length)
+    def next(self, length):
+        assert self.length_consumed + length < MAX_XOF_OUT_STREAM_BYTES
+        out = self.stream[self.length_consumed:self.length_consumed+length]
+        self.length_consumed += length
+        return out
 
 
 class XofFixedKeyAes128(Xof):
@@ -106,12 +118,8 @@ class XofFixedKeyAes128(Xof):
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
-        shake = SHAKE128.new()
-        dst_length = to_le_bytes(len(dst), 1)
-        shake.update(dst_length)
-        shake.update(dst)
-        shake.update(binder)
-        fixed_key = shake.read(16)
+        fixed_key = TurboSHAKE128(
+            to_le_bytes(len(dst), 1) + dst + binder, 2, 16)
         self.cipher = AES.new(fixed_key, AES.MODE_ECB)
         # Save seed to be used in `next`.
         self.seed = seed
@@ -182,17 +190,17 @@ if __name__ == '__main__':
 
     # This test case was found through brute-force search using this tool:
     # https://github.com/divergentdave/vdaf-rejection-sampling-search
-    expanded_vec = XofShake128.expand_into_vec(
+    expanded_vec = XofTurboShake128.expand_into_vec(
         Field64,
-        bytes([0x29, 0xb2, 0x98, 0x64, 0xb4, 0xaa, 0x4e, 0x07, 0x2a, 0x44,
-               0x49, 0x24, 0xf6, 0x74, 0x0a, 0x3d]),
+        bytes([0xd1, 0x95, 0xec, 0x90, 0xc1, 0xbc, 0xf1, 0xf2, 0xcb, 0x2c,
+               0x7e, 0x74, 0xc5, 0xc5, 0xf6, 0xda]),
         b'',  # domain separation tag
         b'',  # binder
-        33237,
+        140,
     )
-    assert expanded_vec[-1] == Field64(2035552711764301796)
+    assert expanded_vec[-1] == Field64(9734340616212735019)
 
-    for cls in (XofShake128, XofFixedKeyAes128):
+    for cls in (XofTurboShake128, XofFixedKeyAes128):
         test_xof(cls, Field128, 23)
 
         if TEST_VECTOR:

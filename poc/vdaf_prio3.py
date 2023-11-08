@@ -443,12 +443,12 @@ class Prio3(Vdaf):
 
 class Prio3Count(Prio3):
     # Generic types required by `Prio3`
-    Xof = xof.XofShake128
+    Xof = xof.XofTurboShake128
     Flp = flp_generic.FlpGeneric(flp_generic.Count())
 
     # Associated parameters.
     ID = 0x00000000
-    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
 
     # Operational parameters.
     test_vec_name = 'Prio3Count'
@@ -456,10 +456,10 @@ class Prio3Count(Prio3):
 
 class Prio3Sum(Prio3):
     # Generic types required by `Prio3`
-    Xof = xof.XofShake128
+    Xof = xof.XofTurboShake128
 
     # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
     ID = 0x00000001
 
     # Operational parameters.
@@ -474,10 +474,10 @@ class Prio3Sum(Prio3):
 
 class Prio3SumVec(Prio3):
     # Generic types required by `Prio3`
-    Xof = xof.XofShake128
+    Xof = xof.XofTurboShake128
 
     # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
     ID = 0x00000002
 
     # Operational parameters.
@@ -495,10 +495,10 @@ class Prio3SumVec(Prio3):
 
 class Prio3Histogram(Prio3):
     # Generic types required by `Prio3`
-    Xof = xof.XofShake128
+    Xof = xof.XofTurboShake128
 
     # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
     ID = 0x00000003
 
     # Operational parameters.
@@ -552,10 +552,10 @@ class Prio3SumVecWithMultiproof(Prio3SumVec):
 
 class Prio3MultiHotHistogram(Prio3):
     # Generic types required by `Prio3`
-    Xof = xof.XofShake128
+    Xof = xof.XofTurboShake128
 
     # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
     # Private codepoint just for testing.
     ID = 0xFFFFFFFF
 
@@ -584,11 +584,11 @@ class TestPrio3Average(Prio3):
     class's decode() method.
     """
 
-    Xof = xof.XofShake128
+    Xof = xof.XofTurboShake128
     # NOTE 0xFFFFFFFF is reserved for testing. If we decide to standardize this
     # Prio3 variant, then we'll need to pick a real codepoint for it.
     ID = 0xFFFFFFFF
-    VERIFY_KEY_SIZE = xof.XofShake128.SEED_SIZE
+    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
 
     @classmethod
     def with_bits(cls, bits: Unsigned):
@@ -650,7 +650,7 @@ if __name__ == '__main__':
     num_shares = 2  # Must be in range `[2, 256)`
 
     cls = Prio3 \
-        .with_xof(xof.XofShake128) \
+        .with_xof(xof.XofTurboShake128) \
         .with_flp(flp.FlpTestField128()) \
         .with_shares(num_shares)
     cls.ID = 0xFFFFFFFF
@@ -659,7 +659,7 @@ if __name__ == '__main__':
     # If JOINT_RAND_LEN == 0, then Fiat-Shamir isn't needed and we can skip
     # generating the joint randomness.
     cls = Prio3 \
-        .with_xof(xof.XofShake128) \
+        .with_xof(xof.XofTurboShake128) \
         .with_flp(flp.FlpTestField128.with_joint_rand_len(0)) \
         .with_shares(num_shares)
     cls.ID = 0xFFFFFFFF
