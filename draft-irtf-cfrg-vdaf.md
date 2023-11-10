@@ -2608,7 +2608,7 @@ def helper_proofs_share(Prio3, agg_id, k_share):
       Prio3.Flp.Field,
       k_share,
       Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
-      byte(agg_id),
+      byte(Prio3.PROOFS) + byte(agg_id),
       Prio3.Flp.PROOF_LEN * Prio3.PROOFS,
   )
 
@@ -2624,7 +2624,7 @@ def prove_rands(Prio3, k_prove):
       Prio3.Flp.Field,
       k_prove,
       Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
-      b'',
+      byte(Prio3.PROOFS),
       Prio3.Flp.PROVE_RAND_LEN * Prio3.PROOFS,
   )
 
@@ -2633,7 +2633,7 @@ def query_rands(Prio3, verify_key, nonce):
       Prio3.Flp.Field,
       verify_key,
       Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
-      nonce,
+      byte(Prio3.PROOFS) + nonce,
       Prio3.Flp.QUERY_RAND_LEN * Prio3.PROOFS,
   )
 
@@ -2654,12 +2654,11 @@ def joint_rand_seed(Prio3, k_joint_rand_parts):
 
 def joint_rands(Prio3, k_joint_rand_seed):
   """Derive the joint randomness from its seed."""
-  binder = b'' if Prio3.PROOFS == 1 else byte(Prio3.PROOFS)
   return Prio3.Xof.expand_into_vec(
       Prio3.Flp.Field,
       k_joint_rand_seed,
       Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
-      binder,
+      byte(Prio3.PROOFS),
       Prio3.Flp.JOINT_RAND_LEN * Prio3.PROOFS,
   )
 ~~~
