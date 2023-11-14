@@ -135,7 +135,7 @@ informative:
 
   GKWWY20:
     title: Better concrete security for half-gates garbling (in the multi-instance setting)
-    authors:
+    author:
       - ins: C. Guo
       - ins: J. Katz
       - ins: X. Wang
@@ -147,7 +147,7 @@ informative:
 
   GKWY20:
     title: Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers
-    authors:
+    author:
       - ins: C. Guo
       - ins: J. Katz
       - ins: X. Wang
