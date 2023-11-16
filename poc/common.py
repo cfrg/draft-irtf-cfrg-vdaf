@@ -8,7 +8,7 @@ from typing import List
 TEST_VECTOR = False
 
 # Document version, reved with each draft that contains breaking changes.
-VERSION = 7
+VERSION = 8
 
 # Primitive types
 Bool = bool
