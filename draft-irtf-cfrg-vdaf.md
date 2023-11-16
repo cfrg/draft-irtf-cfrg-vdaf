@@ -354,6 +354,23 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+08:
+
+* Poplar1: Bind the report nonce to the authenticator vector programmed into
+  the IDPF. (\*)
+
+* IdpfPoplar: Modify `extend()` by stealing each control bit from its
+  corresponding seed. This improves performance by reducing the number of AES
+  calls per level from 3 to 2. The cost is a slight reduction in the concrete
+  privacy bound. (\*)
+
+* Prio3: Add support for generating and verifying mutliple proofs per
+  measurement. This enables a trade-off between communication cost and runtime:
+  if more proofs are used, then a smaller field can be used without impacting
+  robustness. (\*)
+
+* Replace SHAKE128 with TurboSHAKE128. (\*)
+
 07:
 
 * Rename PRG to XOF ("eXtendable Output Function"). Accordingly, rename PrgSha3
