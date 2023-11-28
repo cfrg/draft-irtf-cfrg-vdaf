@@ -623,7 +623,7 @@ def _test_prio3sumvec(num_proofs: Unsigned, field: FftField):
             [255] * 10
         ],
         list(range(256, 266)),
-        print_test_vec=TEST_VECTOR,
+        print_test_vec=False,
     )
     cls = Prio3SumVec.with_params(3, 16, 7).with_shares(3)
     test_vdaf(
@@ -635,7 +635,7 @@ def _test_prio3sumvec(num_proofs: Unsigned, field: FftField):
             [15986, 24671, 23910]
         ],
         [45328, 76286, 26980],
-        print_test_vec=TEST_VECTOR,
+        print_test_vec=False,
         test_vec_instance=1,
     )
 
@@ -743,7 +743,7 @@ if __name__ == '__main__':
     test_vdaf(cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0])
     test_vdaf(cls, None, [[0, 1, 1, 0], [0, 1, 0, 1]], [0, 2, 1, 1])
     test_vdaf(
-        cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0], print_test_vec=TEST_VECTOR
+        cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0], print_test_vec=False
     )
     # Prio3MultiHotHistogram with length = 11, max_count = 5, chunk_length = 3.
     cls = Prio3MultiHotHistogram.with_params(11, 5, 3).with_shares(3)
@@ -752,7 +752,7 @@ if __name__ == '__main__':
         None,
         [[1] * 5 + [0] * 6],
         [1] * 5 + [0] * 6,
-        print_test_vec=TEST_VECTOR,
+        print_test_vec=False,
         test_vec_instance=1,
     )
 
