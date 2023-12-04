@@ -4591,6 +4591,11 @@ perhaps unlikely) for a large set of non-heavy-hitter values to share a common
 prefix, which would be leaked by a prefix tree with a sufficiently small
 threshold.
 
+A malicious collector can abuse this property to acquire the entire multi-set of
+client measurements by claiming that all tree paths are heavy hitters. Notably,
+this means Poplar does not provide better privacy than a shuffling based
+protocol in a security model where clients do not trust the collector.
+
 The only known, general-purpose approach to mitigating this leakage is via
 differential privacy.
 
