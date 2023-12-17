@@ -7,8 +7,10 @@ import sys
 
 from Cryptodome.Cipher import AES
 
-assert os.path.isdir('draft-irtf-cfrg-kangarootwelve/py')  # nopep8
-sys.path.append('draft-irtf-cfrg-kangarootwelve/py')  # nopep8
+kangarootwelve_path = \
+    "%s/draft-irtf-cfrg-kangarootwelve/py" % os.path.dirname(__file__)  # nopep8
+assert os.path.isdir(kangarootwelve_path)  # nopep8
+sys.path.append(kangarootwelve_path)  # nopep8
 from TurboSHAKE import TurboSHAKE128
 
 from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
