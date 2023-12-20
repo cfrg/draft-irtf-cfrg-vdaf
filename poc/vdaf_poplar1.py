@@ -414,28 +414,28 @@ if __name__ == '__main__':
         [2],
     )
     test_vdaf(
-        Poplar1.with_bits(64),
+        Poplar1.with_bits(128),
         (
-            63,
-            (from_be_bytes(b'01234567'),),
+            127,
+            (from_be_bytes(b'0123456789abcdef'),),
         ),
         [
-            from_be_bytes(b'01234567'),
+            from_be_bytes(b'0123456789abcdef'),
         ],
         [1],
     )
     test_vdaf(
-        Poplar1.with_bits(64),
+        Poplar1.with_bits(256),
         (
-            31,
+            63,
             (
-                from_be_bytes(b'0000'),
-                from_be_bytes(b'0123'),
+                from_be_bytes(b'00000000'),
+                from_be_bytes(b'01234567'),
             ),
         ),
         [
-            from_be_bytes(b'01234567'),
-            from_be_bytes(b'01234000'),
+            from_be_bytes(b'0123456789abcdef0123456789abcdef'),
+            from_be_bytes(b'01234567890000000000000000000000'),
         ],
         [0, 2],
     )

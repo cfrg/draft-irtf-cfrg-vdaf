@@ -2,25 +2,12 @@
 
 from __future__ import annotations
 
-import os
-import sys
-
 from Cryptodome.Cipher import AES
-
-kangarootwelve_path = \
-    "%s/draft-irtf-cfrg-kangarootwelve/py" % os.path.dirname(__file__)  # nopep8
-assert os.path.isdir(kangarootwelve_path)  # nopep8
-sys.path.append(kangarootwelve_path)  # nopep8
-from TurboSHAKE import TurboSHAKE128
 
 from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
                     from_le_bytes, gen_rand, next_power_of_2,
                     print_wrapped_line, to_le_bytes, xor)
-
-# Maximum XOF output length that will be requested by any test in this package.
-# Each time `XofTurboShake128` is constructed we call `TurboSHAKE128()` once
-# and fill a buffer with the output stream.
-MAX_XOF_OUT_STREAM_BYTES = 2000
+from turboshake import NewTurboSHAKE128, TurboSHAKE128
 
 
 class Xof:
@@ -84,18 +71,33 @@ class XofTurboShake128(Xof):
     test_vec_name = 'XofTurboShake128'
 
     def __init__(self, seed, dst, binder):
+        '''
+        self.l = 0
+        self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
+        '''
         self.length_consumed = 0
-        self.stream = TurboSHAKE128(
-            to_le_bytes(len(dst), 1) + dst + seed + binder,
-            1,
-            MAX_XOF_OUT_STREAM_BYTES,
-        )
+        state = NewTurboSHAKE128(1)
+        state.update(to_le_bytes(len(dst), 1))
+        state.update(dst)
+        state.update(seed)
+        state.update(binder)
+        self.state = state.squeeze()
 
     def next(self, length):
-        assert self.length_consumed + length < MAX_XOF_OUT_STREAM_BYTES
-        out = self.stream[self.length_consumed:self.length_consumed+length]
-        self.length_consumed += length
-        return out
+        '''
+        self.l += length
+
+        # Function `TurboSHAKE128(M, D, L)` is as defined in
+        # Section 2.2 of [TurboSHAKE].
+        #
+        # Implementation note: Rather than re-generate the output
+        # stream each time `next()` is invoked, most implementations
+        # of TurboSHAKE128 will expose an "absorb-then-squeeze" API that
+        # allows stateful handling of the stream.
+        stream = TurboSHAKE128(self.m, 1, self.l)
+        return stream[-length:]
+        '''
+        return self.state.next(length)
 
 
 class XofFixedKeyAes128(Xof):
@@ -113,9 +115,9 @@ class XofFixedKeyAes128(Xof):
     def __init__(self, seed, dst, binder):
         self.length_consumed = 0
 
-        # Use SHA-3 to derive a key from the binder string and domain
-        # separation tag. Note that the AES key does not need to be
-        # kept secret from any party. However, when used with
+        # Use TurboSHAKE128 to derive a key from the binder string and
+        # domain separation tag. Note that the AES key does not need
+        # to be kept secret from any party. However, when used with
         # IdpfPoplar, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across XOF
