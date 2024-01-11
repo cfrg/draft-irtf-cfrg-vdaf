@@ -2,7 +2,6 @@ test:
 	sage -python common.py
 	sage -python field.py
 	sage -python xof.py
-	sage -python turboshake.py
 	sage -python flp.py
 	sage -python flp_generic.py
 	sage -python idpf.py

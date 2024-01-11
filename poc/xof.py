@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from Cryptodome.Cipher import AES
+from Cryptodome.Hash import TurboSHAKE128
 
 from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
                     from_le_bytes, gen_rand, next_power_of_2,
                     print_wrapped_line, to_le_bytes, xor)
-from turboshake import NewTurboSHAKE128, TurboSHAKE128
 
 
 class Xof:
@@ -76,12 +76,11 @@ class XofTurboShake128(Xof):
         self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
         '''
         self.length_consumed = 0
-        state = NewTurboSHAKE128(1)
-        state.update(to_le_bytes(len(dst), 1))
-        state.update(dst)
-        state.update(seed)
-        state.update(binder)
-        self.state = state.squeeze()
+        self.h = TurboSHAKE128.new(domain=1)
+        self.h.update(to_le_bytes(len(dst), 1))
+        self.h.update(dst)
+        self.h.update(seed)
+        self.h.update(binder)
 
     def next(self, length):
         '''
@@ -97,7 +96,7 @@ class XofTurboShake128(Xof):
         stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
         '''
-        return self.state.next(length)
+        return self.h.read(length)
 
 
 class XofFixedKeyAes128(Xof):
@@ -122,8 +121,11 @@ class XofFixedKeyAes128(Xof):
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
-        fixed_key = TurboSHAKE128(
-            to_le_bytes(len(dst), 1) + dst + binder, 2, 16)
+        h = TurboSHAKE128.new(domain=2)
+        h.update(to_le_bytes(len(dst), 1))
+        h.update(dst)
+        h.update(binder)
+        fixed_key = h.read(16)
         self.cipher = AES.new(fixed_key, AES.MODE_ECB)
         # Save seed to be used in `next`.
         self.seed = seed
