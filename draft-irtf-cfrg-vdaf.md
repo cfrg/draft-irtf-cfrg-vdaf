@@ -2134,7 +2134,15 @@ def run_flp(flp, meas: Vec[Flp.Field], num_shares: Unsigned):
 The proof system is constructed so that, if `meas` is valid, then `run_flp(Flp,
 meas, 1)` always returns `True`. On the other hand, if `meas` is invalid, then
 as long as `joint_rand` and `query_rand` are generated uniform randomly, the
-output is `False` with overwhelming probability.
+output is `False` with high probability. False positives are possible: there is
+a small probability that a verifier accepts an invalid input as valid. An FLP
+is said to be "sound" if this probability is sufficiently small. The soundness
+of the FLP depends on a variety of parameters, like the length of the
+input and the size of the field. See {{flp-generic}} for details.
+
+Note that soundness of an FLP system is not the same as robustness for a VDAF
+In particular, soundness of the FLP is necessary, but insufficient for
+robusntess of Prio3 ({{prio3}}). See {{security-multiproof}} for details.
 
 We remark that {{BBCGGI19}} defines a much larger class of fully linear proof
 systems than we consider here. In particular, what is called an "FLP" here is
@@ -2176,21 +2184,25 @@ post-processing.
 We remark that, taken together, these three functionalities correspond roughly
 to the notion of "Affine-aggregatable encodings (AFEs)" from {{CGB17}}.
 
-### Multiple proofs {#multiproofs}
+### Multiple Proofs {#multiproofs}
 
-To improve soundness, the prover can construct multiple unique proofs for
-its measurement such that the verifier will only accept the measurement once
-all proofs have been verified. Notably, several proofs using a smaller
-field can offer the same level of soundness as a single proof using a large field.
+It is sometimes desirable to generate and verify multiple independent proofs
+for the same input. First, this improves the soundness of the proof system
+without having to change any of its parameters. Second, it allows a smaller
+field to be used (e.g., replace Field128 with Field64, see {{flp-generic}})
+without sacrificing soundness. Generally, choosing a smaller field can
+significantly reduce communication cost. (This is a trade-off, of course, since
+generating and verifying more proofs requires more time.) Given these benefits,
+this feature is implemented by Prio3 ({{prio3}}).
 
 To generate these proofs for a specific measurement, the prover calls
 `Flp.prove` multiple times, each time using an independently generated prover
-and joint randomness string. The verifier checks each proof independently,
-each time with an independently generated query randomness string. It accepts
-the measurement only if all the decision algorithm accepts on each proof.
+and joint randomness string. The verifier checks each proof independently, each
+time with an independently generated query randomness string. It accepts the
+measurement only if all the decision algorithm accepts on each proof.
 
 See {{security-multiproof}} below for discussions on choosing the right number
- of proofs.
+of proofs.
 
 ## Construction {#prio3-construction}
 
@@ -4634,11 +4646,32 @@ We also stress that even if the Idpf is not extractable, Poplar1 guarantees
 that every client can contribute to at most one prefix among the ones being
 evaluated by the helpers.
 
-## Choosing the Number of Proofs to Use for Prio3 {#security-multiproof}
+## Choosing the Field Size {#security-multiproof}
 
-> TODO Add guidance for choosing `PROOFS` ({{multiproofs}}) for Prio3.
- In particular when we go for a smaller field for a given circuit. See
-[this](https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/177) for details.
+Prio3 and other systems built from FLPs ({{flp-generic}} in particular) may
+benefit from choosing a field size that is as small as possible. Generally
+speaking, a smaller field results in lower communication and storage costs.
+Care must be taken, however, since a smaller field also results in degraded (or
+even vacuous) robustness.
+
+Different variants of Prio3 ({{prio3}}) use different field sizes: Prio3Count
+uses Field64; but Prio3Sum, Prio3SumVec, and Prio3Histogram use Field128, a
+field that is twice as large as Field64. This is due to the use of joint
+randomness ({{flp}}) in the latter variants. Joint randomness allows for more
+flexible circuit design (see {{flp-generic-overview-extensions}}), but opens up
+Prio3 to precomputation attacks, which the larger field mitigates. (See
+{{DPRS23}}, Theorem 1.) Note that privacy is not susceptible to such attacks.
+
+Another way to mitigate this issue (or improve robustness in general) is to
+generate and verify multiple, independent proofs. (See {{multiproofs}}.) For
+Prio3, the `PROOFS` parameter controls the number of proofs (at least one) that
+are generated and verified.
+
+In general, Field128 is RECOMMENDED for use in Prio3 when the circuit uses
+joint randomness (`JOINT_RAND_LEN > 0`) and `PROOFS == 1`. Field64 MAY be used
+instead, but `PROOFS` MUST be set to at least `3`. Breaking robustness for
+`PROOFS == 2` is feasible, if impractical; but `PROOFS == 1` is completely
+broken for such a small field.
 
 # IANA Considerations
 
@@ -4669,8 +4702,8 @@ time to developing definitions and security proofs.
 
 Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova, Jacob
-Rothstein, Shan Wang, Xiao Wang, and Christopher Wood for useful feedback on
-and contributions to the spec.
+Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and Christopher Wood for
+useful feedback on and contributions to the spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}
