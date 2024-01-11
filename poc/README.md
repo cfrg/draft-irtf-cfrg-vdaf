@@ -15,6 +15,8 @@ In order to run the code you will need to install
 sage --pip install pycryptodomex
 ```
 
+Version 3.20.0 or later is required.
+
 ## Generating test vectors
 
 To generate test vectors, set the value of `TEST_VECTOR` in `common.py` to
