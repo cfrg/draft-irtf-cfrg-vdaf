@@ -5,8 +5,8 @@ from __future__ import annotations
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import TurboSHAKE128
 
-from common import (TEST_VECTOR, VERSION, Bytes, Unsigned, concat, format_dst,
-                    from_le_bytes, gen_rand, next_power_of_2,
+from common import (TEST_VECTOR, TEST_VECTOR_PATH, Bytes, Unsigned, concat,
+                    format_dst, from_le_bytes, gen_rand, next_power_of_2,
                     print_wrapped_line, to_le_bytes, xor)
 
 
@@ -238,7 +238,8 @@ if __name__ == '__main__':
             print('  expanded_vec_field128: >-')
             print_wrapped_line(test_vector['expanded_vec_field128'], tab=4)
 
-            os.system('mkdir -p test_vec/{:02}'.format(VERSION))
-            with open('test_vec/{:02}/{}.json'.format(VERSION, cls.__name__), 'w') as f:
+            os.system('mkdir -p {}'.format(TEST_VECTOR_PATH))
+            with open('{}/{}.json'.format(
+                    TEST_VECTOR_PATH, cls.__name__), 'w') as f:
                 json.dump(test_vector, f, indent=4, sort_keys=True)
                 f.write('\n')

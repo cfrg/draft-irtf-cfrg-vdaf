@@ -6,7 +6,7 @@ themesleves.
 
 ## Installation
 
-This code is compatilbe with SageMath version 9.6.
+This code is compatible with SageMath version 9.6.
 
 In order to run the code you will need to install
 [PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/index.html).
@@ -19,10 +19,20 @@ Version 3.20.0 or later is required.
 
 ## Generating test vectors
 
-To generate test vectors, set the value of `TEST_VECTOR` in `common.py` to
-`True` and run `make test`.
+To generate test vectors, set environmental variable `TEST_VECTOR` to
+be `TRUE` when running tests:
 
-> TODO Make this an environment variable.
+```
+make TEST_VECTOR=TRUE
+```
+
+Users can also specify a custom path to generate the test vectors in
+environmental variable `TEST_VECTOR_PATH`. For example, to generate
+test vectors for Prio3 VDAFs into path `test_vec/00`:
+
+```
+TEST_VECTOR=TRUE TEST_VECTOR_PATH=test_vec/00 sage -python vdaf_prio3.py
+```
 
 > TODO Pretty-print VDAF name, including associated parameters. (Right now we
 > print "<class '__main__.Prio3Aes128Histogram'>", which is rather ugly.)

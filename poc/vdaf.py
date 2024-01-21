@@ -6,8 +6,8 @@ import json
 import os
 from typing import Tuple, Union
 
-from common import (VERSION, Bool, Bytes, Unsigned, format_dst, gen_rand,
-                    print_wrapped_line, to_le_bytes)
+from common import (TEST_VECTOR_PATH, Bool, Bytes, Unsigned, format_dst,
+                    gen_rand, print_wrapped_line, to_le_bytes)
 
 
 class Vdaf:
@@ -308,9 +308,12 @@ def run_vdaf(Vdaf,
     if print_test_vec:
         pretty_print_vdaf_test_vec(Vdaf, test_vec, type_params)
 
-        os.system('mkdir -p test_vec/{:02}'.format(VERSION))
-        with open('test_vec/{:02}/{}_{}.json'.format(
-                VERSION, Vdaf.test_vec_name, test_vec_instance), 'w') as f:
+        os.system('mkdir -p {}'.format(TEST_VECTOR_PATH))
+        with open(
+            '{}/{}_{}.json'.format(
+                TEST_VECTOR_PATH, Vdaf.test_vec_name, test_vec_instance),
+            'w'
+        ) as f:
             json.dump(test_vec, f, indent=4, sort_keys=True)
             f.write('\n')
 
