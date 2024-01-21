@@ -8,7 +8,7 @@ from functools import reduce
 from typing import Tuple, Union
 
 import field
-from common import VERSION, Bool, Bytes, Unsigned, gen_rand, vec_add
+from common import TEST_VECTOR_PATH, Bool, Bytes, Unsigned, gen_rand, vec_add
 
 
 class Idpf:
@@ -165,9 +165,9 @@ def gen_test_vec(Idpf, alpha, test_vec_instance):
         'keys': printable_keys,
     }
 
-    os.system('mkdir -p test_vec/{:02}'.format(VERSION))
-    with open('test_vec/{:02}/{}_{}.json'.format(
-            VERSION, Idpf.test_vec_name, test_vec_instance), 'w') as f:
+    os.system('mkdir -p {}'.format(TEST_VECTOR_PATH))
+    with open('{}/{}_{}.json'.format(
+            TEST_VECTOR_PATH, Idpf.test_vec_name, test_vec_instance), 'w') as f:
         json.dump(test_vec, f, indent=4, sort_keys=True)
         f.write('\n')
 

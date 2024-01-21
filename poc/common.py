@@ -3,12 +3,15 @@
 import os
 from typing import List
 
-# If set, then test vectors will be generated. A fixed source of randomness is
-# used for `gen_rand()`.
-TEST_VECTOR = False
-
 # Document version, reved with each draft that contains breaking changes.
 VERSION = 8
+
+# If set, then test vectors will be generated. A fixed source of randomness is
+# used for `gen_rand()`.
+TEST_VECTOR = os.environ.get('TEST_VECTOR', 'false').lower() == 'true'
+# The path where test vectors are generated.
+TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
+                                  'test_vec/{:02}'.format(VERSION))
 
 # Primitive types
 Bool = bool
