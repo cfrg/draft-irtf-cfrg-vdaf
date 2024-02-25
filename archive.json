@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-02-22T00:39:59.297567+00:00",
+  "timestamp": "2024-02-25T00:43:18.495940+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4846,7 +4846,7 @@
       ],
       "body": "The collector decides which parts of the IDPF tree to explore. This not only leaks prefixes of the heavy hitter values but, if the collector decides to explore other branches, possibly the values of individual clients.\r\n\r\nThis is pointed out in BBCGGI21:\r\n\r\n> A malicious server\u2019s only strategy to learn extra information\r\nin Protocol 5 is to manipulate answers to the prefix-count oracle\r\nqueries using an \u201cadditive attack.\u201d [...] Intuitively:\r\nthe adversary can essentially control which strings are heavy\r\nhitters (and can thus learn how many honest clients hold strings\r\nin a small set), [..]\r\n\r\nIn the current DAP implementation this is attack is trivial to execute for the collector since it even sees the values in plain. This risk should be clearly pointed out in the standard.",
       "createdAt": "2023-12-04T08:58:48Z",
-      "updatedAt": "2024-02-02T14:40:24Z",
+      "updatedAt": "2024-02-22T20:03:39Z",
       "closedAt": null,
       "comments": [
         {
@@ -4904,6 +4904,13 @@
           "body": "I agree that without Differential Privacy, this attack allowing the malicious aggregator to explore N/T paths of its choice still exists (N=#inputs, T=heavy hitter threshold). It would still exist even if we made the collectors commit to their aggregate shares before exchanging them, since the malicious aggregator can use prior knowledge about the weight of paths to consistently modify its shares.\r\n\r\nI believe the best thing we can do is what @cjpatton suggested, i.e. implement the algorithm where the total count of the children at each expansion is capped by the count of the parent, make it clear in the security considerations that this still allows the attack you mention, and suggest Differential Privacy as a mitigation for that.",
           "createdAt": "2024-02-02T14:39:42Z",
           "updatedAt": "2024-02-02T14:40:24Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Concretely, it sounds like what we need to do is pass the previous aggregate result to `Vdaf.is_valid()` so that the Aggregators can enforce this. Does that sound right, @schoppmp ?",
+          "createdAt": "2024-02-22T20:03:38Z",
+          "updatedAt": "2024-02-22T20:03:38Z"
         }
       ]
     },
