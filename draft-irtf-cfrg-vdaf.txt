@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 26 July 2024                                               ISRG
+Expires: 29 August 2024                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         23 January 2024
+                                                        26 February 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 July 2024.
+   This Internet-Draft will expire on 29 August 2024.
 
 Copyright Notice
 
@@ -5018,9 +5018,9 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    [TurboSHAKE]
               Viguier, B., Wong, D., Van Assche, G., Dang, Q., and J.
               Daemen, "KangarooTwelve and TurboSHAKE", Work in Progress,
-              Internet-Draft, draft-irtf-cfrg-kangarootwelve-12, 18
-              December 2023, <https://datatracker.ietf.org/doc/html/
-              draft-irtf-cfrg-kangarootwelve-12>.
+              Internet-Draft, draft-irtf-cfrg-kangarootwelve-13, 6
+              February 2024, <https://datatracker.ietf.org/doc/html/
+              draft-irtf-cfrg-kangarootwelve-13>.
 
 11.2.  Informative References
 
