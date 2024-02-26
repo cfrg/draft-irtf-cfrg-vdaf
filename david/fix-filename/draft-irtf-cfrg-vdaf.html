@@ -18,24 +18,24 @@ are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
 measurement that would result in an invalid aggregate result. 
     " name="description">
-<meta content="xml2rfc 3.18.2" name="generator">
+<meta content="xml2rfc 3.19.4" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.18.2
+  xml2rfc 3.19.4
     Python 3.11.6
-    ConfigArgParse 1.5.3
+    ConfigArgParse 1.7
     google-i18n-address 3.1.0
     intervaltree 3.1.0
     Jinja2 3.1.2
     lxml 4.9.3
-    platformdirs 4.1.0
+    platformdirs 4.2.0
     pycountry 22.3.5
-    PyYAML 6.0
+    PyYAML 6.0.1
     requests 2.31.0
-    setuptools 67.7.2
+    setuptools 68.2.2
     six 1.16.0
-    wcwidth 0.2.12
+    wcwidth 0.2.13
 -->
 <link href="draft-irtf-cfrg-vdaf.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1034,11 +1034,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">VDAF</td>
-<td class="right">December 2023</td>
+<td class="right">February 2024</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 9 June 2024</td>
+<td class="center">Expires 29 August 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-12-07" class="published">7 December 2023</time>
+<time datetime="2024-02-26" class="published">26 February 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-06-09">9 June 2024</time></dd>
+<dd class="expires"><time datetime="2024-08-29">29 August 2024</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 9 June 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 29 August 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1128,7 +1128,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
 <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
         </h2>
 <p id="section-boilerplate.2-1">
-            Copyright (c) 2023 IETF Trust and the persons identified as the
+            Copyright (c) 2024 IETF Trust and the persons identified as the
             document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.2-2">
             This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1260,7 +1260,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                     <p id="section-toc.1-1.7.2.1.2.1.1"><a href="#section-7.1.1" class="auto internal xref">7.1.1</a>.  <a href="#name-encoding-the-input" class="internal xref">Encoding the Input</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1.2.2">
-                    <p id="section-toc.1-1.7.2.1.2.2.1"><a href="#section-7.1.2" class="auto internal xref">7.1.2</a>.  <a href="#name-multiple-proofs" class="internal xref">Multiple proofs</a></p>
+                    <p id="section-toc.1-1.7.2.1.2.2.1"><a href="#section-7.1.2" class="auto internal xref">7.1.2</a>.  <a href="#name-multiple-proofs" class="internal xref">Multiple Proofs</a></p>
 </li>
                 </ul>
 </li>
@@ -1392,7 +1392,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                 <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-requirements-for-xofs" class="internal xref">Requirements for XOFs</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.5">
-                <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-choosing-the-number-of-proo" class="internal xref">Choosing the Number of Proofs to Use for Prio3</a></p>
+                <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-choosing-the-field-size" class="internal xref">Choosing the Field Size</a></p>
 </li>
             </ul>
 </li>
@@ -4000,10 +4000,17 @@ def run_flp(flp, meas: Vec[Flp.Field], num_shares: Unsigned):
 <p id="section-7.1-11">The proof system is constructed so that, if <code>meas</code> is valid, then <code>run_flp(Flp,
 meas, 1)</code> always returns <code>True</code>. On the other hand, if <code>meas</code> is invalid, then
 as long as <code>joint_rand</code> and <code>query_rand</code> are generated uniform randomly, the
-output is <code>False</code> with overwhelming probability.<a href="#section-7.1-11" class="pilcrow">¶</a></p>
-<p id="section-7.1-12">We remark that <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> defines a much larger class of fully linear proof
+output is <code>False</code> with high probability. False positives are possible: there is
+a small probability that a verifier accepts an invalid input as valid. An FLP
+is said to be "sound" if this probability is sufficiently small. The soundness
+of the FLP depends on a variety of parameters, like the length of the
+input and the size of the field. See <a href="#flp-generic" class="auto internal xref">Section 7.3</a> for details.<a href="#section-7.1-11" class="pilcrow">¶</a></p>
+<p id="section-7.1-12">Note that soundness of an FLP system is not the same as robustness for a VDAF
+In particular, soundness of the FLP is necessary, but insufficient for
+robusntess of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>). See <a href="#security-multiproof" class="auto internal xref">Section 9.5</a> for details.<a href="#section-7.1-12" class="pilcrow">¶</a></p>
+<p id="section-7.1-13">We remark that <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> defines a much larger class of fully linear proof
 systems than we consider here. In particular, what is called an "FLP" here is
-called a 1.5-round, public-coin, interactive oracle proof system in their paper.<a href="#section-7.1-12" class="pilcrow">¶</a></p>
+called a 1.5-round, public-coin, interactive oracle proof system in their paper.<a href="#section-7.1-13" class="pilcrow">¶</a></p>
 <div id="flp-encode">
 <section id="section-7.1.1">
           <h4 id="name-encoding-the-input">
@@ -4053,19 +4060,23 @@ to the notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CG
 <div id="multiproofs">
 <section id="section-7.1.2">
           <h4 id="name-multiple-proofs">
-<a href="#section-7.1.2" class="section-number selfRef">7.1.2. </a><a href="#name-multiple-proofs" class="section-name selfRef">Multiple proofs</a>
+<a href="#section-7.1.2" class="section-number selfRef">7.1.2. </a><a href="#name-multiple-proofs" class="section-name selfRef">Multiple Proofs</a>
           </h4>
-<p id="section-7.1.2-1">To improve soundness, the prover can construct multiple unique proofs for
-its measurement such that the verifier will only accept the measurement once
-all proofs have been verified. Notably, several proofs using a smaller
-field can offer the same level of soundness as a single proof using a large field.<a href="#section-7.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.1.2-1">It is sometimes desirable to generate and verify multiple independent proofs
+for the same input. First, this improves the soundness of the proof system
+without having to change any of its parameters. Second, it allows a smaller
+field to be used (e.g., replace Field128 with Field64, see <a href="#flp-generic" class="auto internal xref">Section 7.3</a>)
+without sacrificing soundness. Generally, choosing a smaller field can
+significantly reduce communication cost. (This is a trade-off, of course, since
+generating and verifying more proofs requires more time.) Given these benefits,
+this feature is implemented by Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>).<a href="#section-7.1.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.1.2-2">To generate these proofs for a specific measurement, the prover calls
 <code>Flp.prove</code> multiple times, each time using an independently generated prover
-and joint randomness string. The verifier checks each proof independently,
-each time with an independently generated query randomness string. It accepts
-the measurement only if all the decision algorithm accepts on each proof.<a href="#section-7.1.2-2" class="pilcrow">¶</a></p>
+and joint randomness string. The verifier checks each proof independently, each
+time with an independently generated query randomness string. It accepts the
+measurement only if all the decision algorithm accepts on each proof.<a href="#section-7.1.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.1.2-3">See <a href="#security-multiproof" class="auto internal xref">Section 9.5</a> below for discussions on choosing the right number
- of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
+of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -7132,7 +7143,7 @@ next. This would help reduce communication overhead.<a href="#section-8.2.6.6-4"
 <div id="idpf-poplar">
 <section id="section-8.3">
         <h3 id="name-the-idpf-scheme-of">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-the-idpf-scheme-of" class="section-name selfRef">The IDPF scheme of <em class="cite xref">[BBCGGI21]</em></a>
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-the-idpf-scheme-of" class="section-name selfRef">The IDPF scheme of <span class="cite xref">[BBCGGI21]</span></a>
         </h3>
 <p id="section-8.3-1">In this section we specify a concrete IDPF, called IdpfPoplar, suitable for
 instantiating Poplar1. The scheme gets its name from the name of the protocol of
@@ -7686,16 +7697,30 @@ evaluated by the helpers.<a href="#section-9.4-6" class="pilcrow">¶</a></p>
 </div>
 <div id="security-multiproof">
 <section id="section-9.5">
-        <h3 id="name-choosing-the-number-of-proo">
-<a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-choosing-the-number-of-proo" class="section-name selfRef">Choosing the Number of Proofs to Use for Prio3</a>
+        <h3 id="name-choosing-the-field-size">
+<a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-choosing-the-field-size" class="section-name selfRef">Choosing the Field Size</a>
         </h3>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-9.5-1.1">
-            <p id="section-9.5-1.1.1">TODO Add guidance for choosing <code>PROOFS</code> (<a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>) for Prio3.
- In particular when we go for a smaller field for a given circuit. See
-<a href="https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/177">this</a> for details.<a href="#section-9.5-1.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
+<p id="section-9.5-1">Prio3 and other systems built from FLPs (<a href="#flp-generic" class="auto internal xref">Section 7.3</a> in particular) may
+benefit from choosing a field size that is as small as possible. Generally
+speaking, a smaller field results in lower communication and storage costs.
+Care must be taken, however, since a smaller field also results in degraded (or
+even vacuous) robustness.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-2">Different variants of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) use different field sizes: Prio3Count
+uses Field64; but Prio3Sum, Prio3SumVec, and Prio3Histogram use Field128, a
+field that is twice as large as Field64. This is due to the use of joint
+randomness (<a href="#flp" class="auto internal xref">Section 7.1</a>) in the latter variants. Joint randomness allows for more
+flexible circuit design (see <a href="#flp-generic-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>), but opens up
+Prio3 to precomputation attacks, which the larger field mitigates. (See
+<span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, Theorem 1.) Note that privacy is not susceptible to such attacks.<a href="#section-9.5-2" class="pilcrow">¶</a></p>
+<p id="section-9.5-3">Another way to mitigate this issue (or improve robustness in general) is to
+generate and verify multiple, independent proofs. (See <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>.) For
+Prio3, the <code>PROOFS</code> parameter controls the number of proofs (at least one) that
+are generated and verified.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
+<p id="section-9.5-4">In general, Field128 is <span class="bcp14">RECOMMENDED</span> for use in Prio3 when the circuit uses
+joint randomness (<code>JOINT_RAND_LEN &gt; 0</code>) and <code>PROOFS == 1</code>. Field64 <span class="bcp14">MAY</span> be used
+instead, but <code>PROOFS</code> <span class="bcp14">MUST</span> be set to at least <code>3</code>. Breaking robustness for
+<code>PROOFS == 2</code> is feasible, if impractical; but <code>PROOFS == 1</code> is completely
+broken for such a small field.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -7822,7 +7847,7 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dd class="break"></dd>
 <dt id="TurboSHAKE">[TurboSHAKE]</dt>
       <dd>
-<span class="refAuthor">Viguier, B.</span>, <span class="refAuthor">Wong, D.</span>, <span class="refAuthor">Van Assche, G.</span>, <span class="refAuthor">Dang, Q.</span>, and <span class="refAuthor">J. Daemen</span>, <span class="refTitle">"KangarooTwelve and TurboSHAKE"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-kangarootwelve-11</span>, <time datetime="2023-06-20" class="refDate">20 June 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-11">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-11</a>&gt;</span>. </dd>
+<span class="refAuthor">Viguier, B.</span>, <span class="refAuthor">Wong, D.</span>, <span class="refAuthor">Van Assche, G.</span>, <span class="refAuthor">Dang, Q.</span>, and <span class="refAuthor">J. Daemen</span>, <span class="refTitle">"KangarooTwelve and TurboSHAKE"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-kangarootwelve-13</span>, <time datetime="2024-02-06" class="refDate">6 February 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-13">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-13</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -7851,7 +7876,7 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dd class="break"></dd>
 <dt id="DAP">[DAP]</dt>
         <dd>
-<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-08</span>, <time datetime="2023-10-23" class="refDate">23 October 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-08">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-08</a>&gt;</span>. </dd>
+<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Pitman, B.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-09</span>, <time datetime="2023-12-18" class="refDate">18 December 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-09">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-09</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Dou02">[Dou02]</dt>
         <dd>
@@ -7907,8 +7932,8 @@ analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. Thank
 time to developing definitions and security proofs.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <p id="appendix-A-2">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova, Jacob
-Rothstein, Shan Wang, Xiao Wang, and Christopher Wood for useful feedback on
-and contributions to the spec.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and Christopher Wood for
+useful feedback on and contributions to the spec.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="test-vectors">

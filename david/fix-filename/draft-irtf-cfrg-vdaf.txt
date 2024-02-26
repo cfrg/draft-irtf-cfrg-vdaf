@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 9 June 2024                                                ISRG
+Expires: 29 August 2024                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         7 December 2023
+                                                        26 February 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,11 +53,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 June 2024.
+   This Internet-Draft will expire on 29 August 2024.
 
 Copyright Notice
 
-   Copyright (c) 2023 IETF Trust and the persons identified as the
+   Copyright (c) 2024 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -104,7 +104,7 @@ Table of Contents
    7.  Prio3
      7.1.  Fully Linear Proof (FLP) Systems
        7.1.1.  Encoding the Input
-       7.1.2.  Multiple proofs
+       7.1.2.  Multiple Proofs
      7.2.  Construction
        7.2.1.  Sharding
        7.2.2.  Preparation
@@ -142,7 +142,7 @@ Table of Contents
      9.3.  Requirements for the Aggregation Parameters
        9.3.1.  Additional Privacy Considerations
      9.4.  Requirements for XOFs
-     9.5.  Choosing the Number of Proofs to Use for Prio3
+     9.5.  Choosing the Field Size
    10. IANA Considerations
    11. References
      11.1.  Normative References
@@ -2272,8 +2272,18 @@ class XofFixedKeyAes128(Xof):
    The proof system is constructed so that, if meas is valid, then
    run_flp(Flp, meas, 1) always returns True.  On the other hand, if
    meas is invalid, then as long as joint_rand and query_rand are
-   generated uniform randomly, the output is False with overwhelming
-   probability.
+   generated uniform randomly, the output is False with high
+   probability.  False positives are possible: there is a small
+   probability that a verifier accepts an invalid input as valid.  An
+   FLP is said to be "sound" if this probability is sufficiently small.
+   The soundness of the FLP depends on a variety of parameters, like the
+   length of the input and the size of the field.  See Section 7.3 for
+   details.
+
+   Note that soundness of an FLP system is not the same as robustness
+   for a VDAF In particular, soundness of the FLP is necessary, but
+   insufficient for robusntess of Prio3 (Section 7).  See Section 9.5
+   for details.
 
    We remark that [BBCGGI19] defines a much larger class of fully linear
    proof systems than we consider here.  In particular, what is called
@@ -2321,13 +2331,17 @@ class XofFixedKeyAes128(Xof):
    correspond roughly to the notion of "Affine-aggregatable encodings
    (AFEs)" from [CGB17].
 
-7.1.2.  Multiple proofs
+7.1.2.  Multiple Proofs
 
-   To improve soundness, the prover can construct multiple unique proofs
-   for its measurement such that the verifier will only accept the
-   measurement once all proofs have been verified.  Notably, several
-   proofs using a smaller field can offer the same level of soundness as
-   a single proof using a large field.
+   It is sometimes desirable to generate and verify multiple independent
+   proofs for the same input.  First, this improves the soundness of the
+   proof system without having to change any of its parameters.  Second,
+   it allows a smaller field to be used (e.g., replace Field128 with
+   Field64, see Section 7.3) without sacrificing soundness.  Generally,
+   choosing a smaller field can significantly reduce communication cost.
+   (This is a trade-off, of course, since generating and verifying more
+   proofs requires more time.)  Given these benefits, this feature is
+   implemented by Prio3 (Section 7).
 
    To generate these proofs for a specific measurement, the prover calls
    Flp.prove multiple times, each time using an independently generated
@@ -4925,12 +4939,34 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    Poplar1 guarantees that every client can contribute to at most one
    prefix among the ones being evaluated by the helpers.
 
-9.5.  Choosing the Number of Proofs to Use for Prio3
+9.5.  Choosing the Field Size
 
-      TODO Add guidance for choosing PROOFS (Section 7.1.2) for Prio3.
-      In particular when we go for a smaller field for a given circuit.
-      See this (https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/177)
-      for details.
+   Prio3 and other systems built from FLPs (Section 7.3 in particular)
+   may benefit from choosing a field size that is as small as possible.
+   Generally speaking, a smaller field results in lower communication
+   and storage costs.  Care must be taken, however, since a smaller
+   field also results in degraded (or even vacuous) robustness.
+
+   Different variants of Prio3 (Section 7) use different field sizes:
+   Prio3Count uses Field64; but Prio3Sum, Prio3SumVec, and
+   Prio3Histogram use Field128, a field that is twice as large as
+   Field64.  This is due to the use of joint randomness (Section 7.1) in
+   the latter variants.  Joint randomness allows for more flexible
+   circuit design (see Section 7.3.1.1), but opens up Prio3 to
+   precomputation attacks, which the larger field mitigates.  (See
+   [DPRS23], Theorem 1.)  Note that privacy is not susceptible to such
+   attacks.
+
+   Another way to mitigate this issue (or improve robustness in general)
+   is to generate and verify multiple, independent proofs.  (See
+   Section 7.1.2.)  For Prio3, the PROOFS parameter controls the number
+   of proofs (at least one) that are generated and verified.
+
+   In general, Field128 is RECOMMENDED for use in Prio3 when the circuit
+   uses joint randomness (JOINT_RAND_LEN > 0) and PROOFS == 1.  Field64
+   MAY be used instead, but PROOFS MUST be set to at least 3.  Breaking
+   robustness for PROOFS == 2 is feasible, if impractical; but PROOFS ==
+   1 is completely broken for such a small field.
 
 10.  IANA Considerations
 
@@ -4982,9 +5018,9 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    [TurboSHAKE]
               Viguier, B., Wong, D., Van Assche, G., Dang, Q., and J.
               Daemen, "KangarooTwelve and TurboSHAKE", Work in Progress,
-              Internet-Draft, draft-irtf-cfrg-kangarootwelve-11, 20 June
-              2023, <https://datatracker.ietf.org/doc/html/draft-irtf-
-              cfrg-kangarootwelve-11>.
+              Internet-Draft, draft-irtf-cfrg-kangarootwelve-13, 6
+              February 2024, <https://datatracker.ietf.org/doc/html/
+              draft-irtf-cfrg-kangarootwelve-13>.
 
 11.2.  Informative References
 
@@ -5007,12 +5043,12 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
               2017 , 2017,
               <https://dl.acm.org/doi/10.5555/3154630.3154652>.
 
-   [DAP]      Geoghegan, T., Patton, C., Rescorla, E., and C. A. Wood,
-              "Distributed Aggregation Protocol for Privacy Preserving
-              Measurement", Work in Progress, Internet-Draft, draft-
-              ietf-ppm-dap-08, 23 October 2023,
+   [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
+              C. A. Wood, "Distributed Aggregation Protocol for Privacy
+              Preserving Measurement", Work in Progress, Internet-Draft,
+              draft-ietf-ppm-dap-09, 18 December 2023,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              08>.
+              09>.
 
    [Dou02]    Douceur, J., "The Sybil Attack", IPTPS 2002 , 2002,
               <https://doi.org/10.1007/3-540-45748-8_24>.
@@ -5071,8 +5107,9 @@ Acknowledgments
 
    Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
    Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
-   Raykova, Jacob Rothstein, Shan Wang, Xiao Wang, and Christopher Wood
-   for useful feedback on and contributions to the spec.
+   Raykova, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
+   Christopher Wood for useful feedback on and contributions to the
+   spec.
 
 Test Vectors
 
