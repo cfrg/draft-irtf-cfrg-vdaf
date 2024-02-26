@@ -1,5 +1,5 @@
-# prio3_multiproof_robustness.py - Plot robustness bounds for various parameters.
-# Use `sage -python prio3_multiproof_robustness.py`
+# plot_prio3_multiproof_robustness.py - Plot robustness bounds for various parameters.
+# Use `sage -python plot_prio3_multiproof_robustness.py`
 import math
 
 import matplotlib.pyplot as plt
