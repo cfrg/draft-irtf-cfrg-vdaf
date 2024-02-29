@@ -16,18 +16,11 @@ jobs:
   test:
     name: "Run unit tests for reference code"
     runs-on: ubuntu-latest
+    container: sagemath/sagemath:latest
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-      with:
-        submodules: true
-
-    - name: Install Sage
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y sagemath python3-cffi
-        sage -pip install pycryptodomex
 
     - name: Run tests
       working-directory: poc
-      run: make test
+      run: sage -python -m unittest
