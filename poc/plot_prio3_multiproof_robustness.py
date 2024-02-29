@@ -1,4 +1,5 @@
-# plot_prio3_multiproof_robustness.py - Plot robustness bounds for various parameters.
+# plot_prio3_multiproof_robustness.py - Plot robustness bounds for various
+# parameters.
 # Use `sage -python plot_prio3_multiproof_robustness.py`
 import math
 
@@ -30,8 +31,8 @@ def robustness(epsilon, ro_queries, prep_queries, num_proofs, seed_bits):
 
     epsilon - soundness of the base FLP
 
-    ro_queries - random oracle queries, a proxy for the amount of precomputation
-                 done by the adversary
+    ro_queries - random oracle queries, a proxy for the amount of
+                 precomputation done by the adversary
 
     prep_queries - number of online attempts, a proxy for the batch size
 

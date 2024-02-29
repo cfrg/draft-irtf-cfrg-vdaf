@@ -25,11 +25,11 @@ jobs:
 
     - name: Run pyflakes
       working-directory: poc
-      run: pyflakes *.py
+      run: pyflakes *.py tests/*.py
 
     - name: Run autopep8
       working-directory: poc
-      run: autopep8 --diff --exit-code *.py
+      run: autopep8 --diff --exit-code *.py tests/*.py
 
     - name: Run isort
       working-directory: poc
