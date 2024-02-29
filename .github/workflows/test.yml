@@ -16,7 +16,9 @@ jobs:
   test:
     name: "Run unit tests for reference code"
     runs-on: ubuntu-latest
-    container: sagemath/sagemath:latest
+    container:
+      image: sagemath/sagemath:latest
+      options: --user root
     steps:
     - name: Checkout
       uses: actions/checkout@v3
