@@ -23,6 +23,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
+    - name: Install dependencies
+      run: sage --pip install pycryptodomex
+
     - name: Run tests
       working-directory: poc
       run: sage -python -m unittest
