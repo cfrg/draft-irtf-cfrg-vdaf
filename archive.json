@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-02-29T00:39:55.631862+00:00",
+  "timestamp": "2024-03-03T00:42:34.236213+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -27482,6 +27482,137 @@
           "body": "",
           "createdAt": "2024-02-26T17:00:40Z",
           "updatedAt": "2024-02-26T17:00:40Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 330,
+      "id": "PR_kwDOGKuqOc5oTrnk",
+      "title": "Use unittest for tests",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/330",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This moves tests from `if __name__ == \"__main__\":` blocks in each file to a separate directory, using the standard library's `unittest` framework. Aside from better code organization, this also speeds up test execution, because we only need to load Sage's libraries once. This is part of #327.",
+      "createdAt": "2024-02-29T15:18:27Z",
+      "updatedAt": "2024-02-29T16:09:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "da84b8ad9ad38bf998a423da4fd6cdfffd70813b",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/move-tests",
+      "headRefOid": "10ca481230ace17cb9e9f04602eb266c00d6e489",
+      "closedAt": "2024-02-29T16:09:33Z",
+      "mergedAt": "2024-02-29T16:09:33Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "9bb282b1efd3278c2f02b2800ad71adbd1164f90"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc5xzB8L",
+          "commit": {
+            "abbreviatedOid": "10ca481"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Beautiful, thanks so much for putting the time in on this.",
+          "createdAt": "2024-02-29T15:32:10Z",
+          "updatedAt": "2024-02-29T15:35:27Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "Why make this change?",
+              "createdAt": "2024-02-29T15:32:10Z",
+              "updatedAt": "2024-02-29T15:35:27Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "Why is this file needed?",
+              "createdAt": "2024-02-29T15:34:16Z",
+              "updatedAt": "2024-02-29T15:35:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5xzKEX",
+          "commit": {
+            "abbreviatedOid": "10ca481"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-02-29T15:45:40Z",
+          "updatedAt": "2024-02-29T15:48:32Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "I saw a message after I added an import for this file, I think it was a deprecation warning. The issue is that `\\s` is not a supported escape character sequence. Since backslashes are only used in LaTeX syntax here, I just turned the docstring into a raw string literal to fix it.",
+              "createdAt": "2024-02-29T15:45:40Z",
+              "updatedAt": "2024-02-29T15:48:32Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "This indicates that Python should treat the folder hierarchy as a package. The unittest auto-discovery code needs to see this, and it's also required to enable intra-package imports.",
+              "createdAt": "2024-02-29T15:48:21Z",
+              "updatedAt": "2024-02-29T15:48:32Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 331,
+      "id": "PR_kwDOGKuqOc5oUF_m",
+      "title": "Use Sage container image in CI",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/331",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This uses a Sage Docker image in lieu of installing Sage with apt-get. This should hopefully speed up CI significantly. #330 enables this because our Makefile is now only two lines long, so we can duplicate the command in it, and use this container image that lacks GNU Make.",
+      "createdAt": "2024-02-29T16:17:26Z",
+      "updatedAt": "2024-02-29T16:37:00Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9bb282b1efd3278c2f02b2800ad71adbd1164f90",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/gha-docker",
+      "headRefOid": "39db3a31daaf0bbe3ca3155ebd9529696e78202c",
+      "closedAt": "2024-02-29T16:36:58Z",
+      "mergedAt": "2024-02-29T16:36:58Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "82389a81e1c871b39cd24d267768873555580529"
+      },
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Now twice as fast!",
+          "createdAt": "2024-02-29T16:36:49Z",
+          "updatedAt": "2024-02-29T16:36:49Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc5xznyD",
+          "commit": {
+            "abbreviatedOid": "39db3a3"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-02-29T16:35:54Z",
+          "updatedAt": "2024-02-29T16:35:54Z",
           "comments": []
         }
       ]
