@@ -3864,7 +3864,7 @@ but this does allow uniqueness to be determined more efficiently.
 ~~~
 def prep_init(Poplar1, verify_key, agg_id, agg_param,
               nonce, public_share, input_share):
-    (level, prefixes) = agg_param
+    (level, prefixes, _, _) = agg_param
     (key, corr_seed, corr_inner, corr_leaf) = input_share
     Field = Poplar1.Idpf.current_field(level)
 
@@ -3952,8 +3952,8 @@ def prep_next(Poplar1, prep_state, prep_msg):
 
 def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
     if len(prep_shares) != 2:
-        raise ERR_INPUT  # unexpected number of prep shares
-    (level, _) = agg_param
+        raise ERR_INPUT # unexpected number of prep shares
+    (level, _, _, _) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     sketch = vec_add(prep_shares[0], prep_shares[1])
     if len(sketch) == 3:
@@ -3979,11 +3979,37 @@ combination of input share and level.
 
 ~~~
 def is_valid(agg_param, previous_agg_params):
-    (level, _) = agg_param
-    return all(
-        level != other_level
-        for (other_level, _) in previous_agg_params
-    )
+    # Exit early if this is the first time.
+    if len(previous_agg_params) < 1:
+      return True
+
+    (level, prefixes, threshold, prefix_counts) = agg_param
+    (last_level, last_prefixes, last_threshold, last_prefix_counts) = previous_agg_params[-1]
+
+    # Check that prefix_count for prefixes are above threshold.
+    for count in prefix_counts:
+      if count < threshold:
+        return False
+
+    # Check that level increased by one, and the threshold is the same
+    if level != last_level + 1:
+      return False
+    if threshold != last_threshold:
+      return False
+
+    # Check that prefixes are suffixes of the last level's prefixes,
+    # and that the counts of siblings sum up to at most the parent's count.
+    for i in range(len(prefixes))
+      if not parent_index.contains(prefixes[i] >> 1):
+        return False
+      parent_index = last_prefixes.index(prefixes[i] >> 1)
+      count = prefix_counts[i]
+      if prefixes[i+1] == prefixes[i] + 1:
+        count += prefix_counts[i+1]  # Both children are in this level's prefixes.
+      if count > last_prefix_counts[parent_index]:
+        return False
+
+    return True
 ~~~
 {: #poplar1-validity-scope title="Validity of aggregation parameters for
 Poplar1."}
@@ -3994,7 +4020,9 @@ Aggregation involves simply adding up the output shares.
 
 ~~~
 def aggregate(Poplar1, agg_param, out_shares):
-    (level, prefixes) = agg_param
+    (level, prefixes, _, prefix_counts) = agg_param
+    if sum(prefix_counts) > len(out_shares):
+      return ERR_VERIFY
     Field = Poplar1.Idpf.current_field(level)
     agg_share = Field.zeros(len(prefixes))
     for out_share in out_shares:
@@ -4011,7 +4039,7 @@ shares.
 ~~~
 def unshard(Poplar1, agg_param,
             agg_shares, _num_measurements):
-    (level, prefixes) = agg_param
+    (level, prefixes, _, _) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     agg = Field.zeros(len(prefixes))
     for agg_share in agg_shares:
