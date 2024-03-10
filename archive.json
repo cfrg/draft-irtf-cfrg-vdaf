@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-03-07T00:33:24.553829+00:00",
+  "timestamp": "2024-03-10T00:43:23.993816+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4846,7 +4846,7 @@
       ],
       "body": "The collector decides which parts of the IDPF tree to explore. This not only leaks prefixes of the heavy hitter values but, if the collector decides to explore other branches, possibly the values of individual clients.\r\n\r\nThis is pointed out in BBCGGI21:\r\n\r\n> A malicious server\u2019s only strategy to learn extra information\r\nin Protocol 5 is to manipulate answers to the prefix-count oracle\r\nqueries using an \u201cadditive attack.\u201d [...] Intuitively:\r\nthe adversary can essentially control which strings are heavy\r\nhitters (and can thus learn how many honest clients hold strings\r\nin a small set), [..]\r\n\r\nIn the current DAP implementation this is attack is trivial to execute for the collector since it even sees the values in plain. This risk should be clearly pointed out in the standard.",
       "createdAt": "2023-12-04T08:58:48Z",
-      "updatedAt": "2024-02-22T20:03:39Z",
+      "updatedAt": "2024-03-07T18:57:40Z",
       "closedAt": null,
       "comments": [
         {
@@ -4911,6 +4911,41 @@
           "body": "Concretely, it sounds like what we need to do is pass the previous aggregate result to `Vdaf.is_valid()` so that the Aggregators can enforce this. Does that sound right, @schoppmp ?",
           "createdAt": "2024-02-22T20:03:38Z",
           "updatedAt": "2024-02-22T20:03:38Z"
+        },
+        {
+          "author": "wbl",
+          "authorAssociation": "NONE",
+          "body": "So I was a bit confused by what gets revealed and I think there's a very powerful attack here.\r\n\r\nLet's say the strings are 6 bits, and we have 100110 reported 128 times, 101010 reported another 128 and 110010 is some string an attacker would love to determine that appears once 1. Critically the attacker knows that it starts with 110. We'll pretend nothing is known about the whole number of things/there's enough stuff getting dropped. We'll say that the threshold for discovery is 64, and we're holding two prefixes at once so each query is 4 strings, and the top two survive.\r\n\r\nAttacker reports bit 1 happens 4097 times, and 0 0. Next round we ask about 10 and 11. Now the attacker starts cheating. 10 is 256 as honest, but 11 is 3841. The next round is 100, 101, 110, and 111. The attacker doesn't boost 100 and 101 which are both 128, and then 110 gets boosted to 1921, while 111 is left at 1920. Now the next four are 1100, 1101, 1110 and 1111, and the attacker boosts so that 1100 is 961, while the others only 960. Whatever tiebreaking happens 1100 survives, and next 11001 and then 11010.\r\n\r\nIn fact the attacker can do this blind: just by splitting their addition in half every time across the prefix they get the information. And they (unless I'm missing something) see the resulting string. So its not learn how many clients have a string in a small set but recover strings in the set at will if you know enough to pick the one you want to start with. Application to URLs with tokens in them is left as an exercise.\r\n\r\nUnless I'm really missing something I think submitter privacy is still preserved, but this is still really bad.\r\n(Edit: this is be what @simon-friedberger meant in the PR, but it wasn't clear to me how powerful it was from the bug)",
+          "createdAt": "2024-03-07T06:44:41Z",
+          "updatedAt": "2024-03-07T06:51:14Z"
+        },
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Hmm, I  don't think what you describe generalizes to longer strings, assuming the mitigation I described [above](https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/316#issuecomment-1924018708) is implemented.\r\n\r\nIf I understand correctly, the goal of the attacker in your example is to discover an unknown string with a known prefix, that appears only once (say, a URL with a security token in it). It does that by putting as much \"weight\" as possible on the known prefix, by actively changing the output of the corrupted aggregator. Now at the \"unknown\" part, it starts splitting the weight in half at each level, exploring the path with the greatest weight (since that's where the victim's string is).\r\n\r\nIn your example, the total weight the attacker starts with is 4097, which would be enough to make the entire tree consist of heavy hitters (2^6 * 64 = 4096). This won't work for longer strings, since the honest aggregator can abort if it sees a total weight more than the number of client inputs. So to discover a uniform length-L token, the attacker would need at least 2^L clients / total weight to start with.\r\n\r\nThat said, I agree that even with mitigations in place, Poplar reveals far more than only the heavy hitters (even passive adversaries learn the prefix tree. Actively changing the prefix tree is what enables all the attacks in this thread). I will try to make this very explicit in the PR I'm working on.",
+          "createdAt": "2024-03-07T09:50:48Z",
+          "updatedAt": "2024-03-07T09:50:48Z"
+        },
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I pushed a first draft in #332. @simon-friedberger @wbl do the changes to `is_valid` plus the text in the security considerations adequately describe the issue?",
+          "createdAt": "2024-03-07T14:43:35Z",
+          "updatedAt": "2024-03-07T14:43:35Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'd like to see more prose describing the invariants we want to guarantee. Also, as suggested there, I wonder if we want to enforce that the sum of the prefix counts is equal to the number of reports.",
+          "createdAt": "2024-03-07T18:49:34Z",
+          "updatedAt": "2024-03-07T18:49:34Z"
+        },
+        {
+          "author": "wbl",
+          "authorAssociation": "NONE",
+          "body": "@Schoppmp The attacker needs 2^b to recover b bits, but can wait to start recovering until after going down the tree a bit, and can subtract from other counts. So in one round they recover very, next round verysec, next round verysecret, etc. ",
+          "createdAt": "2024-03-07T18:57:39Z",
+          "updatedAt": "2024-03-07T18:57:39Z"
         }
       ]
     },
@@ -26483,21 +26518,21 @@
       "id": "PR_kwDOGKuqOc5hB1Y9",
       "title": "Clarify powers of malicious collectors in Poplar",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/317",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "simon-friedberger",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "This resolves https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/316",
       "createdAt": "2023-12-04T09:19:26Z",
-      "updatedAt": "2023-12-08T17:22:16Z",
+      "updatedAt": "2024-03-07T17:24:56Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e03411b116a185de6c42dfe43a0e8f3b5f62ca90",
       "headRepository": "simon-friedberger/draft-irtf-cfrg-vdaf",
       "headRefName": "main",
       "headRefOid": "cba222fa5946ff286e3bdb6b1b5377e7906b79b4",
-      "closedAt": null,
+      "closedAt": "2024-03-07T17:24:55Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -26508,6 +26543,13 @@
           "body": "Hey @simon-friedberger, just a heads up that we've been disucssing this issue and may end up resolving it slightly differently. We'll review this PR soon. Thanks again!",
           "createdAt": "2023-12-08T17:22:14Z",
           "updatedAt": "2023-12-08T17:22:14Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closing in favor of #332.",
+          "createdAt": "2024-03-07T17:24:55Z",
+          "updatedAt": "2024-03-07T17:24:55Z"
         }
       ],
       "reviews": []
@@ -27614,6 +27656,101 @@
           "createdAt": "2024-02-29T16:35:54Z",
           "updatedAt": "2024-02-29T16:35:54Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 332,
+      "id": "PR_kwDOGKuqOc5o-NMp",
+      "title": "Add checks that prefix counts are consistent across multiple VDAF executions",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/332",
+      "state": "OPEN",
+      "author": "schoppmp",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #316 ",
+      "createdAt": "2024-03-07T14:17:58Z",
+      "updatedAt": "2024-03-07T18:45:34Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "schoppmp/issue-316",
+      "headRefOid": "bb7ef6506ecfaf9a1dd3b4344af9575d30c33794",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc5yoQoh",
+          "commit": {
+            "abbreviatedOid": "bb7ef65"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-03-07T17:53:17Z",
+          "updatedAt": "2024-03-07T18:45:34Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "We'll need to update the type of `previous_agg_params` to be a `list[AggParam]` instead of a `set[AggParam]`: https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-5.3",
+              "createdAt": "2024-03-07T17:53:17Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 45,
+              "body": "Could we relax this to allow the level to increase by _at least_ 1? ",
+              "createdAt": "2024-03-07T17:54:49Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "This is a class method.\r\n```suggestion\r\ndef is_valid(Poplar1, agg_param, previous_agg_params):\r\n```",
+              "createdAt": "2024-03-07T17:56:00Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 48,
+              "body": "Is there any reason to allow the threshold to vary at each level? It's not necessary for the plain heavy hitters use case. On the other hand, it seems a little dangerous to give the attacker (i.e., the party that picks the threshold) this much control.\r\n\r\nI suggest making we make the threshold a parameter of `Poplar1` class. In fact, I would even go a step further: `Poplar1` should enforce agreement on the threshold among honest parties. That is, preparation should fail unless the Client and honest Aggregator agree on the threshold.",
+              "createdAt": "2024-03-07T17:59:12Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 53,
+              "body": "```suggestion\r\n    for i in range(len(prefixes)):\r\n```",
+              "createdAt": "2024-03-07T18:30:08Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 54,
+              "body": "`parent_index` is not defined.",
+              "createdAt": "2024-03-07T18:37:03Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 52,
+              "body": "This code is hard to follow. Let's try to encapsulate some of the bit fiddling details with high level funtions, like `is_parent_of(parent, child)`.",
+              "createdAt": "2024-03-07T18:41:44Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 95,
+              "body": "```suggestion\r\nIDPF output at any position. While our construction ensures that the sum of all\r\n```",
+              "createdAt": "2024-03-07T18:42:29Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "Here we should list the invariants we should expect to hold for each aggregation.\r\n\r\nWDYTA enforcing that the sum of the prefix counts is equal to the number of valid reports in the batch?",
+              "createdAt": "2024-03-07T18:45:31Z",
+              "updatedAt": "2024-03-07T18:45:34Z"
+            }
+          ]
         }
       ]
     }
