@@ -2767,7 +2767,7 @@ class XofFixedKeyAes128(Xof):
    Every input share MUST only be used once, regardless of the
    aggregation parameters used.
 
-   def is_valid(agg_param, previous_agg_params):
+   def is_valid(Prio3, agg_param, previous_agg_params):
        return len(previous_agg_params) == 0
 
           Figure 19: Validity of aggregation parameters for Prio3.
@@ -4278,6 +4278,10 @@ struct {
    previous level's prefixes, and that the counts of siblings sum up to
    at most the parent's counts.
 
+def get_prefix(input, this_level, last_level):
+    # Helper function to determin the prefix of `input` at `last_level`.
+    return input >> (this_level - last_level)
+
 def is_valid(Poplar1, agg_param, previous_agg_params):
     # Exit early if this is the first time.
     if len(previous_agg_params) < 1:
@@ -4288,26 +4292,27 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
 
     # Check that prefix_count for prefixes are above threshold.
     for count in prefix_counts:
-      if count < threshold:
+      if count < self.threshold:
         return False
 
-    # Check that level increased by one, and the threshold is the same
-    if level != last_level + 1:
+    # Check that level increased.
+    if level <= last_level
       return False
-    if threshold != last_threshold:
-      return False
+
+    # Save last level's prefixes and counts in a dict.
+    last_prefix_count_dict = {}
+    for (i, prefix) in enumerate(last_prefixes):
+      last_prefix_count_dict[prefix] = last_prefix_counts[i]
 
     # Check that prefixes are suffixes of the last level's prefixes,
-    # and that the counts of siblings sum up to at most the parent's count.
-    for i in range(len(prefixes))
-      if not last_prefixes.contains(prefixes[i] >> 1):
-        return False
-      parent_index = last_prefixes.index(prefixes[i] >> 1)
-      count = prefix_counts[i]
-      if prefixes[i+1] == prefixes[i] + 1:
-        count += prefix_counts[i+1]  # Both children are in this level's prefixes.
-      if count > last_prefix_counts[parent_index]:
-        return False
+    # and that the counts of siblings sum up to at most the ancestor's count.
+    for (i, prefix) in enumerate(prefixes)
+      last_prefix = get_prefix(prefix, level, last_level)
+      if last_prefix not in last_prefix_count_dict:
+        return False  # Current prefix not a suffix of last level's prefixes.
+      if last_prefix_count_dict[last_prefix] < prefix_counts[i]:
+        return False  # Count exceeds last level's count.
+      last_prefix_count_dict[last_prefix] -= prefix_counts[i]
 
     return True
 
@@ -4931,7 +4936,7 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
    A malicious adversary controlling the Collector and one of the
    Aggregators can further turn arbitrary non-heavy prefixes into heavy
-   ones by tampering with the IDPF output at any position.  While our
+   ones by tampering with the DPF output at any position.  While our
    construction ensures that the sum of all nodes evaluated at a level
    cannot exceed the value at the parent nodes, this still may allow an
    adversary to discover individual non-heavy strings.
