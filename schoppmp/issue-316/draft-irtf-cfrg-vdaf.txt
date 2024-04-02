@@ -4306,7 +4306,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
 
     # Check that prefixes are suffixes of the last level's prefixes,
     # and that the counts of siblings sum up to at most the ancestor's count.
-    for (i, prefix) in enumerate(prefixes)
+    for (i, prefix) in enumerate(prefixes):
       last_prefix = get_prefix(prefix, level, last_level)
       if last_prefix not in last_prefix_count_dict:
         return False  # Current prefix not a suffix of last level's prefixes.
