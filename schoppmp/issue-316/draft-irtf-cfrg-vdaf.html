@@ -2793,7 +2793,7 @@ been used with the same input share.<a href="#section-5.3-1" class="pilcrow">¶<
 <p id="section-5.3-2">VDAFs <span class="bcp14">MUST</span> implement the following function:<a href="#section-5.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3-3.1">
-            <p id="section-5.3-3.1.1"><code>Vdaf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) -&gt;
+            <p id="section-5.3-3.1.1"><code>Vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) -&gt;
 Bool</code>: Checks if the <code>agg_param</code> is compatible with all elements of
 <code>previous_agg_params</code>.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -6853,9 +6853,12 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
 parameter with the same level has been used with the same input share before.
 The whole preparation phase <span class="bcp14">MUST NOT</span> be run more than once for a given
 combination of input share and level.<a href="#section-8.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.2.3-2">Also enforces that the prefixes at each level are suffixes of the previous
+level's prefixes, and that the counts of siblings sum up to at most the parent's
+counts.<a href="#section-8.2.3-2" class="pilcrow">¶</a></p>
 <span id="name-validity-of-aggregation-paramete"></span><div id="poplar1-validity-scope">
 <figure id="figure-25">
-            <div class="alignLeft art-text artwork" id="section-8.2.3-2.1">
+            <div class="alignLeft art-text artwork" id="section-8.2.3-3.1">
 <pre>
 def is_valid(Poplar1, agg_param, previous_agg_params):
     # Exit early if this is the first time.
@@ -6879,7 +6882,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
     # Check that prefixes are suffixes of the last level's prefixes,
     # and that the counts of siblings sum up to at most the parent's count.
     for i in range(len(prefixes))
-      if not parent_index.contains(prefixes[i] &gt;&gt; 1):
+      if not last_prefixes.contains(prefixes[i] &gt;&gt; 1):
         return False
       parent_index = last_prefixes.index(prefixes[i] &gt;&gt; 1)
       count = prefix_counts[i]
