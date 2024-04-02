@@ -4635,7 +4635,7 @@ threshold.
 
 A malicious adversary controlling the Collector and one of the Aggregators can
 further turn arbitrary non-heavy prefixes into heavy ones by tampering with the
-DPF output at any position. While our construction ensures that the sum of all
+IDPF output at any position. While our construction ensures that the sum of all
 nodes evaluated at a level cannot exceed the value at the parent nodes, this
 still may allow an adversary to discover individual non-heavy strings.
 
