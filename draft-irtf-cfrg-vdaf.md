@@ -3980,7 +3980,7 @@ combination of input share and level.
 <!-- TODO: Text about counts -->
 
 ~~~
-def is_valid(agg_param, previous_agg_params):
+def is_valid(Poplar1, agg_param, previous_agg_params):
     # Exit early if this is the first time.
     if len(previous_agg_params) < 1:
       return True
