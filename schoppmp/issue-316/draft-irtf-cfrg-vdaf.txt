@@ -4182,7 +4182,7 @@ struct {
           corr_xof = Poplar1.Xof(
               corr_seed,
               Poplar1.domain_separation_tag(USAGE_CORR_INNER),
-              byte(agg_id) + nonce,
+              byte(agg_id) + nonce + to_be_bytes(self.threshold),
           )
           # Fast-forward the XOF state to the current level.
           corr_xof.next_vec(Field, 3 * level)
@@ -4190,7 +4190,7 @@ struct {
           corr_xof = Poplar1.Xof(
               corr_seed,
               Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
-              byte(agg_id) + nonce,
+              byte(agg_id) + nonce + to_be_bytes(self.threshold),
           )
       (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
       (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
