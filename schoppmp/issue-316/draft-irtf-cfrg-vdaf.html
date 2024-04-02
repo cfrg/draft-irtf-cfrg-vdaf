@@ -6733,7 +6733,7 @@ but this does allow uniqueness to be determined more efficiently.<a href="#secti
 <pre>
 def prep_init(Poplar1, verify_key, agg_id, agg_param,
               nonce, public_share, input_share):
-    (level, prefixes, _, _) = agg_param
+    (level, prefixes, _) = agg_param
     (key, corr_seed, corr_inner, corr_leaf) = input_share
     Field = Poplar1.Idpf.current_field(level)
 
@@ -6822,7 +6822,7 @@ def prep_next(Poplar1, prep_state, prep_msg):
 def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
     if len(prep_shares) != 2:
         raise ERR_INPUT # unexpected number of prep shares
-    (level, _, _, _) = agg_param
+    (level, _, _) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     sketch = vec_add(prep_shares[0], prep_shares[1])
     if len(sketch) == 3:
@@ -6869,8 +6869,8 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
     if len(previous_agg_params) &lt; 1:
       return True
 
-    (level, prefixes, threshold, prefix_counts) = agg_param
-    (last_level, last_prefixes, last_threshold, last_prefix_counts) = previous_agg_params[-1]
+    (level, prefixes, prefix_counts) = agg_param
+    (last_level, last_prefixes, last_prefix_counts) = previous_agg_params[-1]
 
     # Check that prefix_count for prefixes are above threshold.
     for count in prefix_counts:
@@ -6945,7 +6945,7 @@ shares.<a href="#section-8.2.5-1" class="pilcrow">¶</a></p>
 <pre>
 def unshard(Poplar1, agg_param,
             agg_shares, _num_measurements):
-    (level, prefixes, _, _) = agg_param
+    (level, prefixes, _) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     agg = Field.zeros(len(prefixes))
     for agg_share in agg_shares:
