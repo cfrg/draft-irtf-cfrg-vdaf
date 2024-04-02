@@ -1180,7 +1180,7 @@ been used with the same input share.
 
 VDAFs MUST implement the following function:
 
-* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) ->
+* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) ->
   Bool`: Checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
@@ -3977,7 +3977,9 @@ parameter with the same level has been used with the same input share before.
 The whole preparation phase MUST NOT be run more than once for a given
 combination of input share and level.
 
-<!-- TODO: Text about counts -->
+Also enforces that the prefixes at each level are suffixes of the previous
+level's prefixes, and that the counts of siblings sum up to at most the parent's
+counts.
 
 ~~~
 def is_valid(Poplar1, agg_param, previous_agg_params):
@@ -4002,7 +4004,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
     # Check that prefixes are suffixes of the last level's prefixes,
     # and that the counts of siblings sum up to at most the parent's count.
     for i in range(len(prefixes))
-      if not parent_index.contains(prefixes[i] >> 1):
+      if not last_prefixes.contains(prefixes[i] >> 1):
         return False
       parent_index = last_prefixes.index(prefixes[i] >> 1)
       count = prefix_counts[i]
