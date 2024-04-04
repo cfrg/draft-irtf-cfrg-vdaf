@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-04-02T00:42:39.166444+00:00",
+  "timestamp": "2024-04-04T00:42:18.403449+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4840,13 +4840,13 @@
         "schoppmp"
       ],
       "labels": [
-        "feature",
+        "wire change",
         "security consideration",
         "draft-09"
       ],
       "body": "The collector decides which parts of the IDPF tree to explore. This not only leaks prefixes of the heavy hitter values but, if the collector decides to explore other branches, possibly the values of individual clients.\r\n\r\nThis is pointed out in BBCGGI21:\r\n\r\n> A malicious server\u2019s only strategy to learn extra information\r\nin Protocol 5 is to manipulate answers to the prefix-count oracle\r\nqueries using an \u201cadditive attack.\u201d [...] Intuitively:\r\nthe adversary can essentially control which strings are heavy\r\nhitters (and can thus learn how many honest clients hold strings\r\nin a small set), [..]\r\n\r\nIn the current DAP implementation this is attack is trivial to execute for the collector since it even sees the values in plain. This risk should be clearly pointed out in the standard.",
       "createdAt": "2023-12-04T08:58:48Z",
-      "updatedAt": "2024-03-07T18:57:40Z",
+      "updatedAt": "2024-04-03T19:20:10Z",
       "closedAt": null,
       "comments": [
         {
@@ -4946,6 +4946,13 @@
           "body": "@Schoppmp The attacker needs 2^b to recover b bits, but can wait to start recovering until after going down the tree a bit, and can subtract from other counts. So in one round they recover very, next round verysec, next round verysecret, etc. ",
           "createdAt": "2024-03-07T18:57:39Z",
           "updatedAt": "2024-03-07T18:57:39Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Tasks for resolution:\r\n\r\n- [ ] Add prefix counts to the aggregation parameter.\r\n- [ ] Update agg param validator to enforce consistent traversal/counts.\r\n- [ ] Describe \"steering attacks\" in Security Considerations and possible mitigations we've noted.",
+          "createdAt": "2024-04-02T16:30:26Z",
+          "updatedAt": "2024-04-02T16:30:26Z"
         }
       ]
     },
@@ -5032,6 +5039,40 @@
       "body": "              > @divergentdave  Looks good. I think we should also add `| PROOFS | 1 |` to tables 9, 10, 11, and 12, right after `Field`, to be clear about the parameter values for the four concrete Prio3 VDAFs (and algorithm IDs) we define.\r\n\r\nThese tables specify parameters of the circuit; the number of proofs is not a parameter of the circuit. In fact, the gudance here is about modifying one of the circuits, say `SumVec` by changing the field from `Field64` to `Field128`.\r\n\r\nWhat do you think about decoupling `Field` from the circuit and moving it to the `Prio3` variant. There, `PROOFS` is (or should, at least) be specified.\r\n\r\n_Originally posted by @cjpatton in https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/325#issuecomment-1906952751_\r\n            ",
       "createdAt": "2024-01-23T21:58:11Z",
       "updatedAt": "2024-01-23T21:58:11Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 333,
+      "id": "I_kwDOGKuqOc6EXtM0",
+      "title": "Poplar1: Should the threshold be a parameter of the scheme?",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/333",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change"
+      ],
+      "body": "The privacy of this VDAF depends on the threshold chosen by the Collector. At the application level, it will often be useful to ensure that all honest parties agree on the threshold such that the attacker can't change its value, for example, with the task binding mechanism of the proposed [taskprov extension for DAP.](https://github.com/wangshan/draft-wang-ppm-dap-taskprov).",
+      "createdAt": "2024-04-02T15:21:17Z",
+      "updatedAt": "2024-04-03T19:19:31Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 334,
+      "id": "I_kwDOGKuqOc6Ei6kZ",
+      "title": "Version Poplar1 and Prio3 separately",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/334",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The draft specifies a constant `VERSION` that is used for domain separation in Prio3 and Poplar1. This is intended to force incompatibility across drafts such that an old version of Prio3 doesn't interop with a new version. (Likewise for Poplar1.)\r\n\r\nWe're considering two breaking changes for Poplar1 in the next draft:\r\n- #316\r\n- #333\r\n\r\nHowever we're not likely to see breaking changes for Prio3.  VDAF-08-Prio3 is already deployed:  I propose that, for VDAF-09, we keep the version tag for Prio3 the same and only bump the version tag for Poplar1. If breaking changes for Prio3 are required in the future, then we can bump the version tag then.",
+      "createdAt": "2024-04-03T19:29:27Z",
+      "updatedAt": "2024-04-03T19:29:27Z",
       "closedAt": null,
       "comments": []
     }
@@ -27671,13 +27712,13 @@
       "labels": [],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-03-07T18:45:34Z",
+      "updatedAt": "2024-04-03T22:24:25Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-316",
-      "headRefOid": "bb7ef6506ecfaf9a1dd3b4344af9575d30c33794",
+      "headRefOid": "d837f123fb316c193287532a6c2219e669185fce",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -27749,6 +27790,154 @@
               "body": "Here we should list the invariants we should expect to hold for each aggregation.\r\n\r\nWDYTA enforcing that the sum of the prefix counts is equal to the number of valid reports in the batch?",
               "createdAt": "2024-03-07T18:45:31Z",
               "updatedAt": "2024-03-07T18:45:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc51t9q2",
+          "commit": {
+            "abbreviatedOid": "0aa572f"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-02T20:42:25Z",
+          "updatedAt": "2024-04-02T21:29:12Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "Done.",
+              "createdAt": "2024-04-02T20:42:26Z",
+              "updatedAt": "2024-04-02T21:29:12Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "Added some text.\r\n\r\n> WDYTA enforcing that the sum of the prefix counts is equal to the number of valid reports in the batch?\r\n\r\nThis is enforced in `aggregate`.",
+              "createdAt": "2024-04-02T21:15:52Z",
+              "updatedAt": "2024-04-02T21:29:12Z"
+            },
+            {
+              "originalPosition": 45,
+              "body": "We could, is this needed somewhere? This would require changing the checks below.",
+              "createdAt": "2024-04-02T21:22:17Z",
+              "updatedAt": "2024-04-02T21:29:12Z"
+            },
+            {
+              "originalPosition": 54,
+              "body": "Fixed.",
+              "createdAt": "2024-04-02T21:26:11Z",
+              "updatedAt": "2024-04-02T21:29:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc51uxA5",
+          "commit": {
+            "abbreviatedOid": "bb7ef65"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-02T22:40:54Z",
+          "updatedAt": "2024-04-02T22:40:55Z",
+          "comments": [
+            {
+              "originalPosition": 45,
+              "body": "Done.",
+              "createdAt": "2024-04-02T22:40:54Z",
+              "updatedAt": "2024-04-02T22:40:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc51ux00",
+          "commit": {
+            "abbreviatedOid": "bb7ef65"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-02T22:44:54Z",
+          "updatedAt": "2024-04-02T22:44:54Z",
+          "comments": [
+            {
+              "originalPosition": 48,
+              "body": "Done.",
+              "createdAt": "2024-04-02T22:44:54Z",
+              "updatedAt": "2024-04-02T22:44:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc51ux8Y",
+          "commit": {
+            "abbreviatedOid": "bb7ef65"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-02T22:45:32Z",
+          "updatedAt": "2024-04-02T22:45:32Z",
+          "comments": [
+            {
+              "originalPosition": 52,
+              "body": "Added a helper `get_prefix` that contains the bit shift.",
+              "createdAt": "2024-04-02T22:45:32Z",
+              "updatedAt": "2024-04-02T22:45:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc516HAm",
+          "commit": {
+            "abbreviatedOid": "d837f12"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "This looks to be on the right track, modulo our conversation today about compatibility with DP. I think the only thing that would change is enforcing count consistency, in which case we would take some version of this PR no matter what the outcome is.\r\n\r\nI'd suggest implementing in the reference code so that we can unit test is_valid() and make sure the changes to the rest of the construction still pass our current tests. If you like you can leave out the count checks.",
+          "createdAt": "2024-04-03T22:12:58Z",
+          "updatedAt": "2024-04-03T22:24:25Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Note that we'll need to make the same change to `shard()`.",
+              "createdAt": "2024-04-03T22:12:58Z",
+              "updatedAt": "2024-04-03T22:24:25Z"
+            },
+            {
+              "originalPosition": 51,
+              "body": "I believe our Python linters like two spaces for in-line comments\r\n```suggestion\r\n        raise ERR_INPUT  # unexpected number of prep shares\r\n```",
+              "createdAt": "2024-04-03T22:13:31Z",
+              "updatedAt": "2024-04-03T22:24:25Z"
+            },
+            {
+              "originalPosition": 72,
+              "body": "```suggestion\r\n    # Helper function to determine the prefix of `input` at `last_level`.\r\n```",
+              "createdAt": "2024-04-03T22:14:19Z",
+              "updatedAt": "2024-04-03T22:24:25Z"
+            },
+            {
+              "originalPosition": 32,
+              "body": "`prep_init()` is a classmethod; the class is called `Poplar1` in this scope.\r\n\r\n(Sorry, in retrospect, class factories was probably the wrong paradigm for this project. cc/ @divergentdave.)",
+              "createdAt": "2024-04-03T22:17:12Z",
+              "updatedAt": "2024-04-03T22:24:25Z"
+            },
+            {
+              "originalPosition": 71,
+              "body": "WDYT?\r\n```suggestion\r\ndef get_ancestor(input, this_level, last_level):\r\n```",
+              "createdAt": "2024-04-03T22:19:03Z",
+              "updatedAt": "2024-04-03T22:24:25Z"
+            },
+            {
+              "originalPosition": 105,
+              "body": "I think we also need to check that value in this dict is 0?",
+              "createdAt": "2024-04-03T22:21:19Z",
+              "updatedAt": "2024-04-03T22:24:25Z"
             }
           ]
         }
