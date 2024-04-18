@@ -150,17 +150,38 @@ class Poplar1(Vdaf):
         # and a share of the correlated randomness.
         input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
         return (public_share, input_shares)
+    
+    @classmethod
+    def get_ancestor(Poplar1, input, this_level, last_level):
+        """
+        Helper function to determine the prefix of `input` at `last_level`.
+        """
+        return input >> (this_level - last_level)
 
-    def is_valid(agg_param, previous_agg_params):
+    @classmethod
+    def is_valid(Poplar1, agg_param, previous_agg_params):
         """
-        Checks if the level of `agg_param` appears anywhere in
-        `previous_agg_params`. Returns `False` if it does, and `True` otherwise.
+        Checks that levels are increasing between calls, and also enforces that
+        the prefixes at each level are suffixes of the previous level's
+        prefixes.
         """
-        (level, _) = agg_param
-        return all(
-            level != other_level
-            for (other_level, _) in previous_agg_params
-        )
+        if len(previous_agg_params) < 1:
+            return True
+
+        (level, prefixes) = agg_param
+        (last_level, last_prefixes) = previous_agg_params[-1]
+
+        # Check that level increased.
+        if level <= last_level:
+            return False
+
+        # Check that prefixes are suffixes of the last level's prefixes.
+        for (i, prefix) in enumerate(prefixes):
+            last_prefix = Poplar1.get_ancestor(prefix, level, last_level)
+            if last_prefix != last_prefixes[i]:
+                return False  # Current prefix not a suffix of last level's prefixes.
+
+        return True
 
     @classmethod
     def prep_init(Poplar1, verify_key, agg_id, agg_param,
