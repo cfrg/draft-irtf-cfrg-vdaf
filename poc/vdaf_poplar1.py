@@ -170,6 +170,7 @@ class Poplar1(Vdaf):
 
         (level, prefixes) = agg_param
         (last_level, last_prefixes) = previous_agg_params[-1]
+        last_prefixes_set = set(last_prefixes + [0])  # The empyt prefix 0 is always there.
 
         # Check that level increased.
         if level <= last_level:
@@ -178,7 +179,7 @@ class Poplar1(Vdaf):
         # Check that prefixes are suffixes of the last level's prefixes.
         for (i, prefix) in enumerate(prefixes):
             last_prefix = Poplar1.get_ancestor(prefix, level, last_level)
-            if last_prefix != last_prefixes[i]:
+            if last_prefix not in last_prefixes_set:
                 return False  # Current prefix not a suffix of last level's prefixes.
 
         return True
