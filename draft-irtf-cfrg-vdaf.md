@@ -3983,7 +3983,7 @@ counts.
 
 ~~~
 def get_prefix(input, this_level, last_level):
-    # Helper function to determin the prefix of `input` at `last_level`.
+    # Helper function to determine the prefix of `input` at `last_level`.
     return input >> (this_level - last_level)
 
 def is_valid(Poplar1, agg_param, previous_agg_params):
