@@ -4161,7 +4161,7 @@ struct {
 
   def prep_init(Poplar1, verify_key, agg_id, agg_param,
                 nonce, public_share, input_share):
-      (level, prefixes, _) = agg_param
+      (level, prefixes) = agg_param
       (key, corr_seed, corr_inner, corr_leaf) = input_share
       Field = Poplar1.Idpf.current_field(level)
 
@@ -4182,7 +4182,7 @@ struct {
           corr_xof = Poplar1.Xof(
               corr_seed,
               Poplar1.domain_separation_tag(USAGE_CORR_INNER),
-              byte(agg_id) + nonce + to_be_bytes(self.threshold),
+              byte(agg_id) + nonce,
           )
           # Fast-forward the XOF state to the current level.
           corr_xof.next_vec(Field, 3 * level)
@@ -4190,7 +4190,7 @@ struct {
           corr_xof = Poplar1.Xof(
               corr_seed,
               Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
-              byte(agg_id) + nonce + to_be_bytes(self.threshold),
+              byte(agg_id) + nonce,
           )
       (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
       (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
@@ -4250,7 +4250,7 @@ struct {
   def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
       if len(prep_shares) != 2:
           raise ERR_INPUT  # unexpected number of prep shares
-      (level, _, _) = agg_param
+      (level, _) = agg_param
       Field = Poplar1.Idpf.current_field(level)
       sketch = vec_add(prep_shares[0], prep_shares[1])
       if len(sketch) == 3:
@@ -4272,13 +4272,12 @@ struct {
    Aggregation parameters are valid for a given input share if no
    aggregation parameter with the same level has been used with the same
    input share before.  The whole preparation phase MUST NOT be run more
-   than once for a given combination of input share and level.
+   than once for a given combination of input share and level.  This
+   function checks that levels are increasing between calls, and also
+   enforces that the prefixes at each level are suffixes of the previous
+   level's prefixes.
 
-   Also enforces that the prefixes at each level are suffixes of the
-   previous level's prefixes, and that the counts of siblings sum up to
-   at most the parent's counts.
-
-def get_prefix(input, this_level, last_level):
+def get_ancestor(Poplar1, input, this_level, last_level):
     # Helper function to determine the prefix of `input` at `last_level`.
     return input >> (this_level - last_level)
 
@@ -4287,32 +4286,19 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
     if len(previous_agg_params) < 1:
       return True
 
-    (level, prefixes, prefix_counts) = agg_param
-    (last_level, last_prefixes, last_prefix_counts) = previous_agg_params[-1]
-
-    # Check that prefix_count for prefixes are above threshold.
-    for count in prefix_counts:
-      if count < self.threshold:
-        return False
+    (level, prefixes) = agg_param
+    (last_level, last_prefixes) = previous_agg_params[-1]
+    last_prefixes_set = set(last_prefixes + [0])  # The empyt prefix 0 is always there.
 
     # Check that level increased.
     if level <= last_level
       return False
 
-    # Save last level's prefixes and counts in a dict.
-    last_prefix_count_dict = {}
-    for (i, prefix) in enumerate(last_prefixes):
-      last_prefix_count_dict[prefix] = last_prefix_counts[i]
-
-    # Check that prefixes are suffixes of the last level's prefixes,
-    # and that the counts of siblings sum up to at most the ancestor's count.
-    for (i, prefix) in enumerate(prefixes):
-      last_prefix = get_prefix(prefix, level, last_level)
-      if last_prefix not in last_prefix_count_dict:
+    # Check that prefixes are suffixes of the last level's prefixes.
+    for prefix in prefixes:
+      last_prefix = get_ancestor(prefix, level, last_level)
+      if last_prefix not in last_prefixes_set:
         return False  # Current prefix not a suffix of last level's prefixes.
-      if last_prefix_count_dict[last_prefix] < prefix_counts[i]:
-        return False  # Count exceeds last level's count.
-      last_prefix_count_dict[last_prefix] -= prefix_counts[i]
 
     return True
 
@@ -4323,7 +4309,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
    Aggregation involves simply adding up the output shares.
 
    def aggregate(Poplar1, agg_param, out_shares):
-       (level, prefixes, _, prefix_counts) = agg_param
+       (level, prefixes) = agg_param
        if sum(prefix_counts) > len(out_shares):
          return ERR_VERIFY
        Field = Poplar1.Idpf.current_field(level)
@@ -4341,7 +4327,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
 
    def unshard(Poplar1, agg_param,
                agg_shares, _num_measurements):
-       (level, prefixes, _) = agg_param
+       (level, prefixes) = agg_param
        Field = Poplar1.Idpf.current_field(level)
        agg = Field.zeros(len(prefixes))
        for agg_share in agg_shares:
