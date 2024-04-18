@@ -6821,7 +6821,7 @@ def prep_next(Poplar1, prep_state, prep_msg):
 
 def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
     if len(prep_shares) != 2:
-        raise ERR_INPUT # unexpected number of prep shares
+        raise ERR_INPUT  # unexpected number of prep shares
     (level, _, _) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     sketch = vec_add(prep_shares[0], prep_shares[1])
