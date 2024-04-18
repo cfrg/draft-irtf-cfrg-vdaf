@@ -3982,7 +3982,7 @@ level's prefixes, and that the counts of siblings sum up to at most the parent's
 counts.
 
 ~~~
-def get_prefix(input, this_level, last_level):
+def get_ancestor(input, this_level, last_level):
     # Helper function to determine the prefix of `input` at `last_level`.
     return input >> (this_level - last_level)
 
