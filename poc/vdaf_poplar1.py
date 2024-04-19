@@ -150,7 +150,7 @@ class Poplar1(Vdaf):
         # and a share of the correlated randomness.
         input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
         return (public_share, input_shares)
-    
+
     @classmethod
     def get_ancestor(Poplar1, input, this_level, last_level):
         """
@@ -181,8 +181,8 @@ class Poplar1(Vdaf):
         for (i, prefix) in enumerate(prefixes):
             last_prefix = Poplar1.get_ancestor(prefix, level, last_level)
             if last_prefix not in last_prefixes_set:
-                return False  # Current prefix not a suffix of last level's prefixes.
-
+                # Current prefix not a suffix of last level's prefixes.
+                return False
         return True
 
     @classmethod
