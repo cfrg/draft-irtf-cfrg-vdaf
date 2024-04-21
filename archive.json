@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-04-18T00:40:52.738293+00:00",
+  "timestamp": "2024-04-21T00:45:08.024420+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -27712,18 +27712,26 @@
       "labels": [],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-04-03T22:24:25Z",
+      "updatedAt": "2024-04-19T16:16:07Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-316",
-      "headRefOid": "d837f123fb316c193287532a6c2219e669185fce",
+      "headRefOid": "a6371319ade845475c74001e2dd596f265205dc9",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Following the discussion in [this doc](https://docs.google.com/document/d/1ZjXz-1kGsTDf2Vn2u-fwYqR8BSc3tOYlELVHAYvAfjk), it seems clear that differential privacy is required to implement heavy hitters privately. For now, this PR only ensures that the tree is traversed correctly (i.e., not on arbitrary leaves; see mitigation 1 [here](https://docs.google.com/document/d/1ZjXz-1kGsTDf2Vn2u-fwYqR8BSc3tOYlELVHAYvAfjk/edit#bookmark=id.yyi83665dnuy)).\r\n\r\nThe details of how to add differential privacy to a heavy hitters protocol based on Poplar should be specified in the higher-level protocol, as VDAF doesn't have any syntax for DP (like privacy parameters). There are also different ways to implement DP here, so this is not something we want to restrict in VDAF.",
+          "createdAt": "2024-04-19T16:13:32Z",
+          "updatedAt": "2024-04-19T16:13:32Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc5yoQoh",
@@ -27938,6 +27946,52 @@
               "body": "I think we also need to check that value in this dict is 0?",
               "createdAt": "2024-04-03T22:21:19Z",
               "updatedAt": "2024-04-03T22:24:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc53yFwr",
+          "commit": {
+            "abbreviatedOid": "7dcb804"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-18T18:39:52Z",
+          "updatedAt": "2024-04-18T19:25:01Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Reverted to avoid depending on heavy hitters parameters.",
+              "createdAt": "2024-04-18T18:39:52Z",
+              "updatedAt": "2024-04-18T19:25:01Z"
+            },
+            {
+              "originalPosition": 105,
+              "body": "Removed the dict.",
+              "createdAt": "2024-04-18T19:24:55Z",
+              "updatedAt": "2024-04-18T19:25:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc536mNi",
+          "commit": {
+            "abbreviatedOid": "5280b62"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-19T16:09:28Z",
+          "updatedAt": "2024-04-19T16:09:29Z",
+          "comments": [
+            {
+              "originalPosition": 84,
+              "body": "Should this become a MUST?",
+              "createdAt": "2024-04-19T16:09:29Z",
+              "updatedAt": "2024-04-19T16:09:29Z"
             }
           ]
         }
