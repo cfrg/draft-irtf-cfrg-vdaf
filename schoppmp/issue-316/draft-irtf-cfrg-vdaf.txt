@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 21 October 2024                                            ISRG
+Expires: 26 October 2024                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                           19 April 2024
+                                                           24 April 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 October 2024.
+   This Internet-Draft will expire on 26 October 2024.
 
 Copyright Notice
 
@@ -4923,7 +4923,7 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
    A malicious adversary controlling the Collector and one of the
    Aggregators can further turn arbitrary non-heavy prefixes into heavy
-   ones by tampering with the DPF output at any position.  While our
+   ones by tampering with the IDPF output at any position.  While our
    construction ensures that the sum of all nodes evaluated at a level
    cannot exceed the value at the parent nodes, this still may allow an
    adversary to discover individual non-heavy strings.
