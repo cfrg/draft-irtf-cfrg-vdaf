@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-04-23T00:42:05.922333+00:00",
+  "timestamp": "2024-04-25T00:44:12.213007+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -27712,13 +27712,13 @@
       "labels": [],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-04-19T16:16:07Z",
+      "updatedAt": "2024-04-24T20:42:35Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-316",
-      "headRefOid": "a6371319ade845475c74001e2dd596f265205dc9",
+      "headRefOid": "12bbf0e06c97d220e6e8ea0fd14ae42bf9fb1994",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -27992,6 +27992,64 @@
               "body": "Should this become a MUST?",
               "createdAt": "2024-04-19T16:09:29Z",
               "updatedAt": "2024-04-19T16:09:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc54b-dW",
+          "commit": {
+            "abbreviatedOid": "a637131"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-24T18:09:32Z",
+          "updatedAt": "2024-04-24T18:13:25Z",
+          "comments": [
+            {
+              "originalPosition": 46,
+              "body": "`0` is not the empty prefix here, but the leftmost prefix. The length of all these prefixes is implicitly `last_level`, so there's no way to represent the empty prefix. Rather, bootstrapping prefixes is handled by `if len(previous_agg_params) < 1:` above.\r\n```suggestion\r\n    last_prefixes_set = set(last_prefixes)\r\n```",
+              "createdAt": "2024-04-24T18:09:32Z",
+              "updatedAt": "2024-04-24T18:13:25Z"
+            },
+            {
+              "originalPosition": 32,
+              "body": "See the related suggestion on the specification.\r\n```suggestion\r\n        last_prefixes_set = set(last_prefixes)\r\n```",
+              "createdAt": "2024-04-24T18:10:24Z",
+              "updatedAt": "2024-04-24T18:13:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc54dFyU",
+          "commit": {
+            "abbreviatedOid": "a637131"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-04-24T20:33:42Z",
+          "updatedAt": "2024-04-24T20:40:54Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "This doesn't need to be a class method. How about defining this below the class somewhere, just as a helper function?",
+              "createdAt": "2024-04-24T20:37:10Z",
+              "updatedAt": "2024-04-24T20:40:55Z"
+            },
+            {
+              "originalPosition": 79,
+              "body": "```suggestion\r\nIDPF output at any position. While our construction ensures that the sum of all\r\n```",
+              "createdAt": "2024-04-24T20:39:56Z",
+              "updatedAt": "2024-04-24T20:40:55Z"
+            },
+            {
+              "originalPosition": 84,
+              "body": "I don't think we can make it a MUST without specifying a mechanism for achieving it.",
+              "createdAt": "2024-04-24T20:40:31Z",
+              "updatedAt": "2024-04-24T20:40:55Z"
             }
           ]
         }
