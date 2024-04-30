@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-04-28T00:45:58.647420+00:00",
+  "timestamp": "2024-04-30T00:41:37.554870+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -27712,7 +27712,7 @@
       "labels": [],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-04-24T20:42:35Z",
+      "updatedAt": "2024-04-29T20:30:08Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
@@ -28050,6 +28050,92 @@
               "body": "I don't think we can make it a MUST without specifying a mechanism for achieving it.",
               "createdAt": "2024-04-24T20:40:31Z",
               "updatedAt": "2024-04-24T20:40:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc54-CmL",
+          "commit": {
+            "abbreviatedOid": "12bbf0e"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-29T20:19:42Z",
+          "updatedAt": "2024-04-29T20:23:25Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "I don't think I understand what this check does. Where is `prefix_counts` defined?",
+              "createdAt": "2024-04-29T20:19:43Z",
+              "updatedAt": "2024-04-29T20:23:25Z"
+            },
+            {
+              "originalPosition": 84,
+              "body": "I don't think that's true. For instance, OHTTP doesn't specify how clients obtain the configuration of gateways, but still has a MUST about it ([source](https://datatracker.ietf.org/doc/html/rfc9458#section-7)):\r\n\r\n> A specific method for a Client to acquire configurations is not included in this specification. Applications using this design MUST provide accommodations to mitigate tracking using Client configurations.\r\n\r\nSo I think we could include a MUST about using DP, since the VDAF's privacy guarantees don't hold unless you do.",
+              "createdAt": "2024-04-29T20:21:52Z",
+              "updatedAt": "2024-04-29T20:23:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc54-NAv",
+          "commit": {
+            "abbreviatedOid": "5280b62"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-29T20:29:56Z",
+          "updatedAt": "2024-04-29T20:29:56Z",
+          "comments": [
+            {
+              "originalPosition": 84,
+              "body": "I'm fine with it being a MUST.",
+              "createdAt": "2024-04-29T20:29:56Z",
+              "updatedAt": "2024-04-29T20:29:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc54-NG-",
+          "commit": {
+            "abbreviatedOid": "a637131"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-29T20:30:03Z",
+          "updatedAt": "2024-04-29T20:30:03Z",
+          "comments": [
+            {
+              "originalPosition": 46,
+              "body": "Bump",
+              "createdAt": "2024-04-29T20:30:03Z",
+              "updatedAt": "2024-04-29T20:30:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc54-NLS",
+          "commit": {
+            "abbreviatedOid": "a637131"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-29T20:30:08Z",
+          "updatedAt": "2024-04-29T20:30:08Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Bump",
+              "createdAt": "2024-04-29T20:30:08Z",
+              "updatedAt": "2024-04-29T20:30:08Z"
             }
           ]
         }
