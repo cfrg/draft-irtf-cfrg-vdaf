@@ -1141,10 +1141,6 @@ algorithm, and the update algorithm advances the Aggregator to the next state.
 Thus, in addition to defining the number of rounds (`ROUNDS`), a VDAF instance
 defines the state of the Aggregator after each round.
 
-> TODO Consider how to bake this "linear state machine" condition into the
-> syntax. Given that Python 3 is used as our pseudocode, it's easier to specify
-> the preparation state using a class.
-
 The preparation-state update accomplishes two tasks: recovery of output shares
 from the input shares and ensuring that the recovered output shares are valid.
 The abstraction boundary is drawn so that an Aggregator only recovers an output
@@ -1155,17 +1151,6 @@ would allow the possibility of misusing the API by, say, aggregating an invalid
 output share. Moreover, in protocols like Prio+ {{AGJOP21}} based on oblivious
 transfer, it is necessary for the Aggregators to interact in order to recover
 aggregatable output shares at all.
-
-Note that it is possible for a VDAF to specify `ROUNDS == 0`, in which case each
-Aggregator runs the preparation-state update algorithm once and immediately
-recovers its output share without interacting with the other Aggregators.
-However, most, if not all, constructions will require some amount of interaction
-in order to ensure validity of the output shares (while also maintaining
-privacy).
-
-> OPEN ISSUE accommodating 0-round VDAFs may require syntax changes if, for
-> example, public keys are required. On the other hand, we could consider
-> defining this class of schemes as a different primitive. See issue#77.
 
 ## Validity of Aggregation Parameters {#sec-vdaf-validity-scopes}
 
