@@ -4782,9 +4782,8 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    VDAFs do not inherently provide differential privacy [Dwo06]:
    depending on the distribution of the measurements, the aggregate
    result itself can still leak a significant amount of information
-   about the measurements or the Clients that generated them.
-   Applications SHOULD execute a VDAF with a compatible mechanism for
-   differential privacy.
+   about the measurements.  Thus applications SHOULD execute a VDAF with
+   a compatible mechanism for differential privacy.
 
 9.1.  Requirements for the Verification Key
 
