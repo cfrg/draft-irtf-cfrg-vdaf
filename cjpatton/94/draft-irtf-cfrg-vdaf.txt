@@ -205,10 +205,10 @@ Table of Contents
    The ideal goal for a privacy-preserving measurement system is that of
    secure multi-party computation (MPC): No participant in the protocol
    should learn anything about an individual measurement beyond what it
-   can deduce from the (differntially private [MPRV09]) aggregate.  In
+   can deduce from the differntially private aggregate [MPRV09].  In
    this document, we describe Verifiable Distributed Aggregation
    Functions (VDAFs) as a general class of delegated MPC protocols that
-   achieve this goal.
+   can be used to achieve this goal.
 
    VDAF schemes achieve their privacy goal by distributing the
    computation of the aggregate among a number of non-colluding
