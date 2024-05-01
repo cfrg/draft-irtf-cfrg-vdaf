@@ -149,6 +149,16 @@ informative:
     seriesinfo: S&P 2020
     target: https://eprint.iacr.org/2019/074
 
+  MPRV09:
+    title: "Computational Differential Privacy"
+    author:
+      - ins: I. Mironov
+      - ins: O. Pandey
+      - ins: O. Reingold
+      - ins: S. Vadhan
+    seriesinfo: CRYPTO 2009
+    target: https://link.springer.com/chapter/10.1007/978-3-642-03356-8_8
+
   MRH04:
     title: "Indifferentiability, impossibility results on reductions, and applications to the random oracle methodology"
     seriesinfo:
@@ -175,13 +185,6 @@ informative:
     title: "Origin Telemetry"
     date: 2020
     target: https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
-
-  #Vad16:
-  #  title: "The Complexity of Differential Privacy"
-  #  author:
-  #    - ins: S. Vadhan
-  #  date: 2016
-  #  target: https://link.springer.com/chapter/10.1007/978-3-319-57048-8_7
 
 --- abstract
 
@@ -217,47 +220,42 @@ fraction of people have experienced a given disease.  Thus systems that provide
 aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.
 
-Most prior approaches to this problem fall under the rubric of "differential
-privacy (DP)" {{Dwo06}}. Roughly speaking, a data aggregation system that is
-differentially private ensures that the degree to which any individual
-measurement influences the value of the aggregate result can be precisely
-controlled. For example, in systems like RAPPOR {{EPK14}}, each user samples
-noise from a well-known distribution and adds it to their measurement before
-submitting to the aggregation server. The aggregation server then adds up the
-noisy measurements, and because it knows the distribution from whence the noise
-was sampled, it can estimate the true sum with reasonable precision.
+This problem is often formulated in terms of differential privacy (DP)
+{{Dwo06}}. Roughly speaking, a data aggregation system that is differentially
+private ensures that the degree to which any individual measurement influences
+the value of the aggregate result can be precisely controlled. For example, in
+systems like RAPPOR {{EPK14}}, each user samples noise from a well-known
+distribution and adds it to their measurement before submitting to the
+aggregation server. The aggregation server then adds up the noisy measurements,
+and because it knows the distribution from which the noise was sampled, it can
+estimate the true sum with reasonable accuracy.
 
-Differentially private systems like RAPPOR are easy to deploy and provide a
-useful guarantee. On its own, however, DP falls short of the strongest privacy
-property one could hope for. Specifically, depending on the "amount" of noise a
-client adds to its measurement, it may be possible for a curious aggregator to
-make a reasonable guess of the measurement's true value. Indeed, the more noise
-the clients add, the less reliable will be the server's estimate of the output.
-Thus systems employing DP techniques alone must strike a delicate balance
+However, even when noise is added to the measurements, collecting them in the
+clear still reveals a significant amount of information to the collector. On
+the one hand, depending on the "amount" of noise a client adds to its
+measurement, it may be possible for a curious collector to make a reasonable
+guess of the measurement's true value. On the other hand, the more noise the
+clients add, the less reliable will be the server's estimate of the output.
+Thus systems relying solely on a DP mechanism must strike a delicate balance
 between privacy and utility.
 
 The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation (MPC): No participant in the protocol should learn
 anything about an individual measurement beyond what it can deduce from the
-aggregate. In this document, we describe Verifiable Distributed Aggregation
-Functions (VDAFs) as a general class of protocols that achieve this goal.
+differentially private aggregate {{MPRV09}}. In this document, we describe
+Verifiable Distributed Aggregation Functions (VDAFs) as a general class of
+delegated MPC protocols that can be used to achieve this goal.
 
 VDAF schemes achieve their privacy goal by distributing the computation of the
 aggregate among a number of non-colluding aggregation servers. As long as a
 subset of the servers executes the protocol honestly, VDAFs guarantee that no
 measurement is ever accessible to any party besides the client that submitted
-it. At the same time, VDAFs are "verifiable" in the sense that malformed
+it. VDAFs can also be composed with various DP mechanisms, thereby ensuring the
+aggregate result does not leak too much information about any one measurmment.
+At the same time, VDAFs are "verifiable" in the sense that malformed
 measurements that would otherwise garble the result of the computation can be
 detected and removed from the set of measurements. We refer to this property as
 "robustness".
-
-In addition to these MPC-style security goals of privacy and robustness, VDAFs
-can be composed with various mechanisms for differential privacy, thereby
-providing the added assurance that the aggregate result itself does not leak
-too much information about any one measurement.
-
-> TODO(issue #94) Provide guidance for local and central DP and point to it
-> here.
 
 The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
@@ -890,12 +888,6 @@ recover the following output:
 ~~~~
 {: #unshard-flow title="Computation of the final aggregate result from aggregate
 shares."}
-
-> QUESTION Maybe the aggregation algorithms should be randomized in order to
-> allow the Aggregators (or the Collector) to add noise for differential
-> privacy. (See the security considerations of {{?DAP=I-D.draft-ietf-ppm-dap}}.)
-> Or is this out-of-scope of this document? See
-> https://github.com/ietf-wg-ppm/ppm-specification/issues/19.
 
 ## Execution of a DAF {#daf-execution}
 
@@ -4508,12 +4500,10 @@ picks bogus measurements for the remaining Clients.  Applications can guard
 against these risks by adding additional controls on report submission,
 such as Client authentication and rate limits.
 
-VDAFs do not inherently provide differential privacy {{Dwo06}}.  The VDAF approach
-to private measurement can be viewed as complementary to differential privacy,
-relying on non-collusion instead of statistical noise to protect the privacy of
-the inputs.  It is possible that a future VDAF could incorporate differential
-privacy features, e.g., by injecting noise before the sharding stage and
-removing it after unsharding.
+VDAFs do not, on their own, provide differential privacy {{Dwo06}}. Depending
+on the distribution of the measurements, the aggregate result itself can still
+leak a significant amount of information about an individual measurement or the
+person that generated it.
 
 ## Requirements for the Verification Key
 
@@ -4605,9 +4595,6 @@ threshold.
 
 The only known, general-purpose approach to mitigating this leakage is via
 differential privacy.
-
-> TODO(issue #94) Describe (or point to some description of) the central DP
-> mechanism for Poplar described in {{BBCGGI21}}.
 
 ## Requirements for XOFs {#xof-vs-ro}
 
