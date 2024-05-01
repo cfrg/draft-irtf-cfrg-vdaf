@@ -1470,13 +1470,14 @@ distribution and adds it to their measurement before submitting to the
 aggregation server. The aggregation server then adds up the noisy measurements,
 and because it knows the distribution from whence the noise was sampled, it can
 estimate the true sum with reasonable accuracy.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">However, even collecting noised measurements in the clear still reveals a
-signficiant amount of information to the collector. Specifically, depending on
-the "amount" of noise a client adds to its measurement, it may be possible for
-a curious collector to make a reasonable guess of the measurement's true
-value. Indeed, the more noise the clients add, the less reliable will be the
-server's estimate of the output. Thus systems relying solely on a DP mechanism
-must strike a delicate balance between privacy and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-6">However even when the measurements are noised, collecting them in the clear
+still reveals a signficiant amount of information to the collector.
+Specifically, depending on the "amount" of noise a client adds to its
+measurement, it may be possible for a curious collector to make a reasonable
+guess of the measurement's true value. Indeed, the more noise the clients add,
+the less reliable will be the server's estimate of the output. Thus systems
+relying solely on a DP mechanism must strike a delicate balance between privacy
+and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <p id="section-1-7">The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation (MPC): No participant in the protocol should learn
 anything about an individual measurement beyond what it can deduce from the
