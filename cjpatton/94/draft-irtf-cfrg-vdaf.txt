@@ -215,7 +215,7 @@ Table of Contents
    aggregation servers.  As long as a subset of the servers executes the
    protocol honestly, VDAFs guarantee that no measurement is ever
    accessible to any party besides the client that submitted it.  VDAFs
-   can also be composed with various DP mechanisms, therby ensuring the
+   can also be composed with various DP mechanisms, thereby ensuring the
    aggregate result does not leak too much information about any one
    measurmment.  At the same time, VDAFs are "verifiable" in the sense
    that malformed measurements that would otherwise garble the result of
