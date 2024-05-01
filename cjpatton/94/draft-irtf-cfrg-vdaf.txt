@@ -194,7 +194,7 @@ Table of Contents
    sampled, it can estimate the true sum with reasonable accuracy.
 
    However even when the measurements are noised, collecting them in the
-   clear still reveals a signficiant amount of information to the
+   clear still reveals a significant amount of information to the
    collector.  Specifically, depending on the "amount" of noise a client
    adds to its measurement, it may be possible for a curious collector
    to make a reasonable guess of the measurement's true value.  Indeed,
