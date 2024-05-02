@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 2 November 2024                                            ISRG
+Expires: 3 November 2024                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                              1 May 2024
+                                                              2 May 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 November 2024.
+   This Internet-Draft will expire on 3 November 2024.
 
 Copyright Notice
 
@@ -182,30 +182,31 @@ Table of Contents
    individual measurements can deliver the value of the measurements
    while protecting users' privacy.
 
-   This problem is often formulated in terms of "differential privacy
-   (DP)" [Dwo06].  Roughly speaking, a data aggregation system that is
+   This problem is often formulated in terms of differential privacy
+   (DP) [Dwo06].  Roughly speaking, a data aggregation system that is
    differentially private ensures that the degree to which any
    individual measurement influences the value of the aggregate result
    can be precisely controlled.  For example, in systems like RAPPOR
    [EPK14], each user samples noise from a well-known distribution and
    adds it to their measurement before submitting to the aggregation
    server.  The aggregation server then adds up the noisy measurements,
-   and because it knows the distribution from whence the noise was
+   and because it knows the distribution from which the noise was
    sampled, it can estimate the true sum with reasonable accuracy.
 
-   However even when the measurements are noised, collecting them in the
-   clear still reveals a significant amount of information to the
-   collector.  Specifically, depending on the "amount" of noise a client
-   adds to its measurement, it may be possible for a curious collector
-   to make a reasonable guess of the measurement's true value.  Indeed,
-   the more noise the clients add, the less reliable will be the
-   server's estimate of the output.  Thus systems relying solely on a DP
-   mechanism must strike a delicate balance between privacy and utility.
+   However, even when noise is added to the measurements, collecting
+   them in the clear still reveals a significant amount of information
+   to the collector.  On the one hand, depending on the "amount" of
+   noise a client adds to its measurement, it may be possible for a
+   curious collector to make a reasonable guess of the measurement's
+   true value.  On the other hand, the more noise the clients add, the
+   less reliable will be the server's estimate of the output.  Thus
+   systems relying solely on a DP mechanism must strike a delicate
+   balance between privacy and utility.
 
    The ideal goal for a privacy-preserving measurement system is that of
    secure multi-party computation (MPC): No participant in the protocol
    should learn anything about an individual measurement beyond what it
-   can deduce from the differntially private aggregate [MPRV09].  In
+   can deduce from the differentially private aggregate [MPRV09].  In
    this document, we describe Verifiable Distributed Aggregation
    Functions (VDAFs) as a general class of delegated MPC protocols that
    can be used to achieve this goal.
@@ -4779,11 +4780,10 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    adding additional controls on report submission, such as Client
    authentication and rate limits.
 
-   VDAFs do not inherently provide differential privacy [Dwo06]:
-   depending on the distribution of the measurements, the aggregate
+   VDAFs do not, on their own, provide differential privacy [Dwo06].
+   Depending on the distribution of the measurements, the aggregate
    result itself can still leak a significant amount of information
-   about the measurements.  Thus applications SHOULD execute a VDAF with
-   a compatible mechanism for differential privacy.
+   about an individual measurement or the person that generated it.
 
 9.1.  Requirements for the Verification Key
 

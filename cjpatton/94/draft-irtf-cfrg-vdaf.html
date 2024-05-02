@@ -1038,7 +1038,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 2 November 2024</td>
+<td class="center">Expires 3 November 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-05-01" class="published">1 May 2024</time>
+<time datetime="2024-05-02" class="published">2 May 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-11-02">2 November 2024</time></dd>
+<dd class="expires"><time datetime="2024-11-03">3 November 2024</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 2 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1461,27 +1461,27 @@ statistics, e.g., which portions of an application are most used or what
 fraction of people have experienced a given disease.  Thus systems that provide
 aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">This problem is often formulated in terms of "differential privacy (DP)"
+<p id="section-1-5">This problem is often formulated in terms of differential privacy (DP)
 <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Roughly speaking, a data aggregation system that is differentially
 private ensures that the degree to which any individual measurement influences
 the value of the aggregate result can be precisely controlled. For example, in
 systems like RAPPOR <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, each user samples noise from a well-known
 distribution and adds it to their measurement before submitting to the
 aggregation server. The aggregation server then adds up the noisy measurements,
-and because it knows the distribution from whence the noise was sampled, it can
+and because it knows the distribution from which the noise was sampled, it can
 estimate the true sum with reasonable accuracy.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">However even when the measurements are noised, collecting them in the clear
-still reveals a significant amount of information to the collector.
-Specifically, depending on the "amount" of noise a client adds to its
+<p id="section-1-6">However, even when noise is added to the measurements, collecting them in the
+clear still reveals a significant amount of information to the collector. On
+the one hand, depending on the "amount" of noise a client adds to its
 measurement, it may be possible for a curious collector to make a reasonable
-guess of the measurement's true value. Indeed, the more noise the clients add,
-the less reliable will be the server's estimate of the output. Thus systems
-relying solely on a DP mechanism must strike a delicate balance between privacy
-and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
+guess of the measurement's true value. On the other hand, the more noise the
+clients add, the less reliable will be the server's estimate of the output.
+Thus systems relying solely on a DP mechanism must strike a delicate balance
+between privacy and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <p id="section-1-7">The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation (MPC): No participant in the protocol should learn
 anything about an individual measurement beyond what it can deduce from the
-differntially private aggregate <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span>. In this document, we describe
+differentially private aggregate <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span>. In this document, we describe
 Verifiable Distributed Aggregation Functions (VDAFs) as a general class of
 delegated MPC protocols that can be used to achieve this goal.<a href="#section-1-7" class="pilcrow">¶</a></p>
 <p id="section-1-8">VDAF schemes achieve their privacy goal by distributing the computation of the
@@ -7525,11 +7525,10 @@ interested in. It allows the input shares to be processed, but corrupts and
 picks bogus measurements for the remaining Clients.  Applications can guard
 against these risks by adding additional controls on report submission,
 such as Client authentication and rate limits.<a href="#section-9-6" class="pilcrow">¶</a></p>
-<p id="section-9-7">VDAFs do not inherently provide differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>: depending on
-the distribution of the measurements, the aggregate result itself can still
-leak a significant amount of information about the measurements. Thus
-applications <span class="bcp14">SHOULD</span> execute a VDAF with a compatible mechanism for differential
-privacy.<a href="#section-9-7" class="pilcrow">¶</a></p>
+<p id="section-9-7">VDAFs do not, on their own, provide differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Depending
+on the distribution of the measurements, the aggregate result itself can still
+leak a significant amount of information about an individual measurement or the
+person that generated it.<a href="#section-9-7" class="pilcrow">¶</a></p>
 <div id="requirements-for-the-verification-key">
 <section id="section-9.1">
         <h3 id="name-requirements-for-the-verifi">
