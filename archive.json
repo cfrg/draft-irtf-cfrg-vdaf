@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-04-30T00:41:37.554870+00:00",
+  "timestamp": "2024-05-02T00:41:49.546812+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -323,15 +323,16 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
-        "divergentdave"
+        "cjpatton"
       ],
       "labels": [
         "editorial",
-        "security consideration"
+        "security consideration",
+        "draft-09"
       ],
       "body": "With `prio3` it's straightforward to roughly estimate quantiles using a histogram (cf https://docs.rs/prio/0.6.1/prio/vdaf/prio3/type.Prio3Histogram64.html). But what if you wanted to precisely compute, say, the 50th percentile (i.e., the median) or the 95th percentile? Prio isn't well-suited for this (cf [[CGB17], Appendix G]).\r\n\r\nIf your application allows for multiple rounds of interaction with the clients, maybe you could do a kind of binary search to find the quantile you're after. Suppose the client measurements are arbitrary 32-bit integers and you want to compute the median. Suppose there are `N` measurements in all. Let `buckets = [2^31]`. Have the clients shard their measurements using `buckets` as the bucket boundaries. Execute the VDAF over the set of input shares, getting bucket counts `agg` as the aggregate result. `agg[0]` is equal to the number of measurements less than or equal to `2^31`, and `agg[1] <= N/2`, then the median must be less than `2^31`. On the other hand, if `agg[1] > N/2` then you know the median must greater than `2^31`. You then repeat the process, adjusting the bucket boundaries based on the previous result: if the median is less than `2^31`, then let `buckets = [2^31 - 2^30]`; otherwise let `buckets = [2^31 + 2^30]`.\r\n\r\nI'm not sure how many iterations would be needed, or how precisely you could compute quantiles this way. Regardless, ideally there would be a VDAF that allows for computing quantiles without interacting with clients more than once.\r\n\r\n\r\n\r\n\r\n\r\n[CGB17]: https://crypto.stanford.edu/prio/paper.pdf",
       "createdAt": "2021-11-17T17:58:28Z",
-      "updatedAt": "2024-01-25T17:51:22Z",
+      "updatedAt": "2024-04-30T22:40:43Z",
       "closedAt": null,
       "comments": [
         {
@@ -993,13 +994,16 @@
       "state": "OPEN",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
-        "editorial"
+        "editorial",
+        "draft-09"
       ],
       "body": "The following currently appears in section 4.3.\r\n\r\n> TODO Consider how to bake this \"linear state machine\" condition into the syntax. Given that Python 3 is used as our pseudocode, it's easier to specify the preparation state using a class.",
       "createdAt": "2022-03-28T19:00:08Z",
-      "updatedAt": "2022-08-25T00:16:22Z",
+      "updatedAt": "2024-05-01T20:16:45Z",
       "closedAt": null,
       "comments": [
         {
@@ -1048,7 +1052,7 @@
       "id": "I_kwDOGKuqOc5H9Pb0",
       "title": "Combined state machine and output extraction",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/45",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "chris-wood",
       "authorAssociation": "NONE",
       "assignees": [],
@@ -1057,8 +1061,8 @@
       ],
       "body": "Right now, `prep_next` returns one of two types: a final output share, or a new state and output message. Why not split these two into separate functions, e.g., `prep_next` for advancing the state machine and then `prep_finish` for producing the final output?",
       "createdAt": "2022-04-18T16:56:44Z",
-      "updatedAt": "2022-08-25T00:17:12Z",
-      "closedAt": null,
+      "updatedAt": "2024-04-30T23:02:28Z",
+      "closedAt": "2024-04-30T23:02:27Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -1087,6 +1091,13 @@
           "body": "Yeah, this is pretty much editorial.",
           "createdAt": "2022-04-21T01:13:00Z",
           "updatedAt": "2022-04-21T01:13:00Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "As of this writing, preparation is now:\r\n* prep_init() -> (prep_state, prep_share)\r\n* prep_shares_to_prep(prep_shares) -> prep_msg\r\n* prep_next(prep_state, prep_msg) -> (prep_state, prep_share) / out_share\r\n\r\nThus we still have the problem that @chris-wood pointed out: the output type of the last API call (either the next prep state or a completed output share) is ambiguous if there is a variable number of rounds. However this is still hypothetical, as all existing VDAFs have a constant number of rounds.\r\n\r\nNevertheless, it is arguably \"cleaner\" from an API perspective to add a method on `PrepState`, call it `is_finished()`, which returns a `bool` indicating whether the next call to `prep_next()` is the last. I\"d be fine with this change, but we would need to make sure to actually use it somewhere, otherwise we'll just end up with code rot.\r\n\r\nOne way we could use it here is to modify `run_vdaf()` by replacing the `for`-loop with a `while` loop once all of the aggregators are finished. Personally, I think this would be messier than what we have.\r\n\r\nI'm going to close this issue with no action. If someone wants to see a change here, please feel free to re-open and send a PR.",
+          "createdAt": "2024-04-30T23:02:27Z",
+          "updatedAt": "2024-04-30T23:02:27Z"
         }
       ]
     },
@@ -1261,10 +1272,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "poc"
+      ],
       "body": "Type annotations are used in the reference implementation in order to generate a more readable spec. Currently these type annotations aren't for correctness. For instance, in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/57, @jbr noticed that type for the verification parameter for Prio3 is not defined.\r\n\r\nIn python3 it's possible to use a static type checker, like https://mypy.readthedocs.io/en/stable/, for this purpose. At the very least, we should extend the unit tests to check that class attributes that are expected to be non-`None` have a value.\r\n\r\nNote that, for the verification parameter in particular, a solution to https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/38 might make this a moot point. However there are many situations for which this would be useful.\r\n",
       "createdAt": "2022-05-10T01:11:18Z",
-      "updatedAt": "2022-05-10T02:30:02Z",
+      "updatedAt": "2024-04-30T23:11:13Z",
       "closedAt": null,
       "comments": [
         {
@@ -1819,7 +1832,7 @@
       ],
       "body": "We wish for the VDAF draft to have first-class support for schemes that are amendable to differential privacy (DP). The task for this issue is to identify what changes need to be made, if any, to accommodate DP. In addition, we should consider adding guidance to the draft about best practices.",
       "createdAt": "2022-06-28T15:22:45Z",
-      "updatedAt": "2024-01-25T17:48:46Z",
+      "updatedAt": "2024-05-01T21:18:51Z",
       "closedAt": null,
       "comments": [
         {
@@ -1940,6 +1953,13 @@
           "body": "As of this writing, PPM has not reached consensus about adopting https://github.com/wangshan/draft-wang-ppm-differential-privacy/. It's clear however that folks think there is something to be done about differential privacy, and that PPM is the right place to do it. It also seems fairly clear that whatever needs to be specified for DP is orthogonal to the VDAF draft.\r\n\r\nI'm going to close this issue after clarifying in the draft that DP is out-of-scope and emphasizing that VDAFs can be made differentially private.",
           "createdAt": "2024-01-25T17:48:35Z",
           "updatedAt": "2024-01-25T17:48:35Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Hi folks, I've put up a PR to resolve this issue. Basically it says that VDAFs SHOULD be composed with a DP mechanism, but leaves it to the application. We don't need any changes to this draft.",
+          "createdAt": "2024-05-01T21:18:50Z",
+          "updatedAt": "2024-05-01T21:18:50Z"
         }
       ]
     },
@@ -4232,14 +4252,15 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
-        "schoppmp"
+        "cjpatton"
       ],
       "labels": [
-        "security consideration"
+        "security consideration",
+        "draft-09"
       ],
       "body": "A recent [email](https://mailarchive.ietf.org/arch/msg/ppm/6DEXt2PS3IGOGWcg5hHzgsIGYyg/) on the PPM list mentioned using Poplar1 and making some optimizations in the traversal of the IDPF tree. One natural way to alter the tree traversal algorithm would be to stop early before reaching the leaf level, but I'm concerned that doing so would lose the benefit of the \"extractability\" property, which depends on the leaf level field size being larger, and thus it could impact the whole scheme's robustness. Currently, we only mention extractability twice, in the context of the public share and the leaf level field size, but we do not explain its relevance. Is it the case that maliciously constructed reports could evaluate to \"1\" on multiple prefixes at some inner level, but it would be computationally infeasible to do the same on the leaf level? If so, we should outline the limitations on robustness, and possibly provide advice about skipping tree levels, i.e. to always do one last subset histogram at the leaf level. In what way do the secure sketching scheme and the extractability property contribute to the overall VDAF's robustness? Would the attack on an inner level be brute-forcing keys that produce values that pass secure sketching by pure chance, inside a ~2^-64 soundness error?",
       "createdAt": "2023-07-28T16:53:58Z",
-      "updatedAt": "2024-01-25T17:51:38Z",
+      "updatedAt": "2024-04-30T23:21:52Z",
       "closedAt": null,
       "comments": [
         {
@@ -4295,11 +4316,12 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "editorial"
+        "editorial",
+        "poc"
       ],
       "body": "              I think these are fine, our `Error` class subclasses `Exception` from the standard library. It inherits from the right things, and it gets good `repr` formatting for free. We could do `raise Error('input: invalid length')` to provide more granular messages.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/276#discussion_r1283348909_\r\n            ",
       "createdAt": "2023-08-03T15:30:50Z",
-      "updatedAt": "2023-10-17T01:34:16Z",
+      "updatedAt": "2024-04-30T23:11:36Z",
       "closedAt": null,
       "comments": []
     },
@@ -4315,11 +4337,11 @@
         "divergentdave"
       ],
       "labels": [
-        "editorial"
+        "poc"
       ],
       "body": "If we moved field element encoding/decoding routines elsewhere, we could simplify the proof of concept implementation by eliminating our `Field` class and using Sage's finite field classes directly. We could also represent polynomials in Sage natively rather than as lists of field elements. This would simplify implementing gadgets, as we'd no longer need a separate `eval_poly()`. (Currently, we only use `PolynomialRing` when interpolating, but then drop out to the list representation immediately)",
       "createdAt": "2023-08-08T17:37:42Z",
-      "updatedAt": "2023-08-16T03:49:59Z",
+      "updatedAt": "2024-04-30T23:11:58Z",
       "closedAt": null,
       "comments": []
     },
@@ -4840,13 +4862,12 @@
         "schoppmp"
       ],
       "labels": [
-        "wire change",
         "security consideration",
         "draft-09"
       ],
       "body": "The collector decides which parts of the IDPF tree to explore. This not only leaks prefixes of the heavy hitter values but, if the collector decides to explore other branches, possibly the values of individual clients.\r\n\r\nThis is pointed out in BBCGGI21:\r\n\r\n> A malicious server\u2019s only strategy to learn extra information\r\nin Protocol 5 is to manipulate answers to the prefix-count oracle\r\nqueries using an \u201cadditive attack.\u201d [...] Intuitively:\r\nthe adversary can essentially control which strings are heavy\r\nhitters (and can thus learn how many honest clients hold strings\r\nin a small set), [..]\r\n\r\nIn the current DAP implementation this is attack is trivial to execute for the collector since it even sees the values in plain. This risk should be clearly pointed out in the standard.",
       "createdAt": "2023-12-04T08:58:48Z",
-      "updatedAt": "2024-04-03T19:20:10Z",
+      "updatedAt": "2024-04-30T23:14:20Z",
       "closedAt": null,
       "comments": [
         {
@@ -4946,13 +4967,6 @@
           "body": "@Schoppmp The attacker needs 2^b to recover b bits, but can wait to start recovering until after going down the tree a bit, and can subtract from other counts. So in one round they recover very, next round verysec, next round verysecret, etc. ",
           "createdAt": "2024-03-07T18:57:39Z",
           "updatedAt": "2024-03-07T18:57:39Z"
-        },
-        {
-          "author": "cjpatton",
-          "authorAssociation": "COLLABORATOR",
-          "body": "Tasks for resolution:\r\n\r\n- [ ] Add prefix counts to the aggregation parameter.\r\n- [ ] Update agg param validator to enforce consistent traversal/counts.\r\n- [ ] Describe \"steering attacks\" in Security Considerations and possible mitigations we've noted.",
-          "createdAt": "2024-04-02T16:30:26Z",
-          "updatedAt": "2024-04-02T16:30:26Z"
         }
       ]
     },
@@ -5073,6 +5087,42 @@
       "body": "The draft specifies a constant `VERSION` that is used for domain separation in Prio3 and Poplar1. This is intended to force incompatibility across drafts such that an old version of Prio3 doesn't interop with a new version. (Likewise for Poplar1.)\r\n\r\nWe're considering two breaking changes for Poplar1 in the next draft:\r\n- #316\r\n- #333\r\n\r\nHowever we're not likely to see breaking changes for Prio3.  VDAF-08-Prio3 is already deployed:  I propose that, for VDAF-09, we keep the version tag for Prio3 the same and only bump the version tag for Poplar1. If breaking changes for Prio3 are required in the future, then we can bump the version tag then.",
       "createdAt": "2024-04-03T19:29:27Z",
       "updatedAt": "2024-04-03T19:29:27Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 335,
+      "id": "I_kwDOGKuqOc6HcejI",
+      "title": "Consider renaming \"secure sketch\" to \"arithmetic sketch\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/335",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "As formalized in https://eprint.iacr.org/2023/1012.",
+      "createdAt": "2024-04-30T20:22:51Z",
+      "updatedAt": "2024-04-30T20:22:52Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 338,
+      "id": "I_kwDOGKuqOc6HjT5y",
+      "title": "Is it OK to mention specific companies/projects?",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/338",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "The intro mentions the MOzilla Origin Telemtry project, ENPA, ISRG, Google, and Apple by name. I'm not sure this is appropriate for an RFC to do. ",
+      "createdAt": "2024-05-01T20:51:16Z",
+      "updatedAt": "2024-05-01T20:51:16Z",
       "closedAt": null,
       "comments": []
     }
@@ -15072,7 +15122,7 @@
       "labels": [],
       "body": "For Poplar1, this ensures that any given input share will only be used once at a given level.\r\n\r\nFixes #142.",
       "createdAt": "2023-02-23T22:38:50Z",
-      "updatedAt": "2023-02-24T22:34:31Z",
+      "updatedAt": "2024-05-01T20:18:06Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "bfec9707cdf3cc1eb5789a954b75436e80c6d1aa",
@@ -18283,7 +18333,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2023-04-24T23:04:21Z",
-      "updatedAt": "2023-04-25T16:26:27Z",
+      "updatedAt": "2024-05-01T20:18:09Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "186618ef8b7c63077380923a901aa4a2e3b10ff5",
@@ -18889,7 +18939,7 @@
       "labels": [],
       "body": "Defines three new API calls on `Vdaf` used to describe state transitions while preparing a report.\r\n\r\n1. `prep_start()` is a derived method that defines the initial state transition `START` -> `CONTINUED(host_prep_state)`\r\n\r\n2. `ping_pong_prep_next()` is a derived method that defines all subsequent state transitions `CONTINUED(host_prep_state)` -> `FINISHED(out_share)` in the \"ping pong\" flow being discussed for DAP-05 (https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/pull/393).\r\n\r\n3. `prep_size()` is a required method that indicates the size of the prep message for a given round. This is needed in order to coalesce prep shares and prep messages into the same, opaque byte string.\r\n\r\nThis allows us to expose the simplest possible interface to DAP.",
       "createdAt": "2023-05-23T00:22:05Z",
-      "updatedAt": "2023-06-14T15:19:27Z",
+      "updatedAt": "2024-05-01T20:18:15Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b3e4c28b5a51a5ecb1ce7b6b484fa8f703adf437",
@@ -20730,7 +20780,7 @@
       "labels": [],
       "body": "Add a CODEOWNERS file so that GitHub tags each of the Authors with each new PR.",
       "createdAt": "2023-06-08T20:54:00Z",
-      "updatedAt": "2023-06-08T21:25:34Z",
+      "updatedAt": "2024-05-01T20:18:13Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "287e24eb0dfb284988ee44c07de96ca78ac2c596",
@@ -20856,7 +20906,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2023-06-14T22:29:52Z",
-      "updatedAt": "2023-06-16T01:52:25Z",
+      "updatedAt": "2024-05-01T20:18:17Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "dca32de7527342b8c64d0cae909682facf1174b7",
@@ -20984,7 +21034,7 @@
       ],
       "body": "Partially addresses #215.\r\n\r\nThe description of Prio3 makes it unclear when joint randomness is computed. To clarify the sharding algorithm, we split it into two methods, one that is called when the FLP requires joint randomness and another that is called when joint randomness is not required.",
       "createdAt": "2023-07-12T00:03:47Z",
-      "updatedAt": "2023-08-03T18:01:49Z",
+      "updatedAt": "2024-05-01T20:18:18Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "2951d2e0f35d06bab3484b1bee958e7e339b328a",
@@ -21380,7 +21430,7 @@
       ],
       "body": "Closes #256.\r\n\r\nSay that this is intended to make circuit design more flexible. While at it, give a slightly more realistic example.\r\n\r\ncc/ @wangshan ",
       "createdAt": "2023-07-14T21:18:35Z",
-      "updatedAt": "2023-08-03T17:59:32Z",
+      "updatedAt": "2024-05-01T20:18:19Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "a0ee768faaa6c9b4b186e7d6c82292f31d9e81b1",
@@ -21424,7 +21474,7 @@
       ],
       "body": "Partially addresses #255.\r\n\r\ncc/ @wangshan ",
       "createdAt": "2023-07-14T22:09:30Z",
-      "updatedAt": "2023-08-03T17:59:23Z",
+      "updatedAt": "2024-05-01T20:18:19Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e5c45e17269720071b3f7290057c3d15d521cc48",
@@ -21468,7 +21518,7 @@
       ],
       "body": "Partially addresses #259 \r\ncc/ @wangshan \r\n\r\nHarmonize by `Daf` with `Vdaf` by adding a nonce to the API. Now all stages of execution are identical except for preparation.\r\n\r\nThis may also be useful for using IDPF as a standalone `Daf`. In `Poplar`, we pass the nonce to the IDPF.",
       "createdAt": "2023-07-14T23:05:16Z",
-      "updatedAt": "2023-08-03T17:59:11Z",
+      "updatedAt": "2024-05-01T20:18:20Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e5c45e17269720071b3f7290057c3d15d521cc48",
@@ -21519,7 +21569,7 @@
       ],
       "body": "Closes #217.\r\n\r\n\"input\" refers to:\r\n* a measurement (we write both \"input\" and \"measurement\")\r\n* input to the validity circuit in `Flp` (we write \"input\" for the plaintext value and \"measurement share\" for the secret-shared value)\r\n* input share as in `Vdaf` (we are consistent here)\r\n* IDPF to `Idpf` (we are also consistent here)\r\n\r\nResolve the ambiguities by:\r\n* always calling a measurement (i.e., the input to the protocol) a measurement\r\n* always call the input to the validity circuit a measurement",
       "createdAt": "2023-07-15T00:04:32Z",
-      "updatedAt": "2023-08-03T17:58:58Z",
+      "updatedAt": "2024-05-01T20:18:26Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cfe4aee531bd3ec49549839322be6194ecc4ce2c",
@@ -21672,7 +21722,7 @@
       ],
       "body": "Closes #223.\r\ncc/ @chris-wood ",
       "createdAt": "2023-07-18T18:00:59Z",
-      "updatedAt": "2023-08-03T17:58:46Z",
+      "updatedAt": "2024-05-01T20:18:21Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "0e7ed7e79048175057098007fbc59306dbb8e666",
@@ -21775,7 +21825,7 @@
       ],
       "body": "Closes #58.\r\nPartially addresses #255 (see TODOs)\r\nPartially addresses #222\r\n\r\nThe current convention for the `Daf` and `Vdaf` interfaces is to any value that must be written to the network in order to carry out the computation as an opaque byte string (type `bytes`). This includes the public share, input share, prep share, prep message, and aggregate share. These values implicitly have type `bytes` and thus their types don't appear in the interface.\r\n\r\nThis mixture of explicit and implicit types makes the interface confusing. At the same time, the current adhoc approach to specifying encoding of types is hard to understand.\r\n\r\nThis commit requires (V)DAF to specify explicit types for all previously implicitly-`bytes` types. Furthermore, it RECOMMENDS that concrete (V)DAFs specify encodings for these. Finally, this change:\r\n\r\n* Replaces the corresponding types for Prio3 and Poplar1 with more explicit types.\r\n* Moves the previous encodings to their own sections and replaces the adhoc methods with TLS syntax.",
       "createdAt": "2023-08-02T01:26:53Z",
-      "updatedAt": "2023-08-16T01:39:07Z",
+      "updatedAt": "2024-05-01T20:18:28Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "7fce26b73876a10d0fac5adfca3eb7da6e5deeaa",
@@ -22798,7 +22848,7 @@
       ],
       "body": "",
       "createdAt": "2023-08-03T18:04:53Z",
-      "updatedAt": "2023-08-03T18:35:43Z",
+      "updatedAt": "2024-05-01T20:18:28Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "5ec5721885a35485fdfdeb56141763b7f1e6ab23",
@@ -26992,7 +27042,7 @@
       "labels": [],
       "body": "Closes #323.\r\n\r\nSupport for TurboSHAKE was recently (as of version 3.20.0) added to PyCryptodomex. Use it instead of our own implementation and remove our implementation.\r\n\r\nAccordingly, remove the draft-irtf-cfrg-kangarootwelve submodule, as we no longer need it for interop testing with our code.\r\n\r\nNote that PyCryptodomex can be upgraded with:\r\n\r\n$ sage -pip install --upgrade pycryptodomex",
       "createdAt": "2024-01-11T19:26:13Z",
-      "updatedAt": "2024-01-11T19:58:36Z",
+      "updatedAt": "2024-05-01T20:18:34Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "97fcdd4e159767ced633d373397b7048901f7d29",
@@ -27147,7 +27197,7 @@
       "labels": [],
       "body": "Closes #311.\r\n\r\nFor Prio3, when joint randomness is used:\r\n\r\n* RECOMMEND Field128\r\n* Field64 MAY be used, but `PROOFS` MUST be `3`\r\n\r\nThe latter is motivated by issue #177. The recommendation is based on the upper bound given by {{DPRS23}}, Theorem 1 and a matching attack described by @bwesterb (see issue #311).",
       "createdAt": "2024-01-11T22:13:34Z",
-      "updatedAt": "2024-01-23T21:58:41Z",
+      "updatedAt": "2024-05-01T20:18:35Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b87c2d6e2169ba2801f14f63abc24723d03c8da6",
@@ -27709,10 +27759,13 @@
       "author": "schoppmp",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "security consideration",
+        "draft-09"
+      ],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-04-29T20:30:08Z",
+      "updatedAt": "2024-04-30T22:30:43Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
@@ -28140,6 +28193,376 @@
           ]
         }
       ]
+    },
+    {
+      "number": 336,
+      "id": "PR_kwDOGKuqOc5uMw7-",
+      "title": "Add IDPF extractability to security considerations",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "security consideration",
+        "draft-09"
+      ],
+      "body": "Closes #12.\r\nCloses #273.\r\n\r\nFirst, clarify that the Aggregators need to check that they have the same public share.\r\n\r\nSecond, clarify which IDPF tree traversals are safe. Since we only guarantee extractability at the last level, it is not safe to use intermediate nodes for any purpose except the heavy hitters tree traversal.",
+      "createdAt": "2024-04-30T22:00:10Z",
+      "updatedAt": "2024-05-02T00:02:11Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/poplar1-extractability",
+      "headRefOid": "d95f2d7c3976d95db3f225887bc7727307bad41f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc55J1-C",
+          "commit": {
+            "abbreviatedOid": "85dd125"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-30T22:01:30Z",
+          "updatedAt": "2024-04-30T22:01:31Z",
+          "comments": [
+            {
+              "originalPosition": 33,
+              "body": "@schoppmp a question: I wonder if we should be worried about using `XofFixedKeyAes128` for generating leaf nodes, since the Poplar paper wants this to be a random oracle?",
+              "createdAt": "2024-04-30T22:01:31Z",
+              "updatedAt": "2024-04-30T22:01:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55KZ7k",
+          "commit": {
+            "abbreviatedOid": "85dd125"
+          },
+          "author": "branlwyd",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-04-30T23:11:17Z",
+          "updatedAt": "2024-04-30T23:26:30Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "```suggestion\r\nthe Client. It is sufficient, for example, to exchange a hash of the public\r\n```\r\n\r\n(typo nit)",
+              "createdAt": "2024-04-30T23:11:17Z",
+              "updatedAt": "2024-04-30T23:26:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55PD5z",
+          "commit": {
+            "abbreviatedOid": "85dd125"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-01T17:09:02Z",
+          "updatedAt": "2024-05-01T17:10:20Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Do we satisfy this requirement in DAP?",
+              "createdAt": "2024-05-01T17:09:02Z",
+              "updatedAt": "2024-05-01T17:10:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55PFpY",
+          "commit": {
+            "abbreviatedOid": "85dd125"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-01T17:14:03Z",
+          "updatedAt": "2024-05-01T17:14:03Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Yes, since public share is bound to HPKE decryption.",
+              "createdAt": "2024-05-01T17:14:03Z",
+              "updatedAt": "2024-05-01T17:14:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55PIpT",
+          "commit": {
+            "abbreviatedOid": "d95f2d7"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-01T17:21:36Z",
+          "updatedAt": "2024-05-02T00:02:11Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "copyedit\r\n```suggestion\r\nThe Aggregators MUST verify that they have both received the same public share from\r\n```",
+              "createdAt": "2024-05-01T17:21:36Z",
+              "updatedAt": "2024-05-02T00:02:11Z"
+            },
+            {
+              "originalPosition": 29,
+              "body": "This might need to be rephrased a bit, because it's trivial to pick keys and a public share that evaluate to (uncontrolled) nonzero values everywhere. Rather what's hard is multiple nonzero evaluations while keeping the other evaluations equal to zero.",
+              "createdAt": "2024-05-01T23:24:42Z",
+              "updatedAt": "2024-05-02T00:02:11Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 337,
+      "id": "PR_kwDOGKuqOc5uM80m",
+      "title": "Rule out some ideas for streamlining preparation syntax",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/337",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-09"
+      ],
+      "body": "Closes #42.\r\n\r\nWe had considered whether we could bake the idea of a \"linear state machine\" into the VDAF syntax. We could probably do something here, but our best idea involves mucking with type hints, something that has created some code rot in this repository already. Since no one has complained about this, let's just rule it out. Also, note that if we end up simplifying the syntax to only supporting 1-round VDAFs, then this point will be moot.\r\n\r\nAlso, we had a paragraph about 0-round VDAFs, which our syntax currently rules out. Delete the paragraph and the associated OPEN ISSUE.",
+      "createdAt": "2024-04-30T22:31:13Z",
+      "updatedAt": "2024-05-01T17:14:51Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/42",
+      "headRefOid": "5f7ff1bdf5d728356164dd1567b29ab1adfef286",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 339,
+      "id": "PR_kwDOGKuqOc5uSge6",
+      "title": "Say that VDAFs SHOULD be composed with DP",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/339",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "security consideration",
+        "draft-09"
+      ],
+      "body": "Closes #94.\r\n\r\nAs written, the intro seems to frame MPC as an alternative to DP, which is not true. Rather, we want to frame MPC as a necessary component of a data aggregation system that provides DP.\r\n\r\nIndeed, this change goes a step forward: VDAFs SHOULD be composed with a mechanism for DP.",
+      "createdAt": "2024-05-01T21:17:21Z",
+      "updatedAt": "2024-05-01T23:24:17Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/94",
+      "headRefOid": "a4265946e190853f66d2c86d62901ca428e3074d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc55RNc6",
+          "commit": {
+            "abbreviatedOid": "c58d147"
+          },
+          "author": "OR13",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-01T22:21:01Z",
+          "updatedAt": "2024-05-01T22:21:06Z",
+          "comments": [
+            {
+              "originalPosition": 116,
+              "body": "How does an implementer know what makes a mechanism compatible?\n\nWhen is this a MUST?",
+              "createdAt": "2024-05-01T22:21:01Z",
+              "updatedAt": "2024-05-01T22:21:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55ROmv",
+          "commit": {
+            "abbreviatedOid": "c58d147"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-01T22:26:29Z",
+          "updatedAt": "2024-05-01T22:26:29Z",
+          "comments": [
+            {
+              "originalPosition": 116,
+              "body": "> How does an implementer know what makes a mechanism compatible?\r\n\r\nI don't think we can answer this question without being concrete about what DP mechanisms are available. There is an I-D for this, but its in early stages and doesn't have a home at IETF yet: https://github.com/wangshan/draft-wang-ppm-differential-privacy/\r\n\r\n> When is this a MUST?\r\n\r\nIt really depends on the application: for Poplar1, we think it's always going to be necessary to stop attacks (https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336); for Prio3, it doesn't seem strictly necessary in all cases.",
+              "createdAt": "2024-05-01T22:26:29Z",
+              "updatedAt": "2024-05-01T22:26:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55RUNI",
+          "commit": {
+            "abbreviatedOid": "c58d147"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-01T22:56:28Z",
+          "updatedAt": "2024-05-01T22:56:28Z",
+          "comments": [
+            {
+              "originalPosition": 116,
+              "body": "For the record, @ekr suggests on list that a SHOULD is inappropriate and the sentence should just be deleted.",
+              "createdAt": "2024-05-01T22:56:28Z",
+              "updatedAt": "2024-05-01T22:56:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55RYIS",
+          "commit": {
+            "abbreviatedOid": "a426594"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-01T23:17:43Z",
+          "updatedAt": "2024-05-01T23:24:14Z",
+          "comments": [
+            {
+              "originalPosition": 46,
+              "body": "\"from whence\" seems fancy, when \"from which\" would do.",
+              "createdAt": "2024-05-01T23:17:43Z",
+              "updatedAt": "2024-05-01T23:24:14Z"
+            },
+            {
+              "originalPosition": 49,
+              "body": "```suggestion\r\nHowever, even when the measurements are noised, collecting them in the clear\r\n```",
+              "createdAt": "2024-05-01T23:18:08Z",
+              "updatedAt": "2024-05-01T23:24:14Z"
+            },
+            {
+              "originalPosition": 53,
+              "body": "Instead of \"Specifically, ... Indeed...\", I might use \"On the one hand... On the other hand...\"",
+              "createdAt": "2024-05-01T23:20:39Z",
+              "updatedAt": "2024-05-01T23:24:14Z"
+            },
+            {
+              "originalPosition": 116,
+              "body": "Might I suggest one of the additional options in RFC 6919, e.g., [SHOULD CONSIDER](https://rfcs.online/rfcs/rfc6919.html#section-2)?\r\n\r\nMore seriously, the idea of composition seems worth mentioning, but I agree that RFC 2119 language probably isn't appropriate.",
+              "createdAt": "2024-05-01T23:24:05Z",
+              "updatedAt": "2024-05-01T23:24:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55RYnC",
+          "commit": {
+            "abbreviatedOid": "a426594"
+          },
+          "author": "martinthomson",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-01T23:20:31Z",
+          "updatedAt": "2024-05-01T23:24:17Z",
+          "comments": [
+            {
+              "originalPosition": 113,
+              "body": "```suggestion\r\nVDAFs do not inherently provide differential privacy {{Dwo06}}. Depending on\r\n```",
+              "createdAt": "2024-05-01T23:20:31Z",
+              "updatedAt": "2024-05-01T23:24:17Z"
+            },
+            {
+              "originalPosition": 115,
+              "body": "```suggestion\r\nleak a significant amount of information about individual measurements or measurements\r\nthat relate to a single person or group. Thus\r\n```",
+              "createdAt": "2024-05-01T23:21:24Z",
+              "updatedAt": "2024-05-01T23:24:17Z"
+            },
+            {
+              "originalPosition": 116,
+              "body": "```suggestion\r\napplications might compose a VDAF with a compatible mechanism for differential\r\n```",
+              "createdAt": "2024-05-01T23:22:03Z",
+              "updatedAt": "2024-05-01T23:24:17Z"
+            },
+            {
+              "originalPosition": 63,
+              "body": "```suggestion\r\ndifferentially private aggregate {{MPRV09}}. In this document, we describe\r\n```",
+              "createdAt": "2024-05-01T23:22:19Z",
+              "updatedAt": "2024-05-01T23:24:17Z"
+            },
+            {
+              "originalPosition": 39,
+              "body": "```suggestion\r\nThis problem is often formulated in terms of differential privacy (DP)\r\n```",
+              "createdAt": "2024-05-01T23:22:59Z",
+              "updatedAt": "2024-05-01T23:24:17Z"
+            },
+            {
+              "originalPosition": 49,
+              "body": "```suggestion\r\nHowever even when noise is added to measurements, collecting them in the clear\r\n```",
+              "createdAt": "2024-05-01T23:23:39Z",
+              "updatedAt": "2024-05-01T23:24:17Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 340,
+      "id": "PR_kwDOGKuqOc5uTA78",
+      "title": "Tweak nonce requirements",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/340",
+      "state": "OPEN",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "- Clarify that aggregators must verify that nonces are never re-used. Since VDAF aims to provide privacy in the face of malicious clients, it doesn't suffice to say clients MUST generate nonces using a CSPRNG; we have to account for malicious clients by adding a MUST for the aggregator. This lines up with the behavior DAP has specified for a long time now.\r\n\r\n- In the second paragraph, clarify that over exposing a *report* is the risk, not a *measurement*. It's always possible for the same measurement to occur many times (for instance, in `Prio3Count`, most measurements are 1), but we want the enclosing *report* to be unique.\r\n\r\nSee https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/558 for discussion",
+      "createdAt": "2024-05-01T23:58:03Z",
+      "updatedAt": "2024-05-01T23:58:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "headRepository": "tgeoghegan/vdaf",
+      "headRefName": "timg/clarify-nonce-uniqueness",
+      "headRefOid": "0818979bad8e5fad582d7d8a364cb61ee782a486",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
