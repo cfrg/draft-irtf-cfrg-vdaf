@@ -170,8 +170,7 @@ class Poplar1(Vdaf):
 
         (level, prefixes) = agg_param
         (last_level, last_prefixes) = previous_agg_params[-1]
-        # The empty prefix 0 is always there.
-        last_prefixes_set = set(list(last_prefixes) + [0])
+        last_prefixes_set = set(last_prefixes)
 
         # Check that level increased.
         if level <= last_level:
