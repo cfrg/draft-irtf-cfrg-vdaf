@@ -171,18 +171,20 @@ class Poplar1(Vdaf):
         (level, prefixes) = agg_param
         (last_level, last_prefixes) = previous_agg_params[-1]
         # The empty prefix 0 is always there.
-        last_prefixes_set = set(list(last_prefixes) + [0])
+        last_prefixes_set = set(list(last_prefixes))
 
         # Check that level increased.
         if level <= last_level:
             return False
 
-        # Check that prefixes are suffixes of the last level's prefixes.
-        for (i, prefix) in enumerate(prefixes):
-            last_prefix = Poplar1.get_ancestor(prefix, level, last_level)
-            if last_prefix not in last_prefixes_set:
-                # Current prefix not a suffix of last level's prefixes.
-                return False
+        # Check that prefixes are suffixes of the last level's prefixes,
+        # unless the last level was 0 (and therefore had no prefixes).
+        if last_level > 0:
+            for (i, prefix) in enumerate(prefixes):
+                last_prefix = Poplar1.get_ancestor(prefix, level, last_level)
+                if last_prefix not in last_prefixes_set:
+                    # Current prefix not a suffix of last level's prefixes.
+                    return False
         return True
 
     @classmethod
