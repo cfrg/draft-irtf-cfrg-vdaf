@@ -152,13 +152,6 @@ class Poplar1(Vdaf):
         return (public_share, input_shares)
 
     @classmethod
-    def get_ancestor(Poplar1, input, this_level, last_level):
-        """
-        Helper function to determine the prefix of `input` at `last_level`.
-        """
-        return input >> (this_level - last_level)
-
-    @classmethod
     def is_valid(Poplar1, agg_param, previous_agg_params):
         """
         Checks that levels are increasing between calls, and also enforces that
@@ -403,3 +396,10 @@ def encode_idpf_field_vec(vec):
         Field = vec[0].__class__
         encoded += Field.encode_vec(vec)
     return encoded
+
+
+def get_ancestor(input, this_level, last_level):
+    """
+    Helper function to determine the prefix of `input` at `last_level`.
+    """
+    return input >> (this_level - last_level)

@@ -3977,17 +3977,19 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
     (level, prefixes) = agg_param
     (last_level, last_prefixes) = previous_agg_params[-1]
     # The empty prefix 0 is always there.
-    last_prefixes_set = set(list(last_prefixes) + [0])
+    last_prefixes_set = set(list(last_prefixes))
 
     # Check that level increased.
     if level <= last_level
       return False
 
-    # Check that prefixes are suffixes of the last level's prefixes.
-    for prefix in prefixes:
-      last_prefix = get_ancestor(prefix, level, last_level)
-      if last_prefix not in last_prefixes_set:
-        return False  # Current prefix not a suffix of last level's prefixes.
+    # Check that prefixes are suffixes of the last level's prefixes,
+    # unless the last level was 0 (and therefore had no prefixes).
+    if last_level > 0:
+      for prefix in prefixes:
+        last_prefix = get_ancestor(prefix, level, last_level)
+        if last_prefix not in last_prefixes_set:
+          return False  # Current prefix not a suffix of last level's prefixes.
 
     return True
 ~~~
@@ -4001,8 +4003,6 @@ Aggregation involves simply adding up the output shares.
 ~~~
 def aggregate(Poplar1, agg_param, out_shares):
     (level, prefixes) = agg_param
-    if sum(prefix_counts) > len(out_shares):
-      return ERR_VERIFY
     Field = Poplar1.Idpf.current_field(level)
     agg_share = Field.zeros(len(prefixes))
     for out_share in out_shares:
