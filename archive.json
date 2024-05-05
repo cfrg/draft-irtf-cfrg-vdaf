@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-05-02T00:41:49.546812+00:00",
+  "timestamp": "2024-05-05T00:45:40.155675+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -991,7 +991,7 @@
       "id": "I_kwDOGKuqOc5GkD62",
       "title": "Representing 'linear state machine' requirement in pseudocode",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/42",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -1003,8 +1003,8 @@
       ],
       "body": "The following currently appears in section 4.3.\r\n\r\n> TODO Consider how to bake this \"linear state machine\" condition into the syntax. Given that Python 3 is used as our pseudocode, it's easier to specify the preparation state using a class.",
       "createdAt": "2022-03-28T19:00:08Z",
-      "updatedAt": "2024-05-01T20:16:45Z",
-      "closedAt": null,
+      "updatedAt": "2024-05-02T14:56:44Z",
+      "closedAt": "2024-05-02T14:56:44Z",
       "comments": [
         {
           "author": "divergentdave",
@@ -1828,11 +1828,12 @@
         "cjpatton"
       ],
       "labels": [
-        "editorial"
+        "editorial",
+        "draft-09"
       ],
       "body": "We wish for the VDAF draft to have first-class support for schemes that are amendable to differential privacy (DP). The task for this issue is to identify what changes need to be made, if any, to accommodate DP. In addition, we should consider adding guidance to the draft about best practices.",
       "createdAt": "2022-06-28T15:22:45Z",
-      "updatedAt": "2024-05-01T21:18:51Z",
+      "updatedAt": "2024-05-02T15:08:07Z",
       "closedAt": null,
       "comments": [
         {
@@ -27765,13 +27766,13 @@
       ],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-04-30T22:30:43Z",
+      "updatedAt": "2024-05-03T14:54:24Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "baseRefOid": "e8c0cbeab9588613801feb3579536bc1221571dc",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-316",
-      "headRefOid": "12bbf0e06c97d220e6e8ea0fd14ae42bf9fb1994",
+      "headRefOid": "f8e91c2bae0a8931d639121f6b1e074fa3ada177",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -28191,6 +28192,66 @@
               "updatedAt": "2024-04-29T20:30:08Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55aKvg",
+          "commit": {
+            "abbreviatedOid": "5280b62"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T21:02:56Z",
+          "updatedAt": "2024-05-02T21:02:56Z",
+          "comments": [
+            {
+              "originalPosition": 84,
+              "body": "I'm leaving it at RECOMMENDED for now, since I'm not sure prescribing DP but not any particular DP parameters would be meaningful. In particular, implementers could satisfy the requirement by implementing DP with $\\delta=1$ or similar insecure settings.",
+              "createdAt": "2024-05-02T21:02:56Z",
+              "updatedAt": "2024-05-02T21:02:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55flsx",
+          "commit": {
+            "abbreviatedOid": "15299a7"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-03T14:48:39Z",
+          "updatedAt": "2024-05-03T14:48:39Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "This was from an earlier version, removed it.",
+              "createdAt": "2024-05-03T14:48:39Z",
+              "updatedAt": "2024-05-03T14:48:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55fmfU",
+          "commit": {
+            "abbreviatedOid": "15299a7"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-03T14:50:03Z",
+          "updatedAt": "2024-05-03T14:50:03Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Done.",
+              "createdAt": "2024-05-03T14:50:03Z",
+              "updatedAt": "2024-05-03T14:50:03Z"
+            }
+          ]
         }
       ]
     },
@@ -28209,13 +28270,13 @@
       ],
       "body": "Closes #12.\r\nCloses #273.\r\n\r\nFirst, clarify that the Aggregators need to check that they have the same public share.\r\n\r\nSecond, clarify which IDPF tree traversals are safe. Since we only guarantee extractability at the last level, it is not safe to use intermediate nodes for any purpose except the heavy hitters tree traversal.",
       "createdAt": "2024-04-30T22:00:10Z",
-      "updatedAt": "2024-05-02T00:02:11Z",
+      "updatedAt": "2024-05-02T20:46:22Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/poplar1-extractability",
-      "headRefOid": "d95f2d7c3976d95db3f225887bc7727307bad41f",
+      "headRefOid": "897bcfd35f5c0be3c069fcc835fcb2618547eca0",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -28327,6 +28388,46 @@
               "updatedAt": "2024-05-02T00:02:11Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55WuWn",
+          "commit": {
+            "abbreviatedOid": "897bcfd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T14:54:58Z",
+          "updatedAt": "2024-05-02T14:54:58Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "Good catch. This needs a bit of thinking. The way I understand it is that a malicious client shouldn't be able to _undetectably_ produce a Poplar1 report that evaluates to 1 at two leaves.",
+              "createdAt": "2024-05-02T14:54:58Z",
+              "updatedAt": "2024-05-02T14:54:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55ZlSZ",
+          "commit": {
+            "abbreviatedOid": "897bcfd"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T19:43:37Z",
+          "updatedAt": "2024-05-02T20:46:22Z",
+          "comments": [
+            {
+              "originalPosition": 33,
+              "body": "Yeah, for the RO model fixed-key AES may be a bit sketchy (as we discussed in [#279](https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/279#issuecomment-1675457126)). I guess the safe choice would be XofTurboShake128 on the last level. We're already using a different field with larger bit size there.",
+              "createdAt": "2024-05-02T19:43:37Z",
+              "updatedAt": "2024-05-02T20:46:22Z"
+            }
+          ]
         }
       ]
     },
@@ -28335,7 +28436,7 @@
       "id": "PR_kwDOGKuqOc5uM80m",
       "title": "Rule out some ideas for streamlining preparation syntax",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/337",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -28345,24 +28446,40 @@
       ],
       "body": "Closes #42.\r\n\r\nWe had considered whether we could bake the idea of a \"linear state machine\" into the VDAF syntax. We could probably do something here, but our best idea involves mucking with type hints, something that has created some code rot in this repository already. Since no one has complained about this, let's just rule it out. Also, note that if we end up simplifying the syntax to only supporting 1-round VDAFs, then this point will be moot.\r\n\r\nAlso, we had a paragraph about 0-round VDAFs, which our syntax currently rules out. Delete the paragraph and the associated OPEN ISSUE.",
       "createdAt": "2024-04-30T22:31:13Z",
-      "updatedAt": "2024-05-01T17:14:51Z",
+      "updatedAt": "2024-05-02T14:56:43Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/42",
       "headRefOid": "5f7ff1bdf5d728356164dd1567b29ab1adfef286",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-05-02T14:56:43Z",
+      "mergedAt": "2024-05-02T14:56:43Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "e8c0cbeab9588613801feb3579536bc1221571dc"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc55VI_s",
+          "commit": {
+            "abbreviatedOid": "5f7ff1b"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-02T12:17:39Z",
+          "updatedAt": "2024-05-02T12:17:39Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 339,
       "id": "PR_kwDOGKuqOc5uSge6",
-      "title": "Say that VDAFs SHOULD be composed with DP",
+      "title": "Clarify that VDAFs aren't sufficient for DP",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/339",
       "state": "OPEN",
       "author": "cjpatton",
@@ -28370,18 +28487,17 @@
       "assignees": [],
       "labels": [
         "editorial",
-        "security consideration",
         "draft-09"
       ],
-      "body": "Closes #94.\r\n\r\nAs written, the intro seems to frame MPC as an alternative to DP, which is not true. Rather, we want to frame MPC as a necessary component of a data aggregation system that provides DP.\r\n\r\nIndeed, this change goes a step forward: VDAFs SHOULD be composed with a mechanism for DP.",
+      "body": "Closes #94.\r\n\r\nAs written, the intro seems to frame MPC as an alternative to DP, which is not true. Rather, we want to frame MPC as a necessary component of a data aggregation system that provides DP.\r\n\r\n~Indeed, this change goes a step forward: VDAFs SHOULD be composed with a mechanism for DP.~",
       "createdAt": "2024-05-01T21:17:21Z",
-      "updatedAt": "2024-05-01T23:24:17Z",
+      "updatedAt": "2024-05-03T13:19:57Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/94",
-      "headRefOid": "a4265946e190853f66d2c86d62901ca428e3074d",
+      "headRefOid": "473849044a92bf65be7ff9ca59907e1579de1351",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -28535,6 +28651,192 @@
               "updatedAt": "2024-05-01T23:24:17Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55WGNr",
+          "commit": {
+            "abbreviatedOid": "c58d147"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T14:00:56Z",
+          "updatedAt": "2024-05-02T14:00:56Z",
+          "comments": [
+            {
+              "originalPosition": 116,
+              "body": "@martinthomson also concurs on list, I'll remove it!",
+              "createdAt": "2024-05-02T14:00:56Z",
+              "updatedAt": "2024-05-02T14:00:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55WO-r",
+          "commit": {
+            "abbreviatedOid": "a426594"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T14:12:43Z",
+          "updatedAt": "2024-05-02T14:12:43Z",
+          "comments": [
+            {
+              "originalPosition": 115,
+              "body": "Changed to \"an individual measurement or the person that generated it\", PTAL.",
+              "createdAt": "2024-05-02T14:12:43Z",
+              "updatedAt": "2024-05-02T14:12:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55WPdz",
+          "commit": {
+            "abbreviatedOid": "a426594"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T14:13:30Z",
+          "updatedAt": "2024-05-02T14:13:30Z",
+          "comments": [
+            {
+              "originalPosition": 116,
+              "body": "I deleted the sentence per @ekr's suggestion ... I can add it back with \"might\" if you like.",
+              "createdAt": "2024-05-02T14:13:30Z",
+              "updatedAt": "2024-05-02T14:13:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55WPs2",
+          "commit": {
+            "abbreviatedOid": "a426594"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T14:13:54Z",
+          "updatedAt": "2024-05-02T14:13:55Z",
+          "comments": [
+            {
+              "originalPosition": 46,
+              "body": "Thanks for crushing my dreams, Richard.",
+              "createdAt": "2024-05-02T14:13:55Z",
+              "updatedAt": "2024-05-02T14:13:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55WiDd",
+          "commit": {
+            "abbreviatedOid": "f2a7ff8"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-02T14:42:11Z",
+          "updatedAt": "2024-05-02T14:45:54Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "We can also delete the commented-out \"Vad16\" reference below. That was just used [here](https://github.com/cjpatton/ppm/blob/1d38aacd713ec7f23a3de3a41c5166e29ef43be2/draft-patton-multi-ppm.md?plain=1#L377) early in the history of the document, and the other references we have are sufficient.",
+              "createdAt": "2024-05-02T14:42:12Z",
+              "updatedAt": "2024-05-02T14:45:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55XfI2",
+          "commit": {
+            "abbreviatedOid": "4738490"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "~I agree with Richard that a SHOULD CONSIDER is appropriate.~ Oh I get the joke",
+          "createdAt": "2024-05-02T16:07:53Z",
+          "updatedAt": "2024-05-02T16:09:51Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "What does \"delegated\" MPC mean? Is the distinction useful in this document?",
+              "createdAt": "2024-05-02T16:07:53Z",
+              "updatedAt": "2024-05-02T16:08:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55X1Qa",
+          "commit": {
+            "abbreviatedOid": "4738490"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T16:43:22Z",
+          "updatedAt": "2024-05-02T16:43:22Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "\"Delegated\" means a small set of servers carry out the computation on behalf of a large number of clients providing the inputs.",
+              "createdAt": "2024-05-02T16:43:22Z",
+              "updatedAt": "2024-05-02T16:43:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55X63-",
+          "commit": {
+            "abbreviatedOid": "4738490"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-02T16:55:02Z",
+          "updatedAt": "2024-05-02T16:55:02Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55aQas",
+          "commit": {
+            "abbreviatedOid": "4738490"
+          },
+          "author": "martinthomson",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T21:11:15Z",
+          "updatedAt": "2024-05-02T21:11:15Z",
+          "comments": [
+            {
+              "originalPosition": 78,
+              "body": "Is that a term of art?  It's the first I've heard it.",
+              "createdAt": "2024-05-02T21:11:15Z",
+              "updatedAt": "2024-05-02T21:11:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55e2ox",
+          "commit": {
+            "abbreviatedOid": "4738490"
+          },
+          "author": "chris-wood",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-03T13:19:57Z",
+          "updatedAt": "2024-05-03T13:19:57Z",
+          "comments": []
         }
       ]
     },
@@ -28547,10 +28849,13 @@
       "author": "tgeoghegan",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "security consideration",
+        "draft-09"
+      ],
       "body": "- Clarify that aggregators must verify that nonces are never re-used. Since VDAF aims to provide privacy in the face of malicious clients, it doesn't suffice to say clients MUST generate nonces using a CSPRNG; we have to account for malicious clients by adding a MUST for the aggregator. This lines up with the behavior DAP has specified for a long time now.\r\n\r\n- In the second paragraph, clarify that over exposing a *report* is the risk, not a *measurement*. It's always possible for the same measurement to occur many times (for instance, in `Prio3Count`, most measurements are 1), but we want the enclosing *report* to be unique.\r\n\r\nSee https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/558 for discussion",
       "createdAt": "2024-05-01T23:58:03Z",
-      "updatedAt": "2024-05-01T23:58:03Z",
+      "updatedAt": "2024-05-02T20:30:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
@@ -28561,8 +28866,223 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "~For the record: it's not clear this is strictly necessary, but it does correspond to the threat model described in DPRS23. And since we already have the requirement in DAP, we might as well adopt it here.~",
+          "createdAt": "2024-05-02T15:15:21Z",
+          "updatedAt": "2024-05-02T15:38:55Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc55WzFt",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-02T15:02:55Z",
+          "updatedAt": "2024-05-02T15:02:55Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55W7wF",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-02T15:17:52Z",
+          "updatedAt": "2024-05-02T15:17:52Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55XCvU",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "",
+          "createdAt": "2024-05-02T15:29:17Z",
+          "updatedAt": "2024-05-02T15:29:42Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Actually, I'm a little hesitant to create this requirement for non-DAP applications. And I'm not sure it's strictly necessary.\r\n\r\n```suggestion\r\nmeasurement, the Client MUST generate this nonce using a CSPRNG. This is\r\nrequired in order to leverage security analysis for the privacy definition of\r\n{{DPRS23}}, which assumes the nonce is chosen at random prior to generating the\r\nreport.\r\n```\r\n\r\nFirst, let me to clarify my claim on the thread in https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/558.  First, the security game in {{DPRS23}} models honest clients that always generate nonces at random. It does not say anything about privacy once a collision occurs, but if the nonce space is sufficiently large, then the probability of a collision is negligible.\r\n\r\nNow, let's consider an attacker that sends the honest aggregator a report with the nonce generated by an honest client. For Prio3, what it learns is a verifier share computed with the same query randomness, but over an input and proof it already knows. The question then is what does the honest client's input as a result? Observe that the attacker can compute this verifier share on its own; there is nothing more it can learn by interacting with the honest aggregator.\r\n\r\nThis makes me think that replay protection is not necessary for the _base_ privacy goal of VDAF. (It would be necessary for DP.)\r\n\r\n@hannahdaviscrypto I would appreciate your view here.",
+              "createdAt": "2024-05-02T15:29:17Z",
+              "updatedAt": "2024-05-02T15:29:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55XoTn",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "hannahdaviscrypto",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T16:23:16Z",
+          "updatedAt": "2024-05-02T16:23:16Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "I agree with this change. It's true that for Prio3, the attacker can't learn anything by submitting an input share with a repeated nonce and known input/proof to the honest aggregator, and in the {{DPRS23}} model, this is the only way it can repeat a nonce.\r\n\r\nBut implicitly, the {{DPRS23}} model is relying on non-malleability of the channel between the prover and the honest aggregator, which some VDAFs might not want to assume. If the attacker can submit a report with the same nonce and input share as an honest client but a tampered proof, I think we've lost security in a way that isn't covered by the {{DPRS23}} model (but would be by the {{MPDST24}} model).\r\n\r\nIn DAP, of course, we should have non-malleability and don't need to worry about it. But if we're specifically talking about non-DAP applications, it seems wise to keep the requirements on them as light as possible. \r\n\r\nMore to the point, is there a downside to asking this of aggregators? Is there a target application where it would substantially help to allow repeated nonces?",
+              "createdAt": "2024-05-02T16:23:16Z",
+              "updatedAt": "2024-05-02T16:23:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55X5py",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T16:52:20Z",
+          "updatedAt": "2024-05-02T16:52:20Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "The downside of this requirement is that checking for nonce uniqueness is expensive and so relaxing the requirement can make protocols easier to implement or at least to operate (fewer expensive database lookups).",
+              "createdAt": "2024-05-02T16:52:20Z",
+              "updatedAt": "2024-05-02T16:52:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55YABq",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T17:03:27Z",
+          "updatedAt": "2024-05-02T17:03:27Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "By {{MPDST24}} you mean https://eprint.iacr.org/2024/221, correct?\r\n\r\nThis non-malleability property is important and needs to be called out. I believe this is provided by HPKE, as long as it is IND-CCA. Do you agree? \r\n\r\n> In DAP, of course, we should have non-malleability and don't need to worry about it. But if we're specifically talking about non-DAP applications, it seems wise to keep the requirements on them as light as possible.\r\n>\r\n> More to the point, is there a downside to asking this of aggregators? Is there a target application where it would substantially help to allow repeated nonces?\r\n\r\nYou bring up a very interesting point. On the one hand, we would like security requirements to be as minimal as possible, i.e., not requiring non-malleability of the channel would be good. On the other hand, detecting replayed nonces is a rather stringent _operational_ requirement. In fact, this is what spurred @tgeoghegan's PR in the first place: https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/556\r\n\r\nTo answer your question: anti-replay has a high operational cost, and while it already exists for DAP, I wouldn't want to impose it on every application.",
+              "createdAt": "2024-05-02T17:03:27Z",
+              "updatedAt": "2024-05-02T17:03:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55YCis",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T17:06:46Z",
+          "updatedAt": "2024-05-02T17:06:46Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "On balance, I think I would prefer to spell out that security consideration than impose the operational consideration. What do you two think?",
+              "createdAt": "2024-05-02T17:06:46Z",
+              "updatedAt": "2024-05-02T17:06:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55YFAr",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "hannahdaviscrypto",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T17:11:45Z",
+          "updatedAt": "2024-05-02T17:11:45Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Yep, that's the paper I meant. I think we did later decide that it was important to model malicious clients in privacy.\r\n\r\nYes, IND-CCA HPKE is definitely sufficient, and a callout would be good.\r\n\r\nThanks for highlighting the operational cost. In that case I think the question is this: are there any VDAFs we're interested in where, unlike Prio3, privacy could be compromised by submitting a known report with a repeated nonce to an honest aggregator? If so, I think that the security concern would probably outweigh the cost concern and we should make this change. If not, letting applications pick between using HPKE and unique nonces makes sense.\r\n\r\nThe stupid toy example I'm thinking of is a VDAF where privacy relies on queries being truly random. Perhaps instead of the leader selecting a verification key, the aggregators have to interact to jointly sample it. Then nonce replays would be more dangerous. ",
+              "createdAt": "2024-05-02T17:11:45Z",
+              "updatedAt": "2024-05-02T17:11:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55ZkPh",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T19:40:57Z",
+          "updatedAt": "2024-05-02T19:40:58Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "> Thanks for highlighting the operational cost. In that case I think the question is this: are there any VDAFs we're interested in where, unlike Prio3, privacy could be compromised by submitting a known report with a repeated nonce to an honest aggregator? If so, I think that the security concern would probably outweigh the cost concern and we should make this change. If not, letting applications pick between using HPKE and unique nonces makes sense.\r\n\r\nLet me see if I understand the attack:\r\n1. Honest client uploads a report; the attacker interacts with the honest aggregator to process it\r\n2. Attacker uploads a report with the same nonce; the attacker interacts with the honest aggregator to process it\r\n3. Attacker guesses a bit of the honest measurement based on its share of the honest report and the messages exchanged\r\n",
+              "createdAt": "2024-05-02T19:40:58Z",
+              "updatedAt": "2024-05-02T19:40:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55Z13k",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "hannahdaviscrypto",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T20:22:00Z",
+          "updatedAt": "2024-05-02T20:22:00Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "In step 3, possibly also the final result (i.e., whether the honest aggregator accepted the fake report). Otherwise, yes.",
+              "createdAt": "2024-05-02T20:22:00Z",
+              "updatedAt": "2024-05-02T20:22:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55Z5ZP",
+          "commit": {
+            "abbreviatedOid": "0818979"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-02T20:30:54Z",
+          "updatedAt": "2024-05-02T20:30:54Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Thanks. At the moment I can't imagine a VDAF for which this attack is possible. It would require preparation of the honest report to leak something it's not supposed to, correct? In which case the repeated nonce doesn't matter.\r\n\r\nPerhaps we should try to flesh out your counter example? ",
+              "createdAt": "2024-05-02T20:30:54Z",
+              "updatedAt": "2024-05-02T20:30:54Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
