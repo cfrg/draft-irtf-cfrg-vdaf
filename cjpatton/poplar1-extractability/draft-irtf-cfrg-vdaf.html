@@ -7634,16 +7634,19 @@ differential privacy.<a href="#section-9.4.1-3" class="pilcrow">¶</a></p>
           </h4>
 <p id="section-9.4.2-1">The secure sketch described in <a href="#poplar1" class="auto internal xref">Section 8</a> is used by the Aggregators to check
 that the shares of the vector obtained by evaluating a Client's IDPF at a
-sequence of candidate prefixes has at most one non-zero entry, and that the
-non-zero entry is <code>1</code>. Indeed, for an honestly generated Poplar1 report, we
-expect the IDPF tree has exactly one non-zero path from the root to the leaves,
-but this is not guaranteed by the secure sketch alone.<a href="#section-9.4.2-1" class="pilcrow">¶</a></p>
-<p id="section-9.4.2-2">IDPFs are designed to prevent a malicious Client from producing key shares with
-more than one non-zero path in the tree. This property is formalized as
-"extractability" in Appendix D of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>: for any pair of key shares and
-public share produced by a malicious Client and a given level of the tree, one
-can efficiently extract from the Client the underlying prefix (i.e., a prefix
-of <code>alpha</code>), in particular from its queries to the random oracle.<a href="#section-9.4.2-2" class="pilcrow">¶</a></p>
+sequence of candidate prefixes has at most one non-zero value, and that the
+non-zero value is <code>1</code>. Depending on how the vallues are used, the secure sketch
+on its own may not be sufficient for robustness of the application. In
+particular, a malicious Client may attempt to influence the computation by
+choosing an IDPF that evaluates to <code>1</code> at more than one node at a given
+level of the tree.<a href="#section-9.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.4.2-2">This issue can be mitigated by using an IDPF that is extractable as defined in
+in Appendix D of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>. Extractability ensures that, for a particular
+level of the tree, it is infeasible for an attacker to find a non-trivial IDPF
+that has a non-zero value at more than one node. (A trivial IDPF is one for
+which the attacker cannot predict the value or position of non-zero nodes. For
+example, it is trivial to produce IDPF key shares and public share whose output
+is always psuedorandom, but this would be detected by the secure sketch.)<a href="#section-9.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-9.4.2-3">The IDPF specified in <a href="#idpf" class="auto internal xref">Section 8.1</a> only guarantees extractability at the last level
 of the tree. (This is by virtue of using a larger field for the leaves than for
 the inner nodes.) For intermediate levels, it is feasible for a client to

@@ -4881,18 +4881,21 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    The secure sketch described in Section 8 is used by the Aggregators
    to check that the shares of the vector obtained by evaluating a
    Client's IDPF at a sequence of candidate prefixes has at most one
-   non-zero entry, and that the non-zero entry is 1.  Indeed, for an
-   honestly generated Poplar1 report, we expect the IDPF tree has
-   exactly one non-zero path from the root to the leaves, but this is
-   not guaranteed by the secure sketch alone.
+   non-zero value, and that the non-zero value is 1.  Depending on how
+   the vallues are used, the secure sketch on its own may not be
+   sufficient for robustness of the application.  In particular, a
+   malicious Client may attempt to influence the computation by choosing
+   an IDPF that evaluates to 1 at more than one node at a given level of
+   the tree.
 
-   IDPFs are designed to prevent a malicious Client from producing key
-   shares with more than one non-zero path in the tree.  This property
-   is formalized as "extractability" in Appendix D of [BBCGGI21]: for
-   any pair of key shares and public share produced by a malicious
-   Client and a given level of the tree, one can efficiently extract
-   from the Client the underlying prefix (i.e., a prefix of alpha), in
-   particular from its queries to the random oracle.
+   This issue can be mitigated by using an IDPF that is extractable as
+   defined in in Appendix D of [BBCGGI21].  Extractability ensures that,
+   for a particular level of the tree, it is infeasible for an attacker
+   to find a non-trivial IDPF that has a non-zero value at more than one
+   node.  (A trivial IDPF is one for which the attacker cannot predict
+   the value or position of non-zero nodes.  For example, it is trivial
+   to produce IDPF key shares and public share whose output is always
+   psuedorandom, but this would be detected by the secure sketch.)
 
    The IDPF specified in Section 8.1 only guarantees extractability at
    the last level of the tree.  (This is by virtue of using a larger
