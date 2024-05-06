@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 3 November 2024                                            ISRG
+Expires: 7 November 2024                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                              2 May 2024
+                                                              6 May 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 November 2024.
+   This Internet-Draft will expire on 7 November 2024.
 
 Copyright Notice
 
@@ -184,53 +184,46 @@ Table of Contents
    individual measurements can deliver the value of the measurements
    while protecting users' privacy.
 
-   Most prior approaches to this problem fall under the rubric of
-   "differential privacy (DP)" [Dwo06].  Roughly speaking, a data
-   aggregation system that is differentially private ensures that the
-   degree to which any individual measurement influences the value of
-   the aggregate result can be precisely controlled.  For example, in
-   systems like RAPPOR [EPK14], each user samples noise from a well-
-   known distribution and adds it to their measurement before submitting
-   to the aggregation server.  The aggregation server then adds up the
-   noisy measurements, and because it knows the distribution from whence
-   the noise was sampled, it can estimate the true sum with reasonable
-   precision.
+   This problem is often formulated in terms of differential privacy
+   (DP) [Dwo06].  Roughly speaking, a data aggregation system that is
+   differentially private ensures that the degree to which any
+   individual measurement influences the value of the aggregate result
+   can be precisely controlled.  For example, in systems like RAPPOR
+   [EPK14], each user samples noise from a well-known distribution and
+   adds it to their measurement before submitting to the aggregation
+   server.  The aggregation server then adds up the noisy measurements,
+   and because it knows the distribution from which the noise was
+   sampled, it can estimate the true sum with reasonable accuracy.
 
-   Differentially private systems like RAPPOR are easy to deploy and
-   provide a useful guarantee.  On its own, however, DP falls short of
-   the strongest privacy property one could hope for.  Specifically,
-   depending on the "amount" of noise a client adds to its measurement,
-   it may be possible for a curious aggregator to make a reasonable
-   guess of the measurement's true value.  Indeed, the more noise the
-   clients add, the less reliable will be the server's estimate of the
-   output.  Thus systems employing DP techniques alone must strike a
-   delicate balance between privacy and utility.
+   However, even when noise is added to the measurements, collecting
+   them in the clear still reveals a significant amount of information
+   to the collector.  On the one hand, depending on the "amount" of
+   noise a client adds to its measurement, it may be possible for a
+   curious collector to make a reasonable guess of the measurement's
+   true value.  On the other hand, the more noise the clients add, the
+   less reliable will be the server's estimate of the output.  Thus
+   systems relying solely on a DP mechanism must strike a delicate
+   balance between privacy and utility.
 
    The ideal goal for a privacy-preserving measurement system is that of
    secure multi-party computation (MPC): No participant in the protocol
    should learn anything about an individual measurement beyond what it
-   can deduce from the aggregate.  In this document, we describe
-   Verifiable Distributed Aggregation Functions (VDAFs) as a general
-   class of protocols that achieve this goal.
+   can deduce from the differentially private aggregate [MPRV09].  In
+   this document, we describe Verifiable Distributed Aggregation
+   Functions (VDAFs) as a general class of delegated MPC protocols that
+   can be used to achieve this goal.
 
    VDAF schemes achieve their privacy goal by distributing the
    computation of the aggregate among a number of non-colluding
    aggregation servers.  As long as a subset of the servers executes the
    protocol honestly, VDAFs guarantee that no measurement is ever
-   accessible to any party besides the client that submitted it.  At the
-   same time, VDAFs are "verifiable" in the sense that malformed
-   measurements that would otherwise garble the result of the
-   computation can be detected and removed from the set of measurements.
-   We refer to this property as "robustness".
-
-   In addition to these MPC-style security goals of privacy and
-   robustness, VDAFs can be composed with various mechanisms for
-   differential privacy, thereby providing the added assurance that the
-   aggregate result itself does not leak too much information about any
-   one measurement.
-
-      TODO(issue #94) Provide guidance for local and central DP and
-      point to it here.
+   accessible to any party besides the client that submitted it.  VDAFs
+   can also be composed with various DP mechanisms, thereby ensuring the
+   aggregate result does not leak too much information about any one
+   measurmment.  At the same time, VDAFs are "verifiable" in the sense
+   that malformed measurements that would otherwise garble the result of
+   the computation can be detected and removed from the set of
+   measurements.  We refer to this property as "robustness".
 
    The cost of achieving these security properties is the need for
    multiple servers to participate in the protocol, and the need to
@@ -956,12 +949,6 @@ Table of Contents
           Figure 4: Computation of the final aggregate result from
                              aggregate shares.
 
-      QUESTION Maybe the aggregation algorithms should be randomized in
-      order to allow the Aggregators (or the Collector) to add noise for
-      differential privacy.  (See the security considerations of [DAP].)
-      Or is this out-of-scope of this document?  See https://github.com/
-      ietf-wg-ppm/ppm-specification/issues/19.
-
 4.6.  Execution of a DAF
 
    Securely executing a DAF involves emulating the following procedure.
@@ -1232,10 +1219,6 @@ Table of Contents
    number of rounds (ROUNDS), a VDAF instance defines the state of the
    Aggregator after each round.
 
-      TODO Consider how to bake this "linear state machine" condition
-      into the syntax.  Given that Python 3 is used as our pseudocode,
-      it's easier to specify the preparation state using a class.
-
    The preparation-state update accomplishes two tasks: recovery of
    output shares from the input shares and ensuring that the recovered
    output shares are valid.  The abstraction boundary is drawn so that
@@ -1247,18 +1230,6 @@ Table of Contents
    invalid output share.  Moreover, in protocols like Prio+ [AGJOP21]
    based on oblivious transfer, it is necessary for the Aggregators to
    interact in order to recover aggregatable output shares at all.
-
-   Note that it is possible for a VDAF to specify ROUNDS == 0, in which
-   case each Aggregator runs the preparation-state update algorithm once
-   and immediately recovers its output share without interacting with
-   the other Aggregators.  However, most, if not all, constructions will
-   require some amount of interaction in order to ensure validity of the
-   output shares (while also maintaining privacy).
-
-      OPEN ISSUE accommodating 0-round VDAFs may require syntax changes
-      if, for example, public keys are required.  On the other hand, we
-      could consider defining this class of schemes as a different
-      primitive.  See issue#77.
 
 5.3.  Validity of Aggregation Parameters
 
@@ -4795,13 +4766,10 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    adding additional controls on report submission, such as Client
    authentication and rate limits.
 
-   VDAFs do not inherently provide differential privacy [Dwo06].  The
-   VDAF approach to private measurement can be viewed as complementary
-   to differential privacy, relying on non-collusion instead of
-   statistical noise to protect the privacy of the inputs.  It is
-   possible that a future VDAF could incorporate differential privacy
-   features, e.g., by injecting noise before the sharding stage and
-   removing it after unsharding.
+   VDAFs do not, on their own, provide differential privacy [Dwo06].
+   Depending on the distribution of the measurements, the aggregate
+   result itself can still leak a significant amount of information
+   about an individual measurement or the person that generated it.
 
 9.1.  Requirements for the Verification Key
 
@@ -4907,9 +4875,6 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
    The only known, general-purpose approach to mitigating this leakage
    is via differential privacy.
-
-      TODO(issue #94) Describe (or point to some description of) the
-      central DP mechanism for Poplar described in [BBCGGI21].
 
 9.4.2.  Unsafe IDPF-Tree Traversals
 
@@ -5127,6 +5092,11 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
               Secure Multiparty Computation from Fixed-Key Block
               Ciphers", S&P 2020 , 2020,
               <https://eprint.iacr.org/2019/074>.
+
+   [MPRV09]   Mironov, I., Pandey, O., Reingold, O., and S. Vadhan,
+              "Computational Differential Privacy", CRYPTO 2009 , n.d.,
+              <https://link.springer.com/
+              chapter/10.1007/978-3-642-03356-8_8>.
 
    [MRH04]    Maurer, U., Renner, R., and C. Holenstein,
               "Indifferentiability, impossibility results on reductions,

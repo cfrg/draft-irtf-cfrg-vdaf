@@ -29,7 +29,7 @@ measurement that would result in an invalid aggregate result.
     intervaltree 3.1.0
     Jinja2 3.1.2
     lxml 4.9.3
-    platformdirs 4.2.0
+    platformdirs 4.2.1
     pycountry 22.3.5
     PyYAML 6.0.1
     requests 2.31.0
@@ -1038,7 +1038,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 3 November 2024</td>
+<td class="center">Expires 7 November 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-05-02" class="published">2 May 2024</time>
+<time datetime="2024-05-06" class="published">6 May 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-11-03">3 November 2024</time></dd>
+<dd class="expires"><time datetime="2024-11-07">7 November 2024</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1467,47 +1467,40 @@ statistics, e.g., which portions of an application are most used or what
 fraction of people have experienced a given disease.  Thus systems that provide
 aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">Most prior approaches to this problem fall under the rubric of "differential
-privacy (DP)" <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Roughly speaking, a data aggregation system that is
-differentially private ensures that the degree to which any individual
-measurement influences the value of the aggregate result can be precisely
-controlled. For example, in systems like RAPPOR <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, each user samples
-noise from a well-known distribution and adds it to their measurement before
-submitting to the aggregation server. The aggregation server then adds up the
-noisy measurements, and because it knows the distribution from whence the noise
-was sampled, it can estimate the true sum with reasonable precision.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">Differentially private systems like RAPPOR are easy to deploy and provide a
-useful guarantee. On its own, however, DP falls short of the strongest privacy
-property one could hope for. Specifically, depending on the "amount" of noise a
-client adds to its measurement, it may be possible for a curious aggregator to
-make a reasonable guess of the measurement's true value. Indeed, the more noise
-the clients add, the less reliable will be the server's estimate of the output.
-Thus systems employing DP techniques alone must strike a delicate balance
+<p id="section-1-5">This problem is often formulated in terms of differential privacy (DP)
+<span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Roughly speaking, a data aggregation system that is differentially
+private ensures that the degree to which any individual measurement influences
+the value of the aggregate result can be precisely controlled. For example, in
+systems like RAPPOR <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, each user samples noise from a well-known
+distribution and adds it to their measurement before submitting to the
+aggregation server. The aggregation server then adds up the noisy measurements,
+and because it knows the distribution from which the noise was sampled, it can
+estimate the true sum with reasonable accuracy.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">However, even when noise is added to the measurements, collecting them in the
+clear still reveals a significant amount of information to the collector. On
+the one hand, depending on the "amount" of noise a client adds to its
+measurement, it may be possible for a curious collector to make a reasonable
+guess of the measurement's true value. On the other hand, the more noise the
+clients add, the less reliable will be the server's estimate of the output.
+Thus systems relying solely on a DP mechanism must strike a delicate balance
 between privacy and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <p id="section-1-7">The ideal goal for a privacy-preserving measurement system is that of secure
 multi-party computation (MPC): No participant in the protocol should learn
 anything about an individual measurement beyond what it can deduce from the
-aggregate. In this document, we describe Verifiable Distributed Aggregation
-Functions (VDAFs) as a general class of protocols that achieve this goal.<a href="#section-1-7" class="pilcrow">¶</a></p>
+differentially private aggregate <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span>. In this document, we describe
+Verifiable Distributed Aggregation Functions (VDAFs) as a general class of
+delegated MPC protocols that can be used to achieve this goal.<a href="#section-1-7" class="pilcrow">¶</a></p>
 <p id="section-1-8">VDAF schemes achieve their privacy goal by distributing the computation of the
 aggregate among a number of non-colluding aggregation servers. As long as a
 subset of the servers executes the protocol honestly, VDAFs guarantee that no
 measurement is ever accessible to any party besides the client that submitted
-it. At the same time, VDAFs are "verifiable" in the sense that malformed
+it. VDAFs can also be composed with various DP mechanisms, thereby ensuring the
+aggregate result does not leak too much information about any one measurmment.
+At the same time, VDAFs are "verifiable" in the sense that malformed
 measurements that would otherwise garble the result of the computation can be
 detected and removed from the set of measurements. We refer to this property as
 "robustness".<a href="#section-1-8" class="pilcrow">¶</a></p>
-<p id="section-1-9">In addition to these MPC-style security goals of privacy and robustness, VDAFs
-can be composed with various mechanisms for differential privacy, thereby
-providing the added assurance that the aggregate result itself does not leak
-too much information about any one measurement.<a href="#section-1-9" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-1-10.1">
-          <p id="section-1-10.1.1">TODO(issue #94) Provide guidance for local and central DP and point to it
-here.<a href="#section-1-10.1.1" class="pilcrow">¶</a></p>
-</li>
-      </ul>
-<p id="section-1-11">The cost of achieving these security properties is the need for multiple servers
+<p id="section-1-9">The cost of achieving these security properties is the need for multiple servers
 to participate in the protocol, and the need to ensure they do not collude to
 undermine the VDAF's privacy guarantees.  Recent implementation experience has
 shown that practical challenges of coordinating multiple servers can be
@@ -1515,71 +1508,71 @@ overcome.  The Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]<
 systems supporting hundreds of millions of users: The Mozilla Origin Telemetry
 project <span>[<a href="#OriginTelemetry" class="cite xref">OriginTelemetry</a>]</span> and the Exposure Notification Private Analytics
 collaboration among the Internet Security Research Group (ISRG), Google, Apple,
-and others <span>[<a href="#ENPA" class="cite xref">ENPA</a>]</span>.<a href="#section-1-11" class="pilcrow">¶</a></p>
-<p id="section-1-12">The VDAF abstraction laid out in <a href="#vdaf" class="auto internal xref">Section 5</a> represents a class of multi-party
+and others <span>[<a href="#ENPA" class="cite xref">ENPA</a>]</span>.<a href="#section-1-9" class="pilcrow">¶</a></p>
+<p id="section-1-10">The VDAF abstraction laid out in <a href="#vdaf" class="auto internal xref">Section 5</a> represents a class of multi-party
 protocols for privacy-preserving measurement proposed in the literature. These
 protocols vary in their operational and security requirements, sometimes in
-subtle but consequential ways. This document therefore has two important goals:<a href="#section-1-12" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-13">
-<li id="section-1-13.1">
-          <p id="section-1-13.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> with
+subtle but consequential ways. This document therefore has two important goals:<a href="#section-1-10" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-11">
+<li id="section-1-11.1">
+          <p id="section-1-11.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> with
 a simple, uniform interface for accessing privacy-preserving measurement
 schemes, documenting relevant operational and security requirements, and
-specifying constraints for safe usage:<a href="#section-1-13.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-13.1.2">
-<li id="section-1-13.1.2.1">
-              <p id="section-1-13.1.2.1.1">General patterns of communications among the various actors involved in
+specifying constraints for safe usage:<a href="#section-1-11.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-11.1.2">
+<li id="section-1-11.1.2.1">
+              <p id="section-1-11.1.2.1.1">General patterns of communications among the various actors involved in
 the system (clients, aggregation servers, and the collector of the
-aggregate result);<a href="#section-1-13.1.2.1.1" class="pilcrow">¶</a></p>
+aggregate result);<a href="#section-1-11.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-13.1.2.2">
-              <p id="section-1-13.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
-information about client measurements; and<a href="#section-1-13.1.2.2.1" class="pilcrow">¶</a></p>
+            <li id="section-1-11.1.2.2">
+              <p id="section-1-11.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
+information about client measurements; and<a href="#section-1-11.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-13.1.2.3">
-              <p id="section-1-13.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
-corrupt the computation.<a href="#section-1-13.1.2.3.1" class="pilcrow">¶</a></p>
+            <li id="section-1-11.1.2.3">
+              <p id="section-1-11.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
+corrupt the computation.<a href="#section-1-11.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 </li>
-        <li id="section-1-13.2">
-          <p id="section-1-13.2.1">Providing cryptographers with design criteria that provide a clear
-deployment roadmap for new constructions.<a href="#section-1-13.2.1" class="pilcrow">¶</a></p>
+        <li id="section-1-11.2">
+          <p id="section-1-11.2.1">Providing cryptographers with design criteria that provide a clear
+deployment roadmap for new constructions.<a href="#section-1-11.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-1-14">This document also specifies two concrete VDAF schemes, each based on a protocol
-from the literature.<a href="#section-1-14" class="pilcrow">¶</a></p>
+<p id="section-1-12">This document also specifies two concrete VDAF schemes, each based on a protocol
+from the literature.<a href="#section-1-12" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1-15.1">
-          <p id="section-1-15.1.1">The aforementioned Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving
+<li class="normal" id="section-1-13.1">
+          <p id="section-1-13.1.1">The aforementioned Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving
 computation of a variety aggregate statistics. The basic idea underlying Prio
-is fairly simple:<a href="#section-1-15.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-15.1.2">
-<li id="section-1-15.1.2.1">
-              <p id="section-1-15.1.2.1.1">Each client shards its measurement into a sequence of additive shares and
-distributes the shares among the aggregation servers.<a href="#section-1-15.1.2.1.1" class="pilcrow">¶</a></p>
+is fairly simple:<a href="#section-1-13.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-13.1.2">
+<li id="section-1-13.1.2.1">
+              <p id="section-1-13.1.2.1.1">Each client shards its measurement into a sequence of additive shares and
+distributes the shares among the aggregation servers.<a href="#section-1-13.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-15.1.2.2">
-              <p id="section-1-15.1.2.2.1">Next, each server adds up its shares locally, resulting in an additive
-share of the aggregate.<a href="#section-1-15.1.2.2.1" class="pilcrow">¶</a></p>
+            <li id="section-1-13.1.2.2">
+              <p id="section-1-13.1.2.2.1">Next, each server adds up its shares locally, resulting in an additive
+share of the aggregate.<a href="#section-1-13.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-15.1.2.3">
-              <p id="section-1-15.1.2.3.1">Finally, the aggregation servers send their aggregate shares to the data
-collector, who combines them to obtain the aggregate result.<a href="#section-1-15.1.2.3.1" class="pilcrow">¶</a></p>
+            <li id="section-1-13.1.2.3">
+              <p id="section-1-13.1.2.3.1">Finally, the aggregation servers send their aggregate shares to the data
+collector, who combines them to obtain the aggregate result.<a href="#section-1-13.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
-<p id="section-1-15.1.3">
+<p id="section-1-13.1.3">
 The difficult part of this system is ensuring that the servers hold shares of
 a valid, aggregatable value, e.g., the measurement is an integer in a
 specific range. Thus Prio specifies a multi-party protocol for accomplishing
-this task.<a href="#section-1-15.1.3" class="pilcrow">¶</a></p>
-<p id="section-1-15.1.4">
+this task.<a href="#section-1-13.1.3" class="pilcrow">¶</a></p>
+<p id="section-1-13.1.4">
 In <a href="#prio3" class="auto internal xref">Section 7</a> we describe Prio3, a VDAF that follows the same overall framework
 as the original Prio protocol, but incorporates techniques introduced in
-<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-15.1.4" class="pilcrow">¶</a></p>
+<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-13.1.4" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-1-15.2">
-          <p id="section-1-15.2.1">More recently, Boneh et al. <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> described a protocol called Poplar
+        <li class="normal" id="section-1-13.2">
+          <p id="section-1-13.2.1">More recently, Boneh et al. <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> described a protocol called Poplar
 for solving the <code>t</code>-heavy-hitters problem in a privacy-preserving manner. Here
 each client holds a bit-string of length <code>n</code>, and the goal of the aggregation
 servers is to compute the set of strings that occur at least <code>t</code> times. The
@@ -1589,35 +1582,35 @@ any bit-string of length shorter than or equal to <code>n</code>. As a result of
 query, each of the servers has an additive share of a bit indicating whether
 the string is a prefix of the client's string. The protocol also specifies a
 multi-party computation for verifying that at most one string among a set of
-candidates is a prefix of the client's string.<a href="#section-1-15.2.1" class="pilcrow">¶</a></p>
-<p id="section-1-15.2.2">
+candidates is a prefix of the client's string.<a href="#section-1-13.2.1" class="pilcrow">¶</a></p>
+<p id="section-1-13.2.2">
 In <a href="#poplar1" class="auto internal xref">Section 8</a> we describe a VDAF called Poplar1 that implements this
-functionality.<a href="#section-1-15.2.2" class="pilcrow">¶</a></p>
+functionality.<a href="#section-1-13.2.2" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-16">Finally, perhaps the most complex aspect of schemes like Prio3 and Poplar1 is
+<p id="section-1-14">Finally, perhaps the most complex aspect of schemes like Prio3 and Poplar1 is
 the process by which the client-generated measurements are prepared for
 aggregation. Because these constructions are based on secret sharing, the
 servers will be required to exchange some amount of information in order to
 verify the measurement is valid and can be aggregated. Depending on the
-construction, this process may require multiple round trips over the network.<a href="#section-1-16" class="pilcrow">¶</a></p>
-<p id="section-1-17">There are applications in which this verification step may not be necessary,
+construction, this process may require multiple round trips over the network.<a href="#section-1-14" class="pilcrow">¶</a></p>
+<p id="section-1-15">There are applications in which this verification step may not be necessary,
 e.g., when the client's software is run a trusted execution environment. To
 support these applications, this document also defines Distributed Aggregation
 Functions (DAFs) as a simpler class of protocols that aim to provide the same
-privacy guarantee as VDAFs but fall short of being verifiable.<a href="#section-1-17" class="pilcrow">¶</a></p>
+privacy guarantee as VDAFs but fall short of being verifiable.<a href="#section-1-15" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-1-18.1">
-          <p id="section-1-18.1.1">OPEN ISSUE Decide if we should give one or two example DAFs. There are natural
-variants of Prio3 and Poplar1 that might be worth describing.<a href="#section-1-18.1.1" class="pilcrow">¶</a></p>
+<li class="normal ulEmpty" id="section-1-16.1">
+          <p id="section-1-16.1.1">OPEN ISSUE Decide if we should give one or two example DAFs. There are natural
+variants of Prio3 and Poplar1 that might be worth describing.<a href="#section-1-16.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-19">The remainder of this document is organized as follows: <a href="#overview" class="auto internal xref">Section 3</a> gives a
+<p id="section-1-17">The remainder of this document is organized as follows: <a href="#overview" class="auto internal xref">Section 3</a> gives a
 brief overview of DAFs and VDAFs; <a href="#daf" class="auto internal xref">Section 4</a> defines the syntax for DAFs; <a href="#vdaf" class="auto internal xref">Section 5</a>
 defines the syntax for VDAFs; <a href="#prelim" class="auto internal xref">Section 6</a> defines various functionalities that
 are common to our constructions; <a href="#prio3" class="auto internal xref">Section 7</a> describes the Prio3 construction;
 <a href="#poplar1" class="auto internal xref">Section 8</a> describes the Poplar1 construction; and <a href="#security" class="auto internal xref">Section 9</a> enumerates the
-security considerations for VDAFs.<a href="#section-1-19" class="pilcrow">¶</a></p>
+security considerations for VDAFs.<a href="#section-1-17" class="pilcrow">¶</a></p>
 <div id="change-log">
 <section id="section-1.1">
         <h3 id="name-change-log">
@@ -2385,15 +2378,6 @@ is deterministic.<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
 <a href="#name-computation-of-the-final-ag" class="selfRef">Computation of the final aggregate result from aggregate shares.</a>
           </figcaption></figure>
 </div>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-4.5-4.1">
-            <p id="section-4.5-4.1.1">QUESTION Maybe the aggregation algorithms should be randomized in order to
-allow the Aggregators (or the Collector) to add noise for differential
-privacy. (See the security considerations of <span>[<a href="#DAP" class="cite xref">DAP</a>]</span>.)
-Or is this out-of-scope of this document? See
-https://github.com/ietf-wg-ppm/ppm-specification/issues/19.<a href="#section-4.5-4.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
 </section>
 </div>
 <div id="daf-execution">
@@ -2751,14 +2735,7 @@ states.  The Aggregator enters the first state on using the initialization
 algorithm, and the update algorithm advances the Aggregator to the next state.
 Thus, in addition to defining the number of rounds (<code>ROUNDS</code>), a VDAF instance
 defines the state of the Aggregator after each round.<a href="#section-5.2-7" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-5.2-8.1">
-            <p id="section-5.2-8.1.1">TODO Consider how to bake this "linear state machine" condition into the
-syntax. Given that Python 3 is used as our pseudocode, it's easier to specify
-the preparation state using a class.<a href="#section-5.2-8.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-5.2-9">The preparation-state update accomplishes two tasks: recovery of output shares
+<p id="section-5.2-8">The preparation-state update accomplishes two tasks: recovery of output shares
 from the input shares and ensuring that the recovered output shares are valid.
 The abstraction boundary is drawn so that an Aggregator only recovers an output
 share if it is deemed valid (at least, based on the Aggregator's view of the
@@ -2767,20 +2744,7 @@ recover output shares first, then verify that they are valid. However, this
 would allow the possibility of misusing the API by, say, aggregating an invalid
 output share. Moreover, in protocols like Prio+ <span>[<a href="#AGJOP21" class="cite xref">AGJOP21</a>]</span> based on oblivious
 transfer, it is necessary for the Aggregators to interact in order to recover
-aggregatable output shares at all.<a href="#section-5.2-9" class="pilcrow">¶</a></p>
-<p id="section-5.2-10">Note that it is possible for a VDAF to specify <code>ROUNDS == 0</code>, in which case each
-Aggregator runs the preparation-state update algorithm once and immediately
-recovers its output share without interacting with the other Aggregators.
-However, most, if not all, constructions will require some amount of interaction
-in order to ensure validity of the output shares (while also maintaining
-privacy).<a href="#section-5.2-10" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-5.2-11.1">
-            <p id="section-5.2-11.1.1">OPEN ISSUE accommodating 0-round VDAFs may require syntax changes if, for
-example, public keys are required. On the other hand, we could consider
-defining this class of schemes as a different primitive. See issue#77.<a href="#section-5.2-11.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
+aggregatable output shares at all.<a href="#section-5.2-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-vdaf-validity-scopes">
@@ -7547,12 +7511,10 @@ interested in. It allows the input shares to be processed, but corrupts and
 picks bogus measurements for the remaining Clients.  Applications can guard
 against these risks by adding additional controls on report submission,
 such as Client authentication and rate limits.<a href="#section-9-6" class="pilcrow">¶</a></p>
-<p id="section-9-7">VDAFs do not inherently provide differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>.  The VDAF approach
-to private measurement can be viewed as complementary to differential privacy,
-relying on non-collusion instead of statistical noise to protect the privacy of
-the inputs.  It is possible that a future VDAF could incorporate differential
-privacy features, e.g., by injecting noise before the sharding stage and
-removing it after unsharding.<a href="#section-9-7" class="pilcrow">¶</a></p>
+<p id="section-9-7">VDAFs do not, on their own, provide differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Depending
+on the distribution of the measurements, the aggregate result itself can still
+leak a significant amount of information about an individual measurement or the
+person that generated it.<a href="#section-9-7" class="pilcrow">¶</a></p>
 <div id="requirements-for-the-verification-key">
 <section id="section-9.1">
         <h3 id="name-requirements-for-the-verifi">
@@ -7663,12 +7625,6 @@ prefix, which would be leaked by a prefix tree with a sufficiently small
 threshold.<a href="#section-9.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-9.4.1-3">The only known, general-purpose approach to mitigating this leakage is via
 differential privacy.<a href="#section-9.4.1-3" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-9.4.1-4.1">
-              <p id="section-9.4.1-4.1.1">TODO(issue #94) Describe (or point to some description of) the central DP
-mechanism for Poplar described in <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.<a href="#section-9.4.1-4.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
 </section>
 </div>
 <div id="unsafe-idpf-tree-traversals">
@@ -7956,6 +7912,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dt id="GKWY20">[GKWY20]</dt>
         <dd>
 <span class="refAuthor">Guo, C.</span>, <span class="refAuthor">Katz, J.</span>, <span class="refAuthor">Wang, X.</span>, and <span class="refAuthor">Y. Yu</span>, <span class="refTitle">"Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers"</span>, <span class="seriesInfo">S&amp;P 2020 </span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://eprint.iacr.org/2019/074">https://eprint.iacr.org/2019/074</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="MPRV09">[MPRV09]</dt>
+        <dd>
+<span class="refAuthor">Mironov, I.</span>, <span class="refAuthor">Pandey, O.</span>, <span class="refAuthor">Reingold, O.</span>, and <span class="refAuthor">S. Vadhan</span>, <span class="refTitle">"Computational Differential Privacy"</span>, <span class="seriesInfo">CRYPTO 2009 </span>, <span>n.d.</span>, <span>&lt;<a href="https://link.springer.com/chapter/10.1007/978-3-642-03356-8_8">https://link.springer.com/chapter/10.1007/978-3-642-03356-8_8</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MRH04">[MRH04]</dt>
         <dd>
