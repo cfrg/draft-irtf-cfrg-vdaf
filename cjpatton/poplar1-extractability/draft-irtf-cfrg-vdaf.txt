@@ -142,7 +142,7 @@ Table of Contents
      9.3.  Requirements for the Public Share
      9.4.  Requirements for Aggregation Parameters
        9.4.1.  Additional Privacy Considerations
-       9.4.2.  Safe usage of IDPF outputs
+       9.4.2.  Safe Usage of IDPF Outputs
      9.5.  Requirements for XOFs
      9.6.  Choosing the Field Size
    10. IANA Considerations
@@ -4876,7 +4876,7 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    The only known, general-purpose approach to mitigating this leakage
    is via differential privacy.
 
-9.4.2.  Safe usage of IDPF outputs
+9.4.2.  Safe Usage of IDPF Outputs
 
    The secure sketch described in Section 8 is used by the Aggregators
    to check that the shares of the vector obtained by evaluating a
