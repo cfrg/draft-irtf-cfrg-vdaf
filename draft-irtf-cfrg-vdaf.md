@@ -3976,7 +3976,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
 
     (level, prefixes) = agg_param
     (last_level, last_prefixes) = previous_agg_params[-1]
-    last_prefixes_set = set(list(last_prefixes))
+    last_prefixes_set = set(last_prefixes)
 
     # Check that level increased.
     if level <= last_level
