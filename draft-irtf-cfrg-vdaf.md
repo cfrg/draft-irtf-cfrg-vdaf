@@ -4612,9 +4612,10 @@ threshold.
 
 A malicious adversary controlling the Collector and one of the Aggregators can
 further turn arbitrary non-heavy prefixes into heavy ones by tampering with the
-IDPF output at any position. While our construction ensures that the sum of all
-nodes evaluated at a level cannot exceed the value at the parent nodes, this
-still may allow an adversary to discover individual non-heavy strings.
+IDPF output at any position. While our construction ensures that the nodes
+evaluated at one level are children of the nodes evaluated at the previous
+level, this still may allow an adversary to discover individual non-heavy
+strings.
 
 The only practical, general-purpose approach to mitigating these leakages is via
 differential privacy, which is RECOMMENDED for all protocols using Poplar1 for
