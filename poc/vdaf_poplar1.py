@@ -163,7 +163,7 @@ class Poplar1(Vdaf):
 
         (level, prefixes) = agg_param
         (last_level, last_prefixes) = previous_agg_params[-1]
-        last_prefixes_set = set(list(last_prefixes))
+        last_prefixes_set = set(last_prefixes)
 
         # Check that level increased.
         if level <= last_level:
