@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-05-05T00:45:40.155675+00:00",
+  "timestamp": "2024-05-07T00:42:34.398075+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1821,7 +1821,7 @@
       "id": "I_kwDOGKuqOc5MvfOB",
       "title": "Accommodations for differential privacy",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/94",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -1833,8 +1833,8 @@
       ],
       "body": "We wish for the VDAF draft to have first-class support for schemes that are amendable to differential privacy (DP). The task for this issue is to identify what changes need to be made, if any, to accommodate DP. In addition, we should consider adding guidance to the draft about best practices.",
       "createdAt": "2022-06-28T15:22:45Z",
-      "updatedAt": "2024-05-02T15:08:07Z",
-      "closedAt": null,
+      "updatedAt": "2024-05-06T13:36:26Z",
+      "closedAt": "2024-05-06T13:36:26Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5124,6 +5124,24 @@
       "body": "The intro mentions the MOzilla Origin Telemtry project, ENPA, ISRG, Google, and Apple by name. I'm not sure this is appropriate for an RFC to do. ",
       "createdAt": "2024-05-01T20:51:16Z",
       "updatedAt": "2024-05-01T20:51:16Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 341,
+      "id": "I_kwDOGKuqOc6H9dia",
+      "title": "IDPF: Use XofTurboShake128 for deriving the leaf nodes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/341",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change"
+      ],
+      "body": "This is needed for IDPF to be extractable.\r\n\r\n_Originally posted by @schoppmp in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336#discussion_r1588266127_\r\n            ",
+      "createdAt": "2024-05-06T14:36:25Z",
+      "updatedAt": "2024-05-06T14:37:03Z",
       "closedAt": null,
       "comments": []
     }
@@ -27766,7 +27784,7 @@
       ],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-05-03T14:54:24Z",
+      "updatedAt": "2024-05-06T13:31:01Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e8c0cbeab9588613801feb3579536bc1221571dc",
@@ -28270,18 +28288,26 @@
       ],
       "body": "Closes #12.\r\nCloses #273.\r\n\r\nFirst, clarify that the Aggregators need to check that they have the same public share.\r\n\r\nSecond, clarify which IDPF tree traversals are safe. Since we only guarantee extractability at the last level, it is not safe to use intermediate nodes for any purpose except the heavy hitters tree traversal.",
       "createdAt": "2024-04-30T22:00:10Z",
-      "updatedAt": "2024-05-02T20:46:22Z",
+      "updatedAt": "2024-05-07T00:26:56Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "baseRefOid": "9ff20bfdafd7aa192d06f91f7d362a9835d31ed2",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/poplar1-extractability",
-      "headRefOid": "897bcfd35f5c0be3c069fcc835fcb2618547eca0",
+      "headRefOid": "801dd822860e8ce9bd647298d38f21b789f8c364",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and squashed.",
+          "createdAt": "2024-05-06T13:47:19Z",
+          "updatedAt": "2024-05-06T13:47:19Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc55J1-C",
@@ -28428,6 +28454,79 @@
               "updatedAt": "2024-05-02T20:46:22Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55plDJ",
+          "commit": {
+            "abbreviatedOid": "85dd125"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-06T14:36:41Z",
+          "updatedAt": "2024-05-06T14:36:41Z",
+          "comments": [
+            {
+              "originalPosition": 33,
+              "body": "Filed #341.",
+              "createdAt": "2024-05-06T14:36:41Z",
+              "updatedAt": "2024-05-06T14:36:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55q60A",
+          "commit": {
+            "abbreviatedOid": "d95f2d7"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-06T17:21:07Z",
+          "updatedAt": "2024-05-06T17:21:07Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "I've reworked this text, pleaase take another look.",
+              "createdAt": "2024-05-06T17:21:07Z",
+              "updatedAt": "2024-05-06T17:21:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55sEM2",
+          "commit": {
+            "abbreviatedOid": "801dd82"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-06T20:11:58Z",
+          "updatedAt": "2024-05-06T20:11:58Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55tGV-",
+          "commit": {
+            "abbreviatedOid": "85dd125"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-07T00:26:56Z",
+          "updatedAt": "2024-05-07T00:26:56Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Maybe I'm missing something: in DAP , the client separately HPKE encrypts input shares to either aggregator's respective key. A malicious could therefore use distinct public shares and construct distinct AADs, no?",
+              "createdAt": "2024-05-07T00:26:56Z",
+              "updatedAt": "2024-05-07T00:26:56Z"
+            }
+          ]
         }
       ]
     },
@@ -28481,7 +28580,7 @@
       "id": "PR_kwDOGKuqOc5uSge6",
       "title": "Clarify that VDAFs aren't sufficient for DP",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/339",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -28491,17 +28590,19 @@
       ],
       "body": "Closes #94.\r\n\r\nAs written, the intro seems to frame MPC as an alternative to DP, which is not true. Rather, we want to frame MPC as a necessary component of a data aggregation system that provides DP.\r\n\r\n~Indeed, this change goes a step forward: VDAFs SHOULD be composed with a mechanism for DP.~",
       "createdAt": "2024-05-01T21:17:21Z",
-      "updatedAt": "2024-05-03T13:19:57Z",
+      "updatedAt": "2024-05-06T13:36:26Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
+      "baseRefOid": "e8c0cbeab9588613801feb3579536bc1221571dc",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/94",
-      "headRefOid": "473849044a92bf65be7ff9ca59907e1579de1351",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "ce349107134a6cb44c5c101dfb5484c0f6466662",
+      "closedAt": "2024-05-06T13:36:25Z",
+      "mergedAt": "2024-05-06T13:36:25Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "9ff20bfdafd7aa192d06f91f7d362a9835d31ed2"
+      },
       "comments": [],
       "reviews": [
         {
@@ -28795,14 +28896,14 @@
         {
           "id": "PRR_kwDOGKuqOc55X63-",
           "commit": {
-            "abbreviatedOid": "4738490"
+            "abbreviatedOid": "ce34910"
           },
           "author": "tgeoghegan",
           "authorAssociation": "CONTRIBUTOR",
           "state": "APPROVED",
           "body": "",
           "createdAt": "2024-05-02T16:55:02Z",
-          "updatedAt": "2024-05-02T16:55:02Z",
+          "updatedAt": "2024-05-06T13:32:46Z",
           "comments": []
         },
         {
@@ -28828,14 +28929,14 @@
         {
           "id": "PRR_kwDOGKuqOc55e2ox",
           "commit": {
-            "abbreviatedOid": "4738490"
+            "abbreviatedOid": "ce34910"
           },
           "author": "chris-wood",
           "authorAssociation": "NONE",
           "state": "APPROVED",
           "body": "",
           "createdAt": "2024-05-03T13:19:57Z",
-          "updatedAt": "2024-05-03T13:19:57Z",
+          "updatedAt": "2024-05-06T13:32:46Z",
           "comments": []
         }
       ]
