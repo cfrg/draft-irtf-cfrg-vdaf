@@ -1038,7 +1038,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 7 November 2024</td>
+<td class="center">Expires 8 November 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-05-06" class="published">6 May 2024</time>
+<time datetime="2024-05-07" class="published">7 May 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-11-07">7 November 2024</time></dd>
+<dd class="expires"><time datetime="2024-11-08">8 November 2024</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1381,18 +1381,24 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                 <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-requirements-for-the-nonce" class="internal xref">Requirements for the Nonce</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
-                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-requirements-for-the-aggreg" class="internal xref">Requirements for the Aggregation Parameters</a></p>
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-requirements-for-the-public" class="internal xref">Requirements for the Public Share</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-requirements-for-aggregatio" class="internal xref">Requirements for Aggregation Parameters</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3.2.1">
-                    <p id="section-toc.1-1.9.2.3.2.1.1"><a href="#section-9.3.1" class="auto internal xref">9.3.1</a>.  <a href="#name-additional-privacy-consider" class="internal xref">Additional Privacy Considerations</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4.2.1">
+                    <p id="section-toc.1-1.9.2.4.2.1.1"><a href="#section-9.4.1" class="auto internal xref">9.4.1</a>.  <a href="#name-additional-privacy-consider" class="internal xref">Additional Privacy Considerations</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4.2.2">
+                    <p id="section-toc.1-1.9.2.4.2.2.1"><a href="#section-9.4.2" class="auto internal xref">9.4.2</a>.  <a href="#name-safe-usage-of-idpf-outputs" class="internal xref">Safe Usage of IDPF Outputs</a></p>
 </li>
                 </ul>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
-                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-requirements-for-xofs" class="internal xref">Requirements for XOFs</a></p>
-</li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.5">
-                <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-choosing-the-field-size" class="internal xref">Choosing the Field Size</a></p>
+                <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-requirements-for-xofs" class="internal xref">Requirements for XOFs</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.6">
+                <p id="section-toc.1-1.9.2.6.1"><a href="#section-9.6" class="auto internal xref">9.6</a>.  <a href="#name-choosing-the-field-size" class="internal xref">Choosing the Field Size</a></p>
 </li>
             </ul>
 </li>
@@ -3971,7 +3977,7 @@ of the FLP depends on a variety of parameters, like the length of the
 input and the size of the field. See <a href="#flp-generic" class="auto internal xref">Section 7.3</a> for details.<a href="#section-7.1-11" class="pilcrow">¶</a></p>
 <p id="section-7.1-12">Note that soundness of an FLP system is not the same as robustness for a VDAF
 In particular, soundness of the FLP is necessary, but insufficient for
-robusntess of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>). See <a href="#security-multiproof" class="auto internal xref">Section 9.5</a> for details.<a href="#section-7.1-12" class="pilcrow">¶</a></p>
+robusntess of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>). See <a href="#security-multiproof" class="auto internal xref">Section 9.6</a> for details.<a href="#section-7.1-12" class="pilcrow">¶</a></p>
 <p id="section-7.1-13">We remark that <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> defines a much larger class of fully linear proof
 systems than we consider here. In particular, what is called an "FLP" here is
 called a 1.5-round, public-coin, interactive oracle proof system in their paper.<a href="#section-7.1-13" class="pilcrow">¶</a></p>
@@ -4039,7 +4045,7 @@ this feature is implemented by Prio3 (<a href="#prio3" class="auto internal xref
 and joint randomness string. The verifier checks each proof independently, each
 time with an independently generated query randomness string. It accepts the
 measurement only if all the decision algorithm accepts on each proof.<a href="#section-7.1.2-2" class="pilcrow">¶</a></p>
-<p id="section-7.1.2-3">See <a href="#security-multiproof" class="auto internal xref">Section 9.5</a> below for discussions on choosing the right number
+<p id="section-7.1.2-3">See <a href="#security-multiproof" class="auto internal xref">Section 9.6</a> below for discussions on choosing the right number
 of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -6209,7 +6215,7 @@ inputs and target threshold. To compute the <code>t</code>-heavy hitters for a s
 inputs, the Aggregators and Collector first compute the prefix tree, then
 extract the heavy hitters from the leaves of this tree. (Note that the prefix
 tree may leak more information about the set than the heavy hitters themselves;
-see <a href="#agg-param-privacy" class="auto internal xref">Section 9.3.1</a> for details.)<a href="#section-8-6" class="pilcrow">¶</a></p>
+see <a href="#agg-param-privacy" class="auto internal xref">Section 9.4.1</a> for details.)<a href="#section-8-6" class="pilcrow">¶</a></p>
 <p id="section-8-7">Poplar1 composes an IDPF with the "secure sketching" protocol of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.
 This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
@@ -7122,7 +7128,7 @@ instantiating Poplar1. The scheme gets its name from the name of the protocol of
 <p id="section-8.3-4">IdpfPoplar requires a XOF for deriving the output shares, as well as a variety
 of other artifacts used internally. For performance reasons, we instantiate
 this object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>). See
-<a href="#xof-vs-ro" class="auto internal xref">Section 9.4</a> for justification of this choice.<a href="#section-8.3-4" class="pilcrow">¶</a></p>
+<a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for justification of this choice.<a href="#section-8.3-4" class="pilcrow">¶</a></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-poplar-param">
 <table class="center" id="table-16">
           <caption>
@@ -7576,29 +7582,39 @@ across multiple batches. It is <span class="bcp14">RECOMMENDED</span> that the n
 Client be used by the Aggregators for replay protection.<a href="#section-9.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="requirements-for-the-aggregation-parameters">
+<div id="requirements-for-the-public-share">
 <section id="section-9.3">
-        <h3 id="name-requirements-for-the-aggreg">
-<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-requirements-for-the-aggreg" class="section-name selfRef">Requirements for the Aggregation Parameters</a>
+        <h3 id="name-requirements-for-the-public">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-requirements-for-the-public" class="section-name selfRef">Requirements for the Public Share</a>
         </h3>
-<p id="section-9.3-1">As described in <a href="#sec-daf-validity-scopes" class="auto internal xref">Section 4.3</a> and <a href="#sec-vdaf-validity-scopes" class="auto internal xref">Section 5.3</a>
+<p id="section-9.3-1">The Aggregators <span class="bcp14">MUST</span> verify that they have both received the same public share from
+the Client. It is sufficient, for example, to exchange a hash of the public
+share over a secure channel.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="requirements-for-aggregation-parameters">
+<section id="section-9.4">
+        <h3 id="name-requirements-for-aggregatio">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-requirements-for-aggregatio" class="section-name selfRef">Requirements for Aggregation Parameters</a>
+        </h3>
+<p id="section-9.4-1">As described in <a href="#sec-daf-validity-scopes" class="auto internal xref">Section 4.3</a> and <a href="#sec-vdaf-validity-scopes" class="auto internal xref">Section 5.3</a>
 respectively, DAFs and VDAFs may impose restrictions on the re-use of input
 shares. This is to ensure that correlated randomness provided by the Client
 through the input share is not used more than once, which might compromise
-confidentiality of the Client's measurements.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
-<p id="section-9.3-2">Protocols that make use of VDAFs therefore <span class="bcp14">MUST</span> call <code>Vdaf.is_valid</code>
+confidentiality of the Client's measurements.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-2">Protocols that make use of VDAFs therefore <span class="bcp14">MUST</span> call <code>Vdaf.is_valid</code>
 on the set of all aggregation parameters used for a Client's input share, and
 only proceed with the preparation and aggregation phases if that function call
-returns <code>True</code>.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
+returns <code>True</code>.<a href="#section-9.4-2" class="pilcrow">¶</a></p>
 <div id="agg-param-privacy">
-<section id="section-9.3.1">
+<section id="section-9.4.1">
           <h4 id="name-additional-privacy-consider">
-<a href="#section-9.3.1" class="section-number selfRef">9.3.1. </a><a href="#name-additional-privacy-consider" class="section-name selfRef">Additional Privacy Considerations</a>
+<a href="#section-9.4.1" class="section-number selfRef">9.4.1. </a><a href="#name-additional-privacy-consider" class="section-name selfRef">Additional Privacy Considerations</a>
           </h4>
-<p id="section-9.3.1-1">Aggregating a batch of reports multiple times, each time with a different
+<p id="section-9.4.1-1">Aggregating a batch of reports multiple times, each time with a different
 aggregation parameter, could result in information leakage beyond what is used
-by the application.<a href="#section-9.3.1-1" class="pilcrow">¶</a></p>
-<p id="section-9.3.1-2">For example, when Poplar1 is used for heavy hitters, the Aggregators learn not
+by the application.<a href="#section-9.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.4.1-2">For example, when Poplar1 is used for heavy hitters, the Aggregators learn not
 only the heavy hitters themselves, but also the prefix tree (as defined in
 <a href="#poplar1" class="auto internal xref">Section 8</a>) computed along the way. Indeed, this leakage is inherent to any
 construction that uses an IDPF (<a href="#idpf" class="auto internal xref">Section 8.1</a>) in the same way. Depending on the
@@ -7606,77 +7622,110 @@ distribution of the measurements, the prefix tree can leak a significant amount
 of information about unpopular inputs. For instance, it is possible (though
 perhaps unlikely) for a large set of non-heavy-hitter values to share a common
 prefix, which would be leaked by a prefix tree with a sufficiently small
-threshold.<a href="#section-9.3.1-2" class="pilcrow">¶</a></p>
-<p id="section-9.3.1-3">The only known, general-purpose approach to mitigating this leakage is via
-differential privacy.<a href="#section-9.3.1-3" class="pilcrow">¶</a></p>
+threshold.<a href="#section-9.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-9.4.1-3">The only known, general-purpose approach to mitigating this leakage is via
+differential privacy.<a href="#section-9.4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="safe-usage-of-idpf-outputs">
+<section id="section-9.4.2">
+          <h4 id="name-safe-usage-of-idpf-outputs">
+<a href="#section-9.4.2" class="section-number selfRef">9.4.2. </a><a href="#name-safe-usage-of-idpf-outputs" class="section-name selfRef">Safe Usage of IDPF Outputs</a>
+          </h4>
+<p id="section-9.4.2-1">The secure sketch described in <a href="#poplar1" class="auto internal xref">Section 8</a> is used by the Aggregators to check
+that the shares of the vector obtained by evaluating a Client's IDPF at a
+sequence of candidate prefixes has at most one non-zero value, and that the
+non-zero value is <code>1</code>. Depending on how the values are used, the secure sketch
+on its own may not be sufficient for robustness of the application. In
+particular, a malicious Client may attempt to influence the computation by
+choosing an IDPF that evaluates to <code>1</code> at more than one node at a given
+level of the tree.<a href="#section-9.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.4.2-2">This issue can be mitigated by using an IDPF that is extractable as defined in
+in Appendix D of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>. Extractability ensures that, for a particular
+level of the tree, it is infeasible for an attacker to control values of the
+IDPF such that it takes on chosen non-zero values at more than one node. (It
+can practically only achieve the zero function, a point function, or a
+pseudorandom function.)<a href="#section-9.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-9.4.2-3">The IDPF specified in <a href="#idpf" class="auto internal xref">Section 8.1</a> only guarantees extractability at the last level
+of the tree. (This is by virtue of using a larger field for the leaves than for
+the inner nodes.) For intermediate levels, it is feasible for a client to
+produce IDPF shares with two controlled non-zero nodes.<a href="#section-9.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-9.4.2-4">This is not an issue for running heavy hitters, since (1) each node in the
+prefix tree is a child of a previously traversed node, (2) the secure sketch
+would detect double voting at every level of the prefix tree, and (3) the IDPF
+is extractable at the last level of the tree. However, the lack of
+extractability at intermediate levels may result in attacks on the robustness
+of certain applications.<a href="#section-9.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-9.4.2-5">Thus applications <span class="bcp14">SHOULD NOT</span> use prefix counts for intermediate levels for any
+purpose beyond the heavy-hitters tree traversal.<a href="#section-9.4.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
 <div id="xof-vs-ro">
-<section id="section-9.4">
+<section id="section-9.5">
         <h3 id="name-requirements-for-xofs">
-<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-requirements-for-xofs" class="section-name selfRef">Requirements for XOFs</a>
+<a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-requirements-for-xofs" class="section-name selfRef">Requirements for XOFs</a>
         </h3>
-<p id="section-9.4-1">As described in <a href="#xof" class="auto internal xref">Section 6.2</a>, our constructions rely on eXtendable
+<p id="section-9.5-1">As described in <a href="#xof" class="auto internal xref">Section 6.2</a>, our constructions rely on eXtendable
 Output Functions (XOFs). In the security analyses of our protocols, these are
 usually modeled as random oracles. XofTurboShake128 is designed to be
 indifferentiable from a random oracle <span>[<a href="#MRH04" class="cite xref">MRH04</a>]</span>, making it a suitable choice
-for most situations.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
-<p id="section-9.4-2">The one exception is the Idpf implementation IdpfPoplar <a href="#idpf-poplar" class="auto internal xref">Section 8.3</a>.
+for most situations.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-2">The one exception is the Idpf implementation IdpfPoplar <a href="#idpf-poplar" class="auto internal xref">Section 8.3</a>.
 Here, a random oracle is not needed to prove privacy, since the analysis of
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Proposition 1, only requires a Pseudorandom Generator (PRG).
 As observed in <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>, a PRG can be instantiated from a correlation-robust
 hash function <code>H</code>. Informally, correlation robustness requires that for a random
 <code>r</code>, <code>H(xor(r, x))</code> is computationally indistinguishable from a random function of <code>x</code>.
-A PRG can therefore be constructed as<a href="#section-9.4-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-9.4-3">
+A PRG can therefore be constructed as<a href="#section-9.5-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.5-3">
 <pre>
-PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...`
-</pre><a href="#section-9.4-3" class="pilcrow">¶</a>
+PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...
+</pre><a href="#section-9.5-3" class="pilcrow">¶</a>
 </div>
-<p id="section-9.4-4">since each individual hash function evaluation is indistinguishable from a random
-function.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
-<p id="section-9.4-5">Our construction at <a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a> implements a correlation-robust
+<p id="section-9.5-4">since each individual hash function evaluation is indistinguishable from a random
+function.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
+<p id="section-9.5-5">Our construction at <a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a> implements a correlation-robust
 hash function using fixed-key AES. For security, it assumes that AES with a
 fixed key can be modeled as a random permutation <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
-to better concrete security <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>.<a href="#section-9.4-5" class="pilcrow">¶</a></p>
-<p id="section-9.4-6">We note that for robustness, the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> still assumes a random
+to better concrete security <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
+<p id="section-9.5-6">We note that for robustness, the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> still assumes a random
 oracle to make the Idpf extractable. While XofFixedKeyAes128 has been shown
 to be differentiable from a random oracle <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>, there are no known
 attacks exploiting this difference.
 We also stress that even if the Idpf is not extractable, Poplar1 guarantees
 that every client can contribute to at most one prefix among the ones being
-evaluated by the helpers.<a href="#section-9.4-6" class="pilcrow">¶</a></p>
+evaluated by the helpers.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-multiproof">
-<section id="section-9.5">
+<section id="section-9.6">
         <h3 id="name-choosing-the-field-size">
-<a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-choosing-the-field-size" class="section-name selfRef">Choosing the Field Size</a>
+<a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-choosing-the-field-size" class="section-name selfRef">Choosing the Field Size</a>
         </h3>
-<p id="section-9.5-1">Prio3 and other systems built from FLPs (<a href="#flp-generic" class="auto internal xref">Section 7.3</a> in particular) may
+<p id="section-9.6-1">Prio3 and other systems built from FLPs (<a href="#flp-generic" class="auto internal xref">Section 7.3</a> in particular) may
 benefit from choosing a field size that is as small as possible. Generally
 speaking, a smaller field results in lower communication and storage costs.
 Care must be taken, however, since a smaller field also results in degraded (or
-even vacuous) robustness.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
-<p id="section-9.5-2">Different variants of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) use different field sizes: Prio3Count
+even vacuous) robustness.<a href="#section-9.6-1" class="pilcrow">¶</a></p>
+<p id="section-9.6-2">Different variants of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) use different field sizes: Prio3Count
 uses Field64; but Prio3Sum, Prio3SumVec, and Prio3Histogram use Field128, a
 field that is twice as large as Field64. This is due to the use of joint
 randomness (<a href="#flp" class="auto internal xref">Section 7.1</a>) in the latter variants. Joint randomness allows for more
 flexible circuit design (see <a href="#flp-generic-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>), but opens up
 Prio3 to precomputation attacks, which the larger field mitigates. (See
-<span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, Theorem 1.) Note that privacy is not susceptible to such attacks.<a href="#section-9.5-2" class="pilcrow">¶</a></p>
-<p id="section-9.5-3">Another way to mitigate this issue (or improve robustness in general) is to
+<span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, Theorem 1.) Note that privacy is not susceptible to such attacks.<a href="#section-9.6-2" class="pilcrow">¶</a></p>
+<p id="section-9.6-3">Another way to mitigate this issue (or improve robustness in general) is to
 generate and verify multiple, independent proofs. (See <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>.) For
 Prio3, the <code>PROOFS</code> parameter controls the number of proofs (at least one) that
-are generated and verified.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
-<p id="section-9.5-4">In general, Field128 is <span class="bcp14">RECOMMENDED</span> for use in Prio3 when the circuit uses
+are generated and verified.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
+<p id="section-9.6-4">In general, Field128 is <span class="bcp14">RECOMMENDED</span> for use in Prio3 when the circuit uses
 joint randomness (<code>JOINT_RAND_LEN &gt; 0</code>) and <code>PROOFS == 1</code>. Field64 <span class="bcp14">MAY</span> be used
 instead, but <code>PROOFS</code> <span class="bcp14">MUST</span> be set to at least <code>3</code>. Breaking robustness for
 <code>PROOFS == 2</code> is feasible, if impractical; but <code>PROOFS == 1</code> is completely
-broken for such a small field.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
+broken for such a small field.<a href="#section-9.6-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
