@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 7 November 2024                                            ISRG
+Expires: 8 November 2024                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                              6 May 2024
+                                                              7 May 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 November 2024.
+   This Internet-Draft will expire on 8 November 2024.
 
 Copyright Notice
 
@@ -4882,7 +4882,7 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    to check that the shares of the vector obtained by evaluating a
    Client's IDPF at a sequence of candidate prefixes has at most one
    non-zero value, and that the non-zero value is 1.  Depending on how
-   the vallues are used, the secure sketch on its own may not be
+   the values are used, the secure sketch on its own may not be
    sufficient for robustness of the application.  In particular, a
    malicious Client may attempt to influence the computation by choosing
    an IDPF that evaluates to 1 at more than one node at a given level of
@@ -4891,17 +4891,15 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    This issue can be mitigated by using an IDPF that is extractable as
    defined in in Appendix D of [BBCGGI21].  Extractability ensures that,
    for a particular level of the tree, it is infeasible for an attacker
-   to find a non-trivial IDPF that has a non-zero value at more than one
-   node.  (A trivial IDPF is one for which the attacker cannot predict
-   the value or position of non-zero nodes.  For example, it is trivial
-   to produce IDPF key shares and public share whose output is always
-   psuedorandom, but this would be detected by the secure sketch.)
+   to control values of the IDPF such that it takes on chosen non-zero
+   values at more than one node.  (It can practically only achieve the
+   zero function, a point function, or a pseudorandom function)
 
    The IDPF specified in Section 8.1 only guarantees extractability at
    the last level of the tree.  (This is by virtue of using a larger
    field for the leaves than for the inner nodes.)  For intermediate
    levels, it is feasible for a client to produce IDPF shares with two
-   non-zero nodes.
+   controlled non-zero nodes.
 
    This is not an issue for running heavy hitters, since (1) each node
    in the prefix tree is a child of a previously traversed node, (2) the
