@@ -172,7 +172,7 @@ class Poplar1(Vdaf):
         # Check that prefixes are suffixes of the last level's prefixes,
         # unless the last level was 0 (and therefore had no prefixes).
         if last_level > 0:
-            for (i, prefix) in enumerate(prefixes):
+            for prefix in prefixes:
                 last_prefix = get_ancestor(prefix, level, last_level)
                 if last_prefix not in last_prefixes_set:
                     # Current prefix not a suffix of last level's prefixes.
