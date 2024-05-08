@@ -75,10 +75,12 @@ class TestPoplar1(unittest.TestCase):
         assert not cls.is_valid(agg_params[2], list(agg_params[:2]))
 
         # Test `is_valid` accepts level jumps.
-        agg_params = [(0, ()), (2, (0, 1)), (3, (0, 5))]
+        agg_params = [(0, (0, 1)), (2, (2, 3, 5, 7))]
         assert cls.is_valid(agg_params[1], list(agg_params[:1]))
+
         # Test `is_valid` rejects unconnected prefixes.
-        assert not cls.is_valid(agg_params[2], list(agg_params[:2]))
+        agg_params = [(0, (0)), (2, (2, 3, 5, 7))]
+        assert not cls.is_valid(agg_params[1], list(agg_params[:1]))
 
     def test_aggregation_parameter_encoding(self):
         # Test aggregation parameter encoding.
