@@ -4563,11 +4563,10 @@ scheme would not allow key rotation over the lifetime of a task.
 
 The sharding and preparation steps of VDAF execution depend on a nonce
 associated with the Client's report. To ensure privacy of the underlying
-measurement, honest Clients MUST generate this nonce using a CSPRNG and the
-Aggregators MUST verify that nonces are never re-used, to account for malicious
-clients. This is required in order to leverage security analysis for the privacy
-definition of {{DPRS23}}, which assumes the nonce is chosen at random prior to
-generating the report.
+measurement, the Client MUST generate this nonce using a CSPRNG. This is
+required in order to leverage security analysis for the privacy definition of
+{{DPRS23}}, which assumes the nonce is chosen at random prior to generating the
+report.
 
 Other security considerations may require the nonce to be non-repeating. For
 example, to achieve differential privacy it is necessary to avoid "over
