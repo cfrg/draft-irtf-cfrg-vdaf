@@ -69,7 +69,7 @@ class TestPoplar1(unittest.TestCase):
     def test_is_valid(self):
         # Test `is_valid` returns False on repeated levels, and True otherwise.
         cls = Poplar1.with_bits(256)
-        agg_params = [(0, ()), (1, (0,)), (1, (0, 1))]
+        agg_params = [(0, (0, 1)), (1, (0,)), (1, (0, 1))]
         assert cls.is_valid(agg_params[0], list([]))
         assert cls.is_valid(agg_params[1], list(agg_params[:1]))
         assert not cls.is_valid(agg_params[2], list(agg_params[:2]))
