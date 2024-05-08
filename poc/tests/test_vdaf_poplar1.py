@@ -69,17 +69,17 @@ class TestPoplar1(unittest.TestCase):
     def test_is_valid(self):
         # Test `is_valid` returns False on repeated levels, and True otherwise.
         cls = Poplar1.with_bits(256)
-        agg_params = [(0, (0, 1)), (1, (0,)), (1, (0, 1))]
+        agg_params = [(0, (0b0, 0b1)), (1, (0b00)), (1, (0b00, 0b10))]
         assert cls.is_valid(agg_params[0], list([]))
         assert cls.is_valid(agg_params[1], list(agg_params[:1]))
         assert not cls.is_valid(agg_params[2], list(agg_params[:2]))
 
         # Test `is_valid` accepts level jumps.
-        agg_params = [(0, (0, 1)), (2, (2, 3, 5, 7))]
+        agg_params = [(0, (0b0, 0b1)), (2, (0b010, 0b011, 0b101, 0b111))]
         assert cls.is_valid(agg_params[1], list(agg_params[:1]))
 
         # Test `is_valid` rejects unconnected prefixes.
-        agg_params = [(0, (0)), (2, (2, 3, 5, 7))]
+        agg_params = [(0, (0b0)), (2, (0b010, 0b011, 0b101, 0b111))]
         assert not cls.is_valid(agg_params[1], list(agg_params[:1]))
 
     def test_aggregation_parameter_encoding(self):
