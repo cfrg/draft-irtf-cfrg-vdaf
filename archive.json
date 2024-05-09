@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-05-07T00:42:34.398075+00:00",
+  "timestamp": "2024-05-09T00:42:52.102836+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -319,7 +319,7 @@
       "id": "I_kwDOGKuqOc4-98yb",
       "title": "VDAF for quantiles?",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/12",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -332,8 +332,8 @@
       ],
       "body": "With `prio3` it's straightforward to roughly estimate quantiles using a histogram (cf https://docs.rs/prio/0.6.1/prio/vdaf/prio3/type.Prio3Histogram64.html). But what if you wanted to precisely compute, say, the 50th percentile (i.e., the median) or the 95th percentile? Prio isn't well-suited for this (cf [[CGB17], Appendix G]).\r\n\r\nIf your application allows for multiple rounds of interaction with the clients, maybe you could do a kind of binary search to find the quantile you're after. Suppose the client measurements are arbitrary 32-bit integers and you want to compute the median. Suppose there are `N` measurements in all. Let `buckets = [2^31]`. Have the clients shard their measurements using `buckets` as the bucket boundaries. Execute the VDAF over the set of input shares, getting bucket counts `agg` as the aggregate result. `agg[0]` is equal to the number of measurements less than or equal to `2^31`, and `agg[1] <= N/2`, then the median must be less than `2^31`. On the other hand, if `agg[1] > N/2` then you know the median must greater than `2^31`. You then repeat the process, adjusting the bucket boundaries based on the previous result: if the median is less than `2^31`, then let `buckets = [2^31 - 2^30]`; otherwise let `buckets = [2^31 + 2^30]`.\r\n\r\nI'm not sure how many iterations would be needed, or how precisely you could compute quantiles this way. Regardless, ideally there would be a VDAF that allows for computing quantiles without interacting with clients more than once.\r\n\r\n\r\n\r\n\r\n\r\n[CGB17]: https://crypto.stanford.edu/prio/paper.pdf",
       "createdAt": "2021-11-17T17:58:28Z",
-      "updatedAt": "2024-04-30T22:40:43Z",
-      "closedAt": null,
+      "updatedAt": "2024-05-07T14:05:53Z",
+      "closedAt": "2024-05-07T14:05:53Z",
       "comments": [
         {
           "author": "divergentdave",
@@ -4249,7 +4249,7 @@
       "id": "I_kwDOGKuqOc5s4hZa",
       "title": "Poplar1 security considerations: explain importance of \"extractability\"",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/273",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -4261,8 +4261,8 @@
       ],
       "body": "A recent [email](https://mailarchive.ietf.org/arch/msg/ppm/6DEXt2PS3IGOGWcg5hHzgsIGYyg/) on the PPM list mentioned using Poplar1 and making some optimizations in the traversal of the IDPF tree. One natural way to alter the tree traversal algorithm would be to stop early before reaching the leaf level, but I'm concerned that doing so would lose the benefit of the \"extractability\" property, which depends on the leaf level field size being larger, and thus it could impact the whole scheme's robustness. Currently, we only mention extractability twice, in the context of the public share and the leaf level field size, but we do not explain its relevance. Is it the case that maliciously constructed reports could evaluate to \"1\" on multiple prefixes at some inner level, but it would be computationally infeasible to do the same on the leaf level? If so, we should outline the limitations on robustness, and possibly provide advice about skipping tree levels, i.e. to always do one last subset histogram at the leaf level. In what way do the secure sketching scheme and the extractability property contribute to the overall VDAF's robustness? Would the attack on an inner level be brute-forcing keys that produce values that pass secure sketching by pure chance, inside a ~2^-64 soundness error?",
       "createdAt": "2023-07-28T16:53:58Z",
-      "updatedAt": "2024-04-30T23:21:52Z",
-      "closedAt": null,
+      "updatedAt": "2024-05-07T14:05:53Z",
+      "closedAt": "2024-05-07T14:05:53Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5144,6 +5144,55 @@
       "updatedAt": "2024-05-06T14:37:03Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 342,
+      "id": "I_kwDOGKuqOc6II4hk",
+      "title": "Clarify that public share requirements are relevant to robustness",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/342",
+      "state": "CLOSED",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "editorial"
+      ],
+      "body": "I think I'm being fussy but I want to make sure we don't slip up here. Continuing from #336:\r\n\r\n>The risk that the Poplar paper talks about when the aggregators don't have a consistent view of the public parameters is that the malicious client could control the output of the DPF at two inputs, instead of one, like we want. This happens because choosing different group element correction words for one level, and giving each aggregator a different one, gives the client an extra degree of freedom it shouldn't have.\r\n>\r\n>Since we're considering a malicious client when we consider attempts to break extractability in this manner, we don't need to protect this report's privacy, and thus the only goal that matters is robustness. For robustness, we get to assume that both aggregators are honest, and thus we can assume that the leader will distribute the public share to the helper correctly, without considering the HPKE AAD.\r\n>\r\n>Including the public share in the HPKE AAD is probably more relevant for protecting against privacy attacks, as we wouldn't want to let a rogue leader pass an honest client's input share with a tampered public share.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336#discussion_r1591715132_\r\n\r\nI think I agree with that analysis, but it's hard to square with the MUST added by #336, which reads:\r\n\r\n> The Aggregators MUST verify that they have both received the same public share from\r\n> the Client. It is sufficient, for example, to exchange a hash of the public\r\n> share over a secure channel.\r\n\r\nPerhaps this paragraph should say something like \"In order to protect robustness, the Aggregators MUST verify...\". That would give \"permission\" to a higher level protocol like DAP to apply David's analysis and opt out of doing something like an explicit exchange of the public share. I also wonder if David's analysis should be incorporated into the text of DAP.",
+      "createdAt": "2024-05-07T19:04:29Z",
+      "updatedAt": "2024-05-08T15:31:56Z",
+      "closedAt": "2024-05-08T15:31:56Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I don't quite see how the text we landed doesn't square with David's analysis. Is it that \"the Aggregators MUST verify\" sounds like there needs to be some explicit procedure, like exchanging the hash? As David explains, explicit verification is not necessary: in DAP, the Leader is supposed to copy the public share from the report into the Helper's report share. This provides the property we need, just implicitly.\r\n\r\nPerhaps \"the Aggregators MUST ensure they hold the same public share\"?\r\n\r\nNote that including the the public share in the HPKE AAD is not strictly necessary, either for privacy or robustness. We do this just for defense-in-depth.\r\n\r\nAll that said, your suggestion sounds fine -- feel free to send a PR.",
+          "createdAt": "2024-05-07T20:27:35Z",
+          "updatedAt": "2024-05-07T20:27:35Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The VDAF security model just stipulates secure channels between protocol participants, so part of what's going on is just DAP's implementation decisions regarding instantiating the secure channel from the Client to Leader and Client to Helper. Splitting the report, encrypting part of it, and committing to the other part is complicated, but it saves some communication cost by avoiding duplicate data. (I think DAP does need to include the public share in the HPKE AAD in order to maintain integrity of the whole report while tunneling through the maybe-malicious Leader.)\r\n\r\nI don't think we should say anything about the relationship between robustness and the Aggregators having the same public share, because that could then become a new requirement on VDAFs, depending on how it's phrased. Rephrasing it to make it clear an extra explicit check isn't necessary sounds good.",
+          "createdAt": "2024-05-07T20:41:19Z",
+          "updatedAt": "2024-05-07T20:41:19Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> Is it that \"the Aggregators MUST verify\" sounds like there needs to be some explicit procedure, like exchanging the hash?\r\n\r\nYeah, that's what concerns me. Saying \"MUST ensure\" sounds like a good way to resolve this. \r\n\r\n> in DAP, the Leader is supposed to copy the public share from the report into the Helper's report share. This provides the property we need, just implicitly.\r\n\r\nOh, this is the part I was missing: the honest leader does get to enforce that the public shares match.\r\n\r\nWith all this understood, I'd be comfortable with changing \"MUST verify\" to \"MUST ensure\", but I'd also be OK with doing nothing and closing this without any change.",
+          "createdAt": "2024-05-07T21:11:57Z",
+          "updatedAt": "2024-05-07T21:14:01Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "PR up: @tgeoghegan please take a look!",
+          "createdAt": "2024-05-08T14:56:03Z",
+          "updatedAt": "2024-05-08T14:56:03Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -27784,13 +27833,13 @@
       ],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-05-06T13:31:01Z",
+      "updatedAt": "2024-05-09T00:35:12Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e8c0cbeab9588613801feb3579536bc1221571dc",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-316",
-      "headRefOid": "f8e91c2bae0a8931d639121f6b1e074fa3ada177",
+      "headRefOid": "9af3d2f806d6809532fa6bb1360238f8ba92bc42",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -28270,6 +28319,168 @@
               "updatedAt": "2024-05-03T14:50:03Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc551MQN",
+          "commit": {
+            "abbreviatedOid": "f8e91c2"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-07T19:24:23Z",
+          "updatedAt": "2024-05-07T19:42:50Z",
+          "comments": [
+            {
+              "originalPosition": 74,
+              "body": "This comment is outdated.\r\n```suggestion\r\n```",
+              "createdAt": "2024-05-07T19:24:23Z",
+              "updatedAt": "2024-05-07T19:42:50Z"
+            },
+            {
+              "originalPosition": 75,
+              "body": "nit: I think the intermediate list is unnecessary, as `set()` can take any iterable\r\n```suggestion\r\n    last_prefixes_set = set(last_prefixes)\r\n```",
+              "createdAt": "2024-05-07T19:27:27Z",
+              "updatedAt": "2024-05-07T19:42:50Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "See above\r\n```suggestion\r\n```",
+              "createdAt": "2024-05-07T19:28:32Z",
+              "updatedAt": "2024-05-07T19:42:51Z"
+            },
+            {
+              "originalPosition": 25,
+              "body": "See above\r\n```suggestion\r\n        last_prefixes_set = set(last_prefixes)\r\n```",
+              "createdAt": "2024-05-07T19:28:46Z",
+              "updatedAt": "2024-05-07T19:42:51Z"
+            },
+            {
+              "originalPosition": 83,
+              "body": "I think this conditional is unnecessary, or at least the explanation in the comment is incorrect, since we already handle the first aggregation separately at the top of the function. If the last level was 0, then we would expect the last prefixes to be '0' and '1' (unless the collector had some reason to skip either). Thus, the checks below should still work, though we are high up enough in the tree that the attacker has nothing to gain in its choice of prefixes.",
+              "createdAt": "2024-05-07T19:38:17Z",
+              "updatedAt": "2024-05-07T19:42:51Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "nit: `i` is unused\r\n```suggestion\r\n            for prefix in prefixes:\r\n```",
+              "createdAt": "2024-05-07T19:39:55Z",
+              "updatedAt": "2024-05-07T19:42:51Z"
+            },
+            {
+              "originalPosition": 103,
+              "body": "This is incorrect since we backed out passing the previous aggregate result to `is_valid()`.",
+              "createdAt": "2024-05-07T19:40:27Z",
+              "updatedAt": "2024-05-07T19:42:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc551cnw",
+          "commit": {
+            "abbreviatedOid": "f8e91c2"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-07T19:59:27Z",
+          "updatedAt": "2024-05-07T19:59:27Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "The issue is the following. In the first run, there are no prefixes being passed (i.e., last_prefixes_set is empty). In the second run, either 0 or 1 or both are passed in. `get_ancestor` below will turn both of these to 0 (shifting right by 1 bit), but the membership check fails because the set is empty. The previous version incorrectly always added 0 to the set, here we just skip the check since it's supposed to always pass even on the second run (any string has the empty string as prefix).",
+              "createdAt": "2024-05-07T19:59:27Z",
+              "updatedAt": "2024-05-07T19:59:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc551eRX",
+          "commit": {
+            "abbreviatedOid": "f8e91c2"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-07T20:03:44Z",
+          "updatedAt": "2024-05-07T20:03:44Z",
+          "comments": [
+            {
+              "originalPosition": 103,
+              "body": "Fixed.",
+              "createdAt": "2024-05-07T20:03:44Z",
+              "updatedAt": "2024-05-07T20:03:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc552WLt",
+          "commit": {
+            "abbreviatedOid": "f8e91c2"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-07T22:18:12Z",
+          "updatedAt": "2024-05-07T22:18:12Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "In the second run, \"0, 1, or both\" would be the prefixes from the past aggregation parameter, while the current aggregation parameter would have a level of 1 and a list of prefixes that are two bits long. The current level's prefixes get passed to `get_ancestor()` so those would be mapped to 0 or 1, which is correct.\r\n\r\nI think the existing unit tests of `is_valid()` are misleading. For starters, they show an aggregation parameter with an empty list of candidate prefixes. This doesn't make sense, as it would produce an empty output share if the VDAF were actually run. The candidate prefixes in later aggregation parameters are shorter than they need to be, see the tests `test_poplar1` and test_generate_test_vectors` for comparison.",
+              "createdAt": "2024-05-07T22:18:12Z",
+              "updatedAt": "2024-05-07T22:18:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc552YkI",
+          "commit": {
+            "abbreviatedOid": "f8e91c2"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-07T22:29:21Z",
+          "updatedAt": "2024-05-07T22:29:21Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "Oh, I see. I guess `prefixes` confused me, I thought it refers to the nodes being expanded (the parent), but it's the nodes after the expansion. I'll fix that tomorrow, and the tests as well.",
+              "createdAt": "2024-05-07T22:29:21Z",
+              "updatedAt": "2024-05-07T22:29:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc56AjP-",
+          "commit": {
+            "abbreviatedOid": "9af3d2f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM, though I think we could increase test coverage a bit.",
+          "createdAt": "2024-05-09T00:33:58Z",
+          "updatedAt": "2024-05-09T00:35:12Z",
+          "comments": [
+            {
+              "originalPosition": 76,
+              "body": "```suggestion\r\n    # Check that the level increased.\r\n```",
+              "createdAt": "2024-05-09T00:33:58Z",
+              "updatedAt": "2024-05-09T00:35:12Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "Could we also add some unit tests for `get_ancestor()`?",
+              "createdAt": "2024-05-09T00:34:49Z",
+              "updatedAt": "2024-05-09T00:35:12Z"
+            }
+          ]
         }
       ]
     },
@@ -28278,7 +28489,7 @@
       "id": "PR_kwDOGKuqOc5uMw7-",
       "title": "Add IDPF extractability to security considerations",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -28288,17 +28499,19 @@
       ],
       "body": "Closes #12.\r\nCloses #273.\r\n\r\nFirst, clarify that the Aggregators need to check that they have the same public share.\r\n\r\nSecond, clarify which IDPF tree traversals are safe. Since we only guarantee extractability at the last level, it is not safe to use intermediate nodes for any purpose except the heavy hitters tree traversal.",
       "createdAt": "2024-04-30T22:00:10Z",
-      "updatedAt": "2024-05-07T00:26:56Z",
+      "updatedAt": "2024-05-07T14:05:52Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9ff20bfdafd7aa192d06f91f7d362a9835d31ed2",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/poplar1-extractability",
-      "headRefOid": "801dd822860e8ce9bd647298d38f21b789f8c364",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "fa8775745117f802c60a30a6931b39bf87a04812",
+      "closedAt": "2024-05-07T14:05:52Z",
+      "mergedAt": "2024-05-07T14:05:52Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "d5d3e1f0175f86daf25c215289262deb9e9d340b"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -28525,6 +28738,44 @@
               "body": "Maybe I'm missing something: in DAP , the client separately HPKE encrypts input shares to either aggregator's respective key. A malicious could therefore use distinct public shares and construct distinct AADs, no?",
               "createdAt": "2024-05-07T00:26:56Z",
               "updatedAt": "2024-05-07T00:26:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc55sWli",
+          "commit": {
+            "abbreviatedOid": "801dd82"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-06T20:59:39Z",
+          "updatedAt": "2024-05-07T01:55:42Z",
+          "comments": [
+            {
+              "originalPosition": 24,
+              "body": "nit: typo\r\n```suggestion\r\nnon-zero value is `1`. Depending on how the values are used, the secure sketch\r\n```",
+              "createdAt": "2024-05-06T20:59:39Z",
+              "updatedAt": "2024-05-07T01:55:42Z"
+            },
+            {
+              "originalPosition": 9,
+              "body": "The risk that the Poplar paper talks about when the aggregators don't have a consistent view of the public parameters is that the malicious client could control the output of the DPF at two inputs, instead of one, like we want. This happens because choosing different group element correction words for one level, and giving each aggregator a different one, gives the client an extra degree of freedom it shouldn't have.\r\n\r\nSince we're considering a malicious client when we consider attempts to break extractability in this manner, we don't need to protect this report's privacy, and thus the only goal that matters is robustness. For robustness, we get to assume that both aggregators are honest, and thus we can assume that the leader will distribute the public share to the helper correctly, without considering the HPKE AAD.\r\n\r\nIncluding the public share in the HPKE AAD is probably more relevant for protecting against privacy attacks, as we wouldn't want to let a rogue leader pass an honest client's input share with a tampered public share.",
+              "createdAt": "2024-05-07T01:42:35Z",
+              "updatedAt": "2024-05-07T01:55:42Z"
+            },
+            {
+              "originalPosition": 36,
+              "body": "After reading the extractability section over, I think we should clarify this by talking about the attacker's control over the output, rather than introducing this concept of a trivial IDPF. Note that the game starts with the adversary choosing a subset P (that does not include zero), and it wins if it produces inputs that evaluate to an element of P, such that the extractor can't extract a matching bit string.\r\n\r\n```suggestion\r\nlevel of the tree, it is infeasible for an attacker to control values of the\r\nIDPF such that it takes on chosen non-zero values at more than one node. (It\r\ncan practically only achieve the zero function, a point function, or a\r\npseudorandom function)\r\n```",
+              "createdAt": "2024-05-07T01:46:26Z",
+              "updatedAt": "2024-05-07T01:55:42Z"
+            },
+            {
+              "originalPosition": 41,
+              "body": "(same idea as above)\r\n```suggestion\r\nproduce IDPF shares with two controlled non-zero nodes.\r\n```",
+              "createdAt": "2024-05-07T01:53:03Z",
+              "updatedAt": "2024-05-07T01:55:42Z"
             }
           ]
         }
@@ -28946,7 +29197,7 @@
       "id": "PR_kwDOGKuqOc5uTA78",
       "title": "Tweak nonce requirements",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/340",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "tgeoghegan",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -28956,17 +29207,19 @@
       ],
       "body": "- Clarify that aggregators must verify that nonces are never re-used. Since VDAF aims to provide privacy in the face of malicious clients, it doesn't suffice to say clients MUST generate nonces using a CSPRNG; we have to account for malicious clients by adding a MUST for the aggregator. This lines up with the behavior DAP has specified for a long time now.\r\n\r\n- In the second paragraph, clarify that over exposing a *report* is the risk, not a *measurement*. It's always possible for the same measurement to occur many times (for instance, in `Prio3Count`, most measurements are 1), but we want the enclosing *report* to be unique.\r\n\r\nSee https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/558 for discussion",
       "createdAt": "2024-05-01T23:58:03Z",
-      "updatedAt": "2024-05-02T20:30:54Z",
+      "updatedAt": "2024-05-08T16:14:09Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
       "headRepository": "tgeoghegan/vdaf",
       "headRefName": "timg/clarify-nonce-uniqueness",
-      "headRefOid": "0818979bad8e5fad582d7d8a364cb61ee782a486",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "45fc0bcc060bf059a7b81d0a596200bb2087ba53",
+      "closedAt": "2024-05-08T16:14:09Z",
+      "mergedAt": "2024-05-08T16:14:09Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "3a7fc7f094a6f835fa62fbbfb542f2f0cf8c40c0"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -28974,6 +29227,13 @@
           "body": "~For the record: it's not clear this is strictly necessary, but it does correspond to the threat model described in DPRS23. And since we already have the requirement in DAP, we might as well adopt it here.~",
           "createdAt": "2024-05-02T15:15:21Z",
           "updatedAt": "2024-05-02T15:38:55Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Ah, I forgot that the draft already reacommended using the nonce for replay protection, and that this just adds clarity to this. Looks like we're good to go! I'm gonna merge, and I don't think there's a need for a second PR.",
+          "createdAt": "2024-05-08T16:14:06Z",
+          "updatedAt": "2024-05-08T16:14:06Z"
         }
       ],
       "reviews": [
@@ -29182,6 +29442,77 @@
               "updatedAt": "2024-05-02T20:30:54Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc559IYA",
+          "commit": {
+            "abbreviatedOid": "45fc0bc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-08T15:59:39Z",
+          "updatedAt": "2024-05-08T15:59:39Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc559NDb",
+          "commit": {
+            "abbreviatedOid": "45fc0bc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-08T16:09:20Z",
+          "updatedAt": "2024-05-08T16:09:20Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 343,
+      "id": "PR_kwDOGKuqOc5u5GOR",
+      "title": "Clarify that public share consistency needn't be explicit",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/343",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-09"
+      ],
+      "body": "Closes #342.",
+      "createdAt": "2024-05-08T14:55:11Z",
+      "updatedAt": "2024-05-08T15:31:55Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "d5d3e1f0175f86daf25c215289262deb9e9d340b",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/342",
+      "headRefOid": "415c89c0424febf84b48f065d52cd64fe6c82be5",
+      "closedAt": "2024-05-08T15:31:55Z",
+      "mergedAt": "2024-05-08T15:31:55Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "d9fede04149c48c8f75dc0ca1a2bc4a4fb210ffc"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc558j_Y",
+          "commit": {
+            "abbreviatedOid": "415c89c"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-08T14:56:16Z",
+          "updatedAt": "2024-05-08T14:56:16Z",
+          "comments": []
         }
       ]
     }
