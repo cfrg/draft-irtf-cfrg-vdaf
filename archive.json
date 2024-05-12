@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-05-09T00:42:52.102836+00:00",
+  "timestamp": "2024-05-12T00:47:21.539733+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -27833,13 +27833,13 @@
       ],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-05-09T00:35:12Z",
+      "updatedAt": "2024-05-09T23:03:18Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e8c0cbeab9588613801feb3579536bc1221571dc",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-316",
-      "headRefOid": "9af3d2f806d6809532fa6bb1360238f8ba92bc42",
+      "headRefOid": "a401cca1a0b65b04affafa4209e700c8893d1bac",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
