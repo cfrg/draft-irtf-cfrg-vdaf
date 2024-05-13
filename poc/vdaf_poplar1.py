@@ -151,16 +151,31 @@ class Poplar1(Vdaf):
         input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
         return (public_share, input_shares)
 
-    def is_valid(agg_param, previous_agg_params):
+    @classmethod
+    def is_valid(Poplar1, agg_param, previous_agg_params):
         """
-        Checks if the level of `agg_param` appears anywhere in
-        `previous_agg_params`. Returns `False` if it does, and `True` otherwise.
+        Checks that levels are increasing between calls, and also enforces that
+        the prefixes at each level are suffixes of the previous level's
+        prefixes.
         """
-        (level, _) = agg_param
-        return all(
-            level != other_level
-            for (other_level, _) in previous_agg_params
-        )
+        if len(previous_agg_params) < 1:
+            return True
+
+        (level, prefixes) = agg_param
+        (last_level, last_prefixes) = previous_agg_params[-1]
+        last_prefixes_set = set(last_prefixes)
+
+        # Check that level increased.
+        if level <= last_level:
+            return False
+
+        # Check that prefixes are suffixes of the last level's prefixes.
+        for prefix in prefixes:
+            last_prefix = get_ancestor(prefix, level, last_level)
+            if last_prefix not in last_prefixes_set:
+                # Current prefix not a suffix of last level's prefixes.
+                return False
+        return True
 
     @classmethod
     def prep_init(Poplar1, verify_key, agg_id, agg_param,
@@ -378,3 +393,10 @@ def encode_idpf_field_vec(vec):
         Field = vec[0].__class__
         encoded += Field.encode_vec(vec)
     return encoded
+
+
+def get_ancestor(input, this_level, last_level):
+    """
+    Helper function to determine the prefix of `input` at `last_level`.
+    """
+    return input >> (this_level - last_level)

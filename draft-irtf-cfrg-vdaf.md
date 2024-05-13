@@ -1157,7 +1157,7 @@ been used with the same input share.
 
 VDAFs MUST implement the following function:
 
-* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) ->
+* `Vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) ->
   Bool`: Checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
@@ -2550,7 +2550,7 @@ Every input share MUST only be used once, regardless of the aggregation
 parameters used.
 
 ~~~
-def is_valid(agg_param, previous_agg_params):
+def is_valid(Prio3, agg_param, previous_agg_params):
     return len(previous_agg_params) == 0
 ~~~
 {: #prio3-validity-scope title="Validity of aggregation parameters for Prio3."}
@@ -3952,15 +3952,36 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
 Aggregation parameters are valid for a given input share if no aggregation
 parameter with the same level has been used with the same input share before.
 The whole preparation phase MUST NOT be run more than once for a given
-combination of input share and level.
+combination of input share and level. This function checks that levels are
+increasing between calls, and also enforces that the prefixes at each level are
+suffixes of the previous level's prefixes.
 
 ~~~
-def is_valid(agg_param, previous_agg_params):
-    (level, _) = agg_param
-    return all(
-        level != other_level
-        for (other_level, _) in previous_agg_params
-    )
+def get_ancestor(input, this_level, last_level):
+    # Helper function to determine the prefix of `input` at `last_level`.
+    return input >> (this_level - last_level)
+
+def is_valid(Poplar1, agg_param, previous_agg_params):
+    # Exit early if this is the first time.
+    if len(previous_agg_params) < 1:
+      return True
+
+    (level, prefixes) = agg_param
+    (last_level, last_prefixes) = previous_agg_params[-1]
+    last_prefixes_set = set(last_prefixes)
+
+    # Check that the level increased.
+    if level <= last_level
+      return False
+
+    # Check that prefixes are suffixes of the last level's prefixes.
+    for prefix in prefixes:
+      last_prefix = get_ancestor(prefix, level, last_level)
+      if last_prefix not in last_prefixes_set:
+        # Current prefix not a suffix of last level's prefixes.
+        return False
+
+    return True
 ~~~
 {: #poplar1-validity-scope title="Validity of aggregation parameters for
 Poplar1."}
@@ -4584,8 +4605,16 @@ perhaps unlikely) for a large set of non-heavy-hitter values to share a common
 prefix, which would be leaked by a prefix tree with a sufficiently small
 threshold.
 
-The only known, general-purpose approach to mitigating this leakage is via
-differential privacy.
+A malicious adversary controlling the Collector and one of the Aggregators can
+further turn arbitrary non-heavy prefixes into heavy ones by tampering with the
+IDPF output at any position. While our construction ensures that the nodes
+evaluated at one level are children of the nodes evaluated at the previous
+level, this still may allow an adversary to discover individual non-heavy
+strings.
+
+The only practical, general-purpose approach to mitigating these leakages is via
+differential privacy, which is RECOMMENDED for all protocols using Poplar1 for
+heavy-hitter type applications.
 
 ### Safe Usage of IDPF Outputs
 

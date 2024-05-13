@@ -2,7 +2,7 @@ import unittest
 
 from common import TEST_VECTOR, from_be_bytes
 from tests.vdaf import test_vdaf
-from vdaf_poplar1 import Poplar1
+from vdaf_poplar1 import Poplar1, get_ancestor
 
 
 class TestPoplar1(unittest.TestCase):
@@ -66,13 +66,40 @@ class TestPoplar1(unittest.TestCase):
             [0, 2],
         )
 
+    def test_get_ancestor(self):
+        # No change.
+        assert get_ancestor(0b0, 0, 0) == 0b0
+        assert get_ancestor(0b100, 0, 0) == 0b100
+        assert get_ancestor(0b0, 1, 1) == 0b0
+        assert get_ancestor(0b100, 1, 1) == 0b100
+
+        # Shift once.
+        assert get_ancestor(0b0, 1, 0) == 0b0
+        assert get_ancestor(0b1, 1, 0) == 0b0
+        assert get_ancestor(0b100, 1, 0) == 0b10
+        assert get_ancestor(0b100, 2, 1) == 0b10
+
+        # Shift twice.
+        assert get_ancestor(0b0, 2, 0) == 0b0
+        assert get_ancestor(0b10, 2, 0) == 0b0
+        assert get_ancestor(0b100, 2, 0) == 0b1
+        assert get_ancestor(0b100, 4, 2) == 0b1
+
     def test_is_valid(self):
         # Test `is_valid` returns False on repeated levels, and True otherwise.
         cls = Poplar1.with_bits(256)
-        agg_params = [(0, ()), (1, (0,)), (1, (0, 1))]
-        assert cls.is_valid(agg_params[0], set([]))
-        assert cls.is_valid(agg_params[1], set(agg_params[:1]))
-        assert not cls.is_valid(agg_params[2], set(agg_params[:2]))
+        agg_params = [(0, (0b0, 0b1)), (1, (0b00,)), (1, (0b00, 0b10))]
+        assert cls.is_valid(agg_params[0], list([]))
+        assert cls.is_valid(agg_params[1], list(agg_params[:1]))
+        assert not cls.is_valid(agg_params[2], list(agg_params[:2]))
+
+        # Test `is_valid` accepts level jumps.
+        agg_params = [(0, (0b0, 0b1)), (2, (0b010, 0b011, 0b101, 0b111))]
+        assert cls.is_valid(agg_params[1], list(agg_params[:1]))
+
+        # Test `is_valid` rejects unconnected prefixes.
+        agg_params = [(0, (0b0,)), (2, (0b010, 0b011, 0b101, 0b111))]
+        assert not cls.is_valid(agg_params[1], list(agg_params[:1]))
 
     def test_aggregation_parameter_encoding(self):
         # Test aggregation parameter encoding.
