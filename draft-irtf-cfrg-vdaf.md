@@ -3965,7 +3965,7 @@ increasing between calls, and also enforces that the prefixes at each level are
 suffixes of the previous level's prefixes.
 
 ~~~
-def get_ancestor(Poplar1, input, this_level, last_level):
+def get_ancestor(input, this_level, last_level):
     # Helper function to determine the prefix of `input` at `last_level`.
     return input >> (this_level - last_level)
 
