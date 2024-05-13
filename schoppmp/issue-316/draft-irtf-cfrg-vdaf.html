@@ -6839,7 +6839,7 @@ suffixes of the previous level's prefixes.<a href="#section-8.2.3-1" class="pilc
 <figure id="figure-25">
             <div class="alignLeft art-text artwork" id="section-8.2.3-2.1">
 <pre>
-def get_ancestor(Poplar1, input, this_level, last_level):
+def get_ancestor(input, this_level, last_level):
     # Helper function to determine the prefix of `input` at `last_level`.
     return input &gt;&gt; (this_level - last_level)
 
