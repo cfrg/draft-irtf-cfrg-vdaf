@@ -81,6 +81,7 @@ class TestPoplar1(unittest.TestCase):
 
         # Shift twice.
         assert get_ancestor(0b0, 2, 0) == 0b0
+        assert get_ancestor(0b10, 2, 0) == 0b0
         assert get_ancestor(0b100, 2, 0) == 0b1
         assert get_ancestor(0b100, 4, 2) == 0b1
 
