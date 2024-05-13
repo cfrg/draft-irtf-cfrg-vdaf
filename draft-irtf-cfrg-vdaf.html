@@ -1038,7 +1038,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 9 November 2024</td>
+<td class="center">Expires 14 November 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-05-08" class="published">8 May 2024</time>
+<time datetime="2024-05-13" class="published">13 May 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-11-09">9 November 2024</time></dd>
+<dd class="expires"><time datetime="2024-11-14">14 November 2024</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 9 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 14 November 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2763,7 +2763,7 @@ been used with the same input share.<a href="#section-5.3-1" class="pilcrow">¶<
 <p id="section-5.3-2">VDAFs <span class="bcp14">MUST</span> implement the following function:<a href="#section-5.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3-3.1">
-            <p id="section-5.3-3.1.1"><code>Vdaf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) -&gt;
+            <p id="section-5.3-3.1.1"><code>Vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) -&gt;
 Bool</code>: Checks if the <code>agg_param</code> is compatible with all elements of
 <code>previous_agg_params</code>.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -4647,7 +4647,7 @@ parameters used.<a href="#section-7.2.3-1" class="pilcrow">¶</a></p>
 <figure id="figure-19">
             <div class="alignLeft art-text artwork" id="section-7.2.3-2.1">
 <pre>
-def is_valid(agg_param, previous_agg_params):
+def is_valid(Prio3, agg_param, previous_agg_params):
     return len(previous_agg_params) == 0
 </pre>
 </div>
@@ -6822,17 +6822,38 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
 <p id="section-8.2.3-1">Aggregation parameters are valid for a given input share if no aggregation
 parameter with the same level has been used with the same input share before.
 The whole preparation phase <span class="bcp14">MUST NOT</span> be run more than once for a given
-combination of input share and level.<a href="#section-8.2.3-1" class="pilcrow">¶</a></p>
+combination of input share and level. This function checks that levels are
+increasing between calls, and also enforces that the prefixes at each level are
+suffixes of the previous level's prefixes.<a href="#section-8.2.3-1" class="pilcrow">¶</a></p>
 <span id="name-validity-of-aggregation-paramete"></span><div id="poplar1-validity-scope">
 <figure id="figure-25">
             <div class="alignLeft art-text artwork" id="section-8.2.3-2.1">
 <pre>
-def is_valid(agg_param, previous_agg_params):
-    (level, _) = agg_param
-    return all(
-        level != other_level
-        for (other_level, _) in previous_agg_params
-    )
+def get_ancestor(input, this_level, last_level):
+    # Helper function to determine the prefix of `input` at `last_level`.
+    return input &gt;&gt; (this_level - last_level)
+
+def is_valid(Poplar1, agg_param, previous_agg_params):
+    # Exit early if this is the first time.
+    if len(previous_agg_params) &lt; 1:
+      return True
+
+    (level, prefixes) = agg_param
+    (last_level, last_prefixes) = previous_agg_params[-1]
+    last_prefixes_set = set(last_prefixes)
+
+    # Check that the level increased.
+    if level &lt;= last_level
+      return False
+
+    # Check that prefixes are suffixes of the last level's prefixes.
+    for prefix in prefixes:
+      last_prefix = get_ancestor(prefix, level, last_level)
+      if last_prefix not in last_prefixes_set:
+        # Current prefix not a suffix of last level's prefixes.
+        return False
+
+    return True
 </pre>
 </div>
 <figcaption><a href="#figure-25" class="selfRef">Figure 25</a>:
@@ -7623,8 +7644,15 @@ of information about unpopular inputs. For instance, it is possible (though
 perhaps unlikely) for a large set of non-heavy-hitter values to share a common
 prefix, which would be leaked by a prefix tree with a sufficiently small
 threshold.<a href="#section-9.4.1-2" class="pilcrow">¶</a></p>
-<p id="section-9.4.1-3">The only known, general-purpose approach to mitigating this leakage is via
-differential privacy.<a href="#section-9.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-9.4.1-3">A malicious adversary controlling the Collector and one of the Aggregators can
+further turn arbitrary non-heavy prefixes into heavy ones by tampering with the
+IDPF output at any position. While our construction ensures that the nodes
+evaluated at one level are children of the nodes evaluated at the previous
+level, this still may allow an adversary to discover individual non-heavy
+strings.<a href="#section-9.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-9.4.1-4">The only practical, general-purpose approach to mitigating these leakages is via
+differential privacy, which is <span class="bcp14">RECOMMENDED</span> for all protocols using Poplar1 for
+heavy-hitter type applications.<a href="#section-9.4.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="safe-usage-of-idpf-outputs">
@@ -7852,7 +7880,7 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dd class="break"></dd>
 <dt id="TurboSHAKE">[TurboSHAKE]</dt>
       <dd>
-<span class="refAuthor">Viguier, B.</span>, <span class="refAuthor">Wong, D.</span>, <span class="refAuthor">Van Assche, G.</span>, <span class="refAuthor">Dang, Q.</span>, and <span class="refAuthor">J. Daemen</span>, <span class="refTitle">"KangarooTwelve and TurboSHAKE"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-kangarootwelve-13</span>, <time datetime="2024-02-06" class="refDate">6 February 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-13">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-13</a>&gt;</span>. </dd>
+<span class="refAuthor">Viguier, B.</span>, <span class="refAuthor">Wong, D.</span>, <span class="refAuthor">Van Assche, G.</span>, <span class="refAuthor">Dang, Q.</span>, and <span class="refAuthor">J. Daemen</span>, <span class="refTitle">"KangarooTwelve and TurboSHAKE"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-kangarootwelve-14</span>, <time datetime="2024-05-09" class="refDate">9 May 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-14">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-14</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
