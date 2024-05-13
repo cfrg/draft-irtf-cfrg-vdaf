@@ -352,6 +352,19 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+09:
+
+* Poplar1: Make prefix tree traversal stricter by requiring each node to be a
+  child of a node that was already visited. This change is intended to make it
+  harder for a malicious Aggregator to steer traversal towards
+  non-heavy-hitting measurements.
+
+* Prio3: Add more explicit guidance for choosing the field size.
+
+* IDPF: Define extractability and clarify (un)safe usage of intermediate prefix
+  counts. Accordingly, add text ensuring public share consistency to security
+  considerations.
+
 08:
 
 * Poplar1: Bind the report nonce to the authenticator vector programmed into
