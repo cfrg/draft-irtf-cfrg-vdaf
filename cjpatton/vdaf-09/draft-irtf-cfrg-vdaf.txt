@@ -347,7 +347,7 @@ Table of Contents
    *  Prio3: Add more explicit guidance for choosing the field size.
 
    *  IDPF: Define extractability and clarify (un)safe usage of
-      intermediate prefix counts.  Accordingly, add ensuring public
+      intermediate prefix counts.  Accordingly, add text ensuring public
       share consistency to security considerations.
 
    08:
