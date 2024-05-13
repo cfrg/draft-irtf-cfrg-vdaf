@@ -2,7 +2,7 @@ import unittest
 
 from common import TEST_VECTOR, from_be_bytes
 from tests.vdaf import test_vdaf
-from vdaf_poplar1 import Poplar1
+from vdaf_poplar1 import Poplar1, get_ancestor
 
 
 class TestPoplar1(unittest.TestCase):
@@ -65,6 +65,24 @@ class TestPoplar1(unittest.TestCase):
             ],
             [0, 2],
         )
+
+    def test_get_ancestor(self):
+        # No change.
+        assert get_ancestor(0b0, 0, 0) == 0b0
+        assert get_ancestor(0b100, 0, 0) == 0b100
+        assert get_ancestor(0b0, 1, 1) == 0b0
+        assert get_ancestor(0b100, 1, 1) == 0b100
+
+        # Shift once.
+        assert get_ancestor(0b0, 1, 0) == 0b0
+        assert get_ancestor(0b1, 1, 0) == 0b0
+        assert get_ancestor(0b100, 1, 0) == 0b10
+        assert get_ancestor(0b100, 2, 1) == 0b10
+
+        # Shift twice.
+        assert get_ancestor(0b0, 2, 0) == 0b0
+        assert get_ancestor(0b100, 2, 0) == 0b1
+        assert get_ancestor(0b100, 4, 2) == 0b1
 
     def test_is_valid(self):
         # Test `is_valid` returns False on repeated levels, and True otherwise.
