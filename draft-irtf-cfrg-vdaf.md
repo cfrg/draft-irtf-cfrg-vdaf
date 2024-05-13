@@ -3986,7 +3986,8 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
     for prefix in prefixes:
       last_prefix = get_ancestor(prefix, level, last_level)
       if last_prefix not in last_prefixes_set:
-        return False  # Current prefix not a suffix of last level's prefixes.
+        # Current prefix not a suffix of last level's prefixes.
+        return False
 
     return True
 ~~~
