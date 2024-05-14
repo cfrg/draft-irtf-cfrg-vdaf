@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-05-12T00:47:21.539733+00:00",
+  "timestamp": "2024-05-14T00:43:01.872984+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4856,7 +4856,7 @@
       "id": "I_kwDOGKuqOc54mcxP",
       "title": "Clarify that Poplar-like protocols may leak sensitive information if the collector misbehaves",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/316",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "simon-friedberger",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -4868,8 +4868,8 @@
       ],
       "body": "The collector decides which parts of the IDPF tree to explore. This not only leaks prefixes of the heavy hitter values but, if the collector decides to explore other branches, possibly the values of individual clients.\r\n\r\nThis is pointed out in BBCGGI21:\r\n\r\n> A malicious server\u2019s only strategy to learn extra information\r\nin Protocol 5 is to manipulate answers to the prefix-count oracle\r\nqueries using an \u201cadditive attack.\u201d [...] Intuitively:\r\nthe adversary can essentially control which strings are heavy\r\nhitters (and can thus learn how many honest clients hold strings\r\nin a small set), [..]\r\n\r\nIn the current DAP implementation this is attack is trivial to execute for the collector since it even sees the values in plain. This risk should be clearly pointed out in the standard.",
       "createdAt": "2023-12-04T08:58:48Z",
-      "updatedAt": "2024-04-30T23:14:20Z",
-      "closedAt": null,
+      "updatedAt": "2024-05-13T21:20:35Z",
+      "closedAt": "2024-05-13T21:20:35Z",
       "comments": [
         {
           "author": "simon-friedberger",
@@ -27823,7 +27823,7 @@
       "id": "PR_kwDOGKuqOc5o-NMp",
       "title": "Add checks that prefix counts are consistent across multiple VDAF executions",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/332",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "schoppmp",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -27833,17 +27833,19 @@
       ],
       "body": "Fixes #316 ",
       "createdAt": "2024-03-07T14:17:58Z",
-      "updatedAt": "2024-05-09T23:03:18Z",
+      "updatedAt": "2024-05-13T21:20:35Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e8c0cbeab9588613801feb3579536bc1221571dc",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-316",
-      "headRefOid": "a401cca1a0b65b04affafa4209e700c8893d1bac",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "e8ed23fa8c4fcca2dd2074ff46d2647d5de4f762",
+      "closedAt": "2024-05-13T21:20:34Z",
+      "mergedAt": "2024-05-13T21:20:34Z",
+      "mergedBy": "schoppmp",
+      "mergeCommit": {
+        "oid": "a593fd485d9793cb5047c4d8c9a0351a8da2b436"
+      },
       "comments": [
         {
           "author": "schoppmp",
@@ -28479,6 +28481,52 @@
               "body": "Could we also add some unit tests for `get_ancestor()`?",
               "createdAt": "2024-05-09T00:34:49Z",
               "updatedAt": "2024-05-09T00:35:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc56avnf",
+          "commit": {
+            "abbreviatedOid": "9af3d2f"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-05-13T21:08:17Z",
+          "updatedAt": "2024-05-13T21:08:17Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Done.",
+              "createdAt": "2024-05-13T21:08:17Z",
+              "updatedAt": "2024-05-13T21:08:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc56awIB",
+          "commit": {
+            "abbreviatedOid": "1b07e49"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-13T21:09:41Z",
+          "updatedAt": "2024-05-13T21:14:08Z",
+          "comments": [
+            {
+              "originalPosition": 63,
+              "body": "nit: sync with Sage\r\n```suggestion\r\ndef get_ancestor(input, this_level, last_level):\r\n```",
+              "createdAt": "2024-05-13T21:09:41Z",
+              "updatedAt": "2024-05-13T21:14:08Z"
+            },
+            {
+              "originalPosition": 84,
+              "body": "This is closer to the Sage, and doesn't need as many columns in the text rendering.\r\n```suggestion\r\n        # Current prefix not a suffix of last level's prefixes.\r\n        return False\r\n```",
+              "createdAt": "2024-05-13T21:12:33Z",
+              "updatedAt": "2024-05-13T21:14:08Z"
             }
           ]
         }
@@ -29513,6 +29561,68 @@
           "createdAt": "2024-05-08T14:56:16Z",
           "updatedAt": "2024-05-08T14:56:16Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 344,
+      "id": "PR_kwDOGKuqOc5vSbHE",
+      "title": "Prepare to cut VDAF-09",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/344",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-09"
+      ],
+      "body": "* Update change log for VDAF-09 (assumes #332 has landed)\r\n* Does not bump `VERSION`, as there are no breaking changes in either Prio3 or Poplar1",
+      "createdAt": "2024-05-13T17:01:36Z",
+      "updatedAt": "2024-05-13T21:23:32Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "a593fd485d9793cb5047c4d8c9a0351a8da2b436",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/vdaf-09",
+      "headRefOid": "ffac8b062fa72426003f500f90c328185543e5c1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc56awcC",
+          "commit": {
+            "abbreviatedOid": "63b75f2"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-13T21:10:41Z",
+          "updatedAt": "2024-05-13T21:10:41Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc56ayPM",
+          "commit": {
+            "abbreviatedOid": "63b75f2"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-05-13T21:15:57Z",
+          "updatedAt": "2024-05-13T21:16:12Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "This seems like it's missing a word\r\n```suggestion\r\n  counts. Accordingly, add text ensuring public share consistency to security\r\n  considerations.\r\n```",
+              "createdAt": "2024-05-13T21:15:57Z",
+              "updatedAt": "2024-05-13T21:16:12Z"
+            }
+          ]
         }
       ]
     }
