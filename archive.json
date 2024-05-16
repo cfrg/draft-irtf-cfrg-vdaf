@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-05-14T00:43:01.872984+00:00",
+  "timestamp": "2024-05-16T00:43:35.564757+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -29569,7 +29569,7 @@
       "id": "PR_kwDOGKuqOc5vSbHE",
       "title": "Prepare to cut VDAF-09",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/344",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -29578,17 +29578,19 @@
       ],
       "body": "* Update change log for VDAF-09 (assumes #332 has landed)\r\n* Does not bump `VERSION`, as there are no breaking changes in either Prio3 or Poplar1",
       "createdAt": "2024-05-13T17:01:36Z",
-      "updatedAt": "2024-05-13T21:23:32Z",
+      "updatedAt": "2024-05-14T02:59:13Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "a593fd485d9793cb5047c4d8c9a0351a8da2b436",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/vdaf-09",
       "headRefOid": "ffac8b062fa72426003f500f90c328185543e5c1",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-05-14T02:59:13Z",
+      "mergedAt": "2024-05-14T02:59:12Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b5f062a8e583297684409866b77b6dfb547d15ff"
+      },
       "comments": [],
       "reviews": [
         {
