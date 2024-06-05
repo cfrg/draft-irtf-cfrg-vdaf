@@ -6397,7 +6397,7 @@ state across evaluations. See <a href="#idpf-poplar" class="auto internal xref">
 <p id="section-8.1.1-1">How data are represented as IDPF indices is up to the application. When the
 inputs are fixed-length byte strings, the most natural choice of encoder is
 <code>from_be_bytes()</code>. This ensures that, when a string is a prefix of another, so
-too is its index. For example,<a href="#section-8.1.1-1" class="pilcrow">¶</a></p>
+too is its index. (Index prefixes are defined in <a href="#idpf" class="auto internal xref">Section 8.1</a>). For example,<a href="#section-8.1.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.1.1-2">
 <pre>
 from_be_bytes(b"\x01\x02") == 0x0102
@@ -6409,11 +6409,10 @@ from_be_bytes(b"\x01\x02") == 0x0102
 from_be_bytes(b"\x01\x02\x03") == 0x010203
 </pre><a href="#section-8.1.1-4" class="pilcrow">¶</a>
 </div>
-<p id="section-8.1.1-5">See <a href="#idpf" class="auto internal xref">Section 8.1</a>.<a href="#section-8.1.1-5" class="pilcrow">¶</a></p>
-<p id="section-8.1.1-6">When the inputs are variable length, it is necessary to pad each input to some
+<p id="section-8.1.1-5">When the inputs are variable length, it is necessary to pad each input to some
 fixed length. Further, the padding scheme must be non-ambiguous. For example,
 each input could be padded with <code>b"\x01"</code> followed by as many <code>b"\x00"</code> bytes
-as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
+as needed.<a href="#section-8.1.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
