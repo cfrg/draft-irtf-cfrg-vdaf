@@ -3950,15 +3950,14 @@ struct {
    How data are represented as IDPF indices is up to the application.
    When the inputs are fixed-length byte strings, the most natural
    choice of encoder is from_be_bytes().  This ensures that, when a
-   string is a prefix of another, so too is its index.  For example,
+   string is a prefix of another, so too is its index.  (Index prefixes
+   are defined in Section 8.1).  For example,
 
    from_be_bytes(b"\x01\x02") == 0x0102
 
    is a prefix of
 
    from_be_bytes(b"\x01\x02\x03") == 0x010203
-
-   See Section 8.1.
 
    When the inputs are variable length, it is necessary to pad each
    input to some fixed length.  Further, the padding scheme must be non-
