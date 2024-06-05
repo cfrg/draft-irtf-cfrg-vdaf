@@ -1,14 +1,14 @@
 import unittest
 
-from common import TEST_VECTOR
+from common import TEST_VECTOR, from_be_bytes, gen_rand, vec_add
 from idpf_poplar import IdpfPoplar
 from tests.idpf import gen_test_vec, test_idpf, test_idpf_exhaustive
 
 
 class TestIdpfPoplar(unittest.TestCase):
     def test_idpfpoplar(self):
-        cls = IdpfPoplar \
-            .with_value_len(2)
+        cls = IdpfPoplar.with_value_len(2)
+
         if TEST_VECTOR:
             gen_test_vec(cls.with_bits(10), 0, 0)
         test_idpf(
@@ -47,3 +47,37 @@ class TestIdpfPoplar(unittest.TestCase):
         test_idpf_exhaustive(cls.with_bits(1), 0)
         test_idpf_exhaustive(cls.with_bits(1), 1)
         test_idpf_exhaustive(cls.with_bits(8), 91)
+
+    def test_index_encoding(self):
+        """
+        Ensure that the IDPF index is encoded in big-endian byte order.
+        """
+        cls = IdpfPoplar.with_value_len(1).with_bits(32)
+        binder = b'some nonce'
+
+        def shard(s):
+            alpha = from_be_bytes(s)
+            beta_inner = [[cls.FieldInner(1)]] * (cls.BITS-1)
+            beta_leaf = [cls.FieldLeaf(1)]
+            rand = gen_rand(cls.RAND_SIZE)
+            return cls.gen(alpha, beta_inner, beta_leaf, binder, rand)
+
+        for (alpha_str, alpha, level) in [
+            (
+                b"\x01\x02\x03\x04",
+                0x010203,
+                23,
+            ),
+            (
+                b"abcd",
+                0x61626364,
+                31,
+            )
+        ]:
+            (public_share, keys) = shard(alpha_str)
+            out_share_0 = cls.eval(
+                0, public_share, keys[0], level, (alpha,), binder)
+            out_share_1 = cls.eval(
+                1, public_share, keys[1], level, (alpha,), binder)
+            out = vec_add(out_share_0[0], out_share_1[0])[0]
+            self.assertEqual(out.as_unsigned(), 1)
