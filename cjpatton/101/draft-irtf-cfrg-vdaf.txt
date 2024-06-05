@@ -4028,15 +4028,15 @@ struct {
 
 8.2.1.  Sharding
 
-   The Client's measurement is as an IDPF index, denoted alpha.  The
-   programmed IDPF values are pairs of field elements (1, k) where each
-   k is chosen at random.  This random value is used as part of the
-   secure sketching protocol of [BBCGGI21], Appendix C.4.  After
-   evaluating their IDPF key shares on a given sequence of candidate
-   prefixes, the sketching protocol is used by the Aggregators to verify
-   that they hold shares of a one-hot vector.  In addition, for each
-   level of the tree, the prover generates random elements a, b, and c
-   and computes
+   The Client's measurement is as an IDPF index, denoted alpha.  (See
+   Section 8.1.1 for guidelines on index encoding.)  The programmed IDPF
+   values are pairs of field elements (1, k) where each k is chosen at
+   random.  This random value is used as part of the secure sketching
+   protocol of [BBCGGI21], Appendix C.4.  After evaluating their IDPF
+   key shares on a given sequence of candidate prefixes, the sketching
+   protocol is used by the Aggregators to verify that they hold shares
+   of a one-hot vector.  In addition, for each level of the tree, the
+   prover generates random elements a, b, and c and computes
 
        A = -2*a + k
        B = a^2 + b - k*a + c
