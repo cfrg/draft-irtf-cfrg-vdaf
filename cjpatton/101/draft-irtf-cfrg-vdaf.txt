@@ -126,7 +126,7 @@ Table of Contents
      8.1.  Incremental Distributed Point Functions (IDPFs)
        8.1.1.  Encoding inputs as indices
      8.2.  Construction
-       8.2.1.  Client
+       8.2.1.  Sharding
        8.2.2.  Preparation
        8.2.3.  Validity of Aggregation Parameters
        8.2.4.  Aggregation
@@ -4026,7 +4026,7 @@ struct {
 
                     Table 15: Constants used by Poplar1.
 
-8.2.1.  Client
+8.2.1.  Sharding
 
    The Client's measurement is as an IDPF index, denoted alpha.  The
    programmed IDPF values are pairs of field elements (1, k) where each
