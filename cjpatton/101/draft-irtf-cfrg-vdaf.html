@@ -6601,14 +6601,15 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
           <h4 id="name-sharding-4">
 <a href="#section-8.2.1" class="section-number selfRef">8.2.1. </a><a href="#name-sharding-4" class="section-name selfRef">Sharding</a>
           </h4>
-<p id="section-8.2.1-1">The Client's measurement is as an IDPF index, denoted <code>alpha</code>. The programmed
-IDPF values are pairs of field elements <code>(1, k)</code> where each <code>k</code> is chosen at
-random. This random value is used as part of the secure sketching protocol of
-<span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Appendix C.4. After evaluating their IDPF key shares on a given
-sequence of candidate prefixes, the sketching protocol is used by the
-Aggregators to verify that they hold shares of a one-hot vector. In addition,
-for each level of the tree, the prover generates random elements <code>a</code>, <code>b</code>, and
-<code>c</code> and computes<a href="#section-8.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.2.1-1">The Client's measurement is as an IDPF index, denoted <code>alpha</code>. (See
+<a href="#poplar1-idpf-index-encoding" class="auto internal xref">Section 8.1.1</a> for guidelines on index encoding.) The
+programmed IDPF values are pairs of field elements <code>(1, k)</code> where each <code>k</code> is
+chosen at random. This random value is used as part of the secure sketching
+protocol of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Appendix C.4. After evaluating their IDPF key shares
+on a given sequence of candidate prefixes, the sketching protocol is used by
+the Aggregators to verify that they hold shares of a one-hot vector. In
+addition, for each level of the tree, the prover generates random elements <code>a</code>,
+<code>b</code>, and <code>c</code> and computes<a href="#section-8.2.1-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.2.1-2">
 <pre>
     A = -2*a + k
