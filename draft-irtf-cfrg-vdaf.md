@@ -3519,11 +3519,11 @@ measurement is sharded. This is provided to the FLP by Prio3.
 
 # Poplar1 {#poplar1}
 
-This section specifies Poplar1, a VDAF for the following task. Each Client holds
-a string of length `BITS` and the Aggregators hold a set of `l`-bit strings,
-where `l <= BITS`. We will refer to the latter as the set of "candidate
-prefixes". The Aggregators' goal is to count how many measurements are prefixed
-by each candidate prefix.
+This section specifies Poplar1, a VDAF for the following task. Each Client
+holds a bit-string of length `BITS` and the Aggregators hold a sequence of
+`L`-bit strings, where `L <= BITS`. We will refer to the latter as the set of
+"candidate prefixes". The Aggregators' goal is to count how many measurements
+are prefixed by each candidate prefix.
 
 This functionality is the core component of the Poplar protocol {{BBCGGI21}},
 which was designed to compute the heavy hitters over a set of input strings. At
@@ -3581,19 +3581,20 @@ test vectors can be found in {{test-vectors}}.
 
 ## Incremental Distributed Point Functions (IDPFs) {#idpf}
 
-An IDPF is defined over a domain of size `2^BITS`, where `BITS` is constant
-defined by the IDPF. Indexes into the IDPF tree are encoded as integers in range
-`[0, 2^BITS)`. The Client specifies an index `alpha` and a vector of
-values `beta`, one for each "level" `L` in range `[0, BITS)`. The key generation
-algorithm generates one IDPF "key" for each Aggregator. When evaluated at level
-`L` and index `0 <= prefix < 2^L`, each IDPF key returns an additive share of
-`beta[L]` if `prefix` is the `L`-bit prefix of `alpha` and shares of zero
-otherwise.
+An IDPF is defined over a domain of size `2^BITS`, where `BITS` is a constant.
+Indices into the IDPF tree are encoded as integers in range `[0, 2^BITS)`. (In
+Poplar1, each Client's bit string is encoded as an index; see
+{{poplar1-idpf-index-encoding}} for details.) The Client specifies an index
+`alpha` and a vector of values `beta`, one for each "level" `L` in range `[0,
+BITS)`. The key generation algorithm generates one IDPF "key" for each
+Aggregator. When evaluated at level `L` and index `0 <= prefix < 2^L`, each
+IDPF key returns an additive share of `beta[L]` if `prefix` is the `L`-bit
+prefix of `alpha` and shares of zero otherwise.
 
 An index `x` is defined to be a prefix of another index `y` as follows. Let
-`LSB(x, N)` denote the least significant `N` bits of positive integer `x`. By
-definition, a positive integer `0 <= x < 2^L` is said to be the length-`L`
-prefix of positive integer `0 <= y < 2^BITS` if `LSB(x, L)` is equal to the most
+`LSB(x, L)` denote the least significant `L` bits of positive integer `x`. A
+positive integer `0 <= x < 2^L` is defined to be the length-`L` prefix of
+positive integer `0 <= y < 2^BITS` if `LSB(x, L)` is equal to the most
 significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is the
 length-3 prefix of 25 (11001), but 7 (111) is not.
 
@@ -3674,6 +3675,28 @@ state across evaluations. See {{idpf-poplar}} for details.
 | FieldVec   | Alias of `Union[list[FieldInner], list[FieldLeaf]]` |
 {: #idpf-param title="Constants and types defined by a concrete IDPF."}
 
+### Encoding inputs as indices {#poplar1-idpf-index-encoding}
+
+How data are represented as IDPF indices is up to the application. When the
+inputs are fixed-length byte strings, the most natural choice of encoder is
+`from_be_bytes()`. This ensures that, when a string is a prefix of another, so
+too is its index. (Index prefixes are defined in {{idpf}}). For example,
+
+~~~
+from_be_bytes(b"\x01\x02") == 0x0102
+~~~
+
+is a prefix of
+
+~~~
+from_be_bytes(b"\x01\x02\x03") == 0x010203
+~~~
+
+When the inputs are variable length, it is necessary to pad each input to some
+fixed length. Further, the padding scheme must be non-ambiguous. For example,
+each input could be padded with `b"\x01"` followed by as many `b"\x00"` bytes
+as needed.
+
 ## Construction {#poplar1-construction}
 
 This section specifies `Poplar1`, an implementation of the `Vdaf` interface
@@ -3697,7 +3720,7 @@ subsections. These methods make use of constants defined in {{poplar1-const}}.
 | `InputShare`      | `tuple[bytes, bytes, list[Idpf.FieldInner], list[Idpf.FieldLeaf]]` |
 | `OutShare`        | `Idpf.FieldVec`                         |
 | `AggShare`        | `Idpf.FieldVec`                         |
-| `AggResult`       | `Vec[Unsigned]`                         |
+| `AggResult`       | `list[Unsigned]`                         |
 | `PrepState`       | `tuple[bytes, Unsigned, Idpf.FieldVec]` |
 | `PrepShare`       | `Idpf.FieldVec`                         |
 | `PrepMessage`     | `Optional[Idpf.FieldVec]`               |
@@ -3711,10 +3734,10 @@ subsections. These methods make use of constants defined in {{poplar1-const}}.
 | USAGE_VERIFY_RAND: Unsigned | 4     |
 {: #poplar1-const title="Constants used by Poplar1."}
 
+### Sharding
 
-### Client
-
-The Client's measurement is interpreted as an IDPF index, denoted `alpha`. The
+The Client's measurement is an IDPF index, denoted `alpha`. (See
+{{poplar1-idpf-index-encoding}} for guidelines on index encoding.) The
 programmed IDPF values are pairs of field elements `(1, k)` where each `k` is
 chosen at random. This random value is used as part of the secure sketching
 protocol of {{BBCGGI21}}, Appendix C.4. After evaluating their IDPF key shares
