@@ -5,9 +5,8 @@ from typing import Optional, Union
 import flp
 import flp_generic
 import xof
-from common import (ERR_INPUT, ERR_VERIFY, Unsigned, byte, concat, front,
-                    vec_add, vec_sub, zeros)
-from field import FftField, Field64, Field128
+from common import (ERR_INPUT, ERR_VERIFY, byte, concat, front, vec_add,
+                    vec_sub, zeros)
 from vdaf import Vdaf
 
 USAGE_MEAS_SHARE = 1
@@ -465,7 +464,14 @@ class Prio3Sum(Prio3):
     test_vec_name = 'Prio3Sum'
 
     @classmethod
-    def with_bits(Prio3Sum, bits: Unsigned):
+    def with_bits(Prio3Sum, bits: int):
+        """
+        Set the range to `range(0, 2**bits)`.
+
+        Pre-conditions:
+
+            - `bits > 0`
+        """
         class Prio3SumWithBits(Prio3Sum):
             Flp = flp_generic.FlpGeneric(flp_generic.Sum(bits))
         return Prio3SumWithBits
@@ -483,8 +489,17 @@ class Prio3SumVec(Prio3):
     test_vec_name = 'Prio3SumVec'
 
     @classmethod
-    def with_params(Prio3SumVec, length: Unsigned, bits: Unsigned,
-                    chunk_length: Unsigned):
+    def with_params(Prio3SumVec, length: int, bits: int,
+                    chunk_length: int):
+        """
+        Set the circuit parameters.
+
+        Pre-conditions:
+
+            - `length > 0`
+            - `bits > 0`
+            - `chunk_length > 0`
+        """
         class Prio3SumVecWithParams(Prio3SumVec):
             Flp = flp_generic.FlpGeneric(
                 flp_generic.SumVec(length, bits, chunk_length)
@@ -504,7 +519,15 @@ class Prio3Histogram(Prio3):
     test_vec_name = 'Prio3Histogram'
 
     @classmethod
-    def with_params(Prio3Histogram, length: Unsigned, chunk_length: Unsigned):
+    def with_params(Prio3Histogram, length: int, chunk_length: int):
+        """
+        Set the circuit parameters.
+
+        Pre-conditions:
+
+            - `length > 0`
+            - `chunk_length > 0`
+        """
         class Prio3HistogramWithLength(Prio3Histogram):
             Flp = flp_generic.FlpGeneric(
                 flp_generic.Histogram(length, chunk_length)
@@ -512,34 +535,31 @@ class Prio3Histogram(Prio3):
         return Prio3HistogramWithLength
 
 
-# Experimental multiproof variant of Prio3SumVec
 class Prio3SumVecWithMultiproof(Prio3SumVec):
+    """Experimental multiproof variant of Prio3SumVec."""
+
     # Operational parameters.
     test_vec_name = 'Prio3SumVecWithMultiproof'
 
-    @staticmethod
-    def is_recommended(valid_cls,
-                       num_proofs: Unsigned,
-                       f: FftField) -> bool:
-        # TODO(issue#177) Decide how many proofs to use.
-        if f == Field64:
-            # the upper bound is due to the fact
-            # we encode it using one byte in `joint_rands`
-            return 2 <= num_proofs < 256
-        elif f == Field128:
-            return 1 <= num_proofs < 256
-        return False
-
     @classmethod
     def with_params(cls,
-                    length: Unsigned,
-                    bits: Unsigned,
-                    chunk_length: Unsigned,
-                    num_proofs: Unsigned,
-                    field: FftField):
+                    length: int,
+                    bits: int,
+                    chunk_length: int,
+                    num_proofs: int,
+                    field: type):
+        """
+        Set the circuit parameters, the number of proofs to generate, and the field.
+
+        Pre-conditions:
+
+            - `length > 0`
+            - `bits > 0`
+            - `chunk_length > 0`
+            - `0 < num_proofs` and `num_proofs < 256`
+            - `field` is a sub-class of `FftField`.
+        """
         valid_cls = flp_generic.SumVec.with_field(field)
-        if not cls.is_recommended(valid_cls, num_proofs, field):
-            raise ValueError("parameters not recommended")
 
         class Prio3SumVecWithMultiproofAndParams(cls):
             # Associated parameters.
@@ -563,9 +583,19 @@ class Prio3MultiHotHistogram(Prio3):
 
     @classmethod
     def with_params(Prio3MultiHotHistogram,
-                    length: Unsigned,
-                    max_count: Unsigned,
-                    chunk_length: Unsigned):
+                    length: int,
+                    max_count: int,
+                    chunk_length: int):
+        """
+        Set the circuit parameters.
+
+        Pre-conditions:
+
+            - `length > 0`
+            - `bits > 0`
+            - `max_count > 0`
+            - `chunk_length > 0`
+        """
         class Prio3MultiHotHistogramWithParams(Prio3MultiHotHistogram):
             Flp = flp_generic.FlpGeneric(flp_generic.MultiHotHistogram(
                 length, max_count, chunk_length

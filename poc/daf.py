@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-from common import Bool, Unsigned, gen_rand
+from common import gen_rand
 
 
 class Daf:
     """A DAF"""
 
     # Algorithm identifier for this DAF, a 32-bit integer.
-    ID: Unsigned = None
+    ID: int = None
 
     # The number of Aggregators.
-    SHARES: Unsigned = None
+    SHARES: int = None
 
     # Length of the nonce.
     NONCE_SIZE = None
@@ -44,18 +44,23 @@ class Daf:
     @classmethod
     def shard(Daf,
               measurement: Measurement,
-              nonce: bytes["Daf.NONCE_SIZE"],
-              rand: bytes["Daf.RAND_SIZE"],
+              nonce: bytes,
+              rand: bytes,
               ) -> tuple[PublicShare, list[InputShare]]:
         """
         Shard a measurement into a public share and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
+
+        Pre-conditions:
+
+            - `len(nonce) == Daf.NONCE_SIZE`
+            - `len(rand) == Daf.RAND_SIZE`
         """
         raise NotImplementedError()
 
     @classmethod
     def is_valid(Daf, agg_param: AggParam,
-                 previous_agg_params: set[AggParam]) -> Bool:
+                 previous_agg_params: set[AggParam]) -> bool:
         """
         Check if `agg_param` is valid for use with an input share that has
         previously been used with all `previous_agg_params`.
@@ -64,9 +69,9 @@ class Daf:
 
     @classmethod
     def prep(Daf,
-             agg_id: Unsigned,
+             agg_id: int,
              agg_param: AggParam,
-             nonce: bytes["Daf.NONCE_SIZE"],
+             nonce: bytes,
              public_share: PublicShare,
              input_share: InputShare) -> OutShare:
         """
@@ -76,6 +81,11 @@ class Daf:
         corresponding to the index of `input_share` in the Client's output),
         and an aggregation parameter and returns the corresponding output
         share.
+
+        Pre-conditions:
+
+            - `agg_id in range(0, Daf.SHARES)`
+            - `len(nonce) == Daf.NONCE_SIZE`
         """
         raise NotImplementedError()
 
@@ -94,7 +104,7 @@ class Daf:
     def unshard(Daf,
                 agg_param: AggParam,
                 agg_shares: list[AggShare],
-                num_measurements: Unsigned) -> AggResult:
+                num_measurements: int) -> AggResult:
         """
         Unshard the aggregate shares (encoded as byte strings) and compute the
         aggregate result. This is called by the Collector.
@@ -105,8 +115,14 @@ class Daf:
 def run_daf(Daf,
             agg_param: Daf.AggParam,
             measurements: list[Daf.Measurement],
-            nonces: list[bytes["Daf.NONCE_SIZE"]]):
-    """Run a DAF on a list of measurements."""
+            nonces: list[bytes]):
+    """
+    Run a DAF on a list of measurements.
+
+    Pre-conditions:
+
+        - `len(nonce) == Daf.NONCE_SIZE` for each `nonce` in `nonces`
+    """
     out_shares = [[] for j in range(Daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and

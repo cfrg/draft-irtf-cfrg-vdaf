@@ -7,8 +7,8 @@ from typing import Optional
 import idpf
 import idpf_poplar
 import xof
-from common import (ERR_INPUT, ERR_VERIFY, Bytes, Unsigned, byte,
-                    from_be_bytes, front, to_be_bytes, vec_add, vec_sub)
+from common import (ERR_INPUT, ERR_VERIFY, byte, from_be_bytes, front,
+                    to_be_bytes, vec_add, vec_sub)
 from vdaf import Vdaf
 
 USAGE_SHARD_RAND = 1
@@ -31,8 +31,8 @@ class Poplar1(Vdaf):
     ROUNDS = 2
 
     # Types required by `Vdaf`.
-    Measurement = Unsigned
-    AggParam = tuple[Unsigned, tuple[Unsigned, ...]]
+    Measurement = int  # `range(0, 2**BITS)`
+    AggParam = tuple[int, tuple[int, ...]]  # level, prefixes
     PublicShare = bytes  # IDPF public share
     InputShare = tuple[
         bytes,                  # IDPF key
@@ -42,7 +42,7 @@ class Poplar1(Vdaf):
     ]
     OutShare = Idpf.FieldVec
     AggShare = Idpf.FieldVec
-    AggResult = list[Unsigned]
+    AggResult = list[int]
     PrepState = tuple[bytes,          # sketch round
                       Idpf.FieldVec]  # output (and sketch) share
     PrepShare = Idpf.FieldVec
@@ -311,7 +311,7 @@ class Poplar1(Vdaf):
             raise ERR_INPUT  # level too deep
         if len(prefixes) > 2 ** 32 - 1:
             raise ERR_INPUT  # too many prefixes
-        encoded = Bytes()
+        encoded = bytes()
         encoded += to_be_bytes(level, 2)
         encoded += to_be_bytes(len(prefixes), 4)
         packed = 0
@@ -339,13 +339,20 @@ class Poplar1(Vdaf):
         return (level, tuple(prefixes))
 
     @classmethod
-    def with_bits(Poplar1, bits: Unsigned):
+    def with_bits(cls, bits: int):
+        """
+        Set BITS.
+
+        Pre-conditions:
+
+            - `bits > 0`
+        """
         TheIdpf = idpf_poplar.IdpfPoplar \
             .with_value_len(2) \
             .with_bits(bits)
         TheXof = xof.XofTurboShake128
 
-        class Poplar1WithBits(Poplar1):
+        class Poplar1WithBits(cls):
             Idpf = TheIdpf
             Xof = TheXof
             VERIFY_KEY_SIZE = TheXof.SEED_SIZE
