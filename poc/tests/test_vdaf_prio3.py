@@ -1,8 +1,8 @@
 import unittest
 
-from common import TEST_VECTOR, Unsigned
-from field import FftField, Field64
-from flp_generic import FlpGeneric, SumVec
+from common import TEST_VECTOR
+from field import Field64
+from flp_generic import FlpGeneric
 from tests.test_flp import FlpTestField128
 from tests.test_flp_generic import TestAverage
 from tests.vdaf import test_vdaf
@@ -25,17 +25,13 @@ class TestPrio3Average(Prio3):
     VERIFY_KEY_SIZE = XofTurboShake128.SEED_SIZE
 
     @classmethod
-    def with_bits(cls, bits: Unsigned):
+    def with_bits(cls, bits: int):
         class TestPrio3AverageWithBits(TestPrio3Average):
             Flp = FlpGeneric(TestAverage(bits))
         return TestPrio3AverageWithBits
 
 
-def test_prio3sumvec(num_proofs: Unsigned, field: FftField):
-    valid_cls = SumVec.with_field(field)
-    assert Prio3SumVecWithMultiproof.is_recommended(
-        valid_cls, num_proofs, field)
-
+def test_prio3sumvec(num_proofs: int, field: type):
     cls = Prio3SumVecWithMultiproof \
         .with_params(10, 8, 9, num_proofs, field) \
         .with_shares(2)

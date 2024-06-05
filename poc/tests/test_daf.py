@@ -1,7 +1,7 @@
 import unittest
 from functools import reduce
 
-from common import Unsigned, gen_rand
+from common import gen_rand
 from daf import Daf, run_daf
 from field import Field128
 from xof import XofTurboShake128
@@ -20,12 +20,12 @@ class TestDaf(Daf):
     RAND_SIZE = 16
 
     # Associated types
-    Measurement = Unsigned
+    Measurement = int
     PublicShare = None
     InputShare = Field
     OutShare = Field
     AggShare = Field
-    AggResult = Unsigned
+    AggResult = int
 
     @classmethod
     def shard(cls, measurement, _nonce, rand):

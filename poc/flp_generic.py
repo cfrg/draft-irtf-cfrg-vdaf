@@ -3,7 +3,7 @@
 import copy
 
 import field
-from common import ERR_ABORT, ERR_INPUT, Unsigned, Vec, next_power_of_2
+from common import ERR_ABORT, ERR_INPUT, next_power_of_2
 from field import poly_eval, poly_interp, poly_mul, poly_strip
 from flp import Flp
 
@@ -12,10 +12,10 @@ class Gadget:
     """A validity circuit gadget."""
 
     # Length of the input to the gadget.
-    ARITY: Unsigned
+    ARITY: int
 
     # Arithmetic degree of the circuit.
-    DEGREE: Unsigned
+    DEGREE: int
 
     def eval(self, Field, inp):
         """Evaluate the gadget on a sequence of field elements."""
@@ -49,20 +49,20 @@ class Valid:
     Field: field.FftField = None
 
     # Length of the encoded measurement input to the validity circuit.
-    MEAS_LEN: Unsigned
+    MEAS_LEN: int
 
     # Length of the random input of the validity circuit.
-    JOINT_RAND_LEN: Unsigned
+    JOINT_RAND_LEN: int
 
     # Length of the aggregatable output for this type.
-    OUTPUT_LEN: Unsigned
+    OUTPUT_LEN: int
 
     # The sequence of gadgets for this validity circuit.
-    GADGETS: Vec[Gadget]
+    GADGETS: list[Gadget]
 
     # The number of times each gadget is called. This must have the same length
     # as `GADGETS`.
-    GADGET_CALLS: Vec[Unsigned]
+    GADGET_CALLS: list[int]
 
     def prove_rand_len(self):
         """Length of the prover randomness."""
@@ -87,24 +87,46 @@ class Valid:
             length += g.ARITY + 1
         return length
 
-    def encode(self, measurement: Measurement) -> Vec[Field]:
+    def encode(self, measurement: Measurement) -> list[Field]:
         """Encode a measurement."""
         raise NotImplementedError()
 
-    def truncate(self, meas: Vec[Field]) -> Vec[Field]:
-        """Truncate a measurement to the length of an aggregatable output."""
+    def truncate(self, meas: list[Field]) -> list[Field]:
+        """
+        Truncate a measurement to the length of an aggregatable output.
+
+        Pre-conditions:
+
+            - `len(meas) == self.MEAS_LEN`
+        """
         raise NotImplementedError()
 
-    def decode(self, output: Vec[Field],
-               num_measurements: Unsigned) -> AggResult:
-        """Decode an aggregate result."""
+    def decode(self,
+               output: list[Field],
+               num_measurements: int) -> AggResult:
+        """
+        Decode an aggregate result.
+
+        Pre-conditions:
+
+            - `len(output) == self.OUTPUT_LEN`
+            - `num_measurements >= 1`
+        """
         raise NotImplementedError()
 
     def eval(self,
-             meas: Vec[Field],
-             joint_rand: Vec[Field],
-             num_shares: Unsigned):
-        """Evaluate the circuit on the provided measurement and joint randomness."""
+             meas: list[Field],
+             joint_rand: list[Field],
+             num_shares: int):
+        """
+        Evaluate the circuit on the provided measurement and joint randomness.
+
+        Pre-conditions:
+
+            - `len(meas) == self.MEAS_LEN`
+            - `len(joint_rand) == self.JOINT_RAND_LEN`
+            - `num_shares >= 1`
+        """
         raise NotImplementedError()
 
     def test_vec_set_type_param(self, _test_vec) -> list[str]:
@@ -381,7 +403,7 @@ class PolyEval(Gadget):
     ARITY = 1
     DEGREE = None  # Set by constructor
 
-    def __init__(self, p: Vec[int]):
+    def __init__(self, p: list[int]):
         """
         Instantiate this gadget with the given polynomial.
         """
@@ -479,8 +501,8 @@ class ParallelSum(Gadget):
 
 class Count(Valid):
     # Associated types
-    Measurement = Unsigned
-    AggResult = Unsigned
+    Measurement = int  # `range(2)`
+    AggResult = int
     Field = field.Field64
 
     # Associated parameters
@@ -511,14 +533,14 @@ class Count(Valid):
 
 class Sum(Valid):
     # Associated types
-    Measurement = Unsigned
-    AggResult = Unsigned
+    Measurement = int  # `range(2**self.bits)`
+    AggResult = int
     Field = field.Field128
 
     # Associated parameters
     GADGETS = [Range2()]
     GADGET_CALLS = None  # Set by Sum.with_bits()
-    MEAS_LEN = None    # Set by Sum.with_bits()
+    MEAS_LEN = None  # Set by Sum.with_bits()
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
 
@@ -567,8 +589,8 @@ class Histogram(Valid):
     chunk_length = None  # Set by 'Histogram.with_params()`
 
     # Associated types
-    Measurement = Unsigned
-    AggResult = Vec[Unsigned]
+    Measurement = int  # `range(length)`
+    AggResult = list[int]
     Field = field.Field128
 
     # Associated parameters
@@ -672,8 +694,8 @@ class MultiHotHistogram(Valid):
     chunk_length = None  # Set by constructor
 
     # Associated types
-    Measurement = list[Unsigned]  # A vector of bits.
-    AggResult = list[Unsigned]  # A vector of counts as unsigned integers.
+    Measurement = list[int]  # A vector of bits.
+    AggResult = list[int]  # A vector of counts as unsigned integers.
     Field = field.Field128
 
     # Associated parameters
@@ -785,8 +807,8 @@ class SumVec(Valid):
     chunk_length = None  # Set by constructor
 
     # Associated types
-    Measurement = Vec[Unsigned]
-    AggResult = Vec[Unsigned]
+    Measurement = list[int]
+    AggResult = list[int]
     Field = field.Field128
 
     # Associated parameters
@@ -847,7 +869,7 @@ class SumVec(Valid):
 
         return out
 
-    def encode(self, measurement: Vec[Unsigned]):
+    def encode(self, measurement):
         if len(measurement) != self.length:
             raise ERR_INPUT
 

@@ -5,60 +5,87 @@ from __future__ import annotations
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import TurboSHAKE128
 
-from common import (Bytes, Unsigned, concat, from_le_bytes, next_power_of_2,
-                    to_le_bytes, xor)
+from common import concat, from_le_bytes, next_power_of_2, to_le_bytes, xor
 
 
 class Xof:
     """The base class for XOFs."""
 
     # Size of the seed.
-    SEED_SIZE: Unsigned
+    SEED_SIZE: int
 
-    def __init__(self, seed: Bytes["Xof.SEED_SIZE"], dst: Bytes,
-                 binder: Bytes):
+    def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         """
         Construct a new instance of this XOF from the given seed, domain
         separation tag, and binder string.
+
+        Pre-conditions:
+
+            - `len(seed) == self.SEED_SIZE`
         """
         raise NotImplementedError()
 
-    def next(self, length: Unsigned) -> Bytes:
-        """Output the next `length` bytes of the XOF stream."""
+    def next(self, length: int) -> bytes:
+        """
+        Output the next `length` bytes of the XOF stream.
+
+        Pre-conditions:
+
+            - `length > 0`
+        """
         raise NotImplementedError()
 
     @classmethod
     def derive_seed(Xof,
-                    seed: Bytes["Xof.SEED_SIZE"],
-                    dst: Bytes,
-                    binder: Bytes):
-        """Derive a new seed."""
+                    seed: bytes,
+                    dst: bytes,
+                    binder: bytes):
+        """
+        Derive a new seed.
+
+        Pre-conditions:
+
+            - `len(seed) == Xof.SEED_SIZE`
+        """
         xof = Xof(seed, dst, binder)
         return xof.next(Xof.SEED_SIZE)
 
-    def next_vec(self, Field, length: Unsigned):
-        """Output the next `length` elements of `Field`."""
-        m = next_power_of_2(Field.MODULUS) - 1
+    def next_vec(self, field: type, length: int):
+        """
+        Output the next `length` field elements.
+
+        Pre-conditions:
+
+            - `field` is sub-class of `Field`
+            - `length > 0`
+        """
+        m = next_power_of_2(field.MODULUS) - 1
         vec = []
         while len(vec) < length:
-            x = from_le_bytes(self.next(Field.ENCODED_SIZE))
+            x = from_le_bytes(self.next(field.ENCODED_SIZE))
             x &= m
-            if x < Field.MODULUS:
-                vec.append(Field(x))
+            if x < field.MODULUS:
+                vec.append(field(x))
         return vec
 
     @classmethod
     def expand_into_vec(Xof,
-                        Field,
-                        seed: Bytes["Xof.SEED_SIZE"],
-                        dst: Bytes,
-                        binder: Bytes,
-                        length: Unsigned):
+                        field: type,
+                        seed: bytes,
+                        dst: bytes,
+                        binder: bytes,
+                        length: int):
         """
         Expand the input `seed` into vector of `length` field elements.
+
+        Pre-conditions:
+
+            - `field` is sub-class of `Field`
+            - `len(seed) == Xof.SEED_SIZE`
+            - `length > 0`
         """
         xof = Xof(seed, dst, binder)
-        return xof.next_vec(Field, length)
+        return xof.next_vec(field, length)
 
 
 class XofTurboShake128(Xof):
@@ -130,7 +157,7 @@ class XofFixedKeyAes128(Xof):
         # Save seed to be used in `next`.
         self.seed = seed
 
-    def next(self, length: Unsigned) -> Bytes:
+    def next(self, length):
         offset = self.length_consumed % 16
         new_length = self.length_consumed + length
         block_range = range(

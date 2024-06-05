@@ -1,6 +1,6 @@
 import unittest
 
-from common import ERR_INPUT, Unsigned, next_power_of_2
+from common import ERR_INPUT, next_power_of_2
 from field import Field64, Field96, Field128, poly_eval
 from flp import run_flp
 from flp_generic import (Count, FlpGeneric, Histogram, Mul, MultiHotHistogram,
@@ -10,7 +10,7 @@ from flp_generic import (Count, FlpGeneric, Histogram, Mul, MultiHotHistogram,
 class TestMultiGadget(Valid):
     # Associated types
     Field = Field64
-    Measurement = Unsigned
+    Measurement = int
 
     # Associated parameters
     GADGETS = [Mul(), Mul()]
@@ -91,7 +91,7 @@ class TestAverage(Sum):
     down.
     """
     # Associated types
-    AggResult = Unsigned
+    AggResult = int
 
     def decode(self, output, num_measurements):
         total = super().decode(output, num_measurements)

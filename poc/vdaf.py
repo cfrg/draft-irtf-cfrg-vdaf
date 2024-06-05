@@ -4,17 +4,17 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Tuple, Union
+from typing import Union
 
-from common import (TEST_VECTOR_PATH, Bool, Bytes, Unsigned, format_dst,
-                    gen_rand, print_wrapped_line, to_le_bytes)
+from common import (TEST_VECTOR_PATH, format_dst, gen_rand, print_wrapped_line,
+                    to_le_bytes)
 
 
 class Vdaf:
     """A VDAF."""
 
     # Algorithm identifier for this VDAF, a 32-bit integer.
-    ID: Unsigned = None
+    ID: int = None  # `range(2**32)`
 
     # Length of the verification key shared by the Aggregators.
     VERIFY_KEY_SIZE = None
@@ -26,10 +26,10 @@ class Vdaf:
     RAND_SIZE = None
 
     # The number of Aggregators.
-    SHARES: Unsigned = None
+    SHARES: int = None
 
     # The number of rounds of communication during the Prepare phase.
-    ROUNDS: Unsigned = None
+    ROUNDS: int = None
 
     # The measurement type.
     Measurement = None
@@ -64,18 +64,23 @@ class Vdaf:
     @classmethod
     def shard(Vdaf,
               measurement: Measurement,
-              nonce: bytes["Vdaf.NONCE_SIZE"],
-              rand: bytes["Vdaf.RAND_SIZE"],
+              nonce: bytes,
+              rand: bytes,
               ) -> tuple[PublicShare, list[InputShare]]:
         """
         Shard a measurement into a "public share" and a sequence of input
         shares, one for each Aggregator. This method is run by the Client.
+
+        Pre-conditions:
+
+            - `len(nonce) == Vdaf.NONCE_SIZE`
+            - `len(rand) == Vdaf.RAND_SIZE`
         """
         raise NotImplementedError()
 
     @classmethod
     def is_valid(Vdaf, agg_param: AggParam,
-                 previous_agg_params: set[AggParam]) -> Bool:
+                 previous_agg_params: set[AggParam]) -> bool:
         """
         Check if `agg_param` is valid for use with an input share that has
         previously been used with all `previous_agg_params`.
@@ -84,19 +89,24 @@ class Vdaf:
 
     @classmethod
     def prep_init(Vdaf,
-                  verify_key: Bytes,
-                  agg_id: Unsigned,
+                  verify_key: bytes,
+                  agg_id: int,
                   agg_param: AggParam,
-                  nonce: Bytes,
+                  nonce: bytes,
                   public_share: PublicShare,
                   input_share: InputShare) -> tuple[PrepState, PrepShare]:
         """
         Initialize the prep state for the given input share and return the
         initial prep share. This method is run by an Aggregator. Along with the
         public share and its input share, the inputs include the verification
-        key shared by all of the Aggregators, the Aggregator's ID (a unique
-        integer in range `[0, SHARES)`, and the aggregation parameter and nonce
-        agreed upon by all of the Aggregators.
+        key shared by all of the Aggregators, the Aggregator's ID, and the
+        aggregation parameter and nonce agreed upon by all of the Aggregators.
+
+        Pre-conditions:
+
+            - `len(verify_key) == Vdaf.VERIFY_KEY_SIZE`
+            - `agg_id` in `range(0, Vdaf.SHARES)`
+            - `len(nonce) == Vdaf.NONCE_SIZE`
         """
         raise NotImplementedError()
 
@@ -104,7 +114,7 @@ class Vdaf:
     def prep_next(Vdaf,
                   prep_state: PrepState,
                   prep_msg: PrepMessage,
-                  ) -> Union[Tuple[PrepState, PrepShare], OutShare]:
+                  ) -> Union[tuple[PrepState, PrepShare], OutShare]:
         """
         Consume the inbound message from the previous round and return the
         Aggregator's share of the next round (or the aggregator's output share
@@ -138,17 +148,25 @@ class Vdaf:
     def unshard(Vdaf,
                 agg_param: AggParam,
                 agg_shares: list[AggShare],
-                num_measurements: Unsigned) -> AggResult:
+                num_measurements: int) -> AggResult:
         """
         Unshard the aggregate shares (encoded as byte strings) and compute the
         aggregate result. This is called by the Collector.
+
+        Pre-condition:
+
+            - `num_measurements >= 1`
         """
         raise NotImplementedError()
 
     @classmethod
-    def domain_separation_tag(Vdaf, usage: Unsigned) -> Bytes:
+    def domain_separation_tag(Vdaf, usage: int) -> bytes:
         """
         Format domain separation tag for this VDAF with the given usage.
+
+        Pre-conditions:
+
+            - `usage` in `range(2**16)`
         """
         return format_dst(0, Vdaf.ID, usage)
 
@@ -185,13 +203,20 @@ class Vdaf:
 
 # NOTE This is used to generate {{run-vdaf}}.
 def run_vdaf(Vdaf,
-             verify_key: bytes[Vdaf.VERIFY_KEY_SIZE],
+             verify_key: bytes,
              agg_param: Vdaf.AggParam,
-             nonces: list[bytes[Vdaf.NONCE_SIZE]],
+             nonces: list[bytes],
              measurements: list[Vdaf.Measurement],
              print_test_vec=False,
              test_vec_instance=0):
-    """Run the VDAF on a list of measurements."""
+    """Run the VDAF on a list of measurements.
+
+    Pre-conditions:
+
+        - `len(verify_key) == Vdaf.VERIFY_KEY_SIZE`
+        - `len(nonces) == len(measurements)`
+        - `len(nonce) == Vdaf.NONCE_SIZE` for each `nonce` in `nonces`
+    """
 
     # REMOVE ME
     test_vec = {

@@ -1,7 +1,6 @@
 """Functionalities used by other modules."""
 
 import os
-from typing import List
 
 # Document version, reved with each draft that contains breaking changes.
 VERSION = 8
@@ -12,12 +11,6 @@ TEST_VECTOR = os.environ.get('TEST_VECTOR', 'false').lower() == 'true'
 # The path where test vectors are generated.
 TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
                                   'test_vec/{:02}'.format(VERSION))
-
-# Primitive types
-Bool = bool
-Bytes = bytes
-Unsigned = int
-Vec = List
 
 
 class Error(Exception):
@@ -117,7 +110,7 @@ def from_be_bytes(encoded):
     return int.from_bytes(encoded, byteorder='big')
 
 
-def concat(parts: Vec[Bytes]) -> Bytes:
+def concat(parts: list[bytes]) -> bytes:
     """Return the concatenated byte strings."""
     return b''.join(parts)
 
@@ -130,10 +123,18 @@ def front(length, vec):
     return (vec[:length], vec[length:])
 
 
-def format_dst(algo_class: Unsigned,
-               algo: Unsigned,
-               usage: Unsigned) -> Bytes:
-    """Format XOF domain separation tag for use within a (V)DAF."""
+def format_dst(algo_class: int,
+               algo: int,
+               usage: int) -> bytes:
+    """
+    Format XOF domain separation tag for use within a (V)DAF.
+
+    Pre-conditions:
+
+        - `algo_class` in `range(0, 2**8)`
+        - `algo` in `range(0, 2**32)`
+        - `usage` in `range(0, 2**16)`
+    """
     return concat([
         to_be_bytes(VERSION, 1),
         to_be_bytes(algo_class, 1),

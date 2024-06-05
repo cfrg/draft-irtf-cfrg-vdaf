@@ -1,7 +1,7 @@
 import unittest
 from copy import deepcopy
 
-from common import ERR_ENCODE, Unsigned
+from common import ERR_ENCODE
 from field import Field128
 from flp import Flp, run_flp
 
@@ -18,8 +18,8 @@ class FlpTest(Flp):
     VERIFIER_LEN = 2
 
     # Associated types
-    Measurement = Unsigned
-    AggResult = Unsigned
+    Measurement = int
+    AggResult = int
 
     # Operational parameters
     meas_range = range(5)

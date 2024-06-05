@@ -3,8 +3,8 @@
 import itertools
 
 import field
-from common import (ERR_DECODE, ERR_INPUT, Bytes, Unsigned, Vec, format_dst,
-                    vec_add, vec_neg, vec_sub, xor)
+from common import (ERR_DECODE, ERR_INPUT, format_dst, vec_add, vec_neg,
+                    vec_sub, xor)
 from field import Field2
 from idpf import Idpf
 from xof import XofFixedKeyAes128
@@ -192,7 +192,7 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def encode_public_share(IdpfPoplar, correction_words):
-        encoded = Bytes()
+        encoded = bytes()
         control_bits = list(itertools.chain.from_iterable(
             cw[1] for cw in correction_words
         ))
@@ -227,41 +227,53 @@ class IdpfPoplar(Idpf):
         return correction_words
 
     @classmethod
-    def with_bits(IdpfPoplar, bits: Unsigned):
-        if bits == 0:
-            raise ERR_INPUT  # number of bits must be positive
+    def with_bits(cls, bits: int):
+        """
+        Set `BITS`.
 
-        class IdpfPoplarWithBits(IdpfPoplar):
+        Pre-conditions:
+
+            - `bits > 0`
+        """
+        assert bits > 0
+
+        class IdpfPoplarWithBits(cls):
             BITS = bits
         return IdpfPoplarWithBits
 
     @classmethod
-    def with_value_len(IdpfPoplar, value_len: Unsigned):
-        if value_len == 0:
-            raise ERR_INPUT  # value length must be positive
+    def with_value_len(cls, value_len):
+        """
+        Set `VALUE_LEN`.
 
-        class IdpfPoplarWithValueLen(IdpfPoplar):
+        Pre-conditions:
+
+            - `value_len > 0`
+        """
+        assert value_len > 0
+
+        class IdpfPoplarWithValueLen(cls):
             VALUE_LEN = value_len
         return IdpfPoplarWithValueLen
 
 
-def pack_bits(bits: Vec[Field2]) -> Bytes:
+def pack_bits(bits: list[Field2]) -> bytes:
     byte_len = (len(bits) + 7) // 8
     packed = [int(0)] * byte_len
     for i, bit in enumerate(bits):
         packed[i // 8] |= bit.as_unsigned() << (i % 8)
-    return Bytes(packed)
+    return bytes(packed)
 
 
-def unpack_bits(packed_bits: Bytes, length: Unsigned) -> Vec[Field2]:
+def unpack_bits(packed: bytes, length: int) -> list[Field2]:
     bits = []
     for i in range(length):
         bits.append(Field2(
-            (packed_bits[i // 8] >> (i % 8)) & 1
+            (packed[i // 8] >> (i % 8)) & 1
         ))
-    leftover_bits = packed_bits[-1] >> (
+    leftover_bits = packed[-1] >> (
         (length + 7) % 8 + 1
     )
-    if (length + 7) // 8 != len(packed_bits) or leftover_bits != 0:
+    if (length + 7) // 8 != len(packed) or leftover_bits != 0:
         raise ERR_DECODE
     return bits
