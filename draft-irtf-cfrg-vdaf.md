@@ -1859,7 +1859,7 @@ def derive_seed(Xof,
     xof = Xof(seed, dst, binder)
     return xof.next(Xof.SEED_SIZE)
 
-def next_vec(self, field: type, length: int):
+def next_vec(self, field: type[Field], length: int):
     """
     Output the next `length` field elements.
 
@@ -1869,7 +1869,7 @@ def next_vec(self, field: type, length: int):
         - `length > 0`
     """
     m = next_power_of_2(field.MODULUS) - 1
-    vec = []
+    vec: list[Field] = []
     while len(vec) < length:
         x = from_le_bytes(self.next(field.ENCODED_SIZE))
         x &= m

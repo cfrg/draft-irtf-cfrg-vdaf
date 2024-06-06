@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sage.all import GF, PolynomialRing
+from sage.all import GF, PolynomialRing  # type: ignore
 
 from common import from_le_bytes, to_le_bytes
 
