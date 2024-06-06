@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-04T00:45:03.529795+00:00",
+  "timestamp": "2024-06-06T00:44:22.071675+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -1972,13 +1972,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": "IDPFs (and Poplar1 by extension) take in an \"index\" `alpha` represented as an `Unsigned`. @bifurcation pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/97#discussion_r918280713 that we also call this a \"bit-string\", which is ambiguous. The draft needs guidance on how applications should represent bit strings as IDPF indexes.",
       "createdAt": "2022-07-11T21:48:30Z",
-      "updatedAt": "2023-03-02T16:30:23Z",
+      "updatedAt": "2024-06-05T18:34:08Z",
       "closedAt": null,
       "comments": []
     },
@@ -3368,13 +3370,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": ">The overview of Prio3 and Poplar1 in the introduction feels a bit too out of place, especially as it comes before the generic overview. I would suggest removing this content, as it's somewhat redundant with the section in {{prio3}} and {{poplar1}}.\r\n>\r\n> Moreover, to align with the structure of the document, I might try to reframe the intro to first introduce DAFs, and then introduce malicious clients and the need for verifiability, and then introduce VDAFs. I can propose some text for this if you'd be interested.\r\n",
       "createdAt": "2023-04-04T23:04:50Z",
-      "updatedAt": "2023-10-17T01:33:46Z",
+      "updatedAt": "2024-06-05T20:48:58Z",
       "closedAt": null,
       "comments": [
         {
@@ -3425,13 +3429,15 @@
       "state": "OPEN",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": "We would like to remove aliases of primitive types in `common.py`, and just use the primitive types straight out of their global bindings.\r\n\r\n_Originally posted by @cjpatton in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/221#discussion_r1167331240_\r\n            ",
       "createdAt": "2023-04-14T23:34:54Z",
-      "updatedAt": "2023-07-14T22:24:32Z",
+      "updatedAt": "2024-06-05T20:53:41Z",
       "closedAt": null,
       "comments": [
         {
@@ -5193,6 +5199,22 @@
           "updatedAt": "2024-05-08T14:56:03Z"
         }
       ]
+    },
+    {
+      "number": 346,
+      "id": "I_kwDOGKuqOc6LS0_2",
+      "title": "Consider removing definition of DAFs",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/346",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "DAFs are the same as VDAFs except they don't provide robustness on their own. This feature was requested early on in the history of PPM (https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/45). However no DAF has been defined, much less deployed.\r\n\r\nWe should consider removing DAFs from the draft:\r\n1. This would reduce some maintenance cost in the draft and reference implementation.\r\n2. This would simplify https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/259, which conflicts with the current goal of writing down DAF as a \"warm-up\" to VDAFs.",
+      "createdAt": "2024-06-05T23:06:10Z",
+      "updatedAt": "2024-06-05T23:07:34Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -29627,6 +29649,58 @@
           ]
         }
       ]
+    },
+    {
+      "number": 345,
+      "id": "PR_kwDOGKuqOc5xmpSL",
+      "title": "Add guidance for encoding byte strings as IDPF indices",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/345",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #101.\r\n\r\nBig-endian encoding is the most natural choice as it aligns most naturally with our definition of index. We also should note that a reversible padding scheme is needed when the inputs might be variable length.\r\n\r\nWhile at it, pick up a few minor editorial improvements:\r\n\r\n- \"set of candidate preixes\" -> \"sequence of candidate prefixes\"\r\n- Use one free variable in defining index prefixes\r\n- \"Vec\" -> \"list\"\r\n- \"Client\" -> \"Sharding\" for consistency with the Prio3 section",
+      "createdAt": "2024-06-05T20:48:23Z",
+      "updatedAt": "2024-06-05T20:52:19Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b5f062a8e583297684409866b77b6dfb547d15ff",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/101",
+      "headRefOid": "d5b68bf09550981d42b30b98da15146d7847b242",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 347,
+      "id": "PR_kwDOGKuqOc5xnVWm",
+      "title": "Remove type aliases, simplify hints, and express bounds in prose",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/347",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Based on #345 (merge that first).\r\n\r\nCloses #222.\r\nPartially addresses #233.\r\nPartially addresses #59.\r\n\r\nWe use Python's type hints to make APIs more self-documenting. However\r\nwe abuse hints in a couple of ways:\r\n\r\n1. We give aliases to primitive types, e.g., `Vec` for `list`.\r\n2. We try to express fixed-length arrays with hints, e.g.,\r\n   `bytes[Vdaf.NONCE_SIZE]`, but don't (and probably can't) enforce it.\r\n3. We use `Unsigned` for non-negative integers, but don't enforce it.\r\n\r\nThese abuses have lead to code rot. To address this, we remove the type\r\naliases altogether, simplify the type hints, and express bounds on\r\ntypes in prose. In some cases, the bounds are stricter than they were\r\nbefore.\r\n\r\nA few minor changes picked up along the way:\r\n\r\n- idpf_poplar.py: `packed_bits` -> `packed` for consistency with\r\n  `encoded` elsewhere.\r\n\r\n- vdaf_prio3.py: Remove `PRio3SumVecWithMultiproof.is_recommended()` as\r\n  it is not really used.\r\n\r\n- Declare `gen_rand()` to be a CSPRNG.",
+      "createdAt": "2024-06-06T00:01:59Z",
+      "updatedAt": "2024-06-06T00:33:10Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/101",
+      "baseRefOid": "d5b68bf09550981d42b30b98da15146d7847b242",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/222",
+      "headRefOid": "ba804ba2140afbb94d5f2d1e44b0a7a3deb4e1ed",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
