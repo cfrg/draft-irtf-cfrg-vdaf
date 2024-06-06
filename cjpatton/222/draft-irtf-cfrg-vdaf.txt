@@ -3840,7 +3840,7 @@ struct {
 
    This section specifies Poplar1, a VDAF for the following task.  Each
    Client holds a bit-string of length BITS and the Aggregators hold a
-   sequence of l-bit strings, where l <= BITS.  We will refer to the
+   sequence of L-bit strings, where L <= BITS.  We will refer to the
    latter as the set of "candidate prefixes".  The Aggregators' goal is
    to count how many measurements are prefixed by each candidate prefix.
 
@@ -4130,7 +4130,7 @@ struct {
 
 8.2.1.  Sharding
 
-   The Client's measurement is as an IDPF index, denoted alpha.  (See
+   The Client's measurement is an IDPF index, denoted alpha.  (See
    Section 8.1.1 for guidelines on index encoding.)  The programmed IDPF
    values are pairs of field elements (1, k) where each k is chosen at
    random.  This random value is used as part of the secure sketching
