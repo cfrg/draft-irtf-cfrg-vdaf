@@ -3616,6 +3616,115 @@ measurement is sharded. This is provided to the FLP by Prio3.
 | `Field`          | `Field128` ({{fields}})                         |
 {: title="Parameters of validity circuit Histogram."}
 
+### Prio3MultihotCountVec
+
+For this instance of Prio3, each measurement is a vector of ones and zeros,
+where the number of ones is bounded. This provides a functionality similar to
+Prio3Histogram except that more than one entry may be non-zero. This allows
+Prio3MultihotCountVec to be composed with a randomized response mechanism, like
+{{EPK14}}, for providing differential privacy. (For example, each Client would
+set each entry to one with some small probability.)
+
+Prio3MultihotCountVec uses XofTurboShake128 ({{xof-turboshake128}}) as its XOF.
+Its validity circuit, denoted `MultihotCountVec`, uses `Field128` ({{fields}})
+as its default finite field. It has three parameters: `length`, the number of
+of entries in the count vector; `max_weight`, the maximum number of non-zero
+entries (i.e., the weight must be at most `max_weight`); and `chunk_length`,
+used the same way as in {{prio3sumvec}} and {{prio3histogram}}.
+
+Validation works as follows. Let
+
+* `bits_for_weight = max_weight.bit_length()`
+* `offset = 2**bits_for_weight - 1 - max_weight`
+
+The Client reports the weight of the count vector by adding `offset` to it and
+bit-encoding the result. Observe that only a weight of at most `max_weight` can
+be encoded with `bits_for_weight` bits.
+
+The verifier checks that each entry of the encoded measurement is a bit (i.e.,
+either one or zero). It then decodes the reported weight and subtracts it from
+`offset + sum(count_vec)`, where `count_vec` is the count vector. The result is
+zero if and only if the reported weight is equal to the true weight.
+
+Encoding, truncation, and decoding are defined as follows:
+
+~~~
+def encode(self, measurement):
+    if len(measurement) != self.length:
+        raise ValueError('invalid Client measurement length')
+
+    # The first part is the vector of counters.
+    count_vec = list(map(self.Field, measurement))
+
+    # The second part is the reported weight.
+    weight_reported = sum(count_vec, self.Field(0))
+
+    encoded = []
+    encoded += count_vec
+    encoded += self.Field.encode_into_bit_vector(
+        (self.offset + weight_reported).as_unsigned(),
+        self.bits_for_weight)
+    return encoded
+
+def truncate(self, meas):
+    return meas[:self.length]
+
+def decode(self, output, _num_measurements):
+    return [bucket_count.as_unsigned() for bucket_count in output]
+~~~
+
+Circuit evaluation is defined as follows:
+
+~~~
+def eval(self, meas, joint_rand, num_shares):
+    # Check that each entry in the input vector is one or zero.
+    range_check = self.Field(0)
+    r = joint_rand[0]
+    r_power = r
+    shares_inv = self.Field(num_shares).inv()
+    for i in range(self.GADGET_CALLS[0]):
+        inputs = [None] * (2 * self.chunk_length)
+        for j in range(self.chunk_length):
+            index = i * self.chunk_length + j
+            if index < len(meas):
+                meas_elem = meas[index]
+            else:
+                meas_elem = self.Field(0)
+
+            inputs[j * 2] = r_power * meas_elem
+            inputs[j * 2 + 1] = meas_elem - shares_inv
+
+            r_power *= r
+
+        range_check += self.GADGETS[0].eval(self.Field, inputs)
+
+    # Check that the weight `offset` plus the sum of the counters
+    # is equal to the value claimed by the Client.
+    count_vec = meas[:self.length]
+    weight = sum(count_vec, self.Field(0))
+    weight_reported = \
+        self.Field.decode_from_bit_vector(meas[self.length:])
+    weight_check = self.offset*shares_inv + weight - \
+        weight_reported
+
+    out = joint_rand[1] * range_check + \
+        joint_rand[1] ** 2 * weight_check
+    return out
+~~~
+
+| Parameter        | Value                                           |
+|:-----------------|:------------------------------------------------|
+| `GADGETS`        | `[ParallelSum(Mul(), chunk_length)]`            |
+| `GADGET_CALLS`   | `[(length + bits_for_weight + chunk_length - 1) // chunk_length]` |
+| `MEAS_LEN`       | `length + bits_for_weight`                      |
+| `OUTPUT_LEN`     | `length`                                        |
+| `JOINT_RAND_LEN` | `2`                                             |
+| `Measurement`    | `list[int]`                                     |
+| `AggResult`      | `list[int]`                                     |
+| `Field`          | `Field128` ({{fields}})                         |
+{: title="Parameters of validity circuit MultihotCountVec."}
+
+
 # Poplar1 {#poplar1}
 
 This section specifies Poplar1, a VDAF for the following task. Each Client
@@ -4880,15 +4989,16 @@ broken for such a small field.
 A codepoint for each (V)DAF in this document is defined in the table below. Note
 that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 
-| Value                        | Scheme               | Type | Reference                |
-|:-----------------------------|:---------------------|:-----|:-------------------------|
-| `0x00000000`                 | Prio3Count         | VDAF | {{prio3count}}     |
-| `0x00000001`                 | Prio3Sum           | VDAF | {{prio3sum}}       |
-| `0x00000002`                 | Prio3SumVec        | VDAF | {{prio3sumvec}}    |
-| `0x00000003`                 | Prio3Histogram     | VDAF | {{prio3histogram}} |
-| `0x00000004` to `0x00000FFF` | reserved for Prio3 | VDAF | n/a                |
-| `0x00001000`                 | Poplar1            | VDAF | {{poplar1-inst}}   |
-| `0xFFFF0000` to `0xFFFFFFFF` | reserved           | n/a  | n/a                |
+| Value                        | Scheme                | Type | Reference                 |
+|:-----------------------------|:----------------------|:-----|:--------------------------|
+| `0x00000000`                 | Prio3Count            | VDAF | {{prio3count}}            |
+| `0x00000001`                 | Prio3Sum              | VDAF | {{prio3sum}}              |
+| `0x00000002`                 | Prio3SumVec           | VDAF | {{prio3sumvec}}           |
+| `0x00000003`                 | Prio3Histogram        | VDAF | {{prio3histogram}}        |
+| `0x00000004`                 | Prio3MultihotCountVec | VDAF | {{prio3multihotcountvec}} |
+| `0x00000005` to `0x00000FFF` | reserved for Prio3    | VDAF | n/a                       |
+| `0x00001000`                 | Poplar1               | VDAF | {{poplar1-inst}}          |
+| `0xFFFF0000` to `0xFFFFFFFF` | reserved              | n/a  | n/a                       |
 {: #codepoints title="Unique identifiers for (V)DAFs."}
 
 > TODO Add IANA considerations for the codepoints summarized in {{codepoints}}.
