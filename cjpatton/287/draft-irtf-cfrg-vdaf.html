@@ -6297,20 +6297,18 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
           <h4 id="name-prio3multihotcountvec">
 <a href="#section-7.4.5" class="section-number selfRef">7.4.5. </a><a href="#name-prio3multihotcountvec" class="section-name selfRef">Prio3MultihotCountVec</a>
           </h4>
-<p id="section-7.4.5-1">For this instance of Prio3, each measurement is a vector of ones and
-zeros, where the number of ones is is bounded. This provides a
-functionality similar to Prio3Histogram except that more than one
-entry may be set. This allows Prio3MultihotCountVec to be composed
-with a randomized respjonse mechanism, like <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing
-differential privacy. (For example, each Client would set each entry
-to one with some small probability.)<a href="#section-7.4.5-1" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-2">Prio3MultihotCountVec uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as
-its XOF. Its validity circuit, denoted <code>MultihotCountVec</code>, uses
-<code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>) as its finite field. It has three parameters:
-<code>length</code>, the number of of entries in the count vector; <code>max_weight</code>,
-the maximum weight of the vector (i.e., the number of non-zero
-entries); and <code>chunk_length</code>, which is used by by a circuit
-optimization described below. It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code>
+<p id="section-7.4.5-1">For this instance of Prio3, each measurement is a vector of ones and zeros,
+where the number of ones is bounded. This provides a functionality similar to
+Prio3Histogram except that more than one entry may be set. This allows
+Prio3MultihotCountVec to be composed with a randomized respjonse mechanism,
+like <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For example, each Client
+would set each entry to one with some small probability.)<a href="#section-7.4.5-1" class="pilcrow">¶</a></p>
+<p id="section-7.4.5-2">Prio3MultihotCountVec uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its XOF.
+Its validity circuit, denoted <code>MultihotCountVec</code>, uses <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)
+as its default finite field. It has three parameters: <code>length</code>, the number of
+of entries in the count vector; <code>max_weight</code>, the maximum weight of the vector
+(i.e., the number of non-zero entries); and <code>chunk_length</code>, which is used by by
+a circuit optimization described below. It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code>
 to an integer near the square root of <code>length</code> (see
 <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-3">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
@@ -6320,17 +6318,16 @@ def encode(self, measurement):
     if len(measurement) != self.length:
         raise ValueError('invalid Client measurement length')
 
-    # The first part is the vector entries themselves.
+    # The first part is the vector of counters.
     encoded = list(map(self.Field, measurement))
 
-    # The second part is the bit-encoded weight check.
+    # The second part is the bit-encoded, offset weight.
     offset_weight = self.offset + sum(encoded, self.Field(0))
     encoded += self.Field.encode_into_bit_vector(
         offset_weight.as_unsigned(), self.bits_for_weight)
     return encoded
 
 def truncate(self, meas):
-    # Return the first part only.
     return meas[:self.length]
 
 def decode(self, output, _num_measurements):
@@ -6367,7 +6364,7 @@ def eval(self, meas, joint_rand, num_shares):
 
         range_check += self.GADGETS[0].eval(self.Field, inputs)
 
-    # Check that `offset` plus the sum of the buckets is equal to
+    # Check that `offset` plus the sum of the counters is equal to
     # the value claimed by the Client.
     weight_check = self.offset * shares_inv
     weight_check += sum(meas[:self.length], self.Field(0))
