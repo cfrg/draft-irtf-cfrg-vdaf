@@ -57,7 +57,7 @@ class Idpf:
             - `alpha` in `range(2**BITS)`
             - `len(beta_inner) == Idpf.BITS - 1`
             - `len(beta_inner[level]) == Idpf.VALUE_LEN` for each `level` in
-              `range(Idpf.BITS)`
+              `range(Idpf.BITS - 1)`
             - `len(beta_leaf) == Idpf.VALUE_LEN`
             - `len(rand) == Idpf.RAND_SIZE`
         """
