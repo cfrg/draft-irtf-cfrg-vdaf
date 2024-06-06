@@ -13,21 +13,6 @@ TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
                                   'test_vec/{:02}'.format(VERSION))
 
 
-class Error(Exception):
-    """Base class for errors."""
-
-    def __init__(self, msg):
-        self.msg = msg
-
-
-# Errors
-ERR_ABORT = Error('algorithm aborted')
-ERR_DECODE = Error('decode failure')
-ERR_ENCODE = Error('encode failure')
-ERR_INPUT = Error('invalid input parameter')
-ERR_VERIFY = Error('verification of the user\'s input failed')
-
-
 def next_power_of_2(n):
     """Return the smallest power of 2 that is larger than or equal to n."""
     assert n > 0

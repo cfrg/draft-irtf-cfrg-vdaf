@@ -1,6 +1,6 @@
 import unittest
 
-from common import ERR_INPUT, next_power_of_2
+from common import next_power_of_2
 from field import Field64, Field96, Field128, poly_eval
 from flp import run_flp
 from flp_generic import (Count, FlpGeneric, Histogram, Mul, MultiHotHistogram,
@@ -28,13 +28,9 @@ class TestMultiGadget(Valid):
         return z
 
     def encode(self, measurement):
-        if measurement not in [0, 1]:
-            raise ERR_INPUT
         return [self.Field(measurement)]
 
     def truncate(self, meas):
-        if len(meas) != 1:
-            raise ERR_INPUT
         return meas
 
     def decode(self, output, _num_measurements):

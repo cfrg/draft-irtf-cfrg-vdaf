@@ -3,7 +3,7 @@
 import copy
 
 import field
-from common import ERR_ABORT, ERR_INPUT, next_power_of_2
+from common import next_power_of_2
 from field import poly_eval, poly_interp, poly_mul, poly_strip
 from flp import Flp
 
@@ -27,14 +27,14 @@ class Gadget:
 
     def check_gadget_eval(self, inp):
         if len(inp) != self.ARITY:
-            raise ERR_INPUT
+            raise ValueError('input length must equal the gadget arity')
 
     def check_gadget_eval_poly(self, inp_poly):
         if len(inp_poly) != self.ARITY:
-            raise ERR_INPUT
+            raise ValueError('number of inputs must equal the gadget arity')
         for j in range(len(inp_poly)):
             if len(inp_poly[j]) != len(inp_poly[0]):
-                raise ERR_INPUT
+                raise ValueError('each input must have the same length')
 
 
 class Valid:
@@ -138,9 +138,9 @@ class Valid:
 
     def check_valid_eval(self, meas, joint_rand):
         if len(meas) != self.MEAS_LEN:
-            raise ERR_INPUT
+            raise ValueError('incorrect measurement length')
         if len(joint_rand) != self.JOINT_RAND_LEN:
-            raise ERR_INPUT
+            raise ValueError('incorrect joint randomness length')
 
     @classmethod
     def with_field(cls, field: field.FftField):
@@ -173,7 +173,7 @@ class ProveGadget:
 
 def prove_wrapped(valid, prove_rand):
     if len(prove_rand) != valid.prove_rand_len():
-        raise ERR_INPUT
+        raise ValueError('incorrect proof length')
 
     wrapped_gadgets = []
     for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
@@ -210,7 +210,7 @@ class QueryGadget:
 
 def query_wrapped(valid, proof):
     if len(proof) != valid.proof_len():
-        raise ERR_INPUT
+        raise ValueError('incorrect proof length')
 
     wrapped_gadgets = []
     for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
@@ -292,7 +292,7 @@ class FlpGeneric(Flp):
         v = valid.eval(meas, joint_rand, num_shares)
 
         if len(query_rand) != self.Valid.query_rand_len():
-            raise ERR_INPUT
+            raise ValueError('incorrect query randomness length')
 
         # Construct the verifier message.
         verifier = [v]
@@ -305,7 +305,7 @@ class FlpGeneric(Flp):
             # constructing the gadget polynomial. Using such a point would leak
             # an output of the gadget to the verifier.
             if t ** P == self.Field(1):
-                raise ERR_ABORT
+                raise ValueError('query randomness contains a root of unity')
 
             # Compute the well-formedness test for the gadget polynomial.
             x = []
@@ -323,7 +323,7 @@ class FlpGeneric(Flp):
 
     def decide(self, verifier):
         if len(verifier) != self.Valid.verifier_len():
-            raise ERR_INPUT
+            raise ValueError('incorrect verifier length')
 
         # Check the output of the validity circuit.
         v, verifier = verifier[0], verifier[1:]
@@ -519,12 +519,12 @@ class Count(Valid):
 
     def encode(self, measurement):
         if measurement not in [0, 1]:
-            raise ERR_INPUT
+            raise ValueError('measurement out of range')
         return [self.Field(measurement)]
 
     def truncate(self, meas):
         if len(meas) != 1:
-            raise ERR_INPUT
+            raise ValueError('incorrect encoded measurement length')
         return meas
 
     def decode(self, output, _num_measurements):
@@ -567,7 +567,7 @@ class Sum(Valid):
 
     def encode(self, measurement):
         if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
-            raise ERR_INPUT
+            raise ValueError('measurement out of range')
 
         return self.Field.encode_into_bit_vector(measurement,
                                                  self.MEAS_LEN)
@@ -871,12 +871,12 @@ class SumVec(Valid):
 
     def encode(self, measurement):
         if len(measurement) != self.length:
-            raise ERR_INPUT
+            raise ValueError('incorrect measurement length')
 
         encoded = []
         for val in measurement:
-            if val < 0 or val >= 2 ** self.bits:
-                raise ERR_INPUT
+            if val not in range(2**self.bits):
+                raise ValueError('entry of measurement vector is out of range')
 
             encoded += self.Field.encode_into_bit_vector(val, self.bits)
         return encoded
