@@ -3840,7 +3840,7 @@ def decode(self, output, _num_measurements):
 7.4.5.  Prio3MultihotCountVec
 
    For this instance of Prio3, each measurement is a vector of ones and
-   zeros, where the number of ones is is bounded.  This provides a
+   zeros, where the number of ones is bounded.  This provides a
    functionality similar to Prio3Histogram except that more than one
    entry may be set.  This allows Prio3MultihotCountVec to be composed
    with a randomized respjonse mechanism, like [EPK14], for providing
@@ -3849,12 +3849,12 @@ def decode(self, output, _num_measurements):
 
    Prio3MultihotCountVec uses XofTurboShake128 (Section 6.2.1) as its
    XOF.  Its validity circuit, denoted MultihotCountVec, uses Field128
-   (Table 3) as its finite field.  It has three parameters: length, the
-   number of of entries in the count vector; max_weight, the maximum
-   weight of the vector (i.e., the number of non-zero entries); and
-   chunk_length, which is used by by a circuit optimization described
-   below.  It is RECOMMENDED to set chunk_length to an integer near the
-   square root of length (see Section 7.4.3.1).
+   (Table 3) as its default finite field.  It has three parameters:
+   length, the number of of entries in the count vector; max_weight, the
+   maximum weight of the vector (i.e., the number of non-zero entries);
+   and chunk_length, which is used by by a circuit optimization
+   described below.  It is RECOMMENDED to set chunk_length to an integer
+   near the square root of length (see Section 7.4.3.1).
 
    Encoding, truncation, and decoding are defined as follows:
 
@@ -3862,17 +3862,16 @@ def decode(self, output, _num_measurements):
        if len(measurement) != self.length:
            raise ValueError('invalid Client measurement length')
 
-       # The first part is the vector entries themselves.
+       # The first part is the vector of counters.
        encoded = list(map(self.Field, measurement))
 
-       # The second part is the bit-encoded weight check.
+       # The second part is the bit-encoded, offset weight.
        offset_weight = self.offset + sum(encoded, self.Field(0))
        encoded += self.Field.encode_into_bit_vector(
            offset_weight.as_unsigned(), self.bits_for_weight)
        return encoded
 
    def truncate(self, meas):
-       # Return the first part only.
        return meas[:self.length]
 
    def decode(self, output, _num_measurements):
@@ -3907,7 +3906,7 @@ def eval(self, meas, joint_rand, num_shares):
 
         range_check += self.GADGETS[0].eval(self.Field, inputs)
 
-    # Check that `offset` plus the sum of the buckets is equal to
+    # Check that `offset` plus the sum of the counters is equal to
     # the value claimed by the Client.
     weight_check = self.offset * shares_inv
     weight_check += sum(meas[:self.length], self.Field(0))
