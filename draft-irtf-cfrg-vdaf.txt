@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 15 November 2024                                           ISRG
+Expires: 8 December 2024                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             14 May 2024
+                                                             6 June 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 November 2024.
+   This Internet-Draft will expire on 8 December 2024.
 
 Copyright Notice
 
@@ -124,8 +124,9 @@ Table of Contents
        7.4.4.  Prio3Histogram
    8.  Poplar1
      8.1.  Incremental Distributed Point Functions (IDPFs)
+       8.1.1.  Encoding inputs as indices
      8.2.  Construction
-       8.2.1.  Client
+       8.2.1.  Sharding
        8.2.2.  Preparation
        8.2.3.  Validity of Aggregation Parameters
        8.2.4.  Aggregation
@@ -3761,10 +3762,10 @@ struct {
 8.  Poplar1
 
    This section specifies Poplar1, a VDAF for the following task.  Each
-   Client holds a string of length BITS and the Aggregators hold a set
-   of l-bit strings, where l <= BITS.  We will refer to the latter as
-   the set of "candidate prefixes".  The Aggregators' goal is to count
-   how many measurements are prefixed by each candidate prefix.
+   Client holds a bit-string of length BITS and the Aggregators hold a
+   sequence of L-bit strings, where L <= BITS.  We will refer to the
+   latter as the set of "candidate prefixes".  The Aggregators' goal is
+   to count how many measurements are prefixed by each candidate prefix.
 
    This functionality is the core component of the Poplar protocol
    [BBCGGI21], which was designed to compute the heavy hitters over a
@@ -3832,22 +3833,22 @@ struct {
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
-   An IDPF is defined over a domain of size 2^BITS, where BITS is
-   constant defined by the IDPF.  Indexes into the IDPF tree are encoded
-   as integers in range [0, 2^BITS).  The Client specifies an index
-   alpha and a vector of values beta, one for each "level" L in range
-   [0, BITS).  The key generation algorithm generates one IDPF "key" for
-   each Aggregator.  When evaluated at level L and index 0 <= prefix <
-   2^L, each IDPF key returns an additive share of beta[L] if prefix is
-   the L-bit prefix of alpha and shares of zero otherwise.
+   An IDPF is defined over a domain of size 2^BITS, where BITS is a
+   constant.  Indices into the IDPF tree are encoded as integers in
+   range [0, 2^BITS).  (In Poplar1, each Client's bit string is encoded
+   as an index; see Section 8.1.1 for details.)  The Client specifies an
+   index alpha and a vector of values beta, one for each "level" L in
+   range [0, BITS).  The key generation algorithm generates one IDPF
+   "key" for each Aggregator.  When evaluated at level L and index 0 <=
+   prefix < 2^L, each IDPF key returns an additive share of beta[L] if
+   prefix is the L-bit prefix of alpha and shares of zero otherwise.
 
    An index x is defined to be a prefix of another index y as follows.
-   Let LSB(x, N) denote the least significant N bits of positive integer
-   x.  By definition, a positive integer 0 <= x < 2^L is said to be the
-   length-L prefix of positive integer 0 <= y < 2^BITS if LSB(x, L) is
-   equal to the most significant L bits of LSB(y, BITS), For example, 6
-   (110 in binary) is the length-3 prefix of 25 (11001), but 7 (111) is
-   not.
+   Let LSB(x, L) denote the least significant L bits of positive integer
+   x.  A positive integer 0 <= x < 2^L is defined to be the length-L
+   prefix of positive integer 0 <= y < 2^BITS if LSB(x, L) is equal to
+   the most significant L bits of LSB(y, BITS), For example, 6 (110 in
+   binary) is the length-3 prefix of 25 (11001), but 7 (111) is not.
 
    Each of the programmed points beta is a vector of elements of some
    finite field.  We distinguish two types of fields: One for inner
@@ -3944,6 +3945,25 @@ struct {
 
          Table 13: Constants and types defined by a concrete IDPF.
 
+8.1.1.  Encoding inputs as indices
+
+   How data are represented as IDPF indices is up to the application.
+   When the inputs are fixed-length byte strings, the most natural
+   choice of encoder is from_be_bytes().  This ensures that, when a
+   string is a prefix of another, so too is its index.  (Index prefixes
+   are defined in Section 8.1).  For example,
+
+   from_be_bytes(b"\x01\x02") == 0x0102
+
+   is a prefix of
+
+   from_be_bytes(b"\x01\x02\x03") == 0x010203
+
+   When the inputs are variable length, it is necessary to pad each
+   input to some fixed length.  Further, the padding scheme must be non-
+   ambiguous.  For example, each input could be padded with b"\x01"
+   followed by as many b"\x00" bytes as needed.
+
 8.2.  Construction
 
    This section specifies Poplar1, an implementation of the Vdaf
@@ -3981,7 +4001,7 @@ struct {
      +-----------------+--------------------------------------------+
      | AggShare        | Idpf.FieldVec                              |
      +-----------------+--------------------------------------------+
-     | AggResult       | Vec[Unsigned]                              |
+     | AggResult       | list[Unsigned]                             |
      +-----------------+--------------------------------------------+
      | PrepState       | tuple[bytes, Unsigned, Idpf.FieldVec]      |
      +-----------------+--------------------------------------------+
@@ -4006,17 +4026,17 @@ struct {
 
                     Table 15: Constants used by Poplar1.
 
-8.2.1.  Client
+8.2.1.  Sharding
 
-   The Client's measurement is interpreted as an IDPF index, denoted
-   alpha.  The programmed IDPF values are pairs of field elements (1, k)
-   where each k is chosen at random.  This random value is used as part
-   of the secure sketching protocol of [BBCGGI21], Appendix C.4.  After
-   evaluating their IDPF key shares on a given sequence of candidate
-   prefixes, the sketching protocol is used by the Aggregators to verify
-   that they hold shares of a one-hot vector.  In addition, for each
-   level of the tree, the prover generates random elements a, b, and c
-   and computes
+   The Client's measurement is an IDPF index, denoted alpha.  (See
+   Section 8.1.1 for guidelines on index encoding.)  The programmed IDPF
+   values are pairs of field elements (1, k) where each k is chosen at
+   random.  This random value is used as part of the secure sketching
+   protocol of [BBCGGI21], Appendix C.4.  After evaluating their IDPF
+   key shares on a given sequence of candidate prefixes, the sketching
+   protocol is used by the Aggregators to verify that they hold shares
+   of a one-hot vector.  In addition, for each level of the tree, the
+   prover generates random elements a, b, and c and computes
 
        A = -2*a + k
        B = a^2 + b - k*a + c
@@ -5097,9 +5117,9 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
               C. A. Wood, "Distributed Aggregation Protocol for Privacy
               Preserving Measurement", Work in Progress, Internet-Draft,
-              draft-ietf-ppm-dap-10, 29 February 2024,
+              draft-ietf-ppm-dap-11, 21 May 2024,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              10>.
+              11>.
 
    [Dou02]    Douceur, J., "The Sybil Attack", IPTPS 2002 , 2002,
               <https://doi.org/10.1007/3-540-45748-8_24>.
