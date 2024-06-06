@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from sage.all import GF, PolynomialRing
 
-from common import ERR_DECODE, from_le_bytes, to_le_bytes
+from common import from_le_bytes, to_le_bytes
 
 
 class Field:
@@ -50,14 +50,16 @@ class Field:
         """
         L = Field.ENCODED_SIZE
         if len(encoded) % L != 0:
-            raise ERR_DECODE
+            raise ValueError(
+                'input length must be a multiple of the size of an '
+                'encoded field element')
 
         vec = []
         for i in range(0, len(encoded), L):
             encoded_x = encoded[i:i+L]
             x = from_le_bytes(encoded_x)
             if x >= Field.MODULUS:
-                raise ERR_DECODE  # Integer is larger than modulus
+                raise ValueError('modulus overflow')
             vec.append(Field(x))
         return vec
 

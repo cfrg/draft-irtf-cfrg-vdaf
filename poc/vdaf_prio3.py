@@ -5,8 +5,7 @@ from typing import Optional, Union
 import flp
 import flp_generic
 import xof
-from common import (ERR_INPUT, ERR_VERIFY, byte, concat, front, vec_add,
-                    vec_sub, zeros)
+from common import byte, concat, front, vec_add, vec_sub, zeros
 from vdaf import Vdaf
 
 USAGE_MEAS_SHARE = 1
@@ -117,10 +116,10 @@ class Prio3(Vdaf):
         k_joint_rand = prep_msg
         (out_share, k_corrected_joint_rand) = prep
 
-        # If joint randomness was used, check that the value computed by the
-        # Aggregators matches the value indicated by the Client.
+        # If joint randomness was used, check that the value computed by
+        # the Aggregators matches the value indicated by the Client.
         if k_joint_rand != k_corrected_joint_rand:
-            raise ERR_VERIFY  # joint randomness check failed
+            raise ValueError('joint randomness check failed')
 
         return out_share
 
@@ -139,7 +138,7 @@ class Prio3(Vdaf):
         for _ in range(Prio3.PROOFS):
             verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
             if not Prio3.Flp.decide(verifier):
-                raise ERR_VERIFY  # proof verifier check failed
+                raise ValueError('proof verifier check failed')
 
         # Combine the joint randomness parts computed by the
         # Aggregators into the true joint randomness seed. This is
@@ -363,8 +362,8 @@ class Prio3(Vdaf):
     def with_shares(Prio3, num_shares):
         assert Prio3.Xof is not None
         assert Prio3.Flp is not None
-        if num_shares < 2 or num_shares > 256:
-            raise ERR_INPUT
+        if num_shares not in range(2, 256):
+            raise ValueError('invalid number of shares')
         rand_size = (1+2*(num_shares-1)) * Prio3.Xof.SEED_SIZE
         if Prio3.Flp.JOINT_RAND_LEN > 0:
             rand_size += num_shares * Prio3.Xof.SEED_SIZE

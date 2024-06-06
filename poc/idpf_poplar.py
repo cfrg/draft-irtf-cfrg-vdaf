@@ -3,8 +3,7 @@
 import itertools
 
 import field
-from common import (ERR_DECODE, ERR_INPUT, format_dst, vec_add, vec_neg,
-                    vec_sub, xor)
+from common import format_dst, vec_add, vec_neg, vec_sub, xor
 from field import Field2
 from idpf import Idpf
 from xof import XofFixedKeyAes128
@@ -30,12 +29,12 @@ class IdpfPoplar(Idpf):
 
     @classmethod
     def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
-        if alpha >= 2 ** IdpfPoplar.BITS:
-            raise ERR_INPUT  # alpha too long
+        if alpha not in range(2**IdpfPoplar.BITS):
+            raise ValueError("alpha out of range")
         if len(beta_inner) != IdpfPoplar.BITS - 1:
-            raise ERR_INPUT  # beta_inner vector is the wrong size
+            raise ValueError("incorrect beta_inner length")
         if len(rand) != IdpfPoplar.RAND_SIZE:
-            raise ERR_INPUT  # unexpected length for random input
+            raise ValueError("incorrect rand size")
 
         init_seed = [
             rand[:XofFixedKeyAes128.SEED_SIZE],
@@ -69,7 +68,7 @@ class IdpfPoplar(Idpf):
             b = beta_inner[level] if level < IdpfPoplar.BITS-1 \
                 else beta_leaf
             if len(b) != IdpfPoplar.VALUE_LEN:
-                raise ERR_INPUT  # beta too long or too short
+                raise ValueError("length of beta must match the value length")
 
             w_cw = vec_add(vec_sub(b, w0), w1)
             # Implementation note: Here we negate the correction word if
@@ -87,18 +86,18 @@ class IdpfPoplar(Idpf):
     @classmethod
     def eval(IdpfPoplar, agg_id, public_share, init_seed,
              level, prefixes, binder):
-        if agg_id >= IdpfPoplar.SHARES:
-            raise ERR_INPUT  # invalid aggregator ID
-        if level >= IdpfPoplar.BITS:
-            raise ERR_INPUT  # level too deep
+        if agg_id not in range(IdpfPoplar.SHARES):
+            raise ValueError('aggregator id out of range')
+        if level not in range(IdpfPoplar.BITS):
+            raise ValueError('level out of range')
         if len(set(prefixes)) != len(prefixes):
-            raise ERR_INPUT  # candidate prefixes are non-unique
+            raise ValueError('prefixes must be unique')
 
         correction_words = IdpfPoplar.decode_public_share(public_share)
         out_share = []
         for prefix in prefixes:
-            if prefix >= 2 ** (level+1):
-                raise ERR_INPUT  # prefix too long
+            if prefix not in range(2**(level+1)):
+                raise ValueError('prefix out of range')
 
             # The Aggregator's output share is the value of a node of
             # the IDPF tree at the given `level`. The node's value is
@@ -223,7 +222,7 @@ class IdpfPoplar(Idpf):
             w_cw = Field.decode_vec(encoded_w_cw)
             correction_words.append((seed_cw, ctrl_cw, w_cw))
         if len(encoded) != 0:
-            raise ERR_DECODE
+            raise ValueError('trailing bytes')
         return correction_words
 
     @classmethod
@@ -275,5 +274,5 @@ def unpack_bits(packed: bytes, length: int) -> list[Field2]:
         (length + 7) % 8 + 1
     )
     if (length + 7) // 8 != len(packed) or leftover_bits != 0:
-        raise ERR_DECODE
+        raise ValueError('trailing bits')
     return bits

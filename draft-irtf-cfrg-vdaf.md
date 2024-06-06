@@ -1711,14 +1711,16 @@ def decode_vec(Field, encoded: bytes) -> list[Field]:
     """
     L = Field.ENCODED_SIZE
     if len(encoded) % L != 0:
-        raise ERR_DECODE
+        raise ValueError(
+            'input length must be a multiple of the size of an '
+            'encoded field element')
 
     vec = []
     for i in range(0, len(encoded), L):
         encoded_x = encoded[i:i+L]
         x = from_le_bytes(encoded_x)
         if x >= Field.MODULUS:
-            raise ERR_DECODE  # Integer is larger than modulus
+            raise ValueError('modulus overflow')
         vec.append(Field(x))
     return vec
 ~~~
@@ -2597,39 +2599,39 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
   return (prep_state, prep_share)
 
 def prep_next(Prio3, prep, prep_msg):
-  k_joint_rand = prep_msg
-  (out_share, k_corrected_joint_rand) = prep
+    k_joint_rand = prep_msg
+    (out_share, k_corrected_joint_rand) = prep
 
-  # If joint randomness was used, check that the value computed by the
-  # Aggregators matches the value indicated by the Client.
-  if k_joint_rand != k_corrected_joint_rand:
-      raise ERR_VERIFY  # joint randomness check failed
+    # If joint randomness was used, check that the value computed by
+    # the Aggregators matches the value indicated by the Client.
+    if k_joint_rand != k_corrected_joint_rand:
+        raise ValueError('joint randomness check failed')
 
-  return out_share
+    return out_share
 
 def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
-  # Unshard the verifier shares into the verifier message.
-  verifiers = Prio3.Flp.Field.zeros(
-      Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS)
-  k_joint_rand_parts = []
-  for (verifiers_share, k_joint_rand_part) in prep_shares:
-      verifiers = vec_add(verifiers, verifiers_share)
-      if Prio3.Flp.JOINT_RAND_LEN > 0:
-          k_joint_rand_parts.append(k_joint_rand_part)
+    # Unshard the verifier shares into the verifier message.
+    verifiers = Prio3.Flp.Field.zeros(
+        Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS)
+    k_joint_rand_parts = []
+    for (verifiers_share, k_joint_rand_part) in prep_shares:
+        verifiers = vec_add(verifiers, verifiers_share)
+        if Prio3.Flp.JOINT_RAND_LEN > 0:
+            k_joint_rand_parts.append(k_joint_rand_part)
 
-  # Verify that each proof is well-formed and the input is valid
-  for _ in range(Prio3.PROOFS):
-      verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
-      if not Prio3.Flp.decide(verifier):
-          raise ERR_VERIFY  # proof verifier check failed
+    # Verify that each proof is well-formed and input is valid
+    for _ in range(Prio3.PROOFS):
+        verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
+        if not Prio3.Flp.decide(verifier):
+            raise ValueError('proof verifier check failed')
 
-  # Combine the joint randomness parts computed by the
-  # Aggregators into the true joint randomness seed. This is
-  # used in the last step.
-  k_joint_rand = None
-  if Prio3.Flp.JOINT_RAND_LEN > 0:
-      k_joint_rand = Prio3.joint_rand_seed(k_joint_rand_parts)
-  return k_joint_rand
+    # Combine the joint randomness parts computed by the
+    # Aggregators into the true joint randomness seed. This is
+    # used in the last step.
+    k_joint_rand = None
+    if Prio3.Flp.JOINT_RAND_LEN > 0:
+        k_joint_rand = Prio3.joint_rand_seed(k_joint_rand_parts)
+    return k_joint_rand
 ~~~
 {: #prio3-prep-state title="Preparation state for Prio3."}
 
@@ -3315,7 +3317,7 @@ summand:
 ~~~
 def encode(self, measurement):
     if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
-        raise ERR_INPUT
+        raise ValueError('measurement out of range')
 
     return self.Field.encode_into_bit_vector(measurement,
                                              self.MEAS_LEN)
@@ -3381,12 +3383,12 @@ measurement vector's elements, consecutively, in LSB to MSB order:
 ~~~
 def encode(self, measurement: list[int]):
     if len(measurement) != self.length:
-        raise ERR_INPUT
+        raise ValueError('incorrect measurement length')
 
     encoded = []
     for val in measurement:
-        if 0 > val or val >= 2 ** self.bits:
-            raise ERR_INPUT
+        if val not in range(2**self.bits):
+            raise ValueError('entry of measurement vector is out of range')
 
         encoded += self.Field.encode_into_bit_vector(val, self.bits)
     return encoded
@@ -3851,7 +3853,7 @@ def shard(Poplar1, measurement, nonce, rand):
     # Split the random input into random input for IDPF key
     # generation, correlated randomness, and sharding.
     if len(rand) != Poplar1.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random input
+        raise ValueError('incorrect rand size')
     idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
     seeds = [rand[i:i+l] for i in range(0,3*l,l)]
     corr_seed, seeds = front(2, seeds)
@@ -3974,7 +3976,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # lexicographic order.
     for i in range(1,len(prefixes)):
         if prefixes[i-1] >= prefixes[i]:
-            raise ERR_INPUT # out-of-order prefix
+            raise ValueError('out of order prefix')
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = Poplar1.Idpf.eval(
@@ -4031,7 +4033,7 @@ def prep_next(Poplar1, prep_state, prep_msg):
         if prev_sketch == None:
             prev_sketch = Field.zeros(3)
         elif len(prev_sketch) != 3:
-            raise ERR_INPUT  # prep message malformed
+            raise ValueError('incorrect sketch length')
         (A_share, B_share, agg_id), prep_mem = \
             prep_mem[:3], prep_mem[3:]
         sketch_share = [
@@ -4048,13 +4050,13 @@ def prep_next(Poplar1, prep_state, prep_msg):
         if prev_sketch == None:
             return prep_mem  # Output shares
         else:
-            raise ERR_INPUT  # prep message malformed
+            raise ValueError('invalid prep message')
 
-    raise ERR_INPUT  # unexpected input
+    raise ValueError('invalid prep state')
 
 def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
     if len(prep_shares) != 2:
-        raise ERR_INPUT  # unexpected number of prep shares
+        ValueError('incorrect number of prep shares')
     (level, _) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     sketch = vec_add(prep_shares[0], prep_shares[1])
@@ -4066,9 +4068,9 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
             # denote a successful sketch verification.
             return None
         else:
-            raise ERR_VERIFY  # sketch verification failed
+            raise ValueError('sketch verification failed')
     else:
-        raise ERR_INPUT  # unexpected input length
+        raise ValueError('incorrect sketch length')
 ~~~
 {: #poplar1-prep-state title="Preparation state for Poplar1."}
 
@@ -4287,10 +4289,10 @@ The aggregation parameter is encoded as follows:
 
 ~~~
 def encode_agg_param(Poplar1, (level, prefixes)):
-    if level > 2 ** 16 - 1:
-        raise ERR_INPUT # level too deep
-    if len(prefixes) > 2 ** 32 - 1:
-        raise ERR_INPUT # too many prefixes
+    if level not in range(2**16):
+        raise ValueError('level out of range')
+    if len(prefixes) not in range(2**32):
+        raise ValueError('number of prefixes out of range')
     encoded = bytes()
     encoded += to_be_bytes(level, 2)
     encoded += to_be_bytes(len(prefixes), 4)
@@ -4314,7 +4316,7 @@ def decode_agg_param(Poplar1, encoded):
     for i in range(prefix_count):
         prefixes.append(packed >> ((level+1) * i) & m)
     if len(encoded) != 0:
-        raise ERR_INPUT
+        raise ValueError('trailing bytes')
     return (level, tuple(prefixes))
 ~~~
 
@@ -4363,12 +4365,12 @@ field `GF(2)`.
 
 ~~~
 def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
-    if alpha >= 2 ** IdpfPoplar.BITS:
-        raise ERR_INPUT # alpha too long
+    if alpha not in range(2**IdpfPoplar.BITS):
+        raise ValueError("alpha out of range")
     if len(beta_inner) != IdpfPoplar.BITS - 1:
-        raise ERR_INPUT # beta_inner vector is the wrong size
+        raise ValueError("incorrect beta_inner length")
     if len(rand) != IdpfPoplar.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random input
+        raise ValueError("incorrect rand size")
 
     init_seed = [
         rand[:XofFixedKeyAes128.SEED_SIZE],
@@ -4400,9 +4402,9 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
         ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
         b = beta_inner[level] if level < IdpfPoplar.BITS-1 \
-                else beta_leaf
+            else beta_leaf
         if len(b) != IdpfPoplar.VALUE_LEN:
-            raise ERR_INPUT # beta too long or too short
+            raise ValueError("length of beta must match the value length")
 
         w_cw = vec_add(vec_sub(b, w0), w1)
         # Implementation note: Here we negate the correction word if
@@ -4430,18 +4432,18 @@ functions `extend()`, `convert()`, and `decode_public_share()` defined in
 ~~~
 def eval(IdpfPoplar, agg_id, public_share, init_seed,
          level, prefixes, binder):
-    if agg_id >= IdpfPoplar.SHARES:
-        raise ERR_INPUT # invalid aggregator ID
-    if level >= IdpfPoplar.BITS:
-        raise ERR_INPUT # level too deep
+    if agg_id not in range(IdpfPoplar.SHARES):
+        raise ValueError('aggregator id out of range')
+    if level not in range(IdpfPoplar.BITS):
+        raise ValueError('level out of range')
     if len(set(prefixes)) != len(prefixes):
-        raise ERR_INPUT # candidate prefixes are non-unique
+        raise ValueError('prefixes must be unique')
 
     correction_words = IdpfPoplar.decode_public_share(public_share)
     out_share = []
     for prefix in prefixes:
-        if prefix >= 2 ** (level+1):
-            raise ERR_INPUT # prefix too long
+        if prefix not in range(2**(level+1)):
+            raise ValueError('prefix out of range')
 
         # The Aggregator's output share is the value of a node of
         # the IDPF tree at the given `level`. The node's value is
@@ -4566,7 +4568,7 @@ def decode_public_share(IdpfPoplar, encoded):
         w_cw = Field.decode_vec(encoded_w_cw)
         correction_words.append((seed_cw, ctrl_cw, w_cw))
     if len(encoded) != 0:
-        raise ERR_DECODE
+        raise ValueError('trailing bytes')
     return correction_words
 ~~~
 {: #idpf-poplar-helpers title="Helper functions for IdpfPoplar."}

@@ -1,7 +1,6 @@
 import unittest
 from copy import deepcopy
 
-from common import ERR_ENCODE
 from field import Field128
 from flp import Flp, run_flp
 
@@ -25,8 +24,6 @@ class FlpTest(Flp):
     meas_range = range(5)
 
     def encode(self, measurement):
-        if measurement not in self.meas_range:
-            raise ERR_ENCODE
         return [self.Field(measurement)] * 2
 
     def prove(self, meas, prove_rand, joint_rand):
