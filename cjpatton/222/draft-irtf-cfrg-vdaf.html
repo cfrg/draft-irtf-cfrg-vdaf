@@ -6300,7 +6300,7 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
       </h2>
 <p id="section-8-1">This section specifies Poplar1, a VDAF for the following task. Each Client
 holds a bit-string of length <code>BITS</code> and the Aggregators hold a sequence of
-<code>l</code>-bit strings, where <code>l &lt;= BITS</code>. We will refer to the latter as the set of
+<code>L</code>-bit strings, where <code>L &lt;= BITS</code>. We will refer to the latter as the set of
 "candidate prefixes". The Aggregators' goal is to count how many measurements
 are prefixed by each candidate prefix.<a href="#section-8-1" class="pilcrow">¶</a></p>
 <p id="section-8-2">This functionality is the core component of the Poplar protocol <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>,
@@ -6753,7 +6753,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
           <h4 id="name-sharding-4">
 <a href="#section-8.2.1" class="section-number selfRef">8.2.1. </a><a href="#name-sharding-4" class="section-name selfRef">Sharding</a>
           </h4>
-<p id="section-8.2.1-1">The Client's measurement is as an IDPF index, denoted <code>alpha</code>. (See
+<p id="section-8.2.1-1">The Client's measurement is an IDPF index, denoted <code>alpha</code>. (See
 <a href="#poplar1-idpf-index-encoding" class="auto internal xref">Section 8.1.1</a> for guidelines on index encoding.) The
 programmed IDPF values are pairs of field elements <code>(1, k)</code> where each <code>k</code> is
 chosen at random. This random value is used as part of the secure sketching
