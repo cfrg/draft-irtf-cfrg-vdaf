@@ -24,8 +24,12 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Install dependencies
-      run: sage --pip install pycryptodomex
+      run: sage --pip install pycryptodomex mypy
 
     - name: Run tests
       working-directory: poc
       run: sage -python -m unittest
+
+    - name: Enforce type hints
+      working-directory: poc
+      run: sage -python -m mypy xof.py field.py
