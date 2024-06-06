@@ -1786,33 +1786,35 @@ Table of Contents
    vector of field elements as a byte string and another for decoding a
    vector of field elements.
 
-def encode_vec(Field, vec: list[Field]) -> bytes:
-    """
-    Encode a vector of field elements `vec` as a byte string.
-    """
-    encoded = bytes()
-    for x in vec:
-        encoded += to_le_bytes(x.as_unsigned(), Field.ENCODED_SIZE)
-    return encoded
+   def encode_vec(Field, vec: list[Field]) -> bytes:
+       """
+       Encode a vector of field elements `vec` as a byte string.
+       """
+       encoded = bytes()
+       for x in vec:
+           encoded += to_le_bytes(x.as_unsigned(), Field.ENCODED_SIZE)
+       return encoded
 
-def decode_vec(Field, encoded: bytes) -> list[Field]:
-    """
-    Parse a vector of field elements from `encoded`.
-    """
-    L = Field.ENCODED_SIZE
-    if len(encoded) % L != 0:
-        raise ValueError('input length must be a multiple of the field size')
+   def decode_vec(Field, encoded: bytes) -> list[Field]:
+       """
+       Parse a vector of field elements from `encoded`.
+       """
+       L = Field.ENCODED_SIZE
+       if len(encoded) % L != 0:
+           raise ValueError(
+               'input length must be a multiple of the size of an'
+               'encoded field element')
 
-    vec = []
-    for i in range(0, len(encoded), L):
-        encoded_x = encoded[i:i+L]
-        x = from_le_bytes(encoded_x)
-        if x >= Field.MODULUS:
-            raise ValueError('modulus overflow')
-        vec.append(Field(x))
-    return vec
+       vec = []
+       for i in range(0, len(encoded), L):
+           encoded_x = encoded[i:i+L]
+           x = from_le_bytes(encoded_x)
+           if x >= Field.MODULUS:
+               raise ValueError('modulus overflow')
+           vec.append(Field(x))
+       return vec
 
-          Figure 9: Derived class methods for finite fields.
+             Figure 9: Derived class methods for finite fields.
 
    Finally, Field implements the following methods for representing a
    value as a sequence of field elements, each of which represents a bit
@@ -4368,9 +4370,9 @@ def decode(self, output, _num_measurements):
               # denote a successful sketch verification.
               return None
           else:
-              raise ValueError('invalid prep message')
+              raise ValueError('sketch verification failed')
       else:
-          raise ValueError('invalid prep state')
+          raise ValueError('incorrect sketch length')
 
                 Figure 24: Preparation state for Poplar1.
 
@@ -4565,9 +4567,9 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
       it to test vectors.
 
    def encode_agg_param(Poplar1, (level, prefixes)):
-       if level not in range(2**16 - 1):
+       if level not in range(2**16):
            raise ValueError('level out of range')
-       if len(prefixes) not in range(2**32 - 1):
+       if len(prefixes) not in range(2**32):
            raise ValueError('number of prefixes out of range')
        encoded = bytes()
        encoded += to_be_bytes(level, 2)
