@@ -592,7 +592,6 @@ class Prio3MultiHotHistogram(Prio3):
         Pre-conditions:
 
             - `length > 0`
-            - `bits > 0`
             - `max_count > 0`
             - `chunk_length > 0`
         """
