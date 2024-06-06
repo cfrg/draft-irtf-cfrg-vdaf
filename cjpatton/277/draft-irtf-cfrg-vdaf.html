@@ -3433,7 +3433,9 @@ def decode_vec(Field, encoded: bytes) -&gt; list[Field]:
     """
     L = Field.ENCODED_SIZE
     if len(encoded) % L != 0:
-        raise ValueError('input length must be a multiple of the field size')
+        raise ValueError(
+            'input length must be a multiple of the size of an'
+            'encoded field element')
 
     vec = []
     for i in range(0, len(encoded), L):
@@ -7004,9 +7006,9 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
             # denote a successful sketch verification.
             return None
         else:
-            raise ValueError('invalid prep message')
+            raise ValueError('sketch verification failed')
     else:
-        raise ValueError('invalid prep state')
+        raise ValueError('incorrect sketch length')
 </pre>
 </div>
 <figcaption><a href="#figure-24" class="selfRef">Figure 24</a>:
@@ -7289,9 +7291,9 @@ Decide whether to RECOMMEND this encoding, and if so, add it to test vectors.<a 
 <div class="alignLeft art-text artwork" id="section-8.2.6.6-3">
 <pre>
 def encode_agg_param(Poplar1, (level, prefixes)):
-    if level not in range(2**16 - 1):
+    if level not in range(2**16):
         raise ValueError('level out of range')
-    if len(prefixes) not in range(2**32 - 1):
+    if len(prefixes) not in range(2**32):
         raise ValueError('number of prefixes out of range')
     encoded = bytes()
     encoded += to_be_bytes(level, 2)
