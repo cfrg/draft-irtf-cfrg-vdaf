@@ -568,22 +568,21 @@ class Prio3SumVecWithMultiproof(Prio3SumVec):
         return Prio3SumVecWithMultiproofAndParams
 
 
-class Prio3MultiHotHistogram(Prio3):
+class Prio3MultihotCountVec(Prio3):
     # Generic types required by `Prio3`
     Xof = xof.XofTurboShake128
 
     # Associated parameters.
     VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
-    # Private codepoint just for testing.
-    ID = 0xFFFFFFFF
+    ID = 0x00000004
 
     # Operational parameters.
-    test_vec_name = 'Prio3MultiHotHistogram'
+    test_vec_name = 'Prio3MultihotCountVec'
 
     @classmethod
-    def with_params(Prio3MultiHotHistogram,
+    def with_params(cls,
                     length: int,
-                    max_count: int,
+                    max_weight: int,
                     chunk_length: int):
         """
         Set the circuit parameters.
@@ -591,11 +590,11 @@ class Prio3MultiHotHistogram(Prio3):
         Pre-conditions:
 
             - `length > 0`
-            - `max_count > 0`
+            - `max_weight > 0`
             - `chunk_length > 0`
         """
-        class Prio3MultiHotHistogramWithParams(Prio3MultiHotHistogram):
-            Flp = flp_generic.FlpGeneric(flp_generic.MultiHotHistogram(
-                length, max_count, chunk_length
+        class Prio3MultihotCountVecWithParams(cls):
+            Flp = flp_generic.FlpGeneric(flp_generic.MultihotCountVec(
+                length, max_weight, chunk_length
             ))
-        return Prio3MultiHotHistogramWithParams
+        return Prio3MultihotCountVecWithParams

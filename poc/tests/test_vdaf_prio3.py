@@ -7,7 +7,7 @@ from tests.test_flp import FlpTestField128
 from tests.test_flp_generic import TestAverage
 from tests.vdaf import test_vdaf
 from vdaf_prio3 import (Prio3, Prio3Count, Prio3Histogram,
-                        Prio3MultiHotHistogram, Prio3Sum, Prio3SumVec,
+                        Prio3MultihotCountVec, Prio3Sum, Prio3SumVec,
                         Prio3SumVecWithMultiproof)
 from xof import XofTurboShake128
 
@@ -168,25 +168,25 @@ class TestPrio3(unittest.TestCase):
             test_vec_instance=1,
         )
 
-    def test_multi_hot_histogram(self):
-        # Prio3MultiHotHistogram with length = 4, max_count = 2,
+    def test_multihot_count_vec(self):
+        # Prio3MultihotCountVec with length = 4, max_weight = 2,
         # chunk_length = 2.
-        cls = Prio3MultiHotHistogram \
+        cls = Prio3MultihotCountVec \
             .with_params(4, 2, 2) \
             .with_shares(2)
-        assert cls.ID == 0xFFFFFFFF
+        assert cls.ID == 0x00000004
         test_vdaf(cls, None, [[0, 0, 0, 0]], [0, 0, 0, 0])
         test_vdaf(cls, None, [[0, 1, 0, 0]], [0, 1, 0, 0])
         test_vdaf(cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0])
         test_vdaf(cls, None, [[0, 1, 1, 0], [0, 1, 0, 1]], [0, 2, 1, 1])
         test_vdaf(
-            cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0], print_test_vec=False
+            cls, None, [[0, 1, 1, 0]], [0, 1, 1, 0], print_test_vec=TEST_VECTOR
         )
 
     def test_multi_hot_histogram_3_shares(self):
-        # Prio3MultiHotHistogram with length = 11, max_count = 5,
+        # Prio3MultihotCountVec with length = 11, max_weight = 5,
         # chunk_length = 3.
-        cls = Prio3MultiHotHistogram.with_params(11, 5, 3).with_shares(3)
+        cls = Prio3MultihotCountVec.with_params(11, 5, 3).with_shares(3)
         test_vdaf(
             cls,
             None,

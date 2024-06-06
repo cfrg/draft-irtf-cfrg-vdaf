@@ -3,7 +3,7 @@ import unittest
 from common import next_power_of_2
 from field import Field64, Field96, Field128, poly_eval
 from flp import run_flp
-from flp_generic import (Count, FlpGeneric, Histogram, Mul, MultiHotHistogram,
+from flp_generic import (Count, FlpGeneric, Histogram, Mul, MultihotCountVec,
                          PolyEval, Range2, Sum, SumVec, Valid)
 
 
@@ -141,9 +141,9 @@ class TestFlpGeneric(unittest.TestCase):
             (flp.Field.rand_vec(4), False),
         ])
 
-    def test_multi_hot_histogram(self):
-        # MultiHotHistogram with length = 4, max_count = 2, chunk_length = 2.
-        flp = FlpGeneric(MultiHotHistogram(4, 2, 2))
+    def test_multihot_count_vec(self):
+        flp = FlpGeneric(MultihotCountVec(4, 2, 2))
+
         # Successful cases:
         cases = [
             (flp.encode([0, 0, 0, 0]), True),
@@ -151,20 +151,30 @@ class TestFlpGeneric(unittest.TestCase):
             (flp.encode([0, 1, 1, 0]), True),
             (flp.encode([1, 1, 0, 0]), True),
         ]
-        # Failure cases: too many number of 1s, should fail count check.
+        # Failure cases: too many number of 1s, should fail weight check.
         cases += [
             (
                 [flp.Field(1)] * i +
                 [flp.Field(0)] * (flp.Valid.length - i) +
-                # Try to lie about the encoded count.
-                [flp.Field(0)] * flp.Valid.bits_for_count,
+                # Try to lie about the offset weight.
+                [flp.Field(0)] * flp.Valid.bits_for_weight,
                 False
             )
-            for i in range(flp.Valid.max_count + 1, flp.Valid.length + 1)
+            for i in range(flp.Valid.max_weight + 1, flp.Valid.length + 1)
         ]
         # Failure case: pass count check but fail bit check.
         cases += [(flp.encode([flp.Field.MODULUS - 1, 1, 0, 0]), False)]
         test_flp_generic(flp, cases)
+
+    def test_multihot_count_vec_small(self):
+        flp = FlpGeneric(MultihotCountVec(1, 1, 1))
+
+        test_flp_generic(flp, [
+            (flp.encode([0]), True),
+            (flp.encode([1]), True),
+            ([flp.Field(0), flp.Field(1337)], False),
+            ([flp.Field(1), flp.Field(0)], False),
+        ])
 
     def test_sumvec(self):
         # SumVec with length 2, bits 4, chunk len 1.
