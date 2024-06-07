@@ -1,14 +1,20 @@
 """A generic FLP based on {{BBCGGI19}}, Theorem 4.3."""
 
 import copy
+from typing import Generic, TypeVar
 
-import field
 from common import next_power_of_2
-from field import poly_eval, poly_interp, poly_mul, poly_strip
+from field import (poly_eval, poly_interp, poly_mul, poly_strip, FftField,
+                   Field64, Field128)
 from flp import Flp
 
 
-class Gadget:
+M = TypeVar('M')
+A = TypeVar('A')
+F = TypeVar('F', bound=FftField)
+
+
+class Gadget(Generic[F]):
     """A validity circuit gadget."""
 
     # Length of the input to the gadget.
@@ -17,19 +23,19 @@ class Gadget:
     # Arithmetic degree of the circuit.
     DEGREE: int
 
-    def eval(self, Field, inp):
+    def eval(self, field: type[F], inp: list[F]) -> F:
         """Evaluate the gadget on a sequence of field elements."""
         raise NotImplementedError()
 
-    def eval_poly(self, Field, inp_poly):
+    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
         """Evaluate the gadget on a sequence of polynomials over a field."""
         raise NotImplementedError()
 
-    def check_gadget_eval(self, inp):
+    def check_gadget_eval(self, inp: list[F]):
         if len(inp) != self.ARITY:
             raise ValueError('input length must equal the gadget arity')
 
-    def check_gadget_eval_poly(self, inp_poly):
+    def check_gadget_eval_poly(self, inp_poly: list[list[F]]):
         if len(inp_poly) != self.ARITY:
             raise ValueError('number of inputs must equal the gadget arity')
         for j in range(len(inp_poly)):
@@ -37,16 +43,10 @@ class Gadget:
                 raise ValueError('each input must have the same length')
 
 
-class Valid:
+class Valid(Generic[M, A, F]):
     """
     A validity circuit.
     """
-
-    # Generic parameters overwritten by a concrete validity circuit. `Field`
-    # MUST be FFT-friendly.
-    Measurement = None
-    AggResult = None
-    Field: field.FftField = None
 
     # Length of the encoded measurement input to the validity circuit.
     MEAS_LEN: int
@@ -58,21 +58,24 @@ class Valid:
     OUTPUT_LEN: int
 
     # The sequence of gadgets for this validity circuit.
-    GADGETS: list[Gadget]
+    GADGETS: list[Gadget[F]]
 
     # The number of times each gadget is called. This must have the same length
     # as `GADGETS`.
     GADGET_CALLS: list[int]
 
-    def prove_rand_len(self):
+    # Operational parameters
+    field: type[F]
+
+    def prove_rand_len(self) -> int:
         """Length of the prover randomness."""
         return sum(g.ARITY for g in self.GADGETS)
 
-    def query_rand_len(self):
+    def query_rand_len(self) -> int:
         """Length of the query randomness."""
         return len(self.GADGETS)
 
-    def proof_len(self):
+    def proof_len(self) -> int:
         """Length of the proof."""
         length = 0
         for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
@@ -80,18 +83,18 @@ class Valid:
             length += g.ARITY + g.DEGREE * (P - 1) + 1
         return length
 
-    def verifier_len(self):
+    def verifier_len(self) -> int:
         """Length of the verifier message."""
         length = 1
         for g in self.GADGETS:
             length += g.ARITY + 1
         return length
 
-    def encode(self, measurement: Measurement) -> list[Field]:
+    def encode(self, measurement: M) -> list[F]:
         """Encode a measurement."""
         raise NotImplementedError()
 
-    def truncate(self, meas: list[Field]) -> list[Field]:
+    def truncate(self, meas: list[F]) -> list[F]:
         """
         Truncate a measurement to the length of an aggregatable output.
 
@@ -102,8 +105,8 @@ class Valid:
         raise NotImplementedError()
 
     def decode(self,
-               output: list[Field],
-               num_measurements: int) -> AggResult:
+               output: list[F],
+               num_measurements: int) -> A:
         """
         Decode an aggregate result.
 
@@ -115,9 +118,9 @@ class Valid:
         raise NotImplementedError()
 
     def eval(self,
-             meas: list[Field],
-             joint_rand: list[Field],
-             num_shares: int):
+             meas: list[F],
+             joint_rand: list[F],
+             num_shares: int) -> F:
         """
         Evaluate the circuit on the provided measurement and joint randomness.
 
@@ -142,33 +145,27 @@ class Valid:
         if len(joint_rand) != self.JOINT_RAND_LEN:
             raise ValueError('incorrect joint randomness length')
 
-    @classmethod
-    def with_field(cls, field: field.FftField):
-        class _ValidWithField(cls):
-            Field = field
-        return _ValidWithField
-
 
 class ProveGadget:
-    def __init__(self, Field, wire_seeds, g, g_calls):
+    def __init__(self, field, wire_seeds, g, g_calls):
         self.inner = g
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
         self.wire = []
         P = next_power_of_2(1 + g_calls)
         for j in range(g.ARITY):
-            self.wire.append(Field.zeros(P))
+            self.wire.append(field.zeros(P))
             self.wire[j][0] = wire_seeds[j]
         self.k = 0
 
-    def eval(self, Field, inp):
+    def eval(self, field, inp):
         self.k += 1
         for j in range(len(inp)):
             self.wire[j][self.k] = inp[j]
-        return self.inner.eval(Field, inp)
+        return self.inner.eval(field, inp)
 
-    def eval_poly(self, Field, inp_poly):
-        return self.inner.eval_poly(Field, inp_poly)
+    def eval_poly(self, field, inp_poly):
+        return self.inner.eval_poly(field, inp_poly)
 
 
 def prove_wrapped(valid, prove_rand):
@@ -178,7 +175,7 @@ def prove_wrapped(valid, prove_rand):
     wrapped_gadgets = []
     for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
         wire_seeds, prove_rand = prove_rand[:g.ARITY], prove_rand[g.ARITY:]
-        wrapped = ProveGadget(valid.Field, wire_seeds, g, g_calls)
+        wrapped = ProveGadget(valid.field, wire_seeds, g, g_calls)
         wrapped_gadgets.append(wrapped)
     assert len(prove_rand) == 0
     wrapped_valid = copy.deepcopy(valid)
@@ -187,7 +184,7 @@ def prove_wrapped(valid, prove_rand):
 
 
 class QueryGadget:
-    def __init__(self, Field, wire_seeds, gadget_poly, g, g_calls):
+    def __init__(self, field, wire_seeds, gadget_poly, g, g_calls):
         self.inner = g
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
@@ -195,17 +192,17 @@ class QueryGadget:
         self.gadget_poly = gadget_poly
         P = next_power_of_2(1 + g_calls)
         for j in range(g.ARITY):
-            self.wire.append(Field.zeros(P))
+            self.wire.append(field.zeros(P))
             self.wire[j][0] = wire_seeds[j]
-        assert Field.GEN_ORDER % P == 0
-        self.alpha = Field.gen() ** (Field.GEN_ORDER // P)
+        assert field.GEN_ORDER % P == 0
+        self.alpha = field.gen() ** (field.GEN_ORDER // P)
         self.k = 0
 
-    def eval(self, Field, inp):
+    def eval(self, field, inp):
         self.k += 1
         for j in range(len(inp)):
             self.wire[j][self.k] = inp[j]
-        return poly_eval(Field, self.gadget_poly, self.alpha ** self.k)
+        return poly_eval(field, self.gadget_poly, self.alpha ** self.k)
 
 
 def query_wrapped(valid, proof):
@@ -218,7 +215,7 @@ def query_wrapped(valid, proof):
         gadget_poly_len = g.DEGREE * (P - 1) + 1
         wire_seeds, proof = proof[:g.ARITY], proof[g.ARITY:]
         gadget_poly, proof = proof[:gadget_poly_len], proof[gadget_poly_len:]
-        wrapped = QueryGadget(valid.Field,
+        wrapped = QueryGadget(valid.field,
                               wire_seeds,
                               gadget_poly,
                               g,
@@ -230,18 +227,13 @@ def query_wrapped(valid, proof):
     return wrapped_valid
 
 
-class FlpGeneric(Flp):
+class FlpGeneric(Flp[M, A, F]):
     """An FLP constructed from a validity circuit."""
 
-    Field: field.FftField = None
-    Valid = None
-
-    def __init__(self, valid):
+    def __init__(self, valid: Valid[M, A, F]):
         """Instantiate the generic FLP for the given validity circuit."""
-        self.Valid = valid
-        self.Measurement = valid.Measurement
-        self.AggResult = valid.AggResult
-        self.Field = valid.Field
+        self.valid = valid
+        self.field = valid.field
         self.PROVE_RAND_LEN = valid.prove_rand_len()
         self.QUERY_RAND_LEN = valid.query_rand_len()
         self.JOINT_RAND_LEN = valid.JOINT_RAND_LEN
@@ -250,10 +242,13 @@ class FlpGeneric(Flp):
         self.PROOF_LEN = valid.proof_len()
         self.VERIFIER_LEN = valid.verifier_len()
 
-    def prove(self, meas, prove_rand, joint_rand):
+    def prove(self,
+              meas: list[F],
+              prove_rand: list[F],
+              joint_rand: list[F]) -> list[F]:
         # Evaluate the validity circuit, recording the values of the input wires
         # for each call to each gadget.
-        valid = prove_wrapped(self.Valid, prove_rand)
+        valid = prove_wrapped(self.valid, prove_rand)
         valid.eval(meas, joint_rand, 1)
 
         # Construct the proof.
@@ -267,16 +262,16 @@ class FlpGeneric(Flp):
             # can use FFT for interpolating the wire polynomials. Perhaps there
             # is some clever math for picking `wire_inp` in a way that avoids
             # having to pad.
-            assert self.Field.GEN_ORDER % P == 0
-            alpha = self.Field.gen() ** (self.Field.GEN_ORDER // P)
+            assert self.field.GEN_ORDER % P == 0
+            alpha = self.field.gen() ** (self.field.GEN_ORDER // P)
             wire_inp = [alpha ** k for k in range(P)]
             wire_polys = []
             for j in range(g.ARITY):
-                wire_poly = poly_interp(self.Field, wire_inp, g.wire[j])
+                wire_poly = poly_interp(self.field, wire_inp, g.wire[j])
                 wire_polys.append(wire_poly)
 
             # Compute the gadget polynomial.
-            gadget_poly = g.eval_poly(self.Field, wire_polys)
+            gadget_poly = g.eval_poly(self.field, wire_polys)
 
             for j in range(g.ARITY):
                 proof.append(g.wire[j][0])
@@ -284,14 +279,19 @@ class FlpGeneric(Flp):
 
         return proof
 
-    def query(self, meas, proof, query_rand, joint_rand, num_shares):
+    def query(self,
+              meas: list[F],
+              proof: list[F],
+              query_rand: list[F],
+              joint_rand: list[F],
+              num_shares: int) -> list[F]:
         # Evaluate the validity circuit, recording the values of the input wires
         # for each call to each gadget. The gadget output is computed by
         # evaluating the gadget polynomial.
-        valid = query_wrapped(self.Valid, proof)
+        valid = query_wrapped(self.valid, proof)
         v = valid.eval(meas, joint_rand, num_shares)
 
-        if len(query_rand) != self.Valid.query_rand_len():
+        if len(query_rand) != self.valid.query_rand_len():
             raise ValueError('incorrect query randomness length')
 
         # Construct the verifier message.
@@ -304,54 +304,54 @@ class FlpGeneric(Flp):
             # A degenerate point is one that was used as an input for
             # constructing the gadget polynomial. Using such a point would leak
             # an output of the gadget to the verifier.
-            if t ** P == self.Field(1):
+            if t ** P == self.field(1):
                 raise ValueError('query randomness contains a root of unity')
 
             # Compute the well-formedness test for the gadget polynomial.
             x = []
             wire_inp = [g.alpha ** k for k in range(P)]
             for j in range(g.ARITY):
-                wire_poly = poly_interp(self.Field, wire_inp, g.wire[j])
-                x.append(poly_eval(self.Field, wire_poly, t))
+                wire_poly = poly_interp(self.field, wire_inp, g.wire[j])
+                x.append(poly_eval(self.field, wire_poly, t))
 
-            y = poly_eval(self.Field, g.gadget_poly, t)
+            y = poly_eval(self.field, g.gadget_poly, t)
 
             verifier += x
             verifier.append(y)
 
         return verifier
 
-    def decide(self, verifier):
-        if len(verifier) != self.Valid.verifier_len():
+    def decide(self, verifier: list[F]) -> bool:
+        if len(verifier) != self.valid.verifier_len():
             raise ValueError('incorrect verifier length')
 
         # Check the output of the validity circuit.
         v, verifier = verifier[0], verifier[1:]
-        if v != self.Field(0):
+        if v != self.field(0):
             return False
 
         # Check for well-formedness of each gadget polynomial.
-        for g in self.Valid.GADGETS:
+        for g in self.valid.GADGETS:
             x, verifier = verifier[:g.ARITY], verifier[g.ARITY:]
             y, verifier = verifier[0], verifier[1:]
-            z = g.eval(self.Field, x)
+            z = g.eval(self.field, x)
             if z != y:
                 return False
 
         assert len(verifier) == 0
         return True
 
-    def encode(self, measurement):
-        return self.Valid.encode(measurement)
+    def encode(self, measurement: M) -> list[F]:
+        return self.valid.encode(measurement)
 
-    def truncate(self, meas):
-        return self.Valid.truncate(meas)
+    def truncate(self, meas: list[F]) -> list[F]:
+        return self.valid.truncate(meas)
 
-    def decode(self, output, num_measurements):
-        return self.Valid.decode(output, num_measurements)
+    def decode(self, output: list[F], num_measurements: int) -> A:
+        return self.valid.decode(output, num_measurements)
 
     def test_vec_set_type_param(self, test_vec):
-        return self.Valid.test_vec_set_type_param(test_vec)
+        return self.valid.test_vec_set_type_param(test_vec)
 
 
 ##
@@ -401,7 +401,6 @@ class PolyEval(Gadget):
     p = None
 
     ARITY = 1
-    DEGREE = None  # Set by constructor
 
     def __init__(self, p: list[int]):
         """
@@ -461,9 +460,6 @@ class ParallelSum(Gadget):
     subcircuit = None
     count = None
 
-    ARITY = None  # Set by constructor
-    DEGREE = None  # Set by constructor
-
     def __init__(self, subcircuit: Gadget, count: int):
         self.subcircuit = subcircuit
         self.count = count
@@ -503,7 +499,7 @@ class Count(Valid):
     # Associated types
     Measurement = int  # `range(2)`
     AggResult = int
-    Field = field.Field64
+    field = Field64
 
     # Associated parameters
     GADGETS = [Mul()]
@@ -514,13 +510,13 @@ class Count(Valid):
 
     def eval(self, meas, joint_rand, _num_shares):
         self.check_valid_eval(meas, joint_rand)
-        return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+        return self.GADGETS[0].eval(self.field, [meas[0], meas[0]]) \
             - meas[0]
 
     def encode(self, measurement):
         if measurement not in [0, 1]:
             raise ValueError('measurement out of range')
-        return [self.Field(measurement)]
+        return [self.field(measurement)]
 
     def truncate(self, meas):
         if len(meas) != 1:
@@ -531,26 +527,22 @@ class Count(Valid):
         return output[0].as_unsigned()
 
 
-class Sum(Valid):
-    # Associated types
-    Measurement = int  # `range(2**self.bits)`
-    AggResult = int
-    Field = field.Field128
-
+class Sum(Valid[int, int, Field128]):
     # Associated parameters
     GADGETS = [Range2()]
-    GADGET_CALLS = None  # Set by Sum.with_bits()
-    MEAS_LEN = None  # Set by Sum.with_bits()
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
 
-    def __init__(self, bits):
+    # Operational parameters
+    field = Field128
+
+    def __init__(self, bits: int):
         """
         Instantiate an instace of the `Sum` circuit for measurements in range `[0,
         2^bits)`.
         """
 
-        if 2 ** bits >= self.Field.MODULUS:
+        if 2 ** bits >= self.field.MODULUS:
             raise ValueError('bit size exceeds field modulus')
 
         self.GADGET_CALLS = [bits]
@@ -558,10 +550,10 @@ class Sum(Valid):
 
     def eval(self, meas, joint_rand, _num_shares):
         self.check_valid_eval(meas, joint_rand)
-        out = self.Field(0)
+        out = self.field(0)
         r = joint_rand[0]
         for b in meas:
-            out += r * self.GADGETS[0].eval(self.Field, [b])
+            out += r * self.GADGETS[0].eval(self.field, [b])
             r *= joint_rand[0]
         return out
 
@@ -569,11 +561,11 @@ class Sum(Valid):
         if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
             raise ValueError('measurement out of range')
 
-        return self.Field.encode_into_bit_vector(measurement,
+        return self.field.encode_into_bit_vector(measurement,
                                                  self.MEAS_LEN)
 
     def truncate(self, meas):
-        return [self.Field.decode_from_bit_vector(meas)]
+        return [self.field.decode_from_bit_vector(meas)]
 
     def decode(self, output, _num_measurements):
         return output[0].as_unsigned()
@@ -583,22 +575,14 @@ class Sum(Valid):
         return ['bits']
 
 
-class Histogram(Valid):
+class Histogram(Valid[int, list[int], Field128]):
     # Operational parameters
     length = None  # Set by 'Histogram.with_params()`
     chunk_length = None  # Set by 'Histogram.with_params()`
-
-    # Associated types
-    Measurement = int  # `range(length)`
-    AggResult = list[int]
-    Field = field.Field128
+    field = Field128
 
     # Associated parameters
-    GADGETS = None  # Set by `Histogram.with_params()`
-    GADGET_CALLS = None  # Set by `Histogram.with_params()`
-    MEAS_LEN = None  # Set by `Histogram.with_params()`
     JOINT_RAND_LEN = 2
-    OUTPUT_LEN = None  # Set by `Histogram.with_params()`
 
     def __init__(self, length, chunk_length):
         """
@@ -622,10 +606,10 @@ class Histogram(Valid):
         self.check_valid_eval(meas, joint_rand)
 
         # Check that each bucket is one or zero.
-        range_check = self.Field(0)
+        range_check = self.field(0)
         r = joint_rand[0]
         r_power = r
-        shares_inv = self.Field(num_shares).inv()
+        shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
             inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
@@ -633,14 +617,14 @@ class Histogram(Valid):
                 if index < len(meas):
                     meas_elem = meas[index]
                 else:
-                    meas_elem = self.Field(0)
+                    meas_elem = self.field(0)
 
                 inputs[j * 2] = r_power * meas_elem
                 inputs[j * 2 + 1] = meas_elem - shares_inv
 
                 r_power *= r
 
-            range_check += self.GADGETS[0].eval(self.Field, inputs)
+            range_check += self.GADGETS[0].eval(self.field, inputs)
 
         # Check that the buckets sum to 1.
         sum_check = -shares_inv
@@ -652,8 +636,8 @@ class Histogram(Valid):
         return out
 
     def encode(self, measurement):
-        encoded = [self.Field(0)] * self.length
-        encoded[measurement] = self.Field(1)
+        encoded = [self.field(0)] * self.length
+        encoded[measurement] = self.field(1)
         return encoded
 
     def truncate(self, meas):
@@ -668,7 +652,7 @@ class Histogram(Valid):
         return ['length', 'chunk_length']
 
 
-class MultiHotHistogram(Valid):
+class MultiHotHistogram(Valid[list[int], list[int], Field128]):
     r"""
     A validity circuit that checks each Client's measurement is a bit vector
     with at most `max_count` number of 1s.
@@ -692,18 +676,10 @@ class MultiHotHistogram(Valid):
     length = None  # Set by the constructor
     max_count = None  # Set by constructor
     chunk_length = None  # Set by constructor
-
-    # Associated types
-    Measurement = list[int]  # A vector of bits.
-    AggResult = list[int]  # A vector of counts as unsigned integers.
-    Field = field.Field128
+    field = Field128
 
     # Associated parameters
-    GADGETS = None  # Set by constructor
-    GADGET_CALLS = None  # Set by constructor
-    MEAS_LEN = None  # Set by constructor
     JOINT_RAND_LEN = 2
-    OUTPUT_LEN = None  # Set by constructor
 
     def __init__(self, length, max_count, chunk_length):
         """
@@ -719,10 +695,10 @@ class MultiHotHistogram(Valid):
 
         # Compute the number of bits to represent `max_count`.
         self.bits_for_count = max_count.bit_length()
-        self.offset = self.Field((1 << self.bits_for_count) - 1 - max_count)
+        self.offset = self.field((1 << self.bits_for_count) - 1 - max_count)
         # Sanity check `offset + length` doesn't overflow field size,
         # because in validity circuit, we will compute `offset + \sum_i meas_i`.
-        if self.Field.MODULUS - self.offset.as_unsigned() <= length:
+        if self.field.MODULUS - self.offset.as_unsigned() <= length:
             raise ValueError('length and max_count are too large '
                              'for the current field size')
 
@@ -743,10 +719,10 @@ class MultiHotHistogram(Valid):
         self.check_valid_eval(meas, joint_rand)
 
         # Check that each bucket is one or zero.
-        range_check = self.Field(0)
+        range_check = self.field(0)
         r = joint_rand[0]
         r_power = r
-        shares_inv = self.Field(num_shares).inv()
+        shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
             inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
@@ -754,21 +730,21 @@ class MultiHotHistogram(Valid):
                 if index < len(meas):
                     meas_elem = meas[index]
                 else:
-                    meas_elem = self.Field(0)
+                    meas_elem = self.field(0)
 
                 inputs[j * 2] = r_power * meas_elem
                 inputs[j * 2 + 1] = meas_elem - shares_inv
 
                 r_power *= r
 
-            range_check += self.GADGETS[0].eval(self.Field, inputs)
+            range_check += self.GADGETS[0].eval(self.field, inputs)
 
         # Check that `offset` plus the sum of the buckets is equal to the
         # value claimed by the Client.
         count_check = self.offset * shares_inv
         for i in range(self.length):
             count_check += meas[i]
-        count_check -= self.Field.decode_from_bit_vector(meas[self.length:])
+        count_check -= self.field.decode_from_bit_vector(meas[self.length:])
 
         out = joint_rand[1] * range_check + \
             joint_rand[1] ** 2 * count_check
@@ -778,11 +754,11 @@ class MultiHotHistogram(Valid):
         if len(measurement) != self.length:
             raise ValueError('invalid Client measurement length')
 
-        encoded = list(map(self.Field, measurement))
+        encoded = list(map(self.field, measurement))
         # Encode the result of `offset + \sum_i measurement_i` into
         # `bits_for_count` bits.
-        count = self.offset + sum(encoded, self.Field(0))
-        encoded += self.Field.encode_into_bit_vector(
+        count = self.offset + sum(encoded, self.field(0))
+        encoded += self.field.encode_into_bit_vector(
             count.as_unsigned(), self.bits_for_count
         )
         return encoded
@@ -800,31 +776,23 @@ class MultiHotHistogram(Valid):
         return ['length', 'max_count', 'chunk_length']
 
 
-class SumVec(Valid):
+class SumVec(Valid[list[int], list[int], F]):
     # Operational parameters
-    length = None  # Set by constructor
-    bits = None  # Set by constructor
-    chunk_length = None  # Set by constructor
-
-    # Associated types
-    Measurement = list[int]
-    AggResult = list[int]
-    Field = field.Field128
+    length: int  # Set by constructor
+    bits: int  # Set by constructor
+    chunk_length: int  # Set by constructor
+    field: type[F]  # Set by constructor
 
     # Associated parameters
-    GADGETS = None  # Set by constructor
-    GADGET_CALLS = None  # Set by constructor
-    MEAS_LEN = None  # Set by constructor
     JOINT_RAND_LEN = 1
-    OUTPUT_LEN = None  # Set by constructor
 
-    def __init__(self, length, bits, chunk_length):
+    def __init__(self, length, bits, chunk_length, field: type[F]):
         """
         Instantiate the `SumVec` circuit for measurements with `length`
         elements, each in the range `[0, 2^bits)`.
         """
 
-        if 2 ** bits >= Sum.Field.MODULUS:
+        if 2 ** bits >= field.MODULUS:
             raise ValueError('bit size exceeds field modulus')
         if bits <= 0:
             raise ValueError('invalid bits')
@@ -836,6 +804,7 @@ class SumVec(Valid):
         self.length = length
         self.bits = bits
         self.chunk_length = chunk_length
+        self.field = field
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
             (length * bits + chunk_length - 1) // chunk_length
@@ -846,10 +815,10 @@ class SumVec(Valid):
     def eval(self, meas, joint_rand, num_shares):
         self.check_valid_eval(meas, joint_rand)
 
-        out = self.Field(0)
+        out = self.field(0)
         r = joint_rand[0]
         r_power = r
-        shares_inv = self.Field(num_shares).inv()
+        shares_inv = self.field(num_shares).inv()
 
         for i in range(self.GADGET_CALLS[0]):
             inputs = [None] * (2 * self.chunk_length)
@@ -858,14 +827,14 @@ class SumVec(Valid):
                 if index < len(meas):
                     meas_elem = meas[index]
                 else:
-                    meas_elem = self.Field(0)
+                    meas_elem = self.field(0)
 
                 inputs[j * 2] = r_power * meas_elem
                 inputs[j * 2 + 1] = meas_elem - shares_inv
 
                 r_power *= r
 
-            out += self.GADGETS[0].eval(self.Field, inputs)
+            out += self.GADGETS[0].eval(self.field, inputs)
 
         return out
 
@@ -878,13 +847,13 @@ class SumVec(Valid):
             if val not in range(2**self.bits):
                 raise ValueError('entry of measurement vector is out of range')
 
-            encoded += self.Field.encode_into_bit_vector(val, self.bits)
+            encoded += self.field.encode_into_bit_vector(val, self.bits)
         return encoded
 
     def truncate(self, meas):
         truncated = []
         for i in range(self.length):
-            truncated.append(self.Field.decode_from_bit_vector(
+            truncated.append(self.field.decode_from_bit_vector(
                 meas[i * self.bits: (i + 1) * self.bits]
             ))
         return truncated

@@ -7,10 +7,9 @@ from flp_generic import (Count, FlpGeneric, Histogram, Mul, MultiHotHistogram,
                          PolyEval, Range2, Sum, SumVec, Valid)
 
 
-class TestMultiGadget(Valid):
-    # Associated types
-    Field = Field64
-    Measurement = int
+class TestMultiGadget(Valid[int, int, Field64]):
+    # Operational parameters
+    field = Field64
 
     # Associated parameters
     GADGETS = [Mul(), Mul()]
@@ -22,13 +21,13 @@ class TestMultiGadget(Valid):
     def eval(self, meas, joint_rand, _num_shares):
         self.check_valid_eval(meas, joint_rand)
         # Not a very useful circuit, obviously. We just want to do something.
-        x = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]])
-        y = self.GADGETS[1].eval(self.Field, [meas[0], x])
-        z = self.GADGETS[1].eval(self.Field, [x, y])
+        x = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
+        y = self.GADGETS[1].eval(self.field, [meas[0], x])
+        z = self.GADGETS[1].eval(self.field, [x, y])
         return z
 
     def encode(self, measurement):
-        return [self.Field(measurement)]
+        return [self.field(measurement)]
 
     def truncate(self, meas):
         return meas
@@ -55,19 +54,19 @@ def test_gadget(g, Field, test_length):
 
 
 def test_flp_generic(flp, test_cases):
-    for (g, g_calls) in zip(flp.Valid.GADGETS, flp.Valid.GADGET_CALLS):
-        test_gadget(g, flp.Field, next_power_of_2(g_calls + 1))
+    for (g, g_calls) in zip(flp.valid.GADGETS, flp.valid.GADGET_CALLS):
+        test_gadget(g, flp.field, next_power_of_2(g_calls + 1))
 
     for (i, (meas, expected_decision)) in enumerate(test_cases):
         assert len(meas) == flp.MEAS_LEN
         assert len(flp.truncate(meas)) == flp.OUTPUT_LEN
 
         # Evaluate validity circuit.
-        joint_rand = flp.Field.rand_vec(flp.JOINT_RAND_LEN)
-        v = flp.Valid.eval(meas, joint_rand, 1)
-        if (v == flp.Field(0)) != expected_decision:
+        joint_rand = flp.field.rand_vec(flp.JOINT_RAND_LEN)
+        v = flp.valid.eval(meas, joint_rand, 1)
+        if (v == flp.field(0)) != expected_decision:
             print('{}: test {} failed: validity circuit returned {}'.format(
-                flp.Valid.__class__.__name__, i, v))
+                flp.valid.__class__.__name__, i, v))
 
         # Run the FLP.
         decision = run_flp(flp, meas, 2)
@@ -75,7 +74,7 @@ def test_flp_generic(flp, test_cases):
             print(
                 '{}: test {} failed: proof evaluation resulted in {}; want {}'
                 .format(
-                    flp.Valid.__class__.__name__, i, decision,
+                    flp.valid.__class__.__name__, i, decision,
                     expected_decision,
                 )
             )
@@ -102,10 +101,8 @@ def test_encode_truncate_decode(flp, measurements):
 
 
 def test_encode_truncate_decode_with_fft_fields(cls, measurements, *args):
-    for f in [Field64, Field96, Field128]:
-        cls_with_field = cls.with_field(f)
-        assert cls_with_field.Field == f
-        obj = cls_with_field(*args)
+    for field in [Field64, Field96, Field128]:
+        obj = cls(*args, field)
         assert isinstance(obj, cls)
         test_encode_truncate_decode(FlpGeneric(obj), measurements)
 
@@ -116,7 +113,7 @@ class TestFlpGeneric(unittest.TestCase):
         test_flp_generic(flp, [
             (flp.encode(0), True),
             (flp.encode(1), True),
-            ([flp.Field(1337)], False),
+            ([flp.field(1337)], False),
         ])
 
     def test_sum(self):
@@ -125,7 +122,7 @@ class TestFlpGeneric(unittest.TestCase):
             (flp.encode(0), True),
             (flp.encode(100), True),
             (flp.encode(2 ** 10 - 1), True),
-            (flp.Field.rand_vec(10), False),
+            (flp.field.rand_vec(10), False),
         ])
         test_encode_truncate_decode(flp, [0, 100, 2 ** 10 - 1])
 
@@ -136,9 +133,9 @@ class TestFlpGeneric(unittest.TestCase):
             (flp.encode(1), True),
             (flp.encode(2), True),
             (flp.encode(3), True),
-            ([flp.Field(0)] * 4, False),
-            ([flp.Field(1)] * 4, False),
-            (flp.Field.rand_vec(4), False),
+            ([flp.field(0)] * 4, False),
+            ([flp.field(1)] * 4, False),
+            (flp.field.rand_vec(4), False),
         ])
 
     def test_multi_hot_histogram(self):
@@ -154,16 +151,16 @@ class TestFlpGeneric(unittest.TestCase):
         # Failure cases: too many number of 1s, should fail count check.
         cases += [
             (
-                [flp.Field(1)] * i +
-                [flp.Field(0)] * (flp.Valid.length - i) +
+                [flp.field(1)] * i +
+                [flp.field(0)] * (flp.valid.length - i) +
                 # Try to lie about the encoded count.
-                [flp.Field(0)] * flp.Valid.bits_for_count,
+                [flp.field(0)] * flp.valid.bits_for_count,
                 False
             )
-            for i in range(flp.Valid.max_count + 1, flp.Valid.length + 1)
+            for i in range(flp.valid.max_count + 1, flp.valid.length + 1)
         ]
         # Failure case: pass count check but fail bit check.
-        cases += [(flp.encode([flp.Field.MODULUS - 1, 1, 0, 0]), False)]
+        cases += [(flp.encode([flp.field.MODULUS - 1, 1, 0, 0]), False)]
         test_flp_generic(flp, cases)
 
     def test_sumvec(self):

@@ -1,9 +1,9 @@
 import unittest
 
 from common import TEST_VECTOR
-from field import Field64
+from field import Field64, Field128
 from flp_generic import FlpGeneric
-from tests.test_flp import FlpTestField128
+from tests.test_flp import FlpTest
 from tests.test_flp_generic import TestAverage
 from tests.vdaf import test_vdaf
 from vdaf_prio3 import (Prio3, Prio3Count, Prio3Histogram,
@@ -75,7 +75,7 @@ class TestPrio3(unittest.TestCase):
     def test_flp_test(self):
         cls = Prio3 \
             .with_xof(XofTurboShake128) \
-            .with_flp(FlpTestField128()) \
+            .with_flp(FlpTest(Field128)) \
             .with_shares(2)
         cls.ID = 0xFFFFFFFF
         test_vdaf(cls, None, [1, 2, 3, 4, 4], 14)
@@ -84,7 +84,7 @@ class TestPrio3(unittest.TestCase):
         # generating the joint randomness.
         cls = Prio3 \
             .with_xof(XofTurboShake128) \
-            .with_flp(FlpTestField128.with_joint_rand_len(0)) \
+            .with_flp(FlpTest.with_joint_rand_len(0)) \
             .with_shares(2)
         cls.ID = 0xFFFFFFFF
         test_vdaf(cls, None, [1, 2, 3, 4, 4], 14)
