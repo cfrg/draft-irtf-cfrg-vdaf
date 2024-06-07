@@ -3436,14 +3436,16 @@ def decode_vec(Field, encoded: bytes) -&gt; list[Field]:
     """
     L = Field.ENCODED_SIZE
     if len(encoded) % L != 0:
-        raise ERR_DECODE
+        raise ValueError(
+            'input length must be a multiple of the size of an '
+            'encoded field element')
 
     vec = []
     for i in range(0, len(encoded), L):
         encoded_x = encoded[i:i+L]
         x = from_le_bytes(encoded_x)
         if x &gt;= Field.MODULUS:
-            raise ERR_DECODE  # Integer is larger than modulus
+            raise ValueError('modulus overflow')
         vec.append(Field(x))
     return vec
 </pre>
@@ -3657,7 +3659,7 @@ def derive_seed(Xof,
     xof = Xof(seed, dst, binder)
     return xof.next(Xof.SEED_SIZE)
 
-def next_vec(self, field: type, length: int):
+def next_vec(self, field: type[Field], length: int):
     """
     Output the next `length` field elements.
 
@@ -3667,7 +3669,7 @@ def next_vec(self, field: type, length: int):
         - `length &gt; 0`
     """
     m = next_power_of_2(field.MODULUS) - 1
-    vec = []
+    vec: list[Field] = []
     while len(vec) &lt; length:
         x = from_le_bytes(self.next(field.ENCODED_SIZE))
         x &amp;= m
@@ -4735,39 +4737,39 @@ def prep_init(Prio3, verify_key, agg_id, _agg_param,
   return (prep_state, prep_share)
 
 def prep_next(Prio3, prep, prep_msg):
-  k_joint_rand = prep_msg
-  (out_share, k_corrected_joint_rand) = prep
+    k_joint_rand = prep_msg
+    (out_share, k_corrected_joint_rand) = prep
 
-  # If joint randomness was used, check that the value computed by the
-  # Aggregators matches the value indicated by the Client.
-  if k_joint_rand != k_corrected_joint_rand:
-      raise ERR_VERIFY  # joint randomness check failed
+    # If joint randomness was used, check that the value computed by
+    # the Aggregators matches the value indicated by the Client.
+    if k_joint_rand != k_corrected_joint_rand:
+        raise ValueError('joint randomness check failed')
 
-  return out_share
+    return out_share
 
 def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
-  # Unshard the verifier shares into the verifier message.
-  verifiers = Prio3.Flp.Field.zeros(
-      Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS)
-  k_joint_rand_parts = []
-  for (verifiers_share, k_joint_rand_part) in prep_shares:
-      verifiers = vec_add(verifiers, verifiers_share)
-      if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
-          k_joint_rand_parts.append(k_joint_rand_part)
+    # Unshard the verifier shares into the verifier message.
+    verifiers = Prio3.Flp.Field.zeros(
+        Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS)
+    k_joint_rand_parts = []
+    for (verifiers_share, k_joint_rand_part) in prep_shares:
+        verifiers = vec_add(verifiers, verifiers_share)
+        if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
+            k_joint_rand_parts.append(k_joint_rand_part)
 
-  # Verify that each proof is well-formed and the input is valid
-  for _ in range(Prio3.PROOFS):
-      verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
-      if not Prio3.Flp.decide(verifier):
-          raise ERR_VERIFY  # proof verifier check failed
+    # Verify that each proof is well-formed and input is valid
+    for _ in range(Prio3.PROOFS):
+        verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
+        if not Prio3.Flp.decide(verifier):
+            raise ValueError('proof verifier check failed')
 
-  # Combine the joint randomness parts computed by the
-  # Aggregators into the true joint randomness seed. This is
-  # used in the last step.
-  k_joint_rand = None
-  if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
-      k_joint_rand = Prio3.joint_rand_seed(k_joint_rand_parts)
-  return k_joint_rand
+    # Combine the joint randomness parts computed by the
+    # Aggregators into the true joint randomness seed. This is
+    # used in the last step.
+    k_joint_rand = None
+    if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
+        k_joint_rand = Prio3.joint_rand_seed(k_joint_rand_parts)
+    return k_joint_rand
 </pre>
 </div>
 <figcaption><a href="#figure-18" class="selfRef">Figure 18</a>:
@@ -5810,7 +5812,7 @@ summand:<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <pre>
 def encode(self, measurement):
     if 0 &gt; measurement or measurement &gt;= 2 ** self.MEAS_LEN:
-        raise ERR_INPUT
+        raise ValueError('measurement out of range')
 
     return self.Field.encode_into_bit_vector(measurement,
                                              self.MEAS_LEN)
@@ -5944,12 +5946,12 @@ measurement vector's elements, consecutively, in LSB to MSB order:<a href="#sect
 <pre>
 def encode(self, measurement: list[int]):
     if len(measurement) != self.length:
-        raise ERR_INPUT
+        raise ValueError('incorrect measurement length')
 
     encoded = []
     for val in measurement:
-        if 0 &gt; val or val &gt;= 2 ** self.bits:
-            raise ERR_INPUT
+        if val not in range(2**self.bits):
+            raise ValueError('entry of measurement vector is out of range')
 
         encoded += self.Field.encode_into_bit_vector(val, self.bits)
     return encoded
@@ -6299,32 +6301,54 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
           </h4>
 <p id="section-7.4.5-1">For this instance of Prio3, each measurement is a vector of ones and zeros,
 where the number of ones is bounded. This provides a functionality similar to
-Prio3Histogram except that more than one entry may be set. This allows
-Prio3MultihotCountVec to be composed with a randomized response mechanism,
-like <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For example, each Client
-would set each entry to one with some small probability.)<a href="#section-7.4.5-1" class="pilcrow">¶</a></p>
+Prio3Histogram except that more than one entry may be non-zero. This allows
+Prio3MultihotCountVec to be composed with a randomized response mechanism, like
+<span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For example, each Client would
+set each entry to one with some small probability.)<a href="#section-7.4.5-1" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-2">Prio3MultihotCountVec uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its XOF.
 Its validity circuit, denoted <code>MultihotCountVec</code>, uses <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)
 as its default finite field. It has three parameters: <code>length</code>, the number of
 of entries in the count vector; <code>max_weight</code>, the maximum weight of the vector
-(i.e., the number of non-zero entries); and <code>chunk_length</code>, which is used by
-a circuit optimization described below. It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code>
-to an integer near the square root of <code>length</code> (see
+(i.e., the number of non-zero entries); and <code>chunk_length</code>, used the same way
+as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>. It is <span class="bcp14">RECOMMENDED</span> to set
+<code>chunk_length</code> to an integer near the square root of <code>length</code> (see
 <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-3">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.5-4">
+<p id="section-7.4.5-3">The reported weight is encoded in a way that ensures it is in
+<code>range(max_weight)</code>. Specifically:<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.4.5-4.1">
+              <p id="section-7.4.5-4.1.1">Let <code>offset = 2**bits_for_weight - 1 - max_weight</code> The reported weight is
+encoded by adding <code>offset</code> to it and bit-encoding the result. Observe that
+only a value in <code>range(max_weight)</code> can be encoded with <code>bits_for_weight</code>
+bits. Here <code>bits_for_weight</code> denotes the number of bits required to encode the
+maximum weight.<a href="#section-7.4.5-4.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.5-4.2">
+              <p id="section-7.4.5-4.2.1">The verifier checks that each entry of the encoded measurement is a bit
+(i.e., either one or zero). It then decodes the reported weight and subtracts
+it from <code>offset + sum(count_vec)</code>, where <code>count_vec</code> is the count vector. The
+result is zero if and only if the reported weight is equal to the true
+weight.<a href="#section-7.4.5-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-7.4.5-5">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.4.5-6">
 <pre>
 def encode(self, measurement):
     if len(measurement) != self.length:
         raise ValueError('invalid Client measurement length')
 
     # The first part is the vector of counters.
-    encoded = list(map(self.Field, measurement))
+    count_vec = list(map(self.Field, measurement))
 
-    # The second part is the bit-encoded, offset weight.
-    offset_weight = self.offset + sum(encoded, self.Field(0))
+    # The second part is the reported weight.
+    weight_reported = sum(count_vec, self.Field(0))
+
+    encoded = []
+    encoded += count_vec
     encoded += self.Field.encode_into_bit_vector(
-        offset_weight.as_unsigned(), self.bits_for_weight)
+        (self.offset + weight_reported).as_unsigned(),
+        self.bits_for_weight)
     return encoded
 
 def truncate(self, meas):
@@ -6332,18 +6356,13 @@ def truncate(self, meas):
 
 def decode(self, output, _num_measurements):
     return [bucket_count.as_unsigned() for bucket_count in output]
-</pre><a href="#section-7.4.5-4" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.5-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.5-5">The <code>MultihotCountVec</code> circuit checks the encoded measurement has two
-properties. First, each entry is either a zero or a one. Second, the weight of
-the vector, when offset by <code>max_weight</code> is equal to the offset weight reported
-by the Client.<a href="#section-7.4.5-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.5-6">
+<p id="section-7.4.5-7">Circuit evaluation is defined as follows:<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.4.5-8">
 <pre>
 def eval(self, meas, joint_rand, num_shares):
-    self.check_valid_eval(meas, joint_rand)
-
-    # Check that each bucket is one or zero.
+    # Check that each entry in the input vector is one or zero.
     range_check = self.Field(0)
     r = joint_rand[0]
     r_power = r
@@ -6364,16 +6383,19 @@ def eval(self, meas, joint_rand, num_shares):
 
         range_check += self.GADGETS[0].eval(self.Field, inputs)
 
-    # Check that `offset` plus the sum of the counters is equal to
-    # the value claimed by the Client.
-    weight_check = self.offset * shares_inv
-    weight_check += sum(meas[:self.length], self.Field(0))
-    weight_check -= self.Field.decode_from_bit_vector(meas[self.length:])
+    # Check that the weight `offset` plus the sum of the counters
+    # is equal to the value claimed by the Client.
+    count_vec = meas[:self.length]
+    weight = sum(count_vec, self.Field(0))
+    weight_reported = \
+        self.Field.decode_from_bit_vector(meas[self.length:])
+    weight_check = self.offset*shares_inv + weight - \
+        weight_reported
 
     out = joint_rand[1] * range_check + \
         joint_rand[1] ** 2 * weight_check
     return out
-</pre><a href="#section-7.4.5-6" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.5-8" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circuit-"></span><table class="center" id="table-13">
             <caption>
@@ -6400,7 +6422,7 @@ def eval(self, meas, joint_rand, num_shares):
                   <code>GADGET_CALLS</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>[(length + max_weight.bit_length() + chunk_length - 1) // chunk_length]</code>
+                  <code>[(length + bits_for_weight + chunk_length - 1) // chunk_length]</code>
 </td>
               </tr>
               <tr>
@@ -6408,7 +6430,7 @@ def eval(self, meas, joint_rand, num_shares):
                   <code>MEAS_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>length + max_weight.bit_length()</code>
+                  <code>length + bits_for_weight</code>
 </td>
               </tr>
               <tr>
@@ -6416,7 +6438,7 @@ def eval(self, meas, joint_rand, num_shares):
                   <code>OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>length + max_weight.bit_length()</code>
+                  <code>length + bits_for_weight</code>
 </td>
               </tr>
               <tr>
@@ -6945,7 +6967,7 @@ def shard(Poplar1, measurement, nonce, rand):
     # Split the random input into random input for IDPF key
     # generation, correlated randomness, and sharding.
     if len(rand) != Poplar1.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random input
+        raise ValueError('incorrect rand size')
     idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
     seeds = [rand[i:i+l] for i in range(0,3*l,l)]
     corr_seed, seeds = front(2, seeds)
@@ -7077,7 +7099,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     # lexicographic order.
     for i in range(1,len(prefixes)):
         if prefixes[i-1] &gt;= prefixes[i]:
-            raise ERR_INPUT # out-of-order prefix
+            raise ValueError('out of order prefix')
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = Poplar1.Idpf.eval(
@@ -7134,7 +7156,7 @@ def prep_next(Poplar1, prep_state, prep_msg):
         if prev_sketch == None:
             prev_sketch = Field.zeros(3)
         elif len(prev_sketch) != 3:
-            raise ERR_INPUT  # prep message malformed
+            raise ValueError('incorrect sketch length')
         (A_share, B_share, agg_id), prep_mem = \
             prep_mem[:3], prep_mem[3:]
         sketch_share = [
@@ -7151,13 +7173,13 @@ def prep_next(Poplar1, prep_state, prep_msg):
         if prev_sketch == None:
             return prep_mem  # Output shares
         else:
-            raise ERR_INPUT  # prep message malformed
+            raise ValueError('invalid prep message')
 
-    raise ERR_INPUT  # unexpected input
+    raise ValueError('invalid prep state')
 
 def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
     if len(prep_shares) != 2:
-        raise ERR_INPUT  # unexpected number of prep shares
+        ValueError('incorrect number of prep shares')
     (level, _) = agg_param
     Field = Poplar1.Idpf.current_field(level)
     sketch = vec_add(prep_shares[0], prep_shares[1])
@@ -7169,9 +7191,9 @@ def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
             # denote a successful sketch verification.
             return None
         else:
-            raise ERR_VERIFY  # sketch verification failed
+            raise ValueError('sketch verification failed')
     else:
-        raise ERR_INPUT  # unexpected input length
+        raise ValueError('incorrect sketch length')
 </pre>
 </div>
 <figcaption><a href="#figure-24" class="selfRef">Figure 24</a>:
@@ -7454,10 +7476,10 @@ Decide whether to RECOMMEND this encoding, and if so, add it to test vectors.<a 
 <div class="alignLeft art-text artwork" id="section-8.2.6.6-3">
 <pre>
 def encode_agg_param(Poplar1, (level, prefixes)):
-    if level &gt; 2 ** 16 - 1:
-        raise ERR_INPUT # level too deep
-    if len(prefixes) &gt; 2 ** 32 - 1:
-        raise ERR_INPUT # too many prefixes
+    if level not in range(2**16):
+        raise ValueError('level out of range')
+    if len(prefixes) not in range(2**32):
+        raise ValueError('number of prefixes out of range')
     encoded = bytes()
     encoded += to_be_bytes(level, 2)
     encoded += to_be_bytes(len(prefixes), 4)
@@ -7481,7 +7503,7 @@ def decode_agg_param(Poplar1, encoded):
     for i in range(prefix_count):
         prefixes.append(packed &gt;&gt; ((level+1) * i) &amp; m)
     if len(encoded) != 0:
-        raise ERR_INPUT
+        raise ValueError('trailing bytes')
     return (level, tuple(prefixes))
 </pre><a href="#section-8.2.6.6-3" class="pilcrow">¶</a>
 </div>
@@ -7582,12 +7604,12 @@ field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
             <div class="alignLeft art-text artwork" id="section-8.3.1-3.1">
 <pre>
 def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
-    if alpha &gt;= 2 ** IdpfPoplar.BITS:
-        raise ERR_INPUT # alpha too long
+    if alpha not in range(2**IdpfPoplar.BITS):
+        raise ValueError("alpha out of range")
     if len(beta_inner) != IdpfPoplar.BITS - 1:
-        raise ERR_INPUT # beta_inner vector is the wrong size
+        raise ValueError("incorrect beta_inner length")
     if len(rand) != IdpfPoplar.RAND_SIZE:
-        raise ERR_INPUT # unexpected length for random input
+        raise ValueError("incorrect rand size")
 
     init_seed = [
         rand[:XofFixedKeyAes128.SEED_SIZE],
@@ -7619,9 +7641,9 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
         ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
         b = beta_inner[level] if level &lt; IdpfPoplar.BITS-1 \
-                else beta_leaf
+            else beta_leaf
         if len(b) != IdpfPoplar.VALUE_LEN:
-            raise ERR_INPUT # beta too long or too short
+            raise ValueError("length of beta must match the value length")
 
         w_cw = vec_add(vec_sub(b, w0), w1)
         # Implementation note: Here we negate the correction word if
@@ -7662,18 +7684,18 @@ functions <code>extend()</code>, <code>convert()</code>, and <code>decode_public
 <pre>
 def eval(IdpfPoplar, agg_id, public_share, init_seed,
          level, prefixes, binder):
-    if agg_id &gt;= IdpfPoplar.SHARES:
-        raise ERR_INPUT # invalid aggregator ID
-    if level &gt;= IdpfPoplar.BITS:
-        raise ERR_INPUT # level too deep
+    if agg_id not in range(IdpfPoplar.SHARES):
+        raise ValueError('aggregator id out of range')
+    if level not in range(IdpfPoplar.BITS):
+        raise ValueError('level out of range')
     if len(set(prefixes)) != len(prefixes):
-        raise ERR_INPUT # candidate prefixes are non-unique
+        raise ValueError('prefixes must be unique')
 
     correction_words = IdpfPoplar.decode_public_share(public_share)
     out_share = []
     for prefix in prefixes:
-        if prefix &gt;= 2 ** (level+1):
-            raise ERR_INPUT # prefix too long
+        if prefix not in range(2**(level+1)):
+            raise ValueError('prefix out of range')
 
         # The Aggregator's output share is the value of a node of
         # the IDPF tree at the given `level`. The node's value is
@@ -7809,7 +7831,7 @@ def decode_public_share(IdpfPoplar, encoded):
         w_cw = Field.decode_vec(encoded_w_cw)
         correction_words.append((seed_cw, ctrl_cw, w_cw))
     if len(encoded) != 0:
-        raise ERR_DECODE
+        raise ValueError('trailing bytes')
     return correction_words
 </pre>
 </div>
