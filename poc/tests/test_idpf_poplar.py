@@ -81,3 +81,12 @@ class TestIdpfPoplar(unittest.TestCase):
                 1, public_share, keys[1], level, (alpha,), binder)
             out = vec_add(out_share_0[0], out_share_1[0])[0]
             self.assertEqual(out.as_unsigned(), 1)
+
+    def test_is_prefix(self):
+        cls = IdpfPoplar.with_value_len(1).with_bits(8)
+        self.assertTrue(cls.is_prefix(0b1, 0b11000001, 0))
+        self.assertTrue(cls.is_prefix(0b11, 0b11000001, 1))
+        self.assertTrue(cls.is_prefix(0b110, 0b11000001, 2))
+        self.assertTrue(cls.is_prefix(0b1100, 0b11000001, 3))
+        self.assertFalse(cls.is_prefix(0b111, 0b11000001, 2))
+        self.assertFalse(cls.is_prefix(0b1101, 0b11000001, 3))

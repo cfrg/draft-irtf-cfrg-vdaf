@@ -25,7 +25,7 @@ def test_idpf(Idpf, alpha, level, prefixes):
             out[i] = vec_add(out[i], out_share[i])
 
     for (got, prefix) in zip(out, prefixes):
-        if Idpf.is_prefix(prefix, alpha, level+1):
+        if Idpf.is_prefix(prefix, alpha, level):
             if level < Idpf.BITS-1:
                 want = beta_inner[level]
             else:
@@ -68,7 +68,7 @@ def test_idpf_exhaustive(Idpf, alpha):
             got = reduce(lambda x, y: vec_add(x, y),
                          map(lambda x: x[prefix], out_shares))
 
-            if Idpf.is_prefix(prefix, alpha, level+1):
+            if Idpf.is_prefix(prefix, alpha, level):
                 if level < Idpf.BITS-1:
                     want = beta_inner[level]
                 else:
