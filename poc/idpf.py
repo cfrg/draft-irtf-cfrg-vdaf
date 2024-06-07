@@ -106,13 +106,12 @@ class Idpf:
             else Idpf.FieldLeaf
 
     @classmethod
-    def is_prefix(Idpf, x: int, y: int, L: int) -> bool:
+    def is_prefix(Idpf, x: int, y: int, level: int) -> bool:
         """
-        Returns `True` iff `x` is the prefix of `y` of length `L`.
+        Returns `True` iff `x` is the prefix of `y` at level `level`.
 
         Pre-conditions:
 
-            - `0 < L` and `L <= Idpf.BITS`
+            - `level` in `range(Idpf.BITS)`
         """
-        assert 0 < L and L <= Idpf.BITS
-        return y >> (Idpf.BITS - L) == x
+        return y >> (Idpf.BITS - 1 - level) == x
