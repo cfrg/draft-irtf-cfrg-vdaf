@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 8 December 2024                                            ISRG
+Expires: 9 December 2024                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             6 June 2024
+                                                             7 June 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 December 2024.
+   This Internet-Draft will expire on 9 December 2024.
 
 Copyright Notice
 
@@ -3843,7 +3843,7 @@ struct {
    zeros, where the number of ones is bounded.  This provides a
    functionality similar to Prio3Histogram except that more than one
    entry may be set.  This allows Prio3MultihotCountVec to be composed
-   with a randomized respjonse mechanism, like [EPK14], for providing
+   with a randomized response mechanism, like [EPK14], for providing
    differential privacy.  (For example, each Client would set each entry
    to one with some small probability.)
 
@@ -3852,9 +3852,9 @@ struct {
    (Table 3) as its default finite field.  It has three parameters:
    length, the number of of entries in the count vector; max_weight, the
    maximum weight of the vector (i.e., the number of non-zero entries);
-   and chunk_length, which is used by by a circuit optimization
-   described below.  It is RECOMMENDED to set chunk_length to an integer
-   near the square root of length (see Section 7.4.3.1).
+   and chunk_length, which is used by a circuit optimization described
+   below.  It is RECOMMENDED to set chunk_length to an integer near the
+   square root of length (see Section 7.4.3.1).
 
    Encoding, truncation, and decoding are defined as follows:
 
