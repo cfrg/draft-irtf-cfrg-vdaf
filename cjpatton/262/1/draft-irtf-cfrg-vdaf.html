@@ -5251,12 +5251,12 @@ are distinct. In this document, the fixed points are chosen so that the gadget
 polynomial can be constructed efficiently using the Cooley-Tukey FFT ("Fast
 Fourier Transform") algorithm. Note that this requires the field to be
 "FFT-friendly" as defined in <a href="#field-fft-friendly" class="auto internal xref">Section 6.1.2</a>.<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
-<p id="section-7.3.1.1-9">Finally, the validity circuit in our FLP may have any number of outputs. The
-input is said to be valid if each of the outputs is zero. To save bandwidth, we
-compute interpret the output as coefficients of a polynomial and evaluate the
-polynomial at a random point. Thus if each of the outputs zero, then the
-reduced output will be zero; on the other hand, if one of the outputs is
-non-zero, then the reduced output will be non-zero with high probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
+<p id="section-7.3.1.1-9">Finally, the validity circuit in our FLP may have any number of outputs (at
+least one). The input is said to be valid if each of the outputs is zero. To
+save bandwidth, we interpret the outputs as coefficients of a polynomial and
+evaluate the polynomial at a random point. If each of the outputs zero, then
+the reduced output will be zero; but if one of the outputs is non-zero, then
+the reduced output will be non-zero with high probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
