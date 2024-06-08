@@ -3030,7 +3030,7 @@ the gadget polynomial, are described in detail in {{flp-generic-construction}}.
 #### Extensions {#flp-generic-overview-extensions}
 
 The FLP described in the next section extends the proof system of {{BBCGGI19}},
-Section 4.2 in three ways.
+Section 4.2 in a few ways.
 
 First, the validity circuit in our construction includes an additional, random
 input (this is the "joint randomness" derived from the measurement shares in
@@ -3071,12 +3071,19 @@ inputs are in range `[0,2)` and the last `N-L` inputs are in range `[0,3)`. Of
 course, the same circuit can be expressed using a sub-component that the
 gadgets have in common, namely `Mul`, but the resulting proof would be longer.
 
-Finally, {{BBCGGI19}}, Theorem 4.3 makes no restrictions on the choice of the
+Third, {{BBCGGI19}}, Theorem 4.3 makes no restrictions on the choice of the
 fixed points `alpha[0], ..., alpha[M-1]`, other than to require that the points
 are distinct. In this document, the fixed points are chosen so that the gadget
 polynomial can be constructed efficiently using the Cooley-Tukey FFT ("Fast
 Fourier Transform") algorithm. Note that this requires the field to be
 "FFT-friendly" as defined in {{field-fft-friendly}}.
+
+Finally, the validity circuit in our FLP may have any number of outputs (at
+least one). The input is said to be valid if each of the outputs is zero. To
+save bandwidth, we take a random linear combination of the outputs. If each of
+the outputs is zero, then the reduced output will be zero; but if one of the
+outputs is non-zero, then the reduced output will be non-zero with high
+probability.
 
 ### Validity Circuits {#flp-generic-valid}
 
@@ -3085,16 +3092,17 @@ validity circuit `Valid` that implements the interface described here.
 
 A concrete `Valid` defines the following parameters:
 
-| Parameter        | Description                           |
-|:-----------------|:--------------------------------------|
-| `GADGETS`        | A list of gadgets                     |
-| `GADGET_CALLS`   | Number of times each gadget is called |
-| `MEAS_LEN`       | Length of the measurement             |
-| `OUTPUT_LEN`     | Length of the aggregatable output     |
-| `JOINT_RAND_LEN` | Length of the random input            |
-| `Measurement`    | The type of measurement               |
-| `AggResult`      | Type of the aggregate result          |
-| `Field`          | An FFT-friendly finite field as defined in {{field-fft-friendly}} |
+| Parameter         | Description                           |
+|:------------------|:--------------------------------------|
+| `GADGETS`         | A list of gadgets                     |
+| `GADGET_CALLS`    | Number of times each gadget is called |
+| `MEAS_LEN`        | Length of the measurement             |
+| `OUTPUT_LEN`      | Length of the aggregatable output     |
+| `JOINT_RAND_LEN`  | Length of the random input            |
+| `EVAL_OUTPUT_LEN` | Length of the circuit output          |
+| `Measurement`     | The type of measurement               |
+| `AggResult`       | Type of the aggregate result          |
+| `Field`           | An FFT-friendly finite field as defined in {{field-fft-friendly}} |
 {: title="Validity circuit parameters."}
 
 Each gadget `G` in `GADGETS` defines a constant `DEGREE` that specifies the
@@ -3132,7 +3140,10 @@ def prove_rand_len(self):
 
 def query_rand_len(self):
     """Length of the query randomness."""
-    return len(Valid.GADGETS)
+    query_rand_len = len(self.GADGETS)
+    if self.EVAL_OUTPUT_LEN > 1:
+        query_rand_len += 1
+    return query_rand_len
 
 def proof_len(self):
     """Length of the proof."""
@@ -3243,8 +3254,14 @@ is generated as follows:
    of each gadget in the corresponding table. This step is similar to the
    prover's step (3.) except the verifier does not evaluate the gadgets.
    Instead, it computes the output of the `k`th call to `G_i` by evaluating
-   `poly_gadget_i(alpha_i^k)`. Let `v` denote the output of the circuit
+   `poly_gadget_i(alpha_i^k)`. Let `out` denote the output of the circuit
    evaluation.
+
+1. Next, reduce `out` as follows. If `EVAL_OUTPUT_LEN > 1`, then consume the
+   first element of `query_rand` by letting `[r], query_rand = front(1,
+   query_rand)`. Then let `v = r*out[0] + r**2*out[1] + r**3*out[2] + ...`.
+   That is, interpret the outputs as coefficients of a polynomial `f(x)` and
+   evaluate polynomial `f(x)*x` at a random point `r`.
 
 1. Compute the wire polynomials just as in the prover's step (4.).
 
@@ -3316,23 +3333,25 @@ The `Count` validity circuit is defined as
 
 ~~~
 def eval(self, meas, joint_rand, _num_shares):
-    return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+    out = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
         - meas[0]
+    return [out]
 ~~~
 
 The measurement is encoded and decoded as a singleton vector in the natural
 way. The parameters for this circuit are summarized below.
 
-| Parameter        | Value                  |
-|:-----------------|:-----------------------|
-| `GADGETS`        | `[Mul]`                |
-| `GADGET_CALLS`   | `[1]`                  |
-| `MEAS_LEN`       | `1`                    |
-| `OUTPUT_LEN`     | `1`                    |
-| `JOINT_RAND_LEN` | `0`                    |
-| `Measurement`    | `int` in `range(2)`    |
-| `AggResult`      | `int`                  |
-| `Field`          | `Field64` ({{fields}}) |
+| Parameter         | Value                  |
+|:------------------|:-----------------------|
+| `GADGETS`         | `[Mul]`                |
+| `GADGET_CALLS`    | `[1]`                  |
+| `MEAS_LEN`        | `1`                    |
+| `OUTPUT_LEN`      | `1`                    |
+| `JOINT_RAND_LEN`  | `0`                    |
+| `EVAL_OUTPUT_LEN` | `1`                    |
+| `Measurement`     | `int` in `range(2)`    |
+| `AggResult`       | `int`                  |
+| `Field`           | `Field64` ({{fields}}) |
 {: title="Parameters of validity circuit Count."}
 
 ### Prio3Sum
@@ -3381,19 +3400,20 @@ def eval(self, meas, joint_rand, _num_shares):
     for b in meas:
         out += r * self.GADGETS[0].eval(self.Field, [b])
         r *= joint_rand[0]
-    return out
+    return [out]
 ~~~
 
-| Parameter        | Value                     |
-|:-----------------|:--------------------------|
-| `GADGETS`        | `[Range2]`                |
-| `GADGET_CALLS`   | `[bits]`                  |
-| `MEAS_LEN`       | `bits`                    |
-| `OUTPUT_LEN`     | `1`                       |
-| `JOINT_RAND_LEN` | `1`                       |
-| `Measurement`    | `int` in `range(2**bits)` |
-| `AggResult`      | `int`                     |
-| `Field`          | `Field128` ({{fields}})   |
+| Parameter         | Value                     |
+|:------------------|:--------------------------|
+| `GADGETS`         | `[Range2]`                |
+| `GADGET_CALLS`    | `[bits]`                  |
+| `MEAS_LEN`        | `bits`                    |
+| `OUTPUT_LEN`      | `1`                       |
+| `JOINT_RAND_LEN`  | `1`                       |
+| `EVAL_OUTPUT_LEN` | `1`                       |
+| `Measurement`     | `int` in `range(2**bits)` |
+| `AggResult`       | `int`                     |
+| `Field`           | `Field128` ({{fields}})   |
 {: title="Parameters of validity circuit Sum."}
 
 ### Prio3SumVec
@@ -3501,19 +3521,20 @@ def eval(self, meas, joint_rand, num_shares):
 
         out += self.GADGETS[0].eval(self.Field, inputs)
 
-    return out
+    return [out]
 ~~~
 
-| Parameter        | Value                                                  |
-|:-----------------|:-------------------------------------------------------|
-| `GADGETS`        | `[ParallelSum(Mul(), chunk_length)]`                   |
-| `GADGET_CALLS`   | `[(length * bits + chunk_length - 1) // chunk_length]` |
-| `MEAS_LEN`       | `length * bits`                                        |
-| `OUTPUT_LEN`     | `length`                                               |
-| `JOINT_RAND_LEN` | `1`                                                    |
-| `Measurement`    | `list[int]`, each element in `range(2**bits)`          |
-| `AggResult`      | `list[int]`                                            |
-| `Field`          | `Field128` ({{fields}})                                |
+| Parameter         | Value                                                  |
+|:------------------|:-------------------------------------------------------|
+| `GADGETS`         | `[ParallelSum(Mul(), chunk_length)]`                   |
+| `GADGET_CALLS`    | `[(length * bits + chunk_length - 1) // chunk_length]` |
+| `MEAS_LEN`        | `length * bits`                                        |
+| `OUTPUT_LEN`      | `length`                                               |
+| `JOINT_RAND_LEN`  | `1`                                                    |
+| `EVAL_OUTPUT_LEN` | `1`                                                    |
+| `Measurement`     | `list[int]`, each element in `range(2**bits)`          |
+| `AggResult`       | `list[int]`                                            |
+| `Field`           | `Field128` ({{fields}})                                |
 {: title="Parameters of validity circuit SumVec."}
 
 #### Selection of `ParallelSum` chunk length {#parallel-sum-chunk-length}
@@ -3610,22 +3631,23 @@ def eval(self, meas, joint_rand, num_shares):
 
     out = joint_rand[1] * range_check + \
         joint_rand[1] ** 2 * sum_check
-    return out
+    return [out]
 ~~~
 
 Note that this circuit depends on the number of shares into which the
 measurement is sharded. This is provided to the FLP by Prio3.
 
-| Parameter        | Value                                           |
-|:-----------------|:------------------------------------------------|
-| `GADGETS`        | `[ParallelSum(Mul(), chunk_length)]`            |
-| `GADGET_CALLS`   | `[(length + chunk_length - 1) // chunk_length]` |
-| `MEAS_LEN`       | `length`                                        |
-| `OUTPUT_LEN`     | `length`                                        |
-| `JOINT_RAND_LEN` | `2`                                             |
-| `Measurement`    | `int`                                           |
-| `AggResult`      | `list[int]`                                     |
-| `Field`          | `Field128` ({{fields}})                         |
+| Parameter         | Value                                           |
+|:------------------|:------------------------------------------------|
+| `GADGETS`         | `[ParallelSum(Mul(), chunk_length)]`            |
+| `GADGET_CALLS`    | `[(length + chunk_length - 1) // chunk_length]` |
+| `MEAS_LEN`        | `length`                                        |
+| `OUTPUT_LEN`      | `length`                                        |
+| `JOINT_RAND_LEN`  | `2`                                             |
+| `EVAL_OUTPUT_LEN` | `1`                                             |
+| `Measurement`     | `int`                                           |
+| `AggResult`       | `list[int]`                                     |
+| `Field`           | `Field128` ({{fields}})                         |
 {: title="Parameters of validity circuit Histogram."}
 
 ### Prio3MultihotCountVec

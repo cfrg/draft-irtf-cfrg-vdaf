@@ -4,7 +4,8 @@ from common import next_power_of_2
 from field import Field64, Field96, Field128, poly_eval
 from flp import run_flp
 from flp_generic import (Count, FlpGeneric, Histogram, Mul, MultihotCountVec,
-                         PolyEval, Range2, Sum, SumVec, Valid)
+                         PolyEval, Range2, Sum, SumOfRangeCheckedInputs,
+                         SumVec, Valid)
 
 
 class TestMultiGadget(Valid):
@@ -18,6 +19,7 @@ class TestMultiGadget(Valid):
     MEAS_LEN = 1
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
+    EVAL_OUTPUT_LEN = 1
 
     def eval(self, meas, joint_rand, _num_shares):
         self.check_valid_eval(meas, joint_rand)
@@ -25,7 +27,7 @@ class TestMultiGadget(Valid):
         x = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]])
         y = self.GADGETS[1].eval(self.Field, [meas[0], x])
         z = self.GADGETS[1].eval(self.Field, [x, y])
-        return z
+        return [z]
 
     def encode(self, measurement):
         return [self.Field(measurement)]
@@ -65,7 +67,8 @@ def test_flp_generic(flp, test_cases):
         # Evaluate validity circuit.
         joint_rand = flp.Field.rand_vec(flp.JOINT_RAND_LEN)
         v = flp.Valid.eval(meas, joint_rand, 1)
-        if (v == flp.Field(0)) != expected_decision:
+        if (v == [flp.Field(0)] * flp.Valid.EVAL_OUTPUT_LEN) != \
+                expected_decision:
             print('{}: test {} failed: validity circuit returned {}'.format(
                 flp.Valid.__class__.__name__, i, v))
 
@@ -128,6 +131,15 @@ class TestFlpGeneric(unittest.TestCase):
             (flp.Field.rand_vec(10), False),
         ])
         test_encode_truncate_decode(flp, [0, 100, 2 ** 10 - 1])
+
+    def test_sum_of_range_checked_inputs(self):
+        flp = FlpGeneric(SumOfRangeCheckedInputs(10_000))
+        test_flp_generic(flp, [
+            (flp.encode(0), True),
+            (flp.encode(1337), True),
+            (flp.encode(9_999), True),
+            (flp.Field.zeros(flp.MEAS_LEN), False),
+        ])
 
     def test_histogram(self):
         flp = FlpGeneric(Histogram(4, 2))

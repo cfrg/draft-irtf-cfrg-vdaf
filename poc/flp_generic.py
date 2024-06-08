@@ -4,7 +4,7 @@ import copy
 from typing import Any
 
 import field
-from common import next_power_of_2
+from common import front, next_power_of_2
 from field import poly_eval, poly_interp, poly_mul, poly_strip
 from flp import Flp
 
@@ -58,6 +58,9 @@ class Valid:
     # Length of the aggregatable output for this type.
     OUTPUT_LEN: int
 
+    # Length of the output of `eval()`.
+    EVAL_OUTPUT_LEN: int
+
     # The sequence of gadgets for this validity circuit.
     GADGETS: list[Gadget]
 
@@ -71,7 +74,10 @@ class Valid:
 
     def query_rand_len(self) -> int:
         """Length of the query randomness."""
-        return len(self.GADGETS)
+        query_rand_len = len(self.GADGETS)
+        if self.EVAL_OUTPUT_LEN > 1:
+            query_rand_len += 1
+        return query_rand_len
 
     def proof_len(self) -> int:
         """Length of the proof."""
@@ -118,7 +124,7 @@ class Valid:
     def eval(self,
              meas: list[Field],
              joint_rand: list[Field],
-             num_shares: int) -> Field:
+             num_shares: int) -> list[Field]:
         """
         Evaluate the circuit on the provided measurement and joint randomness.
 
@@ -127,6 +133,10 @@ class Valid:
             - `len(meas) == self.MEAS_LEN`
             - `len(joint_rand) == self.JOINT_RAND_LEN`
             - `num_shares >= 1`
+
+        Post-conditions:
+
+            - return value has length `self.EVAL_OUTPUT_LEN`
         """
         raise NotImplementedError()
 
@@ -287,10 +297,24 @@ class FlpGeneric(Flp):
         # for each call to each gadget. The gadget output is computed by
         # evaluating the gadget polynomial.
         valid = query_wrapped(self.Valid, proof)
-        v = valid.eval(meas, joint_rand, num_shares)
+        out = valid.eval(meas, joint_rand, num_shares)
+
+        if len(out) != self.Valid.EVAL_OUTPUT_LEN:
+            raise ValueError('circuit has unexpected output length')
 
         if len(query_rand) != self.Valid.query_rand_len():
             raise ValueError('incorrect query randomness length')
+
+        # Reduce the output.
+        if self.Valid.EVAL_OUTPUT_LEN > 1:
+            ([r], query_rand) = front(1, query_rand)
+            r_power = r
+            v = self.Field(0)
+            for x in out:
+                v += r_power * x
+                r_power *= r
+        else:
+            [v] = out
 
         # Construct the verifier message.
         verifier = [v]
@@ -505,11 +529,13 @@ class Count(Valid):
     MEAS_LEN = 1
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
+    EVAL_OUTPUT_LEN = 1
 
     def eval(self, meas, joint_rand, _num_shares):
         self.check_valid_eval(meas, joint_rand)
-        return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+        out = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
             - meas[0]
+        return [out]
 
     def encode(self, measurement):
         if measurement not in [0, 1]:
@@ -535,6 +561,7 @@ class Sum(Valid):
     GADGETS = [Range2()]
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
+    EVAL_OUTPUT_LEN = 1
 
     def __init__(self, bits):
         """
@@ -555,7 +582,7 @@ class Sum(Valid):
         for b in meas:
             out += r * self.GADGETS[0].eval(self.Field, [b])
             r *= joint_rand[0]
-        return out
+        return [out]
 
     def encode(self, measurement):
         if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
@@ -587,6 +614,7 @@ class Histogram(Valid):
 
     # Associated parameters
     JOINT_RAND_LEN = 2
+    EVAL_OUTPUT_LEN = 1
 
     def __init__(self, length, chunk_length):
         """
@@ -637,7 +665,7 @@ class Histogram(Valid):
 
         out = joint_rand[1] * range_check + \
             joint_rand[1] ** 2 * sum_check
-        return out
+        return [out]
 
     def encode(self, measurement):
         encoded = [self.Field(0)] * self.length
@@ -688,6 +716,7 @@ class MultihotCountVec(Valid):
 
     # Associated parameters
     JOINT_RAND_LEN = 2
+    EVAL_OUTPUT_LEN = 1
 
     def __init__(self, length, max_weight: int, chunk_length: int):
         """
@@ -763,7 +792,7 @@ class MultihotCountVec(Valid):
 
         out = joint_rand[1] * range_check + \
             joint_rand[1] ** 2 * weight_check
-        return out
+        return [out]
 
     def encode(self, measurement):
         if len(measurement) != self.length:
@@ -808,6 +837,7 @@ class SumVec(Valid):
 
     # Associated parameters
     JOINT_RAND_LEN = 1
+    EVAL_OUTPUT_LEN = 1
 
     def __init__(self, length: int, bits: int, chunk_length: int):
         """
@@ -858,7 +888,7 @@ class SumVec(Valid):
 
             out += self.GADGETS[0].eval(self.Field, inputs)
 
-        return out
+        return [out]
 
     def encode(self, measurement):
         if len(measurement) != self.length:
@@ -888,3 +918,87 @@ class SumVec(Valid):
         test_vec['bits'] = self.bits
         test_vec['chunk_length'] = self.chunk_length
         return ['length', 'bits', 'chunk_length']
+
+
+# TODO(issue #306) Replace `Sum` with this type.
+class SumOfRangeCheckedInputs(Valid):
+    # Associated types
+    Measurement = int  # `range(self.max_measurement+1)`
+    AggResult = int
+    Field = field.Field64
+
+    # Associated parameters
+    GADGETS = [Range2()]
+    JOINT_RAND_LEN = 0
+    OUTPUT_LEN = 1
+
+    def __init__(self, max_measurement: int):
+        """
+        Similar to `Sum` but with an arbitrary bound.
+
+        The circuit checks that the measurement is in
+        `range(max_measurement+1)`. This is accomplished by encoding the
+        measurement in a way that ensures it is in range, then comparing the
+        reported measurement to the range checked measurement.
+
+        Let
+
+        - `bits = max_measurement.bit_length()`
+        - `offset = 2**bits - 1 - max_measurement`
+
+        The range checked measurement is the bit-encoding of `offset` plus the
+        measurement. Observe that only measurements in at most
+        `max_measurement` can be encoded with `bits` bits.
+
+        To do the range check, the circuit first checks that each
+        entry of this bit vector is a one or a zero. It then decodes
+        it and subtracts it from `offset` plus the reported value.
+        Since the range checked measurement is in the correct range,
+        equality implies that the reported measurement is as well.
+        """
+        self.bits = max_measurement.bit_length()
+        self.offset = self.Field(2**self.bits - 1 - max_measurement)
+        self.max_measurement = max_measurement
+
+        if 2**self.bits >= self.Field.MODULUS:
+            raise ValueError('bound exceeds field modulus')
+
+        self.GADGET_CALLS = [2*self.bits]
+        self.MEAS_LEN = 2*self.bits
+        self.EVAL_OUTPUT_LEN = 2*self.bits + 1
+
+    def eval(self, meas, joint_rand, num_shares):
+        self.check_valid_eval(meas, joint_rand)
+        shares_inv = self.Field(num_shares).inv()
+
+        out = []
+        for b in meas:
+            out.append(self.GADGETS[0].eval(self.Field, [b]))
+
+        range_check = self.offset*shares_inv + \
+            self.Field.decode_from_bit_vector(meas[:self.bits]) - \
+            self.Field.decode_from_bit_vector(meas[self.bits:])
+        out.append(range_check)
+        return out
+
+    def encode(self, measurement):
+        encoded = []
+        encoded += self.Field.encode_into_bit_vector(
+            measurement,
+            self.bits
+        )
+        encoded += self.Field.encode_into_bit_vector(
+            measurement + self.offset.as_unsigned(),
+            self.bits
+        )
+        return encoded
+
+    def truncate(self, meas):
+        return [self.Field.decode_from_bit_vector(meas[:self.bits])]
+
+    def decode(self, output, _num_measurements):
+        return output[0].as_unsigned()
+
+    def test_vec_set_type_param(self, test_vec):
+        test_vec['max_measurement'] = int(self.MEAS_LEN)
+        return ['max_measurement']
