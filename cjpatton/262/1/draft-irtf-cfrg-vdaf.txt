@@ -3506,34 +3506,37 @@ struct {
    The Count validity circuit is defined as
 
    def eval(self, meas, joint_rand, _num_shares):
-       return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+       out = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
            - meas[0]
+       return [out]
 
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.
 
-                  +================+===================+
-                  | Parameter      | Value             |
-                  +================+===================+
-                  | GADGETS        | [Mul]             |
-                  +----------------+-------------------+
-                  | GADGET_CALLS   | [1]               |
-                  +----------------+-------------------+
-                  | MEAS_LEN       | 1                 |
-                  +----------------+-------------------+
-                  | OUTPUT_LEN     | 1                 |
-                  +----------------+-------------------+
-                  | JOINT_RAND_LEN | 0                 |
-                  +----------------+-------------------+
-                  | Measurement    | int in range(2)   |
-                  +----------------+-------------------+
-                  | AggResult      | int               |
-                  +----------------+-------------------+
-                  | Field          | Field64 (Table 3) |
-                  +----------------+-------------------+
+                  +=================+===================+
+                  | Parameter       | Value             |
+                  +=================+===================+
+                  | GADGETS         | [Mul]             |
+                  +-----------------+-------------------+
+                  | GADGET_CALLS    | [1]               |
+                  +-----------------+-------------------+
+                  | MEAS_LEN        | 1                 |
+                  +-----------------+-------------------+
+                  | OUTPUT_LEN      | 1                 |
+                  +-----------------+-------------------+
+                  | JOINT_RAND_LEN  | 0                 |
+                  +-----------------+-------------------+
+                  | EVAL_OUTPUT_LEN | 1                 |
+                  +-----------------+-------------------+
+                  | Measurement     | int in range(2)   |
+                  +-----------------+-------------------+
+                  | AggResult       | int               |
+                  +-----------------+-------------------+
+                  | Field           | Field64 (Table 3) |
+                  +-----------------+-------------------+
 
-                     Table 9: Parameters of validity
-                              circuit Count.
+                      Table 9: Parameters of validity
+                               circuit Count.
 
 7.4.2.  Prio3Sum
 
@@ -3577,30 +3580,32 @@ struct {
        for b in meas:
            out += r * self.GADGETS[0].eval(self.Field, [b])
            r *= joint_rand[0]
-       return out
+       return [out]
 
-                +================+=======================+
-                | Parameter      | Value                 |
-                +================+=======================+
-                | GADGETS        | [Range2]              |
-                +----------------+-----------------------+
-                | GADGET_CALLS   | [bits]                |
-                +----------------+-----------------------+
-                | MEAS_LEN       | bits                  |
-                +----------------+-----------------------+
-                | OUTPUT_LEN     | 1                     |
-                +----------------+-----------------------+
-                | JOINT_RAND_LEN | 1                     |
-                +----------------+-----------------------+
-                | Measurement    | int in range(2**bits) |
-                +----------------+-----------------------+
-                | AggResult      | int                   |
-                +----------------+-----------------------+
-                | Field          | Field128 (Table 3)    |
-                +----------------+-----------------------+
+                +=================+=======================+
+                | Parameter       | Value                 |
+                +=================+=======================+
+                | GADGETS         | [Range2]              |
+                +-----------------+-----------------------+
+                | GADGET_CALLS    | [bits]                |
+                +-----------------+-----------------------+
+                | MEAS_LEN        | bits                  |
+                +-----------------+-----------------------+
+                | OUTPUT_LEN      | 1                     |
+                +-----------------+-----------------------+
+                | JOINT_RAND_LEN  | 1                     |
+                +-----------------+-----------------------+
+                | EVAL_OUTPUT_LEN | 1                     |
+                +-----------------+-----------------------+
+                | Measurement     | int in range(2**bits) |
+                +-----------------+-----------------------+
+                | AggResult       | int                   |
+                +-----------------+-----------------------+
+                | Field           | Field128 (Table 3)    |
+                +-----------------+-----------------------+
 
-                     Table 10: Parameters of validity
-                               circuit Sum.
+                      Table 10: Parameters of validity
+                                circuit Sum.
 
 7.4.3.  Prio3SumVec
 
@@ -3668,7 +3673,7 @@ def decode(self, output, _num_measurements):
           start_index = i * self.subcircuit.ARITY
           end_index = (i + 1) * self.subcircuit.ARITY
           out += self.subcircuit.eval(Field, inp[start_index:end_index])
-      return out
+      return [out]
 
    The SumVec validity circuit checks that the encoded measurement
    consists of ones and zeros.  Rather than use the Range2 gadget on
@@ -3706,31 +3711,33 @@ def decode(self, output, _num_measurements):
 
            out += self.GADGETS[0].eval(self.Field, inputs)
 
-       return out
+       return [out]
 
-          +================+====================================+
-          | Parameter      | Value                              |
-          +================+====================================+
-          | GADGETS        | [ParallelSum(Mul(), chunk_length)] |
-          +----------------+------------------------------------+
-          | GADGET_CALLS   | [(length * bits + chunk_length -   |
-          |                | 1) // chunk_length]                |
-          +----------------+------------------------------------+
-          | MEAS_LEN       | length * bits                      |
-          +----------------+------------------------------------+
-          | OUTPUT_LEN     | length                             |
-          +----------------+------------------------------------+
-          | JOINT_RAND_LEN | 1                                  |
-          +----------------+------------------------------------+
-          | Measurement    | list[int], each element in         |
-          |                | range(2**bits)                     |
-          +----------------+------------------------------------+
-          | AggResult      | list[int]                          |
-          +----------------+------------------------------------+
-          | Field          | Field128 (Table 3)                 |
-          +----------------+------------------------------------+
+         +=================+====================================+
+         | Parameter       | Value                              |
+         +=================+====================================+
+         | GADGETS         | [ParallelSum(Mul(), chunk_length)] |
+         +-----------------+------------------------------------+
+         | GADGET_CALLS    | [(length * bits + chunk_length -   |
+         |                 | 1) // chunk_length]                |
+         +-----------------+------------------------------------+
+         | MEAS_LEN        | length * bits                      |
+         +-----------------+------------------------------------+
+         | OUTPUT_LEN      | length                             |
+         +-----------------+------------------------------------+
+         | JOINT_RAND_LEN  | 1                                  |
+         +-----------------+------------------------------------+
+         | EVAL_OUTPUT_LEN | 1                                  |
+         +-----------------+------------------------------------+
+         | Measurement     | list[int], each element in         |
+         |                 | range(2**bits)                     |
+         +-----------------+------------------------------------+
+         | AggResult       | list[int]                          |
+         +-----------------+------------------------------------+
+         | Field           | Field128 (Table 3)                 |
+         +-----------------+------------------------------------+
 
-              Table 11: Parameters of validity circuit SumVec.
+             Table 11: Parameters of validity circuit SumVec.
 
 7.4.3.1.  Selection of ParallelSum chunk length
 
@@ -3829,32 +3836,34 @@ def decode(self, output, _num_measurements):
 
        out = joint_rand[1] * range_check + \
            joint_rand[1] ** 2 * sum_check
-       return out
+       return [out]
 
    Note that this circuit depends on the number of shares into which the
    measurement is sharded.  This is provided to the FLP by Prio3.
 
-    +================+===============================================+
-    | Parameter      | Value                                         |
-    +================+===============================================+
-    | GADGETS        | [ParallelSum(Mul(), chunk_length)]            |
-    +----------------+-----------------------------------------------+
-    | GADGET_CALLS   | [(length + chunk_length - 1) // chunk_length] |
-    +----------------+-----------------------------------------------+
-    | MEAS_LEN       | length                                        |
-    +----------------+-----------------------------------------------+
-    | OUTPUT_LEN     | length                                        |
-    +----------------+-----------------------------------------------+
-    | JOINT_RAND_LEN | 2                                             |
-    +----------------+-----------------------------------------------+
-    | Measurement    | int                                           |
-    +----------------+-----------------------------------------------+
-    | AggResult      | list[int]                                     |
-    +----------------+-----------------------------------------------+
-    | Field          | Field128 (Table 3)                            |
-    +----------------+-----------------------------------------------+
+    +=================+===============================================+
+    | Parameter       | Value                                         |
+    +=================+===============================================+
+    | GADGETS         | [ParallelSum(Mul(), chunk_length)]            |
+    +-----------------+-----------------------------------------------+
+    | GADGET_CALLS    | [(length + chunk_length - 1) // chunk_length] |
+    +-----------------+-----------------------------------------------+
+    | MEAS_LEN        | length                                        |
+    +-----------------+-----------------------------------------------+
+    | OUTPUT_LEN      | length                                        |
+    +-----------------+-----------------------------------------------+
+    | JOINT_RAND_LEN  | 2                                             |
+    +-----------------+-----------------------------------------------+
+    | EVAL_OUTPUT_LEN | 1                                             |
+    +-----------------+-----------------------------------------------+
+    | Measurement     | int                                           |
+    +-----------------+-----------------------------------------------+
+    | AggResult       | list[int]                                     |
+    +-----------------+-----------------------------------------------+
+    | Field           | Field128 (Table 3)                            |
+    +-----------------+-----------------------------------------------+
 
-           Table 12: Parameters of validity circuit Histogram.
+            Table 12: Parameters of validity circuit Histogram.
 
 8.  Poplar1
 

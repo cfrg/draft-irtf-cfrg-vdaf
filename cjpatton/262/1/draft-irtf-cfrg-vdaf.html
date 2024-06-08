@@ -5727,8 +5727,10 @@ not equal to the gadget's <code>ARITY</code> parameter.<a href="#section-7.4.1-4
 <div class="alignLeft art-text artwork" id="section-7.4.1-6">
 <pre>
 def eval(self, meas, joint_rand, _num_shares):
-    return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+    out = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
         - meas[0]
+    return [out]
+
 </pre><a href="#section-7.4.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.1-7">The measurement is encoded and decoded as a singleton vector in the natural
@@ -5783,6 +5785,14 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>0</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
 </td>
               </tr>
               <tr>
@@ -5860,7 +5870,7 @@ def eval(self, meas, joint_rand, _num_shares):
     for b in meas:
         out += r * self.GADGETS[0].eval(self.Field, [b])
         r *= joint_rand[0]
-    return out
+    return [out]
 </pre><a href="#section-7.4.2-7" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circu"></span><table class="center" id="table-10">
@@ -5910,6 +5920,14 @@ def eval(self, meas, joint_rand, _num_shares):
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>JOINT_RAND_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>1</code>
@@ -6008,7 +6026,7 @@ def eval(self, Field, inp):
         start_index = i * self.subcircuit.ARITY
         end_index = (i + 1) * self.subcircuit.ARITY
         out += self.subcircuit.eval(Field, inp[start_index:end_index])
-    return out
+    return [out]
 </pre><a href="#section-7.4.3-7" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.3-8">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
@@ -6047,7 +6065,7 @@ def eval(self, meas, joint_rand, num_shares):
 
         out += self.GADGETS[0].eval(self.Field, inputs)
 
-    return out
+    return [out]
 </pre><a href="#section-7.4.3-9" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circui"></span><table class="center" id="table-11">
@@ -6097,6 +6115,14 @@ def eval(self, meas, joint_rand, num_shares):
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>JOINT_RAND_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>1</code>
@@ -6227,7 +6253,7 @@ def eval(self, meas, joint_rand, num_shares):
 
     out = joint_rand[1] * range_check + \
         joint_rand[1] ** 2 * sum_check
-    return out
+    return [out]
 </pre><a href="#section-7.4.4-7" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.4-8">Note that this circuit depends on the number of shares into which the
@@ -6282,6 +6308,14 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>2</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
 </td>
               </tr>
               <tr>
