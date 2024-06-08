@@ -32,4 +32,5 @@ jobs:
 
     - name: Enforce type hints
       working-directory: poc
-      run: sage -python -m mypy xof.py field.py
+      # TODO(#59) run: sage -python -m mypy *.py tests/*.py
+      run: sage -python -m mypy xof.py field.py flp.py flp_generic.py tests/test_xof.py tests/test_field.py tests/test_flp.py tests/test_flp_generic.py

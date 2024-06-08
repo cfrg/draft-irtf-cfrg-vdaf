@@ -1,6 +1,7 @@
 """A generic FLP based on {{BBCGGI19}}, Theorem 4.3."""
 
 import copy
+from typing import Any
 
 import field
 from common import next_power_of_2
@@ -44,9 +45,9 @@ class Valid:
 
     # Generic parameters overwritten by a concrete validity circuit. `Field`
     # MUST be FFT-friendly.
-    Measurement = None
-    AggResult = None
-    Field: field.FftField = None
+    Measurement: Any = None
+    AggResult: Any = None
+    Field: Any = None
 
     # Length of the encoded measurement input to the validity circuit.
     MEAS_LEN: int
@@ -64,15 +65,15 @@ class Valid:
     # as `GADGETS`.
     GADGET_CALLS: list[int]
 
-    def prove_rand_len(self):
+    def prove_rand_len(self) -> int:
         """Length of the prover randomness."""
         return sum(g.ARITY for g in self.GADGETS)
 
-    def query_rand_len(self):
+    def query_rand_len(self) -> int:
         """Length of the query randomness."""
         return len(self.GADGETS)
 
-    def proof_len(self):
+    def proof_len(self) -> int:
         """Length of the proof."""
         length = 0
         for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
@@ -80,7 +81,7 @@ class Valid:
             length += g.ARITY + g.DEGREE * (P - 1) + 1
         return length
 
-    def verifier_len(self):
+    def verifier_len(self) -> int:
         """Length of the verifier message."""
         length = 1
         for g in self.GADGETS:
@@ -117,7 +118,7 @@ class Valid:
     def eval(self,
              meas: list[Field],
              joint_rand: list[Field],
-             num_shares: int):
+             num_shares: int) -> Field:
         """
         Evaluate the circuit on the provided measurement and joint randomness.
 
@@ -143,10 +144,10 @@ class Valid:
             raise ValueError('incorrect joint randomness length')
 
     @classmethod
-    def with_field(cls, field: field.FftField):
-        class _ValidWithField(cls):
+    def with_field(cls, field):
+        class ValidWithField(cls):
             Field = field
-        return _ValidWithField
+        return ValidWithField
 
 
 class ProveGadget:
@@ -233,10 +234,7 @@ def query_wrapped(valid, proof):
 class FlpGeneric(Flp):
     """An FLP constructed from a validity circuit."""
 
-    Field: field.FftField = None
-    Valid = None
-
-    def __init__(self, valid):
+    def __init__(self, valid: Valid):
         """Instantiate the generic FLP for the given validity circuit."""
         self.Valid = valid
         self.Measurement = valid.Measurement
@@ -401,7 +399,6 @@ class PolyEval(Gadget):
     p = None
 
     ARITY = 1
-    DEGREE = None  # Set by constructor
 
     def __init__(self, p: list[int]):
         """
@@ -458,11 +455,8 @@ class ParallelSum(Gadget):
     """
 
     # Operational parameters
-    subcircuit = None
-    count = None
-
-    ARITY = None  # Set by constructor
-    DEGREE = None  # Set by constructor
+    subcircuit: Gadget
+    count: int
 
     def __init__(self, subcircuit: Gadget, count: int):
         self.subcircuit = subcircuit
@@ -539,8 +533,6 @@ class Sum(Valid):
 
     # Associated parameters
     GADGETS = [Range2()]
-    GADGET_CALLS = None  # Set by Sum.with_bits()
-    MEAS_LEN = None  # Set by Sum.with_bits()
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
 
@@ -594,11 +586,7 @@ class Histogram(Valid):
     Field = field.Field128
 
     # Associated parameters
-    GADGETS = None  # Set by `Histogram.with_params()`
-    GADGET_CALLS = None  # Set by `Histogram.with_params()`
-    MEAS_LEN = None  # Set by `Histogram.with_params()`
     JOINT_RAND_LEN = 2
-    OUTPUT_LEN = None  # Set by `Histogram.with_params()`
 
     def __init__(self, length, chunk_length):
         """
@@ -699,11 +687,7 @@ class MultiHotHistogram(Valid):
     Field = field.Field128
 
     # Associated parameters
-    GADGETS = None  # Set by constructor
-    GADGET_CALLS = None  # Set by constructor
-    MEAS_LEN = None  # Set by constructor
     JOINT_RAND_LEN = 2
-    OUTPUT_LEN = None  # Set by constructor
 
     def __init__(self, length, max_count, chunk_length):
         """
@@ -802,9 +786,9 @@ class MultiHotHistogram(Valid):
 
 class SumVec(Valid):
     # Operational parameters
-    length = None  # Set by constructor
-    bits = None  # Set by constructor
-    chunk_length = None  # Set by constructor
+    length: int
+    bits: int
+    chunk_length: int
 
     # Associated types
     Measurement = list[int]
@@ -812,19 +796,15 @@ class SumVec(Valid):
     Field = field.Field128
 
     # Associated parameters
-    GADGETS = None  # Set by constructor
-    GADGET_CALLS = None  # Set by constructor
-    MEAS_LEN = None  # Set by constructor
     JOINT_RAND_LEN = 1
-    OUTPUT_LEN = None  # Set by constructor
 
-    def __init__(self, length, bits, chunk_length):
+    def __init__(self, length: int, bits: int, chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with `length`
         elements, each in the range `[0, 2^bits)`.
         """
 
-        if 2 ** bits >= Sum.Field.MODULUS:
+        if 2 ** bits >= self.Field.MODULUS:
             raise ValueError('bit size exceeds field modulus')
         if bits <= 0:
             raise ValueError('invalid bits')
