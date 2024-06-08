@@ -3217,12 +3217,12 @@ struct {
    Section 6.1.2.
 
    Finally, the validity circuit in our FLP may have any number of
-   outputs.  The input is said to be valid if each of the outputs is
-   zero.  To save bandwidth, we compute interpret the output as
+   outputs (at least one).  The input is said to be valid if each of the
+   outputs is zero.  To save bandwidth, we interpret the outputs as
    coefficients of a polynomial and evaluate the polynomial at a random
-   point.  Thus if each of the outputs zero, then the reduced output
-   will be zero; on the other hand, if one of the outputs is non-zero,
-   then the reduced output will be non-zero with high probability.
+   point.  If each of the outputs zero, then the reduced output will be
+   zero; but if one of the outputs is non-zero, then the reduced output
+   will be non-zero with high probability.
 
 7.3.2.  Validity Circuits
 
