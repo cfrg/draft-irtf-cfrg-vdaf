@@ -1,17 +1,18 @@
 """Fully linear proof (FLP) systems."""
 
+from typing import Any
+
 import field
 from common import vec_add, vec_sub
-from field import Field
 
 
 class Flp:
     """The base class for FLPs."""
 
     # Generic paraemters
-    Measurement = None
-    AggResult = None
-    Field: field.Field = None
+    Measurement: Any = None
+    AggResult: Any = None
+    Field: Any = None
 
     # Length of the joint randomness shared by the prover and verifier.
     JOINT_RAND_LEN: int
@@ -111,9 +112,9 @@ class Flp:
         return []
 
 
-def additive_secret_share(vec: list[Field],
+def additive_secret_share(vec: list[field.Field],
                           num_shares: int,
-                          field: type) -> list[list[Field]]:
+                          field: type[field.Field]) -> list[list[field.Field]]:
     shares = [
         field.rand_vec(len(vec))
         for _ in range(num_shares - 1)
@@ -126,7 +127,7 @@ def additive_secret_share(vec: list[Field],
 
 
 # NOTE This is used to generate {{run-flp}}.
-def run_flp(flp, meas, num_shares):
+def run_flp(flp: Flp, meas: list[Flp.Field], num_shares: int):
     """Run the FLP on an encoded measurement."""
 
     joint_rand = flp.Field.rand_vec(flp.JOINT_RAND_LEN)
