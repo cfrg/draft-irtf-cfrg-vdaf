@@ -1,53 +1,8 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-06T00:44:22.071675+00:00",
+  "timestamp": "2024-06-09T00:50:45.738985+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
-    {
-      "name": "bug",
-      "description": "Something isn't working",
-      "color": "d73a4a"
-    },
-    {
-      "name": "documentation",
-      "description": "Improvements or additions to documentation",
-      "color": "0075ca"
-    },
-    {
-      "name": "duplicate",
-      "description": "This issue or pull request already exists",
-      "color": "cfd3d7"
-    },
-    {
-      "name": "enhancement",
-      "description": "New feature or request",
-      "color": "a2eeef"
-    },
-    {
-      "name": "good first issue",
-      "description": "Good for newcomers",
-      "color": "7057ff"
-    },
-    {
-      "name": "help wanted",
-      "description": "Extra attention is needed",
-      "color": "008672"
-    },
-    {
-      "name": "invalid",
-      "description": "This doesn't seem right",
-      "color": "e4e669"
-    },
-    {
-      "name": "question",
-      "description": "Further information is requested",
-      "color": "d876e3"
-    },
-    {
-      "name": "wontfix",
-      "description": "This will not be worked on",
-      "color": "ffffff"
-    },
     {
       "name": "draft-01",
       "description": "",
@@ -91,7 +46,7 @@
     {
       "name": "needs security analysis",
       "description": "",
-      "color": "47D6D6"
+      "color": "BE7968"
     },
     {
       "name": "draft-07",
@@ -122,6 +77,16 @@
       "name": "draft-09",
       "description": "",
       "color": "6D7BB8"
+    },
+    {
+      "name": "draft-10",
+      "description": "",
+      "color": "133CD6"
+    },
+    {
+      "name": "pre-RGLC",
+      "description": "",
+      "color": "8E22CC"
     }
   ],
   "issues": [
@@ -1702,7 +1667,6 @@
         "cjpatton"
       ],
       "labels": [
-        "bug",
         "draft-02"
       ],
       "body": "@armfazh pointed this out here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/88#discussion_r899660677",
@@ -1969,19 +1933,20 @@
       "id": "I_kwDOGKuqOc5Nj8Zm",
       "title": "Guidance for encoding IDPF index",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/101",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
         "cjpatton"
       ],
       "labels": [
-        "editorial"
+        "editorial",
+        "draft-10"
       ],
       "body": "IDPFs (and Poplar1 by extension) take in an \"index\" `alpha` represented as an `Unsigned`. @bifurcation pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/97#discussion_r918280713 that we also call this a \"bit-string\", which is ambiguous. The draft needs guidance on how applications should represent bit strings as IDPF indexes.",
       "createdAt": "2022-07-11T21:48:30Z",
-      "updatedAt": "2024-06-05T18:34:08Z",
-      "closedAt": null,
+      "updatedAt": "2024-06-06T21:22:38Z",
+      "closedAt": "2024-06-06T21:22:38Z",
       "comments": []
     },
     {
@@ -2144,10 +2109,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "pre-RGLC"
+      ],
       "body": "As of VDAF-03, the draft has codepoints intended to be used by other drafts (e.g., DAP). These are currently summarized in a table `{{codepoints}}`. This is good enough for now, but eventually we'll need to flesh this out into a section that IANA can actually use. @bifurcation points to an example of how to do this properly:  https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/104#discussion_r948280200_",
       "createdAt": "2022-08-23T16:14:29Z",
-      "updatedAt": "2022-08-23T16:14:29Z",
+      "updatedAt": "2024-06-06T22:42:00Z",
       "closedAt": null,
       "comments": []
     },
@@ -2245,9 +2212,7 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [
-        "bug"
-      ],
+      "labels": [],
       "body": "@divergentdave points out in https://github.com/cloudflare/daphne/issues/82#issuecomment-1246012727 that JSON libraries do not always parse large integers properly. Our test vectors have lots of large numbers (specifically the output shares), so there's a good chance that some implementation will misinterpret these. We will need to change the encoding so that they don't.\r\n\r\nThe tack taken in [the interop testing draft](https://github.com/divergentdave/draft-dcook-ppm-dap-interop-test-design) is to encode these as strings, and have the implementation convert to a big num.",
       "createdAt": "2022-09-13T23:11:46Z",
       "updatedAt": "2022-11-03T00:04:23Z",
@@ -3085,7 +3050,7 @@
       "id": "I_kwDOGKuqOc5fmtFz",
       "title": "IDPF: Supporting very long inputs",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/179",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -3094,9 +3059,17 @@
       ],
       "body": "If the distribution of input lengths has a long tail, then IDPFs are not going to perform very well for heavy hitters. If we have a use case where this becomes an issue, then we should consider investigating a solution.\r\n\r\nOne suggestion for improving performance is the hashing construction from {{BBCGGI21}}, Appendix B. The basic idea is to compute prefix tree for the *hashes* of the input strings, then encode in the outputs of the leaves the strings themselves. This would reduce round complexity from `O(Idpf.BITS)` to `O(HASH_SIZE)`, where `HASH_BITS` is the number of bits of the hash output (typically `256)`. This is worth it if `Idpf.BITS >> HASH_BITS`.\r\n\r\nMaking this work in the VDAF framework is a bit fiddly, since it requires some interaction at the end to recover the strings themselves after aggregating the hit counts.",
       "createdAt": "2023-02-28T23:41:53Z",
-      "updatedAt": "2023-10-17T01:17:27Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2024-06-06T22:36:54Z",
+      "closedAt": "2024-06-06T22:36:54Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This issue is over a year old. Since we don't have any use cases for it right now, I'm going to close. If someone wanted to in the future, IDPF could be extended to support this.",
+          "createdAt": "2024-06-06T22:36:54Z",
+          "updatedAt": "2024-06-06T22:36:54Z"
+        }
+      ]
     },
     {
       "number": 185,
@@ -3426,7 +3399,7 @@
       "id": "I_kwDOGKuqOc5je7L8",
       "title": "Remove aliases of primitive Python types",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/222",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -3437,8 +3410,8 @@
       ],
       "body": "We would like to remove aliases of primitive types in `common.py`, and just use the primitive types straight out of their global bindings.\r\n\r\n_Originally posted by @cjpatton in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/221#discussion_r1167331240_\r\n            ",
       "createdAt": "2023-04-14T23:34:54Z",
-      "updatedAt": "2024-06-05T20:53:41Z",
-      "closedAt": null,
+      "updatedAt": "2024-06-06T21:32:02Z",
+      "closedAt": "2024-06-06T21:32:02Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -3547,11 +3520,11 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "editorial"
+        "poc"
       ],
       "body": "We should get rid of variable name shadowing as a general matter.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/232#discussion_r1181772727_",
       "createdAt": "2023-05-01T18:14:16Z",
-      "updatedAt": "2023-10-25T18:53:33Z",
+      "updatedAt": "2024-06-08T21:56:20Z",
       "closedAt": null,
       "comments": []
     },
@@ -4107,14 +4080,16 @@
       "state": "OPEN",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
-        "wire change",
+        "feature",
         "idea"
       ],
       "body": "While looking at #258, I was considering how one might implement the Prio2 or Prio3CountVec AFE while using Prio3 without joint randomness. No joint randomness means we can't use random linear combinations. Thus, I think we'd be left with taking the conjunction of multiple range check sub-circuits by raising each sub-circuit output to the power $p-1$, which would be pretty expensive. (I think you'd have to split the exponentiation into multiple gadgets for it to be feasible)\r\n\r\nThis conjunction could be avoided entirely if we let the circuit output a vector instead of a single field element, and require that it be equal to $\\vec{0}$ instead of $0$. Circuits that take advantage of such a change would have a bigger verifier message, but it would give us more power/expressiveness without joint randomness.\r\n\r\nI'm not sure if this change is actually worth making in the document, but I figure it would be a useful counterfactual in Prio2 vs. Prio3 benchmark conversations, and in the broader joint randomness discussion.",
       "createdAt": "2023-07-11T17:35:49Z",
-      "updatedAt": "2023-11-16T14:42:48Z",
+      "updatedAt": "2024-06-08T21:51:41Z",
       "closedAt": null,
       "comments": [
         {
@@ -4221,6 +4196,48 @@
           "body": "I don't think there is any rush to implement this for draft-07.",
           "createdAt": "2023-08-17T10:42:16Z",
           "updatedAt": "2023-08-17T10:42:16Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This issue has been open for several months without much movement. Is there still interest in adding this feature to FLP?\r\n\r\nI believe the only circuits for which we get savings are those for which joint randomness is not passed into a gadget and  used only to reduce the outputs:\r\n\r\n- This is TRUE for Prio3Sum. In fact, by removing joint randomness and changing the field from Field128 to Field64, we reduce the number of bits uploaded by the client (the public share and two input shares) from 1376 bytes to about 700. The number of bytes exchanged during preparation wouldn't change significantly. (Note that using the circuit as-is, but using Field64 and 2 proofs is about the same cost as with Field64 and 1 proof.)\r\n\r\n- This is NOT TRUE for Prio3Histogram or Prio3SumVec. Though as @divergentdave points, for small vectors it may be worth dropping the ParallelSum trick in favor of something linear.\r\n\r\n- I think this is currently NOT TRUE for [PINE](https://github.com/junyechen1996/draft-chen-cfrg-vdaf-pine/blob/main/poc/flp_pine.py) because [the ParallelSum trick is applied to the wraparound tests](https://github.com/junyechen1996/draft-chen-cfrg-vdaf-pine/blob/f803bb9034a4ed6f85b9ef37180ae07ffcaebb6f/poc/flp_pine.py#L331-L332). However if we take https://github.com/junyechen1996/draft-chen-cfrg-vdaf-pine/issues/60, then this may no longer be necessary.",
+          "createdAt": "2024-06-06T19:16:29Z",
+          "updatedAt": "2024-06-06T19:16:29Z"
+        },
+        {
+          "author": "junyechen1996",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I think these all sound right. I'm not particularly worried about computing a random linear combination of multiple circuit outputs, which only increases soundness error by a negligible amount if field size is large. But if we use joint randomness to do this reduction, it complicates the security analysis a bit, because now client has control over this reduction.\r\n\r\nBtw, I don't think this will be a breaking change for the wire format between client and server, assuming field size remains the same? If joint randomness is not used in proof generation, aggregators can just use their private randomness to reduce the circuit outputs. I believe all our VDAFs first generate joint randomness field elements used in proof generation, then generate more if they are needed to reduce circuit outputs. We can just avoid generating those joint randomness field elements for reducing circuit outputs?",
+          "createdAt": "2024-06-07T13:15:29Z",
+          "updatedAt": "2024-06-07T13:17:38Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I think these all sound right. I'm not particularly worried about computing a random linear combination of multiple circuit outputs, which only increases soundness error by a negligible amount if field size is large. But if we use joint randomness to do this reduction, it complicates the security analysis a bit, because now client has control over this reduction.\r\n\r\nIt complicates analysis insofar as we have to account for attacks on Fiat-Shamir, hence the larger field (or more proof). Did you have anything else in mind beyond this?\r\n\r\n\r\n> Btw, I don't think this will be a breaking change for the wire format between client and server, assuming field size remains the same?\r\n\r\nI agree, we can make this change without breaking changes to existing circuits. That said, we may consider modifying existing circuits to make them ore efficient, such as `Sum`.\r\n\r\n> If joint randomness is not used in proof generation, aggregators can just use their private randomness to reduce the circuit outputs.\r\n\r\nThis should work:\r\n\r\n- each aggregator $j$ chooses a random $r_j$ and broadcasts $[M]_j = v_0 + r_j \\cdot [v_1]_j + r_j^2 \\cdot [v_2]_j + \\cdots$ where $[v_i]$ is its share of the $i$-th circuit output.\r\n- to finish preparation, compute $M = [M]_1 + \\cdots + [M]_S = v_0 + (r_1 + \\cdots r_S) \\cdot v_1 + (r_1^2 + \\cdots r_S^2) \\cdot v_2 + \\cdots$ and check if $M=0$.\r\n\r\nOne problem is that we would like preparation to be de-randomized. To do this, we'd have each aggregator derive their verification randomness $r_j$ from the verification key, similar to how they derive the query randomness.\r\n\r\nI would also simplify this further by having each aggregator compute a share of the same verification randomness $r$. We do this in the circuit with joint randomness by dividing by the number of shares $S$.\r\n\r\n> I believe all our VDAFs first generate joint randomness field elements used in proof generation, then generate more if they are needed to reduce circuit outputs. We can just avoid generating those joint randomness field elements for reducing circuit outputs?\r\n\r\nWe only generate joint randomness if `Flp.JOINT_RAND_LEN > 0`.\r\n\r\n",
+          "createdAt": "2024-06-07T13:55:32Z",
+          "updatedAt": "2024-06-07T13:56:07Z"
+        },
+        {
+          "author": "junyechen1996",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> Did you have anything else in mind beyond this?\r\n\r\nNot really. Maybe if the circuit already needs joint randomness to do proof generation, using more joint randomness to reduce circuit outputs isn't a terrible thing..?\r\n\r\n> This should work:\r\n\r\nI don't quite get this part. Shouldn't $r_j$ be agreed upon among aggregators? It should be like this?\r\n\r\n* aggregators agree on a verification randomness $r$, derived from the verification key, similarly as query randomness.\r\n* each aggregator j broadcasts $M_j = [v_0]_j + r * [v_1]_j + r^2 * [v_2]_j + ...$, where $[v_i]_j$ is aggregator $j$'s share of the i-th circuit output.\r\n* to finish preparation among $S$ aggregators, compute $M=M_1 + ... + M_S = ([v_0]_1 + ... + [v_0]_S) + r * ([v_1]_1 + ... + [v_1]_S) + r^2 * ([v_2]_1 + ... + [v_2]_S) + ...$, and check if $M$ is 0.\r\n",
+          "createdAt": "2024-06-07T14:37:34Z",
+          "updatedAt": "2024-06-07T14:41:41Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yeah that what I was suggesting here:\r\n\r\n> I would also simplify this further by having each aggregator compute a share of the same verification randomness $r$.\r\n\r\n\r\n",
+          "createdAt": "2024-06-07T18:16:37Z",
+          "updatedAt": "2024-06-07T18:16:37Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There's a PR up for extending FLP. I'm going to assume there's no appetite to modify the circuits for which we don't get any performance benefit. This leaves Prio3Sum as the only possible breaking change. I suggest we close this issue as completed once the PR lands and consider what to do with Prio3Sum in #306.",
+          "createdAt": "2024-06-08T21:51:27Z",
+          "updatedAt": "2024-06-08T21:51:27Z"
         }
       ]
     },
@@ -4318,18 +4335,20 @@
       "id": "I_kwDOGKuqOc5tZEwU",
       "title": "poc: Replace `ERR_INPUT` et al. with `Error('...')`",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/277",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "poc"
       ],
       "body": "              I think these are fine, our `Error` class subclasses `Exception` from the standard library. It inherits from the right things, and it gets good `repr` formatting for free. We could do `raise Error('input: invalid length')` to provide more granular messages.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/276#discussion_r1283348909_\r\n            ",
       "createdAt": "2023-08-03T15:30:50Z",
-      "updatedAt": "2024-04-30T23:11:36Z",
-      "closedAt": null,
+      "updatedAt": "2024-06-07T14:02:21Z",
+      "closedAt": "2024-06-07T14:02:21Z",
       "comments": []
     },
     {
@@ -4412,15 +4431,15 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
-        "junyechen1996"
+        "cjpatton"
       ],
       "labels": [
-        "wire change",
+        "feature",
         "idea"
       ],
       "body": "Section 4.5 of [Samplable Anonymous Aggregation for Private Federated Data Analysis](https://arxiv.org/pdf/2307.15017.pdf) notes that it's possible to efficiently validate that a vector consists of zeros and ones, with at most some constant number of ones. This could be done by generalizing Prio3Histogram. (Open question: does this belong in this document or a separate one?) Here's how I'd implement this:\r\n\r\n* The parameters would be the length, $n$, the chunk length, and the maximum number of ones, $m$.\r\n* Input length would be $n+\\left\\lfloor{log_2(m)}\\right\\rfloor+1$. Let $l_m=\\left\\lfloor{log_2(m)}\\right\\rfloor+1$, the number of bits needed to represent $m$.\r\n* Encoding: The first $n$ field elements are just projected measurement values. Let $c=2^{l_m}-1-m$, a constant offset to let us achieve the sum limit we want. Then, for input values $x_i$, compute $c+\\sum_i{x_i}$, encode it as a bit vector, and append it to the encoded measurement.\r\n* Truncation: Take the first $n$ elements.\r\n* Decoding: $id$\r\n* Validity circuit: Evaluate the range check polynomial $x(x-1)$ on all `INPUT_LEN` elements, and combine the results in a random linear combination (using the parallel sum optimization). Separately, evaluate the following, where $x_i$ are the measurement values from the encoded measurement, and $s_j$ are the bits of the $c+\\sum_i{x_i}$ from the encoded measurement. $$c + \\sum_{i=0}^{n-1} {x_i} - \\sum_{j=0}^{l_m} {2^j s_j}$$ Add the range check and sum check intermediate values together in another random linear combination, and return the result.",
       "createdAt": "2023-08-23T20:00:42Z",
-      "updatedAt": "2023-11-16T14:41:34Z",
+      "updatedAt": "2024-06-06T21:20:55Z",
       "closedAt": null,
       "comments": [
         {
@@ -4562,6 +4581,13 @@
           "body": "Works for me. As for renaming: so far we have tried to align the name of the circuit with the data type of the aggregate result rather than than the type of the measurement. I'm OK breaking this convention if it's annoying :)",
           "createdAt": "2023-10-26T00:24:04Z",
           "updatedAt": "2023-10-26T00:24:13Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Erring on the side of not breaking compatibility, I'm going to add this as a new Prio3 variant and assign it a codepoint. I'll take @divergentdave's suggested name of `Prio3MultiHotVec`.",
+          "createdAt": "2024-06-06T19:24:34Z",
+          "updatedAt": "2024-06-06T19:24:34Z"
         }
       ]
     },
@@ -4616,11 +4642,11 @@
         "pratiksarkar93"
       ],
       "labels": [
-        "editorial"
+        "security consideration"
       ],
       "body": "Hello, I had a discussion with @cjpatton and @pratiksarkar93 about the VDAF security considerations. The draft states:\r\n\r\n```\r\n VDAFs have two essential security goals:\r\n\r\n 1.  Privacy: An attacker that controls the network, the Collector,\r\n     and a subset of Clients and Aggregators learns nothing about the\r\n     measurements of honest Clients beyond what it can deduce from the\r\n     aggregate result.\r\n\r\n 2.  Robustness: An attacker that controls the network and a subset of\r\n     Clients cannot cause the Collector to compute anything other than\r\n     the aggregate of the measurements of honest Clients.\r\n```\r\n\r\nI was wondering if the notion of **robustness** is referring only to **correctness** or to both correctness and **guaranteed output delivery (GOD)**. Would it make sense to split robustness into these two properties to use more formal MPC terms (i.e., [pages 2 & 3 from Lindell's paper](https://eprint.iacr.org/2020/300.pdf))? \r\n\r\nFor example, the draft states \"break robustness\" or \"attack on robustness\" but it is not clear if that means to cause the Collector to output an incorrect result (i.e., attack on correctness) or to prevent honest parties from receiving their output (i.e., attack on GOD).\r\n\r\n\r\n",
       "createdAt": "2023-10-19T19:08:55Z",
-      "updatedAt": "2023-11-20T13:13:21Z",
+      "updatedAt": "2024-06-06T15:59:17Z",
       "closedAt": null,
       "comments": [
         {
@@ -4696,7 +4722,7 @@
       ],
       "body": "In Prio3Sum and Prio3SumVec we do a simple $[0, 2^k)$ range check by encoding the integer as a $k$-bit string and checking each bit is $0$ or $1$. In #287 we devised a simple strategy for generalizing this check to $[0, C)$ for any $C > 0$, even if $C$ is not a power of $2$. What's more, this check is concretely efficient in that it doesn't change the input length or the number of gadget calls. (The affine part of the computation is a bit more complex.)\r\n\r\nCould we, and would it be worth it to, do the same for Prio3Sum and Prio3SumVec? It seems to me this would be a valuable improvement.\r\n\r\ncc/ @divergentdave, @junyechen1996 ",
       "createdAt": "2023-10-25T21:43:29Z",
-      "updatedAt": "2023-11-16T14:40:45Z",
+      "updatedAt": "2024-06-06T22:39:43Z",
       "closedAt": null,
       "comments": [
         {
@@ -4712,6 +4738,13 @@
           "body": ":face_palm: You are absolutely right, we'd need to double the input length to apply the same trick.\r\n\r\nI think it's worth doing for Prio3Sum since input is fairly small.\r\n\r\nFor Prio3SumVec, we definitely don't want to blow up the common \"bit-vector\" use case ($k=1$). If we wanted to change Prio3SumVec this way, then we probably would want to split out the bit-vector circuit into a different variant, e..g, Prio3CountVec or something.",
           "createdAt": "2023-10-25T22:35:25Z",
           "updatedAt": "2023-10-25T22:35:25Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We may end up with a breaking change for Prio3Sum as part of #262. If so, we should also consider taking this change as well.",
+          "createdAt": "2024-06-06T22:39:42Z",
+          "updatedAt": "2024-06-06T22:39:42Z"
         }
       ]
     },
@@ -4817,10 +4850,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "pre-RGLC"
+      ],
       "body": "We removed them a couple of drafts ago because updating them was becoming a pain. (Note that machine-readable test vectors can be found in https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)",
       "createdAt": "2023-11-16T15:03:15Z",
-      "updatedAt": "2023-11-16T15:03:15Z",
+      "updatedAt": "2024-06-06T22:42:22Z",
       "closedAt": null,
       "comments": []
     },
@@ -5213,6 +5248,26 @@
       "body": "DAFs are the same as VDAFs except they don't provide robustness on their own. This feature was requested early on in the history of PPM (https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/45). However no DAF has been defined, much less deployed.\r\n\r\nWe should consider removing DAFs from the draft:\r\n1. This would reduce some maintenance cost in the draft and reference implementation.\r\n2. This would simplify https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/259, which conflicts with the current goal of writing down DAF as a \"warm-up\" to VDAFs.",
       "createdAt": "2024-06-05T23:06:10Z",
       "updatedAt": "2024-06-05T23:07:34Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 352,
+      "id": "I_kwDOGKuqOc6LiXik",
+      "title": "Clarify requirements for generating the IDPF binder string",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/352",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "schoppmp"
+      ],
+      "labels": [
+        "security consideration"
+      ],
+      "body": "We require the binder string to be generated at random, but we don't prescribe its length or say why it needs to be random:\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/3ac03623c4680b28d1517af0a16dd513e1d0c310/draft-irtf-cfrg-vdaf.md?plain=1#L3710-L3714\r\n\r\nI believe this has to do with how `XofFixedKeyAes128` affects the concrete security of `Poplar1`, but I don't remember the details. Let's make sure this is documented. Furthermore, we need to define the length so that the user knows how many bytes to sample. I'd suggest renaming the binder to `nonce` and adding `Idpf.NONCE_SIZE` as a constraint on `Idpf`. (`Poplar1` may need to be modified accordingly.)",
+      "createdAt": "2024-06-07T19:27:11Z",
+      "updatedAt": "2024-06-07T19:27:59Z",
       "closedAt": null,
       "comments": []
     }
@@ -15212,7 +15267,7 @@
       "labels": [],
       "body": "For Poplar1, this ensures that any given input share will only be used once at a given level.\r\n\r\nFixes #142.",
       "createdAt": "2023-02-23T22:38:50Z",
-      "updatedAt": "2024-05-01T20:18:06Z",
+      "updatedAt": "2024-06-08T19:54:49Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "bfec9707cdf3cc1eb5789a954b75436e80c6d1aa",
@@ -26435,7 +26490,7 @@
       ],
       "body": "Partially addresses #177.\r\n\r\nThe query randomness is correlated for different values of `Prio3.PROOFS`. To provide defense in depth in case the same verification key is used for different versions, prepend the binder with `bytes(Prio3.PROOFS)`.\r\n\r\nFor consistency, do the same for the prove randomness and each Helper's share of the proofs. Also, do the same for joint randomness in case `Prio3.PROOFS == 1`.",
       "createdAt": "2023-11-10T12:06:21Z",
-      "updatedAt": "2023-11-16T14:28:15Z",
+      "updatedAt": "2024-06-08T19:54:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "ccbb6a0080255b0dbd28630bfa8b8d522b99fd84",
@@ -26567,7 +26622,7 @@
       "labels": [],
       "body": "* Update change log\r\n* Bump `VERSION`\r\n* Generate test vectors",
       "createdAt": "2023-11-16T15:23:52Z",
-      "updatedAt": "2023-11-20T12:48:11Z",
+      "updatedAt": "2024-06-08T19:54:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "bfcfeb77a7f5866dbf728a247e537248ab303655",
@@ -26649,7 +26704,7 @@
       "labels": [],
       "body": "The reference code has implementations of Prio3 variants that have not been standardized. The test code generates test vectors for these, which we checked in to the repo when we cut the last draft.\r\n\r\nTo avoid confusion, remove the test vectors for these non-standardized variants.",
       "createdAt": "2023-11-28T20:53:00Z",
-      "updatedAt": "2023-11-28T22:19:29Z",
+      "updatedAt": "2024-06-08T19:54:55Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b74e9c37d838b9a1182f0e4b7b4f6e737bd565ed",
@@ -26747,7 +26802,7 @@
       "labels": [],
       "body": "Partially addresses #311.",
       "createdAt": "2023-12-05T21:26:02Z",
-      "updatedAt": "2023-12-15T22:57:54Z",
+      "updatedAt": "2024-06-08T19:54:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e03411b116a185de6c42dfe43a0e8f3b5f62ca90",
@@ -27082,7 +27137,7 @@
       "labels": [],
       "body": "Closes #321.\r\n\r\nThe reference implementation of TurboSHAKE128 provides a one-shot API. To use this efficiently, we restrict the number of bytes required for tests so that we can pre-compute the entire output buffer. This is controlled by MAX_XOF_OUT_STREAM_BYTES.\r\n\r\nThis restriction is confusing and has side-effects for specs that use XofTurboShake128. However using the one-shot API without this optimization makes the unit tests prohibitively slow, about a minute on my machine.\r\n\r\nImplement a stateful API for TurboSHAKE128 and use it in XofTurboShake128. This reduces the runtime to 20 seconds on my machine.\r\n\r\nAccordingly, restore the unit tests for Poplar1 to what they were before we made this optimization.\r\n\r\ncc/ @junyechen1996 ",
       "createdAt": "2023-12-20T19:13:56Z",
-      "updatedAt": "2024-01-10T02:58:19Z",
+      "updatedAt": "2024-06-08T19:54:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "3d2dd77befcf149c818b4bae1744e60c00d0a4f3",
@@ -28569,7 +28624,7 @@
       ],
       "body": "Closes #12.\r\nCloses #273.\r\n\r\nFirst, clarify that the Aggregators need to check that they have the same public share.\r\n\r\nSecond, clarify which IDPF tree traversals are safe. Since we only guarantee extractability at the last level, it is not safe to use intermediate nodes for any purpose except the heavy hitters tree traversal.",
       "createdAt": "2024-04-30T22:00:10Z",
-      "updatedAt": "2024-05-07T14:05:52Z",
+      "updatedAt": "2024-06-08T19:54:48Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9ff20bfdafd7aa192d06f91f7d362a9835d31ed2",
@@ -28866,7 +28921,7 @@
       ],
       "body": "Closes #42.\r\n\r\nWe had considered whether we could bake the idea of a \"linear state machine\" into the VDAF syntax. We could probably do something here, but our best idea involves mucking with type hints, something that has created some code rot in this repository already. Since no one has complained about this, let's just rule it out. Also, note that if we end up simplifying the syntax to only supporting 1-round VDAFs, then this point will be moot.\r\n\r\nAlso, we had a paragraph about 0-round VDAFs, which our syntax currently rules out. Delete the paragraph and the associated OPEN ISSUE.",
       "createdAt": "2024-04-30T22:31:13Z",
-      "updatedAt": "2024-05-02T14:56:43Z",
+      "updatedAt": "2024-06-08T19:54:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "82389a81e1c871b39cd24d267768873555580529",
@@ -28911,7 +28966,7 @@
       ],
       "body": "Closes #94.\r\n\r\nAs written, the intro seems to frame MPC as an alternative to DP, which is not true. Rather, we want to frame MPC as a necessary component of a data aggregation system that provides DP.\r\n\r\n~Indeed, this change goes a step forward: VDAFs SHOULD be composed with a mechanism for DP.~",
       "createdAt": "2024-05-01T21:17:21Z",
-      "updatedAt": "2024-05-06T13:36:26Z",
+      "updatedAt": "2024-06-08T19:54:49Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e8c0cbeab9588613801feb3579536bc1221571dc",
@@ -29556,7 +29611,7 @@
       ],
       "body": "Closes #342.",
       "createdAt": "2024-05-08T14:55:11Z",
-      "updatedAt": "2024-05-08T15:31:55Z",
+      "updatedAt": "2024-06-08T19:54:47Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "d5d3e1f0175f86daf25c215289262deb9e9d340b",
@@ -29600,7 +29655,7 @@
       ],
       "body": "* Update change log for VDAF-09 (assumes #332 has landed)\r\n* Does not bump `VERSION`, as there are no breaking changes in either Prio3 or Poplar1",
       "createdAt": "2024-05-13T17:01:36Z",
-      "updatedAt": "2024-05-14T02:59:13Z",
+      "updatedAt": "2024-06-08T19:54:46Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "a593fd485d9793cb5047c4d8c9a0351a8da2b436",
@@ -29655,20 +29710,579 @@
       "id": "PR_kwDOGKuqOc5xmpSL",
       "title": "Add guidance for encoding byte strings as IDPF indices",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/345",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "Closes #101.\r\n\r\nBig-endian encoding is the most natural choice as it aligns most naturally with our definition of index. We also should note that a reversible padding scheme is needed when the inputs might be variable length.\r\n\r\nWhile at it, pick up a few minor editorial improvements:\r\n\r\n- \"set of candidate preixes\" -> \"sequence of candidate prefixes\"\r\n- Use one free variable in defining index prefixes\r\n- \"Vec\" -> \"list\"\r\n- \"Client\" -> \"Sharding\" for consistency with the Prio3 section",
       "createdAt": "2024-06-05T20:48:23Z",
-      "updatedAt": "2024-06-05T20:52:19Z",
+      "updatedAt": "2024-06-06T21:23:47Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b5f062a8e583297684409866b77b6dfb547d15ff",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/101",
-      "headRefOid": "d5b68bf09550981d42b30b98da15146d7847b242",
+      "headRefOid": "b47b6623a54f7224640f4c33264b316e7c66b7eb",
+      "closedAt": "2024-06-06T21:22:37Z",
+      "mergedAt": "2024-06-06T21:22:37Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "ffd69aa33e1365f6b5f65d1dd0eaf462588d01e4"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59U1HM",
+          "commit": {
+            "abbreviatedOid": "d5b68bf"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-06T17:17:03Z",
+          "updatedAt": "2024-06-06T17:18:55Z",
+          "comments": [
+            {
+              "originalPosition": 96,
+              "body": "nit: extra word\r\n```suggestion\r\nThe Client's measurement is an IDPF index, denoted `alpha`. (See\r\n```",
+              "createdAt": "2024-06-06T17:17:03Z",
+              "updatedAt": "2024-06-06T17:18:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59XMHs",
+          "commit": {
+            "abbreviatedOid": "d5b68bf"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-06T21:17:09Z",
+          "updatedAt": "2024-06-06T21:17:09Z",
+          "comments": [
+            {
+              "originalPosition": 96,
+              "body": "Done.",
+              "createdAt": "2024-06-06T21:17:09Z",
+              "updatedAt": "2024-06-06T21:17:09Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 347,
+      "id": "PR_kwDOGKuqOc5xnVWm",
+      "title": "Remove type aliases, simplify hints, and express bounds in prose",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/347",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Based on #345 (merge that first).\r\n\r\nCloses #222.\r\nPartially addresses #233.\r\nPartially addresses #59.\r\n\r\nWe use Python's type hints to make APIs more self-documenting. However\r\nwe abuse hints in a couple of ways:\r\n\r\n1. We give aliases to primitive types, e.g., `Vec` for `list`.\r\n2. We try to express fixed-length arrays with hints, e.g.,\r\n   `bytes[Vdaf.NONCE_SIZE]`, but don't (and probably can't) enforce it.\r\n3. We use `Unsigned` for non-negative integers, but don't enforce it.\r\n\r\nThese abuses have lead to code rot. To address this, we remove the type\r\naliases altogether, simplify the type hints, and express bounds on\r\ntypes in prose. In some cases, the bounds are stricter than they were\r\nbefore.\r\n\r\nA few minor changes picked up along the way:\r\n\r\n- idpf_poplar.py: `packed_bits` -> `packed` for consistency with\r\n  `encoded` elsewhere.\r\n\r\n- vdaf_prio3.py: Remove `PRio3SumVecWithMultiproof.is_recommended()` as\r\n  it is not really used.\r\n\r\n- Declare `gen_rand()` to be a CSPRNG.",
+      "createdAt": "2024-06-06T00:01:59Z",
+      "updatedAt": "2024-06-08T19:54:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "ffd69aa33e1365f6b5f65d1dd0eaf462588d01e4",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/222",
+      "headRefOid": "b402812916cd4169c931fd058c2f896fea55100f",
+      "closedAt": "2024-06-06T21:32:01Z",
+      "mergedAt": "2024-06-06T21:32:01Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "9e7c7cfdebd512a9930337f0fdd5231bd15b765f"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and addressed your comments.",
+          "createdAt": "2024-06-06T21:27:09Z",
+          "updatedAt": "2024-06-06T21:27:09Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59WKg8",
+          "commit": {
+            "abbreviatedOid": "ba804ba"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-06T18:51:17Z",
+          "updatedAt": "2024-06-06T20:39:29Z",
+          "comments": [
+            {
+              "originalPosition": 227,
+              "body": "nit: missing word\r\n```suggestion\r\n    a CSPRNG. (See {{security}} for details.)\r\n```",
+              "createdAt": "2024-06-06T18:51:17Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 689,
+              "body": "nit: typo\r\n```suggestion\r\n  * `num_measurements` MUST equal the number of measurements that contributed to\r\n```",
+              "createdAt": "2024-06-06T19:20:46Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 858,
+              "body": "nit: repetition\r\n```suggestion\r\n    * `binder` MUST be chosen uniformly at random by the Client\r\n```",
+              "createdAt": "2024-06-06T19:27:08Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 855,
+              "body": "This should be one shorter to reflect the length of the list.\r\n```suggestion\r\n       `range(Idpf.BITS - 1)`.\r\n```",
+              "createdAt": "2024-06-06T19:28:00Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 889,
+              "body": "```suggestion\r\n  * Each `prefix` in `prefixes` MUST be distinct and in `range(2**level)`.\r\n```",
+              "createdAt": "2024-06-06T19:29:17Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 887,
+              "body": "This should probably be deleted, unless we want to say something about the public share here.\r\n```suggestion\r\n```",
+              "createdAt": "2024-06-06T19:30:52Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 63,
+              "body": "Same as in the text\r\n```suggestion\r\n              `range(Idpf.BITS - 1)`\r\n```",
+              "createdAt": "2024-06-06T19:33:51Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 89,
+              "body": "```suggestion\r\n        Evaluate an IDPF key and public share at a given level of the tree\r\n```",
+              "createdAt": "2024-06-06T20:15:29Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            },
+            {
+              "originalPosition": 134,
+              "body": "There's no such argument here\r\n```suggestion\r\n```",
+              "createdAt": "2024-06-06T20:34:13Z",
+              "updatedAt": "2024-06-06T20:39:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59XPZN",
+          "commit": {
+            "abbreviatedOid": "ba804ba"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-06T21:25:59Z",
+          "updatedAt": "2024-06-06T21:25:59Z",
+          "comments": [
+            {
+              "originalPosition": 887,
+              "body": "Ugh, this is a bit of copy-pasta. My apologies, I should have done more self-review before putting this in front of you.",
+              "createdAt": "2024-06-06T21:25:59Z",
+              "updatedAt": "2024-06-06T21:25:59Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 348,
+      "id": "PR_kwDOGKuqOc5xs0wd",
+      "title": "Replace generic `ERR_*` exceptions",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/348",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Based on #350 (merge that first).\r\n\r\nCloses #277.\r\n\r\nUse a generic Python exception with a helpful error message. `ValueError` is the natural choice for all of our cases.",
+      "createdAt": "2024-06-06T15:55:51Z",
+      "updatedAt": "2024-06-08T19:54:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9ba9c346d6f339e2643bc93da749ec0a40d68eef",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/277",
+      "headRefOid": "21f014259596094cdf2f9f96f0ede1e9c876fc3c",
+      "closedAt": "2024-06-07T14:02:20Z",
+      "mergedAt": "2024-06-07T14:02:20Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "9ea01b9c1144b8644527450f03fb35c2a0ff479b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59W9Ew",
+          "commit": {
+            "abbreviatedOid": "0ae9dcd"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-06T20:41:47Z",
+          "updatedAt": "2024-06-06T22:14:11Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "It looks like we can get rid of this class too.",
+              "createdAt": "2024-06-06T20:41:47Z",
+              "updatedAt": "2024-06-06T22:14:11Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "I think \"field size\" is ambiguous here, as it sounds like it's referring to the modulus. Maybe \"a multiple of the size of an encoded field element\"?",
+              "createdAt": "2024-06-06T21:02:42Z",
+              "updatedAt": "2024-06-06T22:14:11Z"
+            },
+            {
+              "originalPosition": 209,
+              "body": "The prepare state is not an input here\r\n```suggestion\r\n        raise ValueError('invalid prep message')\r\n```",
+              "createdAt": "2024-06-06T21:36:59Z",
+              "updatedAt": "2024-06-06T22:14:11Z"
+            },
+            {
+              "originalPosition": 178,
+              "body": "nit: off-by-one errors (the first invalid input should be a power of two in both cases)\r\n```suggestion\r\n    if level not in range(2**16):\r\n        raise ValueError('level out of range')\r\n    if len(prefixes) not in range(2**32):\r\n        raise ValueError('number of prefixes out of range')\r\n```",
+              "createdAt": "2024-06-06T21:46:27Z",
+              "updatedAt": "2024-06-06T22:14:11Z"
+            },
+            {
+              "originalPosition": 89,
+              "body": "nit: typo\r\n```suggestion\r\n            raise ValueError('measurement out of range')\r\n```",
+              "createdAt": "2024-06-06T22:07:13Z",
+              "updatedAt": "2024-06-06T22:14:11Z"
+            },
+            {
+              "originalPosition": 78,
+              "body": "Same as in the document:\r\n```suggestion\r\n        if level not in range(2**16):\r\n            raise ValueError('level out of range')\r\n        if len(prefixes) not in range(2**32):\r\n            raise ValueError('number of prefixes out of range')\r\n```",
+              "createdAt": "2024-06-06T22:13:35Z",
+              "updatedAt": "2024-06-06T22:14:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59Xe49",
+          "commit": {
+            "abbreviatedOid": "0ae9dcd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-06T22:23:16Z",
+          "updatedAt": "2024-06-06T22:27:11Z",
+          "comments": [
+            {
+              "originalPosition": 209,
+              "body": "Fixed by aligning with the poc.",
+              "createdAt": "2024-06-06T22:23:16Z",
+              "updatedAt": "2024-06-06T22:27:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59Xgaq",
+          "commit": {
+            "abbreviatedOid": "72d04bc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-06T22:30:11Z",
+          "updatedAt": "2024-06-07T13:54:31Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "nit: this needs another space\r\n```suggestion\r\n            'input length must be a multiple of the size of an '\r\n```",
+              "createdAt": "2024-06-06T22:30:11Z",
+              "updatedAt": "2024-06-07T13:54:31Z"
+            },
+            {
+              "originalPosition": 15,
+              "body": "Same as above\r\n```suggestion\r\n                'input length must be a multiple of the size of an '\r\n```",
+              "createdAt": "2024-06-07T13:54:08Z",
+              "updatedAt": "2024-06-07T13:54:31Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 349,
+      "id": "PR_kwDOGKuqOc5xut9H",
+      "title": "Add Prio3MultihotCountVec to the draft",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/349",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #287.\r\n\r\nAssign Prio3MultiHotHistogram a codepoint (0x00000004) and add it to the draft under the name Prio3MultihotCountVec. Also, rename \"count\" to \"weight\", as in the \"weight of the vector\" (i.e., the number of non-zero entries).",
+      "createdAt": "2024-06-06T21:06:38Z",
+      "updatedAt": "2024-06-07T19:21:40Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/287",
+      "headRefOid": "2fa9804f99bf60010a1adb89e6b435a16b2d974d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Changed base to main.",
+          "createdAt": "2024-06-06T22:28:41Z",
+          "updatedAt": "2024-06-06T22:28:41Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Addressed Junye's comments and rebased.",
+          "createdAt": "2024-06-07T19:17:30Z",
+          "updatedAt": "2024-06-07T19:17:30Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59coaq",
+          "commit": {
+            "abbreviatedOid": "2933487"
+          },
+          "author": "junyechen1996",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Have one comment about the definition of `offset`, otherwise LGTM.",
+          "createdAt": "2024-06-07T14:00:14Z",
+          "updatedAt": "2024-06-07T14:22:09Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "```suggestion\r\nPrio3MultihotCountVec to be composed with a randomized response mechanism,\r\n```",
+              "createdAt": "2024-06-07T14:00:14Z",
+              "updatedAt": "2024-06-07T14:22:09Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "```suggestion\r\n(i.e., the number of non-zero entries); and `chunk_length`, which is used by\r\n```",
+              "createdAt": "2024-06-07T14:00:55Z",
+              "updatedAt": "2024-06-07T14:22:09Z"
+            },
+            {
+              "originalPosition": 33,
+              "body": "Should we quickly explain what `offset` is in the draft itself?",
+              "createdAt": "2024-06-07T14:07:11Z",
+              "updatedAt": "2024-06-07T14:22:09Z"
+            },
+            {
+              "originalPosition": 47,
+              "body": "Related comment about `offset`: I don't think the circuit is offsetting by `max_weight`? The `offset` is the difference between `max_weight` and `next_power_of_2(max_weight) - 1`.",
+              "createdAt": "2024-06-07T14:21:46Z",
+              "updatedAt": "2024-06-07T14:22:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59ez5g",
+          "commit": {
+            "abbreviatedOid": "2fa9804"
+          },
+          "author": "junyechen1996",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-07T19:21:40Z",
+          "updatedAt": "2024-06-07T19:21:40Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 350,
+      "id": "PR_kwDOGKuqOc5xu1lv",
+      "title": "Apply feedback from @divergentdave's review of #347",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/350",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I forgot to include this before I merged the previous commit. See #347.",
+      "createdAt": "2024-06-06T21:34:36Z",
+      "updatedAt": "2024-06-08T19:54:44Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9e7c7cfdebd512a9930337f0fdd5231bd15b765f",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/222-fix",
+      "headRefOid": "95d62df5f14a1feb52211a3ac663ffe8901387be",
+      "closedAt": "2024-06-06T21:36:50Z",
+      "mergedAt": "2024-06-06T21:36:50Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "9ba9c346d6f339e2643bc93da749ec0a40d68eef"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59XSd4",
+          "commit": {
+            "abbreviatedOid": "95d62df"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-06T21:36:23Z",
+          "updatedAt": "2024-06-06T21:36:23Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 351,
+      "id": "PR_kwDOGKuqOc5xu-9o",
+      "title": "Enforce type hints in field.py, xof.py",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/351",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Partially addresses #59.\r\n\r\nAdd type hint enforcement with mypy to CI, starting with field.py and xof.py. This checks that the variables passed into a function match the function's type hints.",
+      "createdAt": "2024-06-06T22:14:18Z",
+      "updatedAt": "2024-06-08T19:54:43Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9ba9c346d6f339e2643bc93da749ec0a40d68eef",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/59/mypy-1",
+      "headRefOid": "4e35c5b1fd88f0cd4d548a980329989b8bde05a8",
+      "closedAt": "2024-06-07T17:10:11Z",
+      "mergedAt": "2024-06-07T17:10:11Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "3ac03623c4680b28d1517af0a16dd513e1d0c310"
+      },
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "BTW, it would be good to run mypy on unit tests as well, to help catch mistakes.",
+          "createdAt": "2024-06-07T14:51:04Z",
+          "updatedAt": "2024-06-07T14:51:04Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59Xdcr",
+          "commit": {
+            "abbreviatedOid": "4e35c5b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-06T22:16:49Z",
+          "updatedAt": "2024-06-06T22:17:45Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "@divergentdave I added this to the test workflow simply becuase we already have sage as a dependency.  Do you think it would be better to add this as a different workflow?\r\n\r\nAlso, I'm starting with xof.py and field.py because these were straightforward to fix. We'll add more as we go.",
+              "createdAt": "2024-06-06T22:16:49Z",
+              "updatedAt": "2024-06-06T22:17:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59dBwF",
+          "commit": {
+            "abbreviatedOid": "4e35c5b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-07T14:39:53Z",
+          "updatedAt": "2024-06-07T14:47:58Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "Sounds good, this is fast enough to install and run that splitting it wouldn't be worth the parallelism.",
+              "createdAt": "2024-06-07T14:39:53Z",
+              "updatedAt": "2024-06-07T14:47:58Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "It looks like we could improve upon this situation by generating some `.pyi` files with `stubgen`, or writing them by hand, but I think that should wait until after this first pass.\r\n\r\n`sage.all` is kind of terrifying, because it is responsible for importing modules in the right order (and this is load bearing!), it imports all of Sage's libraries, which is wasteful from our perspective, and it does some runtime reflection tricks that probably make things harder for static analysis tools.",
+              "createdAt": "2024-06-07T14:47:00Z",
+              "updatedAt": "2024-06-07T14:47:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59dNHo",
+          "commit": {
+            "abbreviatedOid": "4e35c5b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-07T15:01:19Z",
+          "updatedAt": "2024-06-07T15:01:19Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "I wonder if we should even bother. We have already encapsulated most of the sage stuff behind abstractions like `Field`.",
+              "createdAt": "2024-06-07T15:01:19Z",
+              "updatedAt": "2024-06-07T15:01:19Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 353,
+      "id": "PR_kwDOGKuqOc5x1MmF",
+      "title": "Have `is_prefix()` take in a level rather than a length",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/353",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2024-06-07T19:42:16Z",
+      "updatedAt": "2024-06-07T19:42:26Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/is-prefix",
+      "headRefOid": "81c3bfd95bc2302f5bab43a9ad4d3f2c40ebd55a",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -29677,24 +30291,91 @@
       "reviews": []
     },
     {
-      "number": 347,
-      "id": "PR_kwDOGKuqOc5xnVWm",
-      "title": "Remove type aliases, simplify hints, and express bounds in prose",
-      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/347",
+      "number": 354,
+      "id": "PR_kwDOGKuqOc5x2INa",
+      "title": "Enforce type hints for flp.py, flp_generic.py, and tests",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/354",
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
-      "body": "Based on #345 (merge that first).\r\n\r\nCloses #222.\r\nPartially addresses #233.\r\nPartially addresses #59.\r\n\r\nWe use Python's type hints to make APIs more self-documenting. However\r\nwe abuse hints in a couple of ways:\r\n\r\n1. We give aliases to primitive types, e.g., `Vec` for `list`.\r\n2. We try to express fixed-length arrays with hints, e.g.,\r\n   `bytes[Vdaf.NONCE_SIZE]`, but don't (and probably can't) enforce it.\r\n3. We use `Unsigned` for non-negative integers, but don't enforce it.\r\n\r\nThese abuses have lead to code rot. To address this, we remove the type\r\naliases altogether, simplify the type hints, and express bounds on\r\ntypes in prose. In some cases, the bounds are stricter than they were\r\nbefore.\r\n\r\nA few minor changes picked up along the way:\r\n\r\n- idpf_poplar.py: `packed_bits` -> `packed` for consistency with\r\n  `encoded` elsewhere.\r\n\r\n- vdaf_prio3.py: Remove `PRio3SumVecWithMultiproof.is_recommended()` as\r\n  it is not really used.\r\n\r\n- Declare `gen_rand()` to be a CSPRNG.",
-      "createdAt": "2024-06-06T00:01:59Z",
-      "updatedAt": "2024-06-06T00:33:10Z",
+      "body": "Partially addresses #59.\r\n\r\nThe \"associated type\" pattern we're trying to follow is not enforceable.\r\nFor example, we'll do something like this:\r\n\r\n```\r\nclass Foo:\r\n    Measurement = None\r\n    def bar(self, m: Measurement): pass\r\n```\r\n\r\n`mypy` complains because `None` is not a valid type. We instead could do\r\nthe following:\r\n\r\n```\r\nclass Foo:\r\n    Measurement: Any = None\r\n    def bar(self, m: Measurement): pass\r\n```\r\n\r\nA concrete sub-class would override this in the natural way:\r\n\r\n```\r\nclass FooForInt(Foo):\r\n    Measurement = int\r\n    def bar(self, m: int): pass\r\n\r\nFoo().bar(23)\r\nFoo().bar(\"23\")\r\nFooForInt().bar(23)\r\nFooForInt().bar(\"23\") # fails\r\n```",
+      "createdAt": "2024-06-08T01:14:50Z",
+      "updatedAt": "2024-06-08T01:40:03Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/101",
-      "baseRefOid": "d5b68bf09550981d42b30b98da15146d7847b242",
+      "baseRefName": "main",
+      "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "headRefName": "cjpatton/222",
-      "headRefOid": "ba804ba2140afbb94d5f2d1e44b0a7a3deb4e1ed",
+      "headRefName": "cjpatton/59/2-flp",
+      "headRefOid": "82638453ee23a6ec2ac09929eeb4373b75bd2f9c",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59gCPm",
+          "commit": {
+            "abbreviatedOid": "1ab6113"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-08T01:28:52Z",
+          "updatedAt": "2024-06-08T01:28:52Z",
+          "comments": [
+            {
+              "originalPosition": 100,
+              "body": "Reviewer note: this is an error because `ARITY` and `DEGREE` are declared to have type `int`. Similarly below.",
+              "createdAt": "2024-06-08T01:28:52Z",
+              "updatedAt": "2024-06-08T01:28:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59gCx8",
+          "commit": {
+            "abbreviatedOid": "8263845"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-08T01:39:03Z",
+          "updatedAt": "2024-06-08T01:39:03Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "Reviewer note: I tried this because I thought it would be more natural:\r\n\r\n```suggestion\r\n    Field: type[field.Field]\r\n```\r\n\r\nThis doesn't work: ttps://mypy.readthedocs.io/en/stable/common_issues.html#variables-vs-type-aliases\r\n\r\nAnother alternative is to make this generic. For instance we could do:\r\n```python\r\nF = TypeVar('F', bound=field.Field)\r\nclass Flp(Generic[F]):\r\n   field: F\r\n\r\nclass FlpField64(Flp[Field64]):\r\n   field = Field64\r\n```\r\n\r\nGeneric may in fact be the way to go in the long run, but it requires more refactoring.\r\n\r\nNote that we still we don't get to use `F` as a type: it exists only to support type hints. Thus it is still necessary to define `field` as an attribute.\r\n\r\nAlso, note that as of python 3.12, there is some syntactic sugar that makes this look nicer:\r\n```python\r\nclass Flp[F: Field]:\r\n   field: F\r\n```",
+              "createdAt": "2024-06-08T01:39:03Z",
+              "updatedAt": "2024-06-08T01:39:03Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 355,
+      "id": "PR_kwDOGKuqOc5x3ylr",
+      "title": "flp: Make the output of `Valid` a vector",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/355",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #262.\r\nPartially addresses #306.\r\n\r\nIf the input is valid, then each output should be zero. To save bandwidth, we generate an extra element of query randomness and use it to reduce the result.\r\n\r\nTo exercise this feature, implement a new circuit, `Sum2`, that generalizes `Sum` to support any bound, including non-powers-of-two.",
+      "createdAt": "2024-06-08T21:44:30Z",
+      "updatedAt": "2024-06-08T21:57:48Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/262/1",
+      "headRefOid": "ae7254d15d34f380033f10aae574dfe2cb18bc39",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
