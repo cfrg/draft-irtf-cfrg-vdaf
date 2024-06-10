@@ -126,6 +126,16 @@ informative:
     seriesinfo: EUROCRYPT 2014
     target: https://link.springer.com/chapter/10.1007/978-3-642-55220-5_35
 
+  GSZ20:
+    title: "Guaranteed Output Delivery Comes Free in Honest Majority MPC"
+    author:
+      - ins: V. Goyal
+      - ins: Y. Song
+      - ins: C. Zhu
+    date: 2020
+    seriesinfo: CRYPTO 2020
+    target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22
+
   GKWWY20:
     title: Better concrete security for half-gates garbling (in the multi-instance setting)
     author:
@@ -4592,13 +4602,17 @@ positive value of `BITS`. Test vectors can be found in {{test-vectors}}.
 
 VDAFs have two essential security goals:
 
-1. Privacy: An attacker that controls the network, the Collector, and a subset
-   of Clients and Aggregators learns nothing about the measurements of honest
-   Clients beyond what it can deduce from the aggregate result.
+1. Privacy: An attacker that controls the Collector and a subset of Clients and
+   Aggregators learns nothing about the measurements of honest Clients beyond
+   what it can deduce from the aggregate result. We assume the attacker
+   controls the entire network except for channels between honest Clients and
+   honest Aggregators. In particular, it cannot forge or prevent transmission
+   of messages on these channels.
 
-1. Robustness: An attacker that controls the network and a subset of Clients
-   cannot cause the Collector to compute anything other than the aggregate of
-   the measurements of honest Clients.
+1. Robustness: An attacker that controls a subset of Clients cannot cause the
+   Collector to compute anything other than the aggregate of the measurements
+   of honest Clients. We assume the attacker eavesdrops on the network but does
+   not control transmission of messages between honest parties.
 
 Formal definitions of privacy and robustness can be found in {{DPRS23}}. A VDAF
 is the core cryptographic primitive of a protocol that achieves the above
@@ -4626,17 +4640,27 @@ aggregate result.  The Collector is assured that the aggregate statistic
 accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.
 
-On their own, VDAFs do not mitigate Sybil attacks {{Dou02}}. In this attack, the
-adversary observes a subset of input shares transmitted by a Client it is
-interested in. It allows the input shares to be processed, but corrupts and
-picks bogus measurements for the remaining Clients.  Applications can guard
-against these risks by adding additional controls on report submission,
-such as Client authentication and rate limits.
+On their own, VDAFs do not provide:
 
-VDAFs do not, on their own, provide differential privacy {{Dwo06}}. Depending
-on the distribution of the measurements, the aggregate result itself can still
-leak a significant amount of information about an individual measurement or the
-person that generated it.
+1. Mitigation of Sybil attacks {{Dou02}}. In this attack, the adversary
+   observes a subset of input shares transmitted by a Client it is interested
+   in. It allows the input shares to be processed, but corrupts and picks bogus
+   measurements for the remaining Clients.  Applications can guard against
+   these risks by adding additional controls on report submission, such as
+   Client authentication and rate limits.
+
+1. Differential privacy {{Dwo06}}. Depending on the distribution of the
+   measurements, the aggregate result itself can still leak a significant
+   amount of information about an individual measurement or the person that
+   generated it.
+
+1. Robustness in the presence of a malicious Aggregator. An Aggregator can,
+   without detection, manipulate the aggregate result by modifying its own
+   aggregate share.
+
+1. Guaranteed output delivery {{GSZ20}}. An attacker that controls transmission
+   of messages between honest parties can prevent computation of the aggregate
+   result by dropping messages.
 
 ## Requirements for the Verification Key
 
