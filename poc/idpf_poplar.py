@@ -226,7 +226,7 @@ class IdpfPoplar(Idpf):
         return correction_words
 
     @classmethod
-    def with_bits(cls, bits: int):
+    def with_bits(cls, bits):
         """
         Set `BITS`.
 
