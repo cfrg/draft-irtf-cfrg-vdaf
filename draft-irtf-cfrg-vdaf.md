@@ -68,6 +68,18 @@ informative:
     seriesinfo: IEEE S&P 2021
     target: https://ia.cr/2021/017
 
+  BBCGGI23:
+    title: "Arithmetic Sketching"
+    author:
+      - ins: D. Boneh
+      - ins: E. Boyle
+      - ins: H. Corrigan-Gibbs
+      - ins: N. Gilboa
+      - ins: Y. Ishai
+    date: 2023
+    seriesinfo: CRYPTO 2023
+    target: https://ia.cr/2023/1012
+
   CGB17:
     title: "Prio: Private, Robust, and Scalable Computation of Aggregate Statistics"
     author:
@@ -3776,10 +3788,12 @@ extract the heavy hitters from the leaves of this tree. (Note that the prefix
 tree may leak more information about the set than the heavy hitters themselves;
 see {{agg-param-privacy}} for details.)
 
-Poplar1 composes an IDPF with the "secure sketching" protocol of {{BBCGGI21}}.
+Poplar1 composes an IDPF with the arithmetic sketch of {{BBCGGI21}}, Section
+4.2. (The paper calls this a "secure sketch", but the underlying technique was
+later generalized in {{BBCGGI23}}, where it is called "arithmetic sketching".)
 This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
-is zero everywhere except for one element, which is equal to one.
+is zero everywhere except for at most one element, which is equal to one.
 
 The remainder of this section is structured as follows. IDPFs are defined in
 {{idpf}}; a concrete instantiation is given {{idpf-poplar}}. The Poplar1 VDAF is
@@ -3960,7 +3974,7 @@ subsections. These methods make use of constants defined in {{poplar1-const}}.
 The Client's measurement is an IDPF index, denoted `alpha`. (See
 {{poplar1-idpf-index-encoding}} for guidelines on index encoding.) The
 programmed IDPF values are pairs of field elements `(1, k)` where each `k` is
-chosen at random. This random value is used as part of the secure sketching
+chosen at random. This random value is used as part of the arithmetic sketching
 protocol of {{BBCGGI21}}, Appendix C.4. After evaluating their IDPF key shares
 on a given sequence of candidate prefixes, the sketching protocol is used by
 the Aggregators to verify that they hold shares of a one-hot vector. In
@@ -4889,10 +4903,10 @@ heavy-hitter type applications.
 
 ### Safe Usage of IDPF Outputs
 
-The secure sketch described in {{poplar1}} is used by the Aggregators to check
+The arithmetic sketch described in {{poplar1}} is used by the Aggregators to check
 that the shares of the vector obtained by evaluating a Client's IDPF at a
 sequence of candidate prefixes has at most one non-zero value, and that the
-non-zero value is `1`. Depending on how the values are used, the secure sketch
+non-zero value is `1`. Depending on how the values are used, the arithmetic sketch
 on its own may not be sufficient for robustness of the application. In
 particular, a malicious Client may attempt to influence the computation by
 choosing an IDPF that evaluates to `1` at more than one node at a given
@@ -4911,7 +4925,7 @@ the inner nodes.) For intermediate levels, it is feasible for a client to
 produce IDPF shares with two controlled non-zero nodes.
 
 This is not an issue for running heavy hitters, since (1) each node in the
-prefix tree is a child of a previously traversed node, (2) the secure sketch
+prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
 would detect double voting at every level of the prefix tree, and (3) the IDPF
 is extractable at the last level of the tree. However, the lack of
 extractability at intermediate levels may result in attacks on the robustness
