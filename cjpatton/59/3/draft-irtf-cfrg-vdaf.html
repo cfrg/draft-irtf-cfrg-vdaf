@@ -2437,35 +2437,46 @@ is deterministic.<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
 <figure id="figure-5">
           <div class="alignLeft art-text artwork" id="section-4.6-2.1">
 <pre>
-def run_daf(Daf,
-            agg_param: Daf.AggParam,
-            measurements: list[Daf.Measurement],
-            nonces: list[bytes]):
-    out_shares = [[] for j in range(Daf.SHARES)]
+def run_daf(daf,
+            agg_param,
+            measurements,
+            nonces):
+    """
+    Run a DAF on a list of measurements.
+
+    Pre-conditions:
+
+        - `type(agg_param) == daf.AggParam`
+        - `type(measurement) == daf.Measurement` for each
+          `measurement` in `measurements`
+        - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
+        - `len(nonces) == len(measurements)`
+    """
+    out_shares = [[] for j in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.
-        rand = gen_rand(Daf.RAND_SIZE)
+        rand = gen_rand(daf.RAND_SIZE)
         (public_share, input_shares) = \
-            Daf.shard(measurement, nonce, rand)
+            daf.shard(measurement, nonce, rand)
 
         # Each Aggregator prepares its input share for aggregation.
-        for j in range(Daf.SHARES):
+        for j in range(daf.SHARES):
             out_shares[j].append(
-                Daf.prep(j, agg_param, nonce,
+                daf.prep(j, agg_param, nonce,
                          public_share, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
     # share and sends it to the Collector.
     agg_shares = []
-    for j in range(Daf.SHARES):
-        agg_share_j = Daf.aggregate(agg_param,
+    for j in range(daf.SHARES):
+        agg_share_j = daf.aggregate(agg_param,
                                     out_shares[j])
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate result.
     num_measurements = len(measurements)
-    agg_result = Daf.unshard(agg_param, agg_shares,
+    agg_result = daf.unshard(agg_param, agg_shares,
                              num_measurements)
     return agg_result
 </pre>
