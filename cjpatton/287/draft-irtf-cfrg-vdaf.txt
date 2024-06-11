@@ -3855,8 +3855,9 @@ def decode(self, output, _num_measurements):
    length, the number of of entries in the count vector; max_weight, the
    maximum number of non-zero entries (i.e., the weight must be at most
    max_weight); and chunk_length, used the same way as in Section 7.4.3
-   and Section 7.4.4.  It is RECOMMENDED to set chunk_length to an
-   integer near the square root of length (see Section 7.4.3.1).  Let
+   and Section 7.4.4.
+
+   The measurement is encoded as follows.  Let
 
    *  bits_for_weight = max_weight.bits_length()
 
