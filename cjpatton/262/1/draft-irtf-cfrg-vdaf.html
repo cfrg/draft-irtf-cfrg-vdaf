@@ -7739,14 +7739,18 @@ positive value of <code>BITS</code>. Test vectors can be found in <a href="#test
 <p id="section-9-1">VDAFs have two essential security goals:<a href="#section-9-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9-2">
 <li id="section-9-2.1">
-          <p id="section-9-2.1.1">Privacy: An attacker that controls the network, the Collector, and a subset
-of Clients and Aggregators learns nothing about the measurements of honest
-Clients beyond what it can deduce from the aggregate result.<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
+          <p id="section-9-2.1.1">Privacy: An attacker that controls the Collector and a subset of Clients and
+Aggregators learns nothing about the measurements of honest Clients beyond
+what it can deduce from the aggregate result. We assume the attacker
+controls the entire network except for channels between honest Clients and
+honest Aggregators. In particular, it cannot forge or prevent transmission
+of messages on these channels.<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-9-2.2">
-          <p id="section-9-2.2.1">Robustness: An attacker that controls the network and a subset of Clients
-cannot cause the Collector to compute anything other than the aggregate of
-the measurements of honest Clients.<a href="#section-9-2.2.1" class="pilcrow">¶</a></p>
+          <p id="section-9-2.2.1">Robustness: An attacker that controls a subset of Clients cannot cause the
+Collector to compute anything other than the aggregate of the measurements
+of honest Clients. We assume the attacker eavesdrops on the network but does
+not control transmission of messages between honest parties.<a href="#section-9-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 <p id="section-9-3">Formal definitions of privacy and robustness can be found in <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. A VDAF
@@ -7782,16 +7786,33 @@ aggregate result.  The Aggregators learn neither individual measurements nor the
 aggregate result.  The Collector is assured that the aggregate statistic
 accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.<a href="#section-9-5" class="pilcrow">¶</a></p>
-<p id="section-9-6">On their own, VDAFs do not mitigate Sybil attacks <span>[<a href="#Dou02" class="cite xref">Dou02</a>]</span>. In this attack, the
-adversary observes a subset of input shares transmitted by a Client it is
-interested in. It allows the input shares to be processed, but corrupts and
-picks bogus measurements for the remaining Clients.  Applications can guard
-against these risks by adding additional controls on report submission,
-such as Client authentication and rate limits.<a href="#section-9-6" class="pilcrow">¶</a></p>
-<p id="section-9-7">VDAFs do not, on their own, provide differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Depending
-on the distribution of the measurements, the aggregate result itself can still
-leak a significant amount of information about an individual measurement or the
-person that generated it.<a href="#section-9-7" class="pilcrow">¶</a></p>
+<p id="section-9-6">On their own, VDAFs do not provide:<a href="#section-9-6" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-9-7">
+<li id="section-9-7.1">
+          <p id="section-9-7.1.1">Mitigation of Sybil attacks <span>[<a href="#Dou02" class="cite xref">Dou02</a>]</span>. In this attack, the adversary
+observes a subset of input shares transmitted by a Client it is interested
+in. It allows the input shares to be processed, but corrupts and picks bogus
+measurements for the remaining Clients.  Applications can guard against
+these risks by adding additional controls on report submission, such as
+Client authentication and rate limits.<a href="#section-9-7.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-9-7.2">
+          <p id="section-9-7.2.1">Differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Depending on the distribution of the
+measurements, the aggregate result itself can still leak a significant
+amount of information about an individual measurement or the person that
+generated it.<a href="#section-9-7.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-9-7.3">
+          <p id="section-9-7.3.1">Robustness in the presence of a malicious Aggregator. An Aggregator can,
+without detection, manipulate the aggregate result by modifying its own
+aggregate share.<a href="#section-9-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-9-7.4">
+          <p id="section-9-7.4.1">Guaranteed output delivery <span>[<a href="#GSZ20" class="cite xref">GSZ20</a>]</span>. An attacker that controls transmission
+of messages between honest parties can prevent computation of the aggregate
+result by dropping messages.<a href="#section-9-7.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
 <div id="requirements-for-the-verification-key">
 <section id="section-9.1">
         <h3 id="name-requirements-for-the-verifi">
@@ -8198,6 +8219,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dt id="GKWY20">[GKWY20]</dt>
         <dd>
 <span class="refAuthor">Guo, C.</span>, <span class="refAuthor">Katz, J.</span>, <span class="refAuthor">Wang, X.</span>, and <span class="refAuthor">Y. Yu</span>, <span class="refTitle">"Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers"</span>, <span class="seriesInfo">S&amp;P 2020 </span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://eprint.iacr.org/2019/074">https://eprint.iacr.org/2019/074</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="GSZ20">[GSZ20]</dt>
+        <dd>
+<span class="refAuthor">Goyal, V.</span>, <span class="refAuthor">Song, Y.</span>, and <span class="refAuthor">C. Zhu</span>, <span class="refTitle">"Guaranteed Output Delivery Comes Free in Honest Majority MPC"</span>, <span class="seriesInfo">CRYPTO 2020 </span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22">https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MPRV09">[MPRV09]</dt>
         <dd>
