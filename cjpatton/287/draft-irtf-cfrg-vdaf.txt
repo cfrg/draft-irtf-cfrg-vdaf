@@ -3857,15 +3857,15 @@ def decode(self, output, _num_measurements):
    max_weight); and chunk_length, used the same way as in Section 7.4.3
    and Section 7.4.4.
 
-   The measurement is encoded as follows.  Let
+   Validation works as follows.  Let
 
    *  bits_for_weight = max_weight.bits_length()
 
    *  offset = 2**bits_for_weight - 1 - max_weight
 
-   The reported weight is encoded by adding offset to it and bit-
-   encoding the result.  Observe that only a weight of at most
-   max_weight can be encoded with bits_for_weight bits.
+   The Client reports the weight of the count vector by adding offset to
+   it and bit-encoding the result.  Observe that only a weight of at
+   most max_weight can be encoded with bits_for_weight bits.
 
    The verifier checks that each entry of the encoded measurement is a
    bit (i.e., either one or zero).  It then decodes the reported weight
