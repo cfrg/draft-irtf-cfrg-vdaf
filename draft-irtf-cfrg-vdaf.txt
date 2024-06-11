@@ -979,35 +979,46 @@ Table of Contents
 
    Securely executing a DAF involves emulating the following procedure.
 
-   def run_daf(Daf,
-               agg_param: Daf.AggParam,
-               measurements: list[Daf.Measurement],
-               nonces: list[bytes]):
-       out_shares = [[] for j in range(Daf.SHARES)]
+   def run_daf(daf,
+               agg_param,
+               measurements,
+               nonces):
+       """
+       Run a DAF on a list of measurements.
+
+       Pre-conditions:
+
+           - `type(agg_param) == daf.AggParam`
+           - `type(measurement) == daf.Measurement` for each
+             `measurement` in `measurements`
+           - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
+           - `len(nonces) == len(measurements)`
+       """
+       out_shares = [[] for j in range(daf.SHARES)]
        for (measurement, nonce) in zip(measurements, nonces):
            # Each Client shards its measurement into input shares and
            # distributes them among the Aggregators.
-           rand = gen_rand(Daf.RAND_SIZE)
+           rand = gen_rand(daf.RAND_SIZE)
            (public_share, input_shares) = \
-               Daf.shard(measurement, nonce, rand)
+               daf.shard(measurement, nonce, rand)
 
            # Each Aggregator prepares its input share for aggregation.
-           for j in range(Daf.SHARES):
+           for j in range(daf.SHARES):
                out_shares[j].append(
-                   Daf.prep(j, agg_param, nonce,
+                   daf.prep(j, agg_param, nonce,
                             public_share, input_shares[j]))
 
        # Each Aggregator aggregates its output shares into an aggregate
        # share and sends it to the Collector.
        agg_shares = []
-       for j in range(Daf.SHARES):
-           agg_share_j = Daf.aggregate(agg_param,
+       for j in range(daf.SHARES):
+           agg_share_j = daf.aggregate(agg_param,
                                        out_shares[j])
            agg_shares.append(agg_share_j)
 
        # Collector unshards the aggregate result.
        num_measurements = len(measurements)
-       agg_result = Daf.unshard(agg_param, agg_shares,
+       agg_result = daf.unshard(agg_param, agg_shares,
                                 num_measurements)
        return agg_result
 
@@ -1321,23 +1332,23 @@ Table of Contents
    Secure execution of a VDAF involves simulating the following
    procedure.
 
- def run_vdaf(Vdaf,
-              verify_key: bytes,
-              agg_param: Vdaf.AggParam,
-              nonces: list[bytes],
-              measurements: list[Vdaf.Measurement]):
+ def run_vdaf(vdaf,
+              verify_key,
+              agg_param,
+              nonces,
+              measurements):
      out_shares = []
      for (nonce, measurement) in zip(nonces, measurements):
          # Each Client shards its measurement into input shares.
-         rand = gen_rand(Vdaf.RAND_SIZE)
+         rand = gen_rand(vdaf.RAND_SIZE)
          (public_share, input_shares) = \
-             Vdaf.shard(measurement, nonce, rand)
+             vdaf.shard(measurement, nonce, rand)
 
          # Each Aggregator initializes its preparation state.
          prep_states = []
          outbound = []
-         for j in range(Vdaf.SHARES):
-             (state, share) = Vdaf.prep_init(verify_key, j,
+         for j in range(vdaf.SHARES):
+             (state, share) = vdaf.prep_init(verify_key, j,
                                              agg_param,
                                              nonce,
                                              public_share,
@@ -1346,21 +1357,21 @@ Table of Contents
              outbound.append(share)
 
          # Aggregators recover their output shares.
-         for i in range(Vdaf.ROUNDS-1):
-             prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+         for i in range(vdaf.ROUNDS-1):
+             prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                                  outbound)
              outbound = []
-             for j in range(Vdaf.SHARES):
-                 out = Vdaf.prep_next(prep_states[j], prep_msg)
+             for j in range(vdaf.SHARES):
+                 out = vdaf.prep_next(prep_states[j], prep_msg)
                  (prep_states[j], out) = out
                  outbound.append(out)
 
          # The final outputs of the prepare phase are the output shares.
-         prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+         prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                              outbound)
          outbound = []
-         for j in range(Vdaf.SHARES):
-             out_share = Vdaf.prep_next(prep_states[j], prep_msg)
+         for j in range(vdaf.SHARES):
+             out_share = vdaf.prep_next(prep_states[j], prep_msg)
              outbound.append(out_share)
          out_shares.append(outbound)
 
@@ -1368,14 +1379,14 @@ Table of Contents
      # aggregate share. In a distributed VDAF computation, the
      # aggregate shares are sent over the network.
      agg_shares = []
-     for j in range(Vdaf.SHARES):
+     for j in range(vdaf.SHARES):
          out_shares_j = [out[j] for out in out_shares]
-         agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
+         agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
          agg_shares.append(agg_share_j)
 
      # Collector unshards the aggregate.
      num_measurements = len(measurements)
-     agg_result = Vdaf.unshard(agg_param, agg_shares,
+     agg_result = vdaf.unshard(agg_param, agg_shares,
                                num_measurements)
      return agg_result
 
