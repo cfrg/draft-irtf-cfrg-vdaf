@@ -3852,25 +3852,19 @@ def decode(self, output, _num_measurements):
    Prio3MultihotCountVec uses XofTurboShake128 (Section 6.2.1) as its
    XOF.  Its validity circuit, denoted MultihotCountVec, uses Field128
    (Table 3) as its default finite field.  It has three parameters:
-   length, the number of of entries in the count vector; weight_bound,
-   the bound on the number of non-zero entries (i.e., the weight must be
-   in range(weight_bound)); and chunk_length, used the same way as in
-   Section 7.4.3 and Section 7.4.4.  It is RECOMMENDED to set
-   chunk_length to an integer near the square root of length (see
-   Section 7.4.3.1).
-
-   The reported weight is encoded in a way that ensures it is in
-   range(weight_bound).  Let
-
-   *  max_weight = weight_bound - 1
+   length, the number of of entries in the count vector; max_weight, the
+   maximum number of non-zero entries (i.e., the weight must be at most
+   max_weight); and chunk_length, used the same way as in Section 7.4.3
+   and Section 7.4.4.  It is RECOMMENDED to set chunk_length to an
+   integer near the square root of length (see Section 7.4.3.1).  Let
 
    *  bits_for_weight = max_weight.bits_length()
 
    *  offset = 2**bits_for_weight - 1 - max_weight
 
    The reported weight is encoded by adding offset to it and bit-
-   encoding the result.  Observe that only a value in
-   range(weight_bound) can be encoded with bits_for_weight bits.
+   encoding the result.  Observe that only a weight of at most
+   max_weight can be encoded with bits_for_weight bits.
 
    The verifier checks that each entry of the encoded measurement is a
    bit (i.e., either one or zero).  It then decodes the reported weight

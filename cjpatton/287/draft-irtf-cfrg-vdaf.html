@@ -23,17 +23,17 @@ measurement that would result in an invalid aggregate result.
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.21.0
-    Python 3.11.9
+    Python 3.12.3
     ConfigArgParse 1.7
     google-i18n-address 3.1.0
     intervaltree 3.1.0
-    Jinja2 3.1.2
-    lxml 4.9.3
-    platformdirs 4.2.1
+    Jinja2 3.1.4
+    lxml 4.9.4
+    platformdirs 4.2.2
     pycountry 22.3.5
     PyYAML 6.0.1
     requests 2.31.0
-    setuptools 68.2.2
+    setuptools 69.5.1
     six 1.16.0
     wcwidth 0.2.13
 -->
@@ -6308,33 +6308,28 @@ set each entry to one with some small probability.)<a href="#section-7.4.5-1" cl
 <p id="section-7.4.5-2">Prio3MultihotCountVec uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its XOF.
 Its validity circuit, denoted <code>MultihotCountVec</code>, uses <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)
 as its default finite field. It has three parameters: <code>length</code>, the number of
-of entries in the count vector; <code>weight_bound</code>, the bound on the number of
-non-zero entries (i.e., the weight must be in <code>range(weight_bound)</code>); and
-<code>chunk_length</code>, used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>.
-It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code> to an integer near the square root of
-<code>length</code> (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-3">The reported weight is encoded in a way that ensures it is in
-<code>range(weight_bound)</code>. Let<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
+of entries in the count vector; <code>max_weight</code>, the maximum number of non-zero
+entries (i.e., the weight must be at most <code>max_weight</code>); and <code>chunk_length</code>,
+used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>. It is
+<span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code> to an integer near the square root of
+<code>length</code> (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>). Let<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.4.5-4.1">
-              <p id="section-7.4.5-4.1.1"><code>max_weight = weight_bound - 1</code><a href="#section-7.4.5-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-7.4.5-3.1">
+              <p id="section-7.4.5-3.1.1"><code>bits_for_weight = max_weight.bits_length()</code><a href="#section-7.4.5-3.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-7.4.5-4.2">
-              <p id="section-7.4.5-4.2.1"><code>bits_for_weight = max_weight.bits_length()</code><a href="#section-7.4.5-4.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-7.4.5-4.3">
-              <p id="section-7.4.5-4.3.1"><code>offset = 2**bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-4.3.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-7.4.5-3.2">
+              <p id="section-7.4.5-3.2.1"><code>offset = 2**bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-3.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-7.4.5-5">The reported weight is encoded by adding <code>offset</code> to it and bit-encoding the
-result. Observe that only a value in <code>range(weight_bound)</code> can be encoded with
-<code>bits_for_weight</code> bits.<a href="#section-7.4.5-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-6">The verifier checks that each entry of the encoded measurement is a bit (i.e.,
+<p id="section-7.4.5-4">The reported weight is encoded by adding <code>offset</code> to it and bit-encoding the
+result. Observe that only a weight of at most <code>max_weight</code> can be encoded with
+<code>bits_for_weight</code> bits.<a href="#section-7.4.5-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.5-5">The verifier checks that each entry of the encoded measurement is a bit (i.e.,
 either one or zero). It then decodes the reported weight and subtracts it from
 <code>offset + sum(count_vec)</code>, where <code>count_vec</code> is the count vector. The result is
-zero if and only if the reported weight is equal to the true weight.<a href="#section-7.4.5-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-7">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.5-8">
+zero if and only if the reported weight is equal to the true weight.<a href="#section-7.4.5-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.5-6">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.4.5-7">
 <pre>
 def encode(self, measurement):
     if len(measurement) != self.length:
@@ -6358,10 +6353,10 @@ def truncate(self, meas):
 
 def decode(self, output, _num_measurements):
     return [bucket_count.as_unsigned() for bucket_count in output]
-</pre><a href="#section-7.4.5-8" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.5-7" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.5-9">Circuit evaluation is defined as follows:<a href="#section-7.4.5-9" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.5-10">
+<p id="section-7.4.5-8">Circuit evaluation is defined as follows:<a href="#section-7.4.5-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.4.5-9">
 <pre>
 def eval(self, meas, joint_rand, num_shares):
     # Check that each entry in the input vector is one or zero.
@@ -6397,7 +6392,7 @@ def eval(self, meas, joint_rand, num_shares):
     out = joint_rand[1] * range_check + \
         joint_rand[1] ** 2 * weight_check
     return out
-</pre><a href="#section-7.4.5-10" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.5-9" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circuit-"></span><table class="center" id="table-13">
             <caption>
