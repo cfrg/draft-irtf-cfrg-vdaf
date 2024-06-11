@@ -1,10 +1,8 @@
 """Definition of VDAFs."""
 
-from __future__ import annotations
-
 import json
 import os
-from typing import Union
+from typing import Any, Union
 
 from common import (TEST_VECTOR_PATH, format_dst, gen_rand, print_wrapped_line,
                     to_le_bytes)
@@ -14,52 +12,52 @@ class Vdaf:
     """A VDAF."""
 
     # Algorithm identifier for this VDAF, a 32-bit integer.
-    ID: int = None  # `range(2**32)`
+    ID: int  # `range(2**32)`
 
     # Length of the verification key shared by the Aggregators.
-    VERIFY_KEY_SIZE = None
+    VERIFY_KEY_SIZE: int
 
     # Length of the nonce.
-    NONCE_SIZE = None
+    NONCE_SIZE: int
 
     # Number of random bytes consumed by `shard()`.
-    RAND_SIZE = None
+    RAND_SIZE: int
 
     # The number of Aggregators.
-    SHARES: int = None
+    SHARES: int
 
     # The number of rounds of communication during the Prepare phase.
-    ROUNDS: int = None
+    ROUNDS: int
 
     # The measurement type.
-    Measurement = None
+    Measurement: Any = None
 
     # The aggregation parameter type.
-    AggParam = None
+    AggParam: Any = None
 
     # The public share type.
-    PublicShare = None
+    PublicShare: Any = None
 
     # The input share type.
-    InputShare = None
+    InputShare: Any = None
 
     # The output share type.
-    OutShare = None
+    OutShare: Any = None
 
     # The aggregate share type.
-    AggShare = None
+    AggShare: Any = None
 
     # The aggregate result type.
-    AggResult = None
+    AggResult: Any = None
 
     # The state of an Aggregator during preparation.
-    PrepState = None
+    PrepState: Any = None
 
     # The preparation share type.
-    PrepShare = None
+    PrepShare: Any = None
 
     # The preparation message type.
-    PrepMessage = None
+    PrepMessage: Any = None
 
     @classmethod
     def shard(Vdaf,
@@ -202,36 +200,36 @@ class Vdaf:
 
 
 # NOTE This is used to generate {{run-vdaf}}.
-def run_vdaf(Vdaf,
-             verify_key: bytes,
-             agg_param: Vdaf.AggParam,
-             nonces: list[bytes],
-             measurements: list[Vdaf.Measurement],
+def run_vdaf(vdaf,
+             verify_key,
+             agg_param,
+             nonces,
+             measurements,
              print_test_vec=False,
              test_vec_instance=0):
     """Run the VDAF on a list of measurements.
 
     Pre-conditions:
 
-        - `len(verify_key) == Vdaf.VERIFY_KEY_SIZE`
+        - `len(verify_key) == vdaf.VERIFY_KEY_SIZE`
         - `len(nonces) == len(measurements)`
-        - `len(nonce) == Vdaf.NONCE_SIZE` for each `nonce` in `nonces`
+        - `len(nonce) == vdaf.NONCE_SIZE` for each `nonce` in `nonces`
     """
 
     # REMOVE ME
     test_vec = {
-        'shares': Vdaf.SHARES,
+        'shares': vdaf.SHARES,
         'verify_key': verify_key.hex(),
         'agg_param': agg_param,
         'prep': [],
         'agg_shares': [],
         'agg_result': None,  # set below
     }
-    type_params = Vdaf.test_vec_set_type_param(test_vec)
+    type_params = vdaf.test_vec_set_type_param(test_vec)
 
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
-        assert len(nonce) == Vdaf.NONCE_SIZE
+        assert len(nonce) == vdaf.NONCE_SIZE
 
         # REMOVE ME
         prep_test_vec = {
@@ -239,29 +237,29 @@ def run_vdaf(Vdaf,
             'nonce': nonce.hex(),
             'public_share': None,  # set below
             'input_shares': [],
-            'prep_shares': [[] for _ in range(Vdaf.ROUNDS)],
+            'prep_shares': [[] for _ in range(vdaf.ROUNDS)],
             'prep_messages': [],
             'out_shares': [],
         }
 
         # Each Client shards its measurement into input shares.
-        rand = gen_rand(Vdaf.RAND_SIZE)
+        rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            Vdaf.shard(measurement, nonce, rand)
+            vdaf.shard(measurement, nonce, rand)
 
         # REMOVE ME
         prep_test_vec['rand'] = rand.hex()
         prep_test_vec['public_share'] = \
-            Vdaf.test_vec_encode_public_share(public_share).hex()
+            vdaf.test_vec_encode_public_share(public_share).hex()
         for input_share in input_shares:
             prep_test_vec['input_shares'].append(
-                Vdaf.test_vec_encode_input_share(input_share).hex())
+                vdaf.test_vec_encode_input_share(input_share).hex())
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
         outbound = []
-        for j in range(Vdaf.SHARES):
-            (state, share) = Vdaf.prep_init(verify_key, j,
+        for j in range(vdaf.SHARES):
+            (state, share) = vdaf.prep_init(verify_key, j,
                                             agg_param,
                                             nonce,
                                             public_share,
@@ -271,35 +269,35 @@ def run_vdaf(Vdaf,
         # REMOVE ME
         for prep_share in outbound:
             prep_test_vec['prep_shares'][0].append(
-                Vdaf.test_vec_encode_prep_share(prep_share).hex())
+                vdaf.test_vec_encode_prep_share(prep_share).hex())
 
         # Aggregators recover their output shares.
-        for i in range(Vdaf.ROUNDS-1):
-            prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+        for i in range(vdaf.ROUNDS-1):
+            prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                                 outbound)
             # REMOVE ME
             prep_test_vec['prep_messages'].append(
-                Vdaf.test_vec_encode_prep_msg(prep_msg).hex())
+                vdaf.test_vec_encode_prep_msg(prep_msg).hex())
 
             outbound = []
-            for j in range(Vdaf.SHARES):
-                out = Vdaf.prep_next(prep_states[j], prep_msg)
+            for j in range(vdaf.SHARES):
+                out = vdaf.prep_next(prep_states[j], prep_msg)
                 (prep_states[j], out) = out
                 outbound.append(out)
             # REMOVE ME
             for prep_share in outbound:
                 prep_test_vec['prep_shares'][i+1].append(
-                    Vdaf.test_vec_encode_prep_share(prep_share).hex())
+                    vdaf.test_vec_encode_prep_share(prep_share).hex())
 
         # The final outputs of the prepare phase are the output shares.
-        prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+        prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                             outbound)
         # REMOVE ME
         prep_test_vec['prep_messages'].append(
-            Vdaf.test_vec_encode_prep_msg(prep_msg).hex())
+            vdaf.test_vec_encode_prep_msg(prep_msg).hex())
         outbound = []
-        for j in range(Vdaf.SHARES):
-            out_share = Vdaf.prep_next(prep_states[j], prep_msg)
+        for j in range(vdaf.SHARES):
+            out_share = vdaf.prep_next(prep_states[j], prep_msg)
             outbound.append(out_share)
 
         # REMOVE ME
@@ -316,27 +314,27 @@ def run_vdaf(Vdaf,
     # aggregate share. In a distributed VDAF computation, the
     # aggregate shares are sent over the network.
     agg_shares = []
-    for j in range(Vdaf.SHARES):
+    for j in range(vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
+        agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
         agg_shares.append(agg_share_j)
         # REMOVE ME
         test_vec['agg_shares'].append(
-            Vdaf.test_vec_encode_agg_share(agg_share_j).hex())
+            vdaf.test_vec_encode_agg_share(agg_share_j).hex())
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
-    agg_result = Vdaf.unshard(agg_param, agg_shares,
+    agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
     # REMOVE ME
     test_vec['agg_result'] = agg_result
     if print_test_vec:
-        pretty_print_vdaf_test_vec(Vdaf, test_vec, type_params)
+        pretty_print_vdaf_test_vec(vdaf, test_vec, type_params)
 
         os.system('mkdir -p {}'.format(TEST_VECTOR_PATH))
         with open(
             '{}/{}_{}.json'.format(
-                TEST_VECTOR_PATH, Vdaf.test_vec_name, test_vec_instance),
+                TEST_VECTOR_PATH, vdaf.test_vec_name, test_vec_instance),
             'w'
         ) as f:
             json.dump(test_vec, f, indent=4, sort_keys=True)
