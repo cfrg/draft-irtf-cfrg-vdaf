@@ -2440,35 +2440,46 @@ is deterministic.<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
 <figure id="figure-5">
           <div class="alignLeft art-text artwork" id="section-4.6-2.1">
 <pre>
-def run_daf(Daf,
-            agg_param: Daf.AggParam,
-            measurements: list[Daf.Measurement],
-            nonces: list[bytes]):
-    out_shares = [[] for j in range(Daf.SHARES)]
+def run_daf(daf,
+            agg_param,
+            measurements,
+            nonces):
+    """
+    Run a DAF on a list of measurements.
+
+    Pre-conditions:
+
+        - `type(agg_param) == daf.AggParam`
+        - `type(measurement) == daf.Measurement` for each
+          `measurement` in `measurements`
+        - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
+        - `len(nonces) == len(measurements)`
+    """
+    out_shares = [[] for j in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.
-        rand = gen_rand(Daf.RAND_SIZE)
+        rand = gen_rand(daf.RAND_SIZE)
         (public_share, input_shares) = \
-            Daf.shard(measurement, nonce, rand)
+            daf.shard(measurement, nonce, rand)
 
         # Each Aggregator prepares its input share for aggregation.
-        for j in range(Daf.SHARES):
+        for j in range(daf.SHARES):
             out_shares[j].append(
-                Daf.prep(j, agg_param, nonce,
+                daf.prep(j, agg_param, nonce,
                          public_share, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate
     # share and sends it to the Collector.
     agg_shares = []
-    for j in range(Daf.SHARES):
-        agg_share_j = Daf.aggregate(agg_param,
+    for j in range(daf.SHARES):
+        agg_share_j = daf.aggregate(agg_param,
                                     out_shares[j])
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate result.
     num_measurements = len(measurements)
-    agg_result = Daf.unshard(agg_param, agg_shares,
+    agg_result = daf.unshard(agg_param, agg_shares,
                              num_measurements)
     return agg_result
 </pre>
@@ -2897,23 +2908,23 @@ is deterministic.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
 <figure id="figure-7">
           <div class="alignLeft art-text artwork" id="section-5.6-2.1">
 <pre>
-def run_vdaf(Vdaf,
-             verify_key: bytes,
-             agg_param: Vdaf.AggParam,
-             nonces: list[bytes],
-             measurements: list[Vdaf.Measurement]):
+def run_vdaf(vdaf,
+             verify_key,
+             agg_param,
+             nonces,
+             measurements):
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
         # Each Client shards its measurement into input shares.
-        rand = gen_rand(Vdaf.RAND_SIZE)
+        rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            Vdaf.shard(measurement, nonce, rand)
+            vdaf.shard(measurement, nonce, rand)
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
         outbound = []
-        for j in range(Vdaf.SHARES):
-            (state, share) = Vdaf.prep_init(verify_key, j,
+        for j in range(vdaf.SHARES):
+            (state, share) = vdaf.prep_init(verify_key, j,
                                             agg_param,
                                             nonce,
                                             public_share,
@@ -2922,21 +2933,21 @@ def run_vdaf(Vdaf,
             outbound.append(share)
 
         # Aggregators recover their output shares.
-        for i in range(Vdaf.ROUNDS-1):
-            prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+        for i in range(vdaf.ROUNDS-1):
+            prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                                 outbound)
             outbound = []
-            for j in range(Vdaf.SHARES):
-                out = Vdaf.prep_next(prep_states[j], prep_msg)
+            for j in range(vdaf.SHARES):
+                out = vdaf.prep_next(prep_states[j], prep_msg)
                 (prep_states[j], out) = out
                 outbound.append(out)
 
         # The final outputs of the prepare phase are the output shares.
-        prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+        prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                             outbound)
         outbound = []
-        for j in range(Vdaf.SHARES):
-            out_share = Vdaf.prep_next(prep_states[j], prep_msg)
+        for j in range(vdaf.SHARES):
+            out_share = vdaf.prep_next(prep_states[j], prep_msg)
             outbound.append(out_share)
         out_shares.append(outbound)
 
@@ -2944,14 +2955,14 @@ def run_vdaf(Vdaf,
     # aggregate share. In a distributed VDAF computation, the
     # aggregate shares are sent over the network.
     agg_shares = []
-    for j in range(Vdaf.SHARES):
+    for j in range(vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
+        agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
         agg_shares.append(agg_share_j)
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
-    agg_result = Vdaf.unshard(agg_param, agg_shares,
+    agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
     return agg_result
 </pre>
@@ -6314,7 +6325,7 @@ used the same way as in <a href="#prio3sumvec" class="auto internal xref">Sectio
 <p id="section-7.4.5-3">Validation works as follows. Let<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.4.5-4.1">
-              <p id="section-7.4.5-4.1.1"><code>bits_for_weight = max_weight.bits_length()</code><a href="#section-7.4.5-4.1.1" class="pilcrow">¶</a></p>
+              <p id="section-7.4.5-4.1.1"><code>bits_for_weight = max_weight.bit_length()</code><a href="#section-7.4.5-4.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.4.5-4.2">
               <p id="section-7.4.5-4.2.1"><code>offset = 2**bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-4.2.1" class="pilcrow">¶</a></p>
@@ -7867,14 +7878,18 @@ positive value of <code>BITS</code>. Test vectors can be found in <a href="#test
 <p id="section-9-1">VDAFs have two essential security goals:<a href="#section-9-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9-2">
 <li id="section-9-2.1">
-          <p id="section-9-2.1.1">Privacy: An attacker that controls the network, the Collector, and a subset
-of Clients and Aggregators learns nothing about the measurements of honest
-Clients beyond what it can deduce from the aggregate result.<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
+          <p id="section-9-2.1.1">Privacy: An attacker that controls the Collector and a subset of Clients and
+Aggregators learns nothing about the measurements of honest Clients beyond
+what it can deduce from the aggregate result. We assume the attacker
+controls the entire network except for channels between honest Clients and
+honest Aggregators. In particular, it cannot forge or prevent transmission
+of messages on these channels.<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-9-2.2">
-          <p id="section-9-2.2.1">Robustness: An attacker that controls the network and a subset of Clients
-cannot cause the Collector to compute anything other than the aggregate of
-the measurements of honest Clients.<a href="#section-9-2.2.1" class="pilcrow">¶</a></p>
+          <p id="section-9-2.2.1">Robustness: An attacker that controls a subset of Clients cannot cause the
+Collector to compute anything other than the aggregate of the measurements
+of honest Clients. We assume the attacker eavesdrops on the network but does
+not control transmission of messages between honest parties.<a href="#section-9-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 <p id="section-9-3">Formal definitions of privacy and robustness can be found in <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. A VDAF
@@ -7910,16 +7925,33 @@ aggregate result.  The Aggregators learn neither individual measurements nor the
 aggregate result.  The Collector is assured that the aggregate statistic
 accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.<a href="#section-9-5" class="pilcrow">¶</a></p>
-<p id="section-9-6">On their own, VDAFs do not mitigate Sybil attacks <span>[<a href="#Dou02" class="cite xref">Dou02</a>]</span>. In this attack, the
-adversary observes a subset of input shares transmitted by a Client it is
-interested in. It allows the input shares to be processed, but corrupts and
-picks bogus measurements for the remaining Clients.  Applications can guard
-against these risks by adding additional controls on report submission,
-such as Client authentication and rate limits.<a href="#section-9-6" class="pilcrow">¶</a></p>
-<p id="section-9-7">VDAFs do not, on their own, provide differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Depending
-on the distribution of the measurements, the aggregate result itself can still
-leak a significant amount of information about an individual measurement or the
-person that generated it.<a href="#section-9-7" class="pilcrow">¶</a></p>
+<p id="section-9-6">On their own, VDAFs do not provide:<a href="#section-9-6" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-9-7">
+<li id="section-9-7.1">
+          <p id="section-9-7.1.1">Mitigation of Sybil attacks <span>[<a href="#Dou02" class="cite xref">Dou02</a>]</span>. In this attack, the adversary
+observes a subset of input shares transmitted by a Client it is interested
+in. It allows the input shares to be processed, but corrupts and picks bogus
+measurements for the remaining Clients.  Applications can guard against
+these risks by adding additional controls on report submission, such as
+Client authentication and rate limits.<a href="#section-9-7.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-9-7.2">
+          <p id="section-9-7.2.1">Differential privacy <span>[<a href="#Dwo06" class="cite xref">Dwo06</a>]</span>. Depending on the distribution of the
+measurements, the aggregate result itself can still leak a significant
+amount of information about an individual measurement or the person that
+generated it.<a href="#section-9-7.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-9-7.3">
+          <p id="section-9-7.3.1">Robustness in the presence of a malicious Aggregator. An Aggregator can,
+without detection, manipulate the aggregate result by modifying its own
+aggregate share.<a href="#section-9-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-9-7.4">
+          <p id="section-9-7.4.1">Guaranteed output delivery <span>[<a href="#GSZ20" class="cite xref">GSZ20</a>]</span>. An attacker that controls transmission
+of messages between honest parties can prevent computation of the aggregate
+result by dropping messages.<a href="#section-9-7.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
 <div id="requirements-for-the-verification-key">
 <section id="section-9.1">
         <h3 id="name-requirements-for-the-verifi">
@@ -8336,6 +8368,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dt id="GKWY20">[GKWY20]</dt>
         <dd>
 <span class="refAuthor">Guo, C.</span>, <span class="refAuthor">Katz, J.</span>, <span class="refAuthor">Wang, X.</span>, and <span class="refAuthor">Y. Yu</span>, <span class="refTitle">"Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers"</span>, <span class="seriesInfo">S&amp;P 2020 </span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://eprint.iacr.org/2019/074">https://eprint.iacr.org/2019/074</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="GSZ20">[GSZ20]</dt>
+        <dd>
+<span class="refAuthor">Goyal, V.</span>, <span class="refAuthor">Song, Y.</span>, and <span class="refAuthor">C. Zhu</span>, <span class="refTitle">"Guaranteed Output Delivery Comes Free in Honest Majority MPC"</span>, <span class="seriesInfo">CRYPTO 2020 </span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22">https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MPRV09">[MPRV09]</dt>
         <dd>

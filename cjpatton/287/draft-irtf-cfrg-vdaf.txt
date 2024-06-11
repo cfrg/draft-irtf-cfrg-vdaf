@@ -980,35 +980,46 @@ Table of Contents
 
    Securely executing a DAF involves emulating the following procedure.
 
-   def run_daf(Daf,
-               agg_param: Daf.AggParam,
-               measurements: list[Daf.Measurement],
-               nonces: list[bytes]):
-       out_shares = [[] for j in range(Daf.SHARES)]
+   def run_daf(daf,
+               agg_param,
+               measurements,
+               nonces):
+       """
+       Run a DAF on a list of measurements.
+
+       Pre-conditions:
+
+           - `type(agg_param) == daf.AggParam`
+           - `type(measurement) == daf.Measurement` for each
+             `measurement` in `measurements`
+           - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
+           - `len(nonces) == len(measurements)`
+       """
+       out_shares = [[] for j in range(daf.SHARES)]
        for (measurement, nonce) in zip(measurements, nonces):
            # Each Client shards its measurement into input shares and
            # distributes them among the Aggregators.
-           rand = gen_rand(Daf.RAND_SIZE)
+           rand = gen_rand(daf.RAND_SIZE)
            (public_share, input_shares) = \
-               Daf.shard(measurement, nonce, rand)
+               daf.shard(measurement, nonce, rand)
 
            # Each Aggregator prepares its input share for aggregation.
-           for j in range(Daf.SHARES):
+           for j in range(daf.SHARES):
                out_shares[j].append(
-                   Daf.prep(j, agg_param, nonce,
+                   daf.prep(j, agg_param, nonce,
                             public_share, input_shares[j]))
 
        # Each Aggregator aggregates its output shares into an aggregate
        # share and sends it to the Collector.
        agg_shares = []
-       for j in range(Daf.SHARES):
-           agg_share_j = Daf.aggregate(agg_param,
+       for j in range(daf.SHARES):
+           agg_share_j = daf.aggregate(agg_param,
                                        out_shares[j])
            agg_shares.append(agg_share_j)
 
        # Collector unshards the aggregate result.
        num_measurements = len(measurements)
-       agg_result = Daf.unshard(agg_param, agg_shares,
+       agg_result = daf.unshard(agg_param, agg_shares,
                                 num_measurements)
        return agg_result
 
@@ -1322,23 +1333,23 @@ Table of Contents
    Secure execution of a VDAF involves simulating the following
    procedure.
 
- def run_vdaf(Vdaf,
-              verify_key: bytes,
-              agg_param: Vdaf.AggParam,
-              nonces: list[bytes],
-              measurements: list[Vdaf.Measurement]):
+ def run_vdaf(vdaf,
+              verify_key,
+              agg_param,
+              nonces,
+              measurements):
      out_shares = []
      for (nonce, measurement) in zip(nonces, measurements):
          # Each Client shards its measurement into input shares.
-         rand = gen_rand(Vdaf.RAND_SIZE)
+         rand = gen_rand(vdaf.RAND_SIZE)
          (public_share, input_shares) = \
-             Vdaf.shard(measurement, nonce, rand)
+             vdaf.shard(measurement, nonce, rand)
 
          # Each Aggregator initializes its preparation state.
          prep_states = []
          outbound = []
-         for j in range(Vdaf.SHARES):
-             (state, share) = Vdaf.prep_init(verify_key, j,
+         for j in range(vdaf.SHARES):
+             (state, share) = vdaf.prep_init(verify_key, j,
                                              agg_param,
                                              nonce,
                                              public_share,
@@ -1347,21 +1358,21 @@ Table of Contents
              outbound.append(share)
 
          # Aggregators recover their output shares.
-         for i in range(Vdaf.ROUNDS-1):
-             prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+         for i in range(vdaf.ROUNDS-1):
+             prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                                  outbound)
              outbound = []
-             for j in range(Vdaf.SHARES):
-                 out = Vdaf.prep_next(prep_states[j], prep_msg)
+             for j in range(vdaf.SHARES):
+                 out = vdaf.prep_next(prep_states[j], prep_msg)
                  (prep_states[j], out) = out
                  outbound.append(out)
 
          # The final outputs of the prepare phase are the output shares.
-         prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+         prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                              outbound)
          outbound = []
-         for j in range(Vdaf.SHARES):
-             out_share = Vdaf.prep_next(prep_states[j], prep_msg)
+         for j in range(vdaf.SHARES):
+             out_share = vdaf.prep_next(prep_states[j], prep_msg)
              outbound.append(out_share)
          out_shares.append(outbound)
 
@@ -1369,14 +1380,14 @@ Table of Contents
      # aggregate share. In a distributed VDAF computation, the
      # aggregate shares are sent over the network.
      agg_shares = []
-     for j in range(Vdaf.SHARES):
+     for j in range(vdaf.SHARES):
          out_shares_j = [out[j] for out in out_shares]
-         agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
+         agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
          agg_shares.append(agg_share_j)
 
      # Collector unshards the aggregate.
      num_measurements = len(measurements)
-     agg_result = Vdaf.unshard(agg_param, agg_shares,
+     agg_result = vdaf.unshard(agg_param, agg_shares,
                                num_measurements)
      return agg_result
 
@@ -3859,7 +3870,7 @@ def decode(self, output, _num_measurements):
 
    Validation works as follows.  Let
 
-   *  bits_for_weight = max_weight.bits_length()
+   *  bits_for_weight = max_weight.bit_length()
 
    *  offset = 2**bits_for_weight - 1 - max_weight
 
@@ -4999,14 +5010,19 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
    VDAFs have two essential security goals:
 
-   1.  Privacy: An attacker that controls the network, the Collector,
-       and a subset of Clients and Aggregators learns nothing about the
-       measurements of honest Clients beyond what it can deduce from the
-       aggregate result.
+   1.  Privacy: An attacker that controls the Collector and a subset of
+       Clients and Aggregators learns nothing about the measurements of
+       honest Clients beyond what it can deduce from the aggregate
+       result.  We assume the attacker controls the entire network
+       except for channels between honest Clients and honest
+       Aggregators.  In particular, it cannot forge or prevent
+       transmission of messages on these channels.
 
-   2.  Robustness: An attacker that controls the network and a subset of
-       Clients cannot cause the Collector to compute anything other than
-       the aggregate of the measurements of honest Clients.
+   2.  Robustness: An attacker that controls a subset of Clients cannot
+       cause the Collector to compute anything other than the aggregate
+       of the measurements of honest Clients.  We assume the attacker
+       eavesdrops on the network but does not control transmission of
+       messages between honest parties.
 
    Formal definitions of privacy and robustness can be found in
    [DPRS23].  A VDAF is the core cryptographic primitive of a protocol
@@ -5037,18 +5053,28 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    the inputs as long as the Aggregators correctly executed their role
    in the VDAF.
 
-   On their own, VDAFs do not mitigate Sybil attacks [Dou02].  In this
-   attack, the adversary observes a subset of input shares transmitted
-   by a Client it is interested in.  It allows the input shares to be
-   processed, but corrupts and picks bogus measurements for the
-   remaining Clients.  Applications can guard against these risks by
-   adding additional controls on report submission, such as Client
-   authentication and rate limits.
+   On their own, VDAFs do not provide:
 
-   VDAFs do not, on their own, provide differential privacy [Dwo06].
-   Depending on the distribution of the measurements, the aggregate
-   result itself can still leak a significant amount of information
-   about an individual measurement or the person that generated it.
+   1.  Mitigation of Sybil attacks [Dou02].  In this attack, the
+       adversary observes a subset of input shares transmitted by a
+       Client it is interested in.  It allows the input shares to be
+       processed, but corrupts and picks bogus measurements for the
+       remaining Clients.  Applications can guard against these risks by
+       adding additional controls on report submission, such as Client
+       authentication and rate limits.
+
+   2.  Differential privacy [Dwo06].  Depending on the distribution of
+       the measurements, the aggregate result itself can still leak a
+       significant amount of information about an individual measurement
+       or the person that generated it.
+
+   3.  Robustness in the presence of a malicious Aggregator.  An
+       Aggregator can, without detection, manipulate the aggregate
+       result by modifying its own aggregate share.
+
+   4.  Guaranteed output delivery [GSZ20].  An attacker that controls
+       transmission of messages between honest parties can prevent
+       computation of the aggregate result by dropping messages.
 
 9.1.  Requirements for the Verification Key
 
@@ -5383,6 +5409,11 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
               Secure Multiparty Computation from Fixed-Key Block
               Ciphers", S&P 2020 , 2020,
               <https://eprint.iacr.org/2019/074>.
+
+   [GSZ20]    Goyal, V., Song, Y., and C. Zhu, "Guaranteed Output
+              Delivery Comes Free in Honest Majority MPC", CRYPTO 2020 ,
+              2020, <https://link.springer.com/
+              chapter/10.1007/978-3-030-56880-1_22>.
 
    [MPRV09]   Mironov, I., Pandey, O., Reingold, O., and S. Vadhan,
               "Computational Differential Privacy", CRYPTO 2009 , n.d.,
