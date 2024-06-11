@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 9 December 2024                                            ISRG
+Expires: 13 December 2024                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             7 June 2024
+                                                            11 June 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 December 2024.
+   This Internet-Draft will expire on 13 December 2024.
 
 Copyright Notice
 
@@ -3852,26 +3852,31 @@ def decode(self, output, _num_measurements):
    Prio3MultihotCountVec uses XofTurboShake128 (Section 6.2.1) as its
    XOF.  Its validity circuit, denoted MultihotCountVec, uses Field128
    (Table 3) as its default finite field.  It has three parameters:
-   length, the number of of entries in the count vector; max_weight, the
-   maximum weight of the vector (i.e., the number of non-zero entries);
-   and chunk_length, used the same way as in Section 7.4.3 and
-   Section 7.4.4.  It is RECOMMENDED to set chunk_length to an integer
-   near the square root of length (see Section 7.4.3.1).
+   length, the number of of entries in the count vector; weight_bound,
+   the bound on the number of non-zero entries (i.e., the weight must be
+   in range(weight_bound)); and chunk_length, used the same way as in
+   Section 7.4.3 and Section 7.4.4.  It is RECOMMENDED to set
+   chunk_length to an integer near the square root of length (see
+   Section 7.4.3.1).
 
    The reported weight is encoded in a way that ensures it is in
-   range(max_weight).  Specifically:
+   range(weight_bound).  Let
 
-   *  Let offset = 2**bits_for_weight - 1 - max_weight The reported
-      weight is encoded by adding offset to it and bit-encoding the
-      result.  Observe that only a value in range(max_weight) can be
-      encoded with bits_for_weight bits.  Here bits_for_weight denotes
-      the number of bits required to encode the maximum weight.
+   *  max_weight = weight_bound - 1
 
-   *  The verifier checks that each entry of the encoded measurement is
-      a bit (i.e., either one or zero).  It then decodes the reported
-      weight and subtracts it from offset + sum(count_vec), where
-      count_vec is the count vector.  The result is zero if and only if
-      the reported weight is equal to the true weight.
+   *  bits_for_weight = max_weight.bits_length()
+
+   *  offset = 2**bits_for_weight - 1 - max_weight
+
+   The reported weight is encoded by adding offset to it and bit-
+   encoding the result.  Observe that only a value in
+   range(weight_bound) can be encoded with bits_for_weight bits.
+
+   The verifier checks that each entry of the encoded measurement is a
+   bit (i.e., either one or zero).  It then decodes the reported weight
+   and subtracts it from offset + sum(count_vec), where count_vec is the
+   count vector.  The result is zero if and only if the reported weight
+   is equal to the true weight.
 
    Encoding, truncation, and decoding are defined as follows:
 
@@ -3945,7 +3950,7 @@ def decode(self, output, _num_measurements):
           +----------------+------------------------------------+
           | MEAS_LEN       | length + bits_for_weight           |
           +----------------+------------------------------------+
-          | OUTPUT_LEN     | length + bits_for_weight           |
+          | OUTPUT_LEN     | length                             |
           +----------------+------------------------------------+
           | JOINT_RAND_LEN | 2                                  |
           +----------------+------------------------------------+
