@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-09T00:50:45.738985+00:00",
+  "timestamp": "2024-06-11T00:45:30.671629+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -123,10 +123,12 @@
       "author": "csharrison",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "idea"
+      ],
       "body": "Shuffle differential privacy (https://arxiv.org/pdf/1811.12469.pdf and many other papers) is a type of differential privacy where the privacy mechanism can be thought of as a composition of two pieces:\r\n1. A local randomizer applying some local noise to data (and stripping identifiers, etc)\r\n2. A central curator that takes as input a batch of client data and simply applies a permutation on it\r\n\r\nThe power of the shuffle DP is that the server-side mechanism is _simple_ and _general purpose_. The exact same shuffler can be used for different applications measuring different kinds of things. Privacy guarantees are based on two things:\r\n\r\n1. The level of local noise added to the data\r\n2. The number of clients that participate in a shuffle\r\n\r\nAt an intuitive level, the more reports you have, and the more noise is injected into the reports, the more a given client's input is \"hidden in the crowd\".\r\n\r\nIs this a good fit for VDAFs? Shuffling is conceptually a very simple task to ask a 2-party MPC protocol to do. I could imagine slotting this into the VDAF structure like:\r\n\r\n- Clients split their local data D into \"shares\" where Helper 1 gets Enc2(D) and Helper 2 gets Enc1(null). (Which helper gets the real message can be randomized). Note that nested encryption is used so that no helper can see any raw data before it is shuffled.\r\n- When each helper gets its batch of data, it will run it through a shuffle step, and send the shuffle results to the other helper\r\n- After the exchange, the helpers shuffle the exchanged batches one more time (ensuring all data is shuffled twice, once by each helper).\r\n- Helpers can then decrypt the data and share each shuffled batch to the collector\r\n\r\nPossible concerns:\r\n\r\n- In the simple example above, helpers learn a shuffled version of the true data (i.e. a DP release). The protocol is not zero-knowledge. This could probably be fixed, there is no need for helpers to learn any raw data.\r\n- We rely exclusively on DP for the protection. Whether this can be called \"aggregation\" is maybe subject for debate. Certainly you can say that (if the batches are large enough, with enough noise), that no individual's data can be learned\r\n- The splitting of shares and helpers independently shuffling partial batches is a bit awkward. Probably the ideal mechanism would be for clients to send all data to Helper 1, which shuffles and sends to Helper 2, which sends data to the collector. Parallel shuffling buys us nothing.\r\n- Some shuffle protocols may want some kind of \"label\" in the clear, with minimum batch sizes per label.\r\n\r\nAnyways, thoughts appreciated! Shuffling can be a simple and effective way to achieve good privacy with very simple mechanisms, but it doesn't fit so well into VDAFs.\r\n\r\ncc @schoppmp ",
       "createdAt": "2021-11-11T21:24:52Z",
-      "updatedAt": "2023-03-02T17:39:24Z",
+      "updatedAt": "2024-06-10T16:17:00Z",
       "closedAt": "2023-03-02T17:39:23Z",
       "comments": [
         {
@@ -4437,9 +4439,9 @@
         "feature",
         "idea"
       ],
-      "body": "Section 4.5 of [Samplable Anonymous Aggregation for Private Federated Data Analysis](https://arxiv.org/pdf/2307.15017.pdf) notes that it's possible to efficiently validate that a vector consists of zeros and ones, with at most some constant number of ones. This could be done by generalizing Prio3Histogram. (Open question: does this belong in this document or a separate one?) Here's how I'd implement this:\r\n\r\n* The parameters would be the length, $n$, the chunk length, and the maximum number of ones, $m$.\r\n* Input length would be $n+\\left\\lfloor{log_2(m)}\\right\\rfloor+1$. Let $l_m=\\left\\lfloor{log_2(m)}\\right\\rfloor+1$, the number of bits needed to represent $m$.\r\n* Encoding: The first $n$ field elements are just projected measurement values. Let $c=2^{l_m}-1-m$, a constant offset to let us achieve the sum limit we want. Then, for input values $x_i$, compute $c+\\sum_i{x_i}$, encode it as a bit vector, and append it to the encoded measurement.\r\n* Truncation: Take the first $n$ elements.\r\n* Decoding: $id$\r\n* Validity circuit: Evaluate the range check polynomial $x(x-1)$ on all `INPUT_LEN` elements, and combine the results in a random linear combination (using the parallel sum optimization). Separately, evaluate the following, where $x_i$ are the measurement values from the encoded measurement, and $s_j$ are the bits of the $c+\\sum_i{x_i}$ from the encoded measurement. $$c + \\sum_{i=0}^{n-1} {x_i} - \\sum_{j=0}^{l_m} {2^j s_j}$$ Add the range check and sum check intermediate values together in another random linear combination, and return the result.",
+      "body": "Section 4.5 of [Samplable Anonymous Aggregation for Private Federated Data Analysis](https://arxiv.org/pdf/2307.15017.pdf) notes that it's possible to efficiently validate that a vector consists of zeros and ones, with at most some constant number of ones. This could be done by generalizing Prio3Histogram. (Open question: does this belong in this document or a separate one?) Here's how I'd implement this:\r\n\r\n* The parameters would be the length, $n$, the chunk length, and the maximum number of ones, $m$.\r\n* Input length would be $n+\\left\\lfloor{log_2(m)}\\right\\rfloor+1$. Let $l_m=\\left\\lfloor{log_2(m)}\\right\\rfloor+1$, the number of bits needed to represent $m$.\r\n* Encoding: The first $n$ field elements are just projected measurement values. Let $c=2^{l_m}-1-m$, a constant offset to let us achieve the sum limit we want. Then, for input values $x_i$, compute $c+\\sum_i{x_i}$, encode it as a bit vector, and append it to the encoded measurement.\r\n* Truncation: Take the first $n$ elements.\r\n* Decoding: $id$\r\n* Validity circuit: Evaluate the range check polynomial $x(x-1)$ on all `INPUT_LEN` elements, and combine the results in a random linear combination (using the parallel sum optimization). Separately, evaluate the following, where $x_i$ are the measurement values from the encoded measurement, and $s_j$ are the bits of the $c+\\sum_i{x_i}$ from the encoded measurement. $$c + \\sum_{i=0}^{n-1} {x_i} - \\sum_{j=0}^{l_m-1} {2^j s_j}$$ Add the range check and sum check intermediate values together in another random linear combination, and return the result.",
       "createdAt": "2023-08-23T20:00:42Z",
-      "updatedAt": "2024-06-06T21:20:55Z",
+      "updatedAt": "2024-06-10T20:47:09Z",
       "closedAt": null,
       "comments": [
         {
@@ -4635,19 +4637,19 @@
       "id": "I_kwDOGKuqOc50ZtZB",
       "title": "Clarify threat model for robustness",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/304",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "jimouris",
       "authorAssociation": "NONE",
       "assignees": [
-        "pratiksarkar93"
+        "cjpatton"
       ],
       "labels": [
         "security consideration"
       ],
       "body": "Hello, I had a discussion with @cjpatton and @pratiksarkar93 about the VDAF security considerations. The draft states:\r\n\r\n```\r\n VDAFs have two essential security goals:\r\n\r\n 1.  Privacy: An attacker that controls the network, the Collector,\r\n     and a subset of Clients and Aggregators learns nothing about the\r\n     measurements of honest Clients beyond what it can deduce from the\r\n     aggregate result.\r\n\r\n 2.  Robustness: An attacker that controls the network and a subset of\r\n     Clients cannot cause the Collector to compute anything other than\r\n     the aggregate of the measurements of honest Clients.\r\n```\r\n\r\nI was wondering if the notion of **robustness** is referring only to **correctness** or to both correctness and **guaranteed output delivery (GOD)**. Would it make sense to split robustness into these two properties to use more formal MPC terms (i.e., [pages 2 & 3 from Lindell's paper](https://eprint.iacr.org/2020/300.pdf))? \r\n\r\nFor example, the draft states \"break robustness\" or \"attack on robustness\" but it is not clear if that means to cause the Collector to output an incorrect result (i.e., attack on correctness) or to prevent honest parties from receiving their output (i.e., attack on GOD).\r\n\r\n\r\n",
       "createdAt": "2023-10-19T19:08:55Z",
-      "updatedAt": "2024-06-06T15:59:17Z",
-      "closedAt": null,
+      "updatedAt": "2024-06-10T23:56:21Z",
+      "closedAt": "2024-06-10T23:56:21Z",
       "comments": [
         {
           "author": "divergentdave",
@@ -5103,7 +5105,7 @@
       "id": "I_kwDOGKuqOc6EXtM0",
       "title": "Poplar1: Should the threshold be a parameter of the scheme?",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/333",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -5112,9 +5114,17 @@
       ],
       "body": "The privacy of this VDAF depends on the threshold chosen by the Collector. At the application level, it will often be useful to ensure that all honest parties agree on the threshold such that the attacker can't change its value, for example, with the task binding mechanism of the proposed [taskprov extension for DAP.](https://github.com/wangshan/draft-wang-ppm-dap-taskprov).",
       "createdAt": "2024-04-02T15:21:17Z",
-      "updatedAt": "2024-04-03T19:19:31Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2024-06-10T15:22:44Z",
+      "closedAt": "2024-06-10T15:22:44Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Binding Poplar1 execution to the threshold is similar to binding VDAF's execution to the batch size, something we have not done. One reason not to do the latter is that the batch size may be chosen dynamically by the aggregators, w/ DP noise tuned accordingly.\r\n\r\nBinding to these types of parameters could also be accomplished at the protocol layer, e.g., in DAP via https://github.com/wangshan/draft-wang-ppm-dap-taskprov.",
+          "createdAt": "2024-06-10T15:22:44Z",
+          "updatedAt": "2024-06-10T15:22:44Z"
+        }
+      ]
     },
     {
       "number": 334,
@@ -5160,11 +5170,12 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "editorial"
+        "editorial",
+        "pre-RGLC"
       ],
       "body": "The intro mentions the MOzilla Origin Telemtry project, ENPA, ISRG, Google, and Apple by name. I'm not sure this is appropriate for an RFC to do. ",
       "createdAt": "2024-05-01T20:51:16Z",
-      "updatedAt": "2024-05-01T20:51:16Z",
+      "updatedAt": "2024-06-10T15:16:57Z",
       "closedAt": null,
       "comments": []
     },
@@ -29785,10 +29796,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "Based on #345 (merge that first).\r\n\r\nCloses #222.\r\nPartially addresses #233.\r\nPartially addresses #59.\r\n\r\nWe use Python's type hints to make APIs more self-documenting. However\r\nwe abuse hints in a couple of ways:\r\n\r\n1. We give aliases to primitive types, e.g., `Vec` for `list`.\r\n2. We try to express fixed-length arrays with hints, e.g.,\r\n   `bytes[Vdaf.NONCE_SIZE]`, but don't (and probably can't) enforce it.\r\n3. We use `Unsigned` for non-negative integers, but don't enforce it.\r\n\r\nThese abuses have lead to code rot. To address this, we remove the type\r\naliases altogether, simplify the type hints, and express bounds on\r\ntypes in prose. In some cases, the bounds are stricter than they were\r\nbefore.\r\n\r\nA few minor changes picked up along the way:\r\n\r\n- idpf_poplar.py: `packed_bits` -> `packed` for consistency with\r\n  `encoded` elsewhere.\r\n\r\n- vdaf_prio3.py: Remove `PRio3SumVecWithMultiproof.is_recommended()` as\r\n  it is not really used.\r\n\r\n- Declare `gen_rand()` to be a CSPRNG.",
       "createdAt": "2024-06-06T00:01:59Z",
-      "updatedAt": "2024-06-08T19:54:45Z",
+      "updatedAt": "2024-06-10T16:08:44Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "ffd69aa33e1365f6b5f65d1dd0eaf462588d01e4",
@@ -29910,10 +29923,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "Based on #350 (merge that first).\r\n\r\nCloses #277.\r\n\r\nUse a generic Python exception with a helpful error message. `ValueError` is the natural choice for all of our cases.",
       "createdAt": "2024-06-06T15:55:51Z",
-      "updatedAt": "2024-06-08T19:54:42Z",
+      "updatedAt": "2024-06-10T16:08:57Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9ba9c346d6f339e2643bc93da749ec0a40d68eef",
@@ -30035,10 +30050,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "Closes #287.\r\n\r\nAssign Prio3MultiHotHistogram a codepoint (0x00000004) and add it to the draft under the name Prio3MultihotCountVec. Also, rename \"count\" to \"weight\", as in the \"weight of the vector\" (i.e., the number of non-zero entries).",
       "createdAt": "2024-06-06T21:06:38Z",
-      "updatedAt": "2024-06-07T19:21:40Z",
+      "updatedAt": "2024-06-10T21:47:46Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
@@ -30116,6 +30133,44 @@
           "createdAt": "2024-06-07T19:21:40Z",
           "updatedAt": "2024-06-07T19:21:40Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59sVbn",
+          "commit": {
+            "abbreviatedOid": "2fa9804"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-10T21:21:25Z",
+          "updatedAt": "2024-06-10T21:47:46Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "We shouldn't use `range(max_weight)` Python-style notation here (and elsewhere), as `max_weight` should be an inclusive upper bound, but `range()` has an exclusive upper bound.",
+              "createdAt": "2024-06-10T21:21:25Z",
+              "updatedAt": "2024-06-10T21:47:46Z"
+            },
+            {
+              "originalPosition": 25,
+              "body": "We should define `bits_for_weight` first, before this definition.",
+              "createdAt": "2024-06-10T21:23:36Z",
+              "updatedAt": "2024-06-10T21:47:46Z"
+            },
+            {
+              "originalPosition": 108,
+              "body": "This is incorrect, as we remove some of these elements during `truncate()`.\r\n```suggestion\r\n| `OUTPUT_LEN`     | `length`                                        |\r\n```",
+              "createdAt": "2024-06-10T21:35:15Z",
+              "updatedAt": "2024-06-10T21:47:46Z"
+            },
+            {
+              "originalPosition": 72,
+              "body": "nit: typo\r\n```suggestion\r\n            - `chunk_length > 0`\r\n```",
+              "createdAt": "2024-06-10T21:42:05Z",
+              "updatedAt": "2024-06-10T21:47:46Z"
+            }
+          ]
         }
       ]
     },
@@ -30128,10 +30183,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "I forgot to include this before I merged the previous commit. See #347.",
       "createdAt": "2024-06-06T21:34:36Z",
-      "updatedAt": "2024-06-08T19:54:44Z",
+      "updatedAt": "2024-06-10T16:09:06Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9e7c7cfdebd512a9930337f0fdd5231bd15b765f",
@@ -30170,10 +30227,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "Partially addresses #59.\r\n\r\nAdd type hint enforcement with mypy to CI, starting with field.py and xof.py. This checks that the variables passed into a function match the function's type hints.",
       "createdAt": "2024-06-06T22:14:18Z",
-      "updatedAt": "2024-06-08T19:54:43Z",
+      "updatedAt": "2024-06-10T16:09:19Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9ba9c346d6f339e2643bc93da749ec0a40d68eef",
@@ -30269,26 +30328,44 @@
       "id": "PR_kwDOGKuqOc5x1MmF",
       "title": "Have `is_prefix()` take in a level rather than a length",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/353",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "",
       "createdAt": "2024-06-07T19:42:16Z",
-      "updatedAt": "2024-06-07T19:42:26Z",
+      "updatedAt": "2024-06-10T19:38:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/is-prefix",
       "headRefOid": "81c3bfd95bc2302f5bab43a9ad4d3f2c40ebd55a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-06-10T19:38:53Z",
+      "mergedAt": "2024-06-10T19:38:53Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "c73fb68c8b93e2375223ce45d00ce84dcd779b41"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59rsLU",
+          "commit": {
+            "abbreviatedOid": "81c3bfd"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-10T19:31:52Z",
+          "updatedAt": "2024-06-10T19:31:52Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 354,
@@ -30299,10 +30376,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "Partially addresses #59.\r\n\r\nThe \"associated type\" pattern we're trying to follow is not enforceable.\r\nFor example, we'll do something like this:\r\n\r\n```\r\nclass Foo:\r\n    Measurement = None\r\n    def bar(self, m: Measurement): pass\r\n```\r\n\r\n`mypy` complains because `None` is not a valid type. We instead could do\r\nthe following:\r\n\r\n```\r\nclass Foo:\r\n    Measurement: Any = None\r\n    def bar(self, m: Measurement): pass\r\n```\r\n\r\nA concrete sub-class would override this in the natural way:\r\n\r\n```\r\nclass FooForInt(Foo):\r\n    Measurement = int\r\n    def bar(self, m: int): pass\r\n\r\nFoo().bar(23)\r\nFoo().bar(\"23\")\r\nFooForInt().bar(23)\r\nFooForInt().bar(\"23\") # fails\r\n```",
       "createdAt": "2024-06-08T01:14:50Z",
-      "updatedAt": "2024-06-08T01:40:03Z",
+      "updatedAt": "2024-06-10T18:20:31Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
@@ -30354,6 +30433,26 @@
               "updatedAt": "2024-06-08T01:39:03Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59rFF9",
+          "commit": {
+            "abbreviatedOid": "8263845"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-10T18:01:07Z",
+          "updatedAt": "2024-06-10T18:20:31Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "I think the problem here is fundamentally one of partial initialization, due to how we use class factories. Instead of `Any`, we could hypothetically use something like `Union[type[field.Field], NoneType]`. Note that `None` would still be a problem even if we had generic type variables, as the type hint would then be `Union[type[F], NoneType]`.\r\n\r\nMoreover, the final class we construct from a class factory only really exists at runtime, so static analysis-based type checking will run into some fundamental limitations with this pattern.",
+              "createdAt": "2024-06-10T18:01:07Z",
+              "updatedAt": "2024-06-10T18:20:31Z"
+            }
+          ]
         }
       ]
     },
@@ -30366,10 +30465,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-10"
+      ],
       "body": "Closes #262.\r\nPartially addresses #306.\r\n\r\nIf the input is valid, then each output should be zero. To save bandwidth, we generate an extra element of query randomness and use it to reduce the result.\r\n\r\nTo exercise this feature, implement a new circuit, `Sum2`, that generalizes `Sum` to support any bound, including non-powers-of-two.",
       "createdAt": "2024-06-08T21:44:30Z",
-      "updatedAt": "2024-06-08T21:57:48Z",
+      "updatedAt": "2024-06-10T16:09:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
@@ -30382,6 +30483,103 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 356,
+      "id": "PR_kwDOGKuqOc5x_1jI",
+      "title": "Clarify network assumptions and limits on robustness",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/356",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-10"
+      ],
+      "body": "Closes #304.\r\n\r\nAdd the following clarifications to our thread model:\r\n\r\n- Privacy assumes the attacker does not control transmission of messages between the honest Clients and Aggregators.\r\n\r\n- Robustness assumes the attacker eavesdrops on the network but does not control transmission.\r\n\r\nThis implies that guaranteed output delivery and malicious robustness are not guaranteed.",
+      "createdAt": "2024-06-10T15:56:08Z",
+      "updatedAt": "2024-06-10T23:56:20Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3ac03623c4680b28d1517af0a16dd513e1d0c310",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/304",
+      "headRefOid": "dabc4daa3c5c6b6ad74678f37ebae32ef7b7fd11",
+      "closedAt": "2024-06-10T23:56:20Z",
+      "mergedAt": "2024-06-10T23:56:20Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b59b382f1c4f220d36e0dfc0ab87b11477817798"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc59qIES",
+          "commit": {
+            "abbreviatedOid": "dabc4da"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-10T15:57:26Z",
+          "updatedAt": "2024-06-10T15:57:26Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "@jimouris, @pratiksarkar93 let me know if you have a preferred reference for guaranteed output delivery.",
+              "createdAt": "2024-06-10T15:57:26Z",
+              "updatedAt": "2024-06-10T15:57:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59qIi1",
+          "commit": {
+            "abbreviatedOid": "dabc4da"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-10T15:58:19Z",
+          "updatedAt": "2024-06-10T15:58:19Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "I decided against https://eprint.iacr.org/2020/300 because it's not published anywhere. However RFCs do have references to unpublished work, so we could include it if you think it's better.\r\n",
+              "createdAt": "2024-06-10T15:58:19Z",
+              "updatedAt": "2024-06-10T15:58:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59qKYm",
+          "commit": {
+            "abbreviatedOid": "dabc4da"
+          },
+          "author": "jimouris",
+          "authorAssociation": "NONE",
+          "state": "APPROVED",
+          "body": "Looks good to me, thanks for updating! Agreed that it's better to cite published papers.",
+          "createdAt": "2024-06-10T16:01:54Z",
+          "updatedAt": "2024-06-10T16:01:54Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc59sAQ-",
+          "commit": {
+            "abbreviatedOid": "dabc4da"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-10T20:25:28Z",
+          "updatedAt": "2024-06-10T20:25:28Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
