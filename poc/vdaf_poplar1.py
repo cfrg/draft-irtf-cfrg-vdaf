@@ -32,16 +32,16 @@ class Poplar1(Vdaf):
     # AggParam = tuple[int, tuple[int, ...]]  # level, prefixes
     # PublicShare = bytes  # IDPF public share
     # InputShare = tuple[
-    #    bytes,                  # IDPF key
-    #    bytes,                  # corr seed
-    #    list[Idpf.FieldInner],  # inner corr randomness
-    #    list[Idpf.FieldLeaf],   # leaf corr randomness
+    #     bytes,                  # IDPF key
+    #     bytes,                  # corr seed
+    #     list[Idpf.FieldInner],  # inner corr randomness
+    #     list[Idpf.FieldLeaf],   # leaf corr randomness
     # ]
     # OutShare = Idpf.FieldVec
     # AggShare = Idpf.FieldVec
     # AggResult = list[int]
-    # PrepState = tuple[bytes,          # sketch round
-    #                  Idpf.FieldVec]  # output (and sketch) share
+    # PrepState = tuple[bytes,          # sketch step (evaluate or reveal)
+    #                   Idpf.FieldVec]  # output (and sketch) share
     # PrepShare = Idpf.FieldVec
     # PrepMessage = Optional[Idpf.FieldVec]
 
@@ -70,7 +70,7 @@ class Poplar1(Vdaf):
         # Construct the IDPF values for each level of the IDPF tree.
         # Each "data" value is 1; in addition, the Client generates
         # a random "authenticator" value used by the Aggregators to
-        # compute the sketch during preparation. This sketch is used
+        # evaluate the sketch during preparation. This sketch is used
         # to verify the one-hotness of their output shares.
         beta_inner = [
             [Poplar1.Idpf.FieldInner(1), k]
@@ -88,8 +88,8 @@ class Poplar1(Vdaf):
                                                 idpf_rand)
 
         # Generate correlated randomness used by the Aggregators to
-        # compute a sketch over their output shares. Seeds are used to
-        # encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
+        # evaluate the sketch over their output shares. Seeds are used
+        # to encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
         # Appendix C.4].)
         corr_offsets = vec_add(
             Poplar1.Xof.expand_into_vec(
@@ -191,9 +191,8 @@ class Poplar1(Vdaf):
         value = Poplar1.Idpf.eval(
             agg_id, public_share, key, level, prefixes, nonce)
 
-        # Get shares of the correlated randomness for computing the
-        # Aggregator's share of the sketch for the given level of the IDPF
-        # tree.
+        # Get shares of the correlated randomness for evaluating the
+        # Aggregator's share of the sketch.
         if level < Poplar1.Idpf.BITS - 1:
             corr_xof = Poplar1.Xof(
                 corr_seed,
@@ -212,7 +211,7 @@ class Poplar1(Vdaf):
         (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
             if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
-        # Compute the Aggregator's first round of the sketch. These are
+        # Evaluate the Aggregator's share of the sketch. These are
         # called the "masked input values" [BBCGGI21, Appendix C.4].
         verify_rand_xof = Poplar1.Xof(
             verify_key,
@@ -230,7 +229,7 @@ class Poplar1(Vdaf):
             out_share.append(data_share)
 
         prep_mem = [A_share, B_share, Field(agg_id)] + out_share
-        return ((b'sketch round 1', level, prep_mem),
+        return ((b'evaluate sketch', level, prep_mem),
                 sketch_share)
 
     @classmethod
@@ -239,7 +238,7 @@ class Poplar1(Vdaf):
         (step, level, prep_mem) = prep_state
         Field = Poplar1.Idpf.current_field(level)
 
-        if step == b'sketch round 1':
+        if step == b'evaluate sketch':
             if prev_sketch == None:
                 prev_sketch = Field.zeros(3)
             elif len(prev_sketch) != 3:
@@ -253,10 +252,10 @@ class Poplar1(Vdaf):
                 + A_share * prev_sketch[0]
                 + B_share
             ]
-            return ((b'sketch round 2', level, prep_mem),
+            return ((b'reveal sketch', level, prep_mem),
                     sketch_share)
 
-        elif step == b'sketch round 2':
+        elif step == b'reveal sketch':
             if prev_sketch == None:
                 return prep_mem  # Output shares
             else:
