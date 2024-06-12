@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 13 December 2024                                           ISRG
+Expires: 14 December 2024                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            11 June 2024
+                                                            12 June 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 December 2024.
+   This Internet-Draft will expire on 14 December 2024.
 
 Copyright Notice
 
@@ -122,6 +122,7 @@ Table of Contents
        7.4.2.  Prio3Sum
        7.4.3.  Prio3SumVec
        7.4.4.  Prio3Histogram
+       7.4.5.  Prio3MultihotCountVec
    8.  Poplar1
      8.1.  Incremental Distributed Point Functions (IDPFs)
        8.1.1.  Encoding inputs as indices
@@ -809,7 +810,7 @@ Table of Contents
    AggShare.
 
    Each DAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 17.
+   for each (V)DAF specified in this document are defined in Table 18.
 
 4.1.  Sharding
 
@@ -979,35 +980,46 @@ Table of Contents
 
    Securely executing a DAF involves emulating the following procedure.
 
-   def run_daf(Daf,
-               agg_param: Daf.AggParam,
-               measurements: list[Daf.Measurement],
-               nonces: list[bytes]):
-       out_shares = [[] for j in range(Daf.SHARES)]
+   def run_daf(daf,
+               agg_param,
+               measurements,
+               nonces):
+       """
+       Run a DAF on a list of measurements.
+
+       Pre-conditions:
+
+           - `type(agg_param) == daf.AggParam`
+           - `type(measurement) == daf.Measurement` for each
+             `measurement` in `measurements`
+           - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
+           - `len(nonces) == len(measurements)`
+       """
+       out_shares = [[] for j in range(daf.SHARES)]
        for (measurement, nonce) in zip(measurements, nonces):
            # Each Client shards its measurement into input shares and
            # distributes them among the Aggregators.
-           rand = gen_rand(Daf.RAND_SIZE)
+           rand = gen_rand(daf.RAND_SIZE)
            (public_share, input_shares) = \
-               Daf.shard(measurement, nonce, rand)
+               daf.shard(measurement, nonce, rand)
 
            # Each Aggregator prepares its input share for aggregation.
-           for j in range(Daf.SHARES):
+           for j in range(daf.SHARES):
                out_shares[j].append(
-                   Daf.prep(j, agg_param, nonce,
+                   daf.prep(j, agg_param, nonce,
                             public_share, input_shares[j]))
 
        # Each Aggregator aggregates its output shares into an aggregate
        # share and sends it to the Collector.
        agg_shares = []
-       for j in range(Daf.SHARES):
-           agg_share_j = Daf.aggregate(agg_param,
+       for j in range(daf.SHARES):
+           agg_share_j = daf.aggregate(agg_param,
                                        out_shares[j])
            agg_shares.append(agg_share_j)
 
        # Collector unshards the aggregate result.
        num_measurements = len(measurements)
-       agg_result = Daf.unshard(agg_param, agg_shares,
+       agg_result = daf.unshard(agg_param, agg_shares,
                                 num_measurements)
        return agg_result
 
@@ -1108,7 +1120,7 @@ Table of Contents
    PrepMessage.
 
    Each VDAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 17.
+   for each (V)DAF specified in this document are defined in Table 18.
    The following method is defined for every VDAF:
 
    def domain_separation_tag(Vdaf, usage: int) -> bytes:
@@ -1321,23 +1333,23 @@ Table of Contents
    Secure execution of a VDAF involves simulating the following
    procedure.
 
- def run_vdaf(Vdaf,
-              verify_key: bytes,
-              agg_param: Vdaf.AggParam,
-              nonces: list[bytes],
-              measurements: list[Vdaf.Measurement]):
+ def run_vdaf(vdaf,
+              verify_key,
+              agg_param,
+              nonces,
+              measurements):
      out_shares = []
      for (nonce, measurement) in zip(nonces, measurements):
          # Each Client shards its measurement into input shares.
-         rand = gen_rand(Vdaf.RAND_SIZE)
+         rand = gen_rand(vdaf.RAND_SIZE)
          (public_share, input_shares) = \
-             Vdaf.shard(measurement, nonce, rand)
+             vdaf.shard(measurement, nonce, rand)
 
          # Each Aggregator initializes its preparation state.
          prep_states = []
          outbound = []
-         for j in range(Vdaf.SHARES):
-             (state, share) = Vdaf.prep_init(verify_key, j,
+         for j in range(vdaf.SHARES):
+             (state, share) = vdaf.prep_init(verify_key, j,
                                              agg_param,
                                              nonce,
                                              public_share,
@@ -1346,21 +1358,21 @@ Table of Contents
              outbound.append(share)
 
          # Aggregators recover their output shares.
-         for i in range(Vdaf.ROUNDS-1):
-             prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+         for i in range(vdaf.ROUNDS-1):
+             prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                                  outbound)
              outbound = []
-             for j in range(Vdaf.SHARES):
-                 out = Vdaf.prep_next(prep_states[j], prep_msg)
+             for j in range(vdaf.SHARES):
+                 out = vdaf.prep_next(prep_states[j], prep_msg)
                  (prep_states[j], out) = out
                  outbound.append(out)
 
          # The final outputs of the prepare phase are the output shares.
-         prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+         prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                              outbound)
          outbound = []
-         for j in range(Vdaf.SHARES):
-             out_share = Vdaf.prep_next(prep_states[j], prep_msg)
+         for j in range(vdaf.SHARES):
+             out_share = vdaf.prep_next(prep_states[j], prep_msg)
              outbound.append(out_share)
          out_shares.append(outbound)
 
@@ -1368,14 +1380,14 @@ Table of Contents
      # aggregate share. In a distributed VDAF computation, the
      # aggregate shares are sent over the network.
      agg_shares = []
-     for j in range(Vdaf.SHARES):
+     for j in range(vdaf.SHARES):
          out_shares_j = [out[j] for out in out_shares]
-         agg_share_j = Vdaf.aggregate(agg_param, out_shares_j)
+         agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
          agg_shares.append(agg_share_j)
 
      # Collector unshards the aggregate.
      num_measurements = len(measurements)
-     agg_result = Vdaf.unshard(agg_param, agg_shares,
+     agg_result = vdaf.unshard(agg_param, agg_shares,
                                num_measurements)
      return agg_result
 
@@ -3865,6 +3877,126 @@ def decode(self, output, _num_measurements):
 
             Table 12: Parameters of validity circuit Histogram.
 
+7.4.5.  Prio3MultihotCountVec
+
+   For this instance of Prio3, each measurement is a vector of ones and
+   zeros, where the number of ones is bounded.  This provides a
+   functionality similar to Prio3Histogram except that more than one
+   entry may be non-zero.  This allows Prio3MultihotCountVec to be
+   composed with a randomized response mechanism, like [EPK14], for
+   providing differential privacy.  (For example, each Client would set
+   each entry to one with some small probability.)
+
+   Prio3MultihotCountVec uses XofTurboShake128 (Section 6.2.1) as its
+   XOF.  Its validity circuit, denoted MultihotCountVec, uses Field128
+   (Table 3) as its default finite field.  It has three parameters:
+   length, the number of of entries in the count vector; max_weight, the
+   maximum number of non-zero entries (i.e., the weight must be at most
+   max_weight); and chunk_length, used the same way as in Section 7.4.3
+   and Section 7.4.4.
+
+   Validation works as follows.  Let
+
+   *  bits_for_weight = max_weight.bit_length()
+
+   *  offset = 2**bits_for_weight - 1 - max_weight
+
+   The Client reports the weight of the count vector by adding offset to
+   it and bit-encoding the result.  Observe that only a weight of at
+   most max_weight can be encoded with bits_for_weight bits.
+
+   The verifier checks that each entry of the encoded measurement is a
+   bit (i.e., either one or zero).  It then decodes the reported weight
+   and subtracts it from offset + sum(count_vec), where count_vec is the
+   count vector.  The result is zero if and only if the reported weight
+   is equal to the true weight.
+
+   Encoding, truncation, and decoding are defined as follows:
+
+   def encode(self, measurement):
+       if len(measurement) != self.length:
+           raise ValueError('invalid Client measurement length')
+
+       # The first part is the vector of counters.
+       count_vec = list(map(self.Field, measurement))
+
+       # The second part is the reported weight.
+       weight_reported = sum(count_vec, self.Field(0))
+
+       encoded = []
+       encoded += count_vec
+       encoded += self.Field.encode_into_bit_vector(
+           (self.offset + weight_reported).as_unsigned(),
+           self.bits_for_weight)
+       return encoded
+
+   def truncate(self, meas):
+       return meas[:self.length]
+
+   def decode(self, output, _num_measurements):
+       return [bucket_count.as_unsigned() for bucket_count in output]
+
+   Circuit evaluation is defined as follows:
+
+   def eval(self, meas, joint_rand, num_shares):
+       # Check that each entry in the input vector is one or zero.
+       range_check = self.Field(0)
+       r = joint_rand[0]
+       r_power = r
+       shares_inv = self.Field(num_shares).inv()
+       for i in range(self.GADGET_CALLS[0]):
+           inputs = [None] * (2 * self.chunk_length)
+           for j in range(self.chunk_length):
+               index = i * self.chunk_length + j
+               if index < len(meas):
+                   meas_elem = meas[index]
+               else:
+                   meas_elem = self.Field(0)
+
+               inputs[j * 2] = r_power * meas_elem
+               inputs[j * 2 + 1] = meas_elem - shares_inv
+
+               r_power *= r
+
+           range_check += self.GADGETS[0].eval(self.Field, inputs)
+
+       # Check that the weight `offset` plus the sum of the counters
+       # is equal to the value claimed by the Client.
+       count_vec = meas[:self.length]
+       weight = sum(count_vec, self.Field(0))
+       weight_reported = \
+           self.Field.decode_from_bit_vector(meas[self.length:])
+       weight_check = self.offset*shares_inv + weight - \
+           weight_reported
+
+       out = joint_rand[1] * range_check + \
+           joint_rand[1] ** 2 * weight_check
+       return out
+
+          +================+====================================+
+          | Parameter      | Value                              |
+          +================+====================================+
+          | GADGETS        | [ParallelSum(Mul(), chunk_length)] |
+          +----------------+------------------------------------+
+          | GADGET_CALLS   | [(length + bits_for_weight +       |
+          |                | chunk_length - 1) // chunk_length] |
+          +----------------+------------------------------------+
+          | MEAS_LEN       | length + bits_for_weight           |
+          +----------------+------------------------------------+
+          | OUTPUT_LEN     | length                             |
+          +----------------+------------------------------------+
+          | JOINT_RAND_LEN | 2                                  |
+          +----------------+------------------------------------+
+          | Measurement    | list[int]                          |
+          +----------------+------------------------------------+
+          | AggResult      | list[int]                          |
+          +----------------+------------------------------------+
+          | Field          | Field128 (Table 3)                 |
+          +----------------+------------------------------------+
+
+                  Table 13: Parameters of validity circuit
+                             MultihotCountVec.
+
 8.  Poplar1
 
    This section specifies Poplar1, a VDAF for the following task.  Each
@@ -3964,7 +4096,7 @@ def decode(self, output, _num_measurements):
    "extractable" as defined in [BBCGGI21], Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 13.  In the remainder we write Output as shorthand for the type
+   Table 14.  In the remainder we write Output as shorthand for the type
    Union[list[list[FieldInner]], list[list[FieldLeaf]]].  (This type
    denotes either a vector of inner node field elements or leaf node
    field elements.)  The scheme is comprised of the following
@@ -4072,7 +4204,7 @@ def decode(self, output, _num_measurements):
     | FieldVec   | Alias of Union[list[FieldInner], list[FieldLeaf]]  |
     +------------+----------------------------------------------------+
 
-         Table 13: Constants and types defined by a concrete IDPF.
+         Table 14: Constants and types defined by a concrete IDPF.
 
 8.1.1.  Encoding inputs as indices
 
@@ -4099,10 +4231,10 @@ def decode(self, output, _num_measurements):
    interface (Section 5).  It is defined in terms of any Idpf
    (Section 8.1) for which Idpf.SHARES == 2 and Idpf.VALUE_LEN == 2 and
    an implementation of Xof (Section 6.2).  The associated constants and
-   types required by the Vdaf interface are defined in Table 14.  The
+   types required by the Vdaf interface are defined in Table 15.  The
    methods required for sharding, preparation, aggregation, and
    unsharding are described in the remaining subsections.  These methods
-   make use of constants defined in Table 15.
+   make use of constants defined in Table 16.
 
      +=================+============================================+
      | Parameter       | Value                                      |
@@ -4139,7 +4271,7 @@ def decode(self, output, _num_measurements):
      | PrepMessage     | Optional[Idpf.FieldVec]                    |
      +-----------------+--------------------------------------------+
 
-                  Table 14: VDAF parameters for Poplar1.
+                  Table 15: VDAF parameters for Poplar1.
 
                     +========================+=======+
                     | Variable               | Value |
@@ -4153,7 +4285,7 @@ def decode(self, output, _num_measurements):
                     | USAGE_VERIFY_RAND: int | 4     |
                     +------------------------+-------+
 
-                       Table 15: Constants used by
+                       Table 16: Constants used by
                                  Poplar1.
 
 8.2.1.  Sharding
@@ -4641,7 +4773,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
       TODO We should consider giving IdpfPoplar a more distinctive name.
 
    The constant and type definitions required by the Idpf interface are
-   given in Table 16.
+   given in Table 17.
 
    IdpfPoplar requires a XOF for deriving the output shares, as well as
    a variety of other artifacts used internally.  For performance
@@ -4664,7 +4796,7 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
                    | FieldLeaf  | Field255 (Table 3)   |
                    +------------+----------------------+
 
-                        Table 16: Constants and type
+                        Table 17: Constants and type
                         definitions for IdpfPoplar.
 
 8.3.1.  Key Generation
@@ -5190,29 +5322,32 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    below.  Note that 0xFFFF0000 through 0xFFFFFFFF are reserved for
    private use.
 
-   +==========================+================+======+===============+
-   | Value                    | Scheme         | Type | Reference     |
-   +==========================+================+======+===============+
-   | 0x00000000               | Prio3Count     | VDAF | Section 7.4.1 |
-   +--------------------------+----------------+------+---------------+
-   | 0x00000001               | Prio3Sum       | VDAF | Section 7.4.2 |
-   +--------------------------+----------------+------+---------------+
-   | 0x00000002               | Prio3SumVec    | VDAF | Section 7.4.3 |
-   +--------------------------+----------------+------+---------------+
-   | 0x00000003               | Prio3Histogram | VDAF | Section 7.4.4 |
-   +--------------------------+----------------+------+---------------+
-   | 0x00000004 to 0x00000FFF | reserved for   | VDAF | n/a           |
-   |                          | Prio3          |      |               |
-   +--------------------------+----------------+------+---------------+
-   | 0x00001000               | Poplar1        | VDAF | Section 8.4   |
-   +--------------------------+----------------+------+---------------+
-   | 0xFFFF0000 to 0xFFFFFFFF | reserved       | n/a  | n/a           |
-   +--------------------------+----------------+------+---------------+
+     +===============+=======================+======+===============+
+     | Value         | Scheme                | Type | Reference     |
+     +===============+=======================+======+===============+
+     | 0x00000000    | Prio3Count            | VDAF | Section 7.4.1 |
+     +---------------+-----------------------+------+---------------+
+     | 0x00000001    | Prio3Sum              | VDAF | Section 7.4.2 |
+     +---------------+-----------------------+------+---------------+
+     | 0x00000002    | Prio3SumVec           | VDAF | Section 7.4.3 |
+     +---------------+-----------------------+------+---------------+
+     | 0x00000003    | Prio3Histogram        | VDAF | Section 7.4.4 |
+     +---------------+-----------------------+------+---------------+
+     | 0x00000004    | Prio3MultihotCountVec | VDAF | Section 7.4.5 |
+     +---------------+-----------------------+------+---------------+
+     | 0x00000005 to | reserved for Prio3    | VDAF | n/a           |
+     | 0x00000FFF    |                       |      |               |
+     +---------------+-----------------------+------+---------------+
+     | 0x00001000    | Poplar1               | VDAF | Section 8.4   |
+     +---------------+-----------------------+------+---------------+
+     | 0xFFFF0000 to | reserved              | n/a  | n/a           |
+     | 0xFFFFFFFF    |                       |      |               |
+     +---------------+-----------------------+------+---------------+
 
-                Table 17: Unique identifiers for (V)DAFs.
+                Table 18: Unique identifiers for (V)DAFs.
 
       TODO Add IANA considerations for the codepoints summarized in
-      Table 17.
+      Table 18.
 
 11.  References
 
