@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 import idpf
 import idpf_poplar
 import xof
@@ -23,29 +21,29 @@ class Poplar1(Vdaf):
 
     # Parameters required by `Vdaf`.
     ID = 0x00001000
-    VERIFY_KEY_SIZE = None  # Set by Idpf.Xof
-    RAND_SIZE = None  # Set by Idpf.Xof
     NONCE_SIZE = 16
     SHARES = 2
     ROUNDS = 2
 
+    # TODO(issue #361) Enforce these types at runtime.
+    #
     # Types required by `Vdaf`.
-    Measurement = int  # `range(0, 2**BITS)`
-    AggParam = tuple[int, tuple[int, ...]]  # level, prefixes
-    PublicShare = bytes  # IDPF public share
-    InputShare = tuple[
-        bytes,                  # IDPF key
-        bytes,                  # corr seed
-        list[Idpf.FieldInner],  # inner corr randomness
-        list[Idpf.FieldLeaf],   # leaf corr randomness
-    ]
-    OutShare = Idpf.FieldVec
-    AggShare = Idpf.FieldVec
-    AggResult = list[int]
-    PrepState = tuple[bytes,          # sketch round
-                      Idpf.FieldVec]  # output (and sketch) share
-    PrepShare = Idpf.FieldVec
-    PrepMessage = Optional[Idpf.FieldVec]
+    # Measurement = int  # `range(0, 2**BITS)`
+    # AggParam = tuple[int, tuple[int, ...]]  # level, prefixes
+    # PublicShare = bytes  # IDPF public share
+    # InputShare = tuple[
+    #    bytes,                  # IDPF key
+    #    bytes,                  # corr seed
+    #    list[Idpf.FieldInner],  # inner corr randomness
+    #    list[Idpf.FieldLeaf],   # leaf corr randomness
+    # ]
+    # OutShare = Idpf.FieldVec
+    # AggShare = Idpf.FieldVec
+    # AggResult = list[int]
+    # PrepState = tuple[bytes,          # sketch round
+    #                  Idpf.FieldVec]  # output (and sketch) share
+    # PrepShare = Idpf.FieldVec
+    # PrepMessage = Optional[Idpf.FieldVec]
 
     # Operational parameters.
     test_vec_name = 'Poplar1'
@@ -337,8 +335,9 @@ class Poplar1(Vdaf):
             raise ValueError('trailing bytes')
         return (level, tuple(prefixes))
 
+    # TODO(issue #361) Enforce `bits: int`.
     @classmethod
-    def with_bits(cls, bits: int):
+    def with_bits(cls, bits):
         """
         Set BITS.
 
