@@ -3994,12 +3994,12 @@ follows.
 def shard(Poplar1, measurement, nonce, rand):
     l = Poplar1.Xof.SEED_SIZE
 
-    # Split the random input into random input for IDPF key
+    # Split the random input into the random input for IDPF key
     # generation, correlated randomness, and sharding.
     if len(rand) != Poplar1.RAND_SIZE:
         raise ValueError('incorrect rand size')
     idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
-    seeds = [rand[i:i+l] for i in range(0,3*l,l)]
+    seeds = [rand[i:i+l] for i in range(0, 3*l, l)]
     corr_seed, seeds = front(2, seeds)
     (k_shard,), seeds = front(1, seeds)
 
@@ -4012,7 +4012,7 @@ def shard(Poplar1, measurement, nonce, rand):
     # Construct the IDPF values for each level of the IDPF tree.
     # Each "data" value is 1; in addition, the Client generates
     # a random "authenticator" value used by the Aggregators to
-    # compute the sketch during preparation. This sketch is used
+    # evaluate the sketch during preparation. This sketch is used
     # to verify the one-hotness of their output shares.
     beta_inner = [
         [Poplar1.Idpf.FieldInner(1), k]
@@ -4030,9 +4030,9 @@ def shard(Poplar1, measurement, nonce, rand):
                                             idpf_rand)
 
     # Generate correlated randomness used by the Aggregators to
-    # compute a sketch over their output shares. XOF seeds are
-    # used to encode shares of the `(a, b, c)` triples.
-    # (See [BBCGGI21, Appendix C.4].)
+    # evaluate the sketch over their output shares. Seeds are used
+    # to encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
+    # Appendix C.4].)
     corr_offsets = vec_add(
         Poplar1.Xof.expand_into_vec(
             Poplar1.Idpf.FieldInner,
@@ -4118,7 +4118,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
 
     # Ensure that candidate prefixes are all unique and appear in
     # lexicographic order.
-    for i in range(1,len(prefixes)):
+    for i in range(1, len(prefixes)):
         if prefixes[i-1] >= prefixes[i]:
             raise ValueError('out of order prefix')
 
@@ -4126,9 +4126,8 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     value = Poplar1.Idpf.eval(
         agg_id, public_share, key, level, prefixes, nonce)
 
-    # Get shares of the correlated randomness for computing the
-    # Aggregator's share of the sketch for the given level of the IDPF
-    # tree.
+    # Get shares of the correlated randomness for evaluating the
+    # Aggregator's share of the sketch.
     if level < Poplar1.Idpf.BITS - 1:
         corr_xof = Poplar1.Xof(
             corr_seed,
@@ -4147,7 +4146,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
         if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
-    # Compute the Aggregator's first round of the sketch. These are
+    # Evaluate the Aggregator's share of the sketch. These are
     # called the "masked input values" [BBCGGI21, Appendix C.4].
     verify_rand_xof = Poplar1.Xof(
         verify_key,
@@ -4165,7 +4164,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
         out_share.append(data_share)
 
     prep_mem = [A_share, B_share, Field(agg_id)] + out_share
-    return ((b'sketch round 1', level, prep_mem),
+    return ((b'evaluate sketch', level, prep_mem),
             sketch_share)
 
 def prep_next(Poplar1, prep_state, prep_msg):
@@ -4173,7 +4172,7 @@ def prep_next(Poplar1, prep_state, prep_msg):
     (step, level, prep_mem) = prep_state
     Field = Poplar1.Idpf.current_field(level)
 
-    if step == b'sketch round 1':
+    if step == b'evaluate sketch':
         if prev_sketch == None:
             prev_sketch = Field.zeros(3)
         elif len(prev_sketch) != 3:
@@ -4187,10 +4186,10 @@ def prep_next(Poplar1, prep_state, prep_msg):
             + A_share * prev_sketch[0]
             + B_share
         ]
-        return ((b'sketch round 2', level, prep_mem),
+        return ((b'reveal sketch', level, prep_mem),
                 sketch_share)
 
-    elif step == b'sketch round 2':
+    elif step == b'reveal sketch':
         if prev_sketch == None:
             return prep_mem  # Output shares
         else:
