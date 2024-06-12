@@ -1,8 +1,5 @@
 """The prio3 VDAF."""
 
-from typing import Optional, Union
-
-import flp
 import flp_generic
 import xof
 from common import byte, concat, front, vec_add, vec_sub, zeros
@@ -20,38 +17,39 @@ USAGE_JOINT_RAND_PART = 7
 class Prio3(Vdaf):
     """Base class for VDAFs based on prio3."""
 
+    # TODO(issue #361) The following types are not enforceable by mypy.
+    #
     # Generic types provided by a concrete instance of `Prio3`
-    Flp = flp.Flp
-    Xof = xof.Xof
+    # Flp = flp.Flp
+    # Xof = xof.Xof
 
     # Parameters required by `Vdaf`
-    VERIFY_KEY_SIZE = None  # Set by `Xof`
     NONCE_SIZE = 16
-    RAND_SIZE = None  # Computed from `Xof.SEED_SIZE` and `SHARES`
     ROUNDS = 1
-    SHARES = None  # A number between `[2, 256)` set later
 
     # Operational parameters
     PROOFS = 1  # Number of proofs, in range `[1, 256)`
 
+    # TODO(issue #361) The following type are not enforceable by mypy.
+    #
     # Types required by `Vdaf`
-    Measurement = Flp.Measurement
-    PublicShare = Optional[list[bytes]]  # joint randomness parts
-    InputShare = tuple[
-        Union[
-            tuple[list[Flp.Field], list[Flp.Field]],  # leader
-            tuple[bytes, bytes]                       # helper
-        ],
-        Optional[bytes],  # blind
-    ]
-    OutShare = list[Flp.Field]
-    AggShare = list[Flp.Field]
-    AggResult = Flp.AggResult
-    PrepShare = tuple[list[Flp.Field],  # verifier share
-                      Optional[bytes]]  # joint randomness part
-    PrepState = tuple[list[Flp.Field],  # output share
-                      Optional[bytes]]  # corrected joint randomness seed
-    PrepMessage = Optional[bytes]       # joint randomness check
+    # Measurement = Flp.Measurement
+    # PublicShare = Optional[list[bytes]]  # joint randomness parts
+    # InputShare = tuple[
+    #    Union[
+    #        tuple[list[Flp.Field], list[Flp.Field]],  # leader
+    #        tuple[bytes, bytes]                       # helper
+    #    ],
+    #    Optional[bytes],  # blind
+    # ]
+    # OutShare = list[Flp.Field]
+    # AggShare = list[Flp.Field]
+    # AggResult = Flp.AggResult
+    # PrepShare = tuple[list[Flp.Field],  # verifier share
+    #                  Optional[bytes]]  # joint randomness part
+    # PrepState = tuple[list[Flp.Field],  # output share
+    #                  Optional[bytes]]  # corrected joint randomness seed
+    # PrepMessage = Optional[bytes]       # joint randomness check
 
     @classmethod
     def shard(Prio3, measurement, nonce, rand):
@@ -462,8 +460,9 @@ class Prio3Sum(Prio3):
     # Operational parameters.
     test_vec_name = 'Prio3Sum'
 
+    # TODO(issue #361) Enforce `bits: int`.
     @classmethod
-    def with_bits(Prio3Sum, bits: int):
+    def with_bits(Prio3Sum, bits):
         """
         Set the range to `range(0, 2**bits)`.
 
@@ -487,9 +486,9 @@ class Prio3SumVec(Prio3):
     # Operational parameters.
     test_vec_name = 'Prio3SumVec'
 
+    # TODO(issue #361) Enforce that each parameter is an `int`.
     @classmethod
-    def with_params(Prio3SumVec, length: int, bits: int,
-                    chunk_length: int):
+    def with_params(Prio3SumVec, length, bits, chunk_length):
         """
         Set the circuit parameters.
 
@@ -517,8 +516,9 @@ class Prio3Histogram(Prio3):
     # Operational parameters.
     test_vec_name = 'Prio3Histogram'
 
+    # TODO(issue #361) Enforce that each parameter is an `int`.
     @classmethod
-    def with_params(Prio3Histogram, length: int, chunk_length: int):
+    def with_params(Prio3Histogram, length, chunk_length):
         """
         Set the circuit parameters.
 
@@ -540,13 +540,10 @@ class Prio3SumVecWithMultiproof(Prio3SumVec):
     # Operational parameters.
     test_vec_name = 'Prio3SumVecWithMultiproof'
 
+    # TODO(issue #361) Enforce that each parameter is an `int` except `field`,
+    # which should be a `type[Field]`.
     @classmethod
-    def with_params(cls,
-                    length: int,
-                    bits: int,
-                    chunk_length: int,
-                    num_proofs: int,
-                    field: type):
+    def with_params(cls, length, bits, chunk_length, num_proofs, field):
         """
         Set the circuit parameters, the number of proofs to generate, and the field.
 
@@ -579,11 +576,9 @@ class Prio3MultihotCountVec(Prio3):
     # Operational parameters.
     test_vec_name = 'Prio3MultihotCountVec'
 
+    # TODO(issue #361) Enforce that each parameter is an `int`.
     @classmethod
-    def with_params(cls,
-                    length: int,
-                    max_weight: int,
-                    chunk_length: int):
+    def with_params(cls, length, max_weight, chunk_length):
         """
         Set the circuit parameters.
 
