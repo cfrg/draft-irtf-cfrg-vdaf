@@ -3685,7 +3685,7 @@ def decode(self, output, _num_measurements):
           start_index = i * self.subcircuit.ARITY
           end_index = (i + 1) * self.subcircuit.ARITY
           out += self.subcircuit.eval(Field, inp[start_index:end_index])
-      return [out]
+      return out
 
    The SumVec validity circuit checks that the encoded measurement
    consists of ones and zeros.  Rather than use the Range2 gadget on

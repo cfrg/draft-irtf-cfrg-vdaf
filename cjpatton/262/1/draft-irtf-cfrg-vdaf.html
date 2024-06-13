@@ -6039,7 +6039,7 @@ def eval(self, Field, inp):
         start_index = i * self.subcircuit.ARITY
         end_index = (i + 1) * self.subcircuit.ARITY
         out += self.subcircuit.eval(Field, inp[start_index:end_index])
-    return [out]
+    return out
 </pre><a href="#section-7.4.3-7" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.3-8">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
