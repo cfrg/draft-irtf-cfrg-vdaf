@@ -3230,11 +3230,10 @@ struct {
 
    Finally, the validity circuit in our FLP may have any number of
    outputs (at least one).  The input is said to be valid if each of the
-   outputs is zero.  To save bandwidth, we interpret the outputs as
-   coefficients of a polynomial and evaluate the polynomial at a random
-   point.  If each of the outputs zero, then the reduced output will be
-   zero; but if one of the outputs is non-zero, then the reduced output
-   will be non-zero with high probability.
+   outputs is zero.  To save bandwidth, we take a random linear
+   combination of the outputs.  If each of the outputs is zero, then the
+   reduced output will be zero; but if one of the outputs is non-zero,
+   then the reduced output will be non-zero with high probability.
 
 7.3.2.  Validity Circuits
 
@@ -3442,8 +3441,10 @@ struct {
 
    4.  Next, reduce out as follows.  If EVAL_OUTPUT_LEN > 1, then
        consume the first element of query_rand by letting [r],
-       query_rand = front(1, query_rand).  Then let v = out[0] +
-       r*out[1] + r**2*out[2] + ....
+       query_rand = front(1, query_rand).  Then let v = r*out[0] +
+       r**2*out[1] + r**3*out[2] + .... That is, interpret the outputs
+       as coefficients of a polynomial f(x) and evaluate polynomial
+       f(x)*x at a random point r.
 
    5.  Compute the wire polynomials just as in the prover's step (4.).
 
