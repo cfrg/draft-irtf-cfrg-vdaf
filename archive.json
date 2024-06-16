@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-13T00:45:20.355488+00:00",
+  "timestamp": "2024-06-16T00:50:42.720482+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -30708,13 +30708,13 @@
       ],
       "body": "Closes #262.\r\nPartially addresses #306.\r\n\r\nIf the input is valid, then each output should be zero. To save bandwidth, we generate an extra element of query randomness and use it to reduce the result.\r\n\r\nTo exercise this feature, implement a new circuit, `Sum2`, that generalizes `Sum` to support any bound, including non-powers-of-two.",
       "createdAt": "2024-06-08T21:44:30Z",
-      "updatedAt": "2024-06-12T21:28:21Z",
+      "updatedAt": "2024-06-13T22:23:02Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "f028280737b6167962dce46a30bf831705400ef9",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/262/1",
-      "headRefOid": "dea8cb6826770d7570ce49cd294a28eaaef82eb6",
+      "headRefOid": "9ccfbedccef0c1dc1e572dbdbef1d4da66d2f2cc",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -30728,7 +30728,442 @@
           "updatedAt": "2024-06-11T15:53:56Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc5-F2VE",
+          "commit": {
+            "abbreviatedOid": "dea8cb6"
+          },
+          "author": "junyechen1996",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "LGTM overall, left some nitpicky comments.",
+          "createdAt": "2024-06-13T10:58:50Z",
+          "updatedAt": "2024-06-13T14:49:26Z",
+          "comments": [
+            {
+              "originalPosition": 189,
+              "body": "```suggestion\r\n        - `bits = max_measurement.bit_length()`\r\n```\r\n?",
+              "createdAt": "2024-06-13T10:58:50Z",
+              "updatedAt": "2024-06-13T14:49:26Z"
+            },
+            {
+              "originalPosition": 167,
+              "body": "Can this be more descriptive?",
+              "createdAt": "2024-06-13T14:35:27Z",
+              "updatedAt": "2024-06-13T14:49:26Z"
+            },
+            {
+              "originalPosition": 228,
+              "body": "```suggestion\r\n| `AggResult`       | `list[int]`, each element in `range(2)`                                     |\r\n```",
+              "createdAt": "2024-06-13T14:47:42Z",
+              "updatedAt": "2024-06-13T14:49:26Z"
+            },
+            {
+              "originalPosition": 143,
+              "body": "Will there be a spec for `Sum2` now that we've added a reference implementation?",
+              "createdAt": "2024-06-13T14:48:30Z",
+              "updatedAt": "2024-06-13T14:49:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-I9-A",
+          "commit": {
+            "abbreviatedOid": "dea8cb6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T16:26:41Z",
+          "updatedAt": "2024-06-13T16:26:41Z",
+          "comments": [
+            {
+              "originalPosition": 167,
+              "body": "Uggghh yes :)",
+              "createdAt": "2024-06-13T16:26:41Z",
+              "updatedAt": "2024-06-13T16:26:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-JAhH",
+          "commit": {
+            "abbreviatedOid": "dea8cb6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T16:32:01Z",
+          "updatedAt": "2024-06-13T16:32:01Z",
+          "comments": [
+            {
+              "originalPosition": 228,
+              "body": "That's not true for the aggregate result (it's true for each encoded measurement though)",
+              "createdAt": "2024-06-13T16:32:01Z",
+              "updatedAt": "2024-06-13T16:32:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-JBC1",
+          "commit": {
+            "abbreviatedOid": "dea8cb6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T16:33:07Z",
+          "updatedAt": "2024-06-13T16:33:07Z",
+          "comments": [
+            {
+              "originalPosition": 143,
+              "body": "for now `Sum2` is meant to exercise the new feature in tests. It may eventually replace the circuit in `Prio3Sum`, but that's a question for #306. ",
+              "createdAt": "2024-06-13T16:33:07Z",
+              "updatedAt": "2024-06-13T16:33:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-JD-x",
+          "commit": {
+            "abbreviatedOid": "dea8cb6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T16:39:05Z",
+          "updatedAt": "2024-06-13T16:39:05Z",
+          "comments": [
+            {
+              "originalPosition": 167,
+              "body": "Renamed to `SumOfRangeCheckedInputs`. This is probably overly verbose; we may consider renaming it to `Sum` as part of #306.",
+              "createdAt": "2024-06-13T16:39:05Z",
+              "updatedAt": "2024-06-13T16:39:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-IgGY",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T15:37:43Z",
+          "updatedAt": "2024-06-13T17:21:03Z",
+          "comments": [
+            {
+              "originalPosition": 24,
+              "body": "nit: grammar\r\n```suggestion\r\nevaluate the polynomial at a random point. If each of the outputs is zero, then\r\n```",
+              "createdAt": "2024-06-13T15:37:43Z",
+              "updatedAt": "2024-06-13T17:21:03Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "I think this language is fine as-is, but we could simplify it by just saying that we take a random linear combination of the outputs.",
+              "createdAt": "2024-06-13T15:38:57Z",
+              "updatedAt": "2024-06-13T17:21:03Z"
+            },
+            {
+              "originalPosition": 162,
+              "body": "We don't need to change this one since it's a gadget, not a circuit.",
+              "createdAt": "2024-06-13T16:39:53Z",
+              "updatedAt": "2024-06-13T17:21:03Z"
+            },
+            {
+              "originalPosition": 67,
+              "body": "FWIW, this is inconsistent with how we reduce vectors inside various sectors, where we multiply by r, r^2, r^3, ..., instead of 1, r, r^2, ...\r\n\r\nIn this case it's fine as far as security is concerned, since there's no addition after this linear combination happens, so we don't need to worry about the term with coefficient 1 cancelling with anything. If we unified on starting with r, that could help implementers avoid mistakes by being consistent.",
+              "createdAt": "2024-06-13T17:08:52Z",
+              "updatedAt": "2024-06-13T17:21:03Z"
+            },
+            {
+              "originalPosition": 234,
+              "body": "I don't think this encoding and validity circuit achieve their goal. If the parameters are max_measurement=5, bits=3, offset=2, then the malicious encoding [p-1, 0, 0, 1] would produce a circuit output of [0, 0, 0, shares * 2 * shares_inv + p - 1 - 1] = [0, 0, 0, 0].\r\n\r\nWe could fix this if the encoded measurement length were self.bits * 2, and the encoding routine concatenated encode_into_bit_vector(x) and encode_into_vector(x + offset). I'm not sure whether we can do better.",
+              "createdAt": "2024-06-13T17:19:41Z",
+              "updatedAt": "2024-06-13T17:21:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-J4tQ",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T17:32:39Z",
+          "updatedAt": "2024-06-13T17:53:10Z",
+          "comments": [
+            {
+              "originalPosition": 162,
+              "body": "You're right, that was sloppy.",
+              "createdAt": "2024-06-13T17:32:39Z",
+              "updatedAt": "2024-06-13T17:53:10Z"
+            },
+            {
+              "originalPosition": 67,
+              "body": "Good point. So the draft language in this PR is \"interpret the outputs as coefficients of a polynomial and evaluate that polynomial at a random point\", which is what's implemented here. I think this is a bit more intuitive than starting at $r^1=r$.\r\n\r\nHowever I agree we should be consistent. We could either:\r\n1. Start at $r^0=1$ everywhere (like this change does). This has the advantage of not being a breaking change.\r\n2. Start at $r^1=r$ everywhere (like the current circuits do). This would require a breaking change.\r\n\r\nI'm on the fence because I think 2 is more intuitive. On the other hand, breaking changes are expensive at this stage. On the the other _other_ hand, we're already considering a breaking change for Prio3Sum (#306).\r\n\r\nI don't want to make this change in draft-10, but I think we should consider doing it before RGLC. What do you think?\r\n\r\n",
+              "createdAt": "2024-06-13T17:41:15Z",
+              "updatedAt": "2024-06-13T17:53:10Z"
+            },
+            {
+              "originalPosition": 234,
+              "body": "Hmmm, perhaps you can try express this attack as a test? The circuit seems to detect this particular malformed input:\r\n```python\r\n    def test_sum_of_range_checked_inputs_malformed(self):\r\n        flp = FlpGeneric(SumOfRangeCheckedInputs(5))\r\n        self.assertEqual(flp.Valid.bits, 3)\r\n        self.assertEqual(flp.Valid.offset.as_unsigned(), 2)\r\n        test_flp_generic(flp, [\r\n            (\r\n                [\r\n                    flp.Field(flp.Field.MODULUS - 1),\r\n                    flp.Field(0),\r\n                    flp.Field(0),\r\n                    flp.Field(1),\r\n                ],\r\n                False,\r\n            ),\r\n        ])\r\n```\r\nThe output of the circuit is `[0, 0, 0, 18446744069414584318]`.\r\n\r\nAlternatively, is there a fundamental flaw I'm not seeing?",
+              "createdAt": "2024-06-13T17:51:27Z",
+              "updatedAt": "2024-06-13T17:53:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KCxy",
+          "commit": {
+            "abbreviatedOid": "dea8cb6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T17:56:01Z",
+          "updatedAt": "2024-06-13T17:56:01Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "\"Linear combination\" is a bit more general than this I think? For instance, we could have done $r_1 x_1, + \\cdots r_n x_n$ where the $x_i$s are the outputs and the $r_i$s are independent, uniform random field elements.",
+              "createdAt": "2024-06-13T17:56:01Z",
+              "updatedAt": "2024-06-13T17:56:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KFor",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T18:02:12Z",
+          "updatedAt": "2024-06-13T18:02:13Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "Do you prefer 1 or 2?",
+              "createdAt": "2024-06-13T18:02:13Z",
+              "updatedAt": "2024-06-13T18:02:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KRgi",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T18:25:50Z",
+          "updatedAt": "2024-06-13T18:25:50Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "Changing the circuits using joint randomness to start with 1 makes me a little nervous. We'd have to carefully analyze circuit soundness if we did so, to make sure we don't end up with two monomials with the same powers of joint randomness values, and different input elements. This is doable, but having an extra r factor makes it easier to justify.\r\n\r\nI'm torn between the two options. On the one hand, starting with r has the benefit of inertia, and it's easier to convince oneself of circuit soundness, as discussed above. On the other hand, starting with 1 could be more intuitive to people reading the spec for the first time; in fact this was one of the compatibility bugs we worked through when initially implementing Prio3 in divviup-ts. Maybe if we start with r we should rephrase the prose description.",
+              "createdAt": "2024-06-13T18:25:50Z",
+              "updatedAt": "2024-06-13T18:25:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KVxO",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T18:34:50Z",
+          "updatedAt": "2024-06-13T18:34:50Z",
+          "comments": [
+            {
+              "originalPosition": 234,
+              "body": "Ah, I encoded the bitvector the wrong way in my head. This fails:\r\n\r\n```python\r\n    def test_sum_of_range_checked_inputs_malformed(self):\r\n        flp = FlpGeneric(SumOfRangeCheckedInputs(5))\r\n        self.assertEqual(flp.Valid.bits, 3)\r\n        self.assertEqual(flp.Valid.offset.as_unsigned(), 2)\r\n        test_flp_generic(flp, [\r\n            (\r\n                [\r\n                    flp.Field(flp.Field.MODULUS - 1),\r\n                    flp.Field(1),\r\n                    flp.Field(0),\r\n                    flp.Field(0),\r\n                ],\r\n                False,\r\n            ),\r\n        ])\r\n```",
+              "createdAt": "2024-06-13T18:34:50Z",
+              "updatedAt": "2024-06-13T18:34:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KbJH",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T18:44:58Z",
+          "updatedAt": "2024-06-13T18:44:58Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "> Maybe if we start with r we should rephrase the prose description.\r\n\r\nDefinitely.",
+              "createdAt": "2024-06-13T18:44:58Z",
+              "updatedAt": "2024-06-13T18:44:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-Kdp0",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T18:50:32Z",
+          "updatedAt": "2024-06-13T18:50:32Z",
+          "comments": [
+            {
+              "originalPosition": 234,
+              "body": "Ah, I think I see what's going on here: we need to prevent the offset measurement from wrapping around the field modulus. Bit encoding it is sufficient. Really great catch :)",
+              "createdAt": "2024-06-13T18:50:32Z",
+              "updatedAt": "2024-06-13T18:50:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KhEJ",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T18:55:49Z",
+          "updatedAt": "2024-06-13T18:55:49Z",
+          "comments": [
+            {
+              "originalPosition": 234,
+              "body": "Fixed.",
+              "createdAt": "2024-06-13T18:55:49Z",
+              "updatedAt": "2024-06-13T18:55:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KkIU",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T19:03:21Z",
+          "updatedAt": "2024-06-13T19:03:22Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "> Changing the circuits using joint randomness to start with 1 makes me a little nervous. We'd have to carefully analyze circuit soundness if we did so, to make sure we don't end up with two monomials with the same powers of joint randomness values, and different input elements. This is doable, but having an extra r factor makes it easier to justify.\r\n\r\nCan you elaborate here? I don't know what you mean by \"monomial\".\r\n\r\nStarting with $1$: My intuition here is that if you have a polynomial $f$ of degree $n > 0$, then there are at most $n$ roots, i.e., points $x$ for which $f(x) = 0$. Hence  $Pr[ f(x) = 0 ] \\leq n / p$, where $p$ is the field modulus and where $x$ is uniform random.\r\n\r\nWhen we start with $r$ rather $1$, we're doing basically the same thing except that the polynomial we're evaluating is $f(x) \\cdot x$ which has degree $n+1$.",
+              "createdAt": "2024-06-13T19:03:22Z",
+              "updatedAt": "2024-06-13T19:03:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-KxnX",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T19:37:55Z",
+          "updatedAt": "2024-06-13T19:37:55Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "\"Monomial\" here refers to the terms that get added together in the circuit output, after distributing multiplication and expanding everything.\r\n\r\nOff the top of my head, I think Histogram would be fine to switch to starting with 1. The output would look like bit_check_0 + bit_check_1 * joint_rand[0] + bit_check_2 * joint_rand[0] ** 2 + sum_check * joint_rand[1].\r\n\r\nStarting with r would be robust to things like forgetting joint_rand[1] in the second combination step, because there's already a power of joint_rand[0] on every term from one side, and none on the other side. Thus, we're safe from cancellation even before we multiply by joint_rand[1] and joint_rand[1] ** 2 respectively.",
+              "createdAt": "2024-06-13T19:37:55Z",
+              "updatedAt": "2024-06-13T19:37:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-K1KD",
+          "commit": {
+            "abbreviatedOid": "a89c542"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T19:42:09Z",
+          "updatedAt": "2024-06-13T19:42:09Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "So to your thinking, this is more about defense in depth? Always a good idea, I think. We want to establish patterns that are more likely to be secure when copy-pasted without thinking.",
+              "createdAt": "2024-06-13T19:42:09Z",
+              "updatedAt": "2024-06-13T19:42:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-K4tX",
+          "commit": {
+            "abbreviatedOid": "c9d30b9"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-13T19:51:36Z",
+          "updatedAt": "2024-06-13T19:51:51Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "Done! Please take a look.",
+              "createdAt": "2024-06-13T19:51:37Z",
+              "updatedAt": "2024-06-13T19:51:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5-MIAW",
+          "commit": {
+            "abbreviatedOid": "9ccfbed"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-13T22:06:41Z",
+          "updatedAt": "2024-06-13T22:23:02Z",
+          "comments": [
+            {
+              "originalPosition": 239,
+              "body": "This could be simplified a little now\r\n```suggestion\r\n        encoded = []\r\n        encoded += self.Field.encode_into_bit_vector(\r\n            measurement,\r\n            self.bits\r\n        )\r\n        encoded += self.Field.encode_into_bit_vector(\r\n            measurement + self.offset.as_unsigned(),\r\n            self.bits\r\n        )\r\n        return encoded\r\n```",
+              "createdAt": "2024-06-13T22:06:41Z",
+              "updatedAt": "2024-06-13T22:23:02Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 356,
@@ -30885,7 +31320,7 @@
       ],
       "body": "Closes #335.\r\n\r\n{{BCCGI23}} generalizes the idea from {{BBCGGI21}} for checking one hotness of the output shares for Poplar. The generalization, called \"arithmetic sketching\", allows for checking richer properties of the output shares.",
       "createdAt": "2024-06-11T22:39:41Z",
-      "updatedAt": "2024-06-12T21:22:32Z",
+      "updatedAt": "2024-06-13T22:43:27Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e57208850eb83afee11993df689afbb3809c534d",
@@ -30897,7 +31332,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc5-MQKm",
+          "commit": {
+            "abbreviatedOid": "39f04da"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-13T22:43:27Z",
+          "updatedAt": "2024-06-13T22:43:27Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 360,
@@ -30914,7 +31363,7 @@
       ],
       "body": "Henry Corrigan-Gibbs suggests the following names:\r\n- \"round one\" -> \"evaluate sketch\"\r\n- \"round two\" -> \"reveal sketch\"",
       "createdAt": "2024-06-12T17:31:47Z",
-      "updatedAt": "2024-06-12T21:22:20Z",
+      "updatedAt": "2024-06-13T22:37:59Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e57208850eb83afee11993df689afbb3809c534d",
@@ -30926,7 +31375,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc5-MPGO",
+          "commit": {
+            "abbreviatedOid": "1521ff3"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-13T22:37:59Z",
+          "updatedAt": "2024-06-13T22:37:59Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 362,
