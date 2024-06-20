@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-18T00:46:24.011489+00:00",
+  "timestamp": "2024-06-20T00:44:33.901068+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5178,7 +5178,7 @@
       "id": "I_kwDOGKuqOc6HcejI",
       "title": "Consider renaming \"secure sketch\" to \"arithmetic sketch\"",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/335",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5189,8 +5189,8 @@
       ],
       "body": "As formalized in https://eprint.iacr.org/2023/1012.",
       "createdAt": "2024-04-30T20:22:51Z",
-      "updatedAt": "2024-06-11T17:58:51Z",
-      "closedAt": null,
+      "updatedAt": "2024-06-18T14:13:19Z",
+      "closedAt": "2024-06-18T14:13:19Z",
       "comments": []
     },
     {
@@ -5312,9 +5312,17 @@
       ],
       "body": "We require the binder string to be generated at random, but we don't prescribe its length or say why it needs to be random:\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/3ac03623c4680b28d1517af0a16dd513e1d0c310/draft-irtf-cfrg-vdaf.md?plain=1#L3710-L3714\r\n\r\nI believe this has to do with how `XofFixedKeyAes128` affects the concrete security of `Poplar1`, but I don't remember the details. Let's make sure this is documented. Furthermore, we need to define the length so that the user knows how many bytes to sample. I'd suggest renaming the binder to `nonce` and adding `Idpf.NONCE_SIZE` as a constraint on `Idpf`. (`Poplar1` may need to be modified accordingly.)",
       "createdAt": "2024-06-07T19:27:11Z",
-      "updatedAt": "2024-06-12T21:23:36Z",
+      "updatedAt": "2024-06-18T11:23:29Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This was decided in https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/32#issuecomment-1465432536 and you are correct, it is needed for the concrete security of the fixed-key AES construction. I'll send a PR to clarify this.",
+          "createdAt": "2024-06-18T11:23:28Z",
+          "updatedAt": "2024-06-18T11:23:28Z"
+        }
+      ]
     },
     {
       "number": 359,
@@ -31311,7 +31319,7 @@
       "id": "PR_kwDOGKuqOc5yKmxw",
       "title": "Rename \"secure sketch\" to \"arithmetic sketch\" per {{BBCGGI23}}",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/358",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -31320,17 +31328,19 @@
       ],
       "body": "Closes #335.\r\n\r\n{{BCCGI23}} generalizes the idea from {{BBCGGI21}} for checking one hotness of the output shares for Poplar. The generalization, called \"arithmetic sketching\", allows for checking richer properties of the output shares.",
       "createdAt": "2024-06-11T22:39:41Z",
-      "updatedAt": "2024-06-13T22:43:27Z",
+      "updatedAt": "2024-06-18T14:13:18Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e57208850eb83afee11993df689afbb3809c534d",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/335",
       "headRefOid": "39f04da407fa92da97fb6a8118e2fccdbdd5975c",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-06-18T14:13:18Z",
+      "mergedAt": "2024-06-18T14:13:18Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "d4f5db6c60ef115291ee45aee45b03aeba489452"
+      },
       "comments": [],
       "reviews": [
         {
