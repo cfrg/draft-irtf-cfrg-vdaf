@@ -5221,7 +5221,7 @@ the gadget polynomial, are described in detail in <a href="#flp-generic-construc
 <a href="#section-7.3.1.1" class="section-number selfRef">7.3.1.1. </a><a href="#name-extensions" class="section-name selfRef">Extensions</a>
             </h5>
 <p id="section-7.3.1.1-1">The FLP described in the next section extends the proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
-Section 4.2 in three ways.<a href="#section-7.3.1.1-1" class="pilcrow">¶</a></p>
+Section 4.2 in a few ways.<a href="#section-7.3.1.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-2">First, the validity circuit in our construction includes an additional, random
 input (this is the "joint randomness" derived from the measurement shares in
 Prio3; see <a href="#prio3-construction" class="auto internal xref">Section 7.2</a>). This allows for circuit optimizations that
@@ -5259,12 +5259,18 @@ C(meas, r) = r * Range2(meas[0]) + ... + r^L * Range2(meas[L-1]) + \
 inputs are in range <code>[0,2)</code> and the last <code>N-L</code> inputs are in range <code>[0,3)</code>. Of
 course, the same circuit can be expressed using a sub-component that the
 gadgets have in common, namely <code>Mul</code>, but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
-<p id="section-7.3.1.1-8">Finally, <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 4.3 makes no restrictions on the choice of the
+<p id="section-7.3.1.1-8">Third, <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 4.3 makes no restrictions on the choice of the
 fixed points <code>alpha[0], ..., alpha[M-1]</code>, other than to require that the points
 are distinct. In this document, the fixed points are chosen so that the gadget
 polynomial can be constructed efficiently using the Cooley-Tukey FFT ("Fast
 Fourier Transform") algorithm. Note that this requires the field to be
 "FFT-friendly" as defined in <a href="#field-fft-friendly" class="auto internal xref">Section 6.1.2</a>.<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
+<p id="section-7.3.1.1-9">Finally, the validity circuit in our FLP may have any number of outputs (at
+least one). The input is said to be valid if each of the outputs is zero. To
+save bandwidth, we take a random linear combination of the outputs. If each of
+the outputs is zero, then the reduced output will be zero; but if one of the
+outputs is non-zero, then the reduced output will be non-zero with high
+probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -5318,6 +5324,12 @@ validity circuit <code>Valid</code> that implements the interface described here
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">Length of the random input</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Length of the circuit output</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -5377,7 +5389,10 @@ def prove_rand_len(self):
 
 def query_rand_len(self):
     """Length of the query randomness."""
-    return len(Valid.GADGETS)
+    query_rand_len = len(self.GADGETS)
+    if self.EVAL_OUTPUT_LEN &gt; 1:
+        query_rand_len += 1
+    return query_rand_len
 
 def proof_len(self):
     """Length of the proof."""
@@ -5612,26 +5627,33 @@ is generated as follows:<a href="#section-7.3.3.2-1" class="pilcrow">¶</a></p>
 of each gadget in the corresponding table. This step is similar to the
 prover's step (3.) except the verifier does not evaluate the gadgets.
 Instead, it computes the output of the <code>k</code>th call to <code>G_i</code> by evaluating
-<code>poly_gadget_i(alpha_i^k)</code>. Let <code>v</code> denote the output of the circuit
+<code>poly_gadget_i(alpha_i^k)</code>. Let <code>out</code> denote the output of the circuit
 evaluation.<a href="#section-7.3.3.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.3.3.2-2.4">
-                <p id="section-7.3.3.2-2.4.1">Compute the wire polynomials just as in the prover's step (4.).<a href="#section-7.3.3.2-2.4.1" class="pilcrow">¶</a></p>
+                <p id="section-7.3.3.2-2.4.1">Next, reduce <code>out</code> as follows. If <code>EVAL_OUTPUT_LEN &gt; 1</code>, then consume the
+first element of <code>query_rand</code> by letting <code>[r], query_rand = front(1,
+query_rand)</code>. Then let <code>v = r*out[0] + r**2*out[1] + r**3*out[2] + ...</code>.
+That is, interpret the outputs as coefficients of a polynomial <code>f(x)</code> and
+evaluate polynomial <code>f(x)*x</code> at a random point <code>r</code>.<a href="#section-7.3.3.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.3.3.2-2.5">
-                <p id="section-7.3.3.2-2.5.1">Compute the tests for well-formedness of the gadget polynomials. That is, for
-every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.2-2.5.1" class="pilcrow">¶</a></p>
+                <p id="section-7.3.3.2-2.5.1">Compute the wire polynomials just as in the prover's step (4.).<a href="#section-7.3.3.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-7.3.3.2-2.6">
+                <p id="section-7.3.3.2-2.6.1">Compute the tests for well-formedness of the gadget polynomials. That is, for
+every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.2-2.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.3.2-2.5.2.1">
-                    <p id="section-7.3.3.2-2.5.2.1.1">Let <code>t = query_rand[i]</code>. Check if <code>t^(P_i) == 1</code>: If so, then raise
+<li class="normal" id="section-7.3.3.2-2.6.2.1">
+                    <p id="section-7.3.3.2-2.6.2.1.1">Let <code>t = query_rand[i]</code>. Check if <code>t^(P_i) == 1</code>: If so, then raise
 ERR_ABORT and halt. (This prevents the verifier from inadvertently leaking
-a gadget output in the verifier message.)<a href="#section-7.3.3.2-2.5.2.1.1" class="pilcrow">¶</a></p>
+a gadget output in the verifier message.)<a href="#section-7.3.3.2-2.6.2.1.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="normal" id="section-7.3.3.2-2.5.2.2">
-                    <p id="section-7.3.3.2-2.5.2.2.1">Let <code>y_i = poly_gadget_i(t)</code>.<a href="#section-7.3.3.2-2.5.2.2.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.2-2.6.2.2">
+                    <p id="section-7.3.3.2-2.6.2.2.1">Let <code>y_i = poly_gadget_i(t)</code>.<a href="#section-7.3.3.2-2.6.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="normal" id="section-7.3.3.2-2.5.2.3">
-                    <p id="section-7.3.3.2-2.5.2.3.1">For each <code>j</code> in <code>[0,L_i)</code> let <code>x_i[j-1] = poly_wire_i[j-1](t)</code>.<a href="#section-7.3.3.2-2.5.2.3.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.2-2.6.2.3">
+                    <p id="section-7.3.3.2-2.6.2.3.1">For each <code>j</code> in <code>[0,L_i)</code> let <code>x_i[j-1] = poly_wire_i[j-1](t)</code>.<a href="#section-7.3.3.2-2.6.2.3.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
@@ -5721,8 +5743,9 @@ not equal to the gadget's <code>ARITY</code> parameter.<a href="#section-7.4.1-4
 <div class="alignLeft art-text artwork" id="section-7.4.1-6">
 <pre>
 def eval(self, meas, joint_rand, _num_shares):
-    return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+    out = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
         - meas[0]
+    return [out]
 </pre><a href="#section-7.4.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.1-7">The measurement is encoded and decoded as a singleton vector in the natural
@@ -5777,6 +5800,14 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>0</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
 </td>
               </tr>
               <tr>
@@ -5854,7 +5885,7 @@ def eval(self, meas, joint_rand, _num_shares):
     for b in meas:
         out += r * self.GADGETS[0].eval(self.Field, [b])
         r *= joint_rand[0]
-    return out
+    return [out]
 </pre><a href="#section-7.4.2-7" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circu"></span><table class="center" id="table-10">
@@ -5904,6 +5935,14 @@ def eval(self, meas, joint_rand, _num_shares):
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>JOINT_RAND_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>1</code>
@@ -6041,7 +6080,7 @@ def eval(self, meas, joint_rand, num_shares):
 
         out += self.GADGETS[0].eval(self.Field, inputs)
 
-    return out
+    return [out]
 </pre><a href="#section-7.4.3-9" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circui"></span><table class="center" id="table-11">
@@ -6091,6 +6130,14 @@ def eval(self, meas, joint_rand, num_shares):
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>JOINT_RAND_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>1</code>
@@ -6221,7 +6268,7 @@ def eval(self, meas, joint_rand, num_shares):
 
     out = joint_rand[1] * range_check + \
         joint_rand[1] ** 2 * sum_check
-    return out
+    return [out]
 </pre><a href="#section-7.4.4-7" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.4-8">Note that this circuit depends on the number of shares into which the
@@ -6276,6 +6323,14 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>2</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>1</code>
 </td>
               </tr>
               <tr>
