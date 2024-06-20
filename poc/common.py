@@ -13,18 +13,18 @@ TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
                                   'test_vec/{:02}'.format(VERSION))
 
 
-def next_power_of_2(n):
+def next_power_of_2(n: int) -> int:
     """Return the smallest power of 2 that is larger than or equal to n."""
     assert n > 0
     return 2 ** (int(n - 1).bit_length())
 
 
-def zeros(length):
+def zeros(length: int) -> bytes:
     """Return the requested number of zero bytes."""
     return bytes(bytearray(length))
 
 
-def gen_rand(length):
+def gen_rand(length: int) -> bytes:
     """Return the requested number of random bytes."""
     if TEST_VECTOR:
         out = []
@@ -34,34 +34,34 @@ def gen_rand(length):
     return os.urandom(length)
 
 
-def byte(number) -> bytes:
+def byte(number: int) -> bytes:
     """Return the encoding of the input as a byte."""
     return int(number).to_bytes(1, 'big')
 
 
-def xor(left, right):
+def xor(left: bytes, right: bytes) -> bytes:
     """Return the bitwise XOR of the inputs."""
     return bytes(map(lambda x: x[0] ^ x[1], zip(left, right)))
 
 
-def vec_sub(left, right):
+def vec_sub(left: list, right: list) -> list:
     """
     Subtract the right operand from the left and return the result.
     """
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
 
-def vec_add(left, right):
+def vec_add(left: list, right: list) -> list:
     """Add the right operand to the left and return the result."""
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
 
 
-def vec_neg(vec):
+def vec_neg(vec: list) -> list:
     """Negate the input vector."""
     return list(map(lambda x: -x, vec))
 
 
-def to_le_bytes(val, length):
+def to_le_bytes(val: int, length: int) -> bytes:
     """
     Convert unsigned integer `val` in range `[0, 2^(8*length))` to a
     little-endian byte string.
@@ -73,12 +73,12 @@ def to_le_bytes(val, length):
     return val.to_bytes(length, byteorder='little')
 
 
-def from_le_bytes(encoded):
+def from_le_bytes(encoded: bytes) -> int:
     """Parse an unsigned integer from a little-endian byte string."""
     return int.from_bytes(encoded, byteorder='little')
 
 
-def to_be_bytes(val, length):
+def to_be_bytes(val: int, length: int) -> bytes:
     """
     Convert unsigned integer `val` in range `[0, 2^(8*length))` to a big-endian
     byte string.
@@ -90,7 +90,7 @@ def to_be_bytes(val, length):
     return val.to_bytes(length, byteorder='big')
 
 
-def from_be_bytes(encoded):
+def from_be_bytes(encoded: bytes) -> int:
     """Parse an unsigned integer from a big-endian byte string."""
     return int.from_bytes(encoded, byteorder='big')
 
@@ -100,7 +100,7 @@ def concat(parts: list[bytes]) -> bytes:
     return b''.join(parts)
 
 
-def front(length, vec):
+def front(length: int, vec: list) -> tuple[list, list]:
     """
     Split list `vec` in two and return the front and remainder as a tuple. The
     length of the front is `length`.
@@ -128,7 +128,7 @@ def format_dst(algo_class: int,
     ])
 
 
-def print_wrapped_line(line, tab):
+def print_wrapped_line(line: str, tab: int) -> None:
     width = 72
     chunk_len = width - tab
     for start in range(0, len(line), chunk_len):
