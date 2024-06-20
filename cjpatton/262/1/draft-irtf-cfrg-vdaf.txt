@@ -4057,11 +4057,14 @@ def decode(self, output, _num_measurements):
    information about the set than the heavy hitters themselves; see
    Section 9.4.1 for details.)
 
-   Poplar1 composes an IDPF with the "secure sketching" protocol of
-   [BBCGGI21].  This protocol ensures that evaluating a set of input
-   shares on a unique set of candidate prefixes results in shares of a
-   "one-hot" vector, i.e., a vector that is zero everywhere except for
-   one element, which is equal to one.
+   Poplar1 composes an IDPF with the arithmetic sketch of [BBCGGI21],
+   Section 4.2.  (The paper calls this a "secure sketch", but the
+   underlying technique was later generalized in [BBCGGI23], where it is
+   called "arithmetic sketching".)  This protocol ensures that
+   evaluating a set of input shares on a unique set of candidate
+   prefixes results in shares of a "one-hot" vector, i.e., a vector that
+   is zero everywhere except for at most one element, which is equal to
+   one.
 
    The remainder of this section is structured as follows.  IDPFs are
    defined in Section 8.1; a concrete instantiation is given
@@ -4294,12 +4297,12 @@ def decode(self, output, _num_measurements):
    The Client's measurement is an IDPF index, denoted alpha.  (See
    Section 8.1.1 for guidelines on index encoding.)  The programmed IDPF
    values are pairs of field elements (1, k) where each k is chosen at
-   random.  This random value is used as part of the secure sketching
-   protocol of [BBCGGI21], Appendix C.4.  After evaluating their IDPF
-   key shares on a given sequence of candidate prefixes, the sketching
-   protocol is used by the Aggregators to verify that they hold shares
-   of a one-hot vector.  In addition, for each level of the tree, the
-   prover generates random elements a, b, and c and computes
+   random.  This random value is used as part of the arithmetic
+   sketching protocol of [BBCGGI21], Appendix C.4.  After evaluating
+   their IDPF key shares on a given sequence of candidate prefixes, the
+   sketching protocol is used by the Aggregators to verify that they
+   hold shares of a one-hot vector.  In addition, for each level of the
+   tree, the prover generates random elements a, b, and c and computes
 
        A = -2*a + k
        B = a^2 + b - k*a + c
@@ -4311,12 +4314,12 @@ def decode(self, output, _num_measurements):
    def shard(Poplar1, measurement, nonce, rand):
        l = Poplar1.Xof.SEED_SIZE
 
-       # Split the random input into random input for IDPF key
+       # Split the random input into the random input for IDPF key
        # generation, correlated randomness, and sharding.
        if len(rand) != Poplar1.RAND_SIZE:
            raise ValueError('incorrect rand size')
        idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
-       seeds = [rand[i:i+l] for i in range(0,3*l,l)]
+       seeds = [rand[i:i+l] for i in range(0, 3*l, l)]
        corr_seed, seeds = front(2, seeds)
        (k_shard,), seeds = front(1, seeds)
 
@@ -4329,7 +4332,7 @@ def decode(self, output, _num_measurements):
        # Construct the IDPF values for each level of the IDPF tree.
        # Each "data" value is 1; in addition, the Client generates
        # a random "authenticator" value used by the Aggregators to
-       # compute the sketch during preparation. This sketch is used
+       # evaluate the sketch during preparation. This sketch is used
        # to verify the one-hotness of their output shares.
        beta_inner = [
            [Poplar1.Idpf.FieldInner(1), k]
@@ -4347,9 +4350,9 @@ def decode(self, output, _num_measurements):
                                                idpf_rand)
 
        # Generate correlated randomness used by the Aggregators to
-       # compute a sketch over their output shares. XOF seeds are
-       # used to encode shares of the `(a, b, c)` triples.
-       # (See [BBCGGI21, Appendix C.4].)
+       # evaluate the sketch over their output shares. Seeds are used
+       # to encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
+       # Appendix C.4].)
        corr_offsets = vec_add(
            Poplar1.Xof.expand_into_vec(
                Poplar1.Idpf.FieldInner,
@@ -4428,113 +4431,112 @@ def decode(self, output, _num_measurements):
    Note that enforcing the order is not strictly necessary, but this
    does allow uniqueness to be determined more efficiently.
 
-  def prep_init(Poplar1, verify_key, agg_id, agg_param,
-                nonce, public_share, input_share):
-      (level, prefixes) = agg_param
-      (key, corr_seed, corr_inner, corr_leaf) = input_share
-      Field = Poplar1.Idpf.current_field(level)
+   def prep_init(Poplar1, verify_key, agg_id, agg_param,
+                 nonce, public_share, input_share):
+       (level, prefixes) = agg_param
+       (key, corr_seed, corr_inner, corr_leaf) = input_share
+       Field = Poplar1.Idpf.current_field(level)
 
-      # Ensure that candidate prefixes are all unique and appear in
-      # lexicographic order.
-      for i in range(1,len(prefixes)):
-          if prefixes[i-1] >= prefixes[i]:
-              raise ValueError('out of order prefix')
+       # Ensure that candidate prefixes are all unique and appear in
+       # lexicographic order.
+       for i in range(1, len(prefixes)):
+           if prefixes[i-1] >= prefixes[i]:
+               raise ValueError('out of order prefix')
 
-      # Evaluate the IDPF key at the given set of prefixes.
-      value = Poplar1.Idpf.eval(
-          agg_id, public_share, key, level, prefixes, nonce)
+       # Evaluate the IDPF key at the given set of prefixes.
+       value = Poplar1.Idpf.eval(
+           agg_id, public_share, key, level, prefixes, nonce)
 
-      # Get shares of the correlated randomness for computing the
-      # Aggregator's share of the sketch for the given level of the IDPF
-      # tree.
-      if level < Poplar1.Idpf.BITS - 1:
-          corr_xof = Poplar1.Xof(
-              corr_seed,
-              Poplar1.domain_separation_tag(USAGE_CORR_INNER),
-              byte(agg_id) + nonce,
-          )
-          # Fast-forward the XOF state to the current level.
-          corr_xof.next_vec(Field, 3 * level)
-      else:
-          corr_xof = Poplar1.Xof(
-              corr_seed,
-              Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
-              byte(agg_id) + nonce,
-          )
-      (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
-      (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
-          if level < Poplar1.Idpf.BITS - 1 else corr_leaf
+       # Get shares of the correlated randomness for evaluating the
+       # Aggregator's share of the sketch.
+       if level < Poplar1.Idpf.BITS - 1:
+           corr_xof = Poplar1.Xof(
+               corr_seed,
+               Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+               byte(agg_id) + nonce,
+           )
+           # Fast-forward the XOF state to the current level.
+           corr_xof.next_vec(Field, 3 * level)
+       else:
+           corr_xof = Poplar1.Xof(
+               corr_seed,
+               Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+               byte(agg_id) + nonce,
+           )
+       (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
+       (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
+           if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
-      # Compute the Aggregator's first round of the sketch. These are
-      # called the "masked input values" [BBCGGI21, Appendix C.4].
-      verify_rand_xof = Poplar1.Xof(
-          verify_key,
-          Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
-          nonce + to_be_bytes(level, 2),
-      )
-      verify_rand = verify_rand_xof.next_vec(Field, len(prefixes))
-      sketch_share = [a_share, b_share, c_share]
-      out_share = []
-      for (i, r) in enumerate(verify_rand):
-          [data_share, auth_share] = value[i]
-          sketch_share[0] += data_share * r
-          sketch_share[1] += data_share * r ** 2
-          sketch_share[2] += auth_share * r
-          out_share.append(data_share)
+       # Evaluate the Aggregator's share of the sketch. These are
+       # called the "masked input values" [BBCGGI21, Appendix C.4].
+       verify_rand_xof = Poplar1.Xof(
+           verify_key,
+           Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
+           nonce + to_be_bytes(level, 2),
+       )
+       verify_rand = verify_rand_xof.next_vec(Field, len(prefixes))
+       sketch_share = [a_share, b_share, c_share]
+       out_share = []
+       for (i, r) in enumerate(verify_rand):
+           [data_share, auth_share] = value[i]
+           sketch_share[0] += data_share * r
+           sketch_share[1] += data_share * r ** 2
+           sketch_share[2] += auth_share * r
+           out_share.append(data_share)
 
-      prep_mem = [A_share, B_share, Field(agg_id)] + out_share
-      return ((b'sketch round 1', level, prep_mem),
-              sketch_share)
+       prep_mem = [A_share, B_share, Field(agg_id)] + out_share
+       return ((b'evaluate sketch', level, prep_mem),
+               sketch_share)
 
-  def prep_next(Poplar1, prep_state, prep_msg):
-      prev_sketch = prep_msg
-      (step, level, prep_mem) = prep_state
-      Field = Poplar1.Idpf.current_field(level)
+   def prep_next(Poplar1, prep_state, prep_msg):
+       prev_sketch = prep_msg
+       (step, level, prep_mem) = prep_state
+       Field = Poplar1.Idpf.current_field(level)
 
-      if step == b'sketch round 1':
-          if prev_sketch == None:
-              prev_sketch = Field.zeros(3)
-          elif len(prev_sketch) != 3:
-              raise ValueError('incorrect sketch length')
-          (A_share, B_share, agg_id), prep_mem = \
-              prep_mem[:3], prep_mem[3:]
-          sketch_share = [
-              agg_id * (prev_sketch[0] ** 2
-                        - prev_sketch[1]
-                        - prev_sketch[2])
-              + A_share * prev_sketch[0]
-              + B_share
-          ]
-          return ((b'sketch round 2', level, prep_mem),
-                  sketch_share)
+       if step == b'evaluate sketch':
+           if prev_sketch == None:
+               prev_sketch = Field.zeros(3)
+           elif len(prev_sketch) != 3:
+               raise ValueError('incorrect sketch length')
+           (A_share, B_share, agg_id), prep_mem = \
+               prep_mem[:3], prep_mem[3:]
+           sketch_share = [
+               agg_id * (prev_sketch[0] ** 2
+                         - prev_sketch[1]
+                         - prev_sketch[2])
+               + A_share * prev_sketch[0]
+               + B_share
+           ]
+           return ((b'reveal sketch', level, prep_mem),
+                   sketch_share)
 
-      elif step == b'sketch round 2':
-          if prev_sketch == None:
-              return prep_mem  # Output shares
-          else:
-              raise ValueError('invalid prep message')
+       elif step == b'reveal sketch':
+           if prev_sketch == None:
+               return prep_mem  # Output shares
+           else:
+               raise ValueError('invalid prep message')
 
-      raise ValueError('invalid prep state')
+       raise ValueError('invalid prep state')
 
-  def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
-      if len(prep_shares) != 2:
-          ValueError('incorrect number of prep shares')
-      (level, _) = agg_param
-      Field = Poplar1.Idpf.current_field(level)
-      sketch = vec_add(prep_shares[0], prep_shares[1])
-      if len(sketch) == 3:
-          return sketch
-      elif len(sketch) == 1:
-          if sketch == Field.zeros(1):
-              # In order to reduce communication overhead, let `None`
-              # denote a successful sketch verification.
-              return None
-          else:
-              raise ValueError('sketch verification failed')
-      else:
-          raise ValueError('incorrect sketch length')
+   def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
+       if len(prep_shares) != 2:
+           ValueError('incorrect number of prep shares')
+       (level, _) = agg_param
+       Field = Poplar1.Idpf.current_field(level)
+       sketch = vec_add(prep_shares[0], prep_shares[1])
+       if len(sketch) == 3:
+           return sketch
+       elif len(sketch) == 1:
+           if sketch == Field.zeros(1):
+               # In order to reduce communication overhead, let `None`
+               # denote a successful sketch verification.
+               return None
+           else:
+               raise ValueError('sketch verification failed')
+       else:
+           raise ValueError('incorrect sketch length')
 
-                Figure 24: Preparation state for Poplar1.
+                 Figure 24: Preparation state for Poplar1.
 
 8.2.3.  Validity of Aggregation Parameters
 
@@ -5219,12 +5221,12 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
 9.4.2.  Safe Usage of IDPF Outputs
 
-   The secure sketch described in Section 8 is used by the Aggregators
-   to check that the shares of the vector obtained by evaluating a
-   Client's IDPF at a sequence of candidate prefixes has at most one
-   non-zero value, and that the non-zero value is 1.  Depending on how
-   the values are used, the secure sketch on its own may not be
-   sufficient for robustness of the application.  In particular, a
+   The arithmetic sketch described in Section 8 is used by the
+   Aggregators to check that the shares of the vector obtained by
+   evaluating a Client's IDPF at a sequence of candidate prefixes has at
+   most one non-zero value, and that the non-zero value is 1.  Depending
+   on how the values are used, the arithmetic sketch on its own may not
+   be sufficient for robustness of the application.  In particular, a
    malicious Client may attempt to influence the computation by choosing
    an IDPF that evaluates to 1 at more than one node at a given level of
    the tree.
@@ -5244,10 +5246,10 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
    This is not an issue for running heavy hitters, since (1) each node
    in the prefix tree is a child of a previously traversed node, (2) the
-   secure sketch would detect double voting at every level of the prefix
-   tree, and (3) the IDPF is extractable at the last level of the tree.
-   However, the lack of extractability at intermediate levels may result
-   in attacks on the robustness of certain applications.
+   arithmetic sketch would detect double voting at every level of the
+   prefix tree, and (3) the IDPF is extractable at the last level of the
+   tree.  However, the lack of extractability at intermediate levels may
+   result in attacks on the robustness of certain applications.
 
    Thus applications SHOULD NOT use prefix counts for intermediate
    levels for any purpose beyond the heavy-hitters tree traversal.
@@ -5389,6 +5391,10 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    [BBCGGI21] Boneh, D., Boyle, E., Corrigan-Gibbs, H., Gilboa, N., and
               Y. Ishai, "Lightweight Techniques for Private Heavy
               Hitters", IEEE S&P 2021 , 2021, <https://ia.cr/2021/017>.
+
+   [BBCGGI23] Boneh, D., Boyle, E., Corrigan-Gibbs, H., Gilboa, N., and
+              Y. Ishai, "Arithmetic Sketching", CRYPTO 2023 , 2023,
+              <https://ia.cr/2023/1012>.
 
    [CGB17]    Corrigan-Gibbs, H. and D. Boneh, "Prio: Private, Robust,
               and Scalable Computation of Aggregate Statistics", NSDI
