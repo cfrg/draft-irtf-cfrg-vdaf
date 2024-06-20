@@ -6602,10 +6602,12 @@ inputs, the Aggregators and Collector first compute the prefix tree, then
 extract the heavy hitters from the leaves of this tree. (Note that the prefix
 tree may leak more information about the set than the heavy hitters themselves;
 see <a href="#agg-param-privacy" class="auto internal xref">Section 9.4.1</a> for details.)<a href="#section-8-6" class="pilcrow">¶</a></p>
-<p id="section-8-7">Poplar1 composes an IDPF with the "secure sketching" protocol of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.
+<p id="section-8-7">Poplar1 composes an IDPF with the arithmetic sketch of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Section
+4.2. (The paper calls this a "secure sketch", but the underlying technique was
+later generalized in <span>[<a href="#BBCGGI23" class="cite xref">BBCGGI23</a>]</span>, where it is called "arithmetic sketching".)
 This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
-is zero everywhere except for one element, which is equal to one.<a href="#section-8-7" class="pilcrow">¶</a></p>
+is zero everywhere except for at most one element, which is equal to one.<a href="#section-8-7" class="pilcrow">¶</a></p>
 <p id="section-8-8">The remainder of this section is structured as follows. IDPFs are defined in
 <a href="#idpf" class="auto internal xref">Section 8.1</a>; a concrete instantiation is given <a href="#idpf-poplar" class="auto internal xref">Section 8.3</a>. The Poplar1 VDAF is
 defined in <a href="#poplar1-construction" class="auto internal xref">Section 8.2</a> in terms of a generic IDPF. Finally, a
@@ -7004,7 +7006,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
 <p id="section-8.2.1-1">The Client's measurement is an IDPF index, denoted <code>alpha</code>. (See
 <a href="#poplar1-idpf-index-encoding" class="auto internal xref">Section 8.1.1</a> for guidelines on index encoding.) The
 programmed IDPF values are pairs of field elements <code>(1, k)</code> where each <code>k</code> is
-chosen at random. This random value is used as part of the secure sketching
+chosen at random. This random value is used as part of the arithmetic sketching
 protocol of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Appendix C.4. After evaluating their IDPF key shares
 on a given sequence of candidate prefixes, the sketching protocol is used by
 the Aggregators to verify that they hold shares of a one-hot vector. In
@@ -7026,12 +7028,12 @@ follows.<a href="#section-8.2.1-3" class="pilcrow">¶</a></p>
 def shard(Poplar1, measurement, nonce, rand):
     l = Poplar1.Xof.SEED_SIZE
 
-    # Split the random input into random input for IDPF key
+    # Split the random input into the random input for IDPF key
     # generation, correlated randomness, and sharding.
     if len(rand) != Poplar1.RAND_SIZE:
         raise ValueError('incorrect rand size')
     idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
-    seeds = [rand[i:i+l] for i in range(0,3*l,l)]
+    seeds = [rand[i:i+l] for i in range(0, 3*l, l)]
     corr_seed, seeds = front(2, seeds)
     (k_shard,), seeds = front(1, seeds)
 
@@ -7044,7 +7046,7 @@ def shard(Poplar1, measurement, nonce, rand):
     # Construct the IDPF values for each level of the IDPF tree.
     # Each "data" value is 1; in addition, the Client generates
     # a random "authenticator" value used by the Aggregators to
-    # compute the sketch during preparation. This sketch is used
+    # evaluate the sketch during preparation. This sketch is used
     # to verify the one-hotness of their output shares.
     beta_inner = [
         [Poplar1.Idpf.FieldInner(1), k]
@@ -7062,9 +7064,9 @@ def shard(Poplar1, measurement, nonce, rand):
                                             idpf_rand)
 
     # Generate correlated randomness used by the Aggregators to
-    # compute a sketch over their output shares. XOF seeds are
-    # used to encode shares of the `(a, b, c)` triples.
-    # (See [BBCGGI21, Appendix C.4].)
+    # evaluate the sketch over their output shares. Seeds are used
+    # to encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
+    # Appendix C.4].)
     corr_offsets = vec_add(
         Poplar1.Xof.expand_into_vec(
             Poplar1.Idpf.FieldInner,
@@ -7159,7 +7161,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
 
     # Ensure that candidate prefixes are all unique and appear in
     # lexicographic order.
-    for i in range(1,len(prefixes)):
+    for i in range(1, len(prefixes)):
         if prefixes[i-1] &gt;= prefixes[i]:
             raise ValueError('out of order prefix')
 
@@ -7167,9 +7169,8 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     value = Poplar1.Idpf.eval(
         agg_id, public_share, key, level, prefixes, nonce)
 
-    # Get shares of the correlated randomness for computing the
-    # Aggregator's share of the sketch for the given level of the IDPF
-    # tree.
+    # Get shares of the correlated randomness for evaluating the
+    # Aggregator's share of the sketch.
     if level &lt; Poplar1.Idpf.BITS - 1:
         corr_xof = Poplar1.Xof(
             corr_seed,
@@ -7188,7 +7189,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
     (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
         if level &lt; Poplar1.Idpf.BITS - 1 else corr_leaf
 
-    # Compute the Aggregator's first round of the sketch. These are
+    # Evaluate the Aggregator's share of the sketch. These are
     # called the "masked input values" [BBCGGI21, Appendix C.4].
     verify_rand_xof = Poplar1.Xof(
         verify_key,
@@ -7206,7 +7207,7 @@ def prep_init(Poplar1, verify_key, agg_id, agg_param,
         out_share.append(data_share)
 
     prep_mem = [A_share, B_share, Field(agg_id)] + out_share
-    return ((b'sketch round 1', level, prep_mem),
+    return ((b'evaluate sketch', level, prep_mem),
             sketch_share)
 
 def prep_next(Poplar1, prep_state, prep_msg):
@@ -7214,7 +7215,7 @@ def prep_next(Poplar1, prep_state, prep_msg):
     (step, level, prep_mem) = prep_state
     Field = Poplar1.Idpf.current_field(level)
 
-    if step == b'sketch round 1':
+    if step == b'evaluate sketch':
         if prev_sketch == None:
             prev_sketch = Field.zeros(3)
         elif len(prev_sketch) != 3:
@@ -7228,10 +7229,10 @@ def prep_next(Poplar1, prep_state, prep_msg):
             + A_share * prev_sketch[0]
             + B_share
         ]
-        return ((b'sketch round 2', level, prep_mem),
+        return ((b'reveal sketch', level, prep_mem),
                 sketch_share)
 
-    elif step == b'sketch round 2':
+    elif step == b'reveal sketch':
         if prev_sketch == None:
             return prep_mem  # Output shares
         else:
@@ -8131,10 +8132,10 @@ heavy-hitter type applications.<a href="#section-9.4.1-4" class="pilcrow">¶</a>
           <h4 id="name-safe-usage-of-idpf-outputs">
 <a href="#section-9.4.2" class="section-number selfRef">9.4.2. </a><a href="#name-safe-usage-of-idpf-outputs" class="section-name selfRef">Safe Usage of IDPF Outputs</a>
           </h4>
-<p id="section-9.4.2-1">The secure sketch described in <a href="#poplar1" class="auto internal xref">Section 8</a> is used by the Aggregators to check
+<p id="section-9.4.2-1">The arithmetic sketch described in <a href="#poplar1" class="auto internal xref">Section 8</a> is used by the Aggregators to check
 that the shares of the vector obtained by evaluating a Client's IDPF at a
 sequence of candidate prefixes has at most one non-zero value, and that the
-non-zero value is <code>1</code>. Depending on how the values are used, the secure sketch
+non-zero value is <code>1</code>. Depending on how the values are used, the arithmetic sketch
 on its own may not be sufficient for robustness of the application. In
 particular, a malicious Client may attempt to influence the computation by
 choosing an IDPF that evaluates to <code>1</code> at more than one node at a given
@@ -8150,7 +8151,7 @@ of the tree. (This is by virtue of using a larger field for the leaves than for
 the inner nodes.) For intermediate levels, it is feasible for a client to
 produce IDPF shares with two controlled non-zero nodes.<a href="#section-9.4.2-3" class="pilcrow">¶</a></p>
 <p id="section-9.4.2-4">This is not an issue for running heavy hitters, since (1) each node in the
-prefix tree is a child of a previously traversed node, (2) the secure sketch
+prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
 would detect double voting at every level of the prefix tree, and (3) the IDPF
 is extractable at the last level of the tree. However, the lack of
 extractability at intermediate levels may result in attacks on the robustness
@@ -8383,6 +8384,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dt id="BBCGGI21">[BBCGGI21]</dt>
         <dd>
 <span class="refAuthor">Boneh, D.</span>, <span class="refAuthor">Boyle, E.</span>, <span class="refAuthor">Corrigan-Gibbs, H.</span>, <span class="refAuthor">Gilboa, N.</span>, and <span class="refAuthor">Y. Ishai</span>, <span class="refTitle">"Lightweight Techniques for Private Heavy Hitters"</span>, <span class="seriesInfo">IEEE S&amp;P 2021 </span>, <time datetime="2021" class="refDate">2021</time>, <span>&lt;<a href="https://ia.cr/2021/017">https://ia.cr/2021/017</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="BBCGGI23">[BBCGGI23]</dt>
+        <dd>
+<span class="refAuthor">Boneh, D.</span>, <span class="refAuthor">Boyle, E.</span>, <span class="refAuthor">Corrigan-Gibbs, H.</span>, <span class="refAuthor">Gilboa, N.</span>, and <span class="refAuthor">Y. Ishai</span>, <span class="refTitle">"Arithmetic Sketching"</span>, <span class="seriesInfo">CRYPTO 2023 </span>, <time datetime="2023" class="refDate">2023</time>, <span>&lt;<a href="https://ia.cr/2023/1012">https://ia.cr/2023/1012</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="CGB17">[CGB17]</dt>
         <dd>
