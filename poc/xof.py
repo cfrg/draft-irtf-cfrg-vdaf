@@ -1,6 +1,6 @@
 """Extendable output functions (XOFs)."""
 
-from __future__ import annotations
+from abc import ABCMeta, abstractmethod
 
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import TurboSHAKE128
@@ -9,12 +9,15 @@ from common import concat, from_le_bytes, next_power_of_2, to_le_bytes, xor
 from field import Field
 
 
-class Xof:
+class Xof(metaclass=ABCMeta):
     """The base class for XOFs."""
 
     # Size of the seed.
     SEED_SIZE: int
 
+    test_vec_name: str
+
+    @abstractmethod
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         """
         Construct a new instance of this XOF from the given seed, domain
@@ -24,8 +27,9 @@ class Xof:
 
             - `len(seed) == self.SEED_SIZE`
         """
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     def next(self, length: int) -> bytes:
         """
         Output the next `length` bytes of the XOF stream.
@@ -34,13 +38,13 @@ class Xof:
 
             - `length > 0`
         """
-        raise NotImplementedError()
+        pass
 
     @classmethod
-    def derive_seed(Xof,
+    def derive_seed(cls,
                     seed: bytes,
                     dst: bytes,
-                    binder: bytes):
+                    binder: bytes) -> bytes:
         """
         Derive a new seed.
 
@@ -48,10 +52,10 @@ class Xof:
 
             - `len(seed) == Xof.SEED_SIZE`
         """
-        xof = Xof(seed, dst, binder)
-        return xof.next(Xof.SEED_SIZE)
+        xof = cls(seed, dst, binder)
+        return xof.next(cls.SEED_SIZE)
 
-    def next_vec(self, field: type[Field], length: int):
+    def next_vec(self, field: type[Field], length: int) -> list:
         """
         Output the next `length` field elements.
 
@@ -70,12 +74,12 @@ class Xof:
         return vec
 
     @classmethod
-    def expand_into_vec(Xof,
+    def expand_into_vec(cls,
                         field: type,
                         seed: bytes,
                         dst: bytes,
                         binder: bytes,
-                        length: int):
+                        length: int) -> list:
         """
         Expand the input `seed` into vector of `length` field elements.
 
@@ -85,7 +89,7 @@ class Xof:
             - `len(seed) == Xof.SEED_SIZE`
             - `length > 0`
         """
-        xof = Xof(seed, dst, binder)
+        xof = cls(seed, dst, binder)
         return xof.next_vec(field, length)
 
 
@@ -98,7 +102,7 @@ class XofTurboShake128(Xof):
     # Operational parameters.
     test_vec_name = 'XofTurboShake128'
 
-    def __init__(self, seed, dst, binder):
+    def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         '''
         self.l = 0
         self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
@@ -110,7 +114,7 @@ class XofTurboShake128(Xof):
         self.h.update(seed)
         self.h.update(binder)
 
-    def next(self, length):
+    def next(self, length: int) -> bytes:
         '''
         self.l += length
 
@@ -139,7 +143,7 @@ class XofFixedKeyAes128(Xof):
     # Operational parameters
     test_vec_name = 'XofFixedKeyAes128'
 
-    def __init__(self, seed, dst, binder):
+    def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         self.length_consumed = 0
 
         # Use TurboSHAKE128 to derive a key from the binder string and
@@ -158,7 +162,7 @@ class XofFixedKeyAes128(Xof):
         # Save seed to be used in `next`.
         self.seed = seed
 
-    def next(self, length):
+    def next(self, length: int) -> bytes:
         offset = self.length_consumed % 16
         new_length = self.length_consumed + length
         block_range = range(
@@ -173,7 +177,7 @@ class XofFixedKeyAes128(Xof):
         ]
         return concat(hashed_blocks)[offset:offset+length]
 
-    def hash_block(self, block):
+    def hash_block(self, block: bytes) -> bytes:
         """
         The multi-instance tweakable circular correlation-robust hash
         function of [GKWWY20] (Section 4.2). The tweak here is the key
