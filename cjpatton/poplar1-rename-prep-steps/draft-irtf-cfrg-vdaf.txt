@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 December 2024                                           ISRG
+Expires: 22 December 2024                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            12 June 2024
+                                                            20 June 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 December 2024.
+   This Internet-Draft will expire on 22 December 2024.
 
 Copyright Notice
 
@@ -4029,11 +4029,14 @@ def decode(self, output, _num_measurements):
    information about the set than the heavy hitters themselves; see
    Section 9.4.1 for details.)
 
-   Poplar1 composes an IDPF with the "secure sketching" protocol of
-   [BBCGGI21].  This protocol ensures that evaluating a set of input
-   shares on a unique set of candidate prefixes results in shares of a
-   "one-hot" vector, i.e., a vector that is zero everywhere except for
-   one element, which is equal to one.
+   Poplar1 composes an IDPF with the arithmetic sketch of [BBCGGI21],
+   Section 4.2.  (The paper calls this a "secure sketch", but the
+   underlying technique was later generalized in [BBCGGI23], where it is
+   called "arithmetic sketching".)  This protocol ensures that
+   evaluating a set of input shares on a unique set of candidate
+   prefixes results in shares of a "one-hot" vector, i.e., a vector that
+   is zero everywhere except for at most one element, which is equal to
+   one.
 
    The remainder of this section is structured as follows.  IDPFs are
    defined in Section 8.1; a concrete instantiation is given
@@ -4266,12 +4269,12 @@ def decode(self, output, _num_measurements):
    The Client's measurement is an IDPF index, denoted alpha.  (See
    Section 8.1.1 for guidelines on index encoding.)  The programmed IDPF
    values are pairs of field elements (1, k) where each k is chosen at
-   random.  This random value is used as part of the secure sketching
-   protocol of [BBCGGI21], Appendix C.4.  After evaluating their IDPF
-   key shares on a given sequence of candidate prefixes, the sketching
-   protocol is used by the Aggregators to verify that they hold shares
-   of a one-hot vector.  In addition, for each level of the tree, the
-   prover generates random elements a, b, and c and computes
+   random.  This random value is used as part of the arithmetic
+   sketching protocol of [BBCGGI21], Appendix C.4.  After evaluating
+   their IDPF key shares on a given sequence of candidate prefixes, the
+   sketching protocol is used by the Aggregators to verify that they
+   hold shares of a one-hot vector.  In addition, for each level of the
+   tree, the prover generates random elements a, b, and c and computes
 
        A = -2*a + k
        B = a^2 + b - k*a + c
@@ -5190,12 +5193,12 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
 9.4.2.  Safe Usage of IDPF Outputs
 
-   The secure sketch described in Section 8 is used by the Aggregators
-   to check that the shares of the vector obtained by evaluating a
-   Client's IDPF at a sequence of candidate prefixes has at most one
-   non-zero value, and that the non-zero value is 1.  Depending on how
-   the values are used, the secure sketch on its own may not be
-   sufficient for robustness of the application.  In particular, a
+   The arithmetic sketch described in Section 8 is used by the
+   Aggregators to check that the shares of the vector obtained by
+   evaluating a Client's IDPF at a sequence of candidate prefixes has at
+   most one non-zero value, and that the non-zero value is 1.  Depending
+   on how the values are used, the arithmetic sketch on its own may not
+   be sufficient for robustness of the application.  In particular, a
    malicious Client may attempt to influence the computation by choosing
    an IDPF that evaluates to 1 at more than one node at a given level of
    the tree.
@@ -5215,10 +5218,10 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 
    This is not an issue for running heavy hitters, since (1) each node
    in the prefix tree is a child of a previously traversed node, (2) the
-   secure sketch would detect double voting at every level of the prefix
-   tree, and (3) the IDPF is extractable at the last level of the tree.
-   However, the lack of extractability at intermediate levels may result
-   in attacks on the robustness of certain applications.
+   arithmetic sketch would detect double voting at every level of the
+   prefix tree, and (3) the IDPF is extractable at the last level of the
+   tree.  However, the lack of extractability at intermediate levels may
+   result in attacks on the robustness of certain applications.
 
    Thus applications SHOULD NOT use prefix counts for intermediate
    levels for any purpose beyond the heavy-hitters tree traversal.
@@ -5360,6 +5363,10 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
    [BBCGGI21] Boneh, D., Boyle, E., Corrigan-Gibbs, H., Gilboa, N., and
               Y. Ishai, "Lightweight Techniques for Private Heavy
               Hitters", IEEE S&P 2021 , 2021, <https://ia.cr/2021/017>.
+
+   [BBCGGI23] Boneh, D., Boyle, E., Corrigan-Gibbs, H., Gilboa, N., and
+              Y. Ishai, "Arithmetic Sketching", CRYPTO 2023 , 2023,
+              <https://ia.cr/2023/1012>.
 
    [CGB17]    Corrigan-Gibbs, H. and D. Boneh, "Prio: Private, Robust,
               and Scalable Computation of Aggregate Statistics", NSDI
