@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-20T00:44:33.901068+00:00",
+  "timestamp": "2024-06-23T00:49:58.477312+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4095,7 +4095,7 @@
       "id": "I_kwDOGKuqOc5rQRqz",
       "title": "Flp: Let the circuit output be a vector?",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/262",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -4107,8 +4107,8 @@
       ],
       "body": "While looking at #258, I was considering how one might implement the Prio2 or Prio3CountVec AFE while using Prio3 without joint randomness. No joint randomness means we can't use random linear combinations. Thus, I think we'd be left with taking the conjunction of multiple range check sub-circuits by raising each sub-circuit output to the power $p-1$, which would be pretty expensive. (I think you'd have to split the exponentiation into multiple gadgets for it to be feasible)\r\n\r\nThis conjunction could be avoided entirely if we let the circuit output a vector instead of a single field element, and require that it be equal to $\\vec{0}$ instead of $0$. Circuits that take advantage of such a change would have a bigger verifier message, but it would give us more power/expressiveness without joint randomness.\r\n\r\nI'm not sure if this change is actually worth making in the document, but I figure it would be a useful counterfactual in Prio2 vs. Prio3 benchmark conversations, and in the broader joint randomness discussion.",
       "createdAt": "2023-07-11T17:35:49Z",
-      "updatedAt": "2024-06-12T23:33:53Z",
-      "closedAt": null,
+      "updatedAt": "2024-06-20T16:30:58Z",
+      "closedAt": "2024-06-20T16:30:58Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -30707,7 +30707,7 @@
       "id": "PR_kwDOGKuqOc5x3ylr",
       "title": "flp: Make the output of `Valid` a vector",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/355",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -30716,17 +30716,19 @@
       ],
       "body": "Closes #262.\r\nPartially addresses #306.\r\n\r\nIf the input is valid, then each output should be zero. To save bandwidth, we generate an extra element of query randomness and use it to reduce the result.\r\n\r\nTo exercise this feature, implement a new circuit, `Sum2`, that generalizes `Sum` to support any bound, including non-powers-of-two.",
       "createdAt": "2024-06-08T21:44:30Z",
-      "updatedAt": "2024-06-13T22:23:02Z",
+      "updatedAt": "2024-06-20T17:00:49Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "f028280737b6167962dce46a30bf831705400ef9",
+      "baseRefOid": "12054cd332d75f127b3484119024e70f47b89c34",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/262/1",
-      "headRefOid": "9ccfbedccef0c1dc1e572dbdbef1d4da66d2f2cc",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "f53e1a27be45d02f2b0ae0a518aadc7447c2f2a2",
+      "closedAt": "2024-06-20T16:30:57Z",
+      "mergedAt": "2024-06-20T16:30:57Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "39fb4753a55bbc33a8da8c662dba8ed99f50e6ff"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -30734,6 +30736,13 @@
           "body": "I'm going to update this to speak in terms of \"max_measurement\" rather than \"measurement_bound\" per @divergentdave's comment here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/349#discussion_r1635055085",
           "createdAt": "2024-06-11T15:53:56Z",
           "updatedAt": "2024-06-11T15:53:56Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and squashed.",
+          "createdAt": "2024-06-20T16:22:21Z",
+          "updatedAt": "2024-06-20T16:22:21Z"
         }
       ],
       "reviews": [
@@ -31363,7 +31372,7 @@
       "id": "PR_kwDOGKuqOc5yRJdk",
       "title": "Poplar1: Rename preparation steps",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/360",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -31373,18 +31382,28 @@
       ],
       "body": "Henry Corrigan-Gibbs suggests the following names:\r\n- \"round one\" -> \"evaluate sketch\"\r\n- \"round two\" -> \"reveal sketch\"",
       "createdAt": "2024-06-12T17:31:47Z",
-      "updatedAt": "2024-06-13T22:37:59Z",
+      "updatedAt": "2024-06-20T16:21:21Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "e57208850eb83afee11993df689afbb3809c534d",
+      "baseRefOid": "d4f5db6c60ef115291ee45aee45b03aeba489452",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/poplar1-rename-prep-steps",
-      "headRefOid": "1521ff3c9c8f4162c676cb4b9a0b5370a637ad96",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "6bb7d3629fb1f3d1dbda70b299f9d8e2ac9ecdea",
+      "closedAt": "2024-06-20T16:21:21Z",
+      "mergedAt": "2024-06-20T16:21:21Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "12054cd332d75f127b3484119024e70f47b89c34"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-06-20T16:19:33Z",
+          "updatedAt": "2024-06-20T16:19:33Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc5-MPGO",
@@ -31451,6 +31470,40 @@
           ]
         }
       ]
+    },
+    {
+      "number": 363,
+      "id": "PR_kwDOGKuqOc5zGHTW",
+      "title": "Replace class factories with OOP inheritance",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/363",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR is going to replace class factories throughout the codebase with conventional OOP inheritance and classes defined at the top level. This will make type checking and other static analysis work better, and help avoid bugs around mutating class attributes on the wrong class in factory methods. So far I've rewritten `daf.py`, and improved the type hints in `field.py`, so that __add__ returns `Self` instead of `Field`. `Self` is a special generic type variable, so this more precise signature tells us we get a field element of the same type back, not a field element from possibly any field. I needed this improvement after adding hints to more signatures in `TestDaf`, particularly `aggregate()`.\r\n\r\nRelated to #361.",
+      "createdAt": "2024-06-20T16:38:26Z",
+      "updatedAt": "2024-06-21T21:24:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "39fb4753a55bbc33a8da8c662dba8ed99f50e6ff",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/poc-oop",
+      "headRefOid": "f10a1169bbced8cb20c6122c56536cb7a28c96a7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The type hint system does not support associated types, but I am able to get just as strong type checking by defining a lot of generic type parameters on abstract classes that define interfaces, and then filling in those type parameters on concrete subclasses. I get errors from mypy if an overridden method has a signature incompatible with that defined by the superclass.",
+          "createdAt": "2024-06-21T21:20:46Z",
+          "updatedAt": "2024-06-21T21:24:03Z"
+        }
+      ],
+      "reviews": []
     }
   ]
 }
