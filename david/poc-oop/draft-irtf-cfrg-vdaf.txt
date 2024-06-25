@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 22 December 2024                                           ISRG
+Expires: 27 December 2024                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            20 June 2024
+                                                            25 June 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 December 2024.
+   This Internet-Draft will expire on 27 December 2024.
 
 Copyright Notice
 
@@ -3181,7 +3181,7 @@ struct {
 7.3.1.1.  Extensions
 
    The FLP described in the next section extends the proof system of
-   [BBCGGI19], Section 4.2 in three ways.
+   [BBCGGI19], Section 4.2 in a few ways.
 
    First, the validity circuit in our construction includes an
    additional, random input (this is the "joint randomness" derived from
@@ -3220,13 +3220,20 @@ struct {
    sub-component that the gadgets have in common, namely Mul, but the
    resulting proof would be longer.
 
-   Finally, [BBCGGI19], Theorem 4.3 makes no restrictions on the choice
-   of the fixed points alpha[0], ..., alpha[M-1], other than to require
+   Third, [BBCGGI19], Theorem 4.3 makes no restrictions on the choice of
+   the fixed points alpha[0], ..., alpha[M-1], other than to require
    that the points are distinct.  In this document, the fixed points are
    chosen so that the gadget polynomial can be constructed efficiently
    using the Cooley-Tukey FFT ("Fast Fourier Transform") algorithm.
    Note that this requires the field to be "FFT-friendly" as defined in
    Section 6.1.2.
+
+   Finally, the validity circuit in our FLP may have any number of
+   outputs (at least one).  The input is said to be valid if each of the
+   outputs is zero.  To save bandwidth, we take a random linear
+   combination of the outputs.  If each of the outputs is zero, then the
+   reduced output will be zero; but if one of the outputs is non-zero,
+   then the reduced output will be non-zero with high probability.
 
 7.3.2.  Validity Circuits
 
@@ -3235,28 +3242,30 @@ struct {
 
    A concrete Valid defines the following parameters:
 
-        +================+=======================================+
-        | Parameter      | Description                           |
-        +================+=======================================+
-        | GADGETS        | A list of gadgets                     |
-        +----------------+---------------------------------------+
-        | GADGET_CALLS   | Number of times each gadget is called |
-        +----------------+---------------------------------------+
-        | MEAS_LEN       | Length of the measurement             |
-        +----------------+---------------------------------------+
-        | OUTPUT_LEN     | Length of the aggregatable output     |
-        +----------------+---------------------------------------+
-        | JOINT_RAND_LEN | Length of the random input            |
-        +----------------+---------------------------------------+
-        | Measurement    | The type of measurement               |
-        +----------------+---------------------------------------+
-        | AggResult      | Type of the aggregate result          |
-        +----------------+---------------------------------------+
-        | Field          | An FFT-friendly finite field as       |
-        |                | defined in Section 6.1.2              |
-        +----------------+---------------------------------------+
+        +=================+=======================================+
+        | Parameter       | Description                           |
+        +=================+=======================================+
+        | GADGETS         | A list of gadgets                     |
+        +-----------------+---------------------------------------+
+        | GADGET_CALLS    | Number of times each gadget is called |
+        +-----------------+---------------------------------------+
+        | MEAS_LEN        | Length of the measurement             |
+        +-----------------+---------------------------------------+
+        | OUTPUT_LEN      | Length of the aggregatable output     |
+        +-----------------+---------------------------------------+
+        | JOINT_RAND_LEN  | Length of the random input            |
+        +-----------------+---------------------------------------+
+        | EVAL_OUTPUT_LEN | Length of the circuit output          |
+        +-----------------+---------------------------------------+
+        | Measurement     | The type of measurement               |
+        +-----------------+---------------------------------------+
+        | AggResult       | Type of the aggregate result          |
+        +-----------------+---------------------------------------+
+        | Field           | An FFT-friendly finite field as       |
+        |                 | defined in Section 6.1.2              |
+        +-----------------+---------------------------------------+
 
-                  Table 7: Validity circuit parameters.
+                   Table 7: Validity circuit parameters.
 
    Each gadget G in GADGETS defines a constant DEGREE that specifies the
    circuit's "arithmetic degree".  This is defined to be the degree of
@@ -3293,7 +3302,10 @@ struct {
 
    def query_rand_len(self):
        """Length of the query randomness."""
-       return len(Valid.GADGETS)
+       query_rand_len = len(self.GADGETS)
+       if self.EVAL_OUTPUT_LEN > 1:
+           query_rand_len += 1
+       return query_rand_len
 
    def proof_len(self):
        """Length of the proof."""
@@ -3424,12 +3436,19 @@ struct {
        inputs of each gadget in the corresponding table.  This step is
        similar to the prover's step (3.) except the verifier does not
        evaluate the gadgets.  Instead, it computes the output of the kth
-       call to G_i by evaluating poly_gadget_i(alpha_i^k).  Let v denote
-       the output of the circuit evaluation.
+       call to G_i by evaluating poly_gadget_i(alpha_i^k).  Let out
+       denote the output of the circuit evaluation.
 
-   4.  Compute the wire polynomials just as in the prover's step (4.).
+   4.  Next, reduce out as follows.  If EVAL_OUTPUT_LEN > 1, then
+       consume the first element of query_rand by letting [r],
+       query_rand = front(1, query_rand).  Then let v = r*out[0] +
+       r**2*out[1] + r**3*out[2] + .... That is, interpret the outputs
+       as coefficients of a polynomial f(x) and evaluate polynomial
+       f(x)*x at a random point r.
 
-   5.  Compute the tests for well-formedness of the gadget polynomials.
+   5.  Compute the wire polynomials just as in the prover's step (4.).
+
+   6.  Compute the tests for well-formedness of the gadget polynomials.
        That is, for every i in [H]:
 
        *  Let t = query_rand[i].  Check if t^(P_i) == 1: If so, then
@@ -3500,34 +3519,37 @@ struct {
    The Count validity circuit is defined as
 
    def eval(self, meas, joint_rand, _num_shares):
-       return self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
+       out = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
            - meas[0]
+       return [out]
 
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.
 
-                  +================+===================+
-                  | Parameter      | Value             |
-                  +================+===================+
-                  | GADGETS        | [Mul]             |
-                  +----------------+-------------------+
-                  | GADGET_CALLS   | [1]               |
-                  +----------------+-------------------+
-                  | MEAS_LEN       | 1                 |
-                  +----------------+-------------------+
-                  | OUTPUT_LEN     | 1                 |
-                  +----------------+-------------------+
-                  | JOINT_RAND_LEN | 0                 |
-                  +----------------+-------------------+
-                  | Measurement    | int in range(2)   |
-                  +----------------+-------------------+
-                  | AggResult      | int               |
-                  +----------------+-------------------+
-                  | Field          | Field64 (Table 3) |
-                  +----------------+-------------------+
+                  +=================+===================+
+                  | Parameter       | Value             |
+                  +=================+===================+
+                  | GADGETS         | [Mul]             |
+                  +-----------------+-------------------+
+                  | GADGET_CALLS    | [1]               |
+                  +-----------------+-------------------+
+                  | MEAS_LEN        | 1                 |
+                  +-----------------+-------------------+
+                  | OUTPUT_LEN      | 1                 |
+                  +-----------------+-------------------+
+                  | JOINT_RAND_LEN  | 0                 |
+                  +-----------------+-------------------+
+                  | EVAL_OUTPUT_LEN | 1                 |
+                  +-----------------+-------------------+
+                  | Measurement     | int in range(2)   |
+                  +-----------------+-------------------+
+                  | AggResult       | int               |
+                  +-----------------+-------------------+
+                  | Field           | Field64 (Table 3) |
+                  +-----------------+-------------------+
 
-                     Table 9: Parameters of validity
-                              circuit Count.
+                      Table 9: Parameters of validity
+                               circuit Count.
 
 7.4.2.  Prio3Sum
 
@@ -3571,30 +3593,32 @@ struct {
        for b in meas:
            out += r * self.GADGETS[0].eval(self.Field, [b])
            r *= joint_rand[0]
-       return out
+       return [out]
 
-                +================+=======================+
-                | Parameter      | Value                 |
-                +================+=======================+
-                | GADGETS        | [Range2]              |
-                +----------------+-----------------------+
-                | GADGET_CALLS   | [bits]                |
-                +----------------+-----------------------+
-                | MEAS_LEN       | bits                  |
-                +----------------+-----------------------+
-                | OUTPUT_LEN     | 1                     |
-                +----------------+-----------------------+
-                | JOINT_RAND_LEN | 1                     |
-                +----------------+-----------------------+
-                | Measurement    | int in range(2**bits) |
-                +----------------+-----------------------+
-                | AggResult      | int                   |
-                +----------------+-----------------------+
-                | Field          | Field128 (Table 3)    |
-                +----------------+-----------------------+
+                +=================+=======================+
+                | Parameter       | Value                 |
+                +=================+=======================+
+                | GADGETS         | [Range2]              |
+                +-----------------+-----------------------+
+                | GADGET_CALLS    | [bits]                |
+                +-----------------+-----------------------+
+                | MEAS_LEN        | bits                  |
+                +-----------------+-----------------------+
+                | OUTPUT_LEN      | 1                     |
+                +-----------------+-----------------------+
+                | JOINT_RAND_LEN  | 1                     |
+                +-----------------+-----------------------+
+                | EVAL_OUTPUT_LEN | 1                     |
+                +-----------------+-----------------------+
+                | Measurement     | int in range(2**bits) |
+                +-----------------+-----------------------+
+                | AggResult       | int                   |
+                +-----------------+-----------------------+
+                | Field           | Field128 (Table 3)    |
+                +-----------------+-----------------------+
 
-                     Table 10: Parameters of validity
-                               circuit Sum.
+                      Table 10: Parameters of validity
+                                circuit Sum.
 
 7.4.3.  Prio3SumVec
 
@@ -3700,31 +3724,33 @@ def decode(self, output, _num_measurements):
 
            out += self.GADGETS[0].eval(self.Field, inputs)
 
-       return out
+       return [out]
 
-          +================+====================================+
-          | Parameter      | Value                              |
-          +================+====================================+
-          | GADGETS        | [ParallelSum(Mul(), chunk_length)] |
-          +----------------+------------------------------------+
-          | GADGET_CALLS   | [(length * bits + chunk_length -   |
-          |                | 1) // chunk_length]                |
-          +----------------+------------------------------------+
-          | MEAS_LEN       | length * bits                      |
-          +----------------+------------------------------------+
-          | OUTPUT_LEN     | length                             |
-          +----------------+------------------------------------+
-          | JOINT_RAND_LEN | 1                                  |
-          +----------------+------------------------------------+
-          | Measurement    | list[int], each element in         |
-          |                | range(2**bits)                     |
-          +----------------+------------------------------------+
-          | AggResult      | list[int]                          |
-          +----------------+------------------------------------+
-          | Field          | Field128 (Table 3)                 |
-          +----------------+------------------------------------+
+         +=================+====================================+
+         | Parameter       | Value                              |
+         +=================+====================================+
+         | GADGETS         | [ParallelSum(Mul(), chunk_length)] |
+         +-----------------+------------------------------------+
+         | GADGET_CALLS    | [(length * bits + chunk_length -   |
+         |                 | 1) // chunk_length]                |
+         +-----------------+------------------------------------+
+         | MEAS_LEN        | length * bits                      |
+         +-----------------+------------------------------------+
+         | OUTPUT_LEN      | length                             |
+         +-----------------+------------------------------------+
+         | JOINT_RAND_LEN  | 1                                  |
+         +-----------------+------------------------------------+
+         | EVAL_OUTPUT_LEN | 1                                  |
+         +-----------------+------------------------------------+
+         | Measurement     | list[int], each element in         |
+         |                 | range(2**bits)                     |
+         +-----------------+------------------------------------+
+         | AggResult       | list[int]                          |
+         +-----------------+------------------------------------+
+         | Field           | Field128 (Table 3)                 |
+         +-----------------+------------------------------------+
 
-              Table 11: Parameters of validity circuit SumVec.
+             Table 11: Parameters of validity circuit SumVec.
 
 7.4.3.1.  Selection of ParallelSum chunk length
 
@@ -3823,32 +3849,34 @@ def decode(self, output, _num_measurements):
 
        out = joint_rand[1] * range_check + \
            joint_rand[1] ** 2 * sum_check
-       return out
+       return [out]
 
    Note that this circuit depends on the number of shares into which the
    measurement is sharded.  This is provided to the FLP by Prio3.
 
-    +================+===============================================+
-    | Parameter      | Value                                         |
-    +================+===============================================+
-    | GADGETS        | [ParallelSum(Mul(), chunk_length)]            |
-    +----------------+-----------------------------------------------+
-    | GADGET_CALLS   | [(length + chunk_length - 1) // chunk_length] |
-    +----------------+-----------------------------------------------+
-    | MEAS_LEN       | length                                        |
-    +----------------+-----------------------------------------------+
-    | OUTPUT_LEN     | length                                        |
-    +----------------+-----------------------------------------------+
-    | JOINT_RAND_LEN | 2                                             |
-    +----------------+-----------------------------------------------+
-    | Measurement    | int                                           |
-    +----------------+-----------------------------------------------+
-    | AggResult      | list[int]                                     |
-    +----------------+-----------------------------------------------+
-    | Field          | Field128 (Table 3)                            |
-    +----------------+-----------------------------------------------+
+    +=================+===============================================+
+    | Parameter       | Value                                         |
+    +=================+===============================================+
+    | GADGETS         | [ParallelSum(Mul(), chunk_length)]            |
+    +-----------------+-----------------------------------------------+
+    | GADGET_CALLS    | [(length + chunk_length - 1) // chunk_length] |
+    +-----------------+-----------------------------------------------+
+    | MEAS_LEN        | length                                        |
+    +-----------------+-----------------------------------------------+
+    | OUTPUT_LEN      | length                                        |
+    +-----------------+-----------------------------------------------+
+    | JOINT_RAND_LEN  | 2                                             |
+    +-----------------+-----------------------------------------------+
+    | EVAL_OUTPUT_LEN | 1                                             |
+    +-----------------+-----------------------------------------------+
+    | Measurement     | int                                           |
+    +-----------------+-----------------------------------------------+
+    | AggResult       | list[int]                                     |
+    +-----------------+-----------------------------------------------+
+    | Field           | Field128 (Table 3)                            |
+    +-----------------+-----------------------------------------------+
 
-           Table 12: Parameters of validity circuit Histogram.
+            Table 12: Parameters of validity circuit Histogram.
 
 7.4.5.  Prio3MultihotCountVec
 
@@ -4286,12 +4314,12 @@ def decode(self, output, _num_measurements):
    def shard(Poplar1, measurement, nonce, rand):
        l = Poplar1.Xof.SEED_SIZE
 
-       # Split the random input into random input for IDPF key
+       # Split the random input into the random input for IDPF key
        # generation, correlated randomness, and sharding.
        if len(rand) != Poplar1.RAND_SIZE:
            raise ValueError('incorrect rand size')
        idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
-       seeds = [rand[i:i+l] for i in range(0,3*l,l)]
+       seeds = [rand[i:i+l] for i in range(0, 3*l, l)]
        corr_seed, seeds = front(2, seeds)
        (k_shard,), seeds = front(1, seeds)
 
@@ -4304,7 +4332,7 @@ def decode(self, output, _num_measurements):
        # Construct the IDPF values for each level of the IDPF tree.
        # Each "data" value is 1; in addition, the Client generates
        # a random "authenticator" value used by the Aggregators to
-       # compute the sketch during preparation. This sketch is used
+       # evaluate the sketch during preparation. This sketch is used
        # to verify the one-hotness of their output shares.
        beta_inner = [
            [Poplar1.Idpf.FieldInner(1), k]
@@ -4322,9 +4350,9 @@ def decode(self, output, _num_measurements):
                                                idpf_rand)
 
        # Generate correlated randomness used by the Aggregators to
-       # compute a sketch over their output shares. XOF seeds are
-       # used to encode shares of the `(a, b, c)` triples.
-       # (See [BBCGGI21, Appendix C.4].)
+       # evaluate the sketch over their output shares. Seeds are used
+       # to encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
+       # Appendix C.4].)
        corr_offsets = vec_add(
            Poplar1.Xof.expand_into_vec(
                Poplar1.Idpf.FieldInner,
@@ -4403,113 +4431,112 @@ def decode(self, output, _num_measurements):
    Note that enforcing the order is not strictly necessary, but this
    does allow uniqueness to be determined more efficiently.
 
-  def prep_init(Poplar1, verify_key, agg_id, agg_param,
-                nonce, public_share, input_share):
-      (level, prefixes) = agg_param
-      (key, corr_seed, corr_inner, corr_leaf) = input_share
-      Field = Poplar1.Idpf.current_field(level)
+   def prep_init(Poplar1, verify_key, agg_id, agg_param,
+                 nonce, public_share, input_share):
+       (level, prefixes) = agg_param
+       (key, corr_seed, corr_inner, corr_leaf) = input_share
+       Field = Poplar1.Idpf.current_field(level)
 
-      # Ensure that candidate prefixes are all unique and appear in
-      # lexicographic order.
-      for i in range(1,len(prefixes)):
-          if prefixes[i-1] >= prefixes[i]:
-              raise ValueError('out of order prefix')
+       # Ensure that candidate prefixes are all unique and appear in
+       # lexicographic order.
+       for i in range(1, len(prefixes)):
+           if prefixes[i-1] >= prefixes[i]:
+               raise ValueError('out of order prefix')
 
-      # Evaluate the IDPF key at the given set of prefixes.
-      value = Poplar1.Idpf.eval(
-          agg_id, public_share, key, level, prefixes, nonce)
+       # Evaluate the IDPF key at the given set of prefixes.
+       value = Poplar1.Idpf.eval(
+           agg_id, public_share, key, level, prefixes, nonce)
 
-      # Get shares of the correlated randomness for computing the
-      # Aggregator's share of the sketch for the given level of the IDPF
-      # tree.
-      if level < Poplar1.Idpf.BITS - 1:
-          corr_xof = Poplar1.Xof(
-              corr_seed,
-              Poplar1.domain_separation_tag(USAGE_CORR_INNER),
-              byte(agg_id) + nonce,
-          )
-          # Fast-forward the XOF state to the current level.
-          corr_xof.next_vec(Field, 3 * level)
-      else:
-          corr_xof = Poplar1.Xof(
-              corr_seed,
-              Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
-              byte(agg_id) + nonce,
-          )
-      (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
-      (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
-          if level < Poplar1.Idpf.BITS - 1 else corr_leaf
+       # Get shares of the correlated randomness for evaluating the
+       # Aggregator's share of the sketch.
+       if level < Poplar1.Idpf.BITS - 1:
+           corr_xof = Poplar1.Xof(
+               corr_seed,
+               Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+               byte(agg_id) + nonce,
+           )
+           # Fast-forward the XOF state to the current level.
+           corr_xof.next_vec(Field, 3 * level)
+       else:
+           corr_xof = Poplar1.Xof(
+               corr_seed,
+               Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+               byte(agg_id) + nonce,
+           )
+       (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
+       (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
+           if level < Poplar1.Idpf.BITS - 1 else corr_leaf
 
-      # Compute the Aggregator's first round of the sketch. These are
-      # called the "masked input values" [BBCGGI21, Appendix C.4].
-      verify_rand_xof = Poplar1.Xof(
-          verify_key,
-          Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
-          nonce + to_be_bytes(level, 2),
-      )
-      verify_rand = verify_rand_xof.next_vec(Field, len(prefixes))
-      sketch_share = [a_share, b_share, c_share]
-      out_share = []
-      for (i, r) in enumerate(verify_rand):
-          [data_share, auth_share] = value[i]
-          sketch_share[0] += data_share * r
-          sketch_share[1] += data_share * r ** 2
-          sketch_share[2] += auth_share * r
-          out_share.append(data_share)
+       # Evaluate the Aggregator's share of the sketch. These are
+       # called the "masked input values" [BBCGGI21, Appendix C.4].
+       verify_rand_xof = Poplar1.Xof(
+           verify_key,
+           Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
+           nonce + to_be_bytes(level, 2),
+       )
+       verify_rand = verify_rand_xof.next_vec(Field, len(prefixes))
+       sketch_share = [a_share, b_share, c_share]
+       out_share = []
+       for (i, r) in enumerate(verify_rand):
+           [data_share, auth_share] = value[i]
+           sketch_share[0] += data_share * r
+           sketch_share[1] += data_share * r ** 2
+           sketch_share[2] += auth_share * r
+           out_share.append(data_share)
 
-      prep_mem = [A_share, B_share, Field(agg_id)] + out_share
-      return ((b'sketch round 1', level, prep_mem),
-              sketch_share)
+       prep_mem = [A_share, B_share, Field(agg_id)] + out_share
+       return ((b'evaluate sketch', level, prep_mem),
+               sketch_share)
 
-  def prep_next(Poplar1, prep_state, prep_msg):
-      prev_sketch = prep_msg
-      (step, level, prep_mem) = prep_state
-      Field = Poplar1.Idpf.current_field(level)
+   def prep_next(Poplar1, prep_state, prep_msg):
+       prev_sketch = prep_msg
+       (step, level, prep_mem) = prep_state
+       Field = Poplar1.Idpf.current_field(level)
 
-      if step == b'sketch round 1':
-          if prev_sketch == None:
-              prev_sketch = Field.zeros(3)
-          elif len(prev_sketch) != 3:
-              raise ValueError('incorrect sketch length')
-          (A_share, B_share, agg_id), prep_mem = \
-              prep_mem[:3], prep_mem[3:]
-          sketch_share = [
-              agg_id * (prev_sketch[0] ** 2
-                        - prev_sketch[1]
-                        - prev_sketch[2])
-              + A_share * prev_sketch[0]
-              + B_share
-          ]
-          return ((b'sketch round 2', level, prep_mem),
-                  sketch_share)
+       if step == b'evaluate sketch':
+           if prev_sketch == None:
+               prev_sketch = Field.zeros(3)
+           elif len(prev_sketch) != 3:
+               raise ValueError('incorrect sketch length')
+           (A_share, B_share, agg_id), prep_mem = \
+               prep_mem[:3], prep_mem[3:]
+           sketch_share = [
+               agg_id * (prev_sketch[0] ** 2
+                         - prev_sketch[1]
+                         - prev_sketch[2])
+               + A_share * prev_sketch[0]
+               + B_share
+           ]
+           return ((b'reveal sketch', level, prep_mem),
+                   sketch_share)
 
-      elif step == b'sketch round 2':
-          if prev_sketch == None:
-              return prep_mem  # Output shares
-          else:
-              raise ValueError('invalid prep message')
+       elif step == b'reveal sketch':
+           if prev_sketch == None:
+               return prep_mem  # Output shares
+           else:
+               raise ValueError('invalid prep message')
 
-      raise ValueError('invalid prep state')
+       raise ValueError('invalid prep state')
 
-  def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
-      if len(prep_shares) != 2:
-          ValueError('incorrect number of prep shares')
-      (level, _) = agg_param
-      Field = Poplar1.Idpf.current_field(level)
-      sketch = vec_add(prep_shares[0], prep_shares[1])
-      if len(sketch) == 3:
-          return sketch
-      elif len(sketch) == 1:
-          if sketch == Field.zeros(1):
-              # In order to reduce communication overhead, let `None`
-              # denote a successful sketch verification.
-              return None
-          else:
-              raise ValueError('sketch verification failed')
-      else:
-          raise ValueError('incorrect sketch length')
+   def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
+       if len(prep_shares) != 2:
+           ValueError('incorrect number of prep shares')
+       (level, _) = agg_param
+       Field = Poplar1.Idpf.current_field(level)
+       sketch = vec_add(prep_shares[0], prep_shares[1])
+       if len(sketch) == 3:
+           return sketch
+       elif len(sketch) == 1:
+           if sketch == Field.zeros(1):
+               # In order to reduce communication overhead, let `None`
+               # denote a successful sketch verification.
+               return None
+           else:
+               raise ValueError('sketch verification failed')
+       else:
+           raise ValueError('incorrect sketch length')
 
-                Figure 24: Preparation state for Poplar1.
+                 Figure 24: Preparation state for Poplar1.
 
 8.2.3.  Validity of Aggregation Parameters
 
