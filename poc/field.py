@@ -1,6 +1,6 @@
 """Definitions of finite fields used in this spec."""
 
-from typing import Self, TypeVar
+from typing import Self, TypeVar, cast
 
 from sage.all import GF, PolynomialRing
 from sage.rings.finite_rings.finite_field_constructor import FiniteFieldFactory
@@ -19,7 +19,7 @@ class Field:
 
     gf: FiniteFieldFactory
 
-    def __init__(self, val):
+    def __init__(self, val: int):
         assert int(val) < self.MODULUS
         self.val = self.gf(val)
 
@@ -117,8 +117,10 @@ class Field:
     def inv(self) -> Self:
         return self.__class__(self.val**-1)
 
-    def __eq__(self, other) -> bool:
-        return self.val == other.val
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Field):
+            return NotImplemented
+        return cast(bool, self.val == other.val)
 
     def __sub__(self, other: Self) -> Self:
         return self + (-other)
@@ -154,7 +156,7 @@ class Field2(Field):
     MODULUS = 2
     ENCODED_SIZE = 1
 
-    # Operational parameters
+    # Sage finite field object.
     gf = GF(MODULUS)
 
     def conditional_select(self, inp: bytes) -> bytes:
@@ -182,7 +184,7 @@ class Field64(FftField):
     GEN_ORDER = 2**32
     ENCODED_SIZE = 8
 
-    # Operational parameters
+    # Sage finite field object.
     gf = GF(MODULUS)
 
     @classmethod
@@ -197,7 +199,7 @@ class Field96(FftField):
     GEN_ORDER = 2**64
     ENCODED_SIZE = 12
 
-    # Operational parameters
+    # Sage finite field object.
     gf = GF(MODULUS)
 
     @classmethod
@@ -212,7 +214,7 @@ class Field128(FftField):
     GEN_ORDER = 2**66
     ENCODED_SIZE = 16
 
-    # Operational parameters
+    # Sage finite field object.
     gf = GF(MODULUS)
 
     @classmethod
@@ -226,7 +228,7 @@ class Field255(Field):
     MODULUS = 2**255 - 19
     ENCODED_SIZE = 32
 
-    # Operational parameters
+    # Sage finite field object.
     gf = GF(MODULUS)
 
 
@@ -248,9 +250,9 @@ def poly_strip(field: type[F], p: list[F]) -> list[F]:
 def poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]:
     """Multiply two polynomials."""
     r = [field(0) for _ in range(len(p) + len(q))]
-    for i in range(len(p)):
-        for j in range(len(q)):
-            r[i + j] += p[i] * q[j]
+    for i, p_i in enumerate(p):
+        for j, q_j in enumerate(q):
+            r[i + j] += p_i * q_j
     return poly_strip(field, r)
 
 
@@ -272,4 +274,4 @@ def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
     """Compute the Lagrange interpolation polynomial for the given points."""
     R = PolynomialRing(field.gf, 'x')
     p = R.lagrange_polynomial([(x.val, y.val) for (x, y) in zip(xs, ys)])
-    return poly_strip(field, list(map(lambda x: field(x), p.coefficients())))
+    return poly_strip(field, list(map(field, p.coefficients())))

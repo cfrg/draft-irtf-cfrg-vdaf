@@ -1,18 +1,25 @@
 """Fully linear proof (FLP) systems."""
 
-from typing import Any
+from abc import ABCMeta, abstractmethod
+from typing import Any, Generic, TypeVar
 
-import field
+from circuit import Valid
 from common import vec_add, vec_sub
+from field import Field
+
+Measurement = TypeVar("Measurement")
+AggResult = TypeVar("AggResult")
+F = TypeVar("F", bound=Field)
 
 
-class Flp:
+class Flp(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
     """The base class for FLPs."""
 
-    # Generic paraemters
-    Measurement: Any = None
-    AggResult: Any = None
-    Field: Any = None
+    # Class object for the field.
+    field: type[F]
+
+    # Validity circuit and AFE.
+    valid: Valid[Measurement, AggResult, F]
 
     # Length of the joint randomness shared by the prover and verifier.
     JOINT_RAND_LEN: int
@@ -35,14 +42,20 @@ class Flp:
     # Length of the verifier message.
     VERIFIER_LEN: int
 
-    def encode(self, measurement: Measurement) -> list[Field]:
-        """Encode a measurement."""
-        raise NotImplementedError()
+    @abstractmethod
+    def __init__(self) -> None:
+        pass
 
+    @abstractmethod
+    def encode(self, measurement: Measurement) -> list[F]:
+        """Encode a measurement."""
+        pass
+
+    @abstractmethod
     def prove(self,
-              meas: list[Field],
-              prove_rand: list[Field],
-              joint_rand: list[Field]) -> list[Field]:
+              meas: list[F],
+              prove_rand: list[F],
+              joint_rand: list[F]) -> list[F]:
         """
         Generate a proof of a measurement's validity.
 
@@ -52,14 +65,15 @@ class Flp:
             - `len(prove_rand) == self.PROVE_RAND_LEN`
             - `len(joint_rand) == self.JOINT_RAND_LEN`
         """
-        raise NotImplementedError()
+        pass
 
+    @abstractmethod
     def query(self,
-              meas: list[Field],
-              proof: list[Field],
-              query_rand: list[Field],
-              joint_rand: list[Field],
-              num_shares: int) -> list[Field]:
+              meas: list[F],
+              proof: list[F],
+              query_rand: list[F],
+              joint_rand: list[F],
+              num_shares: int) -> list[F]:
         """
         Generate a verifier message for a measurement and proof.
 
@@ -71,9 +85,10 @@ class Flp:
             - `len(joint_rand) == self.JOINT_RAND_LEN`
             - `num_shares >= 1`
         """
-        raise NotImplementedError()
+        pass
 
-    def decide(self, verifier: list[Field]) -> bool:
+    @abstractmethod
+    def decide(self, verifier: list[F]) -> bool:
         """
         Decide if a verifier message was generated from a valid measurement.
 
@@ -81,9 +96,10 @@ class Flp:
 
             - `len(verifier) == self.VERIFIER_LEN`
         """
-        raise NotImplementedError()
+        pass
 
-    def truncate(self, meas: list[Field]) -> list[Field]:
+    @abstractmethod
+    def truncate(self, meas: list[F]) -> list[F]:
         """
         Map an encoded measurement to an aggregatable output.
 
@@ -91,9 +107,10 @@ class Flp:
 
             - `len(meas) == self.MEAS_LEN`
         """
-        raise NotImplementedError()
+        pass
 
-    def decode(self, output: list[Field], num_measurements: int) -> AggResult:
+    @abstractmethod
+    def decode(self, output: list[F], num_measurements: int) -> AggResult:
         """
         Decode an aggregate result.
 
@@ -102,9 +119,9 @@ class Flp:
             - `len(output) == self.OUTPUT_LEN`
             - `num_measurements >= 1`
         """
-        raise NotImplementedError()
+        pass
 
-    def test_vec_set_type_param(self, test_vec) -> list[str]:
+    def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         """
         Add any parameters to `test_vec` that are required to construct this
         class. Returns the keys that were set.
@@ -112,9 +129,10 @@ class Flp:
         return []
 
 
-def additive_secret_share(vec: list[field.Field],
-                          num_shares: int,
-                          field: type[field.Field]) -> list[list[field.Field]]:
+def additive_secret_share(
+        vec: list[F],
+        num_shares: int,
+        field: type[F]) -> list[list[F]]:
     shares = [
         field.rand_vec(len(vec))
         for _ in range(num_shares - 1)
@@ -127,19 +145,22 @@ def additive_secret_share(vec: list[field.Field],
 
 
 # NOTE This is used to generate {{run-flp}}.
-def run_flp(flp: Flp, meas: list[Flp.Field], num_shares: int):
+def run_flp(
+        flp: Flp[Measurement, AggResult, F],
+        meas: list[F],
+        num_shares: int) -> bool:
     """Run the FLP on an encoded measurement."""
 
-    joint_rand = flp.Field.rand_vec(flp.JOINT_RAND_LEN)
-    prove_rand = flp.Field.rand_vec(flp.PROVE_RAND_LEN)
-    query_rand = flp.Field.rand_vec(flp.QUERY_RAND_LEN)
+    joint_rand = flp.field.rand_vec(flp.JOINT_RAND_LEN)
+    prove_rand = flp.field.rand_vec(flp.PROVE_RAND_LEN)
+    query_rand = flp.field.rand_vec(flp.QUERY_RAND_LEN)
 
     # Prover generates the proof.
     proof = flp.prove(meas, prove_rand, joint_rand)
 
     # Shard the measurement and the proof.
-    meas_shares = additive_secret_share(meas, num_shares, flp.Field)
-    proof_shares = additive_secret_share(proof, num_shares, flp.Field)
+    meas_shares = additive_secret_share(meas, num_shares, flp.field)
+    proof_shares = additive_secret_share(proof, num_shares, flp.field)
 
     # Verifier queries the meas shares and proof shares.
     verifier_shares = [
@@ -154,7 +175,7 @@ def run_flp(flp: Flp, meas: list[Flp.Field], num_shares: int):
     ]
 
     # Combine the verifier shares into the verifier.
-    verifier = flp.Field.zeros(len(verifier_shares[0]))
+    verifier = flp.field.zeros(len(verifier_shares[0]))
     for verifier_share in verifier_shares:
         verifier = vec_add(verifier, verifier_share)
 

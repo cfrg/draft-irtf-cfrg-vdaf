@@ -11,7 +11,7 @@ from vdaf_prio3 import Prio3SumVec
 NUM_REPORTS = 1000000000
 
 
-def soundness(gadget_calls, gadget_degree, field_size):
+def soundness(gadget_calls: int, gadget_degree: int, field_size: int) -> float:
     '''
     ia.cr/2019/188, Theorem 4.3
 
@@ -24,7 +24,7 @@ def soundness(gadget_calls, gadget_degree, field_size):
     return gadget_calls * gadget_degree / (field_size - gadget_calls)
 
 
-def robustness(epsilon, ro_queries, prep_queries, num_proofs, seed_bits):
+def robustness(epsilon: float, ro_queries: int, prep_queries: int, num_proofs: int, seed_bits: int) -> float:
     '''
     ia.cr/2023/130, Theorem 1, assuming the bound can be modified by raising
     `epsilon` to the power of the number of FLPs.
@@ -44,7 +44,7 @@ def robustness(epsilon, ro_queries, prep_queries, num_proofs, seed_bits):
            (ro_queries + prep_queries**2) / 2**(seed_bits - 1)
 
 
-def sum_vec(field_size, num_proofs, length):
+def sum_vec(field_size: int, num_proofs: int, length: int) -> float:
     '''
     Prio3SumVec (draft-irtf-cfrg-vdaf-08, Section 7.4.3): Probability of
     accepting one report in a batch of NUM_REPORTS. Assuming the asymptotically
@@ -52,9 +52,9 @@ def sum_vec(field_size, num_proofs, length):
     '''
     bits = 1
     chunk_length = max(1, length**(1/2))
-    vdaf = Prio3SumVec.with_params(length, bits, chunk_length)
-    gadget_calls = vdaf.Flp.Valid.GADGET_CALLS[0]
-    gadget_degree = vdaf.Flp.Valid.GADGETS[0].DEGREE
+    vdaf = Prio3SumVec(2, length, bits, chunk_length)
+    gadget_calls = vdaf.flp.valid.GADGET_CALLS[0]
+    gadget_degree = vdaf.flp.valid.GADGETS[0].DEGREE
 
     base_flp_soundness = soundness(gadget_calls, gadget_degree, field_size)
 
@@ -69,7 +69,7 @@ def sum_vec(field_size, num_proofs, length):
         2**80,
         NUM_REPORTS,
         num_proofs,
-        vdaf.Xof.SEED_SIZE * 8,
+        vdaf.xof.SEED_SIZE * 8,
     )
 
 

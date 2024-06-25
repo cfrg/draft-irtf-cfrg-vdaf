@@ -1,5 +1,6 @@
 import unittest
 from functools import reduce
+from typing import TypeVar
 
 from common import gen_rand
 from daf import Daf, run_daf
@@ -62,11 +63,32 @@ class TestDaf(
     def aggregate(self, _agg_param: None, out_shares: list[Field128]) -> Field128:
         return reduce(lambda x, y: x + y, out_shares)
 
-    def unshard(self, _agg_param, agg_shares, _num_measurements):
+    def unshard(self, _agg_param: None, agg_shares: list[Field128], _num_measurements: int) -> int:
         return reduce(lambda x, y: x + y, agg_shares).as_unsigned()
 
 
-def test_daf(daf, agg_param, measurements, expected_agg_result):
+Measurement = TypeVar("Measurement")
+AggParam = TypeVar("AggParam")
+PublicShare = TypeVar("PublicShare")
+InputShare = TypeVar("InputShare")
+OutShare = TypeVar("OutShare")
+AggShare = TypeVar("AggShare")
+AggResult = TypeVar("AggResult")
+
+
+def test_daf(
+        daf: Daf[
+            Measurement,
+            AggParam,
+            PublicShare,
+            InputShare,
+            OutShare,
+            AggShare,
+            AggResult
+        ],
+        agg_param: AggParam,
+        measurements: list[Measurement],
+        expected_agg_result: AggResult) -> None:
     # Test that the algorithm identifier is in the correct range.
     assert 0 <= daf.ID and daf.ID < 2 ** 32
 
@@ -83,5 +105,5 @@ def test_daf(daf, agg_param, measurements, expected_agg_result):
 
 
 class TestDafCase(unittest.TestCase):
-    def test_test_daf(self):
+    def test_test_daf(self) -> None:
         test_daf(TestDaf(), None, [1, 2, 3, 4], 10)

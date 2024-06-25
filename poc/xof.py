@@ -1,12 +1,15 @@
 """Extendable output functions (XOFs)."""
 
 from abc import ABCMeta, abstractmethod
+from typing import TypeVar
 
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import TurboSHAKE128
 
 from common import concat, from_le_bytes, next_power_of_2, to_le_bytes, xor
 from field import Field
+
+F = TypeVar("F", bound=Field)
 
 
 class Xof(metaclass=ABCMeta):
@@ -15,6 +18,7 @@ class Xof(metaclass=ABCMeta):
     # Size of the seed.
     SEED_SIZE: int
 
+    # Name of the XOF, for use in test vector filenames.
     test_vec_name: str
 
     @abstractmethod
@@ -55,7 +59,7 @@ class Xof(metaclass=ABCMeta):
         xof = cls(seed, dst, binder)
         return xof.next(cls.SEED_SIZE)
 
-    def next_vec(self, field: type[Field], length: int) -> list:
+    def next_vec(self, field: type[F], length: int) -> list[F]:
         """
         Output the next `length` field elements.
 
@@ -65,7 +69,7 @@ class Xof(metaclass=ABCMeta):
             - `length > 0`
         """
         m = next_power_of_2(field.MODULUS) - 1
-        vec: list[Field] = []
+        vec: list[F] = []
         while len(vec) < length:
             x = from_le_bytes(self.next(field.ENCODED_SIZE))
             x &= m
@@ -75,11 +79,11 @@ class Xof(metaclass=ABCMeta):
 
     @classmethod
     def expand_into_vec(cls,
-                        field: type,
+                        field: type[F],
                         seed: bytes,
                         dst: bytes,
                         binder: bytes,
-                        length: int) -> list:
+                        length: int) -> list[F]:
         """
         Expand the input `seed` into vector of `length` field elements.
 
@@ -99,7 +103,7 @@ class XofTurboShake128(Xof):
     # Associated parameters
     SEED_SIZE = 16
 
-    # Operational parameters.
+    # Name of the XOF, for use in test vector filenames.
     test_vec_name = 'XofTurboShake128'
 
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
@@ -140,7 +144,7 @@ class XofFixedKeyAes128(Xof):
     # Associated parameters
     SEED_SIZE = 16
 
-    # Operational parameters
+    # Name of the XOF, for use in test vector filenames.
     test_vec_name = 'XofFixedKeyAes128'
 
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):

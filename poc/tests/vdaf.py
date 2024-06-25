@@ -1,20 +1,36 @@
+from typing import Any, TypeVar
+
 from common import gen_rand
-from vdaf import run_vdaf
+from vdaf import Vdaf, run_vdaf
+
+Measurement = TypeVar("Measurement")
+AggParam = TypeVar("AggParam")
+PublicShare = TypeVar("PublicShare")
+InputShare = TypeVar("InputShare")
+AggShare = TypeVar("AggShare")
+AggResult = TypeVar("AggResult")
+PrepState = TypeVar("PrepState")
+PrepShare = TypeVar("PrepShare")
+PrepMessage = TypeVar("PrepMessage")
 
 
-def test_vdaf(Vdaf,
-              agg_param,
-              measurements,
-              expected_agg_result,
-              print_test_vec=False,
-              test_vec_instance=0):
+def test_vdaf(
+        vdaf: Vdaf[
+            Measurement, AggParam, PublicShare, InputShare, list[Any], AggShare,
+            AggResult, PrepState, PrepShare, PrepMessage
+        ],
+        agg_param: AggParam,
+        measurements: list[Measurement],
+        expected_agg_result: AggResult,
+        print_test_vec: bool = False,
+        test_vec_instance: int = 0) -> None:
     # Test that the algorithm identifier is in the correct range.
-    assert 0 <= Vdaf.ID and Vdaf.ID < 2 ** 32
+    assert 0 <= vdaf.ID and vdaf.ID < 2 ** 32
 
     # Run the VDAF on the set of measurmenets.
-    nonces = [gen_rand(Vdaf.NONCE_SIZE) for _ in range(len(measurements))]
-    verify_key = gen_rand(Vdaf.VERIFY_KEY_SIZE)
-    agg_result = run_vdaf(Vdaf,
+    nonces = [gen_rand(vdaf.NONCE_SIZE) for _ in range(len(measurements))]
+    verify_key = gen_rand(vdaf.VERIFY_KEY_SIZE)
+    agg_result = run_vdaf(vdaf,
                           verify_key,
                           agg_param,
                           nonces,
@@ -23,5 +39,5 @@ def test_vdaf(Vdaf,
                           test_vec_instance)
     if agg_result != expected_agg_result:
         print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'
-              .format(Vdaf.test_vec_name, measurements, agg_result,
+              .format(vdaf.test_vec_name, measurements, agg_result,
                       expected_agg_result))

@@ -6,29 +6,29 @@ from vdaf_poplar1 import Poplar1, get_ancestor
 
 
 class TestPoplar1(unittest.TestCase):
-    def test_poplar1(self):
-        test_vdaf(Poplar1.with_bits(15), (15, ()), [], [])
-        test_vdaf(Poplar1.with_bits(2), (1, (0b11,)), [], [0])
+    def test_poplar1(self) -> None:
+        test_vdaf(Poplar1(15), (15, ()), [], [])
+        test_vdaf(Poplar1(2), (1, (0b11,)), [], [0])
         test_vdaf(
-            Poplar1.with_bits(2),
+            Poplar1(2),
             (0, (0b0, 0b1)),
             [0b10, 0b00, 0b11, 0b01, 0b11],
             [2, 3],
         )
         test_vdaf(
-            Poplar1.with_bits(2),
+            Poplar1(2),
             (1, (0b00, 0b01)),
             [0b10, 0b00, 0b11, 0b01, 0b01],
             [1, 2],
         )
         test_vdaf(
-            Poplar1.with_bits(16),
+            Poplar1(16),
             (15, (0b1111000011110000,)),
             [0b1111000011110000],
             [1],
         )
         test_vdaf(
-            Poplar1.with_bits(16),
+            Poplar1(16),
             (14, (0b111100001111000,)),
             [
                 0b1111000011110000,
@@ -40,7 +40,7 @@ class TestPoplar1(unittest.TestCase):
             [2],
         )
         test_vdaf(
-            Poplar1.with_bits(128),
+            Poplar1(128),
             (
                 127,
                 (from_be_bytes(b'0123456789abcdef'),),
@@ -51,7 +51,7 @@ class TestPoplar1(unittest.TestCase):
             [1],
         )
         test_vdaf(
-            Poplar1.with_bits(256),
+            Poplar1(256),
             (
                 63,
                 (
@@ -66,7 +66,7 @@ class TestPoplar1(unittest.TestCase):
             [0, 2],
         )
 
-    def test_get_ancestor(self):
+    def test_get_ancestor(self) -> None:
         # No change.
         assert get_ancestor(0b0, 0, 0) == 0b0
         assert get_ancestor(0b100, 0, 0) == 0b100
@@ -85,9 +85,9 @@ class TestPoplar1(unittest.TestCase):
         assert get_ancestor(0b100, 2, 0) == 0b1
         assert get_ancestor(0b100, 4, 2) == 0b1
 
-    def test_is_valid(self):
+    def test_is_valid(self) -> None:
         # Test `is_valid` returns False on repeated levels, and True otherwise.
-        cls = Poplar1.with_bits(256)
+        cls = Poplar1(256)
         agg_params = [(0, (0b0, 0b1)), (1, (0b00,)), (1, (0b00, 0b10))]
         assert cls.is_valid(agg_params[0], list([]))
         assert cls.is_valid(agg_params[1], list(agg_params[:1]))
@@ -101,9 +101,10 @@ class TestPoplar1(unittest.TestCase):
         agg_params = [(0, (0b0,)), (2, (0b010, 0b011, 0b101, 0b111))]
         assert not cls.is_valid(agg_params[1], list(agg_params[:1]))
 
-    def test_aggregation_parameter_encoding(self):
+    def test_aggregation_parameter_encoding(self) -> None:
         # Test aggregation parameter encoding.
-        cls = Poplar1.with_bits(256)
+        cls = Poplar1(256)
+        want: tuple[int, tuple[int, ...]]
         want = (0, ())
         assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
         want = (0, (0, 1))
@@ -115,9 +116,9 @@ class TestPoplar1(unittest.TestCase):
         want = (255, (0, 1, 1233, 2 ** 256 - 1))
         assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
 
-    def test_generate_test_vectors(self):
+    def test_generate_test_vectors(self) -> None:
         # Generate test vectors.
-        cls = Poplar1.with_bits(4)
+        cls = Poplar1(4)
         assert cls.ID == 0x00001000
         measurements = [0b1101]
         tests = [

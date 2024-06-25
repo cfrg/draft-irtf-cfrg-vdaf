@@ -1,6 +1,7 @@
 """Functionalities used by other modules."""
 
 import os
+from typing import Protocol, Self, TypeVar, Union, overload
 
 # Document version, reved with each draft that contains breaking changes.
 VERSION = 8
@@ -13,10 +14,26 @@ TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
                                   'test_vec/{:02}'.format(VERSION))
 
 
+class FieldProtocol(Protocol):
+    def __add__(self, other: Self) -> Self:
+        ...
+
+    def __sub__(self, other: Self) -> Self:
+        ...
+
+    def __neg__(self) -> Self:
+        ...
+
+
+# We use a protocol instead of the Field class itself to avoid circular import
+# issues.
+F = TypeVar("F", bound=FieldProtocol)
+
+
 def next_power_of_2(n: int) -> int:
     """Return the smallest power of 2 that is larger than or equal to n."""
     assert n > 0
-    return 2 ** (int(n - 1).bit_length())
+    return 1 << (int(n - 1).bit_length())
 
 
 def zeros(length: int) -> bytes:
@@ -44,26 +61,26 @@ def xor(left: bytes, right: bytes) -> bytes:
     return bytes(map(lambda x: x[0] ^ x[1], zip(left, right)))
 
 
-def vec_sub(left: list, right: list) -> list:
+def vec_sub(left: list[F], right: list[F]) -> list[F]:
     """
     Subtract the right operand from the left and return the result.
     """
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
 
-def vec_add(left: list, right: list) -> list:
+def vec_add(left: list[F], right: list[F]) -> list[F]:
     """Add the right operand to the left and return the result."""
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
 
 
-def vec_neg(vec: list) -> list:
+def vec_neg(vec: list[F]) -> list[F]:
     """Negate the input vector."""
     return list(map(lambda x: -x, vec))
 
 
 def to_le_bytes(val: int, length: int) -> bytes:
     """
-    Convert unsigned integer `val` in range `[0, 2^(8*length))` to a
+    Convert unsigned integer `val` in range `[0, 2 ^ (8 * length))` to a
     little-endian byte string.
     """
     val = int(val)
@@ -80,7 +97,7 @@ def from_le_bytes(encoded: bytes) -> int:
 
 def to_be_bytes(val: int, length: int) -> bytes:
     """
-    Convert unsigned integer `val` in range `[0, 2^(8*length))` to a big-endian
+    Convert unsigned integer `val` in range `[0, 2 ^ (8 * length))` to a big-endian
     byte string.
     """
     val = int(val)
@@ -100,7 +117,20 @@ def concat(parts: list[bytes]) -> bytes:
     return b''.join(parts)
 
 
-def front(length: int, vec: list) -> tuple[list, list]:
+T = TypeVar("T")
+
+
+@overload
+def front(length: int, vec: bytes) -> tuple[bytes, bytes]:
+    ...
+
+
+@overload
+def front(length: int, vec: list[T]) -> tuple[list[T], list[T]]:
+    ...
+
+
+def front(length: int, vec: Union[bytes, list[T]]) -> tuple[Union[bytes, list[T]], Union[bytes, list[T]]]:
     """
     Split list `vec` in two and return the front and remainder as a tuple. The
     length of the front is `length`.
@@ -116,9 +146,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in `range(0, 2**8)`
-        - `algo` in `range(0, 2**32)`
-        - `usage` in `range(0, 2**16)`
+        - `algo_class` in `range(0, 2 ** 8)`
+        - `algo` in `range(0, 2 ** 32)`
+        - `usage` in `range(0, 2 ** 16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),

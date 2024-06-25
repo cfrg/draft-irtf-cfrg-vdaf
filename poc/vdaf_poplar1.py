@@ -1,69 +1,87 @@
 """The Poplar1 VDAF."""
 
-from __future__ import annotations
+from typing import Any, Optional, Sequence, TypeAlias, Union, cast
 
-import idpf
-import idpf_poplar
-import xof
 from common import byte, from_be_bytes, front, to_be_bytes, vec_add, vec_sub
+from field import Field, Field64, Field255
+from idpf import Idpf
+from idpf_poplar import IdpfPoplar
 from vdaf import Vdaf
+from xof import Xof, XofTurboShake128
 
 USAGE_SHARD_RAND = 1
 USAGE_CORR_INNER = 2
 USAGE_CORR_LEAF = 3
 USAGE_VERIFY_RAND = 4
 
+FieldVec: TypeAlias = Union[list[Field64], list[Field255]]
+Poplar1AggParam: TypeAlias = tuple[
+    int,  # level
+    Sequence[int],  # prefixes
+]
+Poplar1InputShare: TypeAlias = tuple[
+    bytes,  # IDPF key
+    bytes,  # correlated randomness seed
+    list[Field64],  # inner node correlated randomness
+    list[Field255],  # leaf node correlated randomness
+]
+Poplar1PrepState: TypeAlias = tuple[
+    bytes,  # sketch step (evaluate or reveal)
+    int,  # level
+    FieldVec,  # output (and sketch) share
+]
+PrepNextReturnType: TypeAlias = Union[
+    tuple[Poplar1PrepState, FieldVec],
+    FieldVec,
+]
 
-class Poplar1(Vdaf):
-    # Types provided by a concrete instadce of `Poplar1`.
-    Idpf = idpf.Idpf
-    Xof = xof.Xof
 
-    # Parameters required by `Vdaf`.
+class Poplar1(
+        Vdaf[
+            int,  # Measurement, `range(0, 2 ** BITS)`
+            Poplar1AggParam,  # AggParam
+            bytes,  # PublicShare, encoded IDPF public share
+            Poplar1InputShare,  # InputShare
+            FieldVec,  # OutShare
+            FieldVec,  # AggShare
+            list[int],  # AggResult
+            Poplar1PrepState,  # PrepState
+            FieldVec,  # PrepShare
+            Optional[FieldVec],  # PrepMessage
+        ]):
+
+    idpf: Idpf[Field64, Field255]
+    xof: type[Xof]
+
     ID = 0x00001000
     NONCE_SIZE = 16
     SHARES = 2
     ROUNDS = 2
 
-    # TODO(issue #361) Enforce these types at runtime.
-    #
-    # Types required by `Vdaf`.
-    # Measurement = int  # `range(0, 2**BITS)`
-    # AggParam = tuple[int, tuple[int, ...]]  # level, prefixes
-    # PublicShare = bytes  # IDPF public share
-    # InputShare = tuple[
-    #     bytes,                  # IDPF key
-    #     bytes,                  # corr seed
-    #     list[Idpf.FieldInner],  # inner corr randomness
-    #     list[Idpf.FieldLeaf],   # leaf corr randomness
-    # ]
-    # OutShare = Idpf.FieldVec
-    # AggShare = Idpf.FieldVec
-    # AggResult = list[int]
-    # PrepState = tuple[bytes,          # sketch step (evaluate or reveal)
-    #                   Idpf.FieldVec]  # output (and sketch) share
-    # PrepShare = Idpf.FieldVec
-    # PrepMessage = Optional[Idpf.FieldVec]
-
-    # Operational parameters.
+    # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Poplar1'
 
-    @classmethod
-    def shard(Poplar1, measurement, nonce, rand):
-        l = Poplar1.Xof.SEED_SIZE
+    def __init__(self, bits: int):
+        self.idpf = IdpfPoplar(2, bits)
+        self.xof = XofTurboShake128
+        self.VERIFY_KEY_SIZE = self.xof.SEED_SIZE
+        self.RAND_SIZE = 3 * self.xof.SEED_SIZE + self.idpf.RAND_SIZE
+
+    def shard(self, measurement: int, nonce: bytes, rand: bytes) -> tuple[bytes, list[Poplar1InputShare]]:
+        l = self.xof.SEED_SIZE
 
         # Split the random input into the random input for IDPF key
         # generation, correlated randomness, and sharding.
-        if len(rand) != Poplar1.RAND_SIZE:
+        if len(rand) != self.RAND_SIZE:
             raise ValueError('incorrect rand size')
-        idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
-        seeds = [rand[i:i+l] for i in range(0, 3*l, l)]
+        idpf_rand, rand = front(self.idpf.RAND_SIZE, rand)
+        seeds = [rand[i:i + l] for i in range(0, 3 * l, l)]
         corr_seed, seeds = front(2, seeds)
         (k_shard,), seeds = front(1, seeds)
 
-        xof = Poplar1.Xof(
+        xof = self.xof(
             k_shard,
-            Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
+            self.domain_separation_tag(USAGE_SHARD_RAND),
             nonce,
         )
 
@@ -73,52 +91,54 @@ class Poplar1(Vdaf):
         # evaluate the sketch during preparation. This sketch is used
         # to verify the one-hotness of their output shares.
         beta_inner = [
-            [Poplar1.Idpf.FieldInner(1), k]
-            for k in xof.next_vec(Poplar1.Idpf.FieldInner,
-                                  Poplar1.Idpf.BITS - 1)
+            [self.idpf.field_inner(1), k]
+            for k in xof.next_vec(self.idpf.field_inner,
+                                  self.idpf.BITS - 1)
         ]
-        beta_leaf = [Poplar1.Idpf.FieldLeaf(1)] + \
-            xof.next_vec(Poplar1.Idpf.FieldLeaf, 1)
+        beta_leaf = [self.idpf.field_leaf(1)] + \
+            xof.next_vec(self.idpf.field_leaf, 1)
 
         # Generate the IDPF keys.
-        (public_share, keys) = Poplar1.Idpf.gen(measurement,
-                                                beta_inner,
-                                                beta_leaf,
-                                                nonce,
-                                                idpf_rand)
+        (public_share, keys) = self.idpf.gen(
+            measurement,
+            beta_inner,
+            beta_leaf,
+            nonce,
+            idpf_rand,
+        )
 
         # Generate correlated randomness used by the Aggregators to
         # evaluate the sketch over their output shares. Seeds are used
         # to encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
         # Appendix C.4].)
-        corr_offsets = vec_add(
-            Poplar1.Xof.expand_into_vec(
-                Poplar1.Idpf.FieldInner,
+        corr_offsets: list[Field] = vec_add(
+            self.xof.expand_into_vec(
+                self.idpf.field_inner,
                 corr_seed[0],
-                Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+                self.domain_separation_tag(USAGE_CORR_INNER),
                 byte(0) + nonce,
-                3 * (Poplar1.Idpf.BITS-1),
+                3 * (self.idpf.BITS - 1),
             ),
-            Poplar1.Xof.expand_into_vec(
-                Poplar1.Idpf.FieldInner,
+            self.xof.expand_into_vec(
+                self.idpf.field_inner,
                 corr_seed[1],
-                Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+                self.domain_separation_tag(USAGE_CORR_INNER),
                 byte(1) + nonce,
-                3 * (Poplar1.Idpf.BITS-1),
+                3 * (self.idpf.BITS - 1),
             ),
         )
         corr_offsets += vec_add(
-            Poplar1.Xof.expand_into_vec(
-                Poplar1.Idpf.FieldLeaf,
+            self.xof.expand_into_vec(
+                self.idpf.field_leaf,
                 corr_seed[0],
-                Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+                self.domain_separation_tag(USAGE_CORR_LEAF),
                 byte(0) + nonce,
                 3,
             ),
-            Poplar1.Xof.expand_into_vec(
-                Poplar1.Idpf.FieldLeaf,
+            self.xof.expand_into_vec(
+                self.idpf.field_leaf,
                 corr_seed[1],
-                Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+                self.domain_separation_tag(USAGE_CORR_LEAF),
                 byte(1) + nonce,
                 3,
             ),
@@ -127,29 +147,31 @@ class Poplar1(Vdaf):
         # For each level of the IDPF tree, shares of the `(A, B)`
         # pairs are computed from the corresponding `(a, b, c)`
         # triple and authenticator value `k`.
-        corr_inner = [[], []]
-        for level in range(Poplar1.Idpf.BITS):
-            Field = Poplar1.Idpf.current_field(level)
-            k = beta_inner[level][1] if level < Poplar1.Idpf.BITS - 1 \
+        corr_inner: list[list[Field64]] = [[], []]
+        for level in range(self.idpf.BITS):
+            field = cast(type[Field], self.idpf.current_field(level))
+            k = beta_inner[level][1] if level < self.idpf.BITS - 1 \
                 else beta_leaf[1]
             (a, b, c), corr_offsets = corr_offsets[:3], corr_offsets[3:]
-            A = -Field(2) * a + k
+            A = -field(2) * a + k
             B = a ** 2 + b - a * k + c
-            corr1 = xof.next_vec(Field, 2)
+            corr1 = xof.next_vec(field, 2)
             corr0 = vec_sub([A, B], corr1)
-            if level < Poplar1.Idpf.BITS - 1:
-                corr_inner[0] += corr0
-                corr_inner[1] += corr1
+            if level < self.idpf.BITS - 1:
+                corr_inner[0] += cast(list[Field64], corr0)
+                corr_inner[1] += cast(list[Field64], corr1)
             else:
-                corr_leaf = [corr0, corr1]
+                corr_leaf = [
+                    cast(list[Field255], corr0),
+                    cast(list[Field255], corr1),
+                ]
 
         # Each input share consists of the Aggregator's IDPF key
         # and a share of the correlated randomness.
         input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
         return (public_share, input_shares)
 
-    @classmethod
-    def is_valid(Poplar1, agg_param, previous_agg_params):
+    def is_valid(self, agg_param: Poplar1AggParam, previous_agg_params: list[Poplar1AggParam]) -> bool:
         """
         Checks that levels are increasing between calls, and also enforces that
         the prefixes at each level are suffixes of the previous level's
@@ -174,77 +196,91 @@ class Poplar1(Vdaf):
                 return False
         return True
 
-    @classmethod
-    def prep_init(Poplar1, verify_key, agg_id, agg_param,
-                  nonce, public_share, input_share):
+    def prep_init(self, verify_key: bytes, agg_id: int, agg_param: Poplar1AggParam,
+                  nonce: bytes, public_share: bytes, input_share: Poplar1InputShare) -> tuple[Poplar1PrepState, FieldVec]:
         (level, prefixes) = agg_param
         (key, corr_seed, corr_inner, corr_leaf) = input_share
-        Field = Poplar1.Idpf.current_field(level)
+        field = self.idpf.current_field(level)
 
         # Ensure that candidate prefixes are all unique and appear in
         # lexicographic order.
         for i in range(1, len(prefixes)):
-            if prefixes[i-1] >= prefixes[i]:
+            if prefixes[i - 1] >= prefixes[i]:
                 raise ValueError('out of order prefix')
 
         # Evaluate the IDPF key at the given set of prefixes.
-        value = Poplar1.Idpf.eval(
+        value = self.idpf.eval(
             agg_id, public_share, key, level, prefixes, nonce)
 
         # Get shares of the correlated randomness for evaluating the
         # Aggregator's share of the sketch.
-        if level < Poplar1.Idpf.BITS - 1:
-            corr_xof = Poplar1.Xof(
+        if level < self.idpf.BITS - 1:
+            corr_xof = self.xof(
                 corr_seed,
-                Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+                self.domain_separation_tag(USAGE_CORR_INNER),
                 byte(agg_id) + nonce,
             )
             # Fast-forward the XOF state to the current level.
-            corr_xof.next_vec(Field, 3 * level)
+            corr_xof.next_vec(field, 3 * level)
         else:
-            corr_xof = Poplar1.Xof(
+            corr_xof = self.xof(
                 corr_seed,
-                Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+                self.domain_separation_tag(USAGE_CORR_LEAF),
                 byte(agg_id) + nonce,
             )
-        (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
-        (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
-            if level < Poplar1.Idpf.BITS - 1 else corr_leaf
+        (a_share, b_share, c_share) = corr_xof.next_vec(field, 3)
+        if level < self.idpf.BITS - 1:
+            (A_share, B_share) = cast(
+                list[Field],
+                corr_inner[2 * level:2 * (level + 1)],
+            )
+        else:
+            (A_share, B_share) = cast(list[Field], corr_leaf)
 
         # Evaluate the Aggregator's share of the sketch. These are
         # called the "masked input values" [BBCGGI21, Appendix C.4].
-        verify_rand_xof = Poplar1.Xof(
+        verify_rand_xof = self.xof(
             verify_key,
-            Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
+            self.domain_separation_tag(USAGE_VERIFY_RAND),
             nonce + to_be_bytes(level, 2),
         )
-        verify_rand = verify_rand_xof.next_vec(Field, len(prefixes))
+        verify_rand = cast(
+            list[Field],
+            verify_rand_xof.next_vec(field, len(prefixes)),
+        )
         sketch_share = [a_share, b_share, c_share]
         out_share = []
         for (i, r) in enumerate(verify_rand):
-            [data_share, auth_share] = value[i]
+            data_share = cast(Field, value[i][0])
+            auth_share = cast(Field, value[i][1])
             sketch_share[0] += data_share * r
             sketch_share[1] += data_share * r ** 2
             sketch_share[2] += auth_share * r
             out_share.append(data_share)
 
-        prep_mem = [A_share, B_share, Field(agg_id)] + out_share
-        return ((b'evaluate sketch', level, prep_mem),
-                sketch_share)
+        prep_mem = [A_share, B_share, field(agg_id)] + out_share
+        return (
+            (
+                b'evaluate sketch',
+                level,
+                cast(FieldVec, prep_mem),
+            ),
+            cast(FieldVec, sketch_share),
+        )
 
-    @classmethod
-    def prep_next(Poplar1, prep_state, prep_msg):
-        prev_sketch = prep_msg
+    def prep_next(self, prep_state: Poplar1PrepState, prep_msg: Optional[FieldVec]) -> PrepNextReturnType:
+        prev_sketch = cast(list[Field], prep_msg)
         (step, level, prep_mem) = prep_state
-        Field = Poplar1.Idpf.current_field(level)
 
         if step == b'evaluate sketch':
-            if prev_sketch == None:
-                prev_sketch = Field.zeros(3)
+            if prev_sketch is None:
+                raise ValueError("inconsistent state")
             elif len(prev_sketch) != 3:
                 raise ValueError('incorrect sketch length')
-            (A_share, B_share, agg_id), prep_mem = \
-                prep_mem[:3], prep_mem[3:]
+            A_share = cast(Field, prep_mem[0])
+            B_share = cast(Field, prep_mem[1])
+            agg_id = cast(Field, prep_mem[2])
+            prep_mem = prep_mem[3:]
             sketch_share = [
                 agg_id * (prev_sketch[0] ** 2
                           - prev_sketch[1]
@@ -252,28 +288,39 @@ class Poplar1(Vdaf):
                 + A_share * prev_sketch[0]
                 + B_share
             ]
-            return ((b'reveal sketch', level, prep_mem),
-                    sketch_share)
+            return cast(
+                tuple[Poplar1PrepState, FieldVec],
+                (
+                    (
+                        b'reveal sketch',
+                        level,
+                        prep_mem,
+                    ),
+                    sketch_share,
+                )
+            )
 
         elif step == b'reveal sketch':
-            if prev_sketch == None:
+            if prev_sketch is None:
                 return prep_mem  # Output shares
             else:
                 raise ValueError('invalid prep message')
 
         raise ValueError('invalid prep state')
 
-    @classmethod
-    def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
+    def prep_shares_to_prep(self, agg_param: Poplar1AggParam, prep_shares: list[FieldVec]) -> Optional[FieldVec]:
         if len(prep_shares) != 2:
-            ValueError('incorrect number of prep shares')
+            raise ValueError('incorrect number of prep shares')
         (level, _) = agg_param
-        Field = Poplar1.Idpf.current_field(level)
-        sketch = vec_add(prep_shares[0], prep_shares[1])
+        field = self.idpf.current_field(level)
+        sketch = vec_add(
+            cast(list[Field], prep_shares[0]),
+            cast(list[Field], prep_shares[1]),
+        )
         if len(sketch) == 3:
-            return sketch
+            return cast(FieldVec, sketch)
         elif len(sketch) == 1:
-            if sketch == Field.zeros(1):
+            if sketch == field.zeros(1):
                 # In order to reduce communication overhead, let `None`
                 # denote a successful sketch verification.
                 return None
@@ -282,125 +329,92 @@ class Poplar1(Vdaf):
         else:
             raise ValueError('incorrect sketch length')
 
-    @classmethod
-    def aggregate(Poplar1, agg_param, out_shares):
+    def aggregate(self, agg_param: Poplar1AggParam, out_shares: list[FieldVec]) -> FieldVec:
         (level, prefixes) = agg_param
-        Field = Poplar1.Idpf.current_field(level)
-        agg_share = Field.zeros(len(prefixes))
+        field = self.idpf.current_field(level)
+        agg_share = cast(list[Field], field.zeros(len(prefixes)))
         for out_share in out_shares:
-            agg_share = vec_add(agg_share, out_share)
-        return agg_share
+            agg_share = vec_add(agg_share, cast(list[Field], out_share))
+        return cast(FieldVec, agg_share)
 
-    @classmethod
-    def unshard(Poplar1, agg_param,
-                agg_shares, _num_measurements):
+    def unshard(self, agg_param: Poplar1AggParam,
+                agg_shares: list[FieldVec], _num_measurements: int) -> list[int]:
         (level, prefixes) = agg_param
-        Field = Poplar1.Idpf.current_field(level)
-        agg = Field.zeros(len(prefixes))
+        field = self.idpf.current_field(level)
+        agg = cast(list[Field], field.zeros(len(prefixes)))
         for agg_share in agg_shares:
-            agg = vec_add(agg, agg_share)
-        return list(map(lambda x: x.as_unsigned(), agg))
+            agg = vec_add(agg, cast(list[Field], agg_share))
+        return [x.as_unsigned() for x in agg]
 
-    @classmethod
-    def encode_agg_param(Poplar1, level, prefixes):
-        if level not in range(2**16):
+    def encode_agg_param(self, level: int, prefixes: Sequence[int]) -> bytes:
+        if level not in range(2 ** 16):
             raise ValueError('level out of range')
-        if len(prefixes) not in range(2**32):
+        if len(prefixes) not in range(2 ** 32):
             raise ValueError('number of prefixes out of range')
         encoded = bytes()
         encoded += to_be_bytes(level, 2)
         encoded += to_be_bytes(len(prefixes), 4)
         packed = 0
         for (i, prefix) in enumerate(prefixes):
-            packed |= prefix << ((level+1) * i)
-        l = ((level+1) * len(prefixes) + 7) // 8
+            packed |= prefix << ((level + 1) * i)
+        l = ((level + 1) * len(prefixes) + 7) // 8
         encoded += to_be_bytes(packed, l)
         return encoded
 
-    @classmethod
-    def decode_agg_param(Poplar1, encoded):
+    def decode_agg_param(self, encoded: bytes) -> Poplar1AggParam:
         encoded_level, encoded = encoded[:2], encoded[2:]
         level = from_be_bytes(encoded_level)
         encoded_prefix_count, encoded = encoded[:4], encoded[4:]
         prefix_count = from_be_bytes(encoded_prefix_count)
-        l = ((level+1) * prefix_count + 7) // 8
+        l = ((level + 1) * prefix_count + 7) // 8
         encoded_packed, encoded = encoded[:l], encoded[l:]
         packed = from_be_bytes(encoded_packed)
         prefixes = []
-        m = 2 ** (level+1) - 1
+        m = 2 ** (level + 1) - 1
         for i in range(prefix_count):
-            prefixes.append(packed >> ((level+1) * i) & m)
+            prefixes.append(packed >> ((level + 1) * i) & m)
         if len(encoded) != 0:
             raise ValueError('trailing bytes')
         return (level, tuple(prefixes))
 
-    # TODO(issue #361) Enforce `bits: int`.
-    @classmethod
-    def with_bits(cls, bits):
-        """
-        Set BITS.
-
-        Pre-conditions:
-
-            - `bits > 0`
-        """
-        TheIdpf = idpf_poplar.IdpfPoplar \
-            .with_value_len(2) \
-            .with_bits(bits)
-        TheXof = xof.XofTurboShake128
-
-        class Poplar1WithBits(cls):
-            Idpf = TheIdpf
-            Xof = TheXof
-            VERIFY_KEY_SIZE = TheXof.SEED_SIZE
-            RAND_SIZE = 3*TheXof.SEED_SIZE + TheIdpf.RAND_SIZE
-            test_vec_name = 'Poplar1'
-        return Poplar1WithBits
-
-    @classmethod
-    def test_vec_set_type_param(cls, test_vec):
-        test_vec['bits'] = int(cls.Idpf.BITS)
+    def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
+        test_vec['bits'] = int(self.idpf.BITS)
         return ['bits']
 
-    @classmethod
-    def test_vec_encode_input_share(Poplar1, input_share):
+    def test_vec_encode_input_share(self, input_share: Poplar1InputShare) -> bytes:
         (key, seed, inner, leaf) = input_share
         encoded = bytes()
         encoded += key
         encoded += seed
-        encoded += Poplar1.Idpf.FieldInner.encode_vec(inner)
-        encoded += Poplar1.Idpf.FieldLeaf.encode_vec(leaf)
+        encoded += self.idpf.field_inner.encode_vec(inner)
+        encoded += self.idpf.field_leaf.encode_vec(leaf)
         return encoded
 
-    @classmethod
-    def test_vec_encode_public_share(Poplar1, public_share):
+    def test_vec_encode_public_share(self, public_share: bytes) -> bytes:
         return public_share
 
-    @classmethod
-    def test_vec_encode_agg_share(Poplar1, agg_share):
+    def test_vec_encode_agg_share(self, agg_share: FieldVec) -> bytes:
         return encode_idpf_field_vec(agg_share)
 
-    @classmethod
-    def test_vec_encode_prep_share(Poplar1, prep_share):
+    def test_vec_encode_prep_share(self, prep_share: FieldVec) -> bytes:
         return encode_idpf_field_vec(prep_share)
 
-    @classmethod
-    def test_vec_encode_prep_msg(Poplar1, prep_message):
-        if prep_message != None:
+    def test_vec_encode_prep_msg(self, prep_message: Optional[FieldVec]) -> bytes:
+        if prep_message is not None:
             return encode_idpf_field_vec(prep_message)
         return b''
 
 
-def encode_idpf_field_vec(vec):
+def encode_idpf_field_vec(vec: FieldVec) -> bytes:
     encoded = bytes()
     if len(vec) > 0:
-        Field = vec[0].__class__
-        encoded += Field.encode_vec(vec)
+        field = vec[0].__class__
+        encoded += cast(type[Field], field).encode_vec(cast(list[Field], vec))
     return encoded
 
 
-def get_ancestor(input, this_level, last_level):
+def get_ancestor(index: int, this_level: int, last_level: int) -> int:
     """
-    Helper function to determine the prefix of `input` at `last_level`.
+    Helper function to determine the prefix of `index` at `last_level`.
     """
-    return input >> (this_level - last_level)
+    return index >> (this_level - last_level)

@@ -71,7 +71,7 @@ def generate_test_vector(cls: type[Xof]) -> None:
 
 
 class TestXof(unittest.TestCase):
-    def test_rejection_sampling(self):
+    def test_rejection_sampling(self) -> None:
         # This test case was found through brute-force search using this tool:
         # https://github.com/divergentdave/vdaf-rejection-sampling-search
         expanded_vec = XofTurboShake128.expand_into_vec(
@@ -84,12 +84,12 @@ class TestXof(unittest.TestCase):
         )
         assert expanded_vec[-1] == Field64(9734340616212735019)
 
-    def test_turboshake128(self):
+    def test_turboshake128(self) -> None:
         test_xof(XofTurboShake128, Field128, 23)
         if TEST_VECTOR:
             generate_test_vector(XofTurboShake128)
 
-    def test_fixedkeyaes128(self):
+    def test_fixedkeyaes128(self) -> None:
         test_xof(XofFixedKeyAes128, Field128, 23)
         if TEST_VECTOR:
             generate_test_vector(XofFixedKeyAes128)
