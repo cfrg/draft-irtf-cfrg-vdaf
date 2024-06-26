@@ -2,10 +2,12 @@
 # parameters.
 # Use `sage -python plot_prio3_multiproof_robustness.py`
 import math
+from typing import cast
 
 import matplotlib.pyplot as plt
 
 from field import Field64, Field128
+from flp_generic import FlpGeneric
 from vdaf_prio3 import Prio3SumVec
 
 NUM_REPORTS = 1000000000
@@ -53,8 +55,9 @@ def sum_vec(field_size: int, num_proofs: int, length: int) -> float:
     bits = 1
     chunk_length = max(1, length**(1/2))
     vdaf = Prio3SumVec(2, length, bits, chunk_length)
-    gadget_calls = vdaf.flp.valid.GADGET_CALLS[0]
-    gadget_degree = vdaf.flp.valid.GADGETS[0].DEGREE
+    valid = cast(FlpGeneric[list[int], list[int], Field128], vdaf.flp).valid
+    gadget_calls = valid.GADGET_CALLS[0]
+    gadget_degree = valid.GADGETS[0].DEGREE
 
     base_flp_soundness = soundness(gadget_calls, gadget_degree, field_size)
 

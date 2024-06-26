@@ -3,7 +3,6 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from circuit import Valid
 from common import vec_add, vec_sub
 from field import Field
 
@@ -17,9 +16,6 @@ class Flp(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
 
     # Class object for the field.
     field: type[F]
-
-    # Validity circuit and AFE.
-    valid: Valid[Measurement, AggResult, F]
 
     # Length of the joint randomness shared by the prover and verifier.
     JOINT_RAND_LEN: int
