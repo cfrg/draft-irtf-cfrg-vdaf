@@ -44,6 +44,12 @@ class Xof(metaclass=ABCMeta):
         """
         pass
 
+    # NOTE: The methods derive_seed(), next_vec(), and expand_into_vec()
+    # are excerpted in the document, de-indented, as the figure
+    # {{xof-derived-methods}}. Their width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     @classmethod
     def derive_seed(cls,
                     seed: bytes,
@@ -97,6 +103,14 @@ class Xof(metaclass=ABCMeta):
         return xof.next_vec(field, length)
 
 
+# NOTE: A simplified implementation of this class is excerpted in the
+# document. The contents of the docstrings of methods are used in
+# lieu of their actual bodies, because they provide a simpler (though
+# inefficient) implementation defined in terms of the
+# `TurboSHAKE128(M, D, L)` function, and not a sponge/XOF API. The
+# width of the relevant portions of the class should be limited to 69
+# columns, to avoid warnings from xml2rfc.
+# ===================================================================
 class XofTurboShake128(Xof):
     """XOF based on SHA-3 (SHAKE128)."""
 
@@ -139,6 +153,9 @@ class XofTurboShake128(Xof):
         return self.h.read(length)
 
 
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns, to avoid warnings from xml2rfc.
+# ===================================================================
 class XofFixedKeyAes128(Xof):
     """
     XOF based on a circular collision-resistant hash function from

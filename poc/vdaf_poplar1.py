@@ -63,6 +63,11 @@ class Poplar1(
         self.VERIFY_KEY_SIZE = self.xof.SEED_SIZE
         self.RAND_SIZE = 3 * self.xof.SEED_SIZE + self.idpf.RAND_SIZE
 
+    # NOTE: This method is excerpted in the document, de-indented, as the
+    # figure {{poplar1-mes2inp}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def shard(self, measurement: int, nonce: bytes, rand: bytes) -> tuple[bytes, list[Poplar1InputShare]]:
         if len(nonce) != self.NONCE_SIZE:
             raise ValueError("incorrect nonce size")
@@ -172,6 +177,11 @@ class Poplar1(
         input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
         return (public_share, input_shares)
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # part of the figure {{poplar1-validity-scope}}. Its width should be
+    # limited to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def is_valid(self, agg_param: Poplar1AggParam, previous_agg_params: list[Poplar1AggParam]) -> bool:
         """
         Checks that levels are increasing between calls, and also enforces that
@@ -197,6 +207,12 @@ class Poplar1(
                 return False
         return True
 
+    # NOTE: The prep_init(), prep_next(), and prep_shares_to_prep()
+    # methods are excerpted in the document, de-indented, as the figure
+    # {{poplar1-prep-state}}. Their width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
+    # ===================================================================
     def prep_init(self, verify_key: bytes, agg_id: int, agg_param: Poplar1AggParam,
                   nonce: bytes, public_share: bytes, input_share: Poplar1InputShare) -> tuple[Poplar1PrepState, FieldVec]:
         (level, prefixes) = agg_param
@@ -330,6 +346,11 @@ class Poplar1(
         else:
             raise ValueError('incorrect sketch length')
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{poplar1-out2agg}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def aggregate(self, agg_param: Poplar1AggParam, out_shares: list[FieldVec]) -> FieldVec:
         (level, prefixes) = agg_param
         field = self.idpf.current_field(level)
@@ -338,6 +359,11 @@ class Poplar1(
             agg_share = vec_add(agg_share, cast(list[Field], out_share))
         return cast(FieldVec, agg_share)
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{poplar1-agg-output}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def unshard(self, agg_param: Poplar1AggParam,
                 agg_shares: list[FieldVec], _num_measurements: int) -> list[int]:
         (level, prefixes) = agg_param
@@ -347,6 +373,11 @@ class Poplar1(
             agg = vec_add(agg, cast(list[Field], agg_share))
         return [x.as_unsigned() for x in agg]
 
+    # NOTE: The encode_agg_param() and decode_agg_param() methods are
+    # excerpted in the document, de-indented. Their width should be
+    # limited to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def encode_agg_param(self, level: int, prefixes: Sequence[int]) -> bytes:
         if level not in range(2 ** 16):
             raise ValueError('level out of range')
@@ -414,6 +445,10 @@ def encode_idpf_field_vec(vec: FieldVec) -> bytes:
     return encoded
 
 
+# NOTE: This function is excerpted in the document, as part of the
+# figure {{poplar1-validity-scope}}. Its width should be limited to
+# 69 columns, to avoid warnings from xml2rfc.
+# ===================================================================
 def get_ancestor(index: int, this_level: int, last_level: int) -> int:
     """
     Helper function to determine the prefix of `index` at `last_level`.

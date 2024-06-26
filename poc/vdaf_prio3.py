@@ -84,6 +84,11 @@ class Prio3(
             rand_size += shares * self.xof.SEED_SIZE
         self.RAND_SIZE = rand_size
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-eval-input}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def shard(self, measurement: Measurement, nonce: bytes, rand: bytes) -> tuple[Optional[list[bytes]], list[Prio3InputShare]]:
         if len(nonce) != self.NONCE_SIZE:
             raise ValueError("incorrect nonce size")
@@ -99,6 +104,11 @@ class Prio3(
         else:
             return self.shard_without_joint_rand(meas, seeds)
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-validity-scope}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def is_valid(self, _agg_param: None, previous_agg_params: list[None]) -> bool:
         """
         Checks if `previous_agg_params` is empty, as input shares in Prio3 may
@@ -106,6 +116,12 @@ class Prio3(
         """
         return len(previous_agg_params) == 0
 
+    # NOTE: The prep_init(), prep_next(), and prep_shares_to_prep()
+    # methods are excerpted in the document, de-indented, as figure
+    # {{prio3-prep-state}}. Their width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
+    # ===================================================================
     def prep_init(self, verify_key: bytes, agg_id: int, _agg_param: None,
                   nonce: bytes, public_share: Optional[list[bytes]], input_share: Prio3InputShare[F]) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]]:
         k_joint_rand_parts = public_share
@@ -185,12 +201,22 @@ class Prio3(
             k_joint_rand = self.joint_rand_seed(k_joint_rand_parts)
         return k_joint_rand
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-out2agg}}. Its width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
+    # ===================================================================
     def aggregate(self, _agg_param: None, out_shares: list[list[F]]) -> list[F]:
         agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
         for out_share in out_shares:
             agg_share = vec_add(agg_share, out_share)
         return agg_share
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-agg-output}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def unshard(self, _agg_param: None,
                 agg_shares: list[list[F]], num_measurements: int) -> AggResult:
         agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
@@ -200,6 +226,11 @@ class Prio3(
 
     # Auxiliary functions
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-shard-without-joint-rand}}. Its width should be
+    # limited to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def shard_without_joint_rand(self, meas: list[F], seeds: list[bytes]) -> tuple[Optional[list[bytes]], list[Prio3InputShare[F]]]:
         k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
         k_helper_meas_shares = [
@@ -249,6 +280,11 @@ class Prio3(
             ))
         return (None, input_shares)
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-shard-with-joint-rand}}. Its width should be limited
+    # to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def shard_with_joint_rand(self, meas: list[F], nonce: bytes, seeds: list[bytes]) -> tuple[Optional[list[bytes]], list[Prio3InputShare[F]]]:
         k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
         k_helper_meas_shares = [
@@ -317,6 +353,13 @@ class Prio3(
             ))
         return (k_joint_rand_parts, input_shares)
 
+    # NOTE: The helper_meas_share(), helper_proofs_share(),
+    # expand_input_share(), prove_rands(), query_rands(),
+    # joint_rand_part(), joint_rand_seed(), and joint_rands() methods are
+    # excerpted in the document, de-indented. Their width should be
+    # limited to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def helper_meas_share(self, agg_id: int, k_share: bytes) -> list[F]:
         return self.xof.expand_into_vec(
             self.flp.field,

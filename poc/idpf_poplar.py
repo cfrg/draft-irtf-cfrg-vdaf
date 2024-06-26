@@ -46,6 +46,11 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         self.VALUE_LEN = value_len
         self.BITS = bits
 
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{idpf-poplar-gen}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def gen(self, alpha: int, beta_inner: list[list[Field64]], beta_leaf: list[Field255], binder: bytes, rand: bytes) -> tuple[bytes, list[bytes]]:
         if alpha not in range(2 ** self.BITS):
             raise ValueError("alpha out of range")
@@ -103,6 +108,12 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         public_share = self.encode_public_share(correction_words)
         return (public_share, key)
 
+    # NOTE: The eval() and eval_next(), and prep_shares_to_prep() methods
+    # are excerpted in the document, de-indented, as figure
+    # {{idpf-poplar-eval}}. Their width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
+    # ===================================================================
     def eval(self, agg_id: int, public_share: bytes, key: bytes,
              level: int, prefixes: Sequence[int], binder: bytes) -> Union[list[list[Field64]], list[list[Field255]]]:
         if agg_id not in range(self.SHARES):
@@ -188,6 +199,12 @@ class IdpfPoplar(Idpf[Field64, Field255]):
 
         return (next_seed, next_ctrl, cast(FieldVec, y))
 
+    # NOTE: The extend(), convert(), encode_public_share(), and
+    # decode_public_share() methods are excerpted in the document,
+    # de-indented, as figure {{idpf-poplar-helpers}}. Their width should
+    # be limited to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def extend(self, seed: bytes, binder: bytes) -> tuple[list[bytes], list[Field2]]:
         xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
         s = [

@@ -165,6 +165,10 @@ class Vdaf(
         """
         pass
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def domain_separation_tag(self, usage: int) -> bytes:
         """
         Format domain separation tag for this VDAF with the given usage.
@@ -228,7 +232,10 @@ class TestVectorDict(Generic[Measurement, AggParam, AggResult], TypedDict):
 F = TypeVar("F", bound=Field)
 
 
-# NOTE This is used to generate {{run-vdaf}}.
+# NOTE: This function is excerpted in the document, as the figure
+# {{run-vdaf}}. Its width should be limited to 69 columns to avoid
+# warnings from xml2rfc.
+# ===================================================================
 def run_vdaf(
         vdaf: Vdaf[
             Measurement, AggParam, PublicShare, InputShare, list[F], AggShare,

@@ -36,6 +36,11 @@ class Field:
         vec = [cls(cls.gf.random_element()) for _ in range(length)]
         return vec
 
+    # NOTE: The encode_vec() and decode_vec() methods are excerpted in
+    # the document, de-indented, as the figure {{field-derived-methods}}.
+    # Their width should be limited to 69 columns after de-indenting, or
+    # 73 columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     @classmethod
     def encode_vec(cls, vec: list[Self]) -> bytes:
         """
@@ -66,6 +71,12 @@ class Field:
             vec.append(cls(x))
         return vec
 
+    # NOTE: The encode_into_bit_vector() and decode_from_bit_vector()
+    # methods are excerpted in the document, de-indented, as the figure
+    # {{field-bit-rep}}. Their width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
+    # ===================================================================
     @classmethod
     def encode_into_bit_vector(
             cls,

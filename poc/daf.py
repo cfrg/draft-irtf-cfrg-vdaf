@@ -127,6 +127,10 @@ class Daf(
         pass
 
 
+# NOTE: This function is excerpted in the document, as the figure
+# {{run-daf}}. Its width should be limited to 69 columns to avoid
+# warnings from xml2rfc.
+# ===================================================================
 def run_daf(
         daf: Daf[
             Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,

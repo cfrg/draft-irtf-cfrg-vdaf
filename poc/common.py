@@ -61,6 +61,12 @@ def xor(left: bytes, right: bytes) -> bytes:
     return bytes(map(lambda x: x[0] ^ x[1], zip(left, right)))
 
 
+# NOTE: The vec_sub() and vec_add() functions are excerpted in the
+# document, as the figure {{field-helper-functions}}. Their width
+# should be limited to 69 columns to avoid warnings from xml2rfc.
+# TODO: vec_neg() should be excerpted as well, since it is used in
+# Poplar1.
+# ===================================================================
 def vec_sub(left: list[F], right: list[F]) -> list[F]:
     """
     Subtract the right operand from the left and return the result.
@@ -138,6 +144,9 @@ def front(length: int, vec: Union[bytes, list[T]]) -> tuple[Union[bytes, list[T]
     return (vec[:length], vec[length:])
 
 
+# NOTE: This function is excerpted in the document. Its width should
+# be limited to 69 columns, to avoid warnings from xml2rfc.
+# ===================================================================
 def format_dst(algo_class: int,
                algo: int,
                usage: int) -> bytes:

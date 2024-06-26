@@ -88,6 +88,11 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
     # as `GADGETS`.
     GADGET_CALLS: list[int]
 
+    # NOTE: The prove_rand_len(), query_rand_len(), proof_len(), and
+    # verifier_len() methods are excerpted in the document, de-indented.
+    # Their width should be limited to 69 columns after de-indenting, or
+    # 73 columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def prove_rand_len(self) -> int:
         """Length of the prover randomness."""
         return sum(g.ARITY for g in self.GADGETS)
@@ -404,6 +409,10 @@ class Mul(Gadget[F]):
     ARITY = 2
     DEGREE = 2
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, _field: type[F], inp: list[F]) -> F:
         self.check_gadget_eval(inp)
         return inp[0] * inp[1]
@@ -421,6 +430,10 @@ class Range2(Gadget[F]):
     ARITY = 1
     DEGREE = 2
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, _field: type[F], inp: list[F]) -> F:
         self.check_gadget_eval(inp)
         return inp[0] * inp[0] - inp[0]
@@ -507,6 +520,10 @@ class ParallelSum(Gadget[F]):
         self.ARITY = subcircuit.ARITY * count
         self.DEGREE = subcircuit.DEGREE
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.check_gadget_eval(inp)
         out = field(0)
@@ -550,6 +567,10 @@ class Count(
     OUTPUT_LEN = 1
     EVAL_OUTPUT_LEN = 1
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, meas: list[Field64], joint_rand: list[Field64], _num_shares: int) -> list[Field64]:
         self.check_valid_eval(meas, joint_rand)
         out = self.GADGETS[0].eval(self.field, [meas[0], meas[0]]) \
@@ -594,6 +615,10 @@ class Sum(
         self.GADGET_CALLS = [bits]
         self.MEAS_LEN = bits
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, meas: list[Field128], joint_rand: list[Field128], _num_shares: int) -> list[Field128]:
         self.check_valid_eval(meas, joint_rand)
         out = self.field(0)
@@ -603,6 +628,11 @@ class Sum(
             r *= joint_rand[0]
         return [out]
 
+    # NOTE: The encode(), truncate(), and decode() methods are excerpted
+    # in the document, de-indented. Their width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def encode(self, measurement: int) -> list[Field128]:
         if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
             raise ValueError('measurement out of range')
@@ -654,6 +684,10 @@ class Histogram(
         self.MEAS_LEN = self.length
         self.OUTPUT_LEN = self.length
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, meas: list[Field128], joint_rand: list[Field128], num_shares: int) -> list[Field128]:
         self.check_valid_eval(meas, joint_rand)
 
@@ -690,6 +724,11 @@ class Histogram(
             joint_rand[1] ** 2 * sum_check
         return [out]
 
+    # NOTE: The encode(), truncate(), and decode() methods are excerpted
+    # in the document, de-indented. Their width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def encode(self, measurement: int) -> list[Field128]:
         encoded = [self.field(0)] * self.length
         encoded[measurement] = self.field(1)
@@ -782,6 +821,10 @@ class MultihotCountVec(
         self.MEAS_LEN = self.length + self.bits_for_weight
         self.OUTPUT_LEN = self.length
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, meas: list[Field128], joint_rand: list[Field128], num_shares: int) -> list[Field128]:
         self.check_valid_eval(meas, joint_rand)
 
@@ -822,6 +865,11 @@ class MultihotCountVec(
             joint_rand[1] ** 2 * weight_check
         return [out]
 
+    # NOTE: The encode(), truncate(), and decode() methods are excerpted
+    # in the document, de-indented. Their width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def encode(self, measurement: list[int]) -> list[Field128]:
         if len(measurement) != self.length:
             raise ValueError('invalid Client measurement length')
@@ -892,6 +940,10 @@ class SumVec(
         self.MEAS_LEN = length * bits
         self.OUTPUT_LEN = length
 
+    # NOTE: This method is excerpted in the document, de-indented. Its
+    # width should be limited to 69 columns after de-indenting, or 73
+    # columns before de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
     def eval(self, meas: list[F], joint_rand: list[F], num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)
 
@@ -918,6 +970,11 @@ class SumVec(
 
         return [out]
 
+    # NOTE: The encode(), truncate(), and decode() methods are excerpted
+    # in the document, de-indented. Their width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
     def encode(self, measurement: list[int]) -> list[F]:
         if len(measurement) != self.length:
             raise ValueError('incorrect measurement length')

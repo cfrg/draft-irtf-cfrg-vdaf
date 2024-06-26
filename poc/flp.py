@@ -140,7 +140,10 @@ def additive_secret_share(
     return shares
 
 
-# NOTE This is used to generate {{run-flp}}.
+# NOTE This function is excerpted in the document, as the figure
+# {{run-flp}}. Its width should be limited to 69 columns to avoid
+# warnings from xml2rfc.
+# ===================================================================
 def run_flp(
         flp: Flp[Measurement, AggResult, F],
         meas: list[F],
