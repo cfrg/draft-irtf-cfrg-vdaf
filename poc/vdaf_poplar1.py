@@ -155,6 +155,7 @@ class Poplar1(
         # triple and authenticator value `k`.
         corr_inner: list[list[Field64]] = [[], []]
         for level in range(self.idpf.BITS):
+            # REMOVE ME: the cast() call can be elided in the excerpt.
             field = cast(type[Field], self.idpf.current_field(level))
             k = beta_inner[level][1] if level < self.idpf.BITS - 1 \
                 else beta_leaf[1]
@@ -163,6 +164,7 @@ class Poplar1(
             B = a ** 2 + b - a * k + c
             corr1 = xof.next_vec(field, 2)
             corr0 = vec_sub([A, B], corr1)
+            # REMOVE ME: the cast() calls can be elided in the excerpt.
             if level < self.idpf.BITS - 1:
                 corr_inner[0] += cast(list[Field64], corr0)
                 corr_inner[1] += cast(list[Field64], corr1)
@@ -246,6 +248,7 @@ class Poplar1(
                 byte(agg_id) + nonce,
             )
         (a_share, b_share, c_share) = corr_xof.next_vec(field, 3)
+        # REMOVE ME: the cast() calls can be elided in the excerpt.
         if level < self.idpf.BITS - 1:
             (A_share, B_share) = cast(
                 list[Field],
@@ -261,6 +264,7 @@ class Poplar1(
             self.domain_separation_tag(USAGE_VERIFY_RAND),
             nonce + to_be_bytes(level, 2),
         )
+        # REMOVE ME: the cast() call can be elided in the excerpt.
         verify_rand = cast(
             list[Field],
             verify_rand_xof.next_vec(field, len(prefixes)),
@@ -268,6 +272,7 @@ class Poplar1(
         sketch_share = [a_share, b_share, c_share]
         out_share = []
         for (i, r) in enumerate(verify_rand):
+            # REMOVE ME: the cast() calls can be elided in the excerpt.
             data_share = cast(Field, value[i][0])
             auth_share = cast(Field, value[i][1])
             sketch_share[0] += data_share * r
@@ -276,6 +281,7 @@ class Poplar1(
             out_share.append(data_share)
 
         prep_mem = [A_share, B_share, field(agg_id)] + out_share
+        # REMOVE ME: the cast() calls can be elided in the excerpt.
         return (
             (
                 b'evaluate sketch',
@@ -286,6 +292,7 @@ class Poplar1(
         )
 
     def prep_next(self, prep_state: Poplar1PrepState, prep_msg: Optional[FieldVec]) -> Union[tuple[Poplar1PrepState, FieldVec], FieldVec]:
+        # REMOVE ME: the cast() call can be elided in the excerpt.
         prev_sketch = cast(list[Field], prep_msg)
         (step, level, prep_mem) = prep_state
 
@@ -294,6 +301,7 @@ class Poplar1(
                 raise ValueError("inconsistent state")
             elif len(prev_sketch) != 3:
                 raise ValueError('incorrect sketch length')
+            # REMOVE ME: the cast() calls can be elided in the excerpt.
             A_share = cast(Field, prep_mem[0])
             B_share = cast(Field, prep_mem[1])
             agg_id = cast(Field, prep_mem[2])
@@ -305,6 +313,7 @@ class Poplar1(
                 + A_share * prev_sketch[0]
                 + B_share
             ]
+            # REMOVE ME: the cast() call can be elided in the excerpt.
             return cast(
                 tuple[Poplar1PrepState, FieldVec],
                 (
@@ -330,11 +339,13 @@ class Poplar1(
             raise ValueError('incorrect number of prep shares')
         (level, _) = agg_param
         field = self.idpf.current_field(level)
+        # REMOVE ME: the cast() calls can be elided in the excerpt.
         sketch = vec_add(
             cast(list[Field], prep_shares[0]),
             cast(list[Field], prep_shares[1]),
         )
         if len(sketch) == 3:
+            # REMOVE ME: the cast() call can be elided in the excerpt.
             return cast(FieldVec, sketch)
         elif len(sketch) == 1:
             if sketch == field.zeros(1):
@@ -354,6 +365,7 @@ class Poplar1(
     def aggregate(self, agg_param: Poplar1AggParam, out_shares: list[FieldVec]) -> FieldVec:
         (level, prefixes) = agg_param
         field = self.idpf.current_field(level)
+        # REMOVE ME: the cast() calls can be elided in the excerpt.
         agg_share = cast(list[Field], field.zeros(len(prefixes)))
         for out_share in out_shares:
             agg_share = vec_add(agg_share, cast(list[Field], out_share))
@@ -368,6 +380,7 @@ class Poplar1(
                 agg_shares: list[FieldVec], _num_measurements: int) -> list[int]:
         (level, prefixes) = agg_param
         field = self.idpf.current_field(level)
+        # REMOVE ME: the cast() calls can be elided in the excerpt.
         agg = cast(list[Field], field.zeros(len(prefixes)))
         for agg_share in agg_shares:
             agg = vec_add(agg, cast(list[Field], agg_share))

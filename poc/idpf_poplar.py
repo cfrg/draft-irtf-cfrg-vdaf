@@ -68,6 +68,8 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         ctrl = [Field2(0), Field2(1)]
         correction_words = []
         for level in range(self.BITS):
+            # REMOVE ME: the cast() call can be elided in the excerpt.
+
             field: type[Field] = cast(type[Field], self.current_field(level))
             keep = (alpha >> (self.BITS - level - 1)) & 1
             lose = 1 - keep
@@ -87,6 +89,8 @@ class IdpfPoplar(Idpf[Field64, Field255]):
             (seed[1], w1) = self.convert(level, x1, binder)
             ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
             ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
+
+            # REMOVE ME: the cast() calls can be elided in the excerpt.
 
             if level < self.BITS - 1:
                 b = cast(list[Field], beta_inner[level])
@@ -162,6 +166,7 @@ class IdpfPoplar(Idpf[Field64, Field255]):
                     bit,
                     binder,
                 )
+            # REMOVE ME: the cast() calls can be elided in the excerpt.
             if agg_id == 0:
                 out_share.append(cast(list[Field], y))
             else:
@@ -179,6 +184,7 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         field = self.current_field(level)
         seed_cw = correction_word[0]
         ctrl_cw = correction_word[1]
+        # REMOVE ME: the cast() call can be elided in the excerpt.
         w_cw = cast(list[Field], correction_word[2])
         (s, t) = self.extend(prev_seed, binder)
         s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
@@ -189,6 +195,7 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         next_ctrl = t[bit]
         convert_output = self.convert(level, s[bit], binder)
         next_seed = convert_output[0]
+        # REMOVE ME: the cast() calls can be elided in the excerpt.
         y = cast(list[Field], convert_output[1])
         # Implementation note: Here we add the correction word to the
         # output if `next_ctrl` is set. We avoid branching on the value of
@@ -197,6 +204,7 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         for i in range(len(y)):
             y[i] += w_cw[i] * mask
 
+        # REMOVE ME: the cast() call can be elided in the excerpt.
         return (next_seed, next_ctrl, cast(FieldVec, y))
 
     # NOTE: The extend(), convert(), encode_public_share(), and
@@ -224,6 +232,7 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
         field = self.current_field(level)
         w = xof.next_vec(field, self.VALUE_LEN)
+        # REMOVE ME: the cast() call can be elided in the excerpt.
         return (next_seed, cast(FieldVec, w))
 
     def encode_public_share(self, correction_words: list[CorrectionWordTuple]) -> bytes:
@@ -234,8 +243,10 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         encoded += pack_bits(control_bits)
         for (level, (seed_cw, _, w_cw)) \
                 in enumerate(correction_words):
+            # REMOVE ME: the cast() call can be elided in the excerpt.
             field = cast(type[Field], self.current_field(level))
             encoded += seed_cw
+            # REMOVE ME: the cast() call can be elided in the excerpt.
             encoded += field.encode_vec(cast(list[Field], w_cw))
         return encoded
 

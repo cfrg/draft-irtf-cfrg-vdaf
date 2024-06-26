@@ -710,6 +710,8 @@ class Histogram(
 
                 r_power *= r
 
+            # REMOVE ME: the cast() call can be elided in the excerpt.
+
             range_check += self.GADGETS[0].eval(
                 self.field,
                 cast(list[Field128], inputs),
@@ -847,6 +849,8 @@ class MultihotCountVec(
 
                 r_power *= r
 
+            # REMOVE ME: the cast() call can be elided in the excerpt.
+
             range_check += self.GADGETS[0].eval(
                 self.field,
                 cast(list[Field128], inputs),
@@ -965,6 +969,8 @@ class SumVec(
                 inputs[j * 2 + 1] = meas_elem - shares_inv
 
                 r_power *= r
+
+            # REMOVE ME: the cast() call can be elided in the excerpt.
 
             out += self.GADGETS[0].eval(self.field, cast(list[F], inputs))
 
