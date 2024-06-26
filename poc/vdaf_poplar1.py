@@ -30,10 +30,6 @@ Poplar1PrepState: TypeAlias = tuple[
     int,  # level
     FieldVec,  # output (and sketch) share
 ]
-PrepNextReturnType: TypeAlias = Union[
-    tuple[Poplar1PrepState, FieldVec],
-    FieldVec,
-]
 
 
 class Poplar1(
@@ -268,7 +264,7 @@ class Poplar1(
             cast(FieldVec, sketch_share),
         )
 
-    def prep_next(self, prep_state: Poplar1PrepState, prep_msg: Optional[FieldVec]) -> PrepNextReturnType:
+    def prep_next(self, prep_state: Poplar1PrepState, prep_msg: Optional[FieldVec]) -> Union[tuple[Poplar1PrepState, FieldVec], FieldVec]:
         prev_sketch = cast(list[Field], prep_msg)
         (step, level, prep_mem) = prep_state
 
