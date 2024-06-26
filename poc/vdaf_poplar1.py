@@ -64,6 +64,11 @@ class Poplar1(
         self.RAND_SIZE = 3 * self.xof.SEED_SIZE + self.idpf.RAND_SIZE
 
     def shard(self, measurement: int, nonce: bytes, rand: bytes) -> tuple[bytes, list[Poplar1InputShare]]:
+        if len(nonce) != self.NONCE_SIZE:
+            raise ValueError("incorrect nonce size")
+        if len(rand) != self.RAND_SIZE:
+            raise ValueError("incorrect size of random bytes argument")
+
         l = self.xof.SEED_SIZE
 
         # Split the random input into the random input for IDPF key

@@ -249,6 +249,15 @@ def run_vdaf(
         - `len(nonce) == vdaf.NONCE_SIZE` for each `nonce` in `nonces`
     """
 
+    if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
+        raise ValueError("incorrect verify_key size")
+    if any(len(nonce) != vdaf.NONCE_SIZE for nonce in nonces):
+        raise ValueError("incorrect nonce size")
+    if len(nonces) != len(measurements):
+        raise ValueError(
+            "measurements and nonces lists have different lengths"
+        )
+
     # REMOVE ME
     test_vec: TestVectorDict[Measurement, AggParam, AggResult] = {
         'shares': vdaf.SHARES,

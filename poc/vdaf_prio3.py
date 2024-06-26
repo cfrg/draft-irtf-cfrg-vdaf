@@ -68,7 +68,9 @@ class Prio3(
 
     @abstractmethod
     def __init__(self, shares: int, flp: Flp[Measurement, AggResult, F], num_proofs: int):
+        assert self.ID is not None
         assert self.xof is not None
+        assert self.VERIFY_KEY_SIZE is not None
         assert flp is not None
         if shares not in range(2, 256):
             raise ValueError('invalid number of shares')
@@ -83,6 +85,11 @@ class Prio3(
         self.RAND_SIZE = rand_size
 
     def shard(self, measurement: Measurement, nonce: bytes, rand: bytes) -> tuple[Optional[list[bytes]], list[Prio3InputShare]]:
+        if len(nonce) != self.NONCE_SIZE:
+            raise ValueError("incorrect nonce size")
+        if len(rand) != self.RAND_SIZE:
+            raise ValueError("incorrect size of random bytes argument")
+
         l = self.xof.SEED_SIZE
         seeds = [rand[i:i + l] for i in range(0, self.RAND_SIZE, l)]
 

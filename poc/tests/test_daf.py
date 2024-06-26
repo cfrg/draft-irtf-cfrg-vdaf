@@ -28,8 +28,13 @@ class TestDaf(
     def shard(
             self,
             measurement: int,
-            _nonce: bytes,
+            nonce: bytes,
             rand: bytes) -> tuple[None, list[Field128]]:
+        if len(nonce) != self.NONCE_SIZE:
+            raise ValueError("incorrect nonce size")
+        if len(rand) != self.RAND_SIZE:
+            raise ValueError("incorrect size of random bytes argument")
+
         helper_shares = XofTurboShake128.expand_into_vec(
             Field128,
             rand,
@@ -53,9 +58,12 @@ class TestDaf(
             self,
             _agg_id: int,
             _agg_param: None,
-            _nonce: bytes,
+            nonce: bytes,
             _public_share: None,
             input_share: Field128) -> Field128:
+        if len(nonce) != self.NONCE_SIZE:
+            raise ValueError("incorrect nonce size")
+
         # For this simple test DAF, the output share is the same as the input
         # share.
         return input_share

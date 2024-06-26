@@ -146,6 +146,13 @@ def run_daf(
         - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
         - `len(nonces) == len(measurements)`
     """
+    if any(len(nonce) != daf.NONCE_SIZE for nonce in nonces):
+        raise ValueError("incorrect nonce size")
+    if len(nonces) != len(measurements):
+        raise ValueError(
+            "measurements and nonces lists have different lengths"
+        )
+
     out_shares: list[list[OutShare]] = [[] for j in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and

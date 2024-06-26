@@ -111,6 +111,10 @@ class XofTurboShake128(Xof):
         self.l = 0
         self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
         '''
+
+        if len(seed) != self.SEED_SIZE:
+            raise ValueError("incorrect seed size")
+
         self.length_consumed = 0
         self.h = TurboSHAKE128.new(domain=1)
         self.h.update(to_le_bytes(len(dst), 1))
@@ -148,6 +152,9 @@ class XofFixedKeyAes128(Xof):
     test_vec_name = 'XofFixedKeyAes128'
 
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
+        if len(seed) != self.SEED_SIZE:
+            raise ValueError("incorrect seed size")
+
         self.length_consumed = 0
 
         # Use TurboSHAKE128 to derive a key from the binder string and
