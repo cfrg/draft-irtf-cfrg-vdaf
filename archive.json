@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-25T00:45:51.685081+00:00",
+  "timestamp": "2024-06-27T00:46:16.305623+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5112,15 +5112,15 @@
       "id": "I_kwDOGKuqOc58_o0_",
       "title": "Have Prio3 specify the field rather than the FLP circuit",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/328",
-      "state": "CLOSED",
+      "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "              > @divergentdave  Looks good. I think we should also add `| PROOFS | 1 |` to tables 9, 10, 11, and 12, right after `Field`, to be clear about the parameter values for the four concrete Prio3 VDAFs (and algorithm IDs) we define.\r\n\r\nThese tables specify parameters of the circuit; the number of proofs is not a parameter of the circuit. In fact, the gudance here is about modifying one of the circuits, say `SumVec` by changing the field from `Field64` to `Field128`.\r\n\r\nWhat do you think about decoupling `Field` from the circuit and moving it to the `Prio3` variant. There, `PROOFS` is (or should, at least) be specified.\r\n\r\n_Originally posted by @cjpatton in https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/325#issuecomment-1906952751_\r\n            ",
       "createdAt": "2024-01-23T21:58:11Z",
-      "updatedAt": "2024-06-12T23:56:39Z",
-      "closedAt": "2024-06-12T23:56:39Z",
+      "updatedAt": "2024-06-26T17:27:23Z",
+      "closedAt": null,
       "comments": [
         {
           "author": "cjpatton",
@@ -5128,6 +5128,13 @@
           "body": "I think we'll end up resolving this as part of the #361 refactor.",
           "createdAt": "2024-06-12T23:56:17Z",
           "updatedAt": "2024-06-12T23:56:17Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Reopening so we don't forget this",
+          "createdAt": "2024-06-26T17:27:23Z",
+          "updatedAt": "2024-06-26T17:27:23Z"
         }
       ]
     },
@@ -5395,6 +5402,34 @@
           "body": "Yeah, at that point I think it would make sense to roll the asserts into the top of each VDAF method.",
           "createdAt": "2024-06-12T18:01:55Z",
           "updatedAt": "2024-06-12T18:01:55Z"
+        }
+      ]
+    },
+    {
+      "number": 364,
+      "id": "I_kwDOGKuqOc6NowH2",
+      "title": "Clean up use of xml2rfc artwork and sourcecode tags",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/364",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "editorial"
+      ],
+      "body": "We currently use a mixture of `<artwork>` and `<sourcecode>` tags. These are both generated when we fence off preformatted text with three or more tildes. If an identifier appears after the leading group of tildes, on the same line, then a `<sourcecode>` element is generated, with its `type` attribute set to that identifier. See https://datatracker.ietf.org/doc/html/rfc7991#section-2.48 for the xml2rfc tag definition, `<sourcecode>` is now preferred over `<artwork>` for source code and formal languages. The document has a mix of ASCII art and source code excerpts, though almost all `~~~` code fences lack an identifier, save for one with `state` and four with `transition`. We should change excerpts from the proof of concept to `~~~ python`, and change `~~~ state` and `~~~ transition` to `~~~ pseudocode`, which are among the list of preferred values. As a bonus, my editor supports embedded syntax highlighting when I switch a block to `~~~ python`. The fences around true ASCII art can stay as they are.",
+      "createdAt": "2024-06-26T20:57:46Z",
+      "updatedAt": "2024-06-26T21:07:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There is a living list of preferred values for `type` at https://www.rfc-editor.org/rpc/wiki/doku.php?id=sourcecode-types, and it incldues `tls-presentation`. We should use this in the ping-pong topology section.",
+          "createdAt": "2024-06-26T21:07:16Z",
+          "updatedAt": "2024-06-26T21:07:16Z"
         }
       ]
     }
@@ -31434,7 +31469,7 @@
       ],
       "body": "Closes #59.",
       "createdAt": "2024-06-12T17:56:24Z",
-      "updatedAt": "2024-06-12T21:21:56Z",
+      "updatedAt": "2024-06-26T15:22:24Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e57208850eb83afee11993df689afbb3809c534d",
@@ -31483,13 +31518,13 @@
       "labels": [],
       "body": "This PR is going to replace class factories throughout the codebase with conventional OOP inheritance and classes defined at the top level. This will make type checking and other static analysis work better, and help avoid bugs around mutating class attributes on the wrong class in factory methods. So far I've rewritten `daf.py`, and improved the type hints in `field.py`, so that __add__ returns `Self` instead of `Field`. `Self` is a special generic type variable, so this more precise signature tells us we get a field element of the same type back, not a field element from possibly any field. I needed this improvement after adding hints to more signatures in `TestDaf`, particularly `aggregate()`.\r\n\r\nRelated to #361.",
       "createdAt": "2024-06-20T16:38:26Z",
-      "updatedAt": "2024-06-21T21:24:03Z",
+      "updatedAt": "2024-06-26T22:49:05Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "39fb4753a55bbc33a8da8c662dba8ed99f50e6ff",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/poc-oop",
-      "headRefOid": "f10a1169bbced8cb20c6122c56536cb7a28c96a7",
+      "headRefOid": "605b6529ecb5d4e85208c628486d9684d1e5793c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -31503,7 +31538,90 @@
           "updatedAt": "2024-06-21T21:24:03Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc5_jf02",
+          "commit": {
+            "abbreviatedOid": "b0d0d79"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-25T22:48:57Z",
+          "updatedAt": "2024-06-25T23:04:32Z",
+          "comments": [
+            {
+              "originalPosition": 203,
+              "body": "FYI I removed this TODO because the idea referenced is only applicable if the output field is very small, which doesn't align with our use case. This is essentially the dual of the 'stealing' we do for control bits in `extend()` already, but applied to `convert()` instead. We just don't have enough space between the PRG output size and the desired security parameter to fit a 64-bit field element, let alone a 255-bit field element.",
+              "createdAt": "2024-06-25T22:48:57Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            },
+            {
+              "originalPosition": 43,
+              "body": "FYI, I moved this to a separate file because I needed to reference `Valid` in a type hint inside `Flp`, but importing it from `flp_generic.py` would have set up an import cycle. I figured a separate module for arithmetic circuit basics would make sense.",
+              "createdAt": "2024-06-25T22:54:27Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            },
+            {
+              "originalPosition": 83,
+              "body": "This `cast()` function shows up a lot in this file. It's a type hint escape hatch that acts like the identity function at runtime, but tells static analysis tools to ignore the type of the input and use the provided type on the output value. This is necessary primarily because we have many unions of Field64 and Field255, or instances of those classes, or lists thereof. Without the casts, we would get warnings on arithmetic between objects of such union types, because `mypy`'s analysis conservatively assumes that we could have objects of different field classes on either side (though that doesn't happen in practice). I plan to cut out the cast calls in code excerpts in the specification, and add comments here regarding that.",
+              "createdAt": "2024-06-25T22:59:25Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            },
+            {
+              "originalPosition": 283,
+              "body": "Type checking trophy case entry!",
+              "createdAt": "2024-06-25T23:00:14Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            },
+            {
+              "originalPosition": 110,
+              "body": "Type checking caught that this was out of date after other changes",
+              "createdAt": "2024-06-25T23:01:09Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            },
+            {
+              "originalPosition": 90,
+              "body": "This was incorrect, as we actually use a 3-tuple, not nested 2-tuples",
+              "createdAt": "2024-06-25T23:01:49Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            },
+            {
+              "originalPosition": 2,
+              "body": "This setting was important, I learned that `mypy` will by default not do any type checking in the bodies of functions/methods with no type hints in their signature. Setting this flushed a lot of little things out.",
+              "createdAt": "2024-06-25T23:03:11Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            },
+            {
+              "originalPosition": 348,
+              "body": "`mypy` does not like it when we reuse one variable name in a method in two disjoint regions with different types, so I've split uses of `outbound` as appropriate here, and done similar elsewhere.",
+              "createdAt": "2024-06-25T23:04:22Z",
+              "updatedAt": "2024-06-25T23:04:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5_rW3J",
+          "commit": {
+            "abbreviatedOid": "b0d0d79"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-26T14:32:48Z",
+          "updatedAt": "2024-06-26T14:32:48Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "Thinking about this some more, `Flp` doesn't need a `valid: Valid` attribute, `FlpGeneric` does, so I can unwind this particular change.",
+              "createdAt": "2024-06-26T14:32:48Z",
+              "updatedAt": "2024-06-26T14:32:48Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
