@@ -434,7 +434,9 @@ def pretty_print_vdaf_test_vec(
             print_wrapped_line(input_share, tab=4)
 
         # Prepare
-        for (i, (prep_shares, prep_msg)) in enumerate(zip(prep_test_vec['prep_shares'], prep_test_vec['prep_messages'])):
+        for (i, (prep_shares, prep_msg)) in enumerate(
+                zip(prep_test_vec['prep_shares'],
+                    prep_test_vec['prep_messages'])):
             print('  round_{}:'.format(i))
             for (j, prep_share) in enumerate(prep_shares):
                 print('    prep_share_{}: >-'.format(j))

@@ -103,8 +103,8 @@ def from_le_bytes(encoded: bytes) -> int:
 
 def to_be_bytes(val: int, length: int) -> bytes:
     """
-    Convert unsigned integer `val` in range `[0, 2 ^ (8 * length))` to a big-endian
-    byte string.
+    Convert unsigned integer `val` in range `[0, 2 ^ (8 * length))` to a
+    big-endian byte string.
     """
     val = int(val)
     if val < 0 or val >= (1 << (8 * length)):
@@ -136,7 +136,11 @@ def front(length: int, vec: list[T]) -> tuple[list[T], list[T]]:
     ...
 
 
-def front(length: int, vec: Union[bytes, list[T]]) -> tuple[Union[bytes, list[T]], Union[bytes, list[T]]]:
+def front(
+        length: int,
+        vec: Union[bytes, list[T]]) -> tuple[
+            Union[bytes, list[T]],
+            Union[bytes, list[T]]]:
     """
     Split list `vec` in two and return the front and remainder as a tuple. The
     length of the front is `length`.

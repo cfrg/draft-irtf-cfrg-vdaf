@@ -67,7 +67,11 @@ class Prio3(
     PROOFS: int  # Number of proofs, in range `[1, 256)`
 
     @abstractmethod
-    def __init__(self, shares: int, flp: Flp[Measurement, AggResult, F], num_proofs: int):
+    def __init__(
+            self,
+            shares: int,
+            flp: Flp[Measurement, AggResult, F],
+            num_proofs: int):
         assert self.ID is not None
         assert self.xof is not None
         assert self.VERIFY_KEY_SIZE is not None

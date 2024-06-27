@@ -26,7 +26,12 @@ def soundness(gadget_calls: int, gadget_degree: int, field_size: int) -> float:
     return gadget_calls * gadget_degree / (field_size - gadget_calls)
 
 
-def robustness(epsilon: float, ro_queries: int, prep_queries: int, num_proofs: int, seed_bits: int) -> float:
+def robustness(
+        epsilon: float,
+        ro_queries: int,
+        prep_queries: int,
+        num_proofs: int,
+        seed_bits: int) -> float:
     '''
     ia.cr/2023/130, Theorem 1, assuming the bound can be modified by raising
     `epsilon` to the power of the number of FLPs.

@@ -205,7 +205,9 @@ class ProveGadget(Gadget[F]):
         return self.inner.eval_poly(field, inp_poly)
 
 
-def prove_wrapped(valid: Valid[Measurement, AggResult, F], prove_rand: list[F]) -> Valid[Measurement, AggResult, F]:
+def prove_wrapped(
+        valid: Valid[Measurement, AggResult, F],
+        prove_rand: list[F]) -> Valid[Measurement, AggResult, F]:
     if len(prove_rand) != valid.prove_rand_len():
         raise ValueError('incorrect proof length')
 
@@ -221,7 +223,13 @@ def prove_wrapped(valid: Valid[Measurement, AggResult, F], prove_rand: list[F]) 
 
 
 class QueryGadget(Gadget[F]):
-    def __init__(self, field: type[F], wire_seeds: list[F], gadget_poly: list[F], g: Gadget[F], g_calls: int):
+    def __init__(
+            self,
+            field: type[F],
+            wire_seeds: list[F],
+            gadget_poly: list[F],
+            g: Gadget[F],
+            g_calls: int):
         self.inner = g
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
@@ -245,7 +253,9 @@ class QueryGadget(Gadget[F]):
         raise NotImplementedError()
 
 
-def query_wrapped(valid: Valid[Measurement, AggResult, F], proof: list[F]) -> Valid[Measurement, AggResult, F]:
+def query_wrapped(
+        valid: Valid[Measurement, AggResult, F],
+        proof: list[F]) -> Valid[Measurement, AggResult, F]:
     if len(proof) != valid.proof_len():
         raise ValueError('incorrect proof length')
 
@@ -321,7 +331,13 @@ class FlpGeneric(Flp[Measurement, AggResult, F]):
 
         return proof
 
-    def query(self, meas: list[F], proof: list[F], query_rand: list[F], joint_rand: list[F], num_shares: int) -> list[F]:
+    def query(
+            self,
+            meas: list[F],
+            proof: list[F],
+            query_rand: list[F],
+            joint_rand: list[F],
+            num_shares: int) -> list[F]:
         # Evaluate the validity circuit, recording the values of the input wires
         # for each call to each gadget. The gadget output is computed by
         # evaluating the gadget polynomial.
@@ -1100,7 +1116,11 @@ class SumOfRangeCheckedInputs(
         self.MEAS_LEN = 2 * self.bits
         self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
 
-    def eval(self, meas: list[Field64], joint_rand: list[Field64], num_shares: int) -> list[Field64]:
+    def eval(
+            self,
+            meas: list[Field64],
+            joint_rand: list[Field64],
+            num_shares: int) -> list[Field64]:
         self.check_valid_eval(meas, joint_rand)
         shares_inv = self.field(num_shares).inv()
 

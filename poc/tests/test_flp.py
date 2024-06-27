@@ -30,7 +30,13 @@ class FlpTest(Flp[int, int, F]):
         # The proof is the measurement itself for this trivially insecure FLP.
         return deepcopy(meas)
 
-    def query(self, meas: list[F], proof: list[F], query_rand: list[F], joint_rand: list[F], _num_shares: int) -> list[F]:
+    def query(
+            self,
+            meas: list[F],
+            proof: list[F],
+            query_rand: list[F],
+            joint_rand: list[F],
+            _num_shares: int) -> list[F]:
         return deepcopy(proof)
 
     def decide(self, verifier: list[F]) -> bool:

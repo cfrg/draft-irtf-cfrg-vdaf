@@ -23,7 +23,11 @@ class TestMultiGadget(Valid[int, int, Field64]):
     OUTPUT_LEN = 1
     EVAL_OUTPUT_LEN = 1
 
-    def eval(self, meas: list[Field64], joint_rand: list[Field64], _num_shares: int) -> list[Field64]:
+    def eval(
+            self,
+            meas: list[Field64],
+            joint_rand: list[Field64],
+            _num_shares: int) -> list[Field64]:
         self.check_valid_eval(meas, joint_rand)
         # Not a very useful circuit, obviously. We just want to do something.
         x = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
@@ -58,7 +62,9 @@ def test_gadget(g: Gadget, field: type[F], test_length: int) -> None:
     assert got == want
 
 
-def test_flp_generic(flp: FlpGeneric[Measurement, AggResult, F], test_cases: list[tuple[list[F], bool]]) -> None:
+def test_flp_generic(
+        flp: FlpGeneric[Measurement, AggResult, F],
+        test_cases: list[tuple[list[F], bool]]) -> None:
     for (g, g_calls) in zip(flp.valid.GADGETS, flp.valid.GADGET_CALLS):
         test_gadget(g, flp.field, next_power_of_2(g_calls + 1))
 
@@ -98,13 +104,19 @@ class TestAverage(Sum):
 
 
 # Test encoding, truncation, then decoding.
-def test_encode_truncate_decode(flp: Flp[Measurement, AggResult, F], measurements: list[Measurement]) -> None:
+def test_encode_truncate_decode(
+        flp: Flp[Measurement, AggResult, F],
+        measurements: list[Measurement]) -> None:
     for measurement in measurements:
         assert measurement == flp.decode(
             flp.truncate(flp.encode(measurement)), 1)
 
 
-def test_encode_truncate_decode_with_fft_fields(measurements: list[list[int]], length: int, bits: int, chunk_length: int) -> None:
+def test_encode_truncate_decode_with_fft_fields(
+        measurements: list[list[int]],
+        length: int,
+        bits: int,
+        chunk_length: int) -> None:
     for f in [Field64, Field96, Field128]:
         sumvec = SumVec[FftField](length, bits, chunk_length, field=f)
         assert sumvec.field == f
