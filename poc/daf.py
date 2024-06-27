@@ -133,8 +133,13 @@ class Daf(
 # ===================================================================
 def run_daf(
         daf: Daf[
-            Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
-            AggResult
+            Measurement,
+            AggParam,
+            PublicShare,
+            InputShare,
+            OutShare,
+            AggShare,
+            AggResult,
         ],
         agg_param: AggParam,
         measurements: list[Measurement],
@@ -157,7 +162,8 @@ def run_daf(
             "measurements and nonces lists have different lengths"
         )
 
-    out_shares: list[list[OutShare]] = [[] for j in range(daf.SHARES)]
+    out_shares: list[list[OutShare]]
+    out_shares = [[] for j in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.

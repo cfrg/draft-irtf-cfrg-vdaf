@@ -89,7 +89,13 @@ class Prio3(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def shard(self, measurement: Measurement, nonce: bytes, rand: bytes) -> tuple[Optional[list[bytes]], list[Prio3InputShare]]:
+    def shard(
+            self,
+            measurement: Measurement,
+            nonce: bytes,
+            rand: bytes) -> tuple[
+                Optional[list[bytes]],
+                list[Prio3InputShare]]:
         if len(nonce) != self.NONCE_SIZE:
             raise ValueError("incorrect nonce size")
         if len(rand) != self.RAND_SIZE:
@@ -109,10 +115,13 @@ class Prio3(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def is_valid(self, _agg_param: None, previous_agg_params: list[None]) -> bool:
+    def is_valid(
+            self,
+            _agg_param: None,
+            previous_agg_params: list[None]) -> bool:
         """
-        Checks if `previous_agg_params` is empty, as input shares in Prio3 may
-        only be used once.
+        Checks if `previous_agg_params` is empty, as input shares in
+        Prio3 may only be used once.
         """
         return len(previous_agg_params) == 0
 
@@ -122,8 +131,16 @@ class Prio3(
     # after de-indenting, or 73 columns before de-indenting, to avoid
     # warnings from xml2rfc.
     # ===================================================================
-    def prep_init(self, verify_key: bytes, agg_id: int, _agg_param: None,
-                  nonce: bytes, public_share: Optional[list[bytes]], input_share: Prio3InputShare[F]) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]]:
+    def prep_init(
+            self,
+            verify_key: bytes,
+            agg_id: int,
+            _agg_param: None,
+            nonce: bytes,
+            public_share: Optional[list[bytes]],
+            input_share: Prio3InputShare[F]) -> tuple[
+                Prio3PrepState[F],
+                Prio3PrepShare[F]]:
         k_joint_rand_parts = public_share
         (meas_share, proofs_share, k_blind) = \
             self.expand_input_share(agg_id, input_share)
@@ -165,7 +182,12 @@ class Prio3(
         prep_share = (verifiers_share, k_joint_rand_part)
         return (prep_state, prep_share)
 
-    def prep_next(self, prep_state: Prio3PrepState[F], prep_msg: Optional[bytes]) -> Union[tuple[Prio3PrepState[F], Prio3PrepShare[F]], list[F]]:
+    def prep_next(
+            self,
+            prep_state: Prio3PrepState[F],
+            prep_msg: Optional[bytes]) -> Union[
+                tuple[Prio3PrepState[F], Prio3PrepShare[F]],
+                list[F]]:
         k_joint_rand = prep_msg
         (out_share, k_corrected_joint_rand) = prep_state
 
@@ -176,7 +198,10 @@ class Prio3(
 
         return out_share
 
-    def prep_shares_to_prep(self, _agg_param: None, prep_shares: list[Prio3PrepShare[F]]) -> Optional[bytes]:
+    def prep_shares_to_prep(
+            self,
+            _agg_param: None,
+            prep_shares: list[Prio3PrepShare[F]]) -> Optional[bytes]:
         # Unshard the verifier shares into the verifier message.
         verifiers = self.flp.field.zeros(
             self.flp.VERIFIER_LEN * self.PROOFS)
@@ -206,7 +231,10 @@ class Prio3(
     # after de-indenting, or 73 columns before de-indenting, to avoid
     # warnings from xml2rfc.
     # ===================================================================
-    def aggregate(self, _agg_param: None, out_shares: list[list[F]]) -> list[F]:
+    def aggregate(
+            self,
+            _agg_param: None,
+            out_shares: list[list[F]]) -> list[F]:
         agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
         for out_share in out_shares:
             agg_share = vec_add(agg_share, out_share)
@@ -217,8 +245,11 @@ class Prio3(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def unshard(self, _agg_param: None,
-                agg_shares: list[list[F]], num_measurements: int) -> AggResult:
+    def unshard(
+            self,
+            _agg_param: None,
+            agg_shares: list[list[F]],
+            num_measurements: int) -> AggResult:
         agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
         for agg_share in agg_shares:
             agg = vec_add(agg, agg_share)
@@ -231,7 +262,12 @@ class Prio3(
     # limited to 69 columns after de-indenting, or 73 columns before
     # de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def shard_without_joint_rand(self, meas: list[F], seeds: list[bytes]) -> tuple[Optional[list[bytes]], list[Prio3InputShare[F]]]:
+    def shard_without_joint_rand(
+            self,
+            meas: list[F],
+            seeds: list[bytes]) -> tuple[
+                Optional[list[bytes]],
+                list[Prio3InputShare[F]]]:
         k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
         k_helper_meas_shares = [
             k_helper_seeds[i]
@@ -261,7 +297,10 @@ class Prio3(
         for j in range(self.SHARES - 1):
             leader_proofs_share = vec_sub(
                 leader_proofs_share,
-                self.helper_proofs_share(j + 1, k_helper_proofs_shares[j]),
+                self.helper_proofs_share(
+                    j + 1,
+                    k_helper_proofs_shares[j],
+                ),
             )
 
         # Each Aggregator's input share contains its measurement share
@@ -285,7 +324,13 @@ class Prio3(
     # to 69 columns after de-indenting, or 73 columns before
     # de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def shard_with_joint_rand(self, meas: list[F], nonce: bytes, seeds: list[bytes]) -> tuple[Optional[list[bytes]], list[Prio3InputShare[F]]]:
+    def shard_with_joint_rand(
+            self,
+            meas: list[F],
+            nonce: bytes,
+            seeds: list[bytes]) -> tuple[
+                Optional[list[bytes]],
+                list[Prio3InputShare[F]]]:
         k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
         k_helper_meas_shares = [
             k_helper_seeds[i]
@@ -333,7 +378,10 @@ class Prio3(
         for j in range(self.SHARES - 1):
             leader_proofs_share = vec_sub(
                 leader_proofs_share,
-                self.helper_proofs_share(j + 1, k_helper_proofs_shares[j]),
+                self.helper_proofs_share(
+                    j + 1,
+                    k_helper_proofs_shares[j],
+                ),
             )
 
         # Each Aggregator's input share contains its measurement share,
@@ -369,7 +417,10 @@ class Prio3(
             self.flp.MEAS_LEN,
         )
 
-    def helper_proofs_share(self, agg_id: int, k_share: bytes) -> list[F]:
+    def helper_proofs_share(
+            self,
+            agg_id: int,
+            k_share: bytes) -> list[F]:
         return self.xof.expand_into_vec(
             self.flp.field,
             k_share,
@@ -378,7 +429,13 @@ class Prio3(
             self.flp.PROOF_LEN * self.PROOFS,
         )
 
-    def expand_input_share(self, agg_id: int, input_share: Prio3InputShare[F]) -> tuple[list[F], list[F], Optional[bytes]]:
+    def expand_input_share(
+            self,
+            agg_id: int,
+            input_share: Prio3InputShare[F]) -> tuple[
+                list[F],
+                list[F],
+                Optional[bytes]]:
         (meas_share, proofs_share, k_blind) = input_share
         if agg_id > 0:
             assert isinstance(meas_share, bytes)
@@ -408,7 +465,12 @@ class Prio3(
             self.flp.QUERY_RAND_LEN * self.PROOFS,
         )
 
-    def joint_rand_part(self, agg_id: int, k_blind: bytes, meas_share: list[F], nonce: bytes) -> bytes:
+    def joint_rand_part(
+            self,
+            agg_id: int,
+            k_blind: bytes,
+            meas_share: list[F],
+            nonce: bytes) -> bytes:
         return self.xof.derive_seed(
             k_blind,
             self.domain_separation_tag(USAGE_JOINT_RAND_PART),

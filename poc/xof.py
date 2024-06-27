@@ -145,8 +145,8 @@ class XofTurboShake128(Xof):
         #
         # Implementation note: Rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
-        # of TurboSHAKE128 will expose an "absorb-then-squeeze" API that
-        # allows stateful handling of the stream.
+        # of TurboSHAKE128 will expose an "absorb-then-squeeze" API
+        # that allows stateful handling of the stream.
         stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
         '''
@@ -174,10 +174,11 @@ class XofFixedKeyAes128(Xof):
 
         self.length_consumed = 0
 
-        # Use TurboSHAKE128 to derive a key from the binder string and
-        # domain separation tag. Note that the AES key does not need
-        # to be kept secret from any party. However, when used with
-        # IdpfPoplar, we require the binder to be a random nonce.
+        # Use TurboSHAKE128 to derive a key from the binder string
+        # and domain separation tag. Note that the AES key does not
+        # need to be kept secret from any party. However, when used
+        # with IdpfPoplar, we require the binder to be a random
+        # nonce.
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
@@ -208,9 +209,9 @@ class XofFixedKeyAes128(Xof):
     def hash_block(self, block: bytes) -> bytes:
         """
         The multi-instance tweakable circular correlation-robust hash
-        function of [GKWWY20] (Section 4.2). The tweak here is the key
-        that stays constant for all XOF evaluations of the same Client,
-        but differs between Clients.
+        function of [GKWWY20] (Section 4.2). The tweak here is the
+        key that stays constant for all XOF evaluations of the same
+        Client, but differs between Clients.
 
         Function `AES128(key, block)` is the AES-128 blockcipher.
         """

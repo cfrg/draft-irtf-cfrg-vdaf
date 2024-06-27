@@ -158,8 +158,16 @@ def run_flp(
     proof = flp.prove(meas, prove_rand, joint_rand)
 
     # Shard the measurement and the proof.
-    meas_shares = additive_secret_share(meas, num_shares, flp.field)
-    proof_shares = additive_secret_share(proof, num_shares, flp.field)
+    meas_shares = additive_secret_share(
+        meas,
+        num_shares,
+        flp.field,
+    )
+    proof_shares = additive_secret_share(
+        proof,
+        num_shares,
+        flp.field,
+    )
 
     # Verifier queries the meas shares and proof shares.
     verifier_shares = [

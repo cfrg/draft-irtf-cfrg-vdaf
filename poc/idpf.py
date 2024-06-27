@@ -126,7 +126,9 @@ class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
     # width should be limited to 69 columns after de-indenting, or 73
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def current_field(self, level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
+    def current_field(
+            self,
+            level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
         if level < self.BITS - 1:
             return self.field_inner
         else:

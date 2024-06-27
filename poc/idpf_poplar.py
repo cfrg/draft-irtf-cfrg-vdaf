@@ -51,7 +51,13 @@ class IdpfPoplar(Idpf[Field64, Field255]):
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def gen(self, alpha: int, beta_inner: list[list[Field64]], beta_leaf: list[Field255], binder: bytes, rand: bytes) -> tuple[bytes, list[bytes]]:
+    def gen(
+            self,
+            alpha: int,
+            beta_inner: list[list[Field64]],
+            beta_leaf: list[Field255],
+            binder: bytes,
+            rand: bytes) -> tuple[bytes, list[bytes]]:
         if alpha not in range(2 ** self.BITS):
             raise ValueError("alpha out of range")
         if len(beta_inner) != self.BITS - 1:
@@ -70,7 +76,8 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         for level in range(self.BITS):
             # REMOVE ME: the cast() call can be elided in the excerpt.
 
-            field: type[Field] = cast(type[Field], self.current_field(level))
+            field: type[Field]
+            field = cast(type[Field], self.current_field(level))
             keep = (alpha >> (self.BITS - level - 1)) & 1
             lose = 1 - keep
             bit = Field2(keep)
@@ -97,7 +104,9 @@ class IdpfPoplar(Idpf[Field64, Field255]):
             else:
                 b = cast(list[Field], beta_leaf)
             if len(b) != self.VALUE_LEN:
-                raise ValueError("length of beta must match the value length")
+                raise ValueError(
+                    "length of beta must match the value length"
+                )
 
             w_cw = vec_add(vec_sub(b, w0), w1)
             # Implementation note: Here we negate the correction word if
@@ -118,8 +127,16 @@ class IdpfPoplar(Idpf[Field64, Field255]):
     # after de-indenting, or 73 columns before de-indenting, to avoid
     # warnings from xml2rfc.
     # ===================================================================
-    def eval(self, agg_id: int, public_share: bytes, key: bytes,
-             level: int, prefixes: Sequence[int], binder: bytes) -> Union[list[list[Field64]], list[list[Field255]]]:
+    def eval(
+            self,
+            agg_id: int,
+            public_share: bytes,
+            key: bytes,
+            level: int,
+            prefixes: Sequence[int],
+            binder: bytes) -> Union[
+                list[list[Field64]],
+                list[list[Field255]]]:
         if agg_id not in range(self.SHARES):
             raise ValueError('aggregator id out of range')
         if level not in range(self.BITS):
@@ -171,14 +188,23 @@ class IdpfPoplar(Idpf[Field64, Field255]):
                 out_share.append(cast(list[Field], y))
             else:
                 out_share.append(vec_neg(cast(list[Field], y)))
-        return cast(Union[list[list[Field64]], list[list[Field255]]], out_share)
+        return cast(
+            Union[list[list[Field64]], list[list[Field255]]],
+            out_share,
+        )
 
-    def eval_next(self, prev_seed: bytes, prev_ctrl: Field2,
-                  correction_word: CorrectionWordTuple, level: int, bit: int, binder: bytes) -> tuple[bytes, Field2, FieldVec]:
+    def eval_next(
+            self,
+            prev_seed: bytes,
+            prev_ctrl: Field2,
+            correction_word: CorrectionWordTuple,
+            level: int,
+            bit: int,
+            binder: bytes) -> tuple[bytes, Field2, FieldVec]:
         """
-        Compute the next node in the IDPF tree along the path determined by
-        a candidate prefix. The next node is determined by `bit`, the bit of
-        the prefix corresponding to the next level of the tree.
+        Compute the next node in the IDPF tree along the path determined
+        by a candidate prefix. The next node is determined by `bit`, the
+        bit of the prefix corresponding to the next level of the tree.
         """
 
         field = self.current_field(level)
@@ -198,8 +224,8 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         # REMOVE ME: the cast() calls can be elided in the excerpt.
         y = cast(list[Field], convert_output[1])
         # Implementation note: Here we add the correction word to the
-        # output if `next_ctrl` is set. We avoid branching on the value of
-        # the control bit in order to reduce side channel leakage.
+        # output if `next_ctrl` is set. We avoid branching on the value
+        # of the control bit in order to reduce side channel leakage.
         mask = cast(Field, field(next_ctrl.as_unsigned()))
         for i in range(len(y)):
             y[i] += w_cw[i] * mask
@@ -213,7 +239,10 @@ class IdpfPoplar(Idpf[Field64, Field255]):
     # be limited to 69 columns after de-indenting, or 73 columns before
     # de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def extend(self, seed: bytes, binder: bytes) -> tuple[list[bytes], list[Field2]]:
+    def extend(
+            self,
+            seed: bytes,
+            binder: bytes) -> tuple[list[bytes], list[Field2]]:
         xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
         s = [
             bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
@@ -227,7 +256,11 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         s[1][0] &= 0xFE
         return ([bytes(s[0]), bytes(s[1])], t)
 
-    def convert(self, level: int, seed: bytes, binder: bytes) -> tuple[bytes, FieldVec]:
+    def convert(
+            self,
+            level: int,
+            seed: bytes,
+            binder: bytes) -> tuple[bytes, FieldVec]:
         xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
         next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
         field = self.current_field(level)
@@ -235,7 +268,9 @@ class IdpfPoplar(Idpf[Field64, Field255]):
         # REMOVE ME: the cast() call can be elided in the excerpt.
         return (next_seed, cast(FieldVec, w))
 
-    def encode_public_share(self, correction_words: list[CorrectionWordTuple]) -> bytes:
+    def encode_public_share(
+            self,
+            correction_words: list[CorrectionWordTuple]) -> bytes:
         encoded = bytes()
         control_bits = list(itertools.chain.from_iterable(
             cw[1] for cw in correction_words
@@ -250,7 +285,9 @@ class IdpfPoplar(Idpf[Field64, Field255]):
             encoded += field.encode_vec(cast(list[Field], w_cw))
         return encoded
 
-    def decode_public_share(self, encoded: bytes) -> list[CorrectionWordTuple]:
+    def decode_public_share(
+            self,
+            encoded: bytes) -> list[CorrectionWordTuple]:
         l = (2 * self.BITS + 7) // 8
         encoded_ctrl, encoded = encoded[:l], encoded[l:]
         control_bits = unpack_bits(encoded_ctrl, 2 * self.BITS)

@@ -530,7 +530,10 @@ class ParallelSum(Gadget[F]):
         for i in range(self.count):
             start_index = i * self.subcircuit.ARITY
             end_index = (i + 1) * self.subcircuit.ARITY
-            out += self.subcircuit.eval(field, inp[start_index:end_index])
+            out += self.subcircuit.eval(
+                field,
+                inp[start_index:end_index],
+            )
         return out
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
@@ -571,11 +574,14 @@ class Count(
     # width should be limited to 69 columns after de-indenting, or 73
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def eval(self, meas: list[Field64], joint_rand: list[Field64], _num_shares: int) -> list[Field64]:
+    def eval(
+            self,
+            meas: list[Field64],
+            joint_rand: list[Field64],
+            _num_shares: int) -> list[Field64]:
         self.check_valid_eval(meas, joint_rand)
-        out = self.GADGETS[0].eval(self.field, [meas[0], meas[0]]) \
-            - meas[0]
-        return [out]
+        squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
+        return [squared - meas[0]]
 
     def encode(self, measurement: int) -> list[Field64]:
         if measurement not in [0, 1]:
@@ -619,7 +625,11 @@ class Sum(
     # width should be limited to 69 columns after de-indenting, or 73
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def eval(self, meas: list[Field128], joint_rand: list[Field128], _num_shares: int) -> list[Field128]:
+    def eval(
+            self,
+            meas: list[Field128],
+            joint_rand: list[Field128],
+            _num_shares: int) -> list[Field128]:
         self.check_valid_eval(meas, joint_rand)
         out = self.field(0)
         r = joint_rand[0]
@@ -643,7 +653,10 @@ class Sum(
     def truncate(self, meas: list[Field128]) -> list[Field128]:
         return [self.field.decode_from_bit_vector(meas)]
 
-    def decode(self, output: list[Field128], _num_measurements: int) -> int:
+    def decode(
+            self,
+            output: list[Field128],
+            _num_measurements: int) -> int:
         return output[0].as_unsigned()
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
@@ -688,7 +701,11 @@ class Histogram(
     # width should be limited to 69 columns after de-indenting, or 73
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def eval(self, meas: list[Field128], joint_rand: list[Field128], num_shares: int) -> list[Field128]:
+    def eval(
+            self,
+            meas: list[Field128],
+            joint_rand: list[Field128],
+            num_shares: int) -> list[Field128]:
         self.check_valid_eval(meas, joint_rand)
 
         # Check that each bucket is one or zero.
@@ -697,7 +714,8 @@ class Histogram(
         r_power = r
         shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
-            inputs: list[Optional[Field128]] = [None] * (2 * self.chunk_length)
+            inputs: list[Optional[Field128]]
+            inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
                 index = i * self.chunk_length + j
                 if index < len(meas):
@@ -739,7 +757,10 @@ class Histogram(
     def truncate(self, meas: list[Field128]) -> list[Field128]:
         return meas
 
-    def decode(self, output: list[Field128], _num_measurements: int) -> list[int]:
+    def decode(
+            self,
+            output: list[Field128],
+            _num_measurements: int) -> list[int]:
         return [bucket_count.as_unsigned() for bucket_count in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
@@ -827,7 +848,11 @@ class MultihotCountVec(
     # width should be limited to 69 columns after de-indenting, or 73
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def eval(self, meas: list[Field128], joint_rand: list[Field128], num_shares: int) -> list[Field128]:
+    def eval(
+            self,
+            meas: list[Field128],
+            joint_rand: list[Field128],
+            num_shares: int) -> list[Field128]:
         self.check_valid_eval(meas, joint_rand)
 
         # Check that each entry in the input vector is one or zero.
@@ -836,7 +861,8 @@ class MultihotCountVec(
         r_power = r
         shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
-            inputs: list[Optional[Field128]] = [None] * (2 * self.chunk_length)
+            inputs: list[Optional[Field128]]
+            inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
                 index = i * self.chunk_length + j
                 if index < len(meas):
@@ -894,7 +920,10 @@ class MultihotCountVec(
     def truncate(self, meas: list[Field128]) -> list[Field128]:
         return meas[:self.length]
 
-    def decode(self, output: list[Field128], _num_measurements: int) -> list[int]:
+    def decode(
+            self,
+            output: list[Field128],
+            _num_measurements: int) -> list[int]:
         return [bucket_count.as_unsigned() for bucket_count in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
@@ -948,7 +977,11 @@ class SumVec(
     # width should be limited to 69 columns after de-indenting, or 73
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def eval(self, meas: list[F], joint_rand: list[F], num_shares: int) -> list[F]:
+    def eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)
 
         out = self.field(0)
@@ -957,7 +990,8 @@ class SumVec(
         shares_inv = self.field(num_shares).inv()
 
         for i in range(self.GADGET_CALLS[0]):
-            inputs: list[Optional[F]] = [None] * (2 * self.chunk_length)
+            inputs: list[Optional[F]]
+            inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
                 index = i * self.chunk_length + j
                 if index < len(meas):
@@ -972,7 +1006,10 @@ class SumVec(
 
             # REMOVE ME: the cast() call can be elided in the excerpt.
 
-            out += self.GADGETS[0].eval(self.field, cast(list[F], inputs))
+            out += self.GADGETS[0].eval(
+                self.field,
+                cast(list[F], inputs),
+            )
 
         return [out]
 
@@ -988,7 +1025,9 @@ class SumVec(
         encoded = []
         for val in measurement:
             if val not in range(2**self.bits):
-                raise ValueError('entry of measurement vector is out of range')
+                raise ValueError(
+                    'entry of measurement vector is out of range'
+                )
 
             encoded += self.field.encode_into_bit_vector(val, self.bits)
         return encoded
@@ -1001,7 +1040,10 @@ class SumVec(
             ))
         return truncated
 
-    def decode(self, output: list[F], _num_measurements: int) -> list[int]:
+    def decode(
+            self,
+            output: list[F],
+            _num_measurements: int) -> list[int]:
         return [x.as_unsigned() for x in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:

@@ -238,8 +238,16 @@ F = TypeVar("F", bound=Field)
 # ===================================================================
 def run_vdaf(
         vdaf: Vdaf[
-            Measurement, AggParam, PublicShare, InputShare, list[F], AggShare,
-            AggResult, PrepState, PrepShare, PrepMessage
+            Measurement,
+            AggParam,
+            PublicShare,
+            InputShare,
+            list[F],
+            AggShare,
+            AggResult,
+            PrepState,
+            PrepShare,
+            PrepMessage,
         ],
         verify_key: bytes,
         agg_param: AggParam,
@@ -253,7 +261,7 @@ def run_vdaf(
 
         - `len(verify_key) == vdaf.VERIFY_KEY_SIZE`
         - `len(nonces) == len(measurements)`
-        - `len(nonce) == vdaf.NONCE_SIZE` for each `nonce` in `nonces`
+        - `all(len(nonce) == vdaf.NONCE_SIZE for nonce in nonces)`
     """
 
     if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
@@ -274,7 +282,9 @@ def run_vdaf(
         'agg_shares': [],
         'agg_result': None,  # set below
     }
-    type_params = vdaf.test_vec_set_type_param(cast(dict[str, Any], test_vec))
+    type_params = vdaf.test_vec_set_type_param(
+        cast(dict[str, Any], test_vec)
+    )
 
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
@@ -294,7 +304,9 @@ def run_vdaf(
             'prep_messages': [],
             'out_shares': [],
             'rand': rand.hex(),
-            'public_share': vdaf.test_vec_encode_public_share(public_share).hex()
+            'public_share': vdaf.test_vec_encode_public_share(
+                public_share
+            ).hex()
         }
         for input_share in input_shares:
             prep_test_vec['input_shares'].append(
@@ -334,9 +346,11 @@ def run_vdaf(
             # REMOVE ME
             for prep_share in outbound_prep_shares:
                 prep_test_vec['prep_shares'][i+1].append(
-                    vdaf.test_vec_encode_prep_share(prep_share).hex())
+                    vdaf.test_vec_encode_prep_share(prep_share).hex()
+                )
 
-        # The final outputs of the prepare phase are the output shares.
+        # The final outputs of the prepare phase are the output
+        # shares.
         prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                             outbound_prep_shares)
         # REMOVE ME

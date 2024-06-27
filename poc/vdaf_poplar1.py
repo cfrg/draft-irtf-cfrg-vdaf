@@ -68,7 +68,11 @@ class Poplar1(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def shard(self, measurement: int, nonce: bytes, rand: bytes) -> tuple[bytes, list[Poplar1InputShare]]:
+    def shard(
+            self,
+            measurement: int,
+            nonce: bytes,
+            rand: bytes) -> tuple[bytes, list[Poplar1InputShare]]:
         if len(nonce) != self.NONCE_SIZE:
             raise ValueError("incorrect nonce size")
         if len(rand) != self.RAND_SIZE:
@@ -184,11 +188,14 @@ class Poplar1(
     # limited to 69 columns after de-indenting, or 73 columns before
     # de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def is_valid(self, agg_param: Poplar1AggParam, previous_agg_params: list[Poplar1AggParam]) -> bool:
+    def is_valid(
+            self,
+            agg_param: Poplar1AggParam,
+            previous_agg_params: list[Poplar1AggParam]) -> bool:
         """
-        Checks that levels are increasing between calls, and also enforces that
-        the prefixes at each level are suffixes of the previous level's
-        prefixes.
+        Checks that levels are increasing between calls, and also
+        enforces that the prefixes at each level are suffixes of the
+        previous level's prefixes.
         """
         if len(previous_agg_params) < 1:
             return True
@@ -215,8 +222,16 @@ class Poplar1(
     # after de-indenting, or 73 columns before de-indenting, to avoid
     # warnings from xml2rfc.
     # ===================================================================
-    def prep_init(self, verify_key: bytes, agg_id: int, agg_param: Poplar1AggParam,
-                  nonce: bytes, public_share: bytes, input_share: Poplar1InputShare) -> tuple[Poplar1PrepState, FieldVec]:
+    def prep_init(
+            self,
+            verify_key: bytes,
+            agg_id: int,
+            agg_param: Poplar1AggParam,
+            nonce: bytes,
+            public_share: bytes,
+            input_share: Poplar1InputShare) -> tuple[
+                Poplar1PrepState,
+                FieldVec]:
         (level, prefixes) = agg_param
         (key, corr_seed, corr_inner, corr_leaf) = input_share
         field = self.idpf.current_field(level)
@@ -291,7 +306,12 @@ class Poplar1(
             cast(FieldVec, sketch_share),
         )
 
-    def prep_next(self, prep_state: Poplar1PrepState, prep_msg: Optional[FieldVec]) -> Union[tuple[Poplar1PrepState, FieldVec], FieldVec]:
+    def prep_next(
+            self,
+            prep_state: Poplar1PrepState,
+            prep_msg: Optional[FieldVec]) -> Union[
+                tuple[Poplar1PrepState, FieldVec],
+                FieldVec]:
         # REMOVE ME: the cast() call can be elided in the excerpt.
         prev_sketch = cast(list[Field], prep_msg)
         (step, level, prep_mem) = prep_state
@@ -334,7 +354,10 @@ class Poplar1(
 
         raise ValueError('invalid prep state')
 
-    def prep_shares_to_prep(self, agg_param: Poplar1AggParam, prep_shares: list[FieldVec]) -> Optional[FieldVec]:
+    def prep_shares_to_prep(
+            self,
+            agg_param: Poplar1AggParam,
+            prep_shares: list[FieldVec]) -> Optional[FieldVec]:
         if len(prep_shares) != 2:
             raise ValueError('incorrect number of prep shares')
         (level, _) = agg_param
@@ -362,7 +385,10 @@ class Poplar1(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def aggregate(self, agg_param: Poplar1AggParam, out_shares: list[FieldVec]) -> FieldVec:
+    def aggregate(
+            self,
+            agg_param: Poplar1AggParam,
+            out_shares: list[FieldVec]) -> FieldVec:
         (level, prefixes) = agg_param
         field = self.idpf.current_field(level)
         # REMOVE ME: the cast() calls can be elided in the excerpt.
@@ -376,8 +402,11 @@ class Poplar1(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def unshard(self, agg_param: Poplar1AggParam,
-                agg_shares: list[FieldVec], _num_measurements: int) -> list[int]:
+    def unshard(
+            self,
+            agg_param: Poplar1AggParam,
+            agg_shares: list[FieldVec],
+            _num_measurements: int) -> list[int]:
         (level, prefixes) = agg_param
         field = self.idpf.current_field(level)
         # REMOVE ME: the cast() calls can be elided in the excerpt.
@@ -391,7 +420,10 @@ class Poplar1(
     # limited to 69 columns after de-indenting, or 73 columns before
     # de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def encode_agg_param(self, level: int, prefixes: Sequence[int]) -> bytes:
+    def encode_agg_param(
+            self,
+            level: int,
+            prefixes: Sequence[int]) -> bytes:
         if level not in range(2 ** 16):
             raise ValueError('level out of range')
         if len(prefixes) not in range(2 ** 32):
@@ -462,8 +494,12 @@ def encode_idpf_field_vec(vec: FieldVec) -> bytes:
 # figure {{poplar1-validity-scope}}. Its width should be limited to
 # 69 columns, to avoid warnings from xml2rfc.
 # ===================================================================
-def get_ancestor(index: int, this_level: int, last_level: int) -> int:
+def get_ancestor(
+        index: int,
+        this_level: int,
+        last_level: int) -> int:
     """
-    Helper function to determine the prefix of `index` at `last_level`.
+    Helper function to determine the prefix of `index` at
+    `last_level`.
     """
     return index >> (this_level - last_level)
