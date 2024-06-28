@@ -8,6 +8,21 @@ from field import Field, Field2, Field64, Field255
 from idpf import Idpf
 from xof import XofFixedKeyAes128
 
+# This file, and vdaf_poplar1.py, make extensive use of `typing.cast()`. This
+# acts like the identity function at runtime. During static analysis, it gives
+# us an escape hatch to override the results of type inference. Static analysis
+# tools will ignore the type of the value that is passed in, and instead assume
+# that the output of `cast()` has the type given in the first argument.
+#
+# This is necessary primarily because we have many unions of `Field64` and
+# `Field255`, instances of those classes, or lists thereof. Without the casts,
+# we would get warnings on arithmetic between objects of such union types,
+# because `mypy`'s analysis conservatively assumes that we could have objects
+# of different field classes on either side (though that doesn't happen in
+# practice). Casting unions of specific fields to their superclass avoids such
+# errors, and then casting back to union types lets us keep precise return
+# types, which aids with self-documentation.
+
 FieldVec: TypeAlias = Union[list[Field64], list[Field255]]
 CorrectionWordTuple: TypeAlias = tuple[bytes, tuple[Field2, Field2], FieldVec]
 
