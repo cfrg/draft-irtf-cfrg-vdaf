@@ -197,8 +197,8 @@ class ProveGadget(Gadget[F]):
 
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.k += 1
-        for j, inp_j in enumerate(inp):
-            self.wire[j][self.k] = inp_j
+        for j in range(len(inp)):
+            self.wire[j][self.k] = inp[j]
         return self.inner.eval(field, inp)
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
@@ -245,8 +245,8 @@ class QueryGadget(Gadget[F]):
 
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.k += 1
-        for j, inp_j in enumerate(inp):
-            self.wire[j][self.k] = inp_j
+        for j in range(len(inp)):
+            self.wire[j][self.k] = inp[j]
         return poly_eval(field, self.gadget_poly, self.alpha ** self.k)
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
@@ -501,9 +501,9 @@ class PolyEval(Gadget[F]):
         out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
         out[0] = p[0]
         x = inp_poly[0]
-        for p_i in p[1:]:
-            for j, x_j in enumerate(x):
-                out[j] += p_i * x_j
+        for i in range(1, len(p)):
+            for j in range(len(x)):
+                out[j] += p[i] * x[j]
             x = poly_mul(field, x, inp_poly[0])
         return poly_strip(field, out)
 
