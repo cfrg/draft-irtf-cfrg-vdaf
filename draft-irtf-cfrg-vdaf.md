@@ -649,6 +649,11 @@ Some common functionalities:
   vectors of the same length, such that they all add up to the input vector,
   and each proper subset of the vectors are indistinguishable from random.
 
+* `cast(typ: type, val: object) -> object` returns the input value unchanged.
+  This is only present to assist with static analysis of the Python code.
+  Type checkers will ignore the inferred type of the input value, and assume
+  the output value has the given type.
+
 # Overview
 
 ~~~
