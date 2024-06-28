@@ -92,7 +92,7 @@ class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
              key: bytes,
              level: int,
              prefixes: Sequence[int],
-             binder: bytes) -> Output[FieldInner, FieldLeaf]:
+             binder: bytes) -> Output:
         """
         Evaluate an IDPF key share public share at a given level of the tree
         and with the given sequence of prefixes. The output is a vector where
@@ -131,8 +131,7 @@ class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
             level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
         if level < self.BITS - 1:
             return self.field_inner
-        else:
-            return self.field_leaf
+        return self.field_leaf
 
     def is_prefix(self, x: int, y: int, level: int) -> bool:
         """

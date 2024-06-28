@@ -9,6 +9,7 @@ class TestPoplar1(unittest.TestCase):
     def test_poplar1(self) -> None:
         test_vdaf(Poplar1(15), (15, ()), [], [])
         test_vdaf(Poplar1(2), (1, (0b11,)), [], [0])
+        test_vdaf(Poplar1(2), (1, (0b11,)), [0], [0])
         test_vdaf(
             Poplar1(2),
             (0, (0b0, 0b1)),

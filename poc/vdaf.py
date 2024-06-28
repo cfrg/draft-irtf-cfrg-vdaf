@@ -357,21 +357,21 @@ def run_vdaf(
         prep_test_vec['prep_messages'].append(
             vdaf.test_vec_encode_prep_msg(prep_msg).hex())
 
-        outbound_output_shares = []
+        outbound_out_shares = []
         for j in range(vdaf.SHARES):
             out_share = vdaf.prep_next(prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
-            outbound_output_shares.append(out_share)
+            outbound_out_shares.append(out_share)
 
         # REMOVE ME
-        for out_share in outbound_output_shares:
+        for out_share in outbound_out_shares:
             prep_test_vec['out_shares'].append([
                 to_le_bytes(x.as_unsigned(), x.ENCODED_SIZE).hex()
                 for x in out_share
             ])
         test_vec['prep'].append(prep_test_vec)
 
-        out_shares.append(outbound_output_shares)
+        out_shares.append(outbound_out_shares)
 
     # Each Aggregator aggregates its output shares into an
     # aggregate share. In a distributed VDAF computation, the

@@ -318,7 +318,7 @@ class Poplar1(
 
         if step == b'evaluate sketch':
             if prev_sketch is None:
-                raise ValueError("inconsistent state")
+                prev_sketch = self.idpf.current_field(level).zeros(3)
             elif len(prev_sketch) != 3:
                 raise ValueError('incorrect sketch length')
             # REMOVE ME: the cast() calls can be elided in the excerpt.

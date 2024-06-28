@@ -29,8 +29,8 @@ Prio3InputShare: TypeAlias = Union[
         Optional[bytes],  # joint randomness blind
     ],
     tuple[  # helper input share
-        bytes,  # measurement share
-        bytes,  # proof share
+        bytes,  # measurement share seed
+        bytes,  # proof share seed
         Optional[bytes],  # joint randomness blind
     ],
 ]

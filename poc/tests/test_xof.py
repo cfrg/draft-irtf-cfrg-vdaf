@@ -8,7 +8,7 @@ from field import Field, Field64, Field128
 from xof import Xof, XofFixedKeyAes128, XofTurboShake128
 
 
-def test_xof(cls: type[Xof], f: type[Field], expanded_len: int) -> None:
+def test_xof(cls: type[Xof], field: type[Field], expanded_len: int) -> None:
     dst = format_dst(7, 1337, 2)
     binder = b'a string that binds some protocol artifact to the output'
     seed = gen_rand(cls.SEED_SIZE)
@@ -29,7 +29,7 @@ def test_xof(cls: type[Xof], f: type[Field], expanded_len: int) -> None:
     assert len(derived_seed) == cls.SEED_SIZE
 
     # Test expand_into_vec
-    expanded_vec = cls.expand_into_vec(f, seed, dst, binder, expanded_len)
+    expanded_vec = cls.expand_into_vec(field, seed, dst, binder, expanded_len)
     assert len(expanded_vec) == expanded_len
 
 

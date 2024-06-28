@@ -21,7 +21,7 @@ class Daf(
         ],
         metaclass=ABCMeta):
     """
-    A Distributed Aggregation Function (DAF)
+    A Distributed Aggregation Function (DAF).
 
     Generic type parameters:
     Measurement -- the measurement type

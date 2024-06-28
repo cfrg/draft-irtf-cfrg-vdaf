@@ -250,7 +250,9 @@ class QueryGadget(Gadget[F]):
         return poly_eval(field, self.gadget_poly, self.alpha ** self.k)
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
-        raise NotImplementedError()
+        raise NotImplementedError(
+            "QueryGadget does not need to implement eval_poly()"
+        )
 
 
 def query_wrapped(
@@ -305,6 +307,9 @@ class FlpGeneric(Flp[Measurement, AggResult, F]):
 
         # Construct the proof.
         proof = []
+        # Downcast the gadgets from list[Gadget[F]] to list[ProveGadget[F]],
+        # so we can access the wire values. The call to prove_wrapped() above
+        # ensures that all gadgets will be of this type.
         for g in cast(list[ProveGadget[F]], valid.GADGETS):
             P = len(g.wire[0])
 
@@ -682,7 +687,7 @@ class Sum(
 
 class Histogram(
         Valid[
-            int,  # Measurement, `range(length)`
+            int,        # Measurement, `range(length)`
             list[int],  # AggResult
             Field128,
         ]):

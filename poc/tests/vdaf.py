@@ -16,8 +16,16 @@ PrepMessage = TypeVar("PrepMessage")
 
 def test_vdaf(
         vdaf: Vdaf[
-            Measurement, AggParam, PublicShare, InputShare, list[Any], AggShare,
-            AggResult, PrepState, PrepShare, PrepMessage
+            Measurement,
+            AggParam,
+            PublicShare,
+            InputShare,
+            list[Any],  # OutShare
+            AggShare,
+            AggResult,
+            PrepState,
+            PrepShare,
+            PrepMessage,
         ],
         agg_param: AggParam,
         measurements: list[Measurement],
