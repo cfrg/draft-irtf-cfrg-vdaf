@@ -654,6 +654,12 @@ Some common functionalities:
   Type checkers will ignore the inferred type of the input value, and assume
   the output value has the given type.
 
+* `range(stop)` or `range(start, stop[, step])` is the range function from the
+  Python standard library. The one-argument form returns the integers from zero
+  (inclusive) to `stop`, exclusive. The two- and three-argument forms allow
+  overriding the start of the range and overriding the step between successive
+  output values.
+
 # Overview
 
 ~~~
