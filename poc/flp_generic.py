@@ -360,8 +360,8 @@ class FlpGeneric(Flp[Measurement, AggResult, F]):
             ([r], query_rand) = front(1, query_rand)
             r_power = r
             v = self.field(0)
-            for x in out:
-                v += r_power * x
+            for out_elem in out:
+                v += r_power * out_elem
                 r_power *= r
         else:
             [v] = out
@@ -380,12 +380,16 @@ class FlpGeneric(Flp[Measurement, AggResult, F]):
                 raise ValueError('query randomness contains a root of unity')
 
             # Compute the well-formedness test for the gadget polynomial.
+            x = []
             wire_inp = [g.alpha ** k for k in range(P)]
             for j in range(g.ARITY):
                 wire_poly = poly_interp(self.field, wire_inp, g.wire[j])
-                verifier.append(poly_eval(self.field, wire_poly, t))
+                x.append(poly_eval(self.field, wire_poly, t))
 
-            verifier.append(poly_eval(self.field, g.gadget_poly, t))
+            y = poly_eval(self.field, g.gadget_poly, t)
+
+            verifier += x
+            verifier.append(y)
 
         return verifier
 
