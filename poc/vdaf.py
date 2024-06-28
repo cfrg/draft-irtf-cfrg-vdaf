@@ -242,7 +242,7 @@ def run_vdaf(
             AggParam,
             PublicShare,
             InputShare,
-            list[F],
+            list[F],  # OutShare
             AggShare,
             AggResult,
             PrepState,
@@ -255,7 +255,8 @@ def run_vdaf(
         measurements: list[Measurement],
         print_test_vec: bool = False,
         test_vec_instance: int = 0) -> AggResult:
-    """Run the VDAF on a list of measurements.
+    """
+    Run the VDAF on a list of measurements.
 
     Pre-conditions:
 

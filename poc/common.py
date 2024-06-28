@@ -61,11 +61,10 @@ def xor(left: bytes, right: bytes) -> bytes:
     return bytes(map(lambda x: x[0] ^ x[1], zip(left, right)))
 
 
-# NOTE: The vec_sub() and vec_add() functions are excerpted in the
-# document, as the figure {{field-helper-functions}}. Their width
-# should be limited to 69 columns to avoid warnings from xml2rfc.
-# TODO: vec_neg() should be excerpted as well, since it is used in
-# Poplar1.
+# NOTE: The vec_sub(), vec_add(), and vec_neg() functions are
+# excerpted in the document, as the figure
+# {{field-helper-functions}}. Their width should be limited to 69
+# columns to avoid warnings from xml2rfc.
 # ===================================================================
 def vec_sub(left: list[F], right: list[F]) -> list[F]:
     """

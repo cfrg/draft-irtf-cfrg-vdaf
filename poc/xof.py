@@ -112,7 +112,7 @@ class Xof(metaclass=ABCMeta):
 # columns, to avoid warnings from xml2rfc.
 # ===================================================================
 class XofTurboShake128(Xof):
-    """XOF based on SHA-3 (SHAKE128)."""
+    """XOF wrapper for TurboSHAKE128."""
 
     # Associated parameters
     SEED_SIZE = 16
@@ -153,8 +153,13 @@ class XofTurboShake128(Xof):
         return self.h.read(length)
 
 
-# NOTE: This class is excerpted in the document. Its width should be
-# limited to 69 columns, to avoid warnings from xml2rfc.
+# NOTE: A simplified implementation of this class is excerpted in the
+# document. The code in the docstrings of some methods is used in
+# lieu of their actual bodies, because they provide a simpler
+# implementation defined in terms of abstract `TurboSHAKE128(M, D,
+# L)` and `AES128(key, plaintext)` functions, and not real
+# cryptographic APIs. The width of the relevant portions of the class
+# should be limited to 69 columns, to avoid warnings from xml2rfc.
 # ===================================================================
 class XofFixedKeyAes128(Xof):
     """
@@ -169,6 +174,24 @@ class XofFixedKeyAes128(Xof):
     test_vec_name = 'XofFixedKeyAes128'
 
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
+        """
+        if len(seed) != self.SEED_SIZE:
+            raise ValueError("incorrect seed size")
+
+        self.length_consumed = 0
+
+        # Use TurboSHAKE128 to derive a key from the binder string
+        # and domain separation tag. Note that the AES key does not
+        # need to be kept secret from any party. However, when used
+        # with IdpfPoplar, we require the binder to be a random
+        # nonce.
+        #
+        # Implementation note: This step can be cached across XOF
+        # evaluations with many different seeds.
+        dst_length = to_le_bytes(len(dst), 1)
+        self.fixed_key = TurboSHAKE128(dst_length + dst + binder, 2, 16)
+        self.seed = seed
+        """
         if len(seed) != self.SEED_SIZE:
             raise ValueError("incorrect seed size")
 
@@ -214,6 +237,12 @@ class XofFixedKeyAes128(Xof):
         Client, but differs between Clients.
 
         Function `AES128(key, block)` is the AES-128 blockcipher.
+
+        ---
+
+        lo, hi = block[:8], block[8:]
+        sigma_block = concat([hi, xor(hi, lo)])
+        return xor(AES128(self.fixed_key, sigma_block), sigma_block)
         """
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])

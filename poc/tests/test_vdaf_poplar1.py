@@ -107,15 +107,15 @@ class TestPoplar1(unittest.TestCase):
         cls = Poplar1(256)
         want: tuple[int, tuple[int, ...]]
         want = (0, ())
-        assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
+        assert want == cls.decode_agg_param(cls.encode_agg_param(want))
         want = (0, (0, 1))
-        assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
+        assert want == cls.decode_agg_param(cls.encode_agg_param(want))
         want = (2, (0, 1, 2, 3))
-        assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
+        assert want == cls.decode_agg_param(cls.encode_agg_param(want))
         want = (17, (0, 1, 1233, 2 ** 18 - 1))
-        assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
+        assert want == cls.decode_agg_param(cls.encode_agg_param(want))
         want = (255, (0, 1, 1233, 2 ** 256 - 1))
-        assert want == cls.decode_agg_param(cls.encode_agg_param(*want))
+        assert want == cls.decode_agg_param(cls.encode_agg_param(want))
 
     def test_generate_test_vectors(self) -> None:
         # Generate test vectors.

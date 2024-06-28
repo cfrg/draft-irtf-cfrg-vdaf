@@ -88,10 +88,11 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
     # as `GADGETS`.
     GADGET_CALLS: list[int]
 
-    # NOTE: The prove_rand_len(), query_rand_len(), proof_len(), and
-    # verifier_len() methods are excerpted in the document, de-indented.
-    # Their width should be limited to 69 columns after de-indenting, or
-    # 73 columns before de-indenting, to avoid warnings from xml2rfc.
+    # NOTE: The prove_rand_len(), query_rand_len(), proof_len(),
+    # verifier_len(), and check_valid_eval() methods are excerpted in the
+    # document, de-indented. Their width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
     # ===================================================================
     def prove_rand_len(self) -> int:
         """Length of the prover randomness."""
@@ -118,6 +119,12 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
         for g in self.GADGETS:
             length += g.ARITY + 1
         return length
+
+    def check_valid_eval(self, meas: list[F], joint_rand: list[F]) -> None:
+        if len(meas) != self.MEAS_LEN:
+            raise ValueError('incorrect measurement length')
+        if len(joint_rand) != self.JOINT_RAND_LEN:
+            raise ValueError('incorrect joint randomness length')
 
     @abstractmethod
     def encode(self, measurement: Measurement) -> list[F]:
@@ -175,12 +182,6 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
         class. Returns the keys that were set.
         """
         return []
-
-    def check_valid_eval(self, meas: list[F], joint_rand: list[F]) -> None:
-        if len(meas) != self.MEAS_LEN:
-            raise ValueError('incorrect measurement length')
-        if len(joint_rand) != self.JOINT_RAND_LEN:
-            raise ValueError('incorrect joint randomness length')
 
 
 class ProveGadget(Gadget[F]):

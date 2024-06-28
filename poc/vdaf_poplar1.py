@@ -407,10 +407,8 @@ class Poplar1(
     # limited to 69 columns after de-indenting, or 73 columns before
     # de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def encode_agg_param(
-            self,
-            level: int,
-            prefixes: Sequence[int]) -> bytes:
+    def encode_agg_param(self, agg_param: Poplar1AggParam) -> bytes:
+        level, prefixes = agg_param
         if level not in range(2 ** 16):
             raise ValueError('level out of range')
         if len(prefixes) not in range(2 ** 32):
