@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-27T00:46:16.305623+00:00",
+  "timestamp": "2024-06-30T00:51:25.180777+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5421,7 +5421,7 @@
       ],
       "body": "We currently use a mixture of `<artwork>` and `<sourcecode>` tags. These are both generated when we fence off preformatted text with three or more tildes. If an identifier appears after the leading group of tildes, on the same line, then a `<sourcecode>` element is generated, with its `type` attribute set to that identifier. See https://datatracker.ietf.org/doc/html/rfc7991#section-2.48 for the xml2rfc tag definition, `<sourcecode>` is now preferred over `<artwork>` for source code and formal languages. The document has a mix of ASCII art and source code excerpts, though almost all `~~~` code fences lack an identifier, save for one with `state` and four with `transition`. We should change excerpts from the proof of concept to `~~~ python`, and change `~~~ state` and `~~~ transition` to `~~~ pseudocode`, which are among the list of preferred values. As a bonus, my editor supports embedded syntax highlighting when I switch a block to `~~~ python`. The fences around true ASCII art can stay as they are.",
       "createdAt": "2024-06-26T20:57:46Z",
-      "updatedAt": "2024-06-26T21:07:17Z",
+      "updatedAt": "2024-06-27T00:49:11Z",
       "closedAt": null,
       "comments": [
         {
@@ -5430,8 +5430,49 @@
           "body": "There is a living list of preferred values for `type` at https://www.rfc-editor.org/rpc/wiki/doku.php?id=sourcecode-types, and it incldues `tls-presentation`. We should use this in the ping-pong topology section.",
           "createdAt": "2024-06-26T21:07:16Z",
           "updatedAt": "2024-06-26T21:07:16Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> There is a living list of preferred values for `type` at https://www.rfc-editor.org/rpc/wiki/doku.php?id=sourcecode-types, and it incldues `tls-presentation`. We should use this in the ping-pong topology section.\r\n\r\nWe also use TLS representation for specifying some of the message formats in {{prio3}} and {{poplar1}}.",
+          "createdAt": "2024-06-27T00:49:10Z",
+          "updatedAt": "2024-06-27T00:49:10Z"
         }
       ]
+    },
+    {
+      "number": 365,
+      "id": "I_kwDOGKuqOc6NzhPU",
+      "title": "Prio3Count circuit optimization",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/365",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change"
+      ],
+      "body": "The Count circuit currently computes $x^2-x$ using one `Mul` gate, and some affine gates. This could be slightly improved by instead using a polynomial evaluation gate, with arity 1 instead of 2, to compute either $x^2$ or the whole polynomial. This would save a little bit of space on the wire, and probably some computation time as well. We should benchmark the potential improvement, and then decide whether it is worth breaking wire compatibility of Prio3Count or not.",
+      "createdAt": "2024-06-27T21:06:47Z",
+      "updatedAt": "2024-06-27T21:14:29Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 366,
+      "id": "I_kwDOGKuqOc6N5_LM",
+      "title": "Poplar1: reject empty first round prepare message immediately",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/366",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently, when `prep_next()` handles the first round prepare message, it replaces an empty message with three zeros, before continuing on with sketching. Stepping backwards, `prep_shares_to_prep()` just adds shares of a vector of three elements together and returns it. Previously, it used to encode vectors of zeros as the empty string, see https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/363#discussion_r1657803678. I think getting three zero field elements in the first round of sketching is highly unlikely. Since `prep_shares_to_prep()` won't return `None` on the first round, then we can remove this special case, reject empty prepare messages on this round, and stop continuing to verify a sketch of zeros.",
+      "createdAt": "2024-06-28T16:35:54Z",
+      "updatedAt": "2024-06-28T16:35:54Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -31518,13 +31559,13 @@
       "labels": [],
       "body": "This PR is going to replace class factories throughout the codebase with conventional OOP inheritance and classes defined at the top level. This will make type checking and other static analysis work better, and help avoid bugs around mutating class attributes on the wrong class in factory methods. So far I've rewritten `daf.py`, and improved the type hints in `field.py`, so that __add__ returns `Self` instead of `Field`. `Self` is a special generic type variable, so this more precise signature tells us we get a field element of the same type back, not a field element from possibly any field. I needed this improvement after adding hints to more signatures in `TestDaf`, particularly `aggregate()`.\r\n\r\nRelated to #361.",
       "createdAt": "2024-06-20T16:38:26Z",
-      "updatedAt": "2024-06-26T22:49:05Z",
+      "updatedAt": "2024-06-29T00:00:33Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "39fb4753a55bbc33a8da8c662dba8ed99f50e6ff",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/poc-oop",
-      "headRefOid": "605b6529ecb5d4e85208c628486d9684d1e5793c",
+      "headRefOid": "d470f0b02806079983c5346409e10c42bfb0db40",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -31536,6 +31577,27 @@
           "body": "The type hint system does not support associated types, but I am able to get just as strong type checking by defining a lot of generic type parameters on abstract classes that define interfaces, and then filling in those type parameters on concrete subclasses. I get errors from mypy if an overridden method has a signature incompatible with that defined by the superclass.",
           "createdAt": "2024-06-21T21:20:46Z",
           "updatedAt": "2024-06-21T21:24:03Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Alright, I've done everything but update the excerpts in the markdown file at this point. I'll hold off on that until the changes in the proof of concept are settled.",
+          "createdAt": "2024-06-27T14:43:01Z",
+          "updatedAt": "2024-06-27T14:43:01Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This closes #233 as well, since it replaces various class arguments named after classes with `self` arguments instead. I checked this with `sage -python -m pylint --disable=all --enable redefined-outer-name *.py tests/*.py`.",
+          "createdAt": "2024-06-27T22:17:15Z",
+          "updatedAt": "2024-06-27T22:17:15Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> This closes #233 as well, since it replaces various class arguments named after classes with `self` arguments instead. I checked this with `sage -python -m pylint --disable=all --enable redefined-outer-name *.py tests/*.py`.\r\n\r\nWorth adding this check to CI I think.",
+          "createdAt": "2024-06-27T23:11:03Z",
+          "updatedAt": "2024-06-27T23:11:03Z"
         }
       ],
       "reviews": [
@@ -31618,6 +31680,317 @@
               "body": "Thinking about this some more, `Flp` doesn't need a `valid: Valid` attribute, `FlpGeneric` does, so I can unwind this particular change.",
               "createdAt": "2024-06-26T14:32:48Z",
               "updatedAt": "2024-06-26T14:32:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc5_7Yxb",
+          "commit": {
+            "abbreviatedOid": "a538b43"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Wow. I started working on the generic parameter route while working on #59 and gave up. I can appreciate how much work this was. _Thank you_: I think we're way better off. This could also provide a template for future CFRG docs, e.g., the PINE or Mastic drafts.\r\n\r\nJust a few comments/questions inline.",
+          "createdAt": "2024-06-27T18:55:01Z",
+          "updatedAt": "2024-06-27T21:13:24Z",
+          "comments": [
+            {
+              "originalPosition": 136,
+              "body": "where do we use this on `bytes`?",
+              "createdAt": "2024-06-27T18:59:53Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 28,
+              "body": "\r\n```suggestion\r\n    A Distributed Aggregation Function (DAF).\r\n```",
+              "createdAt": "2024-06-27T19:01:12Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 45,
+              "body": "Whooaaa I didn't know you could refer to the class as `Self`!",
+              "createdAt": "2024-06-27T19:09:05Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 266,
+              "body": "Why go with `enumerate()` here? This is a little harder to read IMO.\r\nHere and elsewhere.",
+              "createdAt": "2024-06-27T19:12:19Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "Does mypy enforce this?",
+              "createdAt": "2024-06-27T19:16:36Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 271,
+              "body": "```suggestion\r\n        raise NotImplementedError(\"QueryGadget does not need to implement eval_poly()\")\r\n```",
+              "createdAt": "2024-06-27T19:21:25Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 341,
+              "body": "Why is this `cast()` needed? Maybe add a comment.",
+              "createdAt": "2024-06-27T19:23:07Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 433,
+              "body": "`x` and `y` correspond to variables named in the draft: https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf#section-7.3.3.2-2.5.1\r\n\r\nI'd like to keep them.\r\n",
+              "createdAt": "2024-06-27T19:25:54Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 805,
+              "body": "```suggestion\r\n            int,        # Measurement, `range(length)`\r\n            list[int],  # AggResult\r\n            Field128,\r\n```",
+              "createdAt": "2024-06-27T19:31:27Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 114,
+              "body": "I don't think you need the generic parameters here.\r\n```suggestion\r\n             binder: bytes) -> Output:\r\n```",
+              "createdAt": "2024-06-27T19:39:32Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 150,
+              "body": "Writing Go for years makes me think this is more readable. Feel free to disregard if you don't agree.\r\n```suggestion\r\n        return self.field_leaf\r\n```",
+              "createdAt": "2024-06-27T19:41:06Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 11,
+              "body": "`f` -> `field` for consistency with above.\r\n```suggestion\r\ndef test_xof(cls: type[Xof], field: type[Field], expanded_len: int) -> None:\r\n```",
+              "createdAt": "2024-06-27T20:00:08Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 15,
+              "body": "WDYTA about declaring these type parameters in one file so that we don't have to keep re-declaring them in different files?",
+              "createdAt": "2024-06-27T20:01:31Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 26,
+              "body": "What is `list[Any]` refer to?",
+              "createdAt": "2024-06-27T20:02:14Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 442,
+              "body": "Consistency with `out_share` below\r\n```suggestion\r\n        outbound_out_shares = []\r\n```",
+              "createdAt": "2024-06-27T20:05:50Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 413,
+              "body": "This seems to be a breaking change. It actually seems reasonable to me, and in any case I don't\r\n\r\nDigging through git history, this goes back to the initial version of Popolar1 (a88e2cef):\r\n```python\r\n        elif step == b'sketch round 1' and opt_sketch != None:\r\n            prev_sketch = Field.decode_vec(opt_sketch)\r\n            if len(prev_sketch) == 0:\r\n                prev_sketch = Field.zeros(3)\r\n            elif len(prev_sketch) != 3:\r\n                raise ERR_INPUT # prep message malformed\r\n```\r\n\r\nI suppose this behavior made sense because we treated `b''` as a synonym for the all-zero string:\r\n```python\r\n        if sketch == Field.zeros(len(sketch)):\r\n            # In order to reduce communication overhead, let the\r\n            # empty string denote the zero vector of the required\r\n            # length.\r\n            return b''\r\n```\r\n\r\nHowever, we have sense moved away from operating on byte strings and operating on typed data instead. The type is now `Optional[FieldVec]`, and we only consume `None` on the \"reveal sketch\" step.\r\n\r\nI think we should take this change, but we may need to treat this as breaking and bump the DST for Poplar1.",
+              "createdAt": "2024-06-27T20:49:50Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 526,
+              "body": "FWIW, I think we can probably live with keeping the `cast()`s in the draft. We'd just need to explain somewhere in pros what it means.",
+              "createdAt": "2024-06-27T20:53:03Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            },
+            {
+              "originalPosition": 33,
+              "body": "```suggestion\r\n        bytes,  # measurement share seed\r\n        bytes,  # proof share seed\r\n```",
+              "createdAt": "2024-06-27T20:59:11Z",
+              "updatedAt": "2024-06-27T21:13:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6ACwEc",
+          "commit": {
+            "abbreviatedOid": "10f311d"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-28T14:34:24Z",
+          "updatedAt": "2024-06-28T16:40:39Z",
+          "comments": [
+            {
+              "originalPosition": 136,
+              "body": "There's one case in the Poplar1 shard method, splitting off the IDPF randomness.",
+              "createdAt": "2024-06-28T14:34:24Z",
+              "updatedAt": "2024-06-28T16:40:39Z"
+            },
+            {
+              "originalPosition": 433,
+              "body": "I ran into problems because x was used with a different type further up in the method. I can rename that variable instead.",
+              "createdAt": "2024-06-28T15:08:49Z",
+              "updatedAt": "2024-06-28T16:40:39Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "Yes, insofar as it requires that types subclass the bound when it is used, and it allows you to use methods and attributes the bound provides.",
+              "createdAt": "2024-06-28T15:24:29Z",
+              "updatedAt": "2024-06-28T16:40:39Z"
+            },
+            {
+              "originalPosition": 15,
+              "body": "It seems like this would be non-idiomatic, from what I've seen. Some sources prefix their TypeVar variables with one underscore, to make them effectively module-private (through mangling). I also worry whether various static analysis tools could handle chasing imports to locate type variable definitions. Plus, different files have three different bounds for type variables named `F`.\r\n\r\nType variables have unintuitive behavior, because whenever they get bound in a class or function definition, each binding is entirely separate from the others. Thus, there's nothing to be saved but line count by sharing them, though I think having type variable declarations close to uses outweighs this.",
+              "createdAt": "2024-06-28T15:59:05Z",
+              "updatedAt": "2024-06-28T16:40:39Z"
+            },
+            {
+              "originalPosition": 413,
+              "body": "Hmm, I'll back this out and put a current_field() call back for now, (I don't like the error message I used anymore) but we should probably follow up on this in #366. I don't think we would expect the first prepare message to be three zeros. Now, `prep_shares_to_prep()` only compresses the second round message, when it is one zero.",
+              "createdAt": "2024-06-28T16:25:19Z",
+              "updatedAt": "2024-06-28T16:40:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6AEXQm",
+          "commit": {
+            "abbreviatedOid": "a538b43"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-28T17:42:59Z",
+          "updatedAt": "2024-06-28T17:43:00Z",
+          "comments": [
+            {
+              "originalPosition": 433,
+              "body": "In that case, feel free to keep your code. Perhaps add a comment clarifying how this connects to the text in the doc.",
+              "createdAt": "2024-06-28T17:43:00Z",
+              "updatedAt": "2024-06-28T17:43:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6AEX-w",
+          "commit": {
+            "abbreviatedOid": "a538b43"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-28T17:44:49Z",
+          "updatedAt": "2024-06-28T17:44:49Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "FWIW as of python 3.12 we get to do stuff like this:\r\n```python\r\nclass Foo[Measurement]:\r\n    ...\r\n```\r\nHowever the lateste version of sage uses an older version of python.",
+              "createdAt": "2024-06-28T17:44:49Z",
+              "updatedAt": "2024-06-28T17:44:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6AEYjp",
+          "commit": {
+            "abbreviatedOid": "a538b43"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-28T17:46:04Z",
+          "updatedAt": "2024-06-28T17:46:04Z",
+          "comments": [
+            {
+              "originalPosition": 413,
+              "body": "Agreed this is low probability and probably negligible, but my intuition is that it could weaken the security bound somewhat. I could be wrong.",
+              "createdAt": "2024-06-28T17:46:04Z",
+              "updatedAt": "2024-06-28T17:46:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6AEZTq",
+          "commit": {
+            "abbreviatedOid": "b0d0d79"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-28T17:48:20Z",
+          "updatedAt": "2024-06-28T17:48:20Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "I appreciate the thorough analysis here. It may be useful to summarize this somewhere in a comment.",
+              "createdAt": "2024-06-28T17:48:20Z",
+              "updatedAt": "2024-06-28T17:48:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6AEcr3",
+          "commit": {
+            "abbreviatedOid": "7c04c58"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-28T17:57:03Z",
+          "updatedAt": "2024-06-28T17:57:03Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6AEvCx",
+          "commit": {
+            "abbreviatedOid": "a538b43"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-06-28T18:42:17Z",
+          "updatedAt": "2024-06-28T18:42:17Z",
+          "comments": [
+            {
+              "originalPosition": 433,
+              "body": "Fixed in 7c04c58193cb09e29dd27302deb9c7d4c7e1cf11, this leaves a smaller and nicer diff, keeping x and y during the gadget polynomial query.",
+              "createdAt": "2024-06-28T18:42:17Z",
+              "updatedAt": "2024-06-28T18:42:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6AGPZB",
+          "commit": {
+            "abbreviatedOid": "d470f0b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-06-28T23:57:02Z",
+          "updatedAt": "2024-06-29T00:00:33Z",
+          "comments": [
+            {
+              "originalPosition": 1740,
+              "body": "?\r\n\r\nLikewise elsewhere (grep for `\\.Field')\r\n```suggestion\r\n| `Field`          | `valid.field`       |\r\n```",
+              "createdAt": "2024-06-28T23:57:02Z",
+              "updatedAt": "2024-06-29T00:00:33Z"
+            },
+            {
+              "originalPosition": 1760,
+              "body": "Perhaps clarify in the conventions section that `F` is sometimes used as a generic parameter for a `Field`.",
+              "createdAt": "2024-06-28T23:57:44Z",
+              "updatedAt": "2024-06-29T00:00:33Z"
+            },
+            {
+              "originalPosition": 2053,
+              "body": "Do we need to define this in prose?\r\n\r\nPreviously we were leaving this out, though I don't think we've been consistent.\r\n\r\nIf you decide to remove it, then annotate it with `# REMOVE ME` like we do for other things.",
+              "createdAt": "2024-06-28T23:58:18Z",
+              "updatedAt": "2024-06-29T00:00:33Z"
             }
           ]
         }
