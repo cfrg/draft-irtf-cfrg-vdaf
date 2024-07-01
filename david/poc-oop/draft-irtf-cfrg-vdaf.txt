@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 30 December 2024                                           ISRG
+Expires: 2 January 2025                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            28 June 2024
+                                                             1 July 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 December 2024.
+   This Internet-Draft will expire on 2 January 2025.
 
 Copyright Notice
 
@@ -581,9 +581,10 @@ Table of Contents
    capitals, as shown here.
 
    Algorithms in this document are written in Python 3.  Type hints are
-   used to define input and output types.  A fatal error in a program
-   (e.g., failure to parse one of the function parameters) is usually
-   handled by raising an exception.
+   used to define input and output types.  The type variable F is used
+   in signatures to signify any type that is a subclass of Field.  A
+   fatal error in a program (e.g., failure to parse one of the function
+   parameters) is usually handled by raising an exception.
 
    A variable with type bytes is a byte string.  This document defines
    several byte-string constants.  When comprised of printable ASCII
@@ -2331,7 +2332,7 @@ class XofFixedKeyAes128(Xof):
        +----------------+------------------------------------------+
        | AggResult      | Type of the aggregate result             |
        +----------------+------------------------------------------+
-       | Field          | As defined in (Section 6.1)              |
+       | field          | As defined in (Section 6.1)              |
        +----------------+------------------------------------------+
 
           Table 4: Constants and types defined by a concrete FLP.
@@ -2555,19 +2556,19 @@ class XofFixedKeyAes128(Xof):
      +-----------------+--------------------------------------------+
      | PublicShare     | Optional[list[bytes]]                      |
      +-----------------+--------------------------------------------+
-     | InputShare      | Union[tuple[list[Flp.Field],               |
-     |                 | list[Flp.Field], Optional[bytes]],         |
+     | InputShare      | Union[tuple[list[Flp.field],               |
+     |                 | list[Flp.field], Optional[bytes]],         |
      |                 | tuple[bytes, bytes, Optional[bytes]]]      |
      +-----------------+--------------------------------------------+
-     | OutShare        | list[Flp.Field]                            |
+     | OutShare        | list[Flp.field]                            |
      +-----------------+--------------------------------------------+
-     | AggShare        | list[Flp.Field]                            |
+     | AggShare        | list[Flp.field]                            |
      +-----------------+--------------------------------------------+
      | AggResult       | Flp.AggResult                              |
      +-----------------+--------------------------------------------+
-     | PrepState       | tuple[list[Flp.Field], Optional[bytes]]    |
+     | PrepState       | tuple[list[Flp.field], Optional[bytes]]    |
      +-----------------+--------------------------------------------+
-     | PrepShare       | tuple[list[Flp.Field], Optional[bytes]]    |
+     | PrepShare       | tuple[list[Flp.field], Optional[bytes]]    |
      +-----------------+--------------------------------------------+
      | PrepMessage     | Optional[bytes]                            |
      +-----------------+--------------------------------------------+
@@ -3133,8 +3134,8 @@ class XofFixedKeyAes128(Xof):
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for Prio3.Xof.SEED_SIZE and F as
-   an alias for Prio3.Field.ENCODED_SIZE.  XOF seeds are represented as
+   the remainder we use S as an alias for Prio3.xof.SEED_SIZE and F as
+   an alias for Prio3.field.ENCODED_SIZE.  XOF seeds are represented as
    follows:
 
    opaque Prio3Seed[S];
@@ -3147,7 +3148,7 @@ class XofFixedKeyAes128(Xof):
 7.2.7.1.  Public Share
 
    The encoding of the public share depends on whether joint randomness
-   is required for the underlying FLP (i.e., Prio3.Flp.JOINT_RAND_LEN >
+   is required for the underlying FLP (i.e., Prio3.flp.JOINT_RAND_LEN >
    0).  If joint randomness is not used, then the public share is the
    empty string.  If joint randomness is used, then the public share
    encodes the joint randomness parts as follows:
@@ -3174,8 +3175,8 @@ class XofFixedKeyAes128(Xof):
    randomness is not used, the Leader's share is structured as follows:
 
    struct {
-       Prio3Field meas_share[F * Prio3.Flp.MEAS_LEN];
-       Prio3Field proofs_share[F * Prio3.Flp.PROOF_LEN * Prio3.PROOFS];
+       Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
+       Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
    } Prio3LeaderShare;
 
    When joint randomness is not used, the Helpers' shares are structured
@@ -3208,14 +3209,14 @@ class XofFixedKeyAes128(Xof):
    follows:
 
 struct {
-    Prio3Field verifiers_share[F * Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
 } Prio3PrepShare;
 
    When joint randomness is used, the prep share includes the
    Aggregator's joint randomness part and is structured as follows:
 
 struct {
-    Prio3Field verifiers_share[F * Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
     Prio3Seed k_joint_rand_part;
 } Prio3PrepShareWithJointRand;
 
@@ -3234,7 +3235,7 @@ struct {
    Aggregate shares are structured as follows:
 
    struct {
-       Prio3Field agg_share[F * Prio3.Flp.OUTPUT_LEN];
+       Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
 7.3.  A General-Purpose FLP
@@ -3434,7 +3435,7 @@ struct {
         +-----------------+---------------------------------------+
         | AggResult       | Type of the aggregate result          |
         +-----------------+---------------------------------------+
-        | Field           | An FFT-friendly finite field as       |
+        | field           | An FFT-friendly finite field as       |
         |                 | defined in Section 6.1.2              |
         +-----------------+---------------------------------------+
 
@@ -3553,7 +3554,7 @@ struct {
       +----------------+--------------------------------------------+
       | Measurement    | valid.Measurement                          |
       +----------------+--------------------------------------------+
-      | Field          | valid.Field                                |
+      | field          | valid.field                                |
       +----------------+--------------------------------------------+
 
                    Table 8: FLP Parameters of FlpGeneric.
@@ -3728,7 +3729,7 @@ struct {
                   +-----------------+-------------------+
                   | AggResult       | int               |
                   +-----------------+-------------------+
-                  | Field           | Field64 (Table 3) |
+                  | field           | Field64 (Table 3) |
                   +-----------------+-------------------+
 
                       Table 9: Parameters of validity
@@ -3804,7 +3805,7 @@ struct {
                 +-----------------+-----------------------+
                 | AggResult       | int                   |
                 +-----------------+-----------------------+
-                | Field           | Field128 (Table 3)    |
+                | field           | Field128 (Table 3)    |
                 +-----------------+-----------------------+
 
                       Table 10: Parameters of validity
@@ -3953,7 +3954,7 @@ struct {
          +-----------------+------------------------------------+
          | AggResult       | list[int]                          |
          +-----------------+------------------------------------+
-         | Field           | Field128 (Table 3)                 |
+         | field           | Field128 (Table 3)                 |
          +-----------------+------------------------------------+
 
              Table 11: Parameters of validity circuit SumVec.
@@ -4090,7 +4091,7 @@ struct {
     +-----------------+-----------------------------------------------+
     | AggResult       | list[int]                                     |
     +-----------------+-----------------------------------------------+
-    | Field           | Field128 (Table 3)                            |
+    | field           | Field128 (Table 3)                            |
     +-----------------+-----------------------------------------------+
 
             Table 12: Parameters of validity circuit Histogram.
@@ -4222,7 +4223,7 @@ struct {
           +----------------+------------------------------------+
           | AggResult      | list[int]                          |
           +----------------+------------------------------------+
-          | Field          | Field128 (Table 3)                 |
+          | field          | Field128 (Table 3)                 |
           +----------------+------------------------------------+
 
                   Table 13: Parameters of validity circuit
@@ -4921,9 +4922,9 @@ struct {
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for Poplar1.Xof.SEED_SIZE, Fi as
-   an alias for Poplar1.Idpf.FieldInner and Fl as an alias for
-   Poplar1.Idpf.FieldLeaf.  XOF seeds are represented as follows:
+   the remainder we use S as an alias for Poplar1.xof.SEED_SIZE, Fi as
+   an alias for Poplar1.idpf.field_inner and Fl as an alias for
+   Poplar1.idpf.field_leaf.  XOF seeds are represented as follows:
 
    opaque Poplar1Seed[S];
 

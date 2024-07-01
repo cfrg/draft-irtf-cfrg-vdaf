@@ -1034,11 +1034,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">VDAF</td>
-<td class="right">June 2024</td>
+<td class="right">July 2024</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 30 December 2024</td>
+<td class="center">Expires 2 January 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-06-28" class="published">28 June 2024</time>
+<time datetime="2024-07-01" class="published">1 July 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-12-30">30 December 2024</time></dd>
+<dd class="expires"><time datetime="2025-01-02">2 January 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 30 December 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 2 January 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1918,9 +1918,10 @@ measurements.<a href="#section-1.1-17.4.1" class="pilcrow">¶</a></p>
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <p id="section-2-2">Algorithms in this document are written in Python 3. Type hints are used to
-define input and output types. A fatal error in a program (e.g., failure to
-parse one of the function parameters) is usually handled by raising an
-exception.<a href="#section-2-2" class="pilcrow">¶</a></p>
+define input and output types. The type variable <code>F</code> is used in signatures to
+signify any type that is a subclass of <code>Field</code>. A fatal error in a program
+(e.g., failure to parse one of the function parameters) is usually handled by
+raising an exception.<a href="#section-2-2" class="pilcrow">¶</a></p>
 <p id="section-2-3">A variable with type <code>bytes</code> is a byte string. This document defines several
 byte-string constants. When comprised of printable ASCII characters, they are
 written as Python 3 byte-string literals (e.g., <code>b'some constant string'</code>).<a href="#section-2-3" class="pilcrow">¶</a></p>
@@ -4096,7 +4097,7 @@ a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Field</code>
+                <code>field</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">As defined in (<a href="#field" class="auto internal xref">Section 6.1</a>)</td>
             </tr>
@@ -4391,7 +4392,7 @@ subsections. These methods refer to constants enumerated in
                 <code>InputShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Union[tuple[list[Flp.Field], list[Flp.Field], Optional[bytes]], tuple[bytes, bytes, Optional[bytes]]]</code>
+                <code>Union[tuple[list[Flp.field], list[Flp.field], Optional[bytes]], tuple[bytes, bytes, Optional[bytes]]]</code>
 </td>
             </tr>
             <tr>
@@ -4399,7 +4400,7 @@ subsections. These methods refer to constants enumerated in
                 <code>OutShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>list[Flp.Field]</code>
+                <code>list[Flp.field]</code>
 </td>
             </tr>
             <tr>
@@ -4407,7 +4408,7 @@ subsections. These methods refer to constants enumerated in
                 <code>AggShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>list[Flp.Field]</code>
+                <code>list[Flp.field]</code>
 </td>
             </tr>
             <tr>
@@ -4423,7 +4424,7 @@ subsections. These methods refer to constants enumerated in
                 <code>PrepState</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[list[Flp.Field], Optional[bytes]]</code>
+                <code>tuple[list[Flp.field], Optional[bytes]]</code>
 </td>
             </tr>
             <tr>
@@ -4431,7 +4432,7 @@ subsections. These methods refer to constants enumerated in
                 <code>PrepShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[list[Flp.Field], Optional[bytes]]</code>
+                <code>tuple[list[Flp.field], Optional[bytes]]</code>
 </td>
             </tr>
             <tr>
@@ -5123,8 +5124,8 @@ def joint_rands(self, k_joint_rand_seed: bytes) -&gt; list[F]:
 network while executing Prio3. It is <span class="bcp14">RECOMMENDED</span> that implementations provide
 serialization methods for them.<a href="#section-7.2.7-1" class="pilcrow">¶</a></p>
 <p id="section-7.2.7-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Prio3.Xof.SEED_SIZE</code> and <code>F</code> as an alias
-for <code>Prio3.Field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>Prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
+for <code>Prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.2.7-3">
 <pre>
 opaque Prio3Seed[S];
@@ -5143,7 +5144,7 @@ opaque Prio3Field[F];
 <a href="#section-7.2.7.1" class="section-number selfRef">7.2.7.1. </a><a href="#name-public-share" class="section-name selfRef">Public Share</a>
             </h5>
 <p id="section-7.2.7.1-1">The encoding of the public share depends on whether joint randomness is
-required for the underlying FLP (i.e., <code>Prio3.Flp.JOINT_RAND_LEN &gt; 0</code>). If
+required for the underlying FLP (i.e., <code>Prio3.flp.JOINT_RAND_LEN &gt; 0</code>). If
 joint randomness is not used, then the public share is the empty string. If
 joint randomness is used, then the public share encodes the joint randomness
 parts as follows:<a href="#section-7.2.7.1-1" class="pilcrow">¶</a></p>
@@ -5175,8 +5176,8 @@ not used, the Leader's share is structured as follows:<a href="#section-7.2.7.2-
 <div class="alignLeft art-text artwork" id="section-7.2.7.2-4">
 <pre>
 struct {
-    Prio3Field meas_share[F * Prio3.Flp.MEAS_LEN];
-    Prio3Field proofs_share[F * Prio3.Flp.PROOF_LEN * Prio3.PROOFS];
+    Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
+    Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
 } Prio3LeaderShare;
 </pre><a href="#section-7.2.7.2-4" class="pilcrow">¶</a>
 </div>
@@ -5221,7 +5222,7 @@ struct {
 <div class="alignLeft art-text artwork" id="section-7.2.7.3-2">
 <pre>
 struct {
-    Prio3Field verifiers_share[F * Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
 } Prio3PrepShare;
 </pre><a href="#section-7.2.7.3-2" class="pilcrow">¶</a>
 </div>
@@ -5230,7 +5231,7 @@ randomness part and is structured as follows:<a href="#section-7.2.7.3-3" class=
 <div class="alignLeft art-text artwork" id="section-7.2.7.3-4">
 <pre>
 struct {
-    Prio3Field verifiers_share[F * Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
     Prio3Seed k_joint_rand_part;
 } Prio3PrepShareWithJointRand;
 </pre><a href="#section-7.2.7.3-4" class="pilcrow">¶</a>
@@ -5263,7 +5264,7 @@ struct {
 <div class="alignLeft art-text artwork" id="section-7.2.7.5-2">
 <pre>
 struct {
-    Prio3Field agg_share[F * Prio3.Flp.OUTPUT_LEN];
+    Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
 } Prio3AggShare;
 </pre><a href="#section-7.2.7.5-2" class="pilcrow">¶</a>
 </div>
@@ -5519,7 +5520,7 @@ validity circuit <code>Valid</code> that implements the interface described here
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">An FFT-friendly finite field as defined in <a href="#field-fft-friendly" class="auto internal xref">Section 6.1.2</a>
 </td>
@@ -5714,10 +5715,10 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>valid.Field</code>
+                  <code>valid.field</code>
 </td>
               </tr>
             </tbody>
@@ -6012,7 +6013,7 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -6157,7 +6158,7 @@ def eval(
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -6368,7 +6369,7 @@ def eval(
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -6569,7 +6570,7 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -6760,7 +6761,7 @@ def eval(
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -7683,9 +7684,9 @@ def unshard(
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Poplar1.Xof.SEED_SIZE</code>, <code>Fi</code> as an alias
-for <code>Poplar1.Idpf.FieldInner</code> and <code>Fl</code> as an alias for
-<code>Poplar1.Idpf.FieldLeaf</code>. XOF seeds are represented as follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>Poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
+for <code>Poplar1.idpf.field_inner</code> and <code>Fl</code> as an alias for
+<code>Poplar1.idpf.field_leaf</code>. XOF seeds are represented as follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.2.6-3">
 <pre>
 opaque Poplar1Seed[S];
