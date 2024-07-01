@@ -592,9 +592,10 @@ security considerations for VDAFs.
 {::boilerplate bcp14-tagged}
 
 Algorithms in this document are written in Python 3. Type hints are used to
-define input and output types. A fatal error in a program (e.g., failure to
-parse one of the function parameters) is usually handled by raising an
-exception.
+define input and output types. The type variable `F` is used in signatures to
+signify any type that is a subclass of `Field`. A fatal error in a program
+(e.g., failure to parse one of the function parameters) is usually handled by
+raising an exception.
 
 A variable with type `bytes` is a byte string. This document defines several
 byte-string constants. When comprised of printable ASCII characters, they are
