@@ -1056,12 +1056,6 @@ task: Verification of the validity of the recovered output shares. This process
 ensures that aggregating the output shares will not lead to a garbled aggregate
 result.
 
-<!--
-For some VDAFs, like Prio3 ({{prio3}}) or Poplar1 ({{poplar1}}), the output
-shares are recovered first, then validated. For other protocols, like Prio+
-[AGJOP21], there is no explicit verification step.
--->
-
 The remainder of this section defines the VDAF interface. The attributes are
 listed in {{vdaf-param}} are defined by each concrete VDAF.
 
