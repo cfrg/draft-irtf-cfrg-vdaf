@@ -117,16 +117,16 @@ def test_encode_truncate_decode_with_fft_fields(
         length: int,
         bits: int,
         chunk_length: int) -> None:
-    for f in [Field64, Field96, Field128]:
-        sumvec = SumVec[FftField](length, bits, chunk_length, field=f)
-        assert sumvec.field == f
+    for field in [Field64, Field96, Field128]:
+        sumvec = SumVec[FftField](field, length, bits, chunk_length)
+        assert sumvec.field == field
         assert isinstance(sumvec, SumVec)
         test_encode_truncate_decode(FlpBBCGGI19(sumvec), measurements)
 
 
 class TestFlpBBCGGI19(unittest.TestCase):
     def test_count(self) -> None:
-        flp = FlpBBCGGI19(Count())
+        flp = FlpBBCGGI19(Count(Field64))
         test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(1), True),
@@ -134,7 +134,7 @@ class TestFlpBBCGGI19(unittest.TestCase):
         ])
 
     def test_sum(self) -> None:
-        flp = FlpBBCGGI19(Sum(10))
+        flp = FlpBBCGGI19(Sum(Field128, 10))
         test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(100), True),
@@ -144,7 +144,7 @@ class TestFlpBBCGGI19(unittest.TestCase):
         test_encode_truncate_decode(flp, [0, 100, 2 ** 10 - 1])
 
     def test_sum_of_range_checked_inputs(self) -> None:
-        flp = FlpBBCGGI19(SumOfRangeCheckedInputs(10_000))
+        flp = FlpBBCGGI19(SumOfRangeCheckedInputs(Field128, 10_000))
         test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(1337), True),
@@ -153,7 +153,7 @@ class TestFlpBBCGGI19(unittest.TestCase):
         ])
 
     def test_histogram(self) -> None:
-        flp = FlpBBCGGI19(Histogram(4, 2))
+        flp = FlpBBCGGI19(Histogram(Field128, 4, 2))
         test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(1), True),
@@ -165,7 +165,7 @@ class TestFlpBBCGGI19(unittest.TestCase):
         ])
 
     def test_multihot_count_vec(self) -> None:
-        valid = MultihotCountVec(4, 2, 2)
+        valid = MultihotCountVec(Field128, 4, 2, 2)
         flp = FlpBBCGGI19(valid)
 
         # Successful cases:
@@ -191,7 +191,7 @@ class TestFlpBBCGGI19(unittest.TestCase):
         test_flp_bbcggi19(flp, cases)
 
     def test_multihot_count_vec_small(self) -> None:
-        flp = FlpBBCGGI19(MultihotCountVec(1, 1, 1))
+        flp = FlpBBCGGI19(MultihotCountVec(Field128, 1, 1, 1))
 
         test_flp_bbcggi19(flp, [
             (flp.encode([0]), True),

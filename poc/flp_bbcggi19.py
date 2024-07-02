@@ -5,8 +5,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, Optional, TypeVar, cast
 
 from common import front, next_power_of_2
-from field import (FftField, Field64, Field128, poly_eval, poly_interp,
-                   poly_mul, poly_strip)
+from field import FftField, poly_eval, poly_interp, poly_mul, poly_strip
 from flp import Flp
 
 Measurement = TypeVar("Measurement")
@@ -589,15 +588,20 @@ class Count(
         Valid[
             int,  # Measurement, 0 or 1
             int,  # AggResult
-            Field64,
+            F,
         ]):
-    field = Field64
-    GADGETS: list[Gadget[Field64]] = [Mul()]
+    GADGETS: list[Gadget[F]] = [Mul()]
     GADGET_CALLS = [1]
     MEAS_LEN = 1
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
     EVAL_OUTPUT_LEN = 1
+
+    # Class object for the field.
+    field: type[F]
+
+    def __init__(self, field: type[F]):
+        self.field = field
 
     # NOTE: This method is excerpted in the document, de-indented. Its
     # width should be limited to 69 columns after de-indenting, or 73
@@ -605,24 +609,24 @@ class Count(
     # ===================================================================
     def eval(
             self,
-            meas: list[Field64],
-            joint_rand: list[Field64],
-            _num_shares: int) -> list[Field64]:
+            meas: list[F],
+            joint_rand: list[F],
+            _num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)
         squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
         return [squared - meas[0]]
 
-    def encode(self, measurement: int) -> list[Field64]:
+    def encode(self, measurement: int) -> list[F]:
         if measurement not in [0, 1]:
             raise ValueError('measurement out of range')
         return [self.field(measurement)]
 
-    def truncate(self, meas: list[Field64]) -> list[Field64]:
+    def truncate(self, meas: list[F]) -> list[F]:
         if len(meas) != 1:
             raise ValueError('incorrect encoded measurement length')
         return meas
 
-    def decode(self, output: list[Field64], _num_measurements: int) -> int:
+    def decode(self, output: list[F], _num_measurements: int) -> int:
         return output[0].as_unsigned()
 
 
@@ -630,23 +634,26 @@ class Sum(
         Valid[
             int,  # Measurement, `range(2 ** self.bits)`
             int,  # AggResult
-            Field128,
+            F,
         ]):
-    field = Field128
-    GADGETS: list[Gadget[Field128]] = [Range2()]
+    GADGETS: list[Gadget[F]] = [Range2()]
     JOINT_RAND_LEN = 1
     OUTPUT_LEN = 1
     EVAL_OUTPUT_LEN = 1
 
-    def __init__(self, bits: int):
+    # Class object for the field.
+    field: type[F]
+
+    def __init__(self, field: type[F], bits: int):
         """
         Instantiate an instace of the `Sum` circuit for measurements in range `[0,
         2^bits)`.
         """
 
-        if 2 ** bits >= self.field.MODULUS:
+        if 2 ** bits >= field.MODULUS:
             raise ValueError('bit size exceeds field modulus')
 
+        self.field = field
         self.GADGET_CALLS = [bits]
         self.MEAS_LEN = bits
 
@@ -656,9 +663,9 @@ class Sum(
     # ===================================================================
     def eval(
             self,
-            meas: list[Field128],
-            joint_rand: list[Field128],
-            _num_shares: int) -> list[Field128]:
+            meas: list[F],
+            joint_rand: list[F],
+            _num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)
         out = self.field(0)
         r = joint_rand[0]
@@ -672,19 +679,19 @@ class Sum(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def encode(self, measurement: int) -> list[Field128]:
+    def encode(self, measurement: int) -> list[F]:
         if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
             raise ValueError('measurement out of range')
 
         return self.field.encode_into_bit_vector(measurement,
                                                  self.MEAS_LEN)
 
-    def truncate(self, meas: list[Field128]) -> list[Field128]:
+    def truncate(self, meas: list[F]) -> list[F]:
         return [self.field.decode_from_bit_vector(meas)]
 
     def decode(
             self,
-            output: list[Field128],
+            output: list[F],
             _num_measurements: int) -> int:
         return output[0].as_unsigned()
 
@@ -697,16 +704,17 @@ class Histogram(
         Valid[
             int,        # Measurement, `range(length)`
             list[int],  # AggResult
-            Field128,
+            F,
         ]):
+    # Class object for the field.
+    field: type[F]
     length: int
     chunk_length: int
 
-    field = Field128
     JOINT_RAND_LEN = 2
     EVAL_OUTPUT_LEN = 1
 
-    def __init__(self, length: int, chunk_length: int):
+    def __init__(self, field: type[F], length: int, chunk_length: int):
         """
         Instantiate an instance of the `Histogram` circuit with the given
         length and chunk_length.
@@ -717,9 +725,10 @@ class Histogram(
         if chunk_length <= 0:
             raise ValueError('invalid chunk_length')
 
+        self.field = field
         self.length = length
         self.chunk_length = chunk_length
-        self.GADGETS: list[Gadget[Field128]] = [
+        self.GADGETS: list[Gadget[F]] = [
             ParallelSum(Mul(), chunk_length),
         ]
         self.GADGET_CALLS = [(length + chunk_length - 1) // chunk_length]
@@ -732,9 +741,9 @@ class Histogram(
     # ===================================================================
     def eval(
             self,
-            meas: list[Field128],
-            joint_rand: list[Field128],
-            num_shares: int) -> list[Field128]:
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)
 
         # Check that each bucket is one or zero.
@@ -743,7 +752,7 @@ class Histogram(
         r_power = r
         shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
-            inputs: list[Optional[Field128]]
+            inputs: list[Optional[F]]
             inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
                 index = i * self.chunk_length + j
@@ -759,7 +768,7 @@ class Histogram(
 
             range_check += self.GADGETS[0].eval(
                 self.field,
-                cast(list[Field128], inputs),
+                cast(list[F], inputs),
             )
 
         # Check that the buckets sum to 1.
@@ -776,17 +785,17 @@ class Histogram(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def encode(self, measurement: int) -> list[Field128]:
+    def encode(self, measurement: int) -> list[F]:
         encoded = [self.field(0)] * self.length
         encoded[measurement] = self.field(1)
         return encoded
 
-    def truncate(self, meas: list[Field128]) -> list[Field128]:
+    def truncate(self, meas: list[F]) -> list[F]:
         return meas
 
     def decode(
             self,
-            output: list[Field128],
+            output: list[F],
             _num_measurements: int) -> list[int]:
         return [bucket_count.as_unsigned() for bucket_count in output]
 
@@ -800,7 +809,7 @@ class MultihotCountVec(
         Valid[
             list[int],  # Measurement, a vector of bits
             list[int],  # AggResult, a vector of counts
-            Field128,
+            F,
         ]):
     """
     A validity circuit that checks each Client's measurement is a bit
@@ -826,11 +835,17 @@ class MultihotCountVec(
     `count_vec` is the count vector. The result is zero if and only if
     the reported weight is equal to the true weight.
     """
-    field = Field128
+    # Class object for the field.
+    field: type[F]
+
     JOINT_RAND_LEN = 2
     EVAL_OUTPUT_LEN = 1
 
-    def __init__(self, length: int, max_weight: int, chunk_length: int):
+    def __init__(self,
+                 field: type[F],
+                 length: int,
+                 max_weight: int,
+                 chunk_length: int):
         """
         Instantiate an instance of the this circuit with the given
         `length`, `max_weight`, and `chunk_length`.
@@ -848,6 +863,8 @@ class MultihotCountVec(
         if chunk_length <= 0:
             raise ValueError('invalid chunk_length')
 
+        self.field = field
+
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
         self.offset = self.field((2 ** self.bits_for_weight) - 1 - max_weight)
@@ -862,7 +879,7 @@ class MultihotCountVec(
         self.length = length
         self.max_weight = max_weight
         self.chunk_length = chunk_length
-        self.GADGETS: list[Gadget[Field128]] = [
+        self.GADGETS: list[Gadget[F]] = [
             ParallelSum(Mul(), chunk_length),
         ]
         self.GADGET_CALLS = [
@@ -877,9 +894,9 @@ class MultihotCountVec(
     # ===================================================================
     def eval(
             self,
-            meas: list[Field128],
-            joint_rand: list[Field128],
-            num_shares: int) -> list[Field128]:
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)
 
         # Check that each entry in the input vector is one or zero.
@@ -888,7 +905,7 @@ class MultihotCountVec(
         r_power = r
         shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
-            inputs: list[Optional[Field128]]
+            inputs: list[Optional[F]]
             inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
                 index = i * self.chunk_length + j
@@ -904,7 +921,7 @@ class MultihotCountVec(
 
             range_check += self.GADGETS[0].eval(
                 self.field,
-                cast(list[Field128], inputs),
+                cast(list[F], inputs),
             )
 
         # Check that the weight `offset` plus the sum of the counters
@@ -925,7 +942,7 @@ class MultihotCountVec(
     # columns after de-indenting, or 73 columns before de-indenting, to
     # avoid warnings from xml2rfc.
     # ===================================================================
-    def encode(self, measurement: list[int]) -> list[Field128]:
+    def encode(self, measurement: list[int]) -> list[F]:
         if len(measurement) != self.length:
             raise ValueError('invalid Client measurement length')
 
@@ -942,12 +959,12 @@ class MultihotCountVec(
             self.bits_for_weight)
         return encoded
 
-    def truncate(self, meas: list[Field128]) -> list[Field128]:
+    def truncate(self, meas: list[F]) -> list[F]:
         return meas[:self.length]
 
     def decode(
             self,
-            output: list[Field128],
+            output: list[F],
             _num_measurements: int) -> list[int]:
         return [bucket_count.as_unsigned() for bucket_count in output]
 
@@ -972,7 +989,7 @@ class SumVec(
     JOINT_RAND_LEN = 1
     EVAL_OUTPUT_LEN = 1
 
-    def __init__(self, length: int, bits: int, chunk_length: int, field: type[F]):
+    def __init__(self, field: type[F], length: int, bits: int, chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with `length`
         elements, each in the range `[0, 2^bits)`.
@@ -987,10 +1004,10 @@ class SumVec(
         if chunk_length <= 0:
             raise ValueError('invalid chunk_length')
 
+        self.field = field
         self.length = length
         self.bits = bits
         self.chunk_length = chunk_length
-        self.field = field
         self.GADGETS: list[Gadget[F]] = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
             (length * bits + chunk_length - 1) // chunk_length
@@ -1081,14 +1098,14 @@ class SumOfRangeCheckedInputs(
         Valid[
             int,  # Measurement, `range(self.max_measurement + 1)`
             int,  # AggResult
-            Field64,
+            F,
         ]):
-    field = Field64
-    GADGETS: list[Gadget[Field64]] = [Range2()]
+    field: type[F]
+    GADGETS: list[Gadget[F]] = [Range2()]
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
 
-    def __init__(self, max_measurement: int):
+    def __init__(self, field: type[F], max_measurement: int):
         """
         Similar to `Sum` but with an arbitrary bound.
 
@@ -1112,6 +1129,7 @@ class SumOfRangeCheckedInputs(
         Since the range checked measurement is in the correct range,
         equality implies that the reported measurement is as well.
         """
+        self.field = field
         self.bits = max_measurement.bit_length()
         self.offset = self.field(2 ** self.bits - 1 - max_measurement)
         self.max_measurement = max_measurement
@@ -1125,9 +1143,9 @@ class SumOfRangeCheckedInputs(
 
     def eval(
             self,
-            meas: list[Field64],
-            joint_rand: list[Field64],
-            num_shares: int) -> list[Field64]:
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)
         shares_inv = self.field(num_shares).inv()
 
@@ -1141,7 +1159,7 @@ class SumOfRangeCheckedInputs(
         out.append(range_check)
         return out
 
-    def encode(self, measurement: int) -> list[Field64]:
+    def encode(self, measurement: int) -> list[F]:
         encoded = []
         encoded += self.field.encode_into_bit_vector(
             measurement,
@@ -1153,10 +1171,10 @@ class SumOfRangeCheckedInputs(
         )
         return encoded
 
-    def truncate(self, meas: list[Field64]) -> list[Field64]:
+    def truncate(self, meas: list[F]) -> list[F]:
         return [self.field.decode_from_bit_vector(meas[:self.bits])]
 
-    def decode(self, output: list[Field64], _num_measurements: int) -> int:
+    def decode(self, output: list[F], _num_measurements: int) -> int:
         return output[0].as_unsigned()
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
