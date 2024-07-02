@@ -6,7 +6,7 @@ from field import FftField, Field64, Field128
 from flp_generic import FlpGeneric
 from tests.test_flp import FlpTest
 from tests.test_flp_generic import TestAverage
-from tests.vdaf import test_vdaf
+from tests.vdaf_util import test_vdaf
 from vdaf_prio3 import (Prio3, Prio3Count, Prio3Histogram,
                         Prio3MultihotCountVec, Prio3Sum, Prio3SumVec,
                         Prio3SumVecWithMultiproof)
