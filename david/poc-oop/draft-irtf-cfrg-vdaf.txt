@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 2 January 2025                                             ISRG
+Expires: 3 January 2025                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             1 July 2024
+                                                             2 July 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 January 2025.
+   This Internet-Draft will expire on 3 January 2025.
 
 Copyright Notice
 
@@ -3470,39 +3470,42 @@ struct {
 
    Finally, the following methods are derived for each concrete Valid:
 
- def prove_rand_len(self) -> int:
-     """Length of the prover randomness."""
-     return sum(g.ARITY for g in self.GADGETS)
+   def prove_rand_len(self) -> int:
+       """Length of the prover randomness."""
+       return sum(g.ARITY for g in self.GADGETS)
 
- def query_rand_len(self) -> int:
-     """Length of the query randomness."""
-     query_rand_len = len(self.GADGETS)
-     if self.EVAL_OUTPUT_LEN > 1:
-         query_rand_len += 1
-     return query_rand_len
+   def query_rand_len(self) -> int:
+       """Length of the query randomness."""
+       query_rand_len = len(self.GADGETS)
+       if self.EVAL_OUTPUT_LEN > 1:
+           query_rand_len += 1
+       return query_rand_len
 
- def proof_len(self) -> int:
-     """Length of the proof."""
-     length = 0
-     for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
-         P = next_power_of_2(1 + g_calls)
-         length += g.ARITY + g.DEGREE * (P - 1) + 1
-     return length
+   def proof_len(self) -> int:
+       """Length of the proof."""
+       length = 0
+       for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
+           P = next_power_of_2(1 + g_calls)
+           length += g.ARITY + g.DEGREE * (P - 1) + 1
+       return length
 
- def verifier_len(self) -> int:
-     """Length of the verifier message."""
-     length = 1
-     for g in self.GADGETS:
-         length += g.ARITY + 1
-     return length
+   def verifier_len(self) -> int:
+       """Length of the verifier message."""
+       length = 1
+       for g in self.GADGETS:
+           length += g.ARITY + 1
+       return length
 
- def check_valid_eval(self, meas: list[F], joint_rand: list[F]) -> None:
-     if len(meas) != self.MEAS_LEN:
-         raise ValueError('incorrect measurement length')
-     if len(joint_rand) != self.JOINT_RAND_LEN:
-         raise ValueError('incorrect joint randomness length')
+   def check_valid_eval(
+           self,
+           meas: list[F],
+           joint_rand: list[F]) -> None:
+       if len(meas) != self.MEAS_LEN:
+           raise ValueError('incorrect measurement length')
+       if len(joint_rand) != self.JOINT_RAND_LEN:
+           raise ValueError('incorrect joint randomness length')
 
-           Figure 22: Derived methods for validity circuits.
+             Figure 22: Derived methods for validity circuits.
 
 7.3.3.  Construction
 
