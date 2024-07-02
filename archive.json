@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-06-30T00:51:25.180777+00:00",
+  "timestamp": "2024-07-02T00:46:26.870845+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -31559,13 +31559,13 @@
       "labels": [],
       "body": "This PR is going to replace class factories throughout the codebase with conventional OOP inheritance and classes defined at the top level. This will make type checking and other static analysis work better, and help avoid bugs around mutating class attributes on the wrong class in factory methods. So far I've rewritten `daf.py`, and improved the type hints in `field.py`, so that __add__ returns `Self` instead of `Field`. `Self` is a special generic type variable, so this more precise signature tells us we get a field element of the same type back, not a field element from possibly any field. I needed this improvement after adding hints to more signatures in `TestDaf`, particularly `aggregate()`.\r\n\r\nRelated to #361.",
       "createdAt": "2024-06-20T16:38:26Z",
-      "updatedAt": "2024-06-29T00:00:33Z",
+      "updatedAt": "2024-07-01T23:08:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "39fb4753a55bbc33a8da8c662dba8ed99f50e6ff",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/poc-oop",
-      "headRefOid": "d470f0b02806079983c5346409e10c42bfb0db40",
+      "headRefOid": "d6feb27751b1c23ef3f6261c36c8d7edc2cb815e",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -31991,6 +31991,26 @@
               "body": "Do we need to define this in prose?\r\n\r\nPreviously we were leaving this out, though I don't think we've been consistent.\r\n\r\nIf you decide to remove it, then annotate it with `# REMOVE ME` like we do for other things.",
               "createdAt": "2024-06-28T23:58:18Z",
               "updatedAt": "2024-06-29T00:00:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6ASqus",
+          "commit": {
+            "abbreviatedOid": "d470f0b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-07-01T23:08:54Z",
+          "updatedAt": "2024-07-01T23:08:54Z",
+          "comments": [
+            {
+              "originalPosition": 2053,
+              "body": "I also added the definition of the method to the figure \"Derived methods for validity circuits\"",
+              "createdAt": "2024-07-01T23:08:54Z",
+              "updatedAt": "2024-07-01T23:08:54Z"
             }
           ]
         }
