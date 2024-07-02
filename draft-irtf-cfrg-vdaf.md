@@ -1879,10 +1879,14 @@ def vec_sub(left: list[F], right: list[F]) -> list[F]:
     """
     Subtract the right operand from the left and return the result.
     """
+    if len(left) != len(right):
+        raise ValueError("mismatched vector sizes")
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
 def vec_add(left: list[F], right: list[F]) -> list[F]:
     """Add the right operand to the left and return the result."""
+    if len(left) != len(right):
+        raise ValueError("mismatched vector sizes")
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
 
 def vec_neg(vec: list[F]) -> list[F]:
