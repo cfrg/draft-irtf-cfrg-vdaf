@@ -189,7 +189,11 @@ class XofFixedKeyAes128(Xof):
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
         dst_length = to_le_bytes(len(dst), 1)
-        self.fixed_key = TurboSHAKE128(dst_length + dst + binder, 2, 16)
+        self.fixed_key = TurboSHAKE128(
+            dst_length + dst + binder,
+            2,
+            16,
+        )
         self.seed = seed
         """
         if len(seed) != self.SEED_SIZE:

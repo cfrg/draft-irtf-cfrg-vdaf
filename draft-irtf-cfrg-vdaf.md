@@ -1572,7 +1572,10 @@ def ping_pong_leader_init(
         )
         outbound = Message.initialize(
             vdaf.encode_prep_share(prep_share))
-        return (Continued(prep_state), encode_ping_pong_message(outbound))
+        return (
+            Continued(prep_state),
+            encode_ping_pong_message(outbound),
+        )
     except:
         return (Rejected(), None)
 ~~~
@@ -1643,7 +1646,10 @@ def ping_pong_transition(
         vdaf.encode_prep_msg(prep_msg),
         vdaf.encode_prep_share(prep_share),
     )
-    return (Continued(prep_state), encode_ping_pong_message(outbound))
+    return (
+        Continued(prep_state),
+        encode_ping_pong_message(outbound),
+    )
 ~~~
 
 The output is the `State` to which the Helper has transitioned and an encoded
@@ -1683,14 +1689,20 @@ def ping_pong_continued(
         if !isinstance(state, Continued):
             return (Rejected(), None)
 
-        prep_msg = vdaf.decode_prep_msg(state.prep_state, inbound.prep_msg)
+        prep_msg = vdaf.decode_prep_msg(
+            state.prep_state,
+            inbound.prep_msg,
+        )
         out = vdaf.prep_next(state.prep_state, prep_msg)
         if type(out) == tuple[PrepState, PrepShare] \
                 and inbound.type == 1:
             # continue
             (prep_state, prep_share) = out
             prep_shares = [
-                vdaf.decode_prep_share(prep_state, inbound.prep_share),
+                vdaf.decode_prep_share(
+                    prep_state,
+                    inbound.prep_share,
+                ),
                 prep_share,
             ]
             if is_leader:
@@ -2073,7 +2085,11 @@ class XofFixedKeyAes128(Xof):
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
         dst_length = to_le_bytes(len(dst), 1)
-        self.fixed_key = TurboSHAKE128(dst_length + dst + binder, 2, 16)
+        self.fixed_key = TurboSHAKE128(
+            dst_length + dst + binder,
+            2,
+            16,
+        )
         self.seed = seed
 
     def next(self, length: int) -> bytes:
@@ -3052,7 +3068,9 @@ When joint randomness is not used, the prep share is structured as follows:
 
 ~~~ tls-presentation
 struct {
-    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[
+        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+    ];
 } Prio3PrepShare;
 ~~~
 
@@ -3061,7 +3079,9 @@ randomness part and is structured as follows:
 
 ~~~ tls-presentation
 struct {
-    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[
+        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+    ];
     Prio3Seed k_joint_rand_part;
 } Prio3PrepShareWithJointRand;
 ~~~
