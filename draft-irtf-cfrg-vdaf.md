@@ -4491,7 +4491,7 @@ def prep_next(
 
     if step == b'evaluate sketch':
         if prev_sketch is None:
-            prev_sketch = self.idpf.current_field(level).zeros(3)
+            raise ValueError('expected value, got none')
         elif len(prev_sketch) != 3:
             raise ValueError('incorrect sketch length')
         A_share = cast(Field, prep_mem[0])
