@@ -4,7 +4,7 @@ from typing import cast
 from common import TEST_VECTOR, from_be_bytes, gen_rand, vec_add
 from field import Field
 from idpf_poplar import IdpfPoplar
-from tests.idpf import gen_test_vec, test_idpf, test_idpf_exhaustive
+from tests.idpf_util import gen_test_vec, test_idpf, test_idpf_exhaustive
 
 
 class TestIdpfPoplar(unittest.TestCase):
