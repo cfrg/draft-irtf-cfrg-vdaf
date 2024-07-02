@@ -1695,24 +1695,24 @@ Table of Contents
    them into the prep message, and computes the next prep state of the
    caller:
 
-  def ping_pong_transition(
-              vdaf,
-              agg_param: AggParam,
-              prep_shares: list[PrepShare],
-              prep_state: PrepState,
-           ) -> (State, bytes):
-      prep_msg = vdaf.prep_shares_to_prep(agg_param,
-                                          prep_shares)
-      out = vdaf.prep_next(prep_state, prep_msg)
-      if type(out) == OutShare:
-          outbound = Message.finish(vdaf.encode_prep_msg(prep_msg))
-          return (Finished(out), encode_ping_pong_message(outbound))
-      (prep_state, prep_share) = out
-      outbound = Message.continue(
-          vdaf.encode_prep_msg(prep_msg),
-          vdaf.encode_prep_share(prep_share),
-      )
-      return (Continued(prep_state), encode_ping_pong_message(outbound))
+   def ping_pong_transition(
+               vdaf,
+               agg_param: AggParam,
+               prep_shares: list[PrepShare],
+               prep_state: PrepState,
+            ) -> (State, bytes):
+       prep_msg = vdaf.prep_shares_to_prep(agg_param,
+                                           prep_shares)
+       out = vdaf.prep_next(prep_state, prep_msg)
+       if type(out) == OutShare:
+           outbound = Message.finish(vdaf.encode_prep_msg(prep_msg))
+           return (Finished(out), encode_ping_pong_message(outbound))
+       (prep_state, prep_share) = out
+       outbound = Message.continue(
+           vdaf.encode_prep_msg(prep_msg),
+           vdaf.encode_prep_share(prep_share),
+       )
+       return (Continued(prep_state), encode_ping_pong_message(outbound))
 
    The output is the State to which the Helper has transitioned and an
    encoded Message.  If the Helper's state is Finished or Rejected, then
@@ -2126,60 +2126,60 @@ Table of Contents
    exceed 255 bytes.  See Security Considerations Section 9 for a more
    detailed discussion.
 
-class XofFixedKeyAes128(Xof):
-    """
-    XOF based on a circular collision-resistant hash function from
-    fixed-key AES.
-    """
+   class XofFixedKeyAes128(Xof):
+       """
+       XOF based on a circular collision-resistant hash function from
+       fixed-key AES.
+       """
 
-    # Associated parameters
-    SEED_SIZE = 16
+       # Associated parameters
+       SEED_SIZE = 16
 
-    def __init__(self, seed: bytes, dst: bytes, binder: bytes):
-        if len(seed) != self.SEED_SIZE:
-            raise ValueError("incorrect seed size")
+       def __init__(self, seed: bytes, dst: bytes, binder: bytes):
+           if len(seed) != self.SEED_SIZE:
+               raise ValueError("incorrect seed size")
 
-        self.length_consumed = 0
+           self.length_consumed = 0
 
-        # Use TurboSHAKE128 to derive a key from the binder string
-        # and domain separation tag. Note that the AES key does not
-        # need to be kept secret from any party. However, when used
-        # with IdpfPoplar, we require the binder to be a random
-        # nonce.
-        #
-        # Implementation note: This step can be cached across XOF
-        # evaluations with many different seeds.
-        dst_length = to_le_bytes(len(dst), 1)
-        self.fixed_key = TurboSHAKE128(dst_length + dst + binder, 2, 16)
-        self.seed = seed
+           # Use TurboSHAKE128 to derive a key from the binder string
+           # and domain separation tag. Note that the AES key does not
+           # need to be kept secret from any party. However, when used
+           # with IdpfPoplar, we require the binder to be a random
+           # nonce.
+           #
+           # Implementation note: This step can be cached across XOF
+           # evaluations with many different seeds.
+           dst_length = to_le_bytes(len(dst), 1)
+           self.fixed_key = TurboSHAKE128(dst_length + dst + binder, 2, 16)
+           self.seed = seed
 
-    def next(self, length: int) -> bytes:
-        offset = self.length_consumed % 16
-        new_length = self.length_consumed + length
-        block_range = range(
-            self.length_consumed // 16,
-            new_length // 16 + 1
-        )
-        self.length_consumed = new_length
+       def next(self, length: int) -> bytes:
+           offset = self.length_consumed % 16
+           new_length = self.length_consumed + length
+           block_range = range(
+               self.length_consumed // 16,
+               new_length // 16 + 1
+           )
+           self.length_consumed = new_length
 
-        hashed_blocks = [
-            self.hash_block(xor(self.seed, to_le_bytes(i, 16)))
-            for i in block_range
-        ]
-        return concat(hashed_blocks)[offset:offset+length]
+           hashed_blocks = [
+               self.hash_block(xor(self.seed, to_le_bytes(i, 16)))
+               for i in block_range
+           ]
+           return concat(hashed_blocks)[offset:offset+length]
 
-    def hash_block(self, block: bytes) -> bytes:
-        """
-        The multi-instance tweakable circular correlation-robust hash
-        function of [GKWWY20] (Section 4.2). The tweak here is the
-        key that stays constant for all XOF evaluations of the same
-        Client, but differs between Clients.
+       def hash_block(self, block: bytes) -> bytes:
+           """
+           The multi-instance tweakable circular correlation-robust hash
+           function of [GKWWY20] (Section 4.2). The tweak here is the
+           key that stays constant for all XOF evaluations of the same
+           Client, but differs between Clients.
 
-        Function `AES128(key, block)` is the AES-128 blockcipher.
-        """
-        lo, hi = block[:8], block[8:]
-        sigma_block = concat([hi, xor(hi, lo)])
-        return xor(AES128(self.fixed_key, sigma_block), sigma_block)
+           Function `AES128(key, block)` is the AES-128 blockcipher.
+           """
+           lo, hi = block[:8], block[8:]
+           sigma_block = concat([hi, xor(hi, lo)])
+           return xor(AES128(self.fixed_key, sigma_block), sigma_block)
 
 6.2.3.  The Domain Separation Tag and Binder String
 
@@ -3208,17 +3208,17 @@ class XofFixedKeyAes128(Xof):
    When joint randomness is not used, the prep share is structured as
    follows:
 
-struct {
-    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
-} Prio3PrepShare;
+   struct {
+       Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
+   } Prio3PrepShare;
 
    When joint randomness is used, the prep share includes the
    Aggregator's joint randomness part and is structured as follows:
 
-struct {
-    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
-    Prio3Seed k_joint_rand_part;
-} Prio3PrepShareWithJointRand;
+   struct {
+       Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
+       Prio3Seed k_joint_rand_part;
+   } Prio3PrepShareWithJointRand;
 
 7.2.7.4.  Prep Message
 
