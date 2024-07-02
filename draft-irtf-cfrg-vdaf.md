@@ -6,6 +6,7 @@ category: info
 
 ipr: trust200902
 area: IRTF
+submissiontype: IRTF
 workgroup: CFRG
 keyword: Internet-Draft
 
