@@ -120,7 +120,10 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
             length += g.ARITY + 1
         return length
 
-    def check_valid_eval(self, meas: list[F], joint_rand: list[F]) -> None:
+    def check_valid_eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F]) -> None:
         if len(meas) != self.MEAS_LEN:
             raise ValueError('incorrect measurement length')
         if len(joint_rand) != self.JOINT_RAND_LEN:
