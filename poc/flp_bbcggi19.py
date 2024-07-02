@@ -1,4 +1,4 @@
-"""A generic FLP based on {{BBCGGI19}}, Theorem 4.3."""
+"""The FLP of {{BBCGGI19}}, Theorem 4.3."""
 
 import copy
 from abc import ABCMeta, abstractmethod
@@ -285,8 +285,8 @@ def query_wrapped(
     return wrapped_valid
 
 
-class FlpGeneric(Flp[Measurement, AggResult, F]):
-    """An FLP constructed from a validity circuit."""
+class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
+    """The FLP of {{BBCGGI19}}, Theorem 4.3 with some extensions."""
 
     # Validity circuit and AFE.
     valid: Valid[Measurement, AggResult, F]
