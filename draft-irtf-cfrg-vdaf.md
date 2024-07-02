@@ -957,7 +957,7 @@ Simon Friedberger: I think this would be easier to understand (also a bit
 longer) if there was an Aggregator class which behaved like an actual aggregator
 but with messages being sent by calling functions.
 -->
-~~~
+~~~ python
 def run_daf(
         daf: Daf[
             Measurement,
@@ -1094,7 +1094,7 @@ Each VDAF is identified by a unique, 32-bit integer `ID`. Identifiers for each
 (V)DAF specified in this document are defined in {{codepoints}}. The following
 method is defined for every VDAF:
 
-~~~
+~~~ python
 def domain_separation_tag(self, usage: int) -> bytes:
     """
     Format domain separation tag for this VDAF with the given usage.
@@ -1292,7 +1292,7 @@ The data flow for this stage is illustrated in {{unshard-flow}}.
 
 Secure execution of a VDAF involves simulating the following procedure.
 
-~~~
+~~~ python
 def run_vdaf(
         vdaf: Vdaf[
             Measurement,
@@ -1407,7 +1407,7 @@ this broadcast channel functionality in protocols that use VDAFs.
 
 The state machine of each Aggregator is shown in {{vdaf-prep-state-machine}}.
 
-~~~ state
+~~~
                +----------------+
                |                |
                v                |
@@ -1424,7 +1424,7 @@ terminal states are `Rejected`, which indicates that the report cannot be
 processed any further, and `Finished(out_share)`, which indicates that the
 Aggregator has recovered an output share `out_share`.
 
-~~~
+~~~ pseudocode
 class State:
     pass
 
@@ -1517,7 +1517,7 @@ requests sent.
 Each message in the ping-pong protocol is structured as follows (expressed in
 TLS syntax as defined in {{Section 3 of !RFC8446}}):
 
-~~~
+~~~ tls-presentation
 enum {
   initialize(0),
   continue(1),
@@ -1552,7 +1552,7 @@ described {{Section 3 of !RFC8446}}) using the following routines:
 
 The Leader's initial transition is computed with the following procedure:
 
-~~~ transition
+~~~ pseudocode
 def ping_pong_leader_init(
             vdaf,
             vdaf_verify_key: bytes,
@@ -1584,7 +1584,7 @@ Otherwise, if the state is `Continued`, then processing continues.
 The Leader sends the outbound message to the Helper. The Helper's initial
 transition is computed using the following procedure:
 
-~~~ transition
+~~~ pseudocode
 def ping_pong_helper_init(
             vdaf,
             vdaf_verify_key: bytes,
@@ -1625,7 +1625,7 @@ def ping_pong_helper_init(
 Procedure `ping_pong_transition()` takes in the prep shares, combines them into
 the prep message, and computes the next prep state of the caller:
 
-~~~
+~~~ pseudocode
 def ping_pong_transition(
             vdaf,
             agg_param: AggParam,
@@ -1653,7 +1653,7 @@ halts. Otherwise, if the state is `Continued`, then processing continues.
 Next, the Helper sends the outbound message to the Leader. The Leader computes
 its next state transition using the function `ping_pong_leader_continued`:
 
-~~~ transition
+~~~ pseudocode
 def ping_pong_leader_continued(
             vdaf,
             agg_param: bytes,
@@ -1715,7 +1715,7 @@ Otherwise, the Leader sends the outbound message to the Helper. The Helper
 computes its next state transition using the function
 `ping_pong_helper_continued`:
 
-~~~ transition
+~~~ pseudocode
 def ping_pong_helper_continued(
             vdaf,
             agg_param: bytes,
@@ -1794,7 +1794,7 @@ Each concrete `Field` has two derived class methods, one for encoding
 a vector of field elements as a byte string and another for decoding a vector of
 field elements.
 
-~~~
+~~~ python
 def encode_vec(cls, vec: list[Self]) -> bytes:
     """
     Encode a vector of field elements `vec` as a byte string.
@@ -1828,7 +1828,7 @@ def decode_vec(cls, encoded: bytes) -> list[Self]:
 Finally, `Field` implements the following methods for representing a value as
 a sequence of field elements, each of which represents a bit of the input.
 
-~~~
+~~~ python
 def encode_into_bit_vector(
         cls,
         val: int,
@@ -1874,7 +1874,7 @@ The following auxiliary functions on vectors of field elements are used in the
 remainder of this document. Note that an exception is raised by each function if
 the operands are not the same length.
 
-~~~
+~~~ python
 def vec_sub(left: list[F], right: list[F]) -> list[F]:
     """
     Subtract the right operand from the left and return the result.
@@ -1950,7 +1950,7 @@ elements. The third is a convenience method to construct an `Xof` from a seed,
 domain separation tag, and binder string, and then use it to compute a sequence
 of field elements.
 
-~~~
+~~~ python
 def derive_seed(cls,
                 seed: bytes,
                 dst: bytes,
@@ -2011,7 +2011,7 @@ XOF is RECOMMENDED for all use cases within VDAFs. The length of the
 domain separation string `dst` passed to XofTurboShake128 MUST NOT
 exceed 255 bytes.
 
-~~~
+~~~ python
 class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
 
@@ -2048,7 +2048,7 @@ XOF anywhere else. The length of the domain separation string `dst` passed to
 XofFixedKeyAes128 MUST NOT exceed 255 bytes. See Security Considerations
 {{security}} for a more detailed discussion.
 
-~~~
+~~~ python
 class XofFixedKeyAes128(Xof):
     """
     XOF based on a circular collision-resistant hash function from
@@ -2121,7 +2121,7 @@ encodes the following values:
 The following algorithm is used in the remainder of this document in order to
 format the domain separation tag:
 
-~~~
+~~~ python
 def format_dst(algo_class: int,
                algo: int,
                usage: int) -> bytes:
@@ -2270,7 +2270,7 @@ valid measurement, is the same regardless of the number of shares.
 
 An FLP is executed by the prover and verifier as follows:
 
-~~~
+~~~ python
 def run_flp(
         flp: Flp[Measurement, AggResult, F],
         meas: list[F],
@@ -2470,7 +2470,7 @@ Depending on the FLP, joint randomness may not be required. In particular, when
 `flp.JOINT_RAND_LEN == 0`, the Client does not derive the joint randomness
 (Step 3). The sharding algorithm is specified below.
 
-~~~
+~~~ python
 def shard(
         self,
         measurement: Measurement,
@@ -2504,7 +2504,7 @@ subsections below.
 The following method is used for FLPs that do not require joint randomness,
 i.e., when `flp.JOINT_RAND_LEN == 0`:
 
-~~~
+~~~ python
 def shard_without_joint_rand(
         self,
         meas: list[F],
@@ -2584,7 +2584,7 @@ and proof shares and the methods for encoding the input shares are defined in
 The following method is used for FLPs that require joint randomness,
 i.e., for which `flp.JOINT_RAND_LEN > 0`:
 
-~~~
+~~~ python
 def shard_with_joint_rand(
         self,
         meas: list[F],
@@ -2711,7 +2711,7 @@ verifier(s).
 The definitions of constants and a few auxiliary functions are defined in
 {{prio3-auxiliary}}.
 
-~~~
+~~~ python
 def prep_init(
         self,
         verify_key: bytes,
@@ -2814,7 +2814,7 @@ def prep_shares_to_prep(
 Every input share MUST only be used once, regardless of the aggregation
 parameters used.
 
-~~~
+~~~ python
 def is_valid(
         self,
         _agg_param: None,
@@ -2832,7 +2832,7 @@ def is_valid(
 Aggregating a set of output shares is simply a matter of adding up the vectors
 element-wise.
 
-~~~
+~~~ python
 def aggregate(
         self,
         _agg_param: None,
@@ -2849,7 +2849,7 @@ def aggregate(
 To unshard a set of aggregate shares, the Collector first adds up the vectors
 element-wise. It then converts each element of the vector into an integer.
 
-~~~
+~~~ python
 def unshard(
         self,
         _agg_param: None,
@@ -2869,7 +2869,7 @@ algorithms for Prio3 in the preceding sections.
 
 The following methods are called by the sharding and preparation algorithms.
 
-~~~
+~~~ python
 def helper_meas_share(self, agg_id: int, k_share: bytes) -> list[F]:
     return self.xof.expand_into_vec(
         self.flp.field,
@@ -2968,14 +2968,14 @@ Message structures are defined following {{Section 3 of !RFC8446}}). In the
 remainder we use `S` as an alias for `Prio3.xof.SEED_SIZE` and `F` as an alias
 for `Prio3.field.ENCODED_SIZE`. XOF seeds are represented as follows:
 
-~~~
+~~~ tls-presentation
 opaque Prio3Seed[S];
 ~~~
 
 Field elements are encoded in little-endian byte order (as defined in
 {{field}}) and represented as follows:
 
-~~~
+~~~ tls-presentation
 opaque Prio3Field[F];
 ~~~
 
@@ -2987,7 +2987,7 @@ joint randomness is not used, then the public share is the empty string. If
 joint randomness is used, then the public share encodes the joint randomness
 parts as follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3Seed k_joint_rand_parts[S * Prio3.SHARES];
 } Prio3PublicShareWithJointRand;
@@ -3009,7 +3009,7 @@ by XOF seeds. We shall call the former the "Leader" and the latter the
 In total there are four variants of the input share. When joint randomness is
 not used, the Leader's share is structured as follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
     Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
@@ -3019,7 +3019,7 @@ struct {
 When joint randomness is not used, the Helpers' shares are structured
 as follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3Seed k_meas_share;
     Prio3Seed k_proofs_share;
@@ -3029,7 +3029,7 @@ struct {
 When joint randomness is used, the Leader's input share is structured as
 follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3LeaderShare inner;
     Prio3Seed k_blind;
@@ -3039,7 +3039,7 @@ struct {
 Finally, when joint randomness is used, the Helpers' shares are structured as
 follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3HelperShare inner;
     Prio3Seed k_blind;
@@ -3050,7 +3050,7 @@ struct {
 
 When joint randomness is not used, the prep share is structured as follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
 } Prio3PrepShare;
@@ -3059,7 +3059,7 @@ struct {
 When joint randomness is used, the prep share includes the Aggregator's joint
 randomness part and is structured as follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
     Prio3Seed k_joint_rand_part;
@@ -3072,7 +3072,7 @@ When joint randomness is not used, the prep message is the empty string.
 Otherwise the prep message consists of the joint randomness seed computed by
 the Aggregators:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3Seed k_joint_rand;
 } Prio3PrepMessageWithJointRand;
@@ -3082,7 +3082,7 @@ struct {
 
 Aggregate shares are structured as follows:
 
-~~~
+~~~ tls-presentation
 struct {
     Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
 } Prio3AggShare;
@@ -3306,7 +3306,7 @@ output, and converting an aggregated output to an aggregate result:
 
 Finally, the following methods are derived for each concrete `Valid`:
 
-~~~
+~~~ python
 def prove_rand_len(self) -> int:
     """Length of the prover randomness."""
     return sum(g.ARITY for g in self.GADGETS)
@@ -3502,7 +3502,7 @@ This instance uses XofTurboShake128 ({{xof-turboshake128}}) as its XOF. Its
 validity circuit, denoted `Count`, uses `Field64` ({{fields}}) as its finite
 field. Its gadget, denoted `Mul`, is the degree-2, arity-2 gadget defined as
 
-~~~
+~~~ python
 def eval(self, _field: type[F], inp: list[F]) -> F:
     self.check_gadget_eval(inp)
     return inp[0] * inp[1]
@@ -3513,7 +3513,7 @@ not equal to the gadget's `ARITY` parameter.
 
 The `Count` validity circuit is defined as
 
-~~~
+~~~ python
 def eval(
         self,
         meas: list[Field64],
@@ -3552,7 +3552,7 @@ finite field. The measurement is encoded as a length-`bits` vector of field
 elements, where the `l`th element of the vector represents the `l`th bit of the
 summand:
 
-~~~
+~~~ python
 def encode(self, measurement: int) -> list[Field128]:
     if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
         raise ValueError('measurement out of range')
@@ -3573,7 +3573,7 @@ def decode(
 The validity circuit checks that the input consists of ones and zeros. Its
 gadget, denoted `Range2`, is the degree-2, arity-1 gadget defined as
 
-~~~
+~~~ python
 def eval(self, _field: type[F], inp: list[F]) -> F:
     self.check_gadget_eval(inp)
     return inp[0] * inp[0] - inp[0]
@@ -3581,7 +3581,7 @@ def eval(self, _field: type[F], inp: list[F]) -> F:
 
 The `Sum` validity circuit is defined as
 
-~~~
+~~~ python
 def eval(
         self,
         meas: list[Field128],
@@ -3626,7 +3626,7 @@ Measurements are encoded as a vector of field elements with length `length *
 bits`. The field elements in the encoded vector represent all the bits of the
 measurement vector's elements, consecutively, in LSB to MSB order:
 
-~~~
+~~~ python
 def encode(self, measurement: list[int]) -> list[F]:
     if len(measurement) != self.length:
         raise ValueError('incorrect measurement length')
@@ -3672,7 +3672,7 @@ recording during evaluation, gadget consistency proofs, and proof validation,
 even though the subcircuit is provided to `ParallelSum` as an implementation
 of the `Gadget` interface.
 
-~~~
+~~~ python
 def eval(self, field: type[F], inp: list[F]) -> F:
     self.check_gadget_eval(inp)
     out = field(0)
@@ -3697,7 +3697,7 @@ element minus one. These `Mul` subcircuits are evaluated by a `ParallelSum`
 gadget, and the results are added up both within the `ParallelSum` gadget and
 after it.
 
-~~~
+~~~ python
 def eval(
         self,
         meas: list[F],
@@ -3780,7 +3780,7 @@ square root of `length` (see {{parallel-sum-chunk-length}}).
 The measurement is encoded as a one-hot vector representing the bucket into
 which the measurement falls:
 
-~~~
+~~~ python
 def encode(self, measurement: int) -> list[Field128]:
     encoded = [self.field(0)] * self.length
     encoded[measurement] = self.field(1)
@@ -3811,7 +3811,7 @@ measurement element multiplied by a power of the first joint randomness value,
 and the other is equal to the same measurement element minus one. The results
 are added up both within the `ParallelSum` gadget and after it.
 
-~~~
+~~~ python
 def eval(
         self,
         meas: list[Field128],
@@ -3902,7 +3902,7 @@ zero if and only if the reported weight is equal to the true weight.
 
 Encoding, truncation, and decoding are defined as follows:
 
-~~~
+~~~ python
 def encode(self, measurement: list[int]) -> list[Field128]:
     if len(measurement) != self.length:
         raise ValueError('invalid Client measurement length')
@@ -3932,7 +3932,7 @@ def decode(
 
 Circuit evaluation is defined as follows:
 
-~~~
+~~~ python
 def eval(
         self,
         meas: list[Field128],
@@ -4138,7 +4138,7 @@ elements.) The scheme is comprised of the following algorithms:
 
 In addition, the following method is derived for each concrete `Idpf`:
 
-~~~
+~~~ python
 def current_field(
         self,
         level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
@@ -4174,13 +4174,13 @@ inputs are fixed-length byte strings, the most natural choice of encoder is
 `from_be_bytes()`. This ensures that, when a string is a prefix of another, so
 too is its index. (Index prefixes are defined in {{idpf}}). For example,
 
-~~~
+~~~ python
 from_be_bytes(b"\x01\x02") == 0x0102
 ~~~
 
 is a prefix of
 
-~~~
+~~~ python
 from_be_bytes(b"\x01\x02\x03") == 0x010203
 ~~~
 
@@ -4247,7 +4247,7 @@ and sends additive shares of `a`, `b`, `c`, `A` and `B` to the Aggregators.
 Putting everything together, the sharding algorithm is defined as
 follows.
 
-~~~
+~~~ python
 def shard(
         self,
         measurement: int,
@@ -4380,7 +4380,7 @@ verification might fail, causing the Aggregators to erroneously reject a report
 that is actually valid. Note that enforcing the order is not strictly necessary,
 but this does allow uniqueness to be determined more efficiently.
 
-~~~
+~~~ python
 def prep_init(
         self,
         verify_key: bytes,
@@ -4541,7 +4541,7 @@ combination of input share and level. This function checks that levels are
 increasing between calls, and also enforces that the prefixes at each level are
 suffixes of the previous level's prefixes.
 
-~~~
+~~~ python
 def get_ancestor(
         index: int,
         this_level: int,
@@ -4587,7 +4587,7 @@ Poplar1."}
 
 Aggregation involves simply adding up the output shares.
 
-~~~
+~~~ python
 def aggregate(
         self,
         agg_param: Poplar1AggParam,
@@ -4606,7 +4606,7 @@ def aggregate(
 Finally, the Collector unshards the aggregate result by adding up the aggregate
 shares.
 
-~~~
+~~~ python
 def unshard(
         self,
         agg_param: Poplar1AggParam,
@@ -4632,21 +4632,21 @@ remainder we use `S` as an alias for `Poplar1.xof.SEED_SIZE`, `Fi` as an alias
 for `Poplar1.idpf.field_inner` and `Fl` as an alias for
 `Poplar1.idpf.field_leaf`. XOF seeds are represented as follows:
 
-~~~
+~~~ tls-presentation
 opaque Poplar1Seed[S];
 ~~~
 
 Elements of the inner field are encoded in little-endian byte order (as defined
 in {{field}}) and are represented as follows:
 
-~~~
+~~~ tls-presentation
 opaque Poplar1FieldInner[Fi];
 ~~~
 
 Likewise, elements of the leaf field are encoded in little-endian byte order
 (as defined in {{field}}) and are represented as follows:
 
-~~~
+~~~ tls-presentation
 opaque Poplar1FieldLeaf[Fl];
 ~~~
 
@@ -4659,7 +4659,7 @@ The public share is equal to the IDPF public share, which is a byte string.
 
 Each input share is structured as follows:
 
-~~~
+~~~ tls-presentation
 struct {
     opaque idpf_key[Poplar1.Idpf.KEY_SIZE];
     Poplar1Seed corr_seed;
@@ -4678,7 +4678,7 @@ inner field or the leaf field.
 
 For the first round and inner field:
 
-~~~
+~~~ tls-presentation
 struct {
     Poplar1FieldInner sketch_share[Fi * 3];
 } Poplar1PrepShareRoundOneInner;
@@ -4686,14 +4686,15 @@ struct {
 
 For the first round and leaf field:
 
-~~~
+~~~ tls-presentation
 struct {
     Poplar1FieldLeaf sketch_share[Fl * 3];
 } Poplar1PrepShareRoundOneLeaf;
+~~~
 
 For the second round and inner field:
-~~~
-~~~
+
+~~~ tls-presentation
 struct {
     Poplar1FieldInner sketch_share;
 } Poplar1PrepShareRoundTwoInner;
@@ -4701,7 +4702,7 @@ struct {
 
 For the second round and leaf field:
 
-~~~
+~~~ tls-presentation
 struct {
     Poplar1FieldLeaf sketch_share;
 } Poplar1PrepShareRoundTwoLeaf;
@@ -4712,7 +4713,7 @@ struct {
 Likewise, the structure of the prep message for Poplar1 depends on the
 sketching round and field. For the first round and inner field:
 
-~~~
+~~~ tls-presentation
 struct {
     Poplar1FieldInner[Fi * 3];
 } Poplar1PrepMessageRoundOneInner;
@@ -4720,7 +4721,7 @@ struct {
 
 For the first round and leaf field:
 
-~~~
+~~~ tls-presentation
 struct {
     Poplar1FieldLeaf sketch[Fl * 3];
 } Poplar1PrepMessageRoundOneLeaf;
@@ -4742,7 +4743,7 @@ is used, and the number of candidate prefixes. Both of these are determined by
 
 Let `prefix_count` denote the number of candidate prefixes. For the inner field:
 
-~~~
+~~~ tls-presentation
 struct {
     Poplar1FieldInner agg_share[Fi * prefix_count];
 } Poplar1AggShareInner;
@@ -4750,7 +4751,7 @@ struct {
 
 For the leaf field:
 
-~~~
+~~~ tls-presentation
 struct {
     Poplar1FieldLeaf agg_share[Fl * prefix_count];
 } Poplar1AggShareLeaf;
@@ -4763,7 +4764,7 @@ The aggregation parameter is encoded as follows:
 > TODO(issue #255) Express the aggregation parameter encoding in TLS syntax.
 > Decide whether to RECOMMEND this encoding, and if so, add it to test vectors.
 
-~~~
+~~~ python
 def encode_agg_param(self, agg_param: Poplar1AggParam) -> bytes:
     level, prefixes = agg_param
     if level not in range(2 ** 16):
@@ -4840,7 +4841,7 @@ functions `extend()`, `convert()`, and `encode_public_share()` defined in
 {{idpf-poplar-helper-functions}}. In the following, we let `Field2` denote the
 field `GF(2)`.
 
-~~~
+~~~ python
 def gen(
         self,
         alpha: int,
@@ -4917,7 +4918,7 @@ The description of the IDPF-evaluation algorithm makes use of auxiliary
 functions `extend()`, `convert()`, and `decode_public_share()` defined in
 {{idpf-poplar-helper-functions}}.
 
-~~~
+~~~ python
 def eval(
         self,
         agg_id: int,
@@ -5024,7 +5025,7 @@ def eval_next(
 
 ### Auxiliary Functions {#idpf-poplar-helper-functions}
 
-~~~
+~~~ python
 def extend(
         self,
         seed: bytes,
