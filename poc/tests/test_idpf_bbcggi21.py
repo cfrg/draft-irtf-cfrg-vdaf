@@ -3,56 +3,58 @@ from typing import cast
 
 from common import TEST_VECTOR, from_be_bytes, gen_rand, vec_add
 from field import Field
-from idpf_poplar import IdpfPoplar
+from idpf_bbcggi21 import IdpfBBCGGI21
 from tests.idpf_util import gen_test_vec, test_idpf, test_idpf_exhaustive
 
 
-class TestIdpfPoplar(unittest.TestCase):
-    def test_idpfpoplar(self) -> None:
+class TestIdpfBBCGGI21(unittest.TestCase):
+    def test(self) -> None:
         if TEST_VECTOR:
-            gen_test_vec(IdpfPoplar(2, 10), 0, 0)
+            gen_test_vec(IdpfBBCGGI21(2, 10), 0, 0)
         test_idpf(
-            IdpfPoplar(2, 16),
+            IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             15,
             (0b1111000011110000,),
         )
         test_idpf(
-            IdpfPoplar(2, 16),
+            IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             14,
             (0b111100001111000,),
         )
         test_idpf(
-            IdpfPoplar(2, 16),
+            IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             13,
             (0b11110000111100,),
         )
         test_idpf(
-            IdpfPoplar(2, 16),
+            IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             12,
             (0b1111000011110,),
         )
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 11, (0b111100001111,))
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 10, (0b11110000111,))
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 5, (0b111100,))
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 4, (0b11110,))
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 3, (0b1111,))
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 2, (0b111,))
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 1, (0b11,))
-        test_idpf(IdpfPoplar(2, 16), 0b1111000011110000, 0, (0b1,))
-        test_idpf(IdpfPoplar(2, 1000), 0, 999, (0,))
-        test_idpf_exhaustive(IdpfPoplar(2, 1), 0)
-        test_idpf_exhaustive(IdpfPoplar(2, 1), 1)
-        test_idpf_exhaustive(IdpfPoplar(2, 8), 91)
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000,
+                  11, (0b111100001111,))
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000,
+                  10, (0b11110000111,))
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 5, (0b111100,))
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 4, (0b11110,))
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 3, (0b1111,))
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 2, (0b111,))
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 1, (0b11,))
+        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 0, (0b1,))
+        test_idpf(IdpfBBCGGI21(2, 1000), 0, 999, (0,))
+        test_idpf_exhaustive(IdpfBBCGGI21(2, 1), 0)
+        test_idpf_exhaustive(IdpfBBCGGI21(2, 1), 1)
+        test_idpf_exhaustive(IdpfBBCGGI21(2, 8), 91)
 
     def test_index_encoding(self) -> None:
         """
         Ensure that the IDPF index is encoded in big-endian byte order.
         """
-        idpf = IdpfPoplar(1, 32)
+        idpf = IdpfBBCGGI21(1, 32)
         binder = b'some nonce'
 
         def shard(s: bytes) -> tuple[bytes, list[bytes]]:
@@ -83,7 +85,7 @@ class TestIdpfPoplar(unittest.TestCase):
             self.assertEqual(out.as_unsigned(), 1)
 
     def test_is_prefix(self) -> None:
-        idpf = IdpfPoplar(1, 8)
+        idpf = IdpfBBCGGI21(1, 8)
         self.assertTrue(idpf.is_prefix(0b1, 0b11000001, 0))
         self.assertTrue(idpf.is_prefix(0b11, 0b11000001, 1))
         self.assertTrue(idpf.is_prefix(0b110, 0b11000001, 2))

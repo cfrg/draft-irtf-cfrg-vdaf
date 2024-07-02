@@ -3,7 +3,7 @@
 from abc import abstractmethod
 from typing import Any, Generic, Optional, TypeAlias, TypeVar, Union
 
-import flp_generic
+import flp_bbcggi19
 from common import byte, concat, front, vec_add, vec_sub, zeros
 from field import FftField, Field64, Field128
 from flp import Flp
@@ -556,7 +556,7 @@ class Prio3Count(Prio3[int, int, Field64]):
     test_vec_name = 'Prio3Count'
 
     def __init__(self, shares: int):
-        flp = flp_generic.FlpGeneric[int, int, Field64](flp_generic.Count())
+        flp = flp_bbcggi19.FlpBBCGGI19[int, int, Field64](flp_bbcggi19.Count())
         super().__init__(shares, flp, 1)
 
 
@@ -569,7 +569,8 @@ class Prio3Sum(Prio3[int, int, Field128]):
     test_vec_name = 'Prio3Sum'
 
     def __init__(self, shares: int, bits: int):
-        flp = flp_generic.FlpGeneric[int, int, Field128](flp_generic.Sum(bits))
+        flp = flp_bbcggi19.FlpBBCGGI19[int, int,
+                                       Field128](flp_bbcggi19.Sum(bits))
         super().__init__(shares, flp, 1)
 
 
@@ -582,8 +583,8 @@ class Prio3SumVec(Prio3[list[int], list[int], Field128]):
     test_vec_name = 'Prio3SumVec'
 
     def __init__(self, shares: int, length: int, bits: int, chunk_length: int):
-        flp = flp_generic.FlpGeneric[list[int], list[int], Field128](
-            flp_generic.SumVec(length, bits, chunk_length, Field128)
+        flp = flp_bbcggi19.FlpBBCGGI19[list[int], list[int], Field128](
+            flp_bbcggi19.SumVec(length, bits, chunk_length, Field128)
         )
         super().__init__(shares, flp, 1)
 
@@ -597,8 +598,8 @@ class Prio3Histogram(Prio3[int, list[int], Field128]):
     test_vec_name = 'Prio3Histogram'
 
     def __init__(self, shares: int, length: int, chunk_length: int):
-        flp = flp_generic.FlpGeneric[int, list[int], Field128](
-            flp_generic.Histogram(length, chunk_length)
+        flp = flp_bbcggi19.FlpBBCGGI19[int, list[int], Field128](
+            flp_bbcggi19.Histogram(length, chunk_length)
         )
         super().__init__(shares, flp, 1)
 
@@ -621,8 +622,8 @@ class Prio3SumVecWithMultiproof(Prio3[list[int], list[int], F], Generic[F]):
             length: int,
             bits: int,
             chunk_length: int):
-        flp = flp_generic.FlpGeneric[list[int], list[int], F](
-            flp_generic.SumVec(
+        flp = flp_bbcggi19.FlpBBCGGI19[list[int], list[int], F](
+            flp_bbcggi19.SumVec(
                 length,
                 bits,
                 chunk_length,
@@ -650,8 +651,8 @@ class Prio3MultihotCountVec(Prio3[list[int], list[int], Field128]):
             length: int,
             max_weight: int,
             chunk_length: int):
-        flp = flp_generic.FlpGeneric(
-            flp_generic.MultihotCountVec(
+        flp = flp_bbcggi19.FlpBBCGGI19(
+            flp_bbcggi19.MultihotCountVec(
                 length, max_weight, chunk_length
             )
         )

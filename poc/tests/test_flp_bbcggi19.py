@@ -4,9 +4,9 @@ from typing import TypeVar
 from common import next_power_of_2
 from field import FftField, Field64, Field96, Field128, poly_eval
 from flp import Flp, run_flp
-from flp_generic import (Count, FlpGeneric, Gadget, Histogram, Mul,
-                         MultihotCountVec, PolyEval, Range2, Sum,
-                         SumOfRangeCheckedInputs, SumVec, Valid)
+from flp_bbcggi19 import (Count, FlpBBCGGI19, Gadget, Histogram, Mul,
+                          MultihotCountVec, PolyEval, Range2, Sum,
+                          SumOfRangeCheckedInputs, SumVec, Valid)
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")
@@ -62,8 +62,8 @@ def test_gadget(g: Gadget, field: type[F], test_length: int) -> None:
     assert got == want
 
 
-def test_flp_generic(
-        flp: FlpGeneric[Measurement, AggResult, F],
+def test_flp_bbcggi19(
+        flp: FlpBBCGGI19[Measurement, AggResult, F],
         test_cases: list[tuple[list[F], bool]]) -> None:
     for (g, g_calls) in zip(flp.valid.GADGETS, flp.valid.GADGET_CALLS):
         test_gadget(g, flp.field, next_power_of_2(g_calls + 1))
@@ -121,21 +121,21 @@ def test_encode_truncate_decode_with_fft_fields(
         sumvec = SumVec[FftField](length, bits, chunk_length, field=f)
         assert sumvec.field == f
         assert isinstance(sumvec, SumVec)
-        test_encode_truncate_decode(FlpGeneric(sumvec), measurements)
+        test_encode_truncate_decode(FlpBBCGGI19(sumvec), measurements)
 
 
-class TestFlpGeneric(unittest.TestCase):
+class TestFlpBBCGGI19(unittest.TestCase):
     def test_count(self) -> None:
-        flp = FlpGeneric(Count())
-        test_flp_generic(flp, [
+        flp = FlpBBCGGI19(Count())
+        test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(1), True),
             ([flp.field(1337)], False),
         ])
 
     def test_sum(self) -> None:
-        flp = FlpGeneric(Sum(10))
-        test_flp_generic(flp, [
+        flp = FlpBBCGGI19(Sum(10))
+        test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(100), True),
             (flp.encode(2 ** 10 - 1), True),
@@ -144,8 +144,8 @@ class TestFlpGeneric(unittest.TestCase):
         test_encode_truncate_decode(flp, [0, 100, 2 ** 10 - 1])
 
     def test_sum_of_range_checked_inputs(self) -> None:
-        flp = FlpGeneric(SumOfRangeCheckedInputs(10_000))
-        test_flp_generic(flp, [
+        flp = FlpBBCGGI19(SumOfRangeCheckedInputs(10_000))
+        test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(1337), True),
             (flp.encode(9_999), True),
@@ -153,8 +153,8 @@ class TestFlpGeneric(unittest.TestCase):
         ])
 
     def test_histogram(self) -> None:
-        flp = FlpGeneric(Histogram(4, 2))
-        test_flp_generic(flp, [
+        flp = FlpBBCGGI19(Histogram(4, 2))
+        test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
             (flp.encode(1), True),
             (flp.encode(2), True),
@@ -166,7 +166,7 @@ class TestFlpGeneric(unittest.TestCase):
 
     def test_multihot_count_vec(self) -> None:
         valid = MultihotCountVec(4, 2, 2)
-        flp = FlpGeneric(valid)
+        flp = FlpBBCGGI19(valid)
 
         # Successful cases:
         cases = [
@@ -188,12 +188,12 @@ class TestFlpGeneric(unittest.TestCase):
         ]
         # Failure case: pass count check but fail bit check.
         cases += [(flp.encode([flp.field.MODULUS - 1, 1, 0, 0]), False)]
-        test_flp_generic(flp, cases)
+        test_flp_bbcggi19(flp, cases)
 
     def test_multihot_count_vec_small(self) -> None:
-        flp = FlpGeneric(MultihotCountVec(1, 1, 1))
+        flp = FlpBBCGGI19(MultihotCountVec(1, 1, 1))
 
-        test_flp_generic(flp, [
+        test_flp_bbcggi19(flp, [
             (flp.encode([0]), True),
             (flp.encode([1]), True),
             ([flp.field(0), flp.field(1337)], False),
@@ -210,8 +210,8 @@ class TestFlpGeneric(unittest.TestCase):
         )
 
     def test_multigadget(self) -> None:
-        flp = FlpGeneric(TestMultiGadget())
-        test_flp_generic(flp, [
+        flp = FlpBBCGGI19(TestMultiGadget())
+        test_flp_bbcggi19(flp, [
             (flp.encode(0), True),
         ])
 

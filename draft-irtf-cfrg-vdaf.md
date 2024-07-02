@@ -375,6 +375,10 @@ security considerations for VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+10:
+
+* Rename FlpGeneric to FlpBBCGGI19 and IdpfPoplar to IdpfBBCGGI21.
+
 09:
 
 * Poplar1: Make prefix tree traversal stricter by requiring each node to be a
@@ -1906,8 +1910,8 @@ def vec_neg(vec: list[F]) -> list[F]:
 
 Some VDAFs require fields that are suitable for efficient computation of the
 discrete Fourier transform, as this allows for fast polynomial interpolation.
-(One example is Prio3 ({{prio3}}) when instantiated with the generic FLP of
-{{flp-generic-construction}}.) Specifically, a field is said to be
+(One example is Prio3 ({{prio3}}) when instantiated with the FLP of
+{{flp-bbcggi19-construction}}.) Specifically, a field is said to be
 "FFT-friendly" if, in addition to satisfying the interface described in
 {{field}}, it implements the following method:
 
@@ -2054,7 +2058,7 @@ While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
 cases where a more efficient instantiation based on fixed-key AES is possible.
 For now, this is limited to the XOF used inside the Idpf {{idpf}}
-implementation in Poplar1 {{idpf-poplar}}. It is NOT RECOMMENDED to use this
+implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT RECOMMENDED to use this
 XOF anywhere else. The length of the domain separation string `dst` passed to
 XofFixedKeyAes128 MUST NOT exceed 255 bytes. See Security Considerations
 {{security}} for a more detailed discussion.
@@ -2078,8 +2082,7 @@ class XofFixedKeyAes128(Xof):
         # Use TurboSHAKE128 to derive a key from the binder string
         # and domain separation tag. Note that the AES key does not
         # need to be kept secret from any party. However, when used
-        # with IdpfPoplar, we require the binder to be a random
-        # nonce.
+        # with an IDPF, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
@@ -2205,7 +2208,7 @@ particular class of FLPs into a VDAF.
 The remainder of this section is structured as follows. The syntax for FLPs is
 described in {{flp}}. The generic transformation of an FLP into Prio3 is
 specified in {{prio3-construction}}. Next, a concrete FLP suitable for any
-validity circuit is specified in {{flp-generic}}. Finally, instantiations of
+validity circuit is specified in {{flp-bbcggi19}}. Finally, instantiations of
 Prio3 for various types of measurements are specified in
 {{prio3-instantiations}}. Test vectors can be found in {{test-vectors}}.
 
@@ -2278,7 +2281,7 @@ algorithm.
 The query-generation algorithm includes a parameter `num_shares` that specifies
 the number of shares that were generated. If these data are not secret shared,
 then `num_shares == 1`. This parameter is useful for certain FLP constructions.
-For example, the FLP in {{flp-generic}} is defined in terms of an arithmetic
+For example, the FLP in {{flp-bbcggi19}} is defined in terms of an arithmetic
 circuit; when the circuit contains constants, it is sometimes necessary to
 normalize those constants to ensure that the circuit's output, when run on a
 valid measurement, is the same regardless of the number of shares.
@@ -2340,7 +2343,7 @@ output is `False` with high probability. False positives are possible: there is
 a small probability that a verifier accepts an invalid input as valid. An FLP
 is said to be "sound" if this probability is sufficiently small. The soundness
 of the FLP depends on a variety of parameters, like the length of the
-input and the size of the field. See {{flp-generic}} for details.
+input and the size of the field. See {{flp-bbcggi19}} for details.
 
 Note that soundness of an FLP system is not the same as robustness for a VDAF
 In particular, soundness of the FLP is necessary, but insufficient for
@@ -2395,7 +2398,7 @@ to the notion of "Affine-aggregatable encodings (AFEs)" from {{CGB17}}.
 It is sometimes desirable to generate and verify multiple independent proofs
 for the same input. First, this improves the soundness of the proof system
 without having to change any of its parameters. Second, it allows a smaller
-field to be used (e.g., replace Field128 with Field64, see {{flp-generic}})
+field to be used (e.g., replace Field128 with Field64, see {{flp-bbcggi19}})
 without sacrificing soundness. Generally, choosing a smaller field can
 significantly reduce communication cost. (This is a trade-off, of course, since
 generating and verifying more proofs requires more time.) Given these benefits,
@@ -3107,31 +3110,18 @@ struct {
 } Prio3AggShare;
 ~~~
 
-## A General-Purpose FLP {#flp-generic}
+## The FLP of {{BBCGGI19}} {#flp-bbcggi19}
 
 This section describes an FLP based on the construction from in {{BBCGGI19}},
-Section 4.2. We begin in {{flp-generic-overview}} with an overview of their proof
+Section 4.2. We begin in {{flp-bbcggi19-overview}} with an overview of their proof
 system and the extensions to their proof system made here. The construction is
-specified in {{flp-generic-construction}}.
-
-> OPEN ISSUE We're not yet sure if specifying this general-purpose FLP is
-> desirable. It might be preferable to specify specialized FLPs for each data
-> type that we want to standardize, for two reasons. First, clear and concise
-> specifications are likely easier to write for specialized FLPs rather than the
-> general one. Second, we may end up tailoring each FLP to the measurement type
-> in a way that improves performance, but breaks compatibility with the
-> general-purpose FLP.
->
-> In any case, we can't make this decision until we know which data types to
-> standardize, so for now, we'll stick with the general-purpose construction.
-> The reference implementation can be found at
-> https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc.
+specified in {{flp-bbcggi19-construction}}.
 
 > OPEN ISSUE Chris Wood points out that the this section reads more like a paper
 > than a standard. Eventually we'll want to work this into something that is
 > readily consumable by the CFRG.
 
-### Overview {#flp-generic-overview}
+### Overview {#flp-bbcggi19-overview}
 
 In the proof system of {{BBCGGI19}}, validity is defined via an arithmetic
 circuit evaluated over the encoded measurement: If the circuit output is zero,
@@ -3201,7 +3191,7 @@ of the measurement and proof. The proof is constructed roughly as follows. Let
 the `k`th call to the gadget during the evaluation of `C(x)`. Suppose there are
 `M` such calls and fix distinct field elements `alpha[0], ..., alpha[M-1]`. (We
 will require these points to have a special property, as we'll discuss in
-{{flp-generic-overview-extensions}}; but for the moment it is only important
+{{flp-bbcggi19-overview-extensions}}; but for the moment it is only important
 that they are distinct.)
 
 The prover constructs from `wire` and `alpha` a polynomial that, when evaluated
@@ -3217,9 +3207,9 @@ to produce a gadget polynomial that would result in `C(x)` being computed
 incorrectly, potentially resulting in an invalid measurement being accepted. To
 prevent this, the verifier performs a probabilistic test to check that the
 gadget polynomial is well-formed. This test, and the procedure for constructing
-the gadget polynomial, are described in detail in {{flp-generic-construction}}.
+the gadget polynomial, are described in detail in {{flp-bbcggi19-construction}}.
 
-#### Extensions {#flp-generic-overview-extensions}
+#### Extensions {#flp-bbcggi19-overview-extensions}
 
 The FLP described in the next section extends the proof system of {{BBCGGI19}},
 Section 4.2 in a few ways.
@@ -3277,9 +3267,9 @@ the outputs is zero, then the reduced output will be zero; but if one of the
 outputs is non-zero, then the reduced output will be non-zero with high
 probability.
 
-### Validity Circuits {#flp-generic-valid}
+### Validity Circuits {#flp-bbcggi19-valid}
 
-The FLP described in {{flp-generic-construction}} is defined in terms of a
+The FLP described in {{flp-bbcggi19-construction}} is defined in terms of a
 validity circuit `Valid` that implements the interface described here.
 
 A concrete `Valid` defines the following parameters:
@@ -3300,7 +3290,7 @@ A concrete `Valid` defines the following parameters:
 Each gadget `G` in `GADGETS` defines a constant `DEGREE` that specifies the
 circuit's "arithmetic degree". This is defined to be the degree of the
 polynomial that computes it. For example, the `Mul` circuit in
-{{flp-generic-overview}} is defined by the polynomial `Mul(x) = x * x`, which
+{{flp-bbcggi19-overview}} is defined by the polynomial `Mul(x) = x * x`, which
 has degree `2`. Hence, the arithmetic degree of this gadget is `2`.
 
 Each gadget also defines a parameter `ARITY` that specifies the circuit's arity
@@ -3363,18 +3353,15 @@ def check_valid_eval(
 ~~~
 {: title="Derived methods for validity circuits."}
 
-### Construction {#flp-generic-construction}
+### Construction {#flp-bbcggi19-construction}
 
-This section specifies `FlpGeneric`, an implementation of the `Flp` interface
-({{flp}}). It has as a generic parameter a validity circuit `Valid` implementing
-the interface defined in {{flp-generic-valid}}.
+This section specifies an implementation of the `Flp` interface ({{flp}}). It
+has as a generic parameter a validity circuit `Valid` implementing the
+interface defined in {{flp-bbcggi19-valid}}.
 
-> NOTE A reference implementation can be found in
-> https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/flp_generic.py.
-
-The FLP parameters for `FlpGeneric` are defined in {{flp-generic-param}}. The
-required methods for generating the proof, generating the verifier, and deciding
-validity are specified in the remaining subsections.
+The parameters are defined in {{flp-bbcggi19-param}}. The required methods for
+generating the proof, generating the verifier, and deciding validity are
+specified in the remaining subsections.
 
 In the remainder, we let `[n]` denote the set `{1, ..., n}` for positive integer
 `n`. We also define the following constants:
@@ -3389,18 +3376,18 @@ In the remainder, we let `[n]` denote the set `{1, ..., n}` for positive integer
 
 | Parameter        | Value               |
 |:-----------------|:--------------------|
-| `PROVE_RAND_LEN` | `valid.prove_rand_len()` (see {{flp-generic-valid}}) |
-| `QUERY_RAND_LEN` | `valid.query_rand_len()` (see {{flp-generic-valid}}) |
+| `PROVE_RAND_LEN` | `valid.prove_rand_len()` (see {{flp-bbcggi19-valid}}) |
+| `QUERY_RAND_LEN` | `valid.query_rand_len()` (see {{flp-bbcggi19-valid}}) |
 | `JOINT_RAND_LEN` | `valid.JOINT_RAND_LEN` |
 | `MEAS_LEN`       | `valid.MEAS_LEN`    |
 | `OUTPUT_LEN`     | `valid.OUTPUT_LEN`  |
-| `PROOF_LEN`      | `valid.proof_len()` (see {{flp-generic-valid}}) |
-| `VERIFIER_LEN`   | `valid.verifier_len()` (see {{flp-generic-valid}}) |
+| `PROOF_LEN`      | `valid.proof_len()` (see {{flp-bbcggi19-valid}}) |
+| `VERIFIER_LEN`   | `valid.verifier_len()` (see {{flp-bbcggi19-valid}}) |
 | `Measurement`    | `valid.Measurement` |
 | `field`          | `valid.field`       |
-{: #flp-generic-param title="FLP Parameters of FlpGeneric."}
+{: #flp-bbcggi19-param title="Parameters of FLP of BBCGGI19."}
 
-#### Proof Generation {#flp-generic-construction-prove}
+#### Proof Generation {#flp-bbcggi19-construction-prove}
 
 On input of `meas`, `prove_rand`, and `joint_rand`, the proof is computed as
 follows:
@@ -3441,7 +3428,7 @@ The proof is the vector `proof = seed_1 + coeff_1 + ... + seed_H + coeff_H`,
 where `coeff_i` is the vector of coefficients of `poly_gadget_i` for each `i` in
 `[H]`.
 
-#### Query Generation {#flp-generic-construction-query}
+#### Query Generation {#flp-bbcggi19-construction-query}
 
 On input of `meas`, `proof`, `query_rand`, and `joint_rand`, the verifier message
 is generated as follows:
@@ -3449,7 +3436,7 @@ is generated as follows:
 1. For every `i` in `[H]` create an empty table `wire_i`.
 
 1. Partition `proof` into the sub-vectors `seed_1`, `coeff_1`, ..., `seed_H`,
-   `coeff_H` defined in {{flp-generic-construction-prove}}.
+   `coeff_H` defined in {{flp-bbcggi19-construction-prove}}.
 
 1. Evaluate `Valid` on input of `meas` and `joint_rand`, recording the inputs
    of each gadget in the corresponding table. This step is similar to the
@@ -3486,7 +3473,7 @@ On input of vector `verifier`, the verifier decides if the measurement is valid
 as follows:
 
 1. Parse `verifier` into `v`, `x_1`, `y_1`, ..., `x_H`, `y_H` as defined in
-   {{flp-generic-construction-query}}.
+   {{flp-bbcggi19-construction-query}}.
 
 1. Check for well-formedness of the gadget polynomials. For every `i` in `[H]`:
 
@@ -3505,12 +3492,8 @@ The FLP encoding and truncation methods invoke `valid.encode`,
 ## Instantiations {#prio3-instantiations}
 
 This section specifies instantiations of Prio3 for various measurement types.
-Each uses `FlpGeneric` as the FLP ({{flp-generic}}) and is determined by a
-validity circuit ({{flp-generic-valid}}) and a XOF ({{xof}}). Test vectors for
-each can be found in {{test-vectors}}.
-
-> NOTE Reference implementations of each of these VDAFs can be found in
-> https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/vdaf_prio3.sage.
+Each is determined by a validity circuit ({{flp-bbcggi19-valid}}) and a XOF
+({{xof}}). Test vectors for each can be found in {{test-vectors}}.
 
 ### Prio3Count
 
@@ -3686,10 +3669,10 @@ The `ParallelSum` gadget is parameterized with an arithmetic subcircuit, and a
 `count` of how many times it evaluates that subcircuit. It takes in a list of
 inputs and passes them through to instances of the subcircuit in the same order.
 It returns the sum of the subcircuit outputs. Note that only the `ParallelSum`
-gadget itself, and not its subcircuit, participates in `FlpGeneric`'s wire
-recording during evaluation, gadget consistency proofs, and proof validation,
-even though the subcircuit is provided to `ParallelSum` as an implementation
-of the `Gadget` interface.
+gadget itself, and not its subcircuit, participates in the FLP's wire recording
+during evaluation, gadget consistency proofs, and proof validation, even though
+the subcircuit is provided to `ParallelSum` as an implementation of the
+`Gadget` interface.
 
 ~~~ python
 def eval(self, field: type[F], inp: list[F]) -> F:
@@ -3773,7 +3756,7 @@ length is asymptotically minimized when the chunk length is near the square root
 of the length of the measurement. However, the relationship between VDAF
 parameters and proof length is complicated, involving two forms of rounding (the
 circuit pads the inputs to its last `ParallelSum` gadget call, up to the chunk
-length, and FlpGeneric rounds the degree of wire polynomials -- determined by
+length, and proof system rounds the degree of wire polynomials -- determined by
 the number of times a gadget is called -- up to the next power of two).
 Therefore, the optimal choice of `chunk_length` for a concrete measurement size
 will vary, and must be found through trial and error. Setting `chunk_length`
@@ -4070,7 +4053,7 @@ candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
 is zero everywhere except for at most one element, which is equal to one.
 
 The remainder of this section is structured as follows. IDPFs are defined in
-{{idpf}}; a concrete instantiation is given {{idpf-poplar}}. The Poplar1 VDAF is
+{{idpf}}; a concrete instantiation is given {{idpf-bbcggi21}}. The Poplar1 VDAF is
 defined in {{poplar1-construction}} in terms of a generic IDPF. Finally, a
 concrete instantiation of Poplar1 is specified in {{poplar1-inst}};
 test vectors can be found in {{test-vectors}}.
@@ -4171,7 +4154,7 @@ stateless, in the sense that there is no state carried between IDPF evaluations.
 This is to align the IDPF syntax with the VDAF abstraction boundary, which does
 not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
-state across evaluations. See {{idpf-poplar}} for details.
+state across evaluations. See {{idpf-bbcggi21}} for details.
 
 | Parameter  | Description               |
 |:-----------|:--------------------------|
@@ -4824,21 +4807,19 @@ than is strictly needed. In particular, it may be sufficient to convey which
 indices from the previous execution will have their children included in the
 next. This would help reduce communication overhead.
 
-## The IDPF scheme of {{BBCGGI21}} {#idpf-poplar}
+## The IDPF scheme of {{BBCGGI21}} {#idpf-bbcggi21}
 
-In this section we specify a concrete IDPF, called IdpfPoplar, suitable for
-instantiating Poplar1. The scheme gets its name from the name of the protocol of
+In this section we specify a concrete IDPF suitable for instantiating
+Poplar1. The scheme gets its name from the name of the protocol of
 {{BBCGGI21}}.
 
-> TODO We should consider giving `IdpfPoplar` a more distinctive name.
-
 The constant and type definitions required by the `Idpf` interface are given in
-{{idpf-poplar-param}}.
+{{idpf-bbcggi21-param}}.
 
-IdpfPoplar requires a XOF for deriving the output shares, as well as a variety
-of other artifacts used internally. For performance reasons, we instantiate
-this object using XofFixedKeyAes128 ({{xof-fixed-key-aes128}}). See
-{{xof-vs-ro}} for justification of this choice.
+Our IDPF requires an XOF for deriving the output shares, as well as a variety of
+other artifacts used internally. For performance reasons, we instantiate this
+object using XofFixedKeyAes128 ({{xof-fixed-key-aes128}}). See {{xof-vs-ro}} for
+justification of this choice.
 
 | Parameter  | Value                   |
 |:-----------|:------------------------|
@@ -4848,7 +4829,7 @@ this object using XofFixedKeyAes128 ({{xof-fixed-key-aes128}}). See
 | KEY_SIZE   | `Xof.SEED_SIZE`         |
 | FieldInner | `Field64` ({{fields}})  |
 | FieldLeaf  | `Field255` ({{fields}}) |
-{: #idpf-poplar-param title="Constants and type definitions for IdpfPoplar."}
+{: #idpf-bbcggi21-param title="Constants and type definitions for the IDPF of BBCGGI21."}
 
 ### Key Generation
 
@@ -4857,7 +4838,7 @@ this object using XofFixedKeyAes128 ({{xof-fixed-key-aes128}}). See
 
 The description of the IDPF-key generation algorithm makes use of auxiliary
 functions `extend()`, `convert()`, and `encode_public_share()` defined in
-{{idpf-poplar-helper-functions}}. In the following, we let `Field2` denote the
+{{idpf-bbcggi21-helper-functions}}. In the following, we let `Field2` denote the
 field `GF(2)`.
 
 ~~~ python
@@ -4927,7 +4908,7 @@ def gen(
     public_share = self.encode_public_share(correction_words)
     return (public_share, key)
 ~~~
-{: #idpf-poplar-gen title="IDPF-key generation algorithm of IdpfPoplar."}
+{: #idpf-bbcggi21-gen title="IDPF-key generation algorithm of BBCGGI21."}
 
 ### Key Evaluation
 
@@ -4935,7 +4916,7 @@ def gen(
 
 The description of the IDPF-evaluation algorithm makes use of auxiliary
 functions `extend()`, `convert()`, and `decode_public_share()` defined in
-{{idpf-poplar-helper-functions}}.
+{{idpf-bbcggi21-helper-functions}}.
 
 ~~~ python
 def eval(
@@ -4974,13 +4955,13 @@ def eval(
 
             # Implementation note: Typically the current round of
             # candidate prefixes would have been derived from
-            # aggregate results computed during previous rounds. For
-            # example, when using `IdpfPoplar` to compute heavy
-            # hitters, a string whose hit count exceeded the given
-            # threshold in the last round would be the prefix of each
-            # `prefix` in the current round. (See [BBCGGI21,
-            # Section 5.1].) In this case, part of the path would
-            # have already been traversed.
+            # aggregate results computed during previous rounds.
+            # For example, when using the IDPF to compute heavy
+            # hitters, a string whose hit count exceeded the
+            # given threshold in the last round would be the
+            # prefix of each `prefix` in the current round. (See
+            # [BBCGGI21, Section 5.1].) In this case, part of the
+            # path would have already been traversed.
             #
             # Re-computing nodes along previously traversed paths is
             # wasteful. Implementations can eliminate this added
@@ -5040,9 +5021,9 @@ def eval_next(
 
     return (next_seed, next_ctrl, cast(FieldVec, y))
 ~~~
-{: #idpf-poplar-eval title="IDPF-evaluation generation algorithm of IdpfPoplar."}
+{: #idpf-bbcggi21-eval title="IDPF-evaluation generation algorithm of BBCGGI21."}
 
-### Auxiliary Functions {#idpf-poplar-helper-functions}
+### Auxiliary Functions {#idpf-bbcggi21-helper-functions}
 
 ~~~ python
 def extend(
@@ -5111,7 +5092,7 @@ def decode_public_share(
         raise ValueError('trailing bytes')
     return correction_words
 ~~~
-{: #idpf-poplar-helpers title="Helper functions for IdpfPoplar."}
+{: #idpf-bbcggi21-helpers title="Helper functions for the IDPF."}
 
 Here, `pack_bits()` takes a list of bits, packs each group of eight bits into a
 byte, in LSB to MSB order, padding the most significant bits of the last byte
@@ -5124,9 +5105,9 @@ throws an error.
 
 ## Instantiation {#poplar1-inst}
 
-By default, Poplar1 is instantiated with IdpfPoplar (`VALUE_LEN == 2`) and
-XofTurboShake128 ({{xof-turboshake128}}). This VDAF is suitable for any
-positive value of `BITS`. Test vectors can be found in {{test-vectors}}.
+By default, Poplar1 is instantiated with the IDPF in {{idpf-bbcggi21}} (`VALUE_LEN
+== 2`) and XofTurboShake128 ({{xof-turboshake128}}). This VDAF is suitable for
+any positive value of `BITS`. Test vectors can be found in {{test-vectors}}.
 
 # Security Considerations {#security}
 
@@ -5338,13 +5319,13 @@ usually modeled as random oracles. XofTurboShake128 is designed to be
 indifferentiable from a random oracle {{MRH04}}, making it a suitable choice
 for most situations.
 
-The one exception is the Idpf implementation IdpfPoplar {{idpf-poplar}}.
-Here, a random oracle is not needed to prove privacy, since the analysis of
-{{BBCGGI21}}, Proposition 1, only requires a Pseudorandom Generator (PRG).
-As observed in {{GKWY20}}, a PRG can be instantiated from a correlation-robust
-hash function `H`. Informally, correlation robustness requires that for a random
-`r`, `H(xor(r, x))` is computationally indistinguishable from a random function of `x`.
-A PRG can therefore be constructed as
+The one exception is the IDPF of {{idpf-bbcggi21}}. Here, a random oracle is not
+needed to prove privacy, since the analysis of {{BBCGGI21}}, Proposition 1, only
+requires a Pseudorandom Generator (PRG). As observed in {{GKWY20}}, a PRG can be
+instantiated from a correlation-robust hash function `H`. Informally,
+correlation robustness requires that for a random `r`, `H(xor(r, x))` is
+computationally indistinguishable from a random function of `x`. A PRG can
+therefore be constructed as
 
 ~~~
 PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...
@@ -5369,7 +5350,7 @@ evaluated by the helpers.
 
 ## Choosing the Field Size {#security-multiproof}
 
-Prio3 and other systems built from FLPs ({{flp-generic}} in particular) may
+Prio3 and other systems built from FLPs ({{flp-bbcggi19}} in particular) may
 benefit from choosing a field size that is as small as possible. Generally
 speaking, a smaller field results in lower communication and storage costs.
 Care must be taken, however, since a smaller field also results in degraded (or
@@ -5379,7 +5360,7 @@ Different variants of Prio3 ({{prio3}}) use different field sizes: Prio3Count
 uses Field64; but Prio3Sum, Prio3SumVec, and Prio3Histogram use Field128, a
 field that is twice as large as Field64. This is due to the use of joint
 randomness ({{flp}}) in the latter variants. Joint randomness allows for more
-flexible circuit design (see {{flp-generic-overview-extensions}}), but opens up
+flexible circuit design (see {{flp-bbcggi19-overview-extensions}}), but opens up
 Prio3 to precomputation attacks, which the larger field mitigates. (See
 {{DPRS23}}, Theorem 1.) Note that privacy is not susceptible to such attacks.
 

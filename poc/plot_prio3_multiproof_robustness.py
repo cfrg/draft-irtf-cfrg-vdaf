@@ -7,7 +7,7 @@ from typing import cast
 import matplotlib.pyplot as plt
 
 from field import Field64, Field128
-from flp_generic import FlpGeneric
+from flp_bbcggi19 import FlpBBCGGI19
 from vdaf_prio3 import Prio3SumVec
 
 NUM_REPORTS = 1000000000
@@ -60,7 +60,7 @@ def sum_vec(field_size: int, num_proofs: int, length: int) -> float:
     bits = 1
     chunk_length = max(1, length**(1/2))
     vdaf = Prio3SumVec(2, length, bits, chunk_length)
-    valid = cast(FlpGeneric[list[int], list[int], Field128], vdaf.flp).valid
+    valid = cast(FlpBBCGGI19[list[int], list[int], Field128], vdaf.flp).valid
     gadget_calls = valid.GADGET_CALLS[0]
     gadget_degree = valid.GADGETS[0].DEGREE
 

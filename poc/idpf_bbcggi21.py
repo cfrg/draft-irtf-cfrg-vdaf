@@ -1,4 +1,4 @@
-"""An IDPF based on the construction of [BBCGGI21, Section 6]."""
+"""The IDPF of {{BBCGGI21}}, Section 6."""
 
 import itertools
 from typing import Sequence, TypeAlias, Union, cast
@@ -27,12 +27,11 @@ FieldVec: TypeAlias = Union[list[Field64], list[Field255]]
 CorrectionWordTuple: TypeAlias = tuple[bytes, tuple[Field2, Field2], FieldVec]
 
 
-class IdpfPoplar(Idpf[Field64, Field255]):
+class IdpfBBCGGI21(Idpf[Field64, Field255]):
     """
-    An IDPF based on the construction of [BBCGI21, Section 6]. It is identical
-    except that the output shares may be tuples rather than single field
-    elements. In particular, the value of `VALUE_LEN` may be any positive
-    integer.
+    The IDPF of {{BBCGGI21}}, Section 6. It is identical except that the output
+    shares may be tuples rather than single field elements. In particular, the
+    value of `VALUE_LEN` may be any positive integer.
     """
 
     SHARES = 2
@@ -42,7 +41,7 @@ class IdpfPoplar(Idpf[Field64, Field255]):
     field_leaf = Field255
 
     # Name of the IDPF, for use in test vector filenames.
-    test_vec_name = 'IdpfPoplar'
+    test_vec_name = 'IdpfBBCGGI21'
 
     def __init__(self, value_len: int, bits: int):
         """
@@ -174,13 +173,13 @@ class IdpfPoplar(Idpf[Field64, Field255]):
 
                 # Implementation note: Typically the current round of
                 # candidate prefixes would have been derived from
-                # aggregate results computed during previous rounds. For
-                # example, when using `IdpfPoplar` to compute heavy
-                # hitters, a string whose hit count exceeded the given
-                # threshold in the last round would be the prefix of each
-                # `prefix` in the current round. (See [BBCGGI21,
-                # Section 5.1].) In this case, part of the path would
-                # have already been traversed.
+                # aggregate results computed during previous rounds.
+                # For example, when using the IDPF to compute heavy
+                # hitters, a string whose hit count exceeded the
+                # given threshold in the last round would be the
+                # prefix of each `prefix` in the current round. (See
+                # [BBCGGI21, Section 5.1].) In this case, part of the
+                # path would have already been traversed.
                 #
                 # Re-computing nodes along previously traversed paths is
                 # wasteful. Implementations can eliminate this added

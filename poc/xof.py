@@ -183,8 +183,7 @@ class XofFixedKeyAes128(Xof):
         # Use TurboSHAKE128 to derive a key from the binder string
         # and domain separation tag. Note that the AES key does not
         # need to be kept secret from any party. However, when used
-        # with IdpfPoplar, we require the binder to be a random
-        # nonce.
+        # with an IDPF, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
@@ -204,8 +203,7 @@ class XofFixedKeyAes128(Xof):
         # Use TurboSHAKE128 to derive a key from the binder string
         # and domain separation tag. Note that the AES key does not
         # need to be kept secret from any party. However, when used
-        # with IdpfPoplar, we require the binder to be a random
-        # nonce.
+        # with an IDPF, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.

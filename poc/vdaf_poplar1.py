@@ -5,7 +5,7 @@ from typing import Any, Optional, Sequence, TypeAlias, Union, cast
 from common import byte, from_be_bytes, front, to_be_bytes, vec_add, vec_sub
 from field import Field, Field64, Field255
 from idpf import Idpf
-from idpf_poplar import IdpfPoplar
+from idpf_bbcggi21 import IdpfBBCGGI21
 from vdaf import Vdaf
 from xof import Xof, XofTurboShake128
 
@@ -58,7 +58,7 @@ class Poplar1(
     test_vec_name = 'Poplar1'
 
     def __init__(self, bits: int):
-        self.idpf = IdpfPoplar(2, bits)
+        self.idpf = IdpfBBCGGI21(2, bits)
         self.xof = XofTurboShake128
         self.VERIFY_KEY_SIZE = self.xof.SEED_SIZE
         self.RAND_SIZE = 3 * self.xof.SEED_SIZE + self.idpf.RAND_SIZE
