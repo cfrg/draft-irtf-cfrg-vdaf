@@ -1034,11 +1034,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">VDAF</td>
-<td class="right">June 2024</td>
+<td class="right">July 2024</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 22 December 2024</td>
+<td class="center">Expires 3 January 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-06-20" class="published">20 June 2024</time>
+<time datetime="2024-07-02" class="published">2 July 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-12-22">22 December 2024</time></dd>
+<dd class="expires"><time datetime="2025-01-03">3 January 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1119,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 December 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 January 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1918,9 +1918,10 @@ measurements.<a href="#section-1.1-17.4.1" class="pilcrow">¶</a></p>
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <p id="section-2-2">Algorithms in this document are written in Python 3. Type hints are used to
-define input and output types. A fatal error in a program (e.g., failure to
-parse one of the function parameters) is usually handled by raising an
-exception.<a href="#section-2-2" class="pilcrow">¶</a></p>
+define input and output types. The type variable <code>F</code> is used in signatures to
+signify any type that is a subclass of <code>Field</code>. A fatal error in a program
+(e.g., failure to parse one of the function parameters) is usually handled by
+raising an exception.<a href="#section-2-2" class="pilcrow">¶</a></p>
 <p id="section-2-3">A variable with type <code>bytes</code> is a byte string. This document defines several
 byte-string constants. When comprised of printable ASCII characters, they are
 written as Python 3 byte-string literals (e.g., <code>b'some constant string'</code>).<a href="#section-2-3" class="pilcrow">¶</a></p>
@@ -1983,6 +1984,19 @@ greater than or equal to <code>n</code> that is also a power of two.<a href="#se
 -&gt; list[list[Field]]</code> takes a vector of field elements and returns multiple
 vectors of the same length, such that they all add up to the input vector,
 and each proper subset of the vectors are indistinguishable from random.<a href="#section-2-8.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.11">
+          <p id="section-2-8.11.1"><code>cast(typ: type, val: object) -&gt; object</code> returns the input value unchanged.
+This is only present to assist with static analysis of the Python code.
+Type checkers will ignore the inferred type of the input value, and assume
+the output value has the given type.<a href="#section-2-8.11.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.12">
+          <p id="section-2-8.12.1"><code>range(stop)</code> or <code>range(start, stop[, step])</code> is the range function from the
+Python standard library. The one-argument form returns the integers from zero
+(inclusive) to <code>stop</code>, exclusive. The two- and three-argument forms allow
+overriding the start of the range and overriding the step between successive
+output values.<a href="#section-2-8.12.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
@@ -2223,7 +2237,7 @@ measurements into a sequence of input shares. The <code>shard</code> method is u
 this purpose.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.1-2.1">
-            <p id="section-4.1-2.1.1"><code>Daf.shard(measurement: Measurement, nonce: bytes, rand: bytes) -&gt;
+            <p id="section-4.1-2.1.1"><code>daf.shard(measurement: Measurement, nonce: bytes, rand: bytes) -&gt;
 tuple[PublicShare, list[InputShare]]</code> is the randomized sharding algorithm
 run by each Client that consumes a measurement and nonce and produces a
 "public share" distributed to each of the Aggregate and a corresponding
@@ -2290,7 +2304,7 @@ the next step is to prepare the input share for aggregation. This is
 accomplished using the following algorithm:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-2.1">
-            <p id="section-4.2-2.1.1"><code>Daf.prep(agg_id: int, agg_param: AggParam, nonce: bytes, public_share:
+            <p id="section-4.2-2.1.1"><code>daf.prep(agg_id: int, agg_param: AggParam, nonce: bytes, public_share:
 PublicShare, input_share: InputShare) -&gt; OutShare</code> is the deterministic
 preparation algorithm. It takes as input the public share and one of the
 input shares generated by a Client, the Aggregator's unique identifier, the
@@ -2318,14 +2332,14 @@ Pre-conditions:<a href="#section-4.2-2.1.2" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-4.3-1">Concrete DAFs implementations <span class="bcp14">MAY</span> impose certain restrictions for input shares
 and aggregation parameters. Protocols using a DAF <span class="bcp14">MUST</span> ensure that for each
-input share and aggregation parameter <code>agg_param</code>, <code>Daf.prep</code> is only called if
-<code>Daf.is_valid(agg_param, previous_agg_params)</code> returns True, where
+input share and aggregation parameter <code>agg_param</code>, <code>daf.prep</code> is only called if
+<code>daf.is_valid(agg_param, previous_agg_params)</code> returns True, where
 <code>previous_agg_params</code> contains all aggregation parameters that have previously
 been used with the same input share.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
 <p id="section-4.3-2">DAFs <span class="bcp14">MUST</span> implement the following function:<a href="#section-4.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.3-3.1">
-            <p id="section-4.3-3.1.1"><code>Daf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) -&gt;
+            <p id="section-4.3-3.1.1"><code>daf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) -&gt;
 bool</code>: Checks if the <code>agg_param</code> is compatible with all elements of
 <code>previous_agg_params</code>.<a href="#section-4.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -2342,7 +2356,7 @@ batches are defined by the application), it combines them into a share of the
 desired aggregate result:<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-2.1">
-            <p id="section-4.4-2.1.1"><code>Daf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) -&gt; AggShare</code>
+            <p id="section-4.4-2.1.1"><code>daf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) -&gt; AggShare</code>
 is the deterministic aggregation algorithm. It is run by each Aggregator a
 set of recovered output shares.<a href="#section-4.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -2395,7 +2409,7 @@ sends its aggregate share to the Collector, who runs the following algorithm to
 recover the following output:<a href="#section-4.5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.5-2.1">
-            <p id="section-4.5-2.1.1"><code>Daf.unshard(agg_param: AggParam, agg_shares: list[AggShare],
+            <p id="section-4.5-2.1.1"><code>daf.unshard(agg_param: AggParam, agg_shares: list[AggShare],
 num_measurements: int) -&gt; AggResult</code> is run by the Collector in order to
 compute the aggregate result from the Aggregators' shares. The length of
 <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>. <code>num_measurements</code> is the number of
@@ -2440,10 +2454,19 @@ is deterministic.<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
 <figure id="figure-5">
           <div class="alignLeft art-text artwork" id="section-4.6-2.1">
 <pre>
-def run_daf(daf,
-            agg_param,
-            measurements,
-            nonces):
+def run_daf(
+        daf: Daf[
+            Measurement,
+            AggParam,
+            PublicShare,
+            InputShare,
+            OutShare,
+            AggShare,
+            AggResult,
+        ],
+        agg_param: AggParam,
+        measurements: list[Measurement],
+        nonces: list[bytes]) -&gt; AggResult:
     """
     Run a DAF on a list of measurements.
 
@@ -2455,6 +2478,14 @@ def run_daf(daf,
         - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
         - `len(nonces) == len(measurements)`
     """
+    if any(len(nonce) != daf.NONCE_SIZE for nonce in nonces):
+        raise ValueError("incorrect nonce size")
+    if len(nonces) != len(measurements):
+        raise ValueError(
+            "measurements and nonces lists have different lengths"
+        )
+
+    out_shares: list[list[OutShare]]
     out_shares = [[] for j in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and
@@ -2659,7 +2690,7 @@ of the <code>Vdaf</code> interface specify a method of encoding the <code>Public
 method is defined for every VDAF:<a href="#section-5-8" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-5-9">
 <pre>
-def domain_separation_tag(Vdaf, usage: int) -&gt; bytes:
+def domain_separation_tag(self, usage: int) -&gt; bytes:
     """
     Format domain separation tag for this VDAF with the given usage.
 
@@ -2667,7 +2698,7 @@ def domain_separation_tag(Vdaf, usage: int) -&gt; bytes:
 
         - `usage` in `range(2**16)`
     """
-    return format_dst(0, Vdaf.ID, usage)
+    return format_dst(0, self.ID, usage)
 </pre><a href="#section-5-9" class="pilcrow">¶</a>
 </div>
 <p id="section-5-10">It is used to construct a domain separation tag for an instance of <code>Xof</code> used by
@@ -2682,7 +2713,7 @@ the VDAF. (See <a href="#xof" class="auto internal xref">Section 6.2</a>.)<a hre
 produces a public share:<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.1-2.1">
-            <p id="section-5.1-2.1.1"><code>Vdaf.shard(measurement: Measurement, nonce: bytes, rand: bytes) -&gt;
+            <p id="section-5.1-2.1.1"><code>vdaf.shard(measurement: Measurement, nonce: bytes, rand: bytes) -&gt;
 tuple[PublicShare, list[InputShare]]</code> is the randomized sharding algorithm
 run by each Client that consumes a measurement and nonce and produces a
 public share distributed to each of the Aggregate and a corresponding
@@ -2770,7 +2801,7 @@ before they can begin preparing the measurement shares for aggregation.<a href="
 methods:<a href="#section-5.2-5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.2-6.1">
-            <p id="section-5.2-6.1.1"><code>Vdaf.prep_init(verify_key: bytes, agg_id: int, agg_param: AggParam, nonce:
+            <p id="section-5.2-6.1.1"><code>vdaf.prep_init(verify_key: bytes, agg_id: int, agg_param: AggParam, nonce:
 bytes, public_share: PublicShare, input_share: InputShare) -&gt;
 tuple[PrepState, PrepShare]</code> is the deterministic preparation-state
 initialization algorithm run by each Aggregator to begin processing its input
@@ -2791,20 +2822,20 @@ identical. This is security critical for VDAFs such as Poplar1.<a href="#section
 Pre-conditions:<a href="#section-5.2-6.1.4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.2-6.1.5.1">
-                <p id="section-5.2-6.1.5.1.1"><code>verify_key</code> <span class="bcp14">MUST</span> have length <code>Vdaf.VERIFY_KEY_SIZE</code>.<a href="#section-5.2-6.1.5.1.1" class="pilcrow">¶</a></p>
+                <p id="section-5.2-6.1.5.1.1"><code>verify_key</code> <span class="bcp14">MUST</span> have length <code>vdaf.VERIFY_KEY_SIZE</code>.<a href="#section-5.2-6.1.5.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.2-6.1.5.2">
-                <p id="section-5.2-6.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>range(0, Vdaf.SHARES)</code> that matches the
+                <p id="section-5.2-6.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>range(0, vdaf.SHARES)</code> that matches the
 index of <code>input_share</code> in the sequence of input shares output by the
 Client.<a href="#section-5.2-6.1.5.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.2-6.1.5.3">
-                <p id="section-5.2-6.1.5.3.1"><code>nonce</code> <span class="bcp14">MUST</span> have length <code>Vdaf.NONCE_SIZE</code>.<a href="#section-5.2-6.1.5.3.1" class="pilcrow">¶</a></p>
+                <p id="section-5.2-6.1.5.3.1"><code>nonce</code> <span class="bcp14">MUST</span> have length <code>vdaf.NONCE_SIZE</code>.<a href="#section-5.2-6.1.5.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
           <li class="normal" id="section-5.2-6.2">
-            <p id="section-5.2-6.2.1"><code>Vdaf.prep_next(prep_state: PrepState, prep_msg: PrepMessage) -&gt;
+            <p id="section-5.2-6.2.1"><code>vdaf.prep_next(prep_state: PrepState, prep_msg: PrepMessage) -&gt;
 Union[tuple[PrepState, PrepShare], OutShare]</code> is the deterministic
 preparation-state update algorithm run by each Aggregator. It updates the
 Aggregator's preparation state (<code>prep_state</code>) and returns either its next
@@ -2814,7 +2845,7 @@ share could not be recovered. The input of this algorithm is the inbound
 preparation message.<a href="#section-5.2-6.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.2-6.3">
-            <p id="section-5.2-6.3.1"><code>Vdaf.prep_shares_to_prep(agg_param: AggParam, prep_shares: list[PrepShare])
+            <p id="section-5.2-6.3.1"><code>vdaf.prep_shares_to_prep(agg_param: AggParam, prep_shares: list[PrepShare])
 -&gt; PrepMessage</code> is the deterministic preparation-message pre-processing
 algorithm. It combines the prep shares generated by the Aggregators in the
 previous round into the prep message consumed by each in the next round.<a href="#section-5.2-6.3.1" class="pilcrow">¶</a></p>
@@ -2845,15 +2876,15 @@ aggregatable output shares at all.<a href="#section-5.2-8" class="pilcrow">¶</a
 <p id="section-5.3-1">Similar to DAFs (see <a href="#sec-daf-validity-scopes" class="auto internal xref">Section 4.3</a>), VDAFs <span class="bcp14">MAY</span> impose
 restrictions for input shares and aggregation parameters. Protocols using a VDAF
 <span class="bcp14">MUST</span> ensure that for each input share and aggregation parameter <code>agg_param</code>, the
-preparation phase (including <code>Vdaf.prep_init</code>, <code>Vdaf.prep_next</code>, and
-<code>Vdaf.prep_shares_to_prep</code>; see <a href="#sec-vdaf-prepare" class="auto internal xref">Section 5.2</a>) is only called if
-<code>Vdaf.is_valid(agg_param, previous_agg_params)</code> returns True, where
+preparation phase (including <code>vdaf.prep_init</code>, <code>vdaf.prep_next</code>, and
+<code>vdaf.prep_shares_to_prep</code>; see <a href="#sec-vdaf-prepare" class="auto internal xref">Section 5.2</a>) is only called if
+<code>vdaf.is_valid(agg_param, previous_agg_params)</code> returns True, where
 <code>previous_agg_params</code> contains all aggregation parameters that have previously
 been used with the same input share.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
 <p id="section-5.3-2">VDAFs <span class="bcp14">MUST</span> implement the following function:<a href="#section-5.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.3-3.1">
-            <p id="section-5.3-3.1.1"><code>Vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) -&gt;
+            <p id="section-5.3-3.1.1"><code>vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) -&gt;
 bool</code>: Checks if the <code>agg_param</code> is compatible with all elements of
 <code>previous_agg_params</code>.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -2868,7 +2899,7 @@ bool</code>: Checks if the <code>agg_param</code> is compatible with all element
 <p id="section-5.4-1">VDAF Aggregation is identical to DAF Aggregation (cf. <a href="#sec-daf-aggregate" class="auto internal xref">Section 4.4</a>):<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-2.1">
-            <p id="section-5.4-2.1.1"><code>Vdaf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) -&gt; AggShare</code>
+            <p id="section-5.4-2.1.1"><code>vdaf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) -&gt; AggShare</code>
 is the deterministic aggregation algorithm. It is run by each Aggregator over
 the output shares it has computed for a batch of measurements.<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -2887,7 +2918,7 @@ form, where shares are processed one at a time.<a href="#section-5.4-3" class="p
 <p id="section-5.5-1">VDAF Unsharding is identical to DAF Unsharding (cf. <a href="#sec-daf-unshard" class="auto internal xref">Section 4.5</a>):<a href="#section-5.5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.5-2.1">
-            <p id="section-5.5-2.1.1"><code>Vdaf.unshard(agg_param: AggParam, agg_shares: list[AggShare],
+            <p id="section-5.5-2.1.1"><code>vdaf.unshard(agg_param: AggParam, agg_shares: list[AggShare],
 num_measurements: int) -&gt; AggResult</code> is run by the Collector in order to
 compute the aggregate result from the Aggregators' shares. The length of
 <code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>. <code>num_measurements</code> is the number of
@@ -2908,13 +2939,46 @@ is deterministic.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
 <figure id="figure-7">
           <div class="alignLeft art-text artwork" id="section-5.6-2.1">
 <pre>
-def run_vdaf(vdaf,
-             verify_key,
-             agg_param,
-             nonces,
-             measurements):
+def run_vdaf(
+        vdaf: Vdaf[
+            Measurement,
+            AggParam,
+            PublicShare,
+            InputShare,
+            list[F],  # OutShare
+            AggShare,
+            AggResult,
+            PrepState,
+            PrepShare,
+            PrepMessage,
+        ],
+        verify_key: bytes,
+        agg_param: AggParam,
+        nonces: list[bytes],
+        measurements: list[Measurement]) -&gt; AggResult:
+    """
+    Run the VDAF on a list of measurements.
+
+    Pre-conditions:
+
+        - `len(verify_key) == vdaf.VERIFY_KEY_SIZE`
+        - `len(nonces) == len(measurements)`
+        - `all(len(nonce) == vdaf.NONCE_SIZE for nonce in nonces)`
+    """
+
+    if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
+        raise ValueError("incorrect verify_key size")
+    if any(len(nonce) != vdaf.NONCE_SIZE for nonce in nonces):
+        raise ValueError("incorrect nonce size")
+    if len(nonces) != len(measurements):
+        raise ValueError(
+            "measurements and nonces lists have different lengths"
+        )
+
     out_shares = []
     for (nonce, measurement) in zip(nonces, measurements):
+        assert len(nonce) == vdaf.NONCE_SIZE
+
         # Each Client shards its measurement into input shares.
         rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
@@ -2922,7 +2986,7 @@ def run_vdaf(vdaf,
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
-        outbound = []
+        outbound_prep_shares = []
         for j in range(vdaf.SHARES):
             (state, share) = vdaf.prep_init(verify_key, j,
                                             agg_param,
@@ -2930,26 +2994,30 @@ def run_vdaf(vdaf,
                                             public_share,
                                             input_shares[j])
             prep_states.append(state)
-            outbound.append(share)
+            outbound_prep_shares.append(share)
 
         # Aggregators recover their output shares.
-        for i in range(vdaf.ROUNDS-1):
+        for i in range(vdaf.ROUNDS - 1):
             prep_msg = vdaf.prep_shares_to_prep(agg_param,
-                                                outbound)
-            outbound = []
+                                                outbound_prep_shares)
+            outbound_prep_shares = []
             for j in range(vdaf.SHARES):
                 out = vdaf.prep_next(prep_states[j], prep_msg)
-                (prep_states[j], out) = out
-                outbound.append(out)
+                assert isinstance(out, tuple)
+                (prep_states[j], prep_share) = out
+                outbound_prep_shares.append(prep_share)
 
-        # The final outputs of the prepare phase are the output shares.
+        # The final outputs of the prepare phase are the output
+        # shares.
         prep_msg = vdaf.prep_shares_to_prep(agg_param,
-                                            outbound)
-        outbound = []
+                                            outbound_prep_shares)
+
+        outbound_out_shares = []
         for j in range(vdaf.SHARES):
             out_share = vdaf.prep_next(prep_states[j], prep_msg)
-            outbound.append(out_share)
-        out_shares.append(outbound)
+            assert not isinstance(out_share, tuple)
+            outbound_out_shares.append(out_share)
+        out_shares.append(outbound_out_shares)
 
     # Each Aggregator aggregates its output shares into an
     # aggregate share. In a distributed VDAF computation, the
@@ -3041,38 +3109,38 @@ public shares, input shares, prep shares, prep messages, and aggregation
 parameters. Minimally:<a href="#section-5.7-7" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.7-8.1">
-            <p id="section-5.7-8.1.1"><code>Vdaf.decode_public_share(encoded: bytes) -&gt; Vdaf.PublicShare</code> decodes a
+            <p id="section-5.7-8.1.1"><code>vdaf.decode_public_share(encoded: bytes) -&gt; PublicShare</code> decodes a
 public share.<a href="#section-5.7-8.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.7-8.2">
-            <p id="section-5.7-8.2.1"><code>Vdaf.decode_input_share(agg_id: int, encoded: bytes) -&gt;
-Vdaf.InputShare</code> decodes an input share, using the aggregator ID as optional
+            <p id="section-5.7-8.2.1"><code>vdaf.decode_input_share(agg_id: int, encoded: bytes) -&gt; InputShare</code>
+decodes an input share, using the aggregator ID as optional
 context.<a href="#section-5.7-8.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.7-8.3">
-            <p id="section-5.7-8.3.1"><code>Vdaf.encode_prep_share(prep_share: Vdaf.PrepShare) -&gt; bytes</code> encodes a prep
+            <p id="section-5.7-8.3.1"><code>vdaf.encode_prep_share(prep_share: PrepShare) -&gt; bytes</code> encodes a prep
 share.<a href="#section-5.7-8.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.7-8.4">
-            <p id="section-5.7-8.4.1"><code>Vdaf.decode_prep_share(prep_state: Vdaf.PrepState, encoded: bytes) -&gt;
-Vdaf.PrepShare</code> decodes a prep share, using the prep state as optional
+            <p id="section-5.7-8.4.1"><code>vdaf.decode_prep_share(prep_state: PrepState, encoded: bytes) -&gt;
+PrepShare</code> decodes a prep share, using the prep state as optional
 context.<a href="#section-5.7-8.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.7-8.5">
-            <p id="section-5.7-8.5.1"><code>Vdaf.encode_prep_msg(prep_msg: Vdaf.PrepMessage) -&gt; bytes</code> encodes a prep
+            <p id="section-5.7-8.5.1"><code>vdaf.encode_prep_msg(prep_msg: PrepMessage) -&gt; bytes</code> encodes a prep
 message.<a href="#section-5.7-8.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.7-8.6">
-            <p id="section-5.7-8.6.1"><code>Vdaf.decode_prep_msg(prep_state: Vdaf.PrepState, encoded: bytes) -&gt;
-Vdaf.PrepMessage</code> decodes a prep message, using the prep state as optional
+            <p id="section-5.7-8.6.1"><code>vdaf.decode_prep_msg(prep_state: PrepState, encoded: bytes) -&gt;
+PrepMessage</code> decodes a prep message, using the prep state as optional
 decoding context.<a href="#section-5.7-8.6.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.7-8.7">
-            <p id="section-5.7-8.7.1"><code>Vdaf.decode_agg_param(encoded: bytes) -&gt; Vdaf.AggParam</code> decodes an
+            <p id="section-5.7-8.7.1"><code>vdaf.decode_agg_param(encoded: bytes) -&gt; AggParam</code> decodes an
 aggregation parameter.<a href="#section-5.7-8.7.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-5.7-8.8">
-            <p id="section-5.7-8.8.1"><code>Vdaf.encode_agg_param(agg_param: Vdaf.AggParam) -&gt; bytes</code> encodes an
+            <p id="section-5.7-8.8.1"><code>vdaf.encode_agg_param(agg_param: AggParam) -&gt; bytes</code> encodes an
 aggregation parameter.<a href="#section-5.7-8.8.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
@@ -3085,9 +3153,9 @@ aggregation parameter.<a href="#section-5.7-8.8.1" class="pilcrow">¶</a></p>
         <h3 id="name-ping-pong-topology-only-two">
 <a href="#section-5.8" class="section-number selfRef">5.8. </a><a href="#name-ping-pong-topology-only-two" class="section-name selfRef">Ping-Pong Topology (Only Two Aggregators)</a>
         </h3>
-<p id="section-5.8-1">For VDAFs with precisely two Aggregators (i.e., <code>Vdaf.SHARES == 2</code>), the
-following "ping pong" communication pattern can be used. It is compatible with
-any request/response transport protocol, such as HTTP.<a href="#section-5.8-1" class="pilcrow">¶</a></p>
+<p id="section-5.8-1">For VDAFs with precisely two Aggregators (i.e., <code>SHARES == 2</code>), the following
+"ping pong" communication pattern can be used. It is compatible with any
+request/response transport protocol, such as HTTP.<a href="#section-5.8-1" class="pilcrow">¶</a></p>
 <p id="section-5.8-2">Let us call the initiating party the "Leader" and the responding party the
 "Helper". The high-level idea is that the Leader and Helper will take turns
 running the computation locally until input from their peer is required:<a href="#section-5.8-2" class="pilcrow">¶</a></p>
@@ -3115,7 +3183,7 @@ prep share for the next round.<a href="#section-5.8-3.3.1" class="pilcrow">¶</a
         </ul>
 <p id="section-5.8-4">The Aggregators proceed in this ping-ponging fashion until a step of the
 computation fails (indicating the report is invalid and should be rejected) or
-preparation is completed. All told there there are <code>ceil((Vdaf.ROUNDS+1)/2)</code>
+preparation is completed. All told there there are <code>ceil((ROUNDS+1)/2)</code>
 requests sent.<a href="#section-5.8-4" class="pilcrow">¶</a></p>
 <p id="section-5.8-5">Each message in the ping-pong protocol is structured as follows (expressed in
 TLS syntax as defined in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>):<a href="#section-5.8-5" class="pilcrow">¶</a></p>
@@ -3160,7 +3228,7 @@ encoding.<a href="#section-5.8-8.2.1" class="pilcrow">¶</a></p>
 <div class="lang-transition sourcecode" id="section-5.8-10">
 <pre>
 def ping_pong_leader_init(
-            Vdaf,
+            vdaf,
             vdaf_verify_key: bytes,
             agg_param: bytes,
             nonce: bytes,
@@ -3168,16 +3236,16 @@ def ping_pong_leader_init(
             input_share: bytes,
         ) -&gt; tuple[State, bytes]:
     try:
-        (prep_state, prep_share) = Vdaf.prep_init(
+        (prep_state, prep_share) = vdaf.prep_init(
             vdaf_verify_key,
             0,
-            Vdaf.decode_agg_param(agg_param),
+            vdaf.decode_agg_param(agg_param),
             nonce,
-            Vdaf.decode_public_share(public_share),
-            Vdaf.decode_input_share(0, input_share),
+            vdaf.decode_public_share(public_share),
+            vdaf.decode_input_share(0, input_share),
         )
         outbound = Message.initialize(
-            Vdaf.encode_prep_share(prep_share))
+            vdaf.encode_prep_share(prep_share))
         return (Continued(prep_state), encode_ping_pong_message(outbound))
     except:
         return (Rejected(), None)
@@ -3191,7 +3259,7 @@ transition is computed using the following procedure:<a href="#section-5.8-12" c
 <div class="lang-transition sourcecode" id="section-5.8-13">
 <pre>
 def ping_pong_helper_init(
-            Vdaf,
+            vdaf,
             vdaf_verify_key: bytes,
             agg_param: bytes,
             nonce: bytes,
@@ -3200,13 +3268,13 @@ def ping_pong_helper_init(
             inbound_encoded: bytes,
         ) -&gt; tuple[State, bytes]:
     try:
-        (prep_state, prep_share) = Vdaf.prep_init(
+        (prep_state, prep_share) = vdaf.prep_init(
             vdaf_verify_key,
             1,
-            Vdaf.decode_agg_param(agg_param),
+            vdaf.decode_agg_param(agg_param),
             nonce,
-            Vdaf.decode_public_share(public_share),
-            Vdaf.decode_input_share(1, input_share),
+            vdaf.decode_public_share(public_share),
+            vdaf.decode_input_share(1, input_share),
         )
 
         inbound = decode_ping_pong_message(inbound_encoded)
@@ -3215,10 +3283,10 @@ def ping_pong_helper_init(
             return (Rejected(), None)
 
         prep_shares = [
-            Vdaf.decode_prep_share(prep_state, inbound.prep_share),
+            vdaf.decode_prep_share(prep_state, inbound.prep_share),
             prep_share,
         ]
-        return Vdaf.ping_pong_transition(
+        return vdaf.ping_pong_transition(
             agg_param,
             prep_shares,
             prep_state,
@@ -3232,21 +3300,21 @@ the prep message, and computes the next prep state of the caller:<a href="#secti
 <div class="alignLeft art-text artwork" id="section-5.8-15">
 <pre>
 def ping_pong_transition(
-            Vdaf,
-            agg_param: Vdaf.AggParam,
-            prep_shares: list[Vdaf.PrepShare],
-            prep_state: Vdaf.PrepState,
+            vdaf,
+            agg_param: AggParam,
+            prep_shares: list[PrepShare],
+            prep_state: PrepState,
          ) -&gt; (State, bytes):
-    prep_msg = Vdaf.prep_shares_to_prep(agg_param,
+    prep_msg = vdaf.prep_shares_to_prep(agg_param,
                                         prep_shares)
-    out = Vdaf.prep_next(prep_state, prep_msg)
-    if type(out) == Vdaf.OutShare:
-        outbound = Message.finish(Vdaf.encode_prep_msg(prep_msg))
+    out = vdaf.prep_next(prep_state, prep_msg)
+    if type(out) == OutShare:
+        outbound = Message.finish(vdaf.encode_prep_msg(prep_msg))
         return (Finished(out), encode_ping_pong_message(outbound))
     (prep_state, prep_share) = out
     outbound = Message.continue(
-        Vdaf.encode_prep_msg(prep_msg),
-        Vdaf.encode_prep_share(prep_share),
+        vdaf.encode_prep_msg(prep_msg),
+        vdaf.encode_prep_share(prep_share),
     )
     return (Continued(prep_state), encode_ping_pong_message(outbound))
 </pre><a href="#section-5.8-15" class="pilcrow">¶</a>
@@ -3259,12 +3327,12 @@ its next state transition using the function <code>ping_pong_leader_continued</c
 <div class="breakable lang-transition sourcecode" id="section-5.8-18">
 <pre>
 def ping_pong_leader_continued(
-            Vdaf,
+            vdaf,
             agg_param: bytes,
             state: State,
             inbound_encoded: bytes,
         ) -&gt; (State, Optional[bytes]):
-    return Vdaf.ping_pong_continued(
+    return vdaf.ping_pong_continued(
         True,
         agg_param,
         state,
@@ -3272,7 +3340,7 @@ def ping_pong_leader_continued(
     )
 
 def ping_pong_continued(
-            Vdaf,
+            vdaf,
             is_leader: bool,
             agg_param: bytes,
             state: State,
@@ -3287,24 +3355,24 @@ def ping_pong_continued(
         if !isinstance(state, Continued):
             return (Rejected(), None)
 
-        prep_msg = Vdaf.decode_prep_msg(state.prep_state, inbound.prep_msg)
-        out = Vdaf.prep_next(state.prep_state, prep_msg)
-        if type(out) == tuple[Vdaf.PrepState, Vdaf.PrepShare] \
+        prep_msg = vdaf.decode_prep_msg(state.prep_state, inbound.prep_msg)
+        out = vdaf.prep_next(state.prep_state, prep_msg)
+        if type(out) == tuple[PrepState, PrepShare] \
                 and inbound.type == 1:
             # continue
             (prep_state, prep_share) = out
             prep_shares = [
-                Vdaf.decode_prep_share(prep_state, inbound.prep_share),
+                vdaf.decode_prep_share(prep_state, inbound.prep_share),
                 prep_share,
             ]
             if is_leader:
                 prep_shares.reverse()
-            return Vdaf.ping_pong_transition(
-                Vdaf.decode_agg_param(agg_param),
+            return vdaf.ping_pong_transition(
+                vdaf.decode_agg_param(agg_param),
                 prep_shares,
                 prep_state,
             )
-        elif type(out) == Vdaf.OutShare and inbound.type == 2:
+        elif type(out) == OutShare and inbound.type == 2:
             # finish
             return (Finished(out), None)
         else:
@@ -3321,12 +3389,12 @@ computes its next state transition using the function
 <div class="lang-transition sourcecode" id="section-5.8-20">
 <pre>
 def ping_pong_helper_continued(
-            Vdaf,
+            vdaf,
             agg_param: bytes,
             state: State,
             inbound_encoded: bytes,
         ) -&gt; (State, Optional[bytes]):
-    return Vdaf.ping_pong_continued(
+    return vdaf.ping_pong_continued(
         False,
         agg_param,
         state,
@@ -3386,7 +3454,7 @@ as a byte string.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
 <p id="section-6.1-3">A concrete <code>Field</code> also implements the following class methods:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1-4.1">
-            <p id="section-6.1-4.1.1"><code>Field.zeros(length: int) -&gt; output: list[Field]</code> returns a vector of
+            <p id="section-6.1-4.1.1"><code>Field.zeros(length: int) -&gt; list[Self]</code> returns a vector of
 zeros.<a href="#section-6.1-4.1.1" class="pilcrow">¶</a></p>
 <p id="section-6.1-4.1.2">
 Pre-conditions:<a href="#section-6.1-4.1.2" class="pilcrow">¶</a></p>
@@ -3399,12 +3467,12 @@ Pre-conditions:<a href="#section-6.1-4.1.2" class="pilcrow">¶</a></p>
 Post-conditions:<a href="#section-6.1-4.1.4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1-4.1.5.1">
-                <p id="section-6.1-4.1.5.1.1">The length of <code>output</code> <span class="bcp14">MUST</span> be <code>length</code>.<a href="#section-6.1-4.1.5.1.1" class="pilcrow">¶</a></p>
+                <p id="section-6.1-4.1.5.1.1">The length of the output <span class="bcp14">MUST</span> be <code>length</code>.<a href="#section-6.1-4.1.5.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
           <li class="normal" id="section-6.1-4.2">
-            <p id="section-6.1-4.2.1"><code>Field.rand_vec(length: int) -&gt; output: list[Field]</code> returns a vector of
+            <p id="section-6.1-4.2.1"><code>Field.rand_vec(length: int) -&gt; list[Self]</code> returns a vector of
 random field elements. Same pre- and post-conditions as for <code>Field.zeros()</code>.<a href="#section-6.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
@@ -3422,7 +3490,7 @@ unsigned integer into a field element:<a href="#section-6.1-7" class="pilcrow">�
 <ul class="normal">
 <li class="normal" id="section-6.1-8.1">
             <p id="section-6.1-8.1.1"><code>Field(integer: int)</code> returns <code>integer</code> represented as a field element.
-The value of <code>integer</code> <span class="bcp14">MUST</span> be less than <code>Field.MODULUS</code>.<a href="#section-6.1-8.1.1" class="pilcrow">¶</a></p>
+The value of <code>integer</code> <span class="bcp14">MUST</span> be non-negative and less than <code>Field.MODULUS</code>.<a href="#section-6.1-8.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-6.1-9">Each concrete <code>Field</code> has two derived class methods, one for encoding
@@ -3432,20 +3500,20 @@ field elements.<a href="#section-6.1-9" class="pilcrow">¶</a></p>
 <figure id="figure-9">
           <div class="alignLeft art-text artwork" id="section-6.1-10.1">
 <pre>
-def encode_vec(Field, vec: list[Field]) -&gt; bytes:
+def encode_vec(cls, vec: list[Self]) -&gt; bytes:
     """
     Encode a vector of field elements `vec` as a byte string.
     """
     encoded = bytes()
     for x in vec:
-        encoded += to_le_bytes(x.as_unsigned(), Field.ENCODED_SIZE)
+        encoded += to_le_bytes(x.as_unsigned(), cls.ENCODED_SIZE)
     return encoded
 
-def decode_vec(Field, encoded: bytes) -&gt; list[Field]:
+def decode_vec(cls, encoded: bytes) -&gt; list[Self]:
     """
     Parse a vector of field elements from `encoded`.
     """
-    L = Field.ENCODED_SIZE
+    L = cls.ENCODED_SIZE
     if len(encoded) % L != 0:
         raise ValueError(
             'input length must be a multiple of the size of an '
@@ -3455,9 +3523,9 @@ def decode_vec(Field, encoded: bytes) -&gt; list[Field]:
     for i in range(0, len(encoded), L):
         encoded_x = encoded[i:i+L]
         x = from_le_bytes(encoded_x)
-        if x &gt;= Field.MODULUS:
+        if x &gt;= cls.MODULUS:
             raise ValueError('modulus overflow')
-        vec.append(Field(x))
+        vec.append(cls(x))
     return vec
 </pre>
 </div>
@@ -3471,9 +3539,10 @@ a sequence of field elements, each of which represents a bit of the input.<a hre
 <figure id="figure-10">
           <div class="alignLeft art-text artwork" id="section-6.1-12.1">
 <pre>
-def encode_into_bit_vector(Field,
-                           val: int,
-                           bits: int) -&gt; list[Field]:
+def encode_into_bit_vector(
+        cls,
+        val: int,
+        bits: int) -&gt; list[Self]:
     """
     Encode the bit representation of `val` with at most `bits` number
     of bits, as a vector of field elements.
@@ -3490,21 +3559,21 @@ def encode_into_bit_vector(Field,
                          "the input integer.")
     encoded = []
     for l in range(bits):
-        encoded.append(Field((val &gt;&gt; l) &amp; 1))
+        encoded.append(cls((val &gt;&gt; l) &amp; 1))
     return encoded
 
-def decode_from_bit_vector(Field, vec: list[Field]) -&gt; Field:
+def decode_from_bit_vector(cls, vec: list[Self]) -&gt; Self:
     """
     Decode the field element from the bit representation, expressed
     as a vector of field elements `vec`.
     """
     bits = len(vec)
-    if Field.MODULUS &gt;&gt; bits == 0:
+    if cls.MODULUS &gt;&gt; bits == 0:
         raise ValueError("Number of bits is too large to be "
                          "represented by field modulus.")
-    decoded = Field(0)
+    decoded = cls(0)
     for (l, bit) in enumerate(vec):
-        decoded += Field(1 &lt;&lt; l) * bit
+        decoded += cls(1 &lt;&lt; l) * bit
     return decoded
 </pre>
 </div>
@@ -3524,15 +3593,19 @@ the operands are not the same length.<a href="#section-6.1.1-1" class="pilcrow">
 <figure id="figure-11">
             <div class="alignLeft art-text artwork" id="section-6.1.1-2.1">
 <pre>
-def vec_sub(left: list[Field], right: list[Field]):
+def vec_sub(left: list[F], right: list[F]) -&gt; list[F]:
     """
     Subtract the right operand from the left and return the result.
     """
     return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
-def vec_add(left: list[Field], right: list[Field]):
+def vec_add(left: list[F], right: list[F]) -&gt; list[F]:
     """Add the right operand to the left and return the result."""
     return list(map(lambda x: x[0] + x[1], zip(left, right)))
+
+def vec_neg(vec: list[F]) -&gt; list[F]:
+    """Negate the input vector."""
+    return list(map(lambda x: -x, vec))
 </pre>
 </div>
 <figcaption><a href="#figure-11" class="selfRef">Figure 11</a>:
@@ -3649,17 +3722,19 @@ invocation of the XOF).<a href="#section-6.2-3.2.1" class="pilcrow">¶</a></p>
 <code>xof</code>.<a href="#section-6.2-3.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.2-4">Each <code>Xof</code> has two derived methods. The first is used to derive a fresh seed
+<p id="section-6.2-4">Each <code>Xof</code> has three derived methods. The first is used to derive a fresh seed
 from an existing one. The second is used to compute a sequence of field
-elements.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+elements. The third is a convenience method to construct an <code>Xof</code> from a seed,
+domain separation tag, and binder string, and then use it to compute a sequence
+of field elements.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <span id="name-derived-methods-for-xofs"></span><div id="xof-derived-methods">
 <figure id="figure-12">
           <div class="alignLeft art-text artwork" id="section-6.2-5.1">
 <pre>
-def derive_seed(Xof,
+def derive_seed(cls,
                 seed: bytes,
                 dst: bytes,
-                binder: bytes):
+                binder: bytes) -&gt; bytes:
     """
     Derive a new seed.
 
@@ -3667,10 +3742,10 @@ def derive_seed(Xof,
 
         - `len(seed) == Xof.SEED_SIZE`
     """
-    xof = Xof(seed, dst, binder)
-    return xof.next(Xof.SEED_SIZE)
+    xof = cls(seed, dst, binder)
+    return xof.next(cls.SEED_SIZE)
 
-def next_vec(self, field: type[Field], length: int):
+def next_vec(self, field: type[F], length: int) -&gt; list[F]:
     """
     Output the next `length` field elements.
 
@@ -3680,7 +3755,7 @@ def next_vec(self, field: type[Field], length: int):
         - `length &gt; 0`
     """
     m = next_power_of_2(field.MODULUS) - 1
-    vec: list[Field] = []
+    vec: list[F] = []
     while len(vec) &lt; length:
         x = from_le_bytes(self.next(field.ENCODED_SIZE))
         x &amp;= m
@@ -3688,12 +3763,12 @@ def next_vec(self, field: type[Field], length: int):
             vec.append(field(x))
     return vec
 
-def expand_into_vec(Xof,
-                    field: type,
+def expand_into_vec(cls,
+                    field: type[F],
                     seed: bytes,
                     dst: bytes,
                     binder: bytes,
-                    length: int):
+                    length: int) -&gt; list[F]:
     """
     Expand the input `seed` into vector of `length` field elements.
 
@@ -3703,7 +3778,7 @@ def expand_into_vec(Xof,
         - `len(seed) == Xof.SEED_SIZE`
         - `length &gt; 0`
     """
-    xof = Xof(seed, dst, binder)
+    xof = cls(seed, dst, binder)
     return xof.next_vec(field, length)
 </pre>
 </div>
@@ -3730,7 +3805,7 @@ class XofTurboShake128(Xof):
     # Associated parameters
     SEED_SIZE = 16
 
-    def __init__(self, seed, dst, binder):
+    def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         self.l = 0
         self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
 
@@ -3742,8 +3817,8 @@ class XofTurboShake128(Xof):
         #
         # Implementation note: Rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
-        # of TurboSHAKE128 will expose an "absorb-then-squeeze" API that
-        # allows stateful handling of the stream.
+        # of TurboSHAKE128 will expose an "absorb-then-squeeze" API
+        # that allows stateful handling of the stream.
         stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
 </pre>
@@ -3777,13 +3852,17 @@ class XofFixedKeyAes128(Xof):
     # Associated parameters
     SEED_SIZE = 16
 
-    def __init__(self, seed, dst, binder):
+    def __init__(self, seed: bytes, dst: bytes, binder: bytes):
+        if len(seed) != self.SEED_SIZE:
+            raise ValueError("incorrect seed size")
+
         self.length_consumed = 0
 
-        # Use TurboSHAKE128 to derive a key from the binder string and
-        # domain separation tag. Note that the AES key does not need
-        # to be kept secret from any party. However, when used with
-        # IdpfPoplar, we require the binder to be a random nonce.
+        # Use TurboSHAKE128 to derive a key from the binder string
+        # and domain separation tag. Note that the AES key does not
+        # need to be kept secret from any party. However, when used
+        # with IdpfPoplar, we require the binder to be a random
+        # nonce.
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
@@ -3795,22 +3874,23 @@ class XofFixedKeyAes128(Xof):
         offset = self.length_consumed % 16
         new_length = self.length_consumed + length
         block_range = range(
-            int(self.length_consumed / 16),
-            int(new_length / 16) + 1)
+            self.length_consumed // 16,
+            new_length // 16 + 1
+        )
         self.length_consumed = new_length
 
         hashed_blocks = [
-            self.hash_block(xor(self.seed, to_le_bytes(i, 16))) \
-                         for i in block_range
+            self.hash_block(xor(self.seed, to_le_bytes(i, 16)))
+            for i in block_range
         ]
         return concat(hashed_blocks)[offset:offset+length]
 
-    def hash_block(self, block):
+    def hash_block(self, block: bytes) -&gt; bytes:
         """
         The multi-instance tweakable circular correlation-robust hash
-        function of [GKWWY20] (Section 4.2). The tweak here is the key
-        that stays constant for all XOF evaluations of the same Client,
-        but differs between Clients.
+        function of [GKWWY20] (Section 4.2). The tweak here is the
+        key that stays constant for all XOF evaluations of the same
+        Client, but differs between Clients.
 
         Function `AES128(key, block)` is the AES-128 blockcipher.
         """
@@ -3857,9 +3937,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in `range(0, 2**8)`
-        - `algo` in `range(0, 2**32)`
-        - `usage` in `range(0, 2**16)`
+        - `algo_class` in `range(0, 2 ** 8)`
+        - `algo` in `range(0, 2 ** 32)`
+        - `usage` in `range(0, 2 ** 16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),
@@ -4017,7 +4097,7 @@ a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Field</code>
+                <code>field</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">As defined in (<a href="#field" class="auto internal xref">Section 6.1</a>)</td>
             </tr>
@@ -4028,7 +4108,7 @@ a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
 validity (encoding is described below in <a href="#flp-encode" class="auto internal xref">Section 7.1.1</a>):<a href="#section-7.1-5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1-6.1">
-            <p id="section-7.1-6.1.1"><code>Flp.prove(meas: list[Field], prove_rand: list[Field], joint_rand: list[Field])
+            <p id="section-7.1-6.1.1"><code>flp.prove(meas: list[Field], prove_rand: list[Field], joint_rand: list[Field])
 -&gt; list[Field]</code> is the deterministic proof-generation algorithm run by the
 prover. Its inputs are the encoded measurement, the "prover randomness"
 <code>prove_rand</code>, and the "joint randomness" <code>joint_rand</code>. The prover randomness
@@ -4036,7 +4116,7 @@ is used only by the prover, but the joint randomness is shared by both the
 prover and verifier.<a href="#section-7.1-6.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.1-6.2">
-            <p id="section-7.1-6.2.1"><code>Flp.query(meas: list[Field], proof: list[Field], query_rand: list[Field],
+            <p id="section-7.1-6.2.1"><code>flp.query(meas: list[Field], proof: list[Field], query_rand: list[Field],
 joint_rand: list[Field], num_shares: int) -&gt; list[Field]</code> is the
 query-generation algorithm run by the verifier. This is used to "query" the
 measurement and proof. The result of the query (i.e., the output of this
@@ -4046,7 +4126,7 @@ and the joint randomness <code>joint_rand</code>. The former is used only by the
 verifier. <code>num_shares</code> specifies how many shares were generated.<a href="#section-7.1-6.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.1-6.3">
-            <p id="section-7.1-6.3.1"><code>Flp.decide(verifier: list[Field]) -&gt; bool</code> is the deterministic decision
+            <p id="section-7.1-6.3.1"><code>flp.decide(verifier: list[Field]) -&gt; bool</code> is the deterministic decision
 algorithm run by the verifier. It takes as input the verifier message and
 outputs a boolean indicating if the measurement from which it was generated
 is valid.<a href="#section-7.1-6.3.1" class="pilcrow">¶</a></p>
@@ -4073,17 +4153,30 @@ valid measurement, is the same regardless of the number of shares.<a href="#sect
 <figure id="figure-14">
           <div class="alignLeft art-text artwork" id="section-7.1-10.1">
 <pre>
-def run_flp(flp, meas, num_shares):
-    joint_rand = flp.Field.rand_vec(flp.JOINT_RAND_LEN)
-    prove_rand = flp.Field.rand_vec(flp.PROVE_RAND_LEN)
-    query_rand = flp.Field.rand_vec(flp.QUERY_RAND_LEN)
+def run_flp(
+        flp: Flp[Measurement, AggResult, F],
+        meas: list[F],
+        num_shares: int) -&gt; bool:
+    """Run the FLP on an encoded measurement."""
+
+    joint_rand = flp.field.rand_vec(flp.JOINT_RAND_LEN)
+    prove_rand = flp.field.rand_vec(flp.PROVE_RAND_LEN)
+    query_rand = flp.field.rand_vec(flp.QUERY_RAND_LEN)
 
     # Prover generates the proof.
     proof = flp.prove(meas, prove_rand, joint_rand)
 
     # Shard the measurement and the proof.
-    meas_shares = additive_secret_share(meas, num_shares, flp.Field)
-    proof_shares = additive_secret_share(proof, num_shares, flp.Field)
+    meas_shares = additive_secret_share(
+        meas,
+        num_shares,
+        flp.field,
+    )
+    proof_shares = additive_secret_share(
+        proof,
+        num_shares,
+        flp.field,
+    )
 
     # Verifier queries the meas shares and proof shares.
     verifier_shares = [
@@ -4098,20 +4191,19 @@ def run_flp(flp, meas, num_shares):
     ]
 
     # Combine the verifier shares into the verifier.
-    verifier = flp.Field.zeros(len(verifier_shares[0]))
+    verifier = flp.field.zeros(len(verifier_shares[0]))
     for verifier_share in verifier_shares:
         verifier = vec_add(verifier, verifier_share)
 
     # Verifier decides if the measurement is valid.
     return flp.decide(verifier)
-
 </pre>
 </div>
 <figcaption><a href="#figure-14" class="selfRef">Figure 14</a>:
 <a href="#name-execution-of-an-flp" class="selfRef">Execution of an FLP.</a>
           </figcaption></figure>
 </div>
-<p id="section-7.1-11">The proof system is constructed so that, if <code>meas</code> is valid, then <code>run_flp(Flp,
+<p id="section-7.1-11">The proof system is constructed so that, if <code>meas</code> is valid, then <code>run_flp(flp,
 meas, 1)</code> always returns <code>True</code>. On the other hand, if <code>meas</code> is invalid, then
 as long as <code>joint_rand</code> and <code>query_rand</code> are generated uniform randomly, the
 output is <code>False</code> with high probability. False positives are possible: there is
@@ -4135,7 +4227,7 @@ also specifies a method of encoding raw measurements as a vector of field
 elements:<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-2.1">
-              <p id="section-7.1.1-2.1.1"><code>Flp.encode(measurement: Measurement) -&gt; list[Field]</code> encodes a raw measurement
+              <p id="section-7.1.1-2.1.1"><code>flp.encode(measurement: Measurement) -&gt; list[Field]</code> encodes a raw measurement
 as a vector of field elements. The return value <span class="bcp14">MUST</span> be of length <code>MEAS_LEN</code>.<a href="#section-7.1.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
@@ -4149,7 +4241,7 @@ the integer it represents. Thus the FLP defines an algorithm for truncating the
 encoded measurement to the length of the aggregated output:<a href="#section-7.1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-4.1">
-              <p id="section-7.1.1-4.1.1"><code>Flp.truncate(meas: list[Field]) -&gt; list[Field]</code> maps an encoded measurement
+              <p id="section-7.1.1-4.1.1"><code>flp.truncate(meas: list[Field]) -&gt; list[Field]</code> maps an encoded measurement
 (e.g., the bit-encoding of the measurement) to an aggregatable output (e.g.,
 the singleton vector containing the measurement). The length of the input
 <span class="bcp14">MUST</span> be <code>MEAS_LEN</code> and the length of the output <span class="bcp14">MUST</span> be <code>OUTPUT_LEN</code>.<a href="#section-7.1.1-4.1.1" class="pilcrow">¶</a></p>
@@ -4161,7 +4253,7 @@ the FLP's field to the integers, or it could include additional
 post-processing.<a href="#section-7.1.1-5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-6.1">
-              <p id="section-7.1.1-6.1.1"><code>Flp.decode(output: list[Field], num_measurements: int) -&gt; AggResult</code>
+              <p id="section-7.1.1-6.1.1"><code>flp.decode(output: list[Field], num_measurements: int) -&gt; AggResult</code>
 maps a sum of aggregate shares to an aggregate result.<a href="#section-7.1.1-6.1.1" class="pilcrow">¶</a></p>
 <p id="section-7.1.1-6.1.2">
 Pre-conditions:<a href="#section-7.1.1-6.1.2" class="pilcrow">¶</a></p>
@@ -4194,7 +4286,7 @@ significantly reduce communication cost. (This is a trade-off, of course, since
 generating and verifying more proofs requires more time.) Given these benefits,
 this feature is implemented by Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>).<a href="#section-7.1.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.1.2-2">To generate these proofs for a specific measurement, the prover calls
-<code>Flp.prove</code> multiple times, each time using an independently generated prover
+<code>flp.prove</code> multiple times, each time using an independently generated prover
 and joint randomness string. The verifier checks each proof independently, each
 time with an independently generated query randomness string. It accepts the
 measurement only if all the decision algorithm accepts on each proof.<a href="#section-7.1.2-2" class="pilcrow">¶</a></p>
@@ -4212,13 +4304,13 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.2-1">This section specifies <code>Prio3</code>, an implementation of the <code>Vdaf</code> interface
 (<a href="#vdaf" class="auto internal xref">Section 5</a>). It has two generic parameters: an <code>Flp</code> (<a href="#flp" class="auto internal xref">Section 7.1</a>) and a <code>Xof</code>
 (<a href="#xof" class="auto internal xref">Section 6.2</a>). It also has an associated constant, <code>PROOFS</code>,  with a value within
- the range of <code>[1, 256)</code>, denoting the number of FLPs generated by the Client
- (<a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>). The value of <code>PROOFS</code> is <code>1</code> unless explicitly specified.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+the range of <code>[1, 256)</code>, denoting the number of FLPs generated by the Client
+(<a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>). The value of <code>PROOFS</code> is <code>1</code> unless explicitly specified.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.2-2">The associated constants and types required by the <code>Vdaf</code> interface are
- defined in <a href="#prio3-param" class="auto internal xref">Table 5</a>. The methods required for sharding,
- preparation, aggregation, and unsharding are described in the remaining
- subsections. These methods refer to constants enumerated in
- <a href="#prio3-const" class="auto internal xref">Table 6</a>.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
+defined in <a href="#prio3-param" class="auto internal xref">Table 5</a>. The methods required for sharding,
+preparation, aggregation, and unsharding are described in the remaining
+subsections. These methods refer to constants enumerated in
+<a href="#prio3-const" class="auto internal xref">Table 6</a>.<a href="#section-7.2-2" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-prio3"></span><div id="prio3-param">
 <table class="center" id="table-5">
           <caption>
@@ -4245,7 +4337,7 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
                 <code>RAND_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE * (1 + 2 * (SHARES - 1)) if Flp.JOINT_RAND_LEN == 0 else Xof.SEED_SIZE * (1 + 2 * (SHARES - 1) + SHARES)</code>
+                <code>Xof.SEED_SIZE * (1 + 2 * (SHARES - 1)) if flp.JOINT_RAND_LEN == 0 else Xof.SEED_SIZE * (1 + 2 * (SHARES - 1) + SHARES)</code>
 </td>
             </tr>
             <tr>
@@ -4300,7 +4392,7 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
                 <code>InputShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Union[tuple[list[Flp.Field], list[Flp.Field], Optional[bytes]], tuple[bytes, bytes, Optional[bytes]]]</code>
+                <code>Union[tuple[list[Flp.field], list[Flp.field], Optional[bytes]], tuple[bytes, bytes, Optional[bytes]]]</code>
 </td>
             </tr>
             <tr>
@@ -4308,7 +4400,7 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
                 <code>OutShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>list[Flp.Field]</code>
+                <code>list[Flp.field]</code>
 </td>
             </tr>
             <tr>
@@ -4316,7 +4408,7 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
                 <code>AggShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>list[Flp.Field]</code>
+                <code>list[Flp.field]</code>
 </td>
             </tr>
             <tr>
@@ -4332,7 +4424,7 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
                 <code>PrepState</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[list[Flp.Field], Optional[bytes]]</code>
+                <code>tuple[list[Flp.field], Optional[bytes]]</code>
 </td>
             </tr>
             <tr>
@@ -4340,7 +4432,7 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
                 <code>PrepShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[list[Flp.Field], Optional[bytes]]</code>
+                <code>tuple[list[Flp.field], Optional[bytes]]</code>
 </td>
             </tr>
             <tr>
@@ -4458,21 +4550,32 @@ robustness of Prio3.) To support this, in Prio3:<a href="#section-7.2.1-4" class
 </li>
           </ul>
 <p id="section-7.2.1-6">Depending on the FLP, joint randomness may not be required. In particular, when
-<code>Flp.JOINT_RAND_LEN == 0</code>, the Client does not derive the joint randomness
+<code>flp.JOINT_RAND_LEN == 0</code>, the Client does not derive the joint randomness
 (Step 3). The sharding algorithm is specified below.<a href="#section-7.2.1-6" class="pilcrow">¶</a></p>
 <span id="name-input-distribution-algorith"></span><div id="prio3-eval-input">
 <figure id="figure-15">
             <div class="alignLeft art-text artwork" id="section-7.2.1-7.1">
 <pre>
-def shard(Prio3, measurement, nonce, rand):
-    l = Prio3.Xof.SEED_SIZE
-    seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
+def shard(
+        self,
+        measurement: Measurement,
+        nonce: bytes,
+        rand: bytes) -&gt; tuple[
+            Optional[list[bytes]],
+            list[Prio3InputShare]]:
+    if len(nonce) != self.NONCE_SIZE:
+        raise ValueError("incorrect nonce size")
+    if len(rand) != self.RAND_SIZE:
+        raise ValueError("incorrect size of random bytes argument")
 
-    meas = Prio3.Flp.encode(measurement)
-    if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
-        return Prio3.shard_with_joint_rand(meas, nonce, seeds)
+    l = self.xof.SEED_SIZE
+    seeds = [rand[i:i + l] for i in range(0, self.RAND_SIZE, l)]
+
+    meas = self.flp.encode(measurement)
+    if self.flp.JOINT_RAND_LEN &gt; 0:
+        return self.shard_with_joint_rand(meas, nonce, seeds)
     else:
-        return Prio3.shard_without_joint_rand(meas, seeds)
+        return self.shard_without_joint_rand(meas, seeds)
 </pre>
 </div>
 <figcaption><a href="#figure-15" class="selfRef">Figure 15</a>:
@@ -4489,59 +4592,67 @@ subsections below.<a href="#section-7.2.1-8" class="pilcrow">¶</a></p>
 <a href="#section-7.2.1.1" class="section-number selfRef">7.2.1.1. </a><a href="#name-flps-without-joint-randomne" class="section-name selfRef">FLPs without joint randomness</a>
             </h5>
 <p id="section-7.2.1.1-1">The following method is used for FLPs that do not require joint randomness,
-i.e., when <code>Flp.JOINT_RAND_LEN == 0</code>:<a href="#section-7.2.1.1-1" class="pilcrow">¶</a></p>
+i.e., when <code>flp.JOINT_RAND_LEN == 0</code>:<a href="#section-7.2.1.1-1" class="pilcrow">¶</a></p>
 <span id="name-sharding-an-encoded-measure"></span><div id="prio3-shard-without-joint-rand">
 <figure id="figure-16">
               <div class="alignLeft art-text artwork" id="section-7.2.1.1-2.1">
 <pre>
-def shard_without_joint_rand(Prio3, meas, seeds):
-  k_helper_seeds, seeds = front((Prio3.SHARES-1) * 2, seeds)
-  k_helper_meas_shares = [
-      k_helper_seeds[i]
-      for i in range(0, (Prio3.SHARES-1) * 2, 2)
-  ]
-  k_helper_proofs_shares = [
-      k_helper_seeds[i]
-      for i in range(1, (Prio3.SHARES-1) * 2, 2)
-  ]
-  (k_prove,), seeds = front(1, seeds)
+def shard_without_joint_rand(
+        self,
+        meas: list[F],
+        seeds: list[bytes]) -&gt; tuple[
+            Optional[list[bytes]],
+            list[Prio3InputShare[F]]]:
+    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
+    k_helper_meas_shares = [
+        k_helper_seeds[i]
+        for i in range(0, (self.SHARES - 1) * 2, 2)
+    ]
+    k_helper_proofs_shares = [
+        k_helper_seeds[i]
+        for i in range(1, (self.SHARES - 1) * 2, 2)
+    ]
+    (k_prove,), seeds = front(1, seeds)
 
-  # Shard the encoded measurement into shares.
-  leader_meas_share = meas
-  for j in range(Prio3.SHARES-1):
-      leader_meas_share = vec_sub(
-          leader_meas_share,
-          Prio3.helper_meas_share(j+1, k_helper_meas_shares[j]),
-      )
+    # Shard the encoded measurement into shares.
+    leader_meas_share = meas
+    for j in range(self.SHARES - 1):
+        leader_meas_share = vec_sub(
+            leader_meas_share,
+            self.helper_meas_share(j + 1, k_helper_meas_shares[j]),
+        )
 
-  # Generate and shard each proof into shares.
-  prove_rands = Prio3.prove_rands(k_prove)
-  leader_proofs_share = []
-  for _ in range(Prio3.PROOFS):
-      prove_rand, prove_rands = front(
-          Prio3.Flp.PROVE_RAND_LEN, prove_rands)
-      leader_proofs_share += Prio3.Flp.prove(meas, prove_rand, [])
-  for j in range(Prio3.SHARES-1):
-      leader_proofs_share = vec_sub(
-          leader_proofs_share,
-          Prio3.helper_proofs_share(j+1, k_helper_proofs_shares[j]),
-      )
+    # Generate and shard each proof into shares.
+    prove_rands = self.prove_rands(k_prove)
+    leader_proofs_share = []
+    for _ in range(self.PROOFS):
+        prove_rand, prove_rands = front(
+            self.flp.PROVE_RAND_LEN, prove_rands)
+        leader_proofs_share += self.flp.prove(meas, prove_rand, [])
+    for j in range(self.SHARES - 1):
+        leader_proofs_share = vec_sub(
+            leader_proofs_share,
+            self.helper_proofs_share(
+                j + 1,
+                k_helper_proofs_shares[j],
+            ),
+        )
 
-  # Each Aggregator's input share contains its measurement share
-  # and share of proof(s).
-  input_shares = []
-  input_shares.append((
-      leader_meas_share,
-      leader_proofs_share,
-      None,
-  ))
-  for j in range(Prio3.SHARES-1):
-      input_shares.append((
-          k_helper_meas_shares[j],
-          k_helper_proofs_shares[j],
-          None,
-      ))
-  return (None, input_shares)
+    # Each Aggregator's input share contains its measurement share
+    # and share of proof(s).
+    input_shares: list[Prio3InputShare[F]] = []
+    input_shares.append((
+        leader_meas_share,
+        leader_proofs_share,
+        None,
+    ))
+    for j in range(self.SHARES - 1):
+        input_shares.append((
+            k_helper_meas_shares[j],
+            k_helper_proofs_shares[j],
+            None,
+        ))
+    return (None, input_shares)
 </pre>
 </div>
 <figcaption><a href="#figure-16" class="selfRef">Figure 16</a>:
@@ -4575,76 +4686,87 @@ and proof shares and the methods for encoding the input shares are defined in
 <a href="#section-7.2.1.2" class="section-number selfRef">7.2.1.2. </a><a href="#name-flps-with-joint-randomness" class="section-name selfRef">FLPs with joint randomness</a>
             </h5>
 <p id="section-7.2.1.2-1">The following method is used for FLPs that require joint randomness,
-i.e., for which <code>Flp.JOINT_RAND_LEN &gt; 0</code>:<a href="#section-7.2.1.2-1" class="pilcrow">¶</a></p>
+i.e., for which <code>flp.JOINT_RAND_LEN &gt; 0</code>:<a href="#section-7.2.1.2-1" class="pilcrow">¶</a></p>
 <span id="name-sharding-an-encoded-measurem"></span><div id="prio3-shard-with-joint-rand">
 <figure id="figure-17">
               <div class="alignLeft art-text artwork" id="section-7.2.1.2-2.1">
 <pre>
-def shard_with_joint_rand(Prio3, meas, nonce, seeds):
-  k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
-  k_helper_meas_shares = [
-      k_helper_seeds[i]
-      for i in range(0, (Prio3.SHARES-1) * 3, 3)
-  ]
-  k_helper_proofs_shares = [
-      k_helper_seeds[i]
-      for i in range(1, (Prio3.SHARES-1) * 3, 3)
-  ]
-  k_helper_blinds = [
-      k_helper_seeds[i]
-      for i in range(2, (Prio3.SHARES-1) * 3, 3)
-  ]
-  (k_leader_blind,), seeds = front(1, seeds)
-  (k_prove,), seeds = front(1, seeds)
+def shard_with_joint_rand(
+        self,
+        meas: list[F],
+        nonce: bytes,
+        seeds: list[bytes]) -&gt; tuple[
+            Optional[list[bytes]],
+            list[Prio3InputShare[F]]]:
+    k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
+    k_helper_meas_shares = [
+        k_helper_seeds[i]
+        for i in range(0, (self.SHARES - 1) * 3, 3)
+    ]
+    k_helper_proofs_shares = [
+        k_helper_seeds[i]
+        for i in range(1, (self.SHARES - 1) * 3, 3)
+    ]
+    k_helper_blinds = [
+        k_helper_seeds[i]
+        for i in range(2, (self.SHARES - 1) * 3, 3)
+    ]
+    (k_leader_blind, k_prove), seeds = front(2, seeds)
 
-  # Shard the encoded measurement into shares and compute the
-  # joint randomness parts.
-  leader_meas_share = meas
-  k_joint_rand_parts = []
-  for j in range(Prio3.SHARES-1):
-      helper_meas_share = Prio3.helper_meas_share(
-          j+1, k_helper_meas_shares[j])
-      leader_meas_share = vec_sub(leader_meas_share,
-                                  helper_meas_share)
-      k_joint_rand_parts.append(Prio3.joint_rand_part(
-          j+1, k_helper_blinds[j], helper_meas_share, nonce))
-  k_joint_rand_parts.insert(0, Prio3.joint_rand_part(
-      0, k_leader_blind, leader_meas_share, nonce))
+    # Shard the encoded measurement into shares and compute the
+    # joint randomness parts.
+    leader_meas_share = meas
+    k_joint_rand_parts = []
+    for j in range(self.SHARES - 1):
+        helper_meas_share = self.helper_meas_share(
+            j + 1, k_helper_meas_shares[j])
+        leader_meas_share = vec_sub(leader_meas_share,
+                                    helper_meas_share)
+        k_joint_rand_parts.append(self.joint_rand_part(
+            j + 1, k_helper_blinds[j], helper_meas_share, nonce))
+    k_joint_rand_parts.insert(0, self.joint_rand_part(
+        0, k_leader_blind, leader_meas_share, nonce))
 
-  # Generate and shard each proof into shares.
-  prove_rands = Prio3.prove_rands(k_prove)
-  joint_rands = Prio3.joint_rands(
-      Prio3.joint_rand_seed(k_joint_rand_parts))
-  leader_proofs_share = []
-  for _ in range(Prio3.PROOFS):
-      prove_rand, prove_rands = front(
-          Prio3.Flp.PROVE_RAND_LEN, prove_rands)
-      joint_rand, joint_rands = front(
-          Prio3.Flp.JOINT_RAND_LEN, joint_rands)
-      leader_proofs_share += Prio3.Flp.prove(meas,
-                                             prove_rand, joint_rand)
-  for j in range(Prio3.SHARES-1):
-      leader_proofs_share = vec_sub(
-          leader_proofs_share,
-          Prio3.helper_proofs_share(j+1, k_helper_proofs_shares[j]),
-      )
+    # Generate the proof and shard it into proof shares.
+    prove_rands = self.prove_rands(k_prove)
+    joint_rands = self.joint_rands(
+        self.joint_rand_seed(k_joint_rand_parts))
+    leader_proofs_share = []
+    for _ in range(self.PROOFS):
+        prove_rand, prove_rands = front(
+            self.flp.PROVE_RAND_LEN, prove_rands)
+        joint_rand, joint_rands = front(
+            self.flp.JOINT_RAND_LEN, joint_rands)
+        leader_proofs_share += self.flp.prove(
+            meas,
+            prove_rand,
+            joint_rand,
+        )
+    for j in range(self.SHARES - 1):
+        leader_proofs_share = vec_sub(
+            leader_proofs_share,
+            self.helper_proofs_share(
+                j + 1,
+                k_helper_proofs_shares[j],
+            ),
+        )
 
-  # Each Aggregator's input share contains its measurement share,
-  # share of proof(s), and blind. The public share contains the
-  # Aggregators' joint randomness parts.
-  input_shares = []
-  input_shares.append((
-      leader_meas_share,
-      leader_proofs_share,
-      k_leader_blind,
-  ))
-  for j in range(Prio3.SHARES-1):
-      input_shares.append((
-          k_helper_meas_shares[j],
-          k_helper_proofs_shares[j],
-          k_helper_blinds[j],
-      ))
-  return (k_joint_rand_parts, input_shares)
+    # Each Aggregator's input share contains its measurement share,
+    # share of proof(s), and blind. The public share contains the
+    # Aggregators' joint randomness parts.
+    input_shares: list[Prio3InputShare[F]] = []
+    input_shares.append((
+        leader_meas_share,
+        leader_proofs_share,
+        k_leader_blind,
+    ))
+    for j in range(self.SHARES - 1):
+        input_shares.append((
+            k_helper_meas_shares[j],
+            k_helper_proofs_shares[j],
+            k_helper_blinds[j],
+        ))
+    return (k_joint_rand_parts, input_shares)
 </pre>
 </div>
 <figcaption><a href="#figure-17" class="selfRef">Figure 17</a>:
@@ -4708,48 +4830,65 @@ verifier(s).<a href="#section-7.2.2-3" class="pilcrow">¶</a></p>
 <figure id="figure-18">
             <div class="alignLeft art-text artwork" id="section-7.2.2-5.1">
 <pre>
-def prep_init(Prio3, verify_key, agg_id, _agg_param,
-            nonce, public_share, input_share):
-  k_joint_rand_parts = public_share
-  (meas_share, proofs_share, k_blind) = \
-      Prio3.expand_input_share(agg_id, input_share)
-  out_share = Prio3.Flp.truncate(meas_share)
+def prep_init(
+        self,
+        verify_key: bytes,
+        agg_id: int,
+        _agg_param: None,
+        nonce: bytes,
+        public_share: Optional[list[bytes]],
+        input_share: Prio3InputShare[F]) -&gt; tuple[
+            Prio3PrepState[F],
+            Prio3PrepShare[F]]:
+    k_joint_rand_parts = public_share
+    (meas_share, proofs_share, k_blind) = \
+        self.expand_input_share(agg_id, input_share)
+    out_share = self.flp.truncate(meas_share)
 
-  # Compute the joint randomness.
-  joint_rand = []
-  k_corrected_joint_rand, k_joint_rand_part = None, None
-  if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
-      k_joint_rand_part = Prio3.joint_rand_part(
-          agg_id, k_blind, meas_share, nonce)
-      k_joint_rand_parts[agg_id] = k_joint_rand_part
-      k_corrected_joint_rand = Prio3.joint_rand_seed(
-          k_joint_rand_parts)
-      joint_rands = Prio3.joint_rands(k_corrected_joint_rand)
+    # Compute the joint randomness.
+    joint_rand: list[F] = []
+    k_corrected_joint_rand, k_joint_rand_part = None, None
+    if self.flp.JOINT_RAND_LEN &gt; 0:
+        assert k_blind is not None
+        assert k_joint_rand_parts is not None
+        k_joint_rand_part = self.joint_rand_part(
+            agg_id, k_blind, meas_share, nonce)
+        k_joint_rand_parts[agg_id] = k_joint_rand_part
+        k_corrected_joint_rand = self.joint_rand_seed(
+            k_joint_rand_parts)
+        joint_rands = self.joint_rands(k_corrected_joint_rand)
 
-  # Query the measurement and proof share.
-  query_rands = Prio3.query_rands(verify_key, nonce)
-  verifiers_share = []
-  for _ in range(Prio3.PROOFS):
-      proof_share, proofs_share = front(
-          Prio3.Flp.PROOF_LEN, proofs_share)
-      query_rand, query_rands = front(
-          Prio3.Flp.QUERY_RAND_LEN, query_rands)
-      if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
-          joint_rand, joint_rands = front(
-              Prio3.Flp.JOINT_RAND_LEN, joint_rands)
-      verifiers_share += Prio3.Flp.query(meas_share,
-                                          proof_share,
-                                          query_rand,
-                                          joint_rand,
-                                          Prio3.SHARES)
+    # Query the measurement and proof share.
+    query_rands = self.query_rands(verify_key, nonce)
+    verifiers_share = []
+    for _ in range(self.PROOFS):
+        proof_share, proofs_share = front(
+            self.flp.PROOF_LEN, proofs_share)
+        query_rand, query_rands = front(
+            self.flp.QUERY_RAND_LEN, query_rands)
+        if self.flp.JOINT_RAND_LEN &gt; 0:
+            joint_rand, joint_rands = front(
+                self.flp.JOINT_RAND_LEN, joint_rands)
+        verifiers_share += self.flp.query(
+            meas_share,
+            proof_share,
+            query_rand,
+            joint_rand,
+            self.SHARES,
+        )
 
-  prep_state = (out_share, k_corrected_joint_rand)
-  prep_share = (verifiers_share, k_joint_rand_part)
-  return (prep_state, prep_share)
+    prep_state = (out_share, k_corrected_joint_rand)
+    prep_share = (verifiers_share, k_joint_rand_part)
+    return (prep_state, prep_share)
 
-def prep_next(Prio3, prep, prep_msg):
+def prep_next(
+        self,
+        prep_state: Prio3PrepState[F],
+        prep_msg: Optional[bytes]) -&gt; Union[
+            tuple[Prio3PrepState[F], Prio3PrepShare[F]],
+            list[F]]:
     k_joint_rand = prep_msg
-    (out_share, k_corrected_joint_rand) = prep
+    (out_share, k_corrected_joint_rand) = prep_state
 
     # If joint randomness was used, check that the value computed by
     # the Aggregators matches the value indicated by the Client.
@@ -4758,28 +4897,32 @@ def prep_next(Prio3, prep, prep_msg):
 
     return out_share
 
-def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
+def prep_shares_to_prep(
+        self,
+        _agg_param: None,
+        prep_shares: list[Prio3PrepShare[F]]) -&gt; Optional[bytes]:
     # Unshard the verifier shares into the verifier message.
-    verifiers = Prio3.Flp.Field.zeros(
-        Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS)
+    verifiers = self.flp.field.zeros(
+        self.flp.VERIFIER_LEN * self.PROOFS)
     k_joint_rand_parts = []
     for (verifiers_share, k_joint_rand_part) in prep_shares:
         verifiers = vec_add(verifiers, verifiers_share)
-        if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
+        if self.flp.JOINT_RAND_LEN &gt; 0:
+            assert k_joint_rand_part is not None
             k_joint_rand_parts.append(k_joint_rand_part)
 
     # Verify that each proof is well-formed and input is valid
-    for _ in range(Prio3.PROOFS):
-        verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
-        if not Prio3.Flp.decide(verifier):
+    for _ in range(self.PROOFS):
+        verifier, verifiers = front(self.flp.VERIFIER_LEN, verifiers)
+        if not self.flp.decide(verifier):
             raise ValueError('proof verifier check failed')
 
     # Combine the joint randomness parts computed by the
     # Aggregators into the true joint randomness seed. This is
     # used in the last step.
     k_joint_rand = None
-    if Prio3.Flp.JOINT_RAND_LEN &gt; 0:
-        k_joint_rand = Prio3.joint_rand_seed(k_joint_rand_parts)
+    if self.flp.JOINT_RAND_LEN &gt; 0:
+        k_joint_rand = self.joint_rand_seed(k_joint_rand_parts)
     return k_joint_rand
 </pre>
 </div>
@@ -4800,7 +4943,14 @@ parameters used.<a href="#section-7.2.3-1" class="pilcrow">¶</a></p>
 <figure id="figure-19">
             <div class="alignLeft art-text artwork" id="section-7.2.3-2.1">
 <pre>
-def is_valid(Prio3, agg_param, previous_agg_params):
+def is_valid(
+        self,
+        _agg_param: None,
+        previous_agg_params: list[None]) -&gt; bool:
+    """
+    Checks if `previous_agg_params` is empty, as input shares in
+    Prio3 may only be used once.
+    """
     return len(previous_agg_params) == 0
 </pre>
 </div>
@@ -4821,8 +4971,11 @@ element-wise.<a href="#section-7.2.4-1" class="pilcrow">¶</a></p>
 <figure id="figure-20">
             <div class="alignLeft art-text artwork" id="section-7.2.4-2.1">
 <pre>
-def aggregate(Prio3, _agg_param, out_shares):
-    agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
+def aggregate(
+        self,
+        _agg_param: None,
+        out_shares: list[list[F]]) -&gt; list[F]:
+    agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
     for out_share in out_shares:
         agg_share = vec_add(agg_share, out_share)
     return agg_share
@@ -4845,12 +4998,15 @@ element-wise. It then converts each element of the vector into an integer.<a hre
 <figure id="figure-21">
             <div class="alignLeft art-text artwork" id="section-7.2.5-2.1">
 <pre>
-def unshard(Prio3, _agg_param,
-            agg_shares, num_measurements):
-    agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
+def unshard(
+        self,
+        _agg_param: None,
+        agg_shares: list[list[F]],
+        num_measurements: int) -&gt; AggResult:
+    agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
     for agg_share in agg_shares:
         agg = vec_add(agg, agg_share)
-    return Prio3.Flp.decode(agg, num_measurements)
+    return self.flp.decode(agg, num_measurements)
 </pre>
 </div>
 <figcaption><a href="#figure-21" class="selfRef">Figure 21</a>:
@@ -4869,73 +5025,92 @@ algorithms for Prio3 in the preceding sections.<a href="#section-7.2.6-1" class=
 <p id="section-7.2.6-2">The following methods are called by the sharding and preparation algorithms.<a href="#section-7.2.6-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.2.6-3">
 <pre>
-def helper_meas_share(Prio3, agg_id, k_share):
-    return Prio3.Xof.expand_into_vec(
-        Prio3.Flp.Field,
+def helper_meas_share(self, agg_id: int, k_share: bytes) -&gt; list[F]:
+    return self.xof.expand_into_vec(
+        self.flp.field,
         k_share,
-        Prio3.domain_separation_tag(USAGE_MEAS_SHARE),
+        self.domain_separation_tag(USAGE_MEAS_SHARE),
         byte(agg_id),
-        Prio3.Flp.MEAS_LEN,
+        self.flp.MEAS_LEN,
     )
 
-def helper_proofs_share(Prio3, agg_id, k_share):
-  return Prio3.Xof.expand_into_vec(
-      Prio3.Flp.Field,
-      k_share,
-      Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
-      byte(Prio3.PROOFS) + byte(agg_id),
-      Prio3.Flp.PROOF_LEN * Prio3.PROOFS,
-  )
+def helper_proofs_share(
+        self,
+        agg_id: int,
+        k_share: bytes) -&gt; list[F]:
+    return self.xof.expand_into_vec(
+        self.flp.field,
+        k_share,
+        self.domain_separation_tag(USAGE_PROOF_SHARE),
+        byte(self.PROOFS) + byte(agg_id),
+        self.flp.PROOF_LEN * self.PROOFS,
+    )
 
-def expand_input_share(Prio3, agg_id, input_share):
-  (meas_share, proofs_share, k_blind) = input_share
-  if agg_id &gt; 0:
-      meas_share = Prio3.helper_meas_share(agg_id, meas_share)
-      proofs_share = Prio3.helper_proofs_share(agg_id, proofs_share)
-  return (meas_share, proofs_share, k_blind)
+def expand_input_share(
+        self,
+        agg_id: int,
+        input_share: Prio3InputShare[F]) -&gt; tuple[
+            list[F],
+            list[F],
+            Optional[bytes]]:
+    (meas_share, proofs_share, k_blind) = input_share
+    if agg_id &gt; 0:
+        assert isinstance(meas_share, bytes)
+        assert isinstance(proofs_share, bytes)
+        meas_share = self.helper_meas_share(agg_id, meas_share)
+        proofs_share = self.helper_proofs_share(agg_id, proofs_share)
+    else:
+        assert isinstance(meas_share, list)
+        assert isinstance(proofs_share, list)
+    return (meas_share, proofs_share, k_blind)
 
-def prove_rands(Prio3, k_prove):
-  return Prio3.Xof.expand_into_vec(
-      Prio3.Flp.Field,
-      k_prove,
-      Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
-      byte(Prio3.PROOFS),
-      Prio3.Flp.PROVE_RAND_LEN * Prio3.PROOFS,
-  )
+def prove_rands(self, k_prove: bytes) -&gt; list[F]:
+    return self.xof.expand_into_vec(
+        self.flp.field,
+        k_prove,
+        self.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
+        byte(self.PROOFS),
+        self.flp.PROVE_RAND_LEN * self.PROOFS,
+    )
 
-def query_rands(Prio3, verify_key, nonce):
-  return Prio3.Xof.expand_into_vec(
-      Prio3.Flp.Field,
-      verify_key,
-      Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
-      byte(Prio3.PROOFS) + nonce,
-      Prio3.Flp.QUERY_RAND_LEN * Prio3.PROOFS,
-  )
+def query_rands(self, verify_key: bytes, nonce: bytes) -&gt; list[F]:
+    return self.xof.expand_into_vec(
+        self.flp.field,
+        verify_key,
+        self.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
+        byte(self.PROOFS) + nonce,
+        self.flp.QUERY_RAND_LEN * self.PROOFS,
+    )
 
-def joint_rand_part(Prio3, agg_id, k_blind, meas_share, nonce):
-    return Prio3.Xof.derive_seed(
+def joint_rand_part(
+        self,
+        agg_id: int,
+        k_blind: bytes,
+        meas_share: list[F],
+        nonce: bytes) -&gt; bytes:
+    return self.xof.derive_seed(
         k_blind,
-        Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
-        byte(agg_id) + nonce + Prio3.Flp.Field.encode_vec(meas_share),
+        self.domain_separation_tag(USAGE_JOINT_RAND_PART),
+        byte(agg_id) + nonce + self.flp.field.encode_vec(meas_share),
     )
 
-def joint_rand_seed(Prio3, k_joint_rand_parts):
+def joint_rand_seed(self, k_joint_rand_parts: list[bytes]) -&gt; bytes:
     """Derive the joint randomness seed from its parts."""
-    return Prio3.Xof.derive_seed(
-        zeros(Prio3.Xof.SEED_SIZE),
-        Prio3.domain_separation_tag(USAGE_JOINT_RAND_SEED),
+    return self.xof.derive_seed(
+        zeros(self.xof.SEED_SIZE),
+        self.domain_separation_tag(USAGE_JOINT_RAND_SEED),
         concat(k_joint_rand_parts),
     )
 
-def joint_rands(Prio3, k_joint_rand_seed):
-  """Derive the joint randomness from its seed."""
-  return Prio3.Xof.expand_into_vec(
-      Prio3.Flp.Field,
-      k_joint_rand_seed,
-      Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
-      byte(Prio3.PROOFS),
-      Prio3.Flp.JOINT_RAND_LEN * Prio3.PROOFS,
-  )
+def joint_rands(self, k_joint_rand_seed: bytes) -&gt; list[F]:
+    """Derive the joint randomness from its seed."""
+    return self.xof.expand_into_vec(
+        self.flp.field,
+        k_joint_rand_seed,
+        self.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
+        byte(self.PROOFS),
+        self.flp.JOINT_RAND_LEN * self.PROOFS,
+    )
 </pre><a href="#section-7.2.6-3" class="pilcrow">¶</a>
 </div>
 </section>
@@ -4949,8 +5124,8 @@ def joint_rands(Prio3, k_joint_rand_seed):
 network while executing Prio3. It is <span class="bcp14">RECOMMENDED</span> that implementations provide
 serialization methods for them.<a href="#section-7.2.7-1" class="pilcrow">¶</a></p>
 <p id="section-7.2.7-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Prio3.Xof.SEED_SIZE</code> and <code>F</code> as an alias
-for <code>Prio3.Field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>Prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
+for <code>Prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.2.7-3">
 <pre>
 opaque Prio3Seed[S];
@@ -4969,7 +5144,7 @@ opaque Prio3Field[F];
 <a href="#section-7.2.7.1" class="section-number selfRef">7.2.7.1. </a><a href="#name-public-share" class="section-name selfRef">Public Share</a>
             </h5>
 <p id="section-7.2.7.1-1">The encoding of the public share depends on whether joint randomness is
-required for the underlying FLP (i.e., <code>Prio3.Flp.JOINT_RAND_LEN &gt; 0</code>). If
+required for the underlying FLP (i.e., <code>Prio3.flp.JOINT_RAND_LEN &gt; 0</code>). If
 joint randomness is not used, then the public share is the empty string. If
 joint randomness is used, then the public share encodes the joint randomness
 parts as follows:<a href="#section-7.2.7.1-1" class="pilcrow">¶</a></p>
@@ -5001,8 +5176,8 @@ not used, the Leader's share is structured as follows:<a href="#section-7.2.7.2-
 <div class="alignLeft art-text artwork" id="section-7.2.7.2-4">
 <pre>
 struct {
-    Prio3Field meas_share[F * Prio3.Flp.MEAS_LEN];
-    Prio3Field proofs_share[F * Prio3.Flp.PROOF_LEN * Prio3.PROOFS];
+    Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
+    Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
 } Prio3LeaderShare;
 </pre><a href="#section-7.2.7.2-4" class="pilcrow">¶</a>
 </div>
@@ -5047,7 +5222,7 @@ struct {
 <div class="alignLeft art-text artwork" id="section-7.2.7.3-2">
 <pre>
 struct {
-    Prio3Field verifiers_share[F * Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
 } Prio3PrepShare;
 </pre><a href="#section-7.2.7.3-2" class="pilcrow">¶</a>
 </div>
@@ -5056,7 +5231,7 @@ randomness part and is structured as follows:<a href="#section-7.2.7.3-3" class=
 <div class="alignLeft art-text artwork" id="section-7.2.7.3-4">
 <pre>
 struct {
-    Prio3Field verifiers_share[F * Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS];
+    Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
     Prio3Seed k_joint_rand_part;
 } Prio3PrepShareWithJointRand;
 </pre><a href="#section-7.2.7.3-4" class="pilcrow">¶</a>
@@ -5089,7 +5264,7 @@ struct {
 <div class="alignLeft art-text artwork" id="section-7.2.7.5-2">
 <pre>
 struct {
-    Prio3Field agg_share[F * Prio3.Flp.OUTPUT_LEN];
+    Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
 } Prio3AggShare;
 </pre><a href="#section-7.2.7.5-2" class="pilcrow">¶</a>
 </div>
@@ -5345,7 +5520,7 @@ validity circuit <code>Valid</code> that implements the interface described here
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">An FFT-friendly finite field as defined in <a href="#field-fft-friendly" class="auto internal xref">Section 6.1.2</a>
 </td>
@@ -5367,15 +5542,15 @@ an input vector, truncating an input vector to the length of an aggregatable
 output, and converting an aggregated output to an aggregate result:<a href="#section-7.3.2-7" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.2-8.1">
-              <p id="section-7.3.2-8.1.1"><code>Valid.encode(measurement: Measurement) -&gt; list[Field]</code> returns a vector of
+              <p id="section-7.3.2-8.1.1"><code>valid.encode(measurement: Measurement) -&gt; list[Field]</code> returns a vector of
 length <code>MEAS_LEN</code> representing a measurement.<a href="#section-7.3.2-8.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.2-8.2">
-              <p id="section-7.3.2-8.2.1"><code>Valid.truncate(meas: list[Field]) -&gt; list[Field]</code> returns a vector of length
+              <p id="section-7.3.2-8.2.1"><code>valid.truncate(meas: list[Field]) -&gt; list[Field]</code> returns a vector of length
 <code>OUTPUT_LEN</code> representing an aggregatable output.<a href="#section-7.3.2-8.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.2-8.3">
-              <p id="section-7.3.2-8.3.1"><code>Valid.decode(output: list[Field], num_measurements: int) -&gt; AggResult</code>
+              <p id="section-7.3.2-8.3.1"><code>valid.decode(output: list[Field], num_measurements: int) -&gt; AggResult</code>
 returns an aggregate result.<a href="#section-7.3.2-8.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
@@ -5383,18 +5558,18 @@ returns an aggregate result.<a href="#section-7.3.2-8.3.1" class="pilcrow">¶</a
 <span id="name-derived-methods-for-validit"></span><figure id="figure-22">
             <div class="alignLeft art-text artwork" id="section-7.3.2-10.1">
 <pre>
-def prove_rand_len(self):
+def prove_rand_len(self) -&gt; int:
     """Length of the prover randomness."""
-    return sum(g.ARITY for g in Valid.GADGETS)
+    return sum(g.ARITY for g in self.GADGETS)
 
-def query_rand_len(self):
+def query_rand_len(self) -&gt; int:
     """Length of the query randomness."""
     query_rand_len = len(self.GADGETS)
     if self.EVAL_OUTPUT_LEN &gt; 1:
         query_rand_len += 1
     return query_rand_len
 
-def proof_len(self):
+def proof_len(self) -&gt; int:
     """Length of the proof."""
     length = 0
     for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
@@ -5402,12 +5577,21 @@ def proof_len(self):
         length += g.ARITY + g.DEGREE * (P - 1) + 1
     return length
 
-def verifier_len(self):
+def verifier_len(self) -&gt; int:
     """Length of the verifier message."""
     length = 1
     for g in self.GADGETS:
         length += g.ARITY + 1
     return length
+
+def check_valid_eval(
+        self,
+        meas: list[F],
+        joint_rand: list[F]) -&gt; None:
+    if len(meas) != self.MEAS_LEN:
+        raise ValueError('incorrect measurement length')
+    if len(joint_rand) != self.JOINT_RAND_LEN:
+        raise ValueError('incorrect joint randomness length')
 </pre>
 </div>
 <figcaption><a href="#figure-22" class="selfRef">Figure 22</a>:
@@ -5436,19 +5620,19 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
 <code>n</code>. We also define the following constants:<a href="#section-7.3.3-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.3-5.1">
-              <p id="section-7.3.3-5.1.1">Let <code>H = len(Valid.GADGETS)</code><a href="#section-7.3.3-5.1.1" class="pilcrow">¶</a></p>
+              <p id="section-7.3.3-5.1.1">Let <code>H = len(valid.GADGETS)</code><a href="#section-7.3.3-5.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.3-5.2">
               <p id="section-7.3.3-5.2.1">For each <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3-5.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.3-5.2.2.1">
-                  <p id="section-7.3.3-5.2.2.1.1">Let <code>G_i = Valid.GADGETS[i]</code><a href="#section-7.3.3-5.2.2.1.1" class="pilcrow">¶</a></p>
+                  <p id="section-7.3.3-5.2.2.1.1">Let <code>G_i = valid.GADGETS[i]</code><a href="#section-7.3.3-5.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-7.3.3-5.2.2.2">
-                  <p id="section-7.3.3-5.2.2.2.1">Let <code>L_i = Valid.GADGETS[i].ARITY</code><a href="#section-7.3.3-5.2.2.2.1" class="pilcrow">¶</a></p>
+                  <p id="section-7.3.3-5.2.2.2.1">Let <code>L_i = valid.GADGETS[i].ARITY</code><a href="#section-7.3.3-5.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-7.3.3-5.2.2.3">
-                  <p id="section-7.3.3-5.2.2.3.1">Let <code>M_i = Valid.GADGET_CALLS[i]</code><a href="#section-7.3.3-5.2.2.3.1" class="pilcrow">¶</a></p>
+                  <p id="section-7.3.3-5.2.2.3.1">Let <code>M_i = valid.GADGET_CALLS[i]</code><a href="#section-7.3.3-5.2.2.3.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-7.3.3-5.2.2.4">
                   <p id="section-7.3.3-5.2.2.4.1">Let <code>P_i = next_power_of_2(M_i+1)</code><a href="#section-7.3.3-5.2.2.4.1" class="pilcrow">¶</a></p>
@@ -5477,21 +5661,21 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <code>PROVE_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.prove_rand_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.prove_rand_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>QUERY_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.query_rand_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.query_rand_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.JOINT_RAND_LEN</code>
+                  <code>valid.JOINT_RAND_LEN</code>
 </td>
               </tr>
               <tr>
@@ -5499,7 +5683,7 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <code>MEAS_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.MEAS_LEN</code>
+                  <code>valid.MEAS_LEN</code>
 </td>
               </tr>
               <tr>
@@ -5507,7 +5691,7 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <code>OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.OUTPUT_LEN</code>
+                  <code>valid.OUTPUT_LEN</code>
 </td>
               </tr>
               <tr>
@@ -5515,29 +5699,29 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <code>PROOF_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.proof_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.proof_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>VERIFIER_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.verifier_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.verifier_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Measurement</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.Measurement</code>
+                  <code>valid.Measurement</code>
 </td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid.Field</code>
+                  <code>valid.field</code>
 </td>
               </tr>
             </tbody>
@@ -5697,8 +5881,8 @@ as follows:<a href="#section-7.3.3.3-1" class="pilcrow">¶</a></p>
             <h5 id="name-encoding">
 <a href="#section-7.3.3.4" class="section-number selfRef">7.3.3.4. </a><a href="#name-encoding" class="section-name selfRef">Encoding</a>
             </h5>
-<p id="section-7.3.3.4-1">The FLP encoding and truncation methods invoke <code>Valid.encode</code>,
-<code>Valid.truncate</code>, and <code>Valid.decode</code> in the natural way.<a href="#section-7.3.3.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.3.3.4-1">The FLP encoding and truncation methods invoke <code>valid.encode</code>,
+<code>valid.truncate</code>, and <code>valid.decode</code> in the natural way.<a href="#section-7.3.3.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -5732,7 +5916,7 @@ validity circuit, denoted <code>Count</code>, uses <code>Field64</code> (<a href
 field. Its gadget, denoted <code>Mul</code>, is the degree-2, arity-2 gadget defined as<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.1-3">
 <pre>
-def eval(self, Field, inp):
+def eval(self, _field: type[F], inp: list[F]) -&gt; F:
     self.check_gadget_eval(inp)
     return inp[0] * inp[1]
 </pre><a href="#section-7.4.1-3" class="pilcrow">¶</a>
@@ -5742,10 +5926,14 @@ not equal to the gadget's <code>ARITY</code> parameter.<a href="#section-7.4.1-4
 <p id="section-7.4.1-5">The <code>Count</code> validity circuit is defined as<a href="#section-7.4.1-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.1-6">
 <pre>
-def eval(self, meas, joint_rand, _num_shares):
-    out = self.GADGETS[0].eval(self.Field, [meas[0], meas[0]]) \
-        - meas[0]
-    return [out]
+def eval(
+        self,
+        meas: list[Field64],
+        joint_rand: list[Field64],
+        _num_shares: int) -&gt; list[Field64]:
+    self.check_valid_eval(meas, joint_rand)
+    squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
+    return [squared - meas[0]]
 </pre><a href="#section-7.4.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.1-7">The measurement is encoded and decoded as a singleton vector in the natural
@@ -5828,7 +6016,7 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -5852,17 +6040,20 @@ elements, where the <code>l</code>th element of the vector represents the <code>
 summand:<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.2-3">
 <pre>
-def encode(self, measurement):
+def encode(self, measurement: int) -&gt; list[Field128]:
     if 0 &gt; measurement or measurement &gt;= 2 ** self.MEAS_LEN:
         raise ValueError('measurement out of range')
 
-    return self.Field.encode_into_bit_vector(measurement,
+    return self.field.encode_into_bit_vector(measurement,
                                              self.MEAS_LEN)
 
-def truncate(self, meas):
-    return [self.Field.decode_from_bit_vector(meas)]
+def truncate(self, meas: list[Field128]) -&gt; list[Field128]:
+    return [self.field.decode_from_bit_vector(meas)]
 
-def decode(self, output, _num_measurements):
+def decode(
+        self,
+        output: list[Field128],
+        _num_measurements: int) -&gt; int:
     return output[0].as_unsigned()
 </pre><a href="#section-7.4.2-3" class="pilcrow">¶</a>
 </div>
@@ -5870,7 +6061,7 @@ def decode(self, output, _num_measurements):
 gadget, denoted <code>Range2</code>, is the degree-2, arity-1 gadget defined as<a href="#section-7.4.2-4" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.2-5">
 <pre>
-def eval(self, Field, inp):
+def eval(self, _field: type[F], inp: list[F]) -&gt; F:
     self.check_gadget_eval(inp)
     return inp[0] * inp[0] - inp[0]
 </pre><a href="#section-7.4.2-5" class="pilcrow">¶</a>
@@ -5878,12 +6069,16 @@ def eval(self, Field, inp):
 <p id="section-7.4.2-6">The <code>Sum</code> validity circuit is defined as<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.2-7">
 <pre>
-def eval(self, meas, joint_rand, _num_shares):
+def eval(
+        self,
+        meas: list[Field128],
+        joint_rand: list[Field128],
+        _num_shares: int) -&gt; list[Field128]:
     self.check_valid_eval(meas, joint_rand)
-    out = self.Field(0)
+    out = self.field(0)
     r = joint_rand[0]
     for b in meas:
-        out += r * self.GADGETS[0].eval(self.Field, [b])
+        out += r * self.GADGETS[0].eval(self.field, [b])
         r *= joint_rand[0]
     return [out]
 </pre><a href="#section-7.4.2-7" class="pilcrow">¶</a>
@@ -5966,7 +6161,7 @@ def eval(self, meas, joint_rand, _num_shares):
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -5994,27 +6189,32 @@ bits</code>. The field elements in the encoded vector represent all the bits of 
 measurement vector's elements, consecutively, in LSB to MSB order:<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.3-4">
 <pre>
-def encode(self, measurement: list[int]):
+def encode(self, measurement: list[int]) -&gt; list[F]:
     if len(measurement) != self.length:
         raise ValueError('incorrect measurement length')
 
     encoded = []
     for val in measurement:
         if val not in range(2**self.bits):
-            raise ValueError('entry of measurement vector is out of range')
+            raise ValueError(
+                'entry of measurement vector is out of range'
+            )
 
-        encoded += self.Field.encode_into_bit_vector(val, self.bits)
+        encoded += self.field.encode_into_bit_vector(val, self.bits)
     return encoded
 
-def truncate(self, meas):
+def truncate(self, meas: list[F]) -&gt; list[F]:
     truncated = []
     for i in range(self.length):
-        truncated.append(self.Field.decode_from_bit_vector(
+        truncated.append(self.field.decode_from_bit_vector(
             meas[i * self.bits: (i + 1) * self.bits]
         ))
     return truncated
 
-def decode(self, output, _num_measurements):
+def decode(
+        self,
+        output: list[F],
+        _num_measurements: int) -&gt; list[int]:
     return [x.as_unsigned() for x in output]
 </pre><a href="#section-7.4.3-4" class="pilcrow">¶</a>
 </div>
@@ -6034,13 +6234,16 @@ even though the subcircuit is provided to <code>ParallelSum</code> as an impleme
 of the <code>Gadget</code> interface.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.3-7">
 <pre>
-def eval(self, Field, inp):
+def eval(self, field: type[F], inp: list[F]) -&gt; F:
     self.check_gadget_eval(inp)
-    out = Field(0)
+    out = field(0)
     for i in range(self.count):
         start_index = i * self.subcircuit.ARITY
         end_index = (i + 1) * self.subcircuit.ARITY
-        out += self.subcircuit.eval(Field, inp[start_index:end_index])
+        out += self.subcircuit.eval(
+            field,
+            inp[start_index:end_index],
+        )
     return out
 </pre><a href="#section-7.4.3-7" class="pilcrow">¶</a>
 </div>
@@ -6056,29 +6259,37 @@ gadget, and the results are added up both within the <code>ParallelSum</code> ga
 after it.<a href="#section-7.4.3-8" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.3-9">
 <pre>
-def eval(self, meas, joint_rand, num_shares):
+def eval(
+        self,
+        meas: list[F],
+        joint_rand: list[F],
+        num_shares: int) -&gt; list[F]:
     self.check_valid_eval(meas, joint_rand)
 
-    out = Field128(0)
+    out = self.field(0)
     r = joint_rand[0]
     r_power = r
-    shares_inv = self.Field(num_shares).inv()
+    shares_inv = self.field(num_shares).inv()
 
     for i in range(self.GADGET_CALLS[0]):
+        inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
             index = i * self.chunk_length + j
             if index &lt; len(meas):
                 meas_elem = meas[index]
             else:
-                meas_elem = self.Field(0)
+                meas_elem = self.field(0)
 
             inputs[j * 2] = r_power * meas_elem
             inputs[j * 2 + 1] = meas_elem - shares_inv
 
             r_power *= r
 
-        out += self.GADGETS[0].eval(self.Field, inputs)
+        out += self.GADGETS[0].eval(
+            self.field,
+            cast(list[F], inputs),
+        )
 
     return [out]
 </pre><a href="#section-7.4.3-9" class="pilcrow">¶</a>
@@ -6161,7 +6372,7 @@ def eval(self, meas, joint_rand, num_shares):
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -6210,15 +6421,18 @@ square root of <code>length</code> (see <a href="#parallel-sum-chunk-length" cla
 which the measurement falls:<a href="#section-7.4.4-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.4-4">
 <pre>
-def encode(self, measurement):
-    encoded = [self.Field(0)] * self.length
-    encoded[measurement] = self.Field(1)
+def encode(self, measurement: int) -&gt; list[Field128]:
+    encoded = [self.field(0)] * self.length
+    encoded[measurement] = self.field(1)
     return encoded
 
-def truncate(self, meas):
+def truncate(self, meas: list[Field128]) -&gt; list[Field128]:
     return meas
 
-def decode(self, output, _num_measurements):
+def decode(
+        self,
+        output: list[Field128],
+        _num_measurements: int) -&gt; list[int]:
     return [bucket_count.as_unsigned() for bucket_count in output]
 </pre><a href="#section-7.4.4-4" class="pilcrow">¶</a>
 </div>
@@ -6237,29 +6451,37 @@ and the other is equal to the same measurement element minus one. The results
 are added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.4-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.4-7">
 <pre>
-def eval(self, meas, joint_rand, num_shares):
+def eval(
+        self,
+        meas: list[Field128],
+        joint_rand: list[Field128],
+        num_shares: int) -&gt; list[Field128]:
     self.check_valid_eval(meas, joint_rand)
 
     # Check that each bucket is one or zero.
-    range_check = self.Field(0)
+    range_check = self.field(0)
     r = joint_rand[0]
     r_power = r
-    shares_inv = self.Field(num_shares).inv()
+    shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
+        inputs: list[Optional[Field128]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
             index = i * self.chunk_length + j
             if index &lt; len(meas):
                 meas_elem = meas[index]
             else:
-                meas_elem = self.Field(0)
+                meas_elem = self.field(0)
 
             inputs[j * 2] = r_power * meas_elem
             inputs[j * 2 + 1] = meas_elem - shares_inv
 
             r_power *= r
 
-        range_check += r * self.GADGETS[0].eval(self.Field, inputs)
+        range_check += self.GADGETS[0].eval(
+            self.field,
+            cast(list[Field128], inputs),
+        )
 
     # Check that the buckets sum to 1.
     sum_check = -shares_inv
@@ -6351,7 +6573,7 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -6396,67 +6618,80 @@ zero if and only if the reported weight is equal to the true weight.<a href="#se
 <p id="section-7.4.5-7">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.5-8">
 <pre>
-def encode(self, measurement):
+def encode(self, measurement: list[int]) -&gt; list[Field128]:
     if len(measurement) != self.length:
         raise ValueError('invalid Client measurement length')
 
     # The first part is the vector of counters.
-    count_vec = list(map(self.Field, measurement))
+    count_vec = list(map(self.field, measurement))
 
     # The second part is the reported weight.
-    weight_reported = sum(count_vec, self.Field(0))
+    weight_reported = sum(count_vec, self.field(0))
 
     encoded = []
     encoded += count_vec
-    encoded += self.Field.encode_into_bit_vector(
+    encoded += self.field.encode_into_bit_vector(
         (self.offset + weight_reported).as_unsigned(),
         self.bits_for_weight)
     return encoded
 
-def truncate(self, meas):
+def truncate(self, meas: list[Field128]) -&gt; list[Field128]:
     return meas[:self.length]
 
-def decode(self, output, _num_measurements):
+def decode(
+        self,
+        output: list[Field128],
+        _num_measurements: int) -&gt; list[int]:
     return [bucket_count.as_unsigned() for bucket_count in output]
 </pre><a href="#section-7.4.5-8" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.5-9">Circuit evaluation is defined as follows:<a href="#section-7.4.5-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.5-10">
 <pre>
-def eval(self, meas, joint_rand, num_shares):
+def eval(
+        self,
+        meas: list[Field128],
+        joint_rand: list[Field128],
+        num_shares: int) -&gt; list[Field128]:
+    self.check_valid_eval(meas, joint_rand)
+
     # Check that each entry in the input vector is one or zero.
-    range_check = self.Field(0)
+    range_check = self.field(0)
     r = joint_rand[0]
     r_power = r
-    shares_inv = self.Field(num_shares).inv()
+    shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
+        inputs: list[Optional[Field128]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
             index = i * self.chunk_length + j
             if index &lt; len(meas):
                 meas_elem = meas[index]
             else:
-                meas_elem = self.Field(0)
+                meas_elem = self.field(0)
 
             inputs[j * 2] = r_power * meas_elem
             inputs[j * 2 + 1] = meas_elem - shares_inv
 
             r_power *= r
 
-        range_check += self.GADGETS[0].eval(self.Field, inputs)
+        range_check += self.GADGETS[0].eval(
+            self.field,
+            cast(list[Field128], inputs),
+        )
 
     # Check that the weight `offset` plus the sum of the counters
     # is equal to the value claimed by the Client.
     count_vec = meas[:self.length]
-    weight = sum(count_vec, self.Field(0))
+    weight = sum(count_vec, self.field(0))
     weight_reported = \
-        self.Field.decode_from_bit_vector(meas[self.length:])
+        self.field.decode_from_bit_vector(meas[self.length:])
     weight_check = self.offset*shares_inv + weight - \
         weight_reported
 
     out = joint_rand[1] * range_check + \
         joint_rand[1] ** 2 * weight_check
-    return out
+    return [out]
 </pre><a href="#section-7.4.5-10" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circuit-"></span><table class="center" id="table-13">
@@ -6529,7 +6764,7 @@ def eval(self, meas, joint_rand, num_shares):
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
@@ -6646,7 +6881,7 @@ denotes either a vector of inner node field elements or leaf node field
 elements.) The scheme is comprised of the following algorithms:<a href="#section-8.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.1-5.1">
-            <p id="section-8.1-5.1.1"><code>Idpf.gen(alpha: int, beta_inner: list[list[FieldInner]], beta_leaf:
+            <p id="section-8.1-5.1.1"><code>idpf.gen(alpha: int, beta_inner: list[list[FieldInner]], beta_leaf:
 list[FieldLeaf], binder: bytes, rand: bytes) -&gt; tuple[bytes,
 list[bytes]]</code> is the randomized IDPF-key generation algorithm. Its inputs are the index <code>alpha</code>
 the values <code>beta</code>, and a binder string.<a href="#section-8.1-5.1.1" class="pilcrow">¶</a></p>
@@ -6662,17 +6897,17 @@ Pre-conditions:<a href="#section-8.1-5.1.3" class="pilcrow">¶</a></p>
                 <p id="section-8.1-5.1.4.1.1"><code>alpha</code> <span class="bcp14">MUST</span> be in <code>range(2**BITS)</code>.<a href="#section-8.1-5.1.4.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.1.4.2">
-                <p id="section-8.1-5.1.4.2.1"><code>beta_inner</code> <span class="bcp14">MUST</span> have length <code>Idpf.BITS - 1</code>.<a href="#section-8.1-5.1.4.2.1" class="pilcrow">¶</a></p>
+                <p id="section-8.1-5.1.4.2.1"><code>beta_inner</code> <span class="bcp14">MUST</span> have length <code>BITS - 1</code>.<a href="#section-8.1-5.1.4.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.1.4.3">
-                <p id="section-8.1-5.1.4.3.1"><code>beta_inner[level]</code> <span class="bcp14">MUST</span> have length <code>Idpf.VALUE_LEN</code> for each <code>level</code> in
- <code>range(Idpf.BITS - 1)</code>.<a href="#section-8.1-5.1.4.3.1" class="pilcrow">¶</a></p>
+                <p id="section-8.1-5.1.4.3.1"><code>beta_inner[level]</code> <span class="bcp14">MUST</span> have length <code>VALUE_LEN</code> for each <code>level</code> in
+ <code>range(BITS - 1)</code>.<a href="#section-8.1-5.1.4.3.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.1.4.4">
-                <p id="section-8.1-5.1.4.4.1"><code>beta_leaf</code> <span class="bcp14">MUST</span> have length <code>Idpf.VALUE_LEN</code>.<a href="#section-8.1-5.1.4.4.1" class="pilcrow">¶</a></p>
+                <p id="section-8.1-5.1.4.4.1"><code>beta_leaf</code> <span class="bcp14">MUST</span> have length <code>VALUE_LEN</code>.<a href="#section-8.1-5.1.4.4.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.1.4.5">
-                <p id="section-8.1-5.1.4.5.1"><code>rand</code> <span class="bcp14">MUST</span> be generated by a CSPRNG and have length <code>Idpf.RAND_SIZE</code>.<a href="#section-8.1-5.1.4.5.1" class="pilcrow">¶</a></p>
+                <p id="section-8.1-5.1.4.5.1"><code>rand</code> <span class="bcp14">MUST</span> be generated by a CSPRNG and have length <code>RAND_SIZE</code>.<a href="#section-8.1-5.1.4.5.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.1.4.6">
                 <p id="section-8.1-5.1.4.6.1"><code>binder</code> <span class="bcp14">MUST</span> be chosen uniformly at random by the Client (see
@@ -6693,7 +6928,7 @@ string or to replace it with an explicit type.<a href="#section-8.1-5.1.5.1.1" c
             </ul>
 </li>
           <li class="normal" id="section-8.1-5.2">
-            <p id="section-8.1-5.2.1"><code>Idpf.eval(agg_id: int, public_share: bytes, key: bytes, level:
+            <p id="section-8.1-5.2.1"><code>idpf.eval(agg_id: int, public_share: bytes, key: bytes, level:
 int, prefixes: tuple[int, ...], binder: bytes) -&gt; Output</code> is the
 deterministic, stateless IDPF-key evaluation algorithm run by each
 Aggregator. Its inputs are the Aggregator's unique identifier, the public
@@ -6703,19 +6938,18 @@ and a binder string. It returns the share of the value corresponding to each
 candidate prefix.<a href="#section-8.1-5.2.1" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.2.2">
 The output type (i.e., <code>Output</code>) depends on the value of <code>level</code>: If <code>level &lt;
-Idpf.BITS-1</code>, the output is the value for an inner node, which has type
-<code>list[list[Idpf.FieldInner]]</code>; otherwise, if <code>level == Idpf.BITS-1</code>, then the
-output is the value for a leaf node, which has type
-<code>list[list[Idpf.FieldLeaf]]</code>.<a href="#section-8.1-5.2.2" class="pilcrow">¶</a></p>
+BITS-1</code>, the output is the value for an inner node, which has type
+<code>list[list[FieldInner]]</code>; otherwise, if <code>level == BITS-1</code>, then the output is
+the value for a leaf node, which has type <code>list[list[FieldLeaf]]</code>.<a href="#section-8.1-5.2.2" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.2.3">
 Pre-conditions:<a href="#section-8.1-5.2.3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.1-5.2.4.1">
-                <p id="section-8.1-5.2.4.1.1"><code>agg_id</code> <span class="bcp14">MUST</span> be in <code>range(Idpf.SHARES)</code> and match the index of <code>key</code> in
+                <p id="section-8.1-5.2.4.1.1"><code>agg_id</code> <span class="bcp14">MUST</span> be in <code>range(SHARES)</code> and match the index of <code>key</code> in
 the sequence of IDPF keys output by the Client.<a href="#section-8.1-5.2.4.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.2.4.2">
-                <p id="section-8.1-5.2.4.2.1"><code>level</code> <span class="bcp14">MUST</span> be in <code>range(0, Idpf.BITS)</code>.<a href="#section-8.1-5.2.4.2.1" class="pilcrow">¶</a></p>
+                <p id="section-8.1-5.2.4.2.1"><code>level</code> <span class="bcp14">MUST</span> be in <code>range(0, BITS)</code>.<a href="#section-8.1-5.2.4.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.2.4.3">
                 <p id="section-8.1-5.2.4.3.1">Each <code>prefix</code> in <code>prefixes</code> <span class="bcp14">MUST</span> be distinct and in <code>range(2**level)</code>.<a href="#section-8.1-5.2.4.3.1" class="pilcrow">¶</a></p>
@@ -6726,9 +6960,12 @@ the sequence of IDPF keys output by the Client.<a href="#section-8.1-5.2.4.1.1" 
 <p id="section-8.1-6">In addition, the following method is derived for each concrete <code>Idpf</code>:<a href="#section-8.1-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.1-7">
 <pre>
-def current_field(Idpf, level):
-    return Idpf.FieldInner if level &lt; Idpf.BITS-1 \
-                else Idpf.FieldLeaf
+def current_field(
+        self,
+        level: int) -&gt; Union[type[FieldInner], type[FieldLeaf]]:
+    if level &lt; self.BITS - 1:
+        return self.field_inner
+    return self.field_leaf
 </pre><a href="#section-8.1-7" class="pilcrow">¶</a>
 </div>
 <p id="section-8.1-8">Finally, an implementation note. The interface for IDPFs specified here is
@@ -6826,7 +7063,7 @@ as needed.<a href="#section-8.1.1-5" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-8.2-1">This section specifies <code>Poplar1</code>, an implementation of the <code>Vdaf</code> interface
 (<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of any <code>Idpf</code> (<a href="#idpf" class="auto internal xref">Section 8.1</a>) for which
-<code>Idpf.SHARES == 2</code> and <code>Idpf.VALUE_LEN == 2</code> and an implementation of <code>Xof</code>
+<code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and an implementation of <code>Xof</code>
 (<a href="#xof" class="auto internal xref">Section 6.2</a>). The associated constants and types required by the <code>Vdaf</code> interface
 are defined in <a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding,
 preparation, aggregation, and unsharding are described in the remaining
@@ -6897,7 +7134,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>AggParam</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[int, tuple[int, ...]]</code>
+                <code>tuple[int, Sequence[int]]</code>
 </td>
             </tr>
             <tr>
@@ -6912,7 +7149,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>InputShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[bytes, bytes, list[Idpf.FieldInner], list[Idpf.FieldLeaf]]</code>
+                <code>tuple[bytes, bytes, list[FieldInner], list[FieldLeaf]]</code>
 </td>
             </tr>
             <tr>
@@ -6920,7 +7157,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>OutShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Idpf.FieldVec</code>
+                <code>FieldVec</code>
 </td>
             </tr>
             <tr>
@@ -6928,7 +7165,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>AggShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Idpf.FieldVec</code>
+                <code>FieldVec</code>
 </td>
             </tr>
             <tr>
@@ -6944,7 +7181,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>PrepState</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[bytes, int, Idpf.FieldVec]</code>
+                <code>tuple[bytes, int, FieldVec]</code>
 </td>
             </tr>
             <tr>
@@ -6952,7 +7189,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>PrepShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Idpf.FieldVec</code>
+                <code>FieldVec</code>
 </td>
             </tr>
             <tr>
@@ -6960,7 +7197,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>PrepMessage</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Optional[Idpf.FieldVec]</code>
+                <code>Optional[FieldVec]</code>
 </td>
             </tr>
           </tbody>
@@ -7025,21 +7262,30 @@ follows.<a href="#section-8.2.1-3" class="pilcrow">¶</a></p>
 <figure id="figure-23">
             <div class="alignLeft art-text artwork" id="section-8.2.1-4.1">
 <pre>
-def shard(Poplar1, measurement, nonce, rand):
-    l = Poplar1.Xof.SEED_SIZE
+def shard(
+        self,
+        measurement: int,
+        nonce: bytes,
+        rand: bytes) -&gt; tuple[bytes, list[Poplar1InputShare]]:
+    if len(nonce) != self.NONCE_SIZE:
+        raise ValueError("incorrect nonce size")
+    if len(rand) != self.RAND_SIZE:
+        raise ValueError("incorrect size of random bytes argument")
+
+    l = self.xof.SEED_SIZE
 
     # Split the random input into the random input for IDPF key
     # generation, correlated randomness, and sharding.
-    if len(rand) != Poplar1.RAND_SIZE:
+    if len(rand) != self.RAND_SIZE:
         raise ValueError('incorrect rand size')
-    idpf_rand, rand = front(Poplar1.Idpf.RAND_SIZE, rand)
-    seeds = [rand[i:i+l] for i in range(0, 3*l, l)]
+    idpf_rand, rand = front(self.idpf.RAND_SIZE, rand)
+    seeds = [rand[i:i + l] for i in range(0, 3 * l, l)]
     corr_seed, seeds = front(2, seeds)
     (k_shard,), seeds = front(1, seeds)
 
-    xof = Poplar1.Xof(
+    xof = self.xof(
         k_shard,
-        Poplar1.domain_separation_tag(USAGE_SHARD_RAND),
+        self.domain_separation_tag(USAGE_SHARD_RAND),
         nonce,
     )
 
@@ -7049,52 +7295,54 @@ def shard(Poplar1, measurement, nonce, rand):
     # evaluate the sketch during preparation. This sketch is used
     # to verify the one-hotness of their output shares.
     beta_inner = [
-        [Poplar1.Idpf.FieldInner(1), k]
-        for k in xof.next_vec(Poplar1.Idpf.FieldInner,
-                              Poplar1.Idpf.BITS - 1)
+        [self.idpf.field_inner(1), k]
+        for k in xof.next_vec(self.idpf.field_inner,
+                              self.idpf.BITS - 1)
     ]
-    beta_leaf = [Poplar1.Idpf.FieldLeaf(1)] + \
-        xof.next_vec(Poplar1.Idpf.FieldLeaf, 1)
+    beta_leaf = [self.idpf.field_leaf(1)] + \
+        xof.next_vec(self.idpf.field_leaf, 1)
 
     # Generate the IDPF keys.
-    (public_share, keys) = Poplar1.Idpf.gen(measurement,
-                                            beta_inner,
-                                            beta_leaf,
-                                            nonce,
-                                            idpf_rand)
+    (public_share, keys) = self.idpf.gen(
+        measurement,
+        beta_inner,
+        beta_leaf,
+        nonce,
+        idpf_rand,
+    )
 
     # Generate correlated randomness used by the Aggregators to
     # evaluate the sketch over their output shares. Seeds are used
     # to encode shares of the `(a, b, c)` triples. (See [BBCGGI21,
     # Appendix C.4].)
-    corr_offsets = vec_add(
-        Poplar1.Xof.expand_into_vec(
-            Poplar1.Idpf.FieldInner,
+    corr_offsets: list[Field] = vec_add(
+        self.xof.expand_into_vec(
+            self.idpf.field_inner,
             corr_seed[0],
-            Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+            self.domain_separation_tag(USAGE_CORR_INNER),
             byte(0) + nonce,
-            3 * (Poplar1.Idpf.BITS-1),
+            3 * (self.idpf.BITS - 1),
         ),
-        Poplar1.Xof.expand_into_vec(
-            Poplar1.Idpf.FieldInner,
+        self.xof.expand_into_vec(
+            self.idpf.field_inner,
             corr_seed[1],
-            Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+            self.domain_separation_tag(USAGE_CORR_INNER),
             byte(1) + nonce,
-            3 * (Poplar1.Idpf.BITS-1),
+            3 * (self.idpf.BITS - 1),
         ),
     )
     corr_offsets += vec_add(
-        Poplar1.Xof.expand_into_vec(
-            Poplar1.Idpf.FieldLeaf,
+        self.xof.expand_into_vec(
+            self.idpf.field_leaf,
             corr_seed[0],
-            Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+            self.domain_separation_tag(USAGE_CORR_LEAF),
             byte(0) + nonce,
             3,
         ),
-        Poplar1.Xof.expand_into_vec(
-            Poplar1.Idpf.FieldLeaf,
+        self.xof.expand_into_vec(
+            self.idpf.field_leaf,
             corr_seed[1],
-            Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+            self.domain_separation_tag(USAGE_CORR_LEAF),
             byte(1) + nonce,
             3,
         ),
@@ -7103,21 +7351,24 @@ def shard(Poplar1, measurement, nonce, rand):
     # For each level of the IDPF tree, shares of the `(A, B)`
     # pairs are computed from the corresponding `(a, b, c)`
     # triple and authenticator value `k`.
-    corr_inner = [[], []]
-    for level in range(Poplar1.Idpf.BITS):
-        Field = Poplar1.Idpf.current_field(level)
-        k = beta_inner[level][1] if level &lt; Poplar1.Idpf.BITS - 1 \
+    corr_inner: list[list[Field64]] = [[], []]
+    for level in range(self.idpf.BITS):
+        field = cast(type[Field], self.idpf.current_field(level))
+        k = beta_inner[level][1] if level &lt; self.idpf.BITS - 1 \
             else beta_leaf[1]
         (a, b, c), corr_offsets = corr_offsets[:3], corr_offsets[3:]
-        A = -Field(2) * a + k
+        A = -field(2) * a + k
         B = a ** 2 + b - a * k + c
-        corr1 = xof.next_vec(Field, 2)
+        corr1 = xof.next_vec(field, 2)
         corr0 = vec_sub([A, B], corr1)
-        if level &lt; Poplar1.Idpf.BITS - 1:
-            corr_inner[0] += corr0
-            corr_inner[1] += corr1
+        if level &lt; self.idpf.BITS - 1:
+            corr_inner[0] += cast(list[Field64], corr0)
+            corr_inner[1] += cast(list[Field64], corr1)
         else:
-            corr_leaf = [corr0, corr1]
+            corr_leaf = [
+                cast(list[Field255], corr0),
+                cast(list[Field255], corr1),
+            ]
 
     # Each input share consists of the Aggregator's IDPF key
     # and a share of the correlated randomness.
@@ -7153,75 +7404,104 @@ but this does allow uniqueness to be determined more efficiently.<a href="#secti
 <figure id="figure-24">
             <div class="alignLeft art-text artwork" id="section-8.2.2-3.1">
 <pre>
-def prep_init(Poplar1, verify_key, agg_id, agg_param,
-              nonce, public_share, input_share):
+def prep_init(
+        self,
+        verify_key: bytes,
+        agg_id: int,
+        agg_param: Poplar1AggParam,
+        nonce: bytes,
+        public_share: bytes,
+        input_share: Poplar1InputShare) -&gt; tuple[
+            Poplar1PrepState,
+            FieldVec]:
     (level, prefixes) = agg_param
     (key, corr_seed, corr_inner, corr_leaf) = input_share
-    Field = Poplar1.Idpf.current_field(level)
+    field = self.idpf.current_field(level)
 
     # Ensure that candidate prefixes are all unique and appear in
     # lexicographic order.
     for i in range(1, len(prefixes)):
-        if prefixes[i-1] &gt;= prefixes[i]:
+        if prefixes[i - 1] &gt;= prefixes[i]:
             raise ValueError('out of order prefix')
 
     # Evaluate the IDPF key at the given set of prefixes.
-    value = Poplar1.Idpf.eval(
+    value = self.idpf.eval(
         agg_id, public_share, key, level, prefixes, nonce)
 
     # Get shares of the correlated randomness for evaluating the
     # Aggregator's share of the sketch.
-    if level &lt; Poplar1.Idpf.BITS - 1:
-        corr_xof = Poplar1.Xof(
+    if level &lt; self.idpf.BITS - 1:
+        corr_xof = self.xof(
             corr_seed,
-            Poplar1.domain_separation_tag(USAGE_CORR_INNER),
+            self.domain_separation_tag(USAGE_CORR_INNER),
             byte(agg_id) + nonce,
         )
         # Fast-forward the XOF state to the current level.
-        corr_xof.next_vec(Field, 3 * level)
+        corr_xof.next_vec(field, 3 * level)
     else:
-        corr_xof = Poplar1.Xof(
+        corr_xof = self.xof(
             corr_seed,
-            Poplar1.domain_separation_tag(USAGE_CORR_LEAF),
+            self.domain_separation_tag(USAGE_CORR_LEAF),
             byte(agg_id) + nonce,
         )
-    (a_share, b_share, c_share) = corr_xof.next_vec(Field, 3)
-    (A_share, B_share) = corr_inner[2*level:2*(level+1)] \
-        if level &lt; Poplar1.Idpf.BITS - 1 else corr_leaf
+    (a_share, b_share, c_share) = corr_xof.next_vec(field, 3)
+    if level &lt; self.idpf.BITS - 1:
+        (A_share, B_share) = cast(
+            list[Field],
+            corr_inner[2 * level:2 * (level + 1)],
+        )
+    else:
+        (A_share, B_share) = cast(list[Field], corr_leaf)
 
     # Evaluate the Aggregator's share of the sketch. These are
     # called the "masked input values" [BBCGGI21, Appendix C.4].
-    verify_rand_xof = Poplar1.Xof(
+    verify_rand_xof = self.xof(
         verify_key,
-        Poplar1.domain_separation_tag(USAGE_VERIFY_RAND),
+        self.domain_separation_tag(USAGE_VERIFY_RAND),
         nonce + to_be_bytes(level, 2),
     )
-    verify_rand = verify_rand_xof.next_vec(Field, len(prefixes))
+    verify_rand = cast(
+        list[Field],
+        verify_rand_xof.next_vec(field, len(prefixes)),
+    )
     sketch_share = [a_share, b_share, c_share]
     out_share = []
     for (i, r) in enumerate(verify_rand):
-        [data_share, auth_share] = value[i]
+        data_share = cast(Field, value[i][0])
+        auth_share = cast(Field, value[i][1])
         sketch_share[0] += data_share * r
         sketch_share[1] += data_share * r ** 2
         sketch_share[2] += auth_share * r
         out_share.append(data_share)
 
-    prep_mem = [A_share, B_share, Field(agg_id)] + out_share
-    return ((b'evaluate sketch', level, prep_mem),
-            sketch_share)
+    prep_mem = [A_share, B_share, field(agg_id)] + out_share
+    return (
+        (
+            b'evaluate sketch',
+            level,
+            cast(FieldVec, prep_mem),
+        ),
+        cast(FieldVec, sketch_share),
+    )
 
-def prep_next(Poplar1, prep_state, prep_msg):
-    prev_sketch = prep_msg
+def prep_next(
+        self,
+        prep_state: Poplar1PrepState,
+        prep_msg: Optional[FieldVec]) -&gt; Union[
+            tuple[Poplar1PrepState, FieldVec],
+            FieldVec]:
+    prev_sketch = cast(list[Field], prep_msg)
     (step, level, prep_mem) = prep_state
-    Field = Poplar1.Idpf.current_field(level)
 
     if step == b'evaluate sketch':
-        if prev_sketch == None:
-            prev_sketch = Field.zeros(3)
+        if prev_sketch is None:
+            prev_sketch = self.idpf.current_field(level).zeros(3)
         elif len(prev_sketch) != 3:
             raise ValueError('incorrect sketch length')
-        (A_share, B_share, agg_id), prep_mem = \
-            prep_mem[:3], prep_mem[3:]
+        A_share = cast(Field, prep_mem[0])
+        B_share = cast(Field, prep_mem[1])
+        agg_id = cast(Field, prep_mem[2])
+        prep_mem = prep_mem[3:]
         sketch_share = [
             agg_id * (prev_sketch[0] ** 2
                       - prev_sketch[1]
@@ -7229,27 +7509,42 @@ def prep_next(Poplar1, prep_state, prep_msg):
             + A_share * prev_sketch[0]
             + B_share
         ]
-        return ((b'reveal sketch', level, prep_mem),
-                sketch_share)
+        return cast(
+            tuple[Poplar1PrepState, FieldVec],
+            (
+                (
+                    b'reveal sketch',
+                    level,
+                    prep_mem,
+                ),
+                sketch_share,
+            )
+        )
 
     elif step == b'reveal sketch':
-        if prev_sketch == None:
+        if prev_sketch is None:
             return prep_mem  # Output shares
         else:
             raise ValueError('invalid prep message')
 
     raise ValueError('invalid prep state')
 
-def prep_shares_to_prep(Poplar1, agg_param, prep_shares):
+def prep_shares_to_prep(
+        self,
+        agg_param: Poplar1AggParam,
+        prep_shares: list[FieldVec]) -&gt; Optional[FieldVec]:
     if len(prep_shares) != 2:
-        ValueError('incorrect number of prep shares')
+        raise ValueError('incorrect number of prep shares')
     (level, _) = agg_param
-    Field = Poplar1.Idpf.current_field(level)
-    sketch = vec_add(prep_shares[0], prep_shares[1])
+    field = self.idpf.current_field(level)
+    sketch = vec_add(
+        cast(list[Field], prep_shares[0]),
+        cast(list[Field], prep_shares[1]),
+    )
     if len(sketch) == 3:
-        return sketch
+        return cast(FieldVec, sketch)
     elif len(sketch) == 1:
-        if sketch == Field.zeros(1):
+        if sketch == field.zeros(1):
             # In order to reduce communication overhead, let `None`
             # denote a successful sketch verification.
             return None
@@ -7280,30 +7575,42 @@ suffixes of the previous level's prefixes.<a href="#section-8.2.3-1" class="pilc
 <figure id="figure-25">
             <div class="alignLeft art-text artwork" id="section-8.2.3-2.1">
 <pre>
-def get_ancestor(input, this_level, last_level):
-    # Helper function to determine the prefix of `input` at `last_level`.
-    return input &gt;&gt; (this_level - last_level)
+def get_ancestor(
+        index: int,
+        this_level: int,
+        last_level: int) -&gt; int:
+    """
+    Helper function to determine the prefix of `index` at
+    `last_level`.
+    """
+    return index &gt;&gt; (this_level - last_level)
 
-def is_valid(Poplar1, agg_param, previous_agg_params):
-    # Exit early if this is the first time.
+def is_valid(
+        self,
+        agg_param: Poplar1AggParam,
+        previous_agg_params: list[Poplar1AggParam]) -&gt; bool:
+    """
+    Checks that levels are increasing between calls, and also
+    enforces that the prefixes at each level are suffixes of the
+    previous level's prefixes.
+    """
     if len(previous_agg_params) &lt; 1:
-      return True
+        return True
 
     (level, prefixes) = agg_param
     (last_level, last_prefixes) = previous_agg_params[-1]
     last_prefixes_set = set(last_prefixes)
 
-    # Check that the level increased.
-    if level &lt;= last_level
-      return False
+    # Check that level increased.
+    if level &lt;= last_level:
+        return False
 
     # Check that prefixes are suffixes of the last level's prefixes.
     for prefix in prefixes:
-      last_prefix = get_ancestor(prefix, level, last_level)
-      if last_prefix not in last_prefixes_set:
-        # Current prefix not a suffix of last level's prefixes.
-        return False
-
+        last_prefix = get_ancestor(prefix, level, last_level)
+        if last_prefix not in last_prefixes_set:
+            # Current prefix not a suffix of last level's prefixes.
+            return False
     return True
 </pre>
 </div>
@@ -7323,13 +7630,16 @@ def is_valid(Poplar1, agg_param, previous_agg_params):
 <figure id="figure-26">
             <div class="alignLeft art-text artwork" id="section-8.2.4-2.1">
 <pre>
-def aggregate(Poplar1, agg_param, out_shares):
+def aggregate(
+        self,
+        agg_param: Poplar1AggParam,
+        out_shares: list[FieldVec]) -&gt; FieldVec:
     (level, prefixes) = agg_param
-    Field = Poplar1.Idpf.current_field(level)
-    agg_share = Field.zeros(len(prefixes))
+    field = self.idpf.current_field(level)
+    agg_share = cast(list[Field], field.zeros(len(prefixes)))
     for out_share in out_shares:
-        agg_share = vec_add(agg_share, out_share)
-    return agg_share
+        agg_share = vec_add(agg_share, cast(list[Field], out_share))
+    return cast(FieldVec, agg_share)
 </pre>
 </div>
 <figcaption><a href="#figure-26" class="selfRef">Figure 26</a>:
@@ -7349,14 +7659,17 @@ shares.<a href="#section-8.2.5-1" class="pilcrow">¶</a></p>
 <figure id="figure-27">
             <div class="alignLeft art-text artwork" id="section-8.2.5-2.1">
 <pre>
-def unshard(Poplar1, agg_param,
-            agg_shares, _num_measurements):
+def unshard(
+        self,
+        agg_param: Poplar1AggParam,
+        agg_shares: list[FieldVec],
+        _num_measurements: int) -&gt; list[int]:
     (level, prefixes) = agg_param
-    Field = Poplar1.Idpf.current_field(level)
-    agg = Field.zeros(len(prefixes))
+    field = self.idpf.current_field(level)
+    agg = cast(list[Field], field.zeros(len(prefixes)))
     for agg_share in agg_shares:
-        agg = vec_add(agg, agg_share)
-    return list(map(lambda x: x.as_unsigned(), agg))
+        agg = vec_add(agg, cast(list[Field], agg_share))
+    return [x.as_unsigned() for x in agg]
 </pre>
 </div>
 <figcaption><a href="#figure-27" class="selfRef">Figure 27</a>:
@@ -7374,9 +7687,9 @@ def unshard(Poplar1, agg_param,
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Poplar1.Xof.SEED_SIZE</code>, <code>Fi</code> as an alias
-for <code>Poplar1.Idpf.FieldInner</code> and <code>Fl</code> as an alias for
-<code>Poplar1.Idpf.FieldLeaf</code>. XOF seeds are represented as follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>Poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
+for <code>Poplar1.idpf.field_inner</code> and <code>Fl</code> as an alias for
+<code>Poplar1.idpf.field_leaf</code>. XOF seeds are represented as follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-8.2.6-3">
 <pre>
 opaque Poplar1Seed[S];
@@ -7538,33 +7851,34 @@ Decide whether to RECOMMEND this encoding, and if so, add it to test vectors.<a 
             </ul>
 <div class="alignLeft art-text artwork" id="section-8.2.6.6-3">
 <pre>
-def encode_agg_param(Poplar1, (level, prefixes)):
-    if level not in range(2**16):
+def encode_agg_param(self, agg_param: Poplar1AggParam) -&gt; bytes:
+    level, prefixes = agg_param
+    if level not in range(2 ** 16):
         raise ValueError('level out of range')
-    if len(prefixes) not in range(2**32):
+    if len(prefixes) not in range(2 ** 32):
         raise ValueError('number of prefixes out of range')
     encoded = bytes()
     encoded += to_be_bytes(level, 2)
     encoded += to_be_bytes(len(prefixes), 4)
     packed = 0
     for (i, prefix) in enumerate(prefixes):
-        packed |= prefix &lt;&lt; ((level+1) * i)
-    l = ((level+1) * len(prefixes) + 7) // 8
+        packed |= prefix &lt;&lt; ((level + 1) * i)
+    l = ((level + 1) * len(prefixes) + 7) // 8
     encoded += to_be_bytes(packed, l)
     return encoded
 
-def decode_agg_param(Poplar1, encoded):
+def decode_agg_param(self, encoded: bytes) -&gt; Poplar1AggParam:
     encoded_level, encoded = encoded[:2], encoded[2:]
     level = from_be_bytes(encoded_level)
     encoded_prefix_count, encoded = encoded[:4], encoded[4:]
     prefix_count = from_be_bytes(encoded_prefix_count)
-    l = ((level+1) * prefix_count + 7) // 8
+    l = ((level + 1) * prefix_count + 7) // 8
     encoded_packed, encoded = encoded[:l], encoded[l:]
     packed = from_be_bytes(encoded_packed)
     prefixes = []
-    m = 2 ** (level+1) - 1
+    m = 2 ** (level + 1) - 1
     for i in range(prefix_count):
-        prefixes.append(packed &gt;&gt; ((level+1) * i) &amp; m)
+        prefixes.append(packed &gt;&gt; ((level + 1) * i) &amp; m)
     if len(encoded) != 0:
         raise ValueError('trailing bytes')
     return (level, tuple(prefixes))
@@ -7666,30 +7980,37 @@ field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
 <figure id="figure-28">
             <div class="alignLeft art-text artwork" id="section-8.3.1-3.1">
 <pre>
-def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
-    if alpha not in range(2**IdpfPoplar.BITS):
+def gen(
+        self,
+        alpha: int,
+        beta_inner: list[list[Field64]],
+        beta_leaf: list[Field255],
+        binder: bytes,
+        rand: bytes) -&gt; tuple[bytes, list[bytes]]:
+    if alpha not in range(2 ** self.BITS):
         raise ValueError("alpha out of range")
-    if len(beta_inner) != IdpfPoplar.BITS - 1:
+    if len(beta_inner) != self.BITS - 1:
         raise ValueError("incorrect beta_inner length")
-    if len(rand) != IdpfPoplar.RAND_SIZE:
+    if len(rand) != self.RAND_SIZE:
         raise ValueError("incorrect rand size")
 
-    init_seed = [
+    key = [
         rand[:XofFixedKeyAes128.SEED_SIZE],
         rand[XofFixedKeyAes128.SEED_SIZE:],
     ]
 
-    seed = init_seed.copy()
+    seed = key.copy()
     ctrl = [Field2(0), Field2(1)]
     correction_words = []
-    for level in range(IdpfPoplar.BITS):
-        Field = IdpfPoplar.current_field(level)
-        keep = (alpha &gt;&gt; (IdpfPoplar.BITS - level - 1)) &amp; 1
+    for level in range(self.BITS):
+        field: type[Field]
+        field = cast(type[Field], self.current_field(level))
+        keep = (alpha &gt;&gt; (self.BITS - level - 1)) &amp; 1
         lose = 1 - keep
         bit = Field2(keep)
 
-        (s0, t0) = IdpfPoplar.extend(seed[0], binder)
-        (s1, t1) = IdpfPoplar.extend(seed[1], binder)
+        (s0, t0) = self.extend(seed[0], binder)
+        (s1, t1) = self.extend(seed[1], binder)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
             t0[0] + t1[0] + bit + Field2(1),
@@ -7698,28 +8019,32 @@ def gen(IdpfPoplar, alpha, beta_inner, beta_leaf, binder, rand):
 
         x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
         x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
-        (seed[0], w0) = IdpfPoplar.convert(level, x0, binder)
-        (seed[1], w1) = IdpfPoplar.convert(level, x1, binder)
+        (seed[0], w0) = self.convert(level, x0, binder)
+        (seed[1], w1) = self.convert(level, x1, binder)
         ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
         ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
-        b = beta_inner[level] if level &lt; IdpfPoplar.BITS-1 \
-            else beta_leaf
-        if len(b) != IdpfPoplar.VALUE_LEN:
-            raise ValueError("length of beta must match the value length")
+        if level &lt; self.BITS - 1:
+            b = cast(list[Field], beta_inner[level])
+        else:
+            b = cast(list[Field], beta_leaf)
+        if len(b) != self.VALUE_LEN:
+            raise ValueError(
+                "length of beta must match the value length"
+            )
 
         w_cw = vec_add(vec_sub(b, w0), w1)
         # Implementation note: Here we negate the correction word if
         # the control bit `ctrl[1]` is set. We avoid branching on the
         # value in order to reduce leakage via timing side channels.
-        mask = Field(1) - Field(2) * Field(ctrl[1].as_unsigned())
+        mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
         for i in range(len(w_cw)):
             w_cw[i] *= mask
 
         correction_words.append((seed_cw, ctrl_cw, w_cw))
 
-    public_share = IdpfPoplar.encode_public_share(correction_words)
-    return (public_share, init_seed)
+    public_share = self.encode_public_share(correction_words)
+    return (public_share, key)
 </pre>
 </div>
 <figcaption><a href="#figure-28" class="selfRef">Figure 28</a>:
@@ -7745,29 +8070,38 @@ functions <code>extend()</code>, <code>convert()</code>, and <code>decode_public
 <figure id="figure-29">
             <div class="alignLeft art-text artwork" id="section-8.3.2-3.1">
 <pre>
-def eval(IdpfPoplar, agg_id, public_share, init_seed,
-         level, prefixes, binder):
-    if agg_id not in range(IdpfPoplar.SHARES):
+def eval(
+        self,
+        agg_id: int,
+        public_share: bytes,
+        key: bytes,
+        level: int,
+        prefixes: Sequence[int],
+        binder: bytes) -&gt; Union[
+            list[list[Field64]],
+            list[list[Field255]]]:
+    if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
-    if level not in range(IdpfPoplar.BITS):
+    if level not in range(self.BITS):
         raise ValueError('level out of range')
     if len(set(prefixes)) != len(prefixes):
         raise ValueError('prefixes must be unique')
 
-    correction_words = IdpfPoplar.decode_public_share(public_share)
+    correction_words = self.decode_public_share(public_share)
     out_share = []
     for prefix in prefixes:
-        if prefix not in range(2**(level+1)):
+        if prefix not in range(2 ** (level + 1)):
             raise ValueError('prefix out of range')
 
         # The Aggregator's output share is the value of a node of
         # the IDPF tree at the given `level`. The node's value is
         # computed by traversing the path defined by the candidate
         # `prefix`. Each node in the tree is represented by a seed
-        # (`seed`) and a set of control bits (`ctrl`).
-        seed = init_seed
+        # (`seed`) and a control bit (`ctrl`).
+        seed = key
         ctrl = Field2(agg_id)
-        for current_level in range(level+1):
+        y: FieldVec
+        for current_level in range(level + 1):
             bit = (prefix &gt;&gt; (level - current_level)) &amp; 1
 
             # Implementation note: Typically the current round of
@@ -7784,7 +8118,7 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
             # wasteful. Implementations can eliminate this added
             # complexity by caching nodes (i.e., `(seed, ctrl)`
             # pairs) output by previous calls to `eval_next()`.
-            (seed, ctrl, y) = IdpfPoplar.eval_next(
+            (seed, ctrl, y) = self.eval_next(
                 seed,
                 ctrl,
                 correction_words[current_level],
@@ -7792,39 +8126,51 @@ def eval(IdpfPoplar, agg_id, public_share, init_seed,
                 bit,
                 binder,
             )
-        out_share.append(y if agg_id == 0 else vec_neg(y))
-    return out_share
+        if agg_id == 0:
+            out_share.append(cast(list[Field], y))
+        else:
+            out_share.append(vec_neg(cast(list[Field], y)))
+    return cast(
+        Union[list[list[Field64]], list[list[Field255]]],
+        out_share,
+    )
 
-def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
-              correction_word, level, bit, binder):
+def eval_next(
+        self,
+        prev_seed: bytes,
+        prev_ctrl: Field2,
+        correction_word: CorrectionWordTuple,
+        level: int,
+        bit: int,
+        binder: bytes) -&gt; tuple[bytes, Field2, FieldVec]:
     """
-    Compute the next node in the IDPF tree along the path determined by
-    a candidate prefix. The next node is determined by `bit`, the bit of
-    the prefix corresponding to the next level of the tree.
-
-    TODO Consider implementing some version of the optimization
-    discussed at the end of [BBCGGI21, Appendix C.2]. This could on
-    average reduce the number of AES calls by a constant factor.
+    Compute the next node in the IDPF tree along the path determined
+    by a candidate prefix. The next node is determined by `bit`, the
+    bit of the prefix corresponding to the next level of the tree.
     """
 
-    Field = IdpfPoplar.current_field(level)
-    (seed_cw, ctrl_cw, w_cw) = correction_word
-    (s, t) = IdpfPoplar.extend(prev_seed, binder)
+    field = self.current_field(level)
+    seed_cw = correction_word[0]
+    ctrl_cw = correction_word[1]
+    w_cw = cast(list[Field], correction_word[2])
+    (s, t) = self.extend(prev_seed, binder)
     s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
     s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
     t[0] += ctrl_cw[0] * prev_ctrl
     t[1] += ctrl_cw[1] * prev_ctrl
 
     next_ctrl = t[bit]
-    (next_seed, y) = IdpfPoplar.convert(level, s[bit], binder)
+    convert_output = self.convert(level, s[bit], binder)
+    next_seed = convert_output[0]
+    y = cast(list[Field], convert_output[1])
     # Implementation note: Here we add the correction word to the
-    # output if `next_ctrl` is set. We avoid branching on the value of
-    # the control bit in order to reduce side channel leakage.
-    mask = Field(next_ctrl.as_unsigned())
+    # output if `next_ctrl` is set. We avoid branching on the value
+    # of the control bit in order to reduce side channel leakage.
+    mask = cast(Field, field(next_ctrl.as_unsigned()))
     for i in range(len(y)):
         y[i] += w_cw[i] * mask
 
-    return (next_seed, next_ctrl, y)
+    return (next_seed, next_ctrl, cast(FieldVec, y))
 </pre>
 </div>
 <figcaption><a href="#figure-29" class="selfRef">Figure 29</a>:
@@ -7842,7 +8188,10 @@ def eval_next(IdpfPoplar, prev_seed, prev_ctrl,
 <figure id="figure-30">
             <div class="alignLeft art-text artwork" id="section-8.3.3-1.1">
 <pre>
-def extend(IdpfPoplar, seed, binder):
+def extend(
+        self,
+        seed: bytes,
+        binder: bytes) -&gt; tuple[list[bytes], list[Field2]]:
     xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
     s = [
         bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
@@ -7854,44 +8203,52 @@ def extend(IdpfPoplar, seed, binder):
     t = [Field2(s[0][0] &amp; 1), Field2(s[1][0] &amp; 1)]
     s[0][0] &amp;= 0xFE
     s[1][0] &amp;= 0xFE
-    return (s, t)
+    return ([bytes(s[0]), bytes(s[1])], t)
 
-def convert(IdpfPoplar, level, seed, binder):
+def convert(
+        self,
+        level: int,
+        seed: bytes,
+        binder: bytes) -&gt; tuple[bytes, FieldVec]:
     xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
     next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
-    Field = IdpfPoplar.current_field(level)
-    w = xof.next_vec(Field, IdpfPoplar.VALUE_LEN)
-    return (next_seed, w)
+    field = self.current_field(level)
+    w = xof.next_vec(field, self.VALUE_LEN)
+    return (next_seed, cast(FieldVec, w))
 
-def encode_public_share(IdpfPoplar, correction_words):
+def encode_public_share(
+        self,
+        correction_words: list[CorrectionWordTuple]) -&gt; bytes:
     encoded = bytes()
     control_bits = list(itertools.chain.from_iterable(
         cw[1] for cw in correction_words
     ))
     encoded += pack_bits(control_bits)
     for (level, (seed_cw, _, w_cw)) \
-        in enumerate(correction_words):
-        Field = IdpfPoplar.current_field(level)
+            in enumerate(correction_words):
+        field = cast(type[Field], self.current_field(level))
         encoded += seed_cw
-        encoded += Field.encode_vec(w_cw)
+        encoded += field.encode_vec(cast(list[Field], w_cw))
     return encoded
 
-def decode_public_share(IdpfPoplar, encoded):
-    l = (2*IdpfPoplar.BITS + 7) // 8
+def decode_public_share(
+        self,
+        encoded: bytes) -&gt; list[CorrectionWordTuple]:
+    l = (2 * self.BITS + 7) // 8
     encoded_ctrl, encoded = encoded[:l], encoded[l:]
-    control_bits = unpack_bits(encoded_ctrl, 2 * IdpfPoplar.BITS)
+    control_bits = unpack_bits(encoded_ctrl, 2 * self.BITS)
     correction_words = []
-    for level in range(IdpfPoplar.BITS):
-        Field = IdpfPoplar.current_field(level)
+    for level in range(self.BITS):
+        field = self.current_field(level)
         ctrl_cw = (
             control_bits[level * 2],
             control_bits[level * 2 + 1],
         )
         l = XofFixedKeyAes128.SEED_SIZE
         seed_cw, encoded = encoded[:l], encoded[l:]
-        l = Field.ENCODED_SIZE * IdpfPoplar.VALUE_LEN
+        l = field.ENCODED_SIZE * self.VALUE_LEN
         encoded_w_cw, encoded = encoded[:l], encoded[l:]
-        w_cw = Field.decode_vec(encoded_w_cw)
+        w_cw = field.decode_vec(encoded_w_cw)
         correction_words.append((seed_cw, ctrl_cw, w_cw))
     if len(encoded) != 0:
         raise ValueError('trailing bytes')
@@ -8095,7 +8452,7 @@ respectively, DAFs and VDAFs may impose restrictions on the re-use of input
 shares. This is to ensure that correlated randomness provided by the Client
 through the input share is not used more than once, which might compromise
 confidentiality of the Client's measurements.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
-<p id="section-9.4-2">Protocols that make use of VDAFs therefore <span class="bcp14">MUST</span> call <code>Vdaf.is_valid</code>
+<p id="section-9.4-2">Protocols that make use of VDAFs therefore <span class="bcp14">MUST</span> call <code>vdaf.is_valid</code>
 on the set of all aggregation parameters used for a Client's input share, and
 only proceed with the preparation and aggregation phases if that function call
 returns <code>True</code>.<a href="#section-9.4-2" class="pilcrow">¶</a></p>
