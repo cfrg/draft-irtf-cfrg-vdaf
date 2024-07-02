@@ -1,9 +1,14 @@
-"""The prio3 VDAF."""
+"""The Prio3 VDAF."""
+
+from abc import abstractmethod
+from typing import Any, Generic, Optional, TypeAlias, TypeVar, Union
 
 import flp_generic
-import xof
 from common import byte, concat, front, vec_add, vec_sub, zeros
+from field import FftField, Field64, Field128
+from flp import Flp
 from vdaf import Vdaf
+from xof import Xof, XofTurboShake128
 
 USAGE_MEAS_SHARE = 1
 USAGE_PROOF_SHARE = 2
@@ -13,106 +18,182 @@ USAGE_QUERY_RANDOMNESS = 5
 USAGE_JOINT_RAND_SEED = 6
 USAGE_JOINT_RAND_PART = 7
 
+Measurement = TypeVar("Measurement")
+AggResult = TypeVar("AggResult")
+F = TypeVar("F", bound=FftField)
 
-class Prio3(Vdaf):
-    """Base class for VDAFs based on prio3."""
+Prio3InputShare: TypeAlias = Union[
+    tuple[  # leader input share
+        list[F],  # measurement share
+        list[F],  # proof share
+        Optional[bytes],  # joint randomness blind
+    ],
+    tuple[  # helper input share
+        bytes,  # measurement share seed
+        bytes,  # proof share seed
+        Optional[bytes],  # joint randomness blind
+    ],
+]
+Prio3PrepState: TypeAlias = tuple[
+    list[F],  # output share
+    Optional[bytes],  # corrected joint randomness seed
+]
+Prio3PrepShare: TypeAlias = tuple[
+    list[F],  # verifier share
+    Optional[bytes],  # joint randomness part
+]
 
-    # TODO(issue #361) The following types are not enforceable by mypy.
-    #
-    # Generic types provided by a concrete instance of `Prio3`
-    # Flp = flp.Flp
-    # Xof = xof.Xof
 
-    # Parameters required by `Vdaf`
+class Prio3(
+        Generic[Measurement, AggResult, F],
+        Vdaf[
+            Measurement,
+            None,  # AggParam
+            Optional[list[bytes]],  # PublicShare
+            Prio3InputShare[F],  # InputShare
+            list[F],  # OutShare
+            list[F],  # AggShare
+            AggResult,
+            Prio3PrepState[F],  # PrepState
+            Prio3PrepShare[F],  # PrepShare
+            Optional[bytes],  # PrepMessage, joint randomness seed check
+        ]):
+    """Base class for VDAFs based on Prio3."""
+
     NONCE_SIZE = 16
     ROUNDS = 1
 
-    # Operational parameters
-    PROOFS = 1  # Number of proofs, in range `[1, 256)`
+    xof: type[Xof]
+    PROOFS: int  # Number of proofs, in range `[1, 256)`
 
-    # TODO(issue #361) The following type are not enforceable by mypy.
-    #
-    # Types required by `Vdaf`
-    # Measurement = Flp.Measurement
-    # PublicShare = Optional[list[bytes]]  # joint randomness parts
-    # InputShare = tuple[
-    #    Union[
-    #        tuple[list[Flp.Field], list[Flp.Field]],  # leader
-    #        tuple[bytes, bytes]                       # helper
-    #    ],
-    #    Optional[bytes],  # blind
-    # ]
-    # OutShare = list[Flp.Field]
-    # AggShare = list[Flp.Field]
-    # AggResult = Flp.AggResult
-    # PrepShare = tuple[list[Flp.Field],  # verifier share
-    #                  Optional[bytes]]  # joint randomness part
-    # PrepState = tuple[list[Flp.Field],  # output share
-    #                  Optional[bytes]]  # corrected joint randomness seed
-    # PrepMessage = Optional[bytes]       # joint randomness check
+    @abstractmethod
+    def __init__(
+            self,
+            shares: int,
+            flp: Flp[Measurement, AggResult, F],
+            num_proofs: int):
+        assert self.ID is not None
+        assert self.xof is not None
+        assert self.VERIFY_KEY_SIZE is not None
+        assert flp is not None
+        if shares not in range(2, 256):
+            raise ValueError('invalid number of shares')
 
-    @classmethod
-    def shard(Prio3, measurement, nonce, rand):
-        l = Prio3.Xof.SEED_SIZE
-        seeds = [rand[i:i+l] for i in range(0, Prio3.RAND_SIZE, l)]
+        self.SHARES = shares
+        self.PROOFS = num_proofs
+        self.flp = flp
 
-        meas = Prio3.Flp.encode(measurement)
-        if Prio3.Flp.JOINT_RAND_LEN > 0:
-            return Prio3.shard_with_joint_rand(meas, nonce, seeds)
+        rand_size = (1 + 2 * (shares - 1)) * self.xof.SEED_SIZE
+        if flp.JOINT_RAND_LEN > 0:
+            rand_size += shares * self.xof.SEED_SIZE
+        self.RAND_SIZE = rand_size
+
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-eval-input}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
+    def shard(
+            self,
+            measurement: Measurement,
+            nonce: bytes,
+            rand: bytes) -> tuple[
+                Optional[list[bytes]],
+                list[Prio3InputShare]]:
+        if len(nonce) != self.NONCE_SIZE:
+            raise ValueError("incorrect nonce size")
+        if len(rand) != self.RAND_SIZE:
+            raise ValueError("incorrect size of random bytes argument")
+
+        l = self.xof.SEED_SIZE
+        seeds = [rand[i:i + l] for i in range(0, self.RAND_SIZE, l)]
+
+        meas = self.flp.encode(measurement)
+        if self.flp.JOINT_RAND_LEN > 0:
+            return self.shard_with_joint_rand(meas, nonce, seeds)
         else:
-            return Prio3.shard_without_joint_rand(meas, seeds)
+            return self.shard_without_joint_rand(meas, seeds)
 
-    def is_valid(agg_param, previous_agg_params):
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-validity-scope}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
+    def is_valid(
+            self,
+            _agg_param: None,
+            previous_agg_params: list[None]) -> bool:
         """
-        Checks if `previous_agg_params` is empty, as input shares in Prio3 may
-        only be used once.
+        Checks if `previous_agg_params` is empty, as input shares in
+        Prio3 may only be used once.
         """
         return len(previous_agg_params) == 0
 
-    @classmethod
-    def prep_init(Prio3, verify_key, agg_id, _agg_param,
-                  nonce, public_share, input_share):
+    # NOTE: The prep_init(), prep_next(), and prep_shares_to_prep()
+    # methods are excerpted in the document, de-indented, as figure
+    # {{prio3-prep-state}}. Their width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
+    # ===================================================================
+    def prep_init(
+            self,
+            verify_key: bytes,
+            agg_id: int,
+            _agg_param: None,
+            nonce: bytes,
+            public_share: Optional[list[bytes]],
+            input_share: Prio3InputShare[F]) -> tuple[
+                Prio3PrepState[F],
+                Prio3PrepShare[F]]:
         k_joint_rand_parts = public_share
         (meas_share, proofs_share, k_blind) = \
-            Prio3.expand_input_share(agg_id, input_share)
-        out_share = Prio3.Flp.truncate(meas_share)
+            self.expand_input_share(agg_id, input_share)
+        out_share = self.flp.truncate(meas_share)
 
         # Compute the joint randomness.
-        joint_rand = []
+        joint_rand: list[F] = []
         k_corrected_joint_rand, k_joint_rand_part = None, None
-        if Prio3.Flp.JOINT_RAND_LEN > 0:
-            k_joint_rand_part = Prio3.joint_rand_part(
+        if self.flp.JOINT_RAND_LEN > 0:
+            assert k_blind is not None
+            assert k_joint_rand_parts is not None
+            k_joint_rand_part = self.joint_rand_part(
                 agg_id, k_blind, meas_share, nonce)
             k_joint_rand_parts[agg_id] = k_joint_rand_part
-            k_corrected_joint_rand = Prio3.joint_rand_seed(
+            k_corrected_joint_rand = self.joint_rand_seed(
                 k_joint_rand_parts)
-            joint_rands = Prio3.joint_rands(k_corrected_joint_rand)
+            joint_rands = self.joint_rands(k_corrected_joint_rand)
 
         # Query the measurement and proof share.
-        query_rands = Prio3.query_rands(verify_key, nonce)
+        query_rands = self.query_rands(verify_key, nonce)
         verifiers_share = []
-        for _ in range(Prio3.PROOFS):
+        for _ in range(self.PROOFS):
             proof_share, proofs_share = front(
-                Prio3.Flp.PROOF_LEN, proofs_share)
+                self.flp.PROOF_LEN, proofs_share)
             query_rand, query_rands = front(
-                Prio3.Flp.QUERY_RAND_LEN, query_rands)
-            if Prio3.Flp.JOINT_RAND_LEN > 0:
+                self.flp.QUERY_RAND_LEN, query_rands)
+            if self.flp.JOINT_RAND_LEN > 0:
                 joint_rand, joint_rands = front(
-                    Prio3.Flp.JOINT_RAND_LEN, joint_rands)
-            verifiers_share += Prio3.Flp.query(meas_share,
-                                               proof_share,
-                                               query_rand,
-                                               joint_rand,
-                                               Prio3.SHARES)
+                    self.flp.JOINT_RAND_LEN, joint_rands)
+            verifiers_share += self.flp.query(
+                meas_share,
+                proof_share,
+                query_rand,
+                joint_rand,
+                self.SHARES,
+            )
 
         prep_state = (out_share, k_corrected_joint_rand)
         prep_share = (verifiers_share, k_joint_rand_part)
         return (prep_state, prep_share)
 
-    @classmethod
-    def prep_next(Prio3, prep, prep_msg):
+    def prep_next(
+            self,
+            prep_state: Prio3PrepState[F],
+            prep_msg: Optional[bytes]) -> Union[
+                tuple[Prio3PrepState[F], Prio3PrepShare[F]],
+                list[F]]:
         k_joint_rand = prep_msg
-        (out_share, k_corrected_joint_rand) = prep
+        (out_share, k_corrected_joint_rand) = prep_state
 
         # If joint randomness was used, check that the value computed by
         # the Aggregators matches the value indicated by the Client.
@@ -121,91 +202,120 @@ class Prio3(Vdaf):
 
         return out_share
 
-    @classmethod
-    def prep_shares_to_prep(Prio3, _agg_param, prep_shares):
+    def prep_shares_to_prep(
+            self,
+            _agg_param: None,
+            prep_shares: list[Prio3PrepShare[F]]) -> Optional[bytes]:
         # Unshard the verifier shares into the verifier message.
-        verifiers = Prio3.Flp.Field.zeros(
-            Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS)
+        verifiers = self.flp.field.zeros(
+            self.flp.VERIFIER_LEN * self.PROOFS)
         k_joint_rand_parts = []
         for (verifiers_share, k_joint_rand_part) in prep_shares:
             verifiers = vec_add(verifiers, verifiers_share)
-            if Prio3.Flp.JOINT_RAND_LEN > 0:
+            if self.flp.JOINT_RAND_LEN > 0:
+                assert k_joint_rand_part is not None
                 k_joint_rand_parts.append(k_joint_rand_part)
 
         # Verify that each proof is well-formed and input is valid
-        for _ in range(Prio3.PROOFS):
-            verifier, verifiers = front(Prio3.Flp.VERIFIER_LEN, verifiers)
-            if not Prio3.Flp.decide(verifier):
+        for _ in range(self.PROOFS):
+            verifier, verifiers = front(self.flp.VERIFIER_LEN, verifiers)
+            if not self.flp.decide(verifier):
                 raise ValueError('proof verifier check failed')
 
         # Combine the joint randomness parts computed by the
         # Aggregators into the true joint randomness seed. This is
         # used in the last step.
         k_joint_rand = None
-        if Prio3.Flp.JOINT_RAND_LEN > 0:
-            k_joint_rand = Prio3.joint_rand_seed(k_joint_rand_parts)
+        if self.flp.JOINT_RAND_LEN > 0:
+            k_joint_rand = self.joint_rand_seed(k_joint_rand_parts)
         return k_joint_rand
 
-    @classmethod
-    def aggregate(Prio3, _agg_param, out_shares):
-        agg_share = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-out2agg}}. Its width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
+    # ===================================================================
+    def aggregate(
+            self,
+            _agg_param: None,
+            out_shares: list[list[F]]) -> list[F]:
+        agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
         for out_share in out_shares:
             agg_share = vec_add(agg_share, out_share)
         return agg_share
 
-    @classmethod
-    def unshard(Prio3, _agg_param,
-                agg_shares, num_measurements):
-        agg = Prio3.Flp.Field.zeros(Prio3.Flp.OUTPUT_LEN)
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-agg-output}}. Its width should be limited to 69
+    # columns after de-indenting, or 73 columns before de-indenting, to
+    # avoid warnings from xml2rfc.
+    # ===================================================================
+    def unshard(
+            self,
+            _agg_param: None,
+            agg_shares: list[list[F]],
+            num_measurements: int) -> AggResult:
+        agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
         for agg_share in agg_shares:
             agg = vec_add(agg, agg_share)
-        return Prio3.Flp.decode(agg, num_measurements)
+        return self.flp.decode(agg, num_measurements)
 
     # Auxiliary functions
 
-    @classmethod
-    def shard_without_joint_rand(Prio3, meas, seeds):
-        k_helper_seeds, seeds = front((Prio3.SHARES-1) * 2, seeds)
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-shard-without-joint-rand}}. Its width should be
+    # limited to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
+    def shard_without_joint_rand(
+            self,
+            meas: list[F],
+            seeds: list[bytes]) -> tuple[
+                Optional[list[bytes]],
+                list[Prio3InputShare[F]]]:
+        k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
         k_helper_meas_shares = [
             k_helper_seeds[i]
-            for i in range(0, (Prio3.SHARES-1) * 2, 2)
+            for i in range(0, (self.SHARES - 1) * 2, 2)
         ]
         k_helper_proofs_shares = [
             k_helper_seeds[i]
-            for i in range(1, (Prio3.SHARES-1) * 2, 2)
+            for i in range(1, (self.SHARES - 1) * 2, 2)
         ]
         (k_prove,), seeds = front(1, seeds)
 
         # Shard the encoded measurement into shares.
         leader_meas_share = meas
-        for j in range(Prio3.SHARES-1):
+        for j in range(self.SHARES - 1):
             leader_meas_share = vec_sub(
                 leader_meas_share,
-                Prio3.helper_meas_share(j+1, k_helper_meas_shares[j]),
+                self.helper_meas_share(j + 1, k_helper_meas_shares[j]),
             )
 
         # Generate and shard each proof into shares.
-        prove_rands = Prio3.prove_rands(k_prove)
+        prove_rands = self.prove_rands(k_prove)
         leader_proofs_share = []
-        for _ in range(Prio3.PROOFS):
+        for _ in range(self.PROOFS):
             prove_rand, prove_rands = front(
-                Prio3.Flp.PROVE_RAND_LEN, prove_rands)
-            leader_proofs_share += Prio3.Flp.prove(meas, prove_rand, [])
-        for j in range(Prio3.SHARES-1):
+                self.flp.PROVE_RAND_LEN, prove_rands)
+            leader_proofs_share += self.flp.prove(meas, prove_rand, [])
+        for j in range(self.SHARES - 1):
             leader_proofs_share = vec_sub(
                 leader_proofs_share,
-                Prio3.helper_proofs_share(j+1, k_helper_proofs_shares[j]),
+                self.helper_proofs_share(
+                    j + 1,
+                    k_helper_proofs_shares[j],
+                ),
             )
 
         # Each Aggregator's input share contains its measurement share
         # and share of proof(s).
-        input_shares = []
+        input_shares: list[Prio3InputShare[F]] = []
         input_shares.append((
             leader_meas_share,
             leader_proofs_share,
             None,
         ))
-        for j in range(Prio3.SHARES-1):
+        for j in range(self.SHARES - 1):
             input_shares.append((
                 k_helper_meas_shares[j],
                 k_helper_proofs_shares[j],
@@ -213,66 +323,81 @@ class Prio3(Vdaf):
             ))
         return (None, input_shares)
 
-    @classmethod
-    def shard_with_joint_rand(Prio3, meas, nonce, seeds):
-        k_helper_seeds, seeds = front((Prio3.SHARES-1) * 3, seeds)
+    # NOTE: This method is excerpted in the document, de-indented, as
+    # figure {{prio3-shard-with-joint-rand}}. Its width should be limited
+    # to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
+    def shard_with_joint_rand(
+            self,
+            meas: list[F],
+            nonce: bytes,
+            seeds: list[bytes]) -> tuple[
+                Optional[list[bytes]],
+                list[Prio3InputShare[F]]]:
+        k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
         k_helper_meas_shares = [
             k_helper_seeds[i]
-            for i in range(0, (Prio3.SHARES-1) * 3, 3)
+            for i in range(0, (self.SHARES - 1) * 3, 3)
         ]
         k_helper_proofs_shares = [
             k_helper_seeds[i]
-            for i in range(1, (Prio3.SHARES-1) * 3, 3)
+            for i in range(1, (self.SHARES - 1) * 3, 3)
         ]
         k_helper_blinds = [
             k_helper_seeds[i]
-            for i in range(2, (Prio3.SHARES-1) * 3, 3)
+            for i in range(2, (self.SHARES - 1) * 3, 3)
         ]
-        (k_leader_blind,), seeds = front(1, seeds)
-        (k_prove,), seeds = front(1, seeds)
+        (k_leader_blind, k_prove), seeds = front(2, seeds)
 
         # Shard the encoded measurement into shares and compute the
         # joint randomness parts.
         leader_meas_share = meas
         k_joint_rand_parts = []
-        for j in range(Prio3.SHARES-1):
-            helper_meas_share = Prio3.helper_meas_share(
-                j+1, k_helper_meas_shares[j])
+        for j in range(self.SHARES - 1):
+            helper_meas_share = self.helper_meas_share(
+                j + 1, k_helper_meas_shares[j])
             leader_meas_share = vec_sub(leader_meas_share,
                                         helper_meas_share)
-            k_joint_rand_parts.append(Prio3.joint_rand_part(
-                j+1, k_helper_blinds[j], helper_meas_share, nonce))
-        k_joint_rand_parts.insert(0, Prio3.joint_rand_part(
+            k_joint_rand_parts.append(self.joint_rand_part(
+                j + 1, k_helper_blinds[j], helper_meas_share, nonce))
+        k_joint_rand_parts.insert(0, self.joint_rand_part(
             0, k_leader_blind, leader_meas_share, nonce))
 
         # Generate the proof and shard it into proof shares.
-        prove_rands = Prio3.prove_rands(k_prove)
-        joint_rands = Prio3.joint_rands(
-            Prio3.joint_rand_seed(k_joint_rand_parts))
+        prove_rands = self.prove_rands(k_prove)
+        joint_rands = self.joint_rands(
+            self.joint_rand_seed(k_joint_rand_parts))
         leader_proofs_share = []
-        for _ in range(Prio3.PROOFS):
+        for _ in range(self.PROOFS):
             prove_rand, prove_rands = front(
-                Prio3.Flp.PROVE_RAND_LEN, prove_rands)
+                self.flp.PROVE_RAND_LEN, prove_rands)
             joint_rand, joint_rands = front(
-                Prio3.Flp.JOINT_RAND_LEN, joint_rands)
-            leader_proofs_share += Prio3.Flp.prove(meas,
-                                                   prove_rand, joint_rand)
-        for j in range(Prio3.SHARES-1):
+                self.flp.JOINT_RAND_LEN, joint_rands)
+            leader_proofs_share += self.flp.prove(
+                meas,
+                prove_rand,
+                joint_rand,
+            )
+        for j in range(self.SHARES - 1):
             leader_proofs_share = vec_sub(
                 leader_proofs_share,
-                Prio3.helper_proofs_share(j+1, k_helper_proofs_shares[j]),
+                self.helper_proofs_share(
+                    j + 1,
+                    k_helper_proofs_shares[j],
+                ),
             )
 
         # Each Aggregator's input share contains its measurement share,
         # share of proof(s), and blind. The public share contains the
         # Aggregators' joint randomness parts.
-        input_shares = []
+        input_shares: list[Prio3InputShare[F]] = []
         input_shares.append((
             leader_meas_share,
             leader_proofs_share,
             k_leader_blind,
         ))
-        for j in range(Prio3.SHARES-1):
+        for j in range(self.SHARES - 1):
             input_shares.append((
                 k_helper_meas_shares[j],
                 k_helper_proofs_shares[j],
@@ -280,154 +405,140 @@ class Prio3(Vdaf):
             ))
         return (k_joint_rand_parts, input_shares)
 
-    @classmethod
-    def helper_meas_share(Prio3, agg_id, k_share):
-        return Prio3.Xof.expand_into_vec(
-            Prio3.Flp.Field,
+    # NOTE: The helper_meas_share(), helper_proofs_share(),
+    # expand_input_share(), prove_rands(), query_rands(),
+    # joint_rand_part(), joint_rand_seed(), and joint_rands() methods are
+    # excerpted in the document, de-indented. Their width should be
+    # limited to 69 columns after de-indenting, or 73 columns before
+    # de-indenting, to avoid warnings from xml2rfc.
+    # ===================================================================
+    def helper_meas_share(self, agg_id: int, k_share: bytes) -> list[F]:
+        return self.xof.expand_into_vec(
+            self.flp.field,
             k_share,
-            Prio3.domain_separation_tag(USAGE_MEAS_SHARE),
+            self.domain_separation_tag(USAGE_MEAS_SHARE),
             byte(agg_id),
-            Prio3.Flp.MEAS_LEN,
+            self.flp.MEAS_LEN,
         )
 
-    @classmethod
-    def helper_proofs_share(Prio3, agg_id, k_share):
-        return Prio3.Xof.expand_into_vec(
-            Prio3.Flp.Field,
+    def helper_proofs_share(
+            self,
+            agg_id: int,
+            k_share: bytes) -> list[F]:
+        return self.xof.expand_into_vec(
+            self.flp.field,
             k_share,
-            Prio3.domain_separation_tag(USAGE_PROOF_SHARE),
-            byte(Prio3.PROOFS) + byte(agg_id),
-            Prio3.Flp.PROOF_LEN * Prio3.PROOFS,
+            self.domain_separation_tag(USAGE_PROOF_SHARE),
+            byte(self.PROOFS) + byte(agg_id),
+            self.flp.PROOF_LEN * self.PROOFS,
         )
 
-    @classmethod
-    def expand_input_share(Prio3, agg_id, input_share):
+    def expand_input_share(
+            self,
+            agg_id: int,
+            input_share: Prio3InputShare[F]) -> tuple[
+                list[F],
+                list[F],
+                Optional[bytes]]:
         (meas_share, proofs_share, k_blind) = input_share
         if agg_id > 0:
-            meas_share = Prio3.helper_meas_share(agg_id, meas_share)
-            proofs_share = Prio3.helper_proofs_share(agg_id, proofs_share)
+            assert isinstance(meas_share, bytes)
+            assert isinstance(proofs_share, bytes)
+            meas_share = self.helper_meas_share(agg_id, meas_share)
+            proofs_share = self.helper_proofs_share(agg_id, proofs_share)
+        else:
+            assert isinstance(meas_share, list)
+            assert isinstance(proofs_share, list)
         return (meas_share, proofs_share, k_blind)
 
-    @classmethod
-    def prove_rands(Prio3, k_prove):
-        return Prio3.Xof.expand_into_vec(
-            Prio3.Flp.Field,
+    def prove_rands(self, k_prove: bytes) -> list[F]:
+        return self.xof.expand_into_vec(
+            self.flp.field,
             k_prove,
-            Prio3.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
-            byte(Prio3.PROOFS),
-            Prio3.Flp.PROVE_RAND_LEN * Prio3.PROOFS,
+            self.domain_separation_tag(USAGE_PROVE_RANDOMNESS),
+            byte(self.PROOFS),
+            self.flp.PROVE_RAND_LEN * self.PROOFS,
         )
 
-    @classmethod
-    def query_rands(Prio3, verify_key, nonce):
-        return Prio3.Xof.expand_into_vec(
-            Prio3.Flp.Field,
+    def query_rands(self, verify_key: bytes, nonce: bytes) -> list[F]:
+        return self.xof.expand_into_vec(
+            self.flp.field,
             verify_key,
-            Prio3.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
-            byte(Prio3.PROOFS) + nonce,
-            Prio3.Flp.QUERY_RAND_LEN * Prio3.PROOFS,
+            self.domain_separation_tag(USAGE_QUERY_RANDOMNESS),
+            byte(self.PROOFS) + nonce,
+            self.flp.QUERY_RAND_LEN * self.PROOFS,
         )
 
-    @classmethod
-    def joint_rand_part(Prio3, agg_id, k_blind, meas_share, nonce):
-        return Prio3.Xof.derive_seed(
+    def joint_rand_part(
+            self,
+            agg_id: int,
+            k_blind: bytes,
+            meas_share: list[F],
+            nonce: bytes) -> bytes:
+        return self.xof.derive_seed(
             k_blind,
-            Prio3.domain_separation_tag(USAGE_JOINT_RAND_PART),
-            byte(agg_id) + nonce + Prio3.Flp.Field.encode_vec(meas_share),
+            self.domain_separation_tag(USAGE_JOINT_RAND_PART),
+            byte(agg_id) + nonce + self.flp.field.encode_vec(meas_share),
         )
 
-    @classmethod
-    def joint_rand_seed(Prio3, k_joint_rand_parts):
+    def joint_rand_seed(self, k_joint_rand_parts: list[bytes]) -> bytes:
         """Derive the joint randomness seed from its parts."""
-        return Prio3.Xof.derive_seed(
-            zeros(Prio3.Xof.SEED_SIZE),
-            Prio3.domain_separation_tag(USAGE_JOINT_RAND_SEED),
+        return self.xof.derive_seed(
+            zeros(self.xof.SEED_SIZE),
+            self.domain_separation_tag(USAGE_JOINT_RAND_SEED),
             concat(k_joint_rand_parts),
         )
 
-    @classmethod
-    def joint_rands(Prio3, k_joint_rand_seed):
+    def joint_rands(self, k_joint_rand_seed: bytes) -> list[F]:
         """Derive the joint randomness from its seed."""
-        return Prio3.Xof.expand_into_vec(
-            Prio3.Flp.Field,
+        return self.xof.expand_into_vec(
+            self.flp.field,
             k_joint_rand_seed,
-            Prio3.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
-            byte(Prio3.PROOFS),
-            Prio3.Flp.JOINT_RAND_LEN * Prio3.PROOFS,
+            self.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
+            byte(self.PROOFS),
+            self.flp.JOINT_RAND_LEN * self.PROOFS,
         )
 
-    @classmethod
-    def with_shares(Prio3, num_shares):
-        assert Prio3.Xof is not None
-        assert Prio3.Flp is not None
-        if num_shares not in range(2, 256):
-            raise ValueError('invalid number of shares')
-        rand_size = (1+2*(num_shares-1)) * Prio3.Xof.SEED_SIZE
-        if Prio3.Flp.JOINT_RAND_LEN > 0:
-            rand_size += num_shares * Prio3.Xof.SEED_SIZE
+    def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
+        return self.flp.test_vec_set_type_param(test_vec)
 
-        class Prio3WithShares(Prio3):
-            SHARES = num_shares
-            RAND_SIZE = rand_size
-        return Prio3WithShares
-
-    @classmethod
-    def with_xof(Prio3, TheXof):
-        class Prio3WithXof(Prio3):
-            Xof = TheXof
-            VERIFY_KEY_SIZE = TheXof.SEED_SIZE
-        return Prio3WithXof
-
-    @classmethod
-    def with_flp(Prio3, TheFlp):
-        class Prio3WithFlp(Prio3):
-            Flp = TheFlp
-        return Prio3WithFlp
-
-    @classmethod
-    def test_vec_set_type_param(Prio3, test_vec):
-        return Prio3.Flp.test_vec_set_type_param(test_vec)
-
-    @classmethod
-    def test_vec_encode_input_share(Prio3, input_share):
+    def test_vec_encode_input_share(self, input_share: Prio3InputShare[F]) -> bytes:
         (meas_share, proofs_share, k_blind) = input_share
         encoded = bytes()
-        if type(meas_share) == list and type(proofs_share) == list:  # Leader
-            assert len(proofs_share) == Prio3.Flp.PROOF_LEN * Prio3.PROOFS
-            encoded += Prio3.Flp.Field.encode_vec(meas_share)
-            encoded += Prio3.Flp.Field.encode_vec(proofs_share)
-        elif type(meas_share) == bytes and type(proofs_share) == bytes:  # Helper
+        if isinstance(meas_share, list) and isinstance(proofs_share, list):  # Leader
+            assert len(proofs_share) == self.flp.PROOF_LEN * self.PROOFS
+            encoded += self.flp.field.encode_vec(meas_share)
+            encoded += self.flp.field.encode_vec(proofs_share)
+        elif isinstance(meas_share, bytes) and isinstance(proofs_share, bytes):  # Helper
             encoded += meas_share
             encoded += proofs_share
-        if k_blind != None:  # joint randomness used
+        if k_blind is not None:  # joint randomness used
             encoded += k_blind
         return encoded
 
-    @classmethod
-    def test_vec_encode_public_share(Prio3, k_joint_rand_parts):
+    def test_vec_encode_public_share(self, public_share: Optional[list[bytes]]) -> bytes:
+        k_joint_rand_parts = public_share
         encoded = bytes()
-        if k_joint_rand_parts != None:  # joint randomness used
+        if k_joint_rand_parts is not None:  # joint randomness used
             encoded += concat(k_joint_rand_parts)
         return encoded
 
-    @classmethod
-    def test_vec_encode_agg_share(Prio3, agg_share):
-        return Prio3.Flp.Field.encode_vec(agg_share)
+    def test_vec_encode_agg_share(self, agg_share: list[F]) -> bytes:
+        return self.flp.field.encode_vec(agg_share)
 
-    @classmethod
-    def test_vec_encode_prep_share(Prio3, prep_share):
+    def test_vec_encode_prep_share(self, prep_share: Prio3PrepShare[F]) -> bytes:
         (verifiers_share, k_joint_rand_part) = prep_share
         encoded = bytes()
-        assert len(verifiers_share) == Prio3.Flp.VERIFIER_LEN * Prio3.PROOFS
-        encoded += Prio3.Flp.Field.encode_vec(verifiers_share)
-        if k_joint_rand_part != None:  # joint randomness used
+        assert len(verifiers_share) == self.flp.VERIFIER_LEN * self.PROOFS
+        encoded += self.flp.field.encode_vec(verifiers_share)
+        if k_joint_rand_part is not None:  # joint randomness used
             encoded += k_joint_rand_part
         return encoded
 
-    @classmethod
-    def test_vec_encode_prep_msg(Prio3, k_joint_rand):
+    def test_vec_encode_prep_msg(self, prep_message: Optional[bytes]) -> bytes:
+        k_joint_rand = prep_message
         encoded = bytes()
-        if k_joint_rand != None:  # joint randomness used
+        if k_joint_rand is not None:  # joint randomness used
             encoded += k_joint_rand
         return encoded
 
@@ -436,160 +547,112 @@ class Prio3(Vdaf):
 # INSTANTIATIONS
 #
 
-class Prio3Count(Prio3):
-    # Generic types required by `Prio3`
-    Xof = xof.XofTurboShake128
-    Flp = flp_generic.FlpGeneric(flp_generic.Count())
-
-    # Associated parameters.
+class Prio3Count(Prio3[int, int, Field64]):
     ID = 0x00000000
-    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
+    xof = XofTurboShake128
+    VERIFY_KEY_SIZE = xof.SEED_SIZE
 
-    # Operational parameters.
+    # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3Count'
 
+    def __init__(self, shares: int):
+        flp = flp_generic.FlpGeneric[int, int, Field64](flp_generic.Count())
+        super().__init__(shares, flp, 1)
 
-class Prio3Sum(Prio3):
-    # Generic types required by `Prio3`
-    Xof = xof.XofTurboShake128
 
-    # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
+class Prio3Sum(Prio3[int, int, Field128]):
     ID = 0x00000001
+    xof = XofTurboShake128
+    VERIFY_KEY_SIZE = xof.SEED_SIZE
 
-    # Operational parameters.
+    # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3Sum'
 
-    # TODO(issue #361) Enforce `bits: int`.
-    @classmethod
-    def with_bits(Prio3Sum, bits):
-        """
-        Set the range to `range(0, 2**bits)`.
-
-        Pre-conditions:
-
-            - `bits > 0`
-        """
-        class Prio3SumWithBits(Prio3Sum):
-            Flp = flp_generic.FlpGeneric(flp_generic.Sum(bits))
-        return Prio3SumWithBits
+    def __init__(self, shares: int, bits: int):
+        flp = flp_generic.FlpGeneric[int, int, Field128](flp_generic.Sum(bits))
+        super().__init__(shares, flp, 1)
 
 
-class Prio3SumVec(Prio3):
-    # Generic types required by `Prio3`
-    Xof = xof.XofTurboShake128
-
-    # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
+class Prio3SumVec(Prio3[list[int], list[int], Field128]):
     ID = 0x00000002
+    xof = XofTurboShake128
+    VERIFY_KEY_SIZE = xof.SEED_SIZE
 
-    # Operational parameters.
+    # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3SumVec'
 
-    # TODO(issue #361) Enforce that each parameter is an `int`.
-    @classmethod
-    def with_params(Prio3SumVec, length, bits, chunk_length):
-        """
-        Set the circuit parameters.
-
-        Pre-conditions:
-
-            - `length > 0`
-            - `bits > 0`
-            - `chunk_length > 0`
-        """
-        class Prio3SumVecWithParams(Prio3SumVec):
-            Flp = flp_generic.FlpGeneric(
-                flp_generic.SumVec(length, bits, chunk_length)
-            )
-        return Prio3SumVecWithParams
+    def __init__(self, shares: int, length: int, bits: int, chunk_length: int):
+        flp = flp_generic.FlpGeneric[list[int], list[int], Field128](
+            flp_generic.SumVec(length, bits, chunk_length, Field128)
+        )
+        super().__init__(shares, flp, 1)
 
 
-class Prio3Histogram(Prio3):
-    # Generic types required by `Prio3`
-    Xof = xof.XofTurboShake128
-
-    # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
+class Prio3Histogram(Prio3[int, list[int], Field128]):
     ID = 0x00000003
+    xof = XofTurboShake128
+    VERIFY_KEY_SIZE = xof.SEED_SIZE
 
-    # Operational parameters.
+    # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3Histogram'
 
-    # TODO(issue #361) Enforce that each parameter is an `int`.
-    @classmethod
-    def with_params(Prio3Histogram, length, chunk_length):
-        """
-        Set the circuit parameters.
-
-        Pre-conditions:
-
-            - `length > 0`
-            - `chunk_length > 0`
-        """
-        class Prio3HistogramWithLength(Prio3Histogram):
-            Flp = flp_generic.FlpGeneric(
-                flp_generic.Histogram(length, chunk_length)
-            )
-        return Prio3HistogramWithLength
+    def __init__(self, shares: int, length: int, chunk_length: int):
+        flp = flp_generic.FlpGeneric[int, list[int], Field128](
+            flp_generic.Histogram(length, chunk_length)
+        )
+        super().__init__(shares, flp, 1)
 
 
-class Prio3SumVecWithMultiproof(Prio3SumVec):
+class Prio3SumVecWithMultiproof(Prio3[list[int], list[int], F], Generic[F]):
     """Experimental multiproof variant of Prio3SumVec."""
 
-    # Operational parameters.
+    ID = 0xFFFFFFFF
+    xof = XofTurboShake128
+    VERIFY_KEY_SIZE = xof.SEED_SIZE
+
+    # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3SumVecWithMultiproof'
 
-    # TODO(issue #361) Enforce that each parameter is an `int` except `field`,
-    # which should be a `type[Field]`.
-    @classmethod
-    def with_params(cls, length, bits, chunk_length, num_proofs, field):
-        """
-        Set the circuit parameters, the number of proofs to generate, and the field.
-
-        Pre-conditions:
-
-            - `length > 0`
-            - `bits > 0`
-            - `chunk_length > 0`
-            - `0 < num_proofs` and `num_proofs < 256`
-            - `field` is a sub-class of `FftField`.
-        """
-        valid_cls = flp_generic.SumVec.with_field(field)
-
-        class Prio3SumVecWithMultiproofAndParams(cls):
-            # Associated parameters.
-            ID = 0xFFFFFFFF
-            PROOFS = num_proofs
-            Flp = flp_generic.FlpGeneric(valid_cls(length, bits, chunk_length))
-        return Prio3SumVecWithMultiproofAndParams
+    def __init__(
+            self,
+            shares: int,
+            field: type[F],
+            num_proofs: int,
+            length: int,
+            bits: int,
+            chunk_length: int):
+        flp = flp_generic.FlpGeneric[list[int], list[int], F](
+            flp_generic.SumVec(
+                length,
+                bits,
+                chunk_length,
+                field,
+            )
+        )
+        super().__init__(
+            shares,
+            flp,
+            num_proofs,
+        )
 
 
-class Prio3MultihotCountVec(Prio3):
-    # Generic types required by `Prio3`
-    Xof = xof.XofTurboShake128
-
-    # Associated parameters.
-    VERIFY_KEY_SIZE = xof.XofTurboShake128.SEED_SIZE
+class Prio3MultihotCountVec(Prio3[list[int], list[int], Field128]):
     ID = 0x00000004
+    xof = XofTurboShake128
+    VERIFY_KEY_SIZE = xof.SEED_SIZE
 
-    # Operational parameters.
+    # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3MultihotCountVec'
 
-    # TODO(issue #361) Enforce that each parameter is an `int`.
-    @classmethod
-    def with_params(cls, length, max_weight, chunk_length):
-        """
-        Set the circuit parameters.
-
-        Pre-conditions:
-
-            - `length > 0`
-            - `max_weight > 0`
-            - `chunk_length > 0`
-        """
-        class Prio3MultihotCountVecWithParams(cls):
-            Flp = flp_generic.FlpGeneric(flp_generic.MultihotCountVec(
+    def __init__(
+            self,
+            shares: int,
+            length: int,
+            max_weight: int,
+            chunk_length: int):
+        flp = flp_generic.FlpGeneric(
+            flp_generic.MultihotCountVec(
                 length, max_weight, chunk_length
-            ))
-        return Prio3MultihotCountVecWithParams
+            )
+        )
+        super().__init__(shares, flp, 1)

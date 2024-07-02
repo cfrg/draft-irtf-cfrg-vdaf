@@ -4,36 +4,36 @@ import unittest
 
 from common import (TEST_VECTOR, TEST_VECTOR_PATH, format_dst, gen_rand,
                     print_wrapped_line)
-from field import Field64, Field128
-from xof import XofFixedKeyAes128, XofTurboShake128
+from field import Field, Field64, Field128
+from xof import Xof, XofFixedKeyAes128, XofTurboShake128
 
 
-def test_xof(Xof, F, expanded_len):
+def test_xof(cls: type[Xof], field: type[Field], expanded_len: int) -> None:
     dst = format_dst(7, 1337, 2)
     binder = b'a string that binds some protocol artifact to the output'
-    seed = gen_rand(Xof.SEED_SIZE)
+    seed = gen_rand(cls.SEED_SIZE)
 
     # Test next
-    expanded_data = Xof(seed, dst, binder).next(expanded_len)
+    expanded_data = cls(seed, dst, binder).next(expanded_len)
     assert len(expanded_data) == expanded_len
 
-    want = Xof(seed, dst, binder).next(700)
+    want = cls(seed, dst, binder).next(700)
     got = b''
-    xof = Xof(seed, dst, binder)
+    xof = cls(seed, dst, binder)
     for i in range(0, 700, 7):
         got += xof.next(7)
     assert got == want
 
     # Test derive
-    derived_seed = Xof.derive_seed(seed, dst, binder)
-    assert len(derived_seed) == Xof.SEED_SIZE
+    derived_seed = cls.derive_seed(seed, dst, binder)
+    assert len(derived_seed) == cls.SEED_SIZE
 
     # Test expand_into_vec
-    expanded_vec = Xof.expand_into_vec(F, seed, dst, binder, expanded_len)
+    expanded_vec = cls.expand_into_vec(field, seed, dst, binder, expanded_len)
     assert len(expanded_vec) == expanded_len
 
 
-def generate_test_vector(cls):
+def generate_test_vector(cls: type[Xof]) -> None:
     seed = gen_rand(cls.SEED_SIZE)
     dst = b'domain separation tag'
     binder = b'binder string'
@@ -48,10 +48,11 @@ def generate_test_vector(cls):
         'expanded_vec_field128': None,  # set below
     }
 
-    test_vector['derived_seed'] = cls.derive_seed(
-        seed, dst, binder).hex()
-    test_vector['expanded_vec_field128'] = Field128.encode_vec(
+    derived_seed = cls.derive_seed(seed, dst, binder).hex()
+    expanded_vec_field128 = Field128.encode_vec(
         cls.expand_into_vec(Field128, seed, dst, binder, length)).hex()
+    test_vector['derived_seed'] = derived_seed
+    test_vector['expanded_vec_field128'] = expanded_vec_field128
 
     print('{}:'.format(cls.test_vec_name))
     print('  seed: "{}"'.format(test_vector['seed']))
@@ -60,7 +61,7 @@ def generate_test_vector(cls):
     print('  length: {}'.format(test_vector['length']))
     print('  derived_seed: "{}"'.format(test_vector['derived_seed']))
     print('  expanded_vec_field128: >-')
-    print_wrapped_line(test_vector['expanded_vec_field128'], tab=4)
+    print_wrapped_line(expanded_vec_field128, tab=4)
 
     os.system('mkdir -p {}'.format(TEST_VECTOR_PATH))
     with open('{}/{}.json'.format(
@@ -70,7 +71,7 @@ def generate_test_vector(cls):
 
 
 class TestXof(unittest.TestCase):
-    def test_rejection_sampling(self):
+    def test_rejection_sampling(self) -> None:
         # This test case was found through brute-force search using this tool:
         # https://github.com/divergentdave/vdaf-rejection-sampling-search
         expanded_vec = XofTurboShake128.expand_into_vec(
@@ -83,12 +84,12 @@ class TestXof(unittest.TestCase):
         )
         assert expanded_vec[-1] == Field64(9734340616212735019)
 
-    def test_turboshake128(self):
+    def test_turboshake128(self) -> None:
         test_xof(XofTurboShake128, Field128, 23)
         if TEST_VECTOR:
             generate_test_vector(XofTurboShake128)
 
-    def test_fixedkeyaes128(self):
+    def test_fixedkeyaes128(self) -> None:
         test_xof(XofFixedKeyAes128, Field128, 23)
         if TEST_VECTOR:
             generate_test_vector(XofFixedKeyAes128)
