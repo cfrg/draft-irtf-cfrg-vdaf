@@ -5539,13 +5539,6 @@ validity circuit <code>Valid</code> that implements the interface described here
 </td>
                 <td class="text-left" rowspan="1" colspan="1">Type of the aggregate result</td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>field</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">An FFT-friendly finite field as defined in <a href="#field-fft-friendly" class="auto internal xref">Section 6.1.2</a>
-</td>
-              </tr>
             </tbody>
           </table>
 <p id="section-7.3.2-4">Each gadget <code>G</code> in <code>GADGETS</code> defines a constant <code>DEGREE</code> that specifies the
@@ -5563,15 +5556,15 @@ an input vector, truncating an input vector to the length of an aggregatable
 output, and converting an aggregated output to an aggregate result:<a href="#section-7.3.2-7" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.2-8.1">
-              <p id="section-7.3.2-8.1.1"><code>valid.encode(measurement: Measurement) -&gt; list[Field]</code> returns a vector of
+              <p id="section-7.3.2-8.1.1"><code>valid.encode(measurement: Measurement) -&gt; list[F]</code> returns a vector of
 length <code>MEAS_LEN</code> representing a measurement.<a href="#section-7.3.2-8.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.2-8.2">
-              <p id="section-7.3.2-8.2.1"><code>valid.truncate(meas: list[Field]) -&gt; list[Field]</code> returns a vector of length
+              <p id="section-7.3.2-8.2.1"><code>valid.truncate(meas: list[F]) -&gt; list[F]</code> returns a vector of length
 <code>OUTPUT_LEN</code> representing an aggregatable output.<a href="#section-7.3.2-8.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.2-8.3">
-              <p id="section-7.3.2-8.3.1"><code>valid.decode(output: list[Field], num_measurements: int) -&gt; AggResult</code>
+              <p id="section-7.3.2-8.3.1"><code>valid.decode(output: list[F], num_measurements: int) -&gt; AggResult</code>
 returns an aggregate result.<a href="#section-7.3.2-8.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
@@ -5659,7 +5652,7 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <p id="section-7.3.3-5.2.2.4.1">Let <code>P_i = next_power_of_2(M_i+1)</code><a href="#section-7.3.3-5.2.2.4.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-7.3.3-5.2.2.5">
-                  <p id="section-7.3.3-5.2.2.5.1">Let <code>alpha_i = Field.gen()^(Field.GEN_ORDER / P_i)</code><a href="#section-7.3.3-5.2.2.5.1" class="pilcrow">¶</a></p>
+                  <p id="section-7.3.3-5.2.2.5.1">Let <code>alpha_i = field.gen()^(field.GEN_ORDER / P_i)</code><a href="#section-7.3.3-5.2.2.5.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
 </li>
@@ -5737,14 +5730,6 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <code>valid.Measurement</code>
 </td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>field</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>valid.field</code>
-</td>
-              </tr>
             </tbody>
           </table>
 </div>
@@ -5779,7 +5764,7 @@ call to gadget <code>G_i</code>.<a href="#section-7.3.3.1-2.3.1" class="pilcrow"
                     <p id="section-7.3.3.1-2.4.2.1.1">Let <code>w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]]</code>.<a href="#section-7.3.3.1-2.4.2.1.1" class="pilcrow">¶</a></p>
 </li>
                   <li class="normal" id="section-7.3.3.1-2.4.2.2">
-                    <p id="section-7.3.3.1-2.4.2.2.1">Let <code>padded_w = w + Field.zeros(P_i - len(w))</code>.<a href="#section-7.3.3.1-2.4.2.2.1" class="pilcrow">¶</a></p>
+                    <p id="section-7.3.3.1-2.4.2.2.1">Let <code>padded_w = w + field.zeros(P_i - len(w))</code>.<a href="#section-7.3.3.1-2.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 <ul class="normal ulEmpty">
@@ -5802,7 +5787,7 @@ picking <code>wire_inp</code> in a way that avoids having to pad.<a href="#secti
 <li class="normal" id="section-7.3.3.1-2.5.2.1">
                     <p id="section-7.3.3.1-2.5.2.1.1">Let <code>poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-1])</code>. That
 is, evaluate the circuit <code>G_i</code> on the wire polynomials for the <code>i</code>th
-gadget. (Arithmetic is in the ring of polynomials over <code>Field</code>.)<a href="#section-7.3.3.1-2.5.2.1.1" class="pilcrow">¶</a></p>
+gadget. (Arithmetic is in the ring of polynomials over <code>field</code>.)<a href="#section-7.3.3.1-2.5.2.1.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
@@ -5933,8 +5918,8 @@ https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/vdaf_prio3.sage.<a hr
 <p id="section-7.4.1-1">Our first instance of Prio3 is for a simple counter: Each measurement is either
 one or zero and the aggregate result is the sum of the measurements.<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.4.1-2">This instance uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its XOF. Its
-validity circuit, denoted <code>Count</code>, uses <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>) as its finite
-field. Its gadget, denoted <code>Mul</code>, is the degree-2, arity-2 gadget defined as<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
+validity circuit, denoted <code>Count</code>, uses the following degree-2, arity-2 gadget,
+denoted <code>Mul</code>:<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.1-3">
 <pre>
 def eval(self, _field: type[F], inp: list[F]) -&gt; F:
@@ -5949,16 +5934,17 @@ not equal to the gadget's <code>ARITY</code> parameter.<a href="#section-7.4.1-4
 <pre>
 def eval(
         self,
-        meas: list[Field64],
-        joint_rand: list[Field64],
-        _num_shares: int) -&gt; list[Field64]:
+        meas: list[F],
+        joint_rand: list[F],
+        _num_shares: int) -&gt; list[F]:
     self.check_valid_eval(meas, joint_rand)
     squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
     return [squared - meas[0]]
 </pre><a href="#section-7.4.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.1-7">The measurement is encoded and decoded as a singleton vector in the natural
-way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-7">Here <code>self.field</code> is the class object for the field <code>F</code>.<a href="#section-7.4.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-8">The measurement is encoded and decoded as a singleton vector in the natural
+way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-8" class="pilcrow">¶</a></p>
 <span id="name-parameters-of-validity-circ"></span><table class="center" id="table-9">
             <caption>
 <a href="#table-9" class="selfRef">Table 9</a>:
@@ -6035,13 +6021,6 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
                   <code>int</code>
 </td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>field</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
-              </tr>
             </tbody>
           </table>
 </section>
@@ -6055,25 +6034,24 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
 range. Each measurement is an integer in range <code>[0, 2^bits)</code>, where <code>bits</code> is an
 associated parameter.<a href="#section-7.4.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-2">This instance of Prio3 uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its
-XOF. Its validity circuit, denoted <code>Sum</code>, uses <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>) as its
-finite field. The measurement is encoded as a length-<code>bits</code> vector of field
-elements, where the <code>l</code>th element of the vector represents the <code>l</code>th bit of the
-summand:<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
+XOF. Its validity circuit is denoted <code>Sum</code>. The measurement is encoded as a
+length-<code>bits</code> vector of field elements, where the <code>l</code>th element of the vector
+represents the <code>l</code>th bit of the summand:<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.2-3">
 <pre>
-def encode(self, measurement: int) -&gt; list[Field128]:
+def encode(self, measurement: int) -&gt; list[F]:
     if 0 &gt; measurement or measurement &gt;= 2 ** self.MEAS_LEN:
         raise ValueError('measurement out of range')
 
     return self.field.encode_into_bit_vector(measurement,
                                              self.MEAS_LEN)
 
-def truncate(self, meas: list[Field128]) -&gt; list[Field128]:
+def truncate(self, meas: list[F]) -&gt; list[F]:
     return [self.field.decode_from_bit_vector(meas)]
 
 def decode(
         self,
-        output: list[Field128],
+        output: list[F],
         _num_measurements: int) -&gt; int:
     return output[0].as_unsigned()
 </pre><a href="#section-7.4.2-3" class="pilcrow">¶</a>
@@ -6084,7 +6062,7 @@ gadget, denoted <code>Range2</code>, is the degree-2, arity-1 gadget defined as<
 <pre>
 def eval(self, _field: type[F], inp: list[F]) -&gt; F:
     self.check_gadget_eval(inp)
-    return inp[0] * inp[0] - inp[0]
+
 </pre><a href="#section-7.4.2-5" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.2-6">The <code>Sum</code> validity circuit is defined as<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
@@ -6092,9 +6070,9 @@ def eval(self, _field: type[F], inp: list[F]) -&gt; F:
 <pre>
 def eval(
         self,
-        meas: list[Field128],
-        joint_rand: list[Field128],
-        _num_shares: int) -&gt; list[Field128]:
+        meas: list[F],
+        joint_rand: list[F],
+        _num_shares: int) -&gt; list[F]:
     self.check_valid_eval(meas, joint_rand)
     out = self.field(0)
     r = joint_rand[0]
@@ -6180,13 +6158,6 @@ def eval(
                   <code>int</code>
 </td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>field</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
-              </tr>
             </tbody>
           </table>
 </section>
@@ -6203,8 +6174,7 @@ of the measurement is an integer in the range <code>[0, 2^bits)</code>. It is <s
 to set <code>chunk_length</code> to an integer near the square root of <code>length * bits</code>
 (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-1" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-2">This instance uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its XOF. Its
-validity circuit, denoted <code>SumVec</code>, uses <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>) as its finite
-field.<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
+validity circuit is denoted <code>SumVec</code>.<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-3">Measurements are encoded as a vector of field elements with length <code>length *
 bits</code>. The field elements in the encoded vector represent all the bits of the
 measurement vector's elements, consecutively, in LSB to MSB order:<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
@@ -6391,13 +6361,6 @@ def eval(
                   <code>list[int]</code>
 </td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>field</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
-              </tr>
             </tbody>
           </table>
 <div id="parallel-sum-chunk-length">
@@ -6433,26 +6396,26 @@ example, the buckets might quantize the real numbers, and each measurement would
 report the bucket that the corresponding client's real-numbered value falls
 into. The aggregate result counts the number of measurements in each bucket.<a href="#section-7.4.4-1" class="pilcrow">¶</a></p>
 <p id="section-7.4.4-2">This instance of Prio3 uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its
-XOF. Its validity circuit, denoted <code>Histogram</code>, uses <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>) as
-its finite field. It has two parameters, <code>length</code>, the number of histogram
-buckets, and <code>chunk_length</code>, which is used by by a circuit optimization
-described below. It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code> to an integer near the
-square root of <code>length</code> (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
+XOF. Its validity circuit is denoted <code>Histogram</code>. It has two parameters,
+<code>length</code>, the number of histogram buckets, and <code>chunk_length</code>, which is used by
+by a circuit optimization described below. It is <span class="bcp14">RECOMMENDED</span> to set
+<code>chunk_length</code> to an integer near the square root of <code>length</code> (see
+<a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.4-3">The measurement is encoded as a one-hot vector representing the bucket into
 which the measurement falls:<a href="#section-7.4.4-3" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.4-4">
 <pre>
-def encode(self, measurement: int) -&gt; list[Field128]:
+def encode(self, measurement: int) -&gt; list[F]:
     encoded = [self.field(0)] * self.length
     encoded[measurement] = self.field(1)
     return encoded
 
-def truncate(self, meas: list[Field128]) -&gt; list[Field128]:
+def truncate(self, meas: list[F]) -&gt; list[F]:
     return meas
 
 def decode(
         self,
-        output: list[Field128],
+        output: list[F],
         _num_measurements: int) -&gt; list[int]:
     return [bucket_count.as_unsigned() for bucket_count in output]
 </pre><a href="#section-7.4.4-4" class="pilcrow">¶</a>
@@ -6474,9 +6437,9 @@ are added up both within the <code>ParallelSum</code> gadget and after it.<a hre
 <pre>
 def eval(
         self,
-        meas: list[Field128],
-        joint_rand: list[Field128],
-        num_shares: int) -&gt; list[Field128]:
+        meas: list[F],
+        joint_rand: list[F],
+        num_shares: int) -&gt; list[F]:
     self.check_valid_eval(meas, joint_rand)
 
     # Check that each bucket is one or zero.
@@ -6485,7 +6448,7 @@ def eval(
     r_power = r
     shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
-        inputs: list[Optional[Field128]]
+        inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
             index = i * self.chunk_length + j
@@ -6501,7 +6464,7 @@ def eval(
 
         range_check += self.GADGETS[0].eval(
             self.field,
-            cast(list[Field128], inputs),
+            cast(list[F], inputs),
         )
 
     # Check that the buckets sum to 1.
@@ -6592,13 +6555,6 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
                   <code>list[int]</code>
 </td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>field</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
-              </tr>
             </tbody>
           </table>
 </section>
@@ -6615,11 +6571,11 @@ Prio3MultihotCountVec to be composed with a randomized response mechanism, like
 <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For example, each Client would
 set each entry to one with some small probability.)<a href="#section-7.4.5-1" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-2">Prio3MultihotCountVec uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its XOF.
-Its validity circuit, denoted <code>MultihotCountVec</code>, uses <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)
-as its default finite field. It has three parameters: <code>length</code>, the number of
-of entries in the count vector; <code>max_weight</code>, the maximum number of non-zero
-entries (i.e., the weight must be at most <code>max_weight</code>); and <code>chunk_length</code>,
-used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>.<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
+Its validity circuit is denoted <code>MultihotCountVec</code>. It has three parameters:
+<code>length</code>, the number of of entries in the count vector; <code>max_weight</code>, the
+maximum number of non-zero entries (i.e., the weight must be at most
+<code>max_weight</code>); and <code>chunk_length</code>, used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and
+<a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>.<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-3">Validation works as follows. Let<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.4.5-4.1">
@@ -6639,7 +6595,7 @@ zero if and only if the reported weight is equal to the true weight.<a href="#se
 <p id="section-7.4.5-7">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.5-8">
 <pre>
-def encode(self, measurement: list[int]) -&gt; list[Field128]:
+def encode(self, measurement: list[int]) -&gt; list[F]:
     if len(measurement) != self.length:
         raise ValueError('invalid Client measurement length')
 
@@ -6656,12 +6612,12 @@ def encode(self, measurement: list[int]) -&gt; list[Field128]:
         self.bits_for_weight)
     return encoded
 
-def truncate(self, meas: list[Field128]) -&gt; list[Field128]:
+def truncate(self, meas: list[F]) -&gt; list[F]:
     return meas[:self.length]
 
 def decode(
         self,
-        output: list[Field128],
+        output: list[F],
         _num_measurements: int) -&gt; list[int]:
     return [bucket_count.as_unsigned() for bucket_count in output]
 </pre><a href="#section-7.4.5-8" class="pilcrow">¶</a>
@@ -6671,9 +6627,9 @@ def decode(
 <pre>
 def eval(
         self,
-        meas: list[Field128],
-        joint_rand: list[Field128],
-        num_shares: int) -&gt; list[Field128]:
+        meas: list[F],
+        joint_rand: list[F],
+        num_shares: int) -&gt; list[F]:
     self.check_valid_eval(meas, joint_rand)
 
     # Check that each entry in the input vector is one or zero.
@@ -6682,7 +6638,7 @@ def eval(
     r_power = r
     shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
-        inputs: list[Optional[Field128]]
+        inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
             index = i * self.chunk_length + j
@@ -6698,7 +6654,7 @@ def eval(
 
         range_check += self.GADGETS[0].eval(
             self.field,
-            cast(list[Field128], inputs),
+            cast(list[F], inputs),
         )
 
     # Check that the weight `offset` plus the sum of the counters
@@ -6782,13 +6738,6 @@ def eval(
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>list[int]</code>
 </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>field</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
               </tr>
             </tbody>
           </table>
