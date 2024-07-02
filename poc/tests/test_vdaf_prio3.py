@@ -28,7 +28,7 @@ class TestPrio3Average(Prio3):
     VERIFY_KEY_SIZE = xof.SEED_SIZE
 
     def __init__(self, shares: int, bits: int):
-        flp = FlpBBCGGI19(TestAverage(bits))
+        flp = FlpBBCGGI19(TestAverage(Field128, bits))
         super().__init__(shares, flp, 1)
 
 

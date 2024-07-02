@@ -556,7 +556,9 @@ class Prio3Count(Prio3[int, int, Field64]):
     test_vec_name = 'Prio3Count'
 
     def __init__(self, shares: int):
-        flp = flp_bbcggi19.FlpBBCGGI19[int, int, Field64](flp_bbcggi19.Count())
+        flp = flp_bbcggi19.FlpBBCGGI19[int, int, Field64](
+            flp_bbcggi19.Count(Field64)
+        )
         super().__init__(shares, flp, 1)
 
 
@@ -569,8 +571,9 @@ class Prio3Sum(Prio3[int, int, Field128]):
     test_vec_name = 'Prio3Sum'
 
     def __init__(self, shares: int, bits: int):
-        flp = flp_bbcggi19.FlpBBCGGI19[int, int,
-                                       Field128](flp_bbcggi19.Sum(bits))
+        flp = flp_bbcggi19.FlpBBCGGI19[int, int, Field128](
+            flp_bbcggi19.Sum(Field128, bits)
+        )
         super().__init__(shares, flp, 1)
 
 
@@ -584,7 +587,7 @@ class Prio3SumVec(Prio3[list[int], list[int], Field128]):
 
     def __init__(self, shares: int, length: int, bits: int, chunk_length: int):
         flp = flp_bbcggi19.FlpBBCGGI19[list[int], list[int], Field128](
-            flp_bbcggi19.SumVec(length, bits, chunk_length, Field128)
+            flp_bbcggi19.SumVec(Field128, length, bits, chunk_length)
         )
         super().__init__(shares, flp, 1)
 
@@ -599,7 +602,7 @@ class Prio3Histogram(Prio3[int, list[int], Field128]):
 
     def __init__(self, shares: int, length: int, chunk_length: int):
         flp = flp_bbcggi19.FlpBBCGGI19[int, list[int], Field128](
-            flp_bbcggi19.Histogram(length, chunk_length)
+            flp_bbcggi19.Histogram(Field128, length, chunk_length)
         )
         super().__init__(shares, flp, 1)
 
@@ -624,10 +627,10 @@ class Prio3SumVecWithMultiproof(Prio3[list[int], list[int], F], Generic[F]):
             chunk_length: int):
         flp = flp_bbcggi19.FlpBBCGGI19[list[int], list[int], F](
             flp_bbcggi19.SumVec(
+                field,
                 length,
                 bits,
                 chunk_length,
-                field,
             )
         )
         super().__init__(
@@ -653,7 +656,7 @@ class Prio3MultihotCountVec(Prio3[list[int], list[int], Field128]):
             chunk_length: int):
         flp = flp_bbcggi19.FlpBBCGGI19(
             flp_bbcggi19.MultihotCountVec(
-                length, max_weight, chunk_length
+                Field128, length, max_weight, chunk_length
             )
         )
         super().__init__(shares, flp, 1)
