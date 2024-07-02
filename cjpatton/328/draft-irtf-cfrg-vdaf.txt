@@ -3454,6 +3454,8 @@ Table of Contents
         +-----------------+---------------------------------------+
         | AggResult       | Type of the aggregate result          |
         +-----------------+---------------------------------------+
+        | field           | Class of object for the field         |
+        +-----------------+---------------------------------------+
 
                    Table 7: Validity circuit parameters.
 
@@ -3732,8 +3734,6 @@ Table of Contents
        self.check_valid_eval(meas, joint_rand)
        squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
        return [squared - meas[0]]
-
-   Here self.field is the class object for the field F.
 
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.

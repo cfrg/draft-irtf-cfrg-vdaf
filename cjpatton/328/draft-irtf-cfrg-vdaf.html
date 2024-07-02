@@ -5539,6 +5539,12 @@ validity circuit <code>Valid</code> that implements the interface described here
 </td>
                 <td class="text-left" rowspan="1" colspan="1">Type of the aggregate result</td>
               </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>field</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">Class of object for the field</td>
+              </tr>
             </tbody>
           </table>
 <p id="section-7.3.2-4">Each gadget <code>G</code> in <code>GADGETS</code> defines a constant <code>DEGREE</code> that specifies the
@@ -5979,9 +5985,8 @@ def eval(
     return [squared - meas[0]]
 </pre><a href="#section-7.4.1-7" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.1-8">Here <code>self.field</code> is the class object for the field <code>F</code>.<a href="#section-7.4.1-8" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-9">The measurement is encoded and decoded as a singleton vector in the natural
-way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-9" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-8">The measurement is encoded and decoded as a singleton vector in the natural
+way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-8" class="pilcrow">¶</a></p>
 <span id="name-parameters-of-validity-circ"></span><table class="center" id="table-10">
             <caption>
 <a href="#table-10" class="selfRef">Table 10</a>:
