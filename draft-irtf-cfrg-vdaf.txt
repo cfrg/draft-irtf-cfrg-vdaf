@@ -823,7 +823,7 @@ Table of Contents
    AggShare.
 
    Each DAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 18.
+   for each (V)DAF specified in this document are defined in Table 23.
 
 4.1.  Sharding
 
@@ -1150,7 +1150,7 @@ Table of Contents
    PrepMessage.
 
    Each VDAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 18.
+   for each (V)DAF specified in this document are defined in Table 23.
    The following method is defined for every VDAF:
 
    def domain_separation_tag(self, usage: int) -> bytes:
@@ -2352,7 +2352,7 @@ Table of Contents
        +----------------+------------------------------------------+
        | AggResult      | Type of the aggregate result             |
        +----------------+------------------------------------------+
-       | field          | As defined in (Section 6.1)              |
+       | field          | Class object for the field (Section 6.1) |
        +----------------+------------------------------------------+
 
           Table 4: Constants and types defined by a concrete FLP.
@@ -2361,25 +2361,24 @@ Table of Contents
    verifying proofs of validity (encoding is described below in
    Section 7.1.1):
 
-   *  flp.prove(meas: list[Field], prove_rand: list[Field], joint_rand:
-      list[Field]) -> list[Field] is the deterministic proof-generation
-      algorithm run by the prover.  Its inputs are the encoded
-      measurement, the "prover randomness" prove_rand, and the "joint
-      randomness" joint_rand.  The prover randomness is used only by the
-      prover, but the joint randomness is shared by both the prover and
-      verifier.
+   *  flp.prove(meas: list[F], prove_rand: list[F], joint_rand: list[F])
+      -> list[F] is the deterministic proof-generation algorithm run by
+      the prover.  Its inputs are the encoded measurement, the "prover
+      randomness" prove_rand, and the "joint randomness" joint_rand.
+      The prover randomness is used only by the prover, but the joint
+      randomness is shared by both the prover and verifier.
 
-   *  flp.query(meas: list[Field], proof: list[Field], query_rand:
-      list[Field], joint_rand: list[Field], num_shares: int) ->
-      list[Field] is the query-generation algorithm run by the verifier.
-      This is used to "query" the measurement and proof.  The result of
-      the query (i.e., the output of this function) is called the
-      "verifier message".  In addition to the measurement and proof,
-      this algorithm takes as input the query randomness query_rand and
-      the joint randomness joint_rand.  The former is used only by the
-      verifier. num_shares specifies how many shares were generated.
+   *  flp.query(meas: list[F], proof: list[F], query_rand: list[F],
+      joint_rand: list[F], num_shares: int) -> list[F] is the query-
+      generation algorithm run by the verifier.  This is used to "query"
+      the measurement and proof.  The result of the query (i.e., the
+      output of this function) is called the "verifier message".  In
+      addition to the measurement and proof, this algorithm takes as
+      input the query randomness query_rand and the joint randomness
+      joint_rand.  The former is used only by the verifier. num_shares
+      specifies how many shares were generated.
 
-   *  flp.decide(verifier: list[Field]) -> bool is the deterministic
+   *  flp.decide(verifier: list[F]) -> bool is the deterministic
       decision algorithm run by the verifier.  It takes as input the
       verifier message and outputs a boolean indicating if the
       measurement from which it was generated is valid.
@@ -2480,7 +2479,7 @@ Table of Contents
    Hence, the FLP also specifies a method of encoding raw measurements
    as a vector of field elements:
 
-   *  flp.encode(measurement: Measurement) -> list[Field] encodes a raw
+   *  flp.encode(measurement: Measurement) -> list[F] encodes a raw
       measurement as a vector of field elements.  The return value MUST
       be of length MEAS_LEN.
 
@@ -2494,19 +2493,19 @@ Table of Contents
    represents.  Thus the FLP defines an algorithm for truncating the
    encoded measurement to the length of the aggregated output:
 
-   *  flp.truncate(meas: list[Field]) -> list[Field] maps an encoded
-      measurement (e.g., the bit-encoding of the measurement) to an
-      aggregatable output (e.g., the singleton vector containing the
-      measurement).  The length of the input MUST be MEAS_LEN and the
-      length of the output MUST be OUTPUT_LEN.
+   *  flp.truncate(meas: list[F]) -> list[F] maps an encoded measurement
+      (e.g., the bit-encoding of the measurement) to an aggregatable
+      output (e.g., the singleton vector containing the measurement).
+      The length of the input MUST be MEAS_LEN and the length of the
+      output MUST be OUTPUT_LEN.
 
    Once the aggregate shares have been computed and combined together,
    their sum can be converted into the aggregate result.  This could be
    a projection from the FLP's field to the integers, or it could
    include additional post-processing.
 
-   *  flp.decode(output: list[Field], num_measurements: int) ->
-      AggResult maps a sum of aggregate shares to an aggregate result.
+   *  flp.decode(output: list[F], num_measurements: int) -> AggResult
+      maps a sum of aggregate shares to an aggregate result.
 
       Pre-conditions:
 
@@ -2544,11 +2543,11 @@ Table of Contents
 7.2.  Construction
 
    This section specifies Prio3, an implementation of the Vdaf interface
-   (Section 5).  It has two generic parameters: an Flp (Section 7.1) and
-   a Xof (Section 6.2).  It also has an associated constant, PROOFS,
-   with a value within the range of [1, 256), denoting the number of
-   FLPs generated by the Client (Section 7.1.2).  The value of PROOFS is
-   1 unless explicitly specified.
+   (Section 5).  It has three generic parameters: an FftField ({{fft-
+   field}}), anFlp({{flp}}) and aXof({{xof}}).  It also has an
+   associated constant,PROOFS, with a value within the range of[1,
+   256)`, denoting the number of FLPs generated by the Client
+   (Section 7.1.2).
 
    The associated constants and types required by the Vdaf interface are
    defined in Table 5.  The methods required for sharding, preparation,
@@ -2576,19 +2575,19 @@ Table of Contents
      +-----------------+--------------------------------------------+
      | PublicShare     | Optional[list[bytes]]                      |
      +-----------------+--------------------------------------------+
-     | InputShare      | Union[tuple[list[Flp.field],               |
-     |                 | list[Flp.field], Optional[bytes]],         |
-     |                 | tuple[bytes, bytes, Optional[bytes]]]      |
+     | InputShare      | Union[tuple[list[F], list[F],              |
+     |                 | Optional[bytes]], tuple[bytes, bytes,      |
+     |                 | Optional[bytes]]]                          |
      +-----------------+--------------------------------------------+
-     | OutShare        | list[Flp.field]                            |
+     | OutShare        | list[F]                                    |
      +-----------------+--------------------------------------------+
-     | AggShare        | list[Flp.field]                            |
+     | AggShare        | list[F]                                    |
      +-----------------+--------------------------------------------+
      | AggResult       | Flp.AggResult                              |
      +-----------------+--------------------------------------------+
-     | PrepState       | tuple[list[Flp.field], Optional[bytes]]    |
+     | PrepState       | tuple[list[F], Optional[bytes]]            |
      +-----------------+--------------------------------------------+
-     | PrepShare       | tuple[list[Flp.field], Optional[bytes]]    |
+     | PrepShare       | tuple[list[F], Optional[bytes]]            |
      +-----------------+--------------------------------------------+
      | PrepMessage     | Optional[bytes]                            |
      +-----------------+--------------------------------------------+
@@ -3445,8 +3444,7 @@ Table of Contents
         +-----------------+---------------------------------------+
         | AggResult       | Type of the aggregate result          |
         +-----------------+---------------------------------------+
-        | field           | An FFT-friendly finite field as       |
-        |                 | defined in Section 6.1.2              |
+        | field           | Class object for the field            |
         +-----------------+---------------------------------------+
 
                    Table 7: Validity circuit parameters.
@@ -3469,14 +3467,14 @@ Table of Contents
    length of an aggregatable output, and converting an aggregated output
    to an aggregate result:
 
-   *  valid.encode(measurement: Measurement) -> list[Field] returns a
-      vector of length MEAS_LEN representing a measurement.
+   *  valid.encode(measurement: Measurement) -> list[F] returns a vector
+      of length MEAS_LEN representing a measurement.
 
-   *  valid.truncate(meas: list[Field]) -> list[Field] returns a vector
-      of length OUTPUT_LEN representing an aggregatable output.
+   *  valid.truncate(meas: list[F]) -> list[F] returns a vector of
+      length OUTPUT_LEN representing an aggregatable output.
 
-   *  valid.decode(output: list[Field], num_measurements: int) ->
-      AggResult returns an aggregate result.
+   *  valid.decode(output: list[F], num_measurements: int) -> AggResult
+      returns an aggregate result.
 
    Finally, the following methods are derived for each concrete Valid:
 
@@ -3542,7 +3540,7 @@ Table of Contents
 
       -  Let P_i = next_power_of_2(M_i+1)
 
-      -  Let alpha_i = Field.gen()^(Field.GEN_ORDER / P_i)
+      -  Let alpha_i = field.gen()^(field.GEN_ORDER / P_i)
 
       +================+============================================+
       | Parameter      | Value                                      |
@@ -3562,8 +3560,6 @@ Table of Contents
       | VERIFIER_LEN   | valid.verifier_len() (see Section 7.3.2)   |
       +----------------+--------------------------------------------+
       | Measurement    | valid.Measurement                          |
-      +----------------+--------------------------------------------+
-      | field          | valid.field                                |
       +----------------+--------------------------------------------+
 
                   Table 8: Parameters of FLP of BBCGGI19.
@@ -3590,7 +3586,7 @@ Table of Contents
 
        *  Let w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]].
 
-       *  Let padded_w = w + Field.zeros(P_i - len(w)).
+       *  Let padded_w = w + field.zeros(P_i - len(w)).
 
           NOTE We pad w to the nearest power of 2 so that we can use FFT
           for interpolating the wire polynomials.  Perhaps there is some
@@ -3605,7 +3601,7 @@ Table of Contents
        *  Let poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-
           1]).  That is, evaluate the circuit G_i on the wire
           polynomials for the ith gadget.  (Arithmetic is in the ring of
-          polynomials over Field.)
+          polynomials over field.)
 
    The proof is the vector proof = seed_1 + coeff_1 + ... + seed_H +
    coeff_H, where coeff_i is the vector of coefficients of poly_gadget_i
@@ -3678,20 +3674,33 @@ Table of Contents
 7.4.  Instantiations
 
    This section specifies instantiations of Prio3 for various
-   measurement types.  Each is determined by a validity circuit
-   (Section 7.3.2) and a XOF (Section 6.2).  Test vectors for each can
+   measurement types.  Each is determined by a field (Section 6.1), a
+   validity circuit (Section 7.3.2), an XOF (Section 6.2). and the
+   number of proofs to generate and verify.  Test vectors for each can
    be found in Appendix "Test Vectors".
 
 7.4.1.  Prio3Count
+
+             +===========+==================================+
+             | Parameter | Value                            |
+             +===========+==================================+
+             | Valid     | Count(Field64) (this section)    |
+             +-----------+----------------------------------+
+             | Field     | Field64 (Table 3)                |
+             +-----------+----------------------------------+
+             | PROOFS    | 1                                |
+             +-----------+----------------------------------+
+             | Xof       | XofTurboShake128 (Section 6.2.1) |
+             +-----------+----------------------------------+
+
+                   Table 9: Parameters for Prio3Count.
 
    Our first instance of Prio3 is for a simple counter: Each measurement
    is either one or zero and the aggregate result is the sum of the
    measurements.
 
-   This instance uses XofTurboShake128 (Section 6.2.1) as its XOF.  Its
-   validity circuit, denoted Count, uses Field64 (Table 3) as its finite
-   field.  Its gadget, denoted Mul, is the degree-2, arity-2 gadget
-   defined as
+   Its validity circuit, denoted Count, uses the following degree-2,
+   arity-2 gadget, denoted Mul:
 
    def eval(self, _field: type[F], inp: list[F]) -> F:
        self.check_gadget_eval(inp)
@@ -3704,9 +3713,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field64],
-           joint_rand: list[Field64],
-           _num_shares: int) -> list[Field64]:
+           meas: list[F],
+           joint_rand: list[F],
+           _num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
        squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
        return [squared - meas[0]]
@@ -3714,56 +3723,66 @@ Table of Contents
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.
 
-                  +=================+===================+
-                  | Parameter       | Value             |
-                  +=================+===================+
-                  | GADGETS         | [Mul]             |
-                  +-----------------+-------------------+
-                  | GADGET_CALLS    | [1]               |
-                  +-----------------+-------------------+
-                  | MEAS_LEN        | 1                 |
-                  +-----------------+-------------------+
-                  | OUTPUT_LEN      | 1                 |
-                  +-----------------+-------------------+
-                  | JOINT_RAND_LEN  | 0                 |
-                  +-----------------+-------------------+
-                  | EVAL_OUTPUT_LEN | 1                 |
-                  +-----------------+-------------------+
-                  | Measurement     | int in range(2)   |
-                  +-----------------+-------------------+
-                  | AggResult       | int               |
-                  +-----------------+-------------------+
-                  | field           | Field64 (Table 3) |
-                  +-----------------+-------------------+
+                   +=================+=================+
+                   | Parameter       | Value           |
+                   +=================+=================+
+                   | GADGETS         | [Mul]           |
+                   +-----------------+-----------------+
+                   | GADGET_CALLS    | [1]             |
+                   +-----------------+-----------------+
+                   | MEAS_LEN        | 1               |
+                   +-----------------+-----------------+
+                   | OUTPUT_LEN      | 1               |
+                   +-----------------+-----------------+
+                   | JOINT_RAND_LEN  | 0               |
+                   +-----------------+-----------------+
+                   | EVAL_OUTPUT_LEN | 1               |
+                   +-----------------+-----------------+
+                   | Measurement     | int in range(2) |
+                   +-----------------+-----------------+
+                   | AggResult       | int             |
+                   +-----------------+-----------------+
 
-                      Table 9: Parameters of validity
+                      Table 10: Parameters of validity
                                circuit Count.
 
 7.4.2.  Prio3Sum
+
+            +===========+====================================+
+            | Parameter | Value                              |
+            +===========+====================================+
+            | Valid     | Sum(Field128, bits) (this section) |
+            +-----------+------------------------------------+
+            | Field     | Field128 (Table 3)                 |
+            +-----------+------------------------------------+
+            | PROOFS    | 1                                  |
+            +-----------+------------------------------------+
+            | Xof       | XofTurboShake128 (Section 6.2.1)   |
+            +-----------+------------------------------------+
+
+                    Table 11: Parameters for Prio3Sum.
 
    The next instance of Prio3 supports summing of integers in a pre-
    determined range.  Each measurement is an integer in range [0,
    2^bits), where bits is an associated parameter.
 
-   This instance of Prio3 uses XofTurboShake128 (Section 6.2.1) as its
-   XOF.  Its validity circuit, denoted Sum, uses Field128 (Table 3) as
-   its finite field.  The measurement is encoded as a length-bits vector
-   of field elements, where the lth element of the vector represents the
-   lth bit of the summand:
+   The validity circuit is denoted Sum. The measurement is encoded as a
+   length-bits vector of field elements, where the lth element of the
+   vector represents the lth bit of the summand:
 
-   def encode(self, measurement: int) -> list[Field128]:
+   def encode(self, measurement: int) -> list[F]:
        if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
            raise ValueError('measurement out of range')
 
        return self.field.encode_into_bit_vector(measurement,
                                                 self.MEAS_LEN)
 
-   def truncate(self, meas: list[Field128]) -> list[Field128]:
+   def truncate(self, meas: list[F]) -> list[F]:
        return [self.field.decode_from_bit_vector(meas)]
 
    def decode(
            self,
-           output: list[Field128],
+           output: list[F],
            _num_measurements: int) -> int:
        return output[0].as_unsigned()
 
@@ -3779,9 +3798,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field128],
-           joint_rand: list[Field128],
-           _num_shares: int) -> list[Field128]:
+           meas: list[F],
+           joint_rand: list[F],
+           _num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
        out = self.field(0)
        r = joint_rand[0]
@@ -3809,13 +3828,27 @@ Table of Contents
                 +-----------------+-----------------------+
                 | AggResult       | int                   |
                 +-----------------+-----------------------+
-                | field           | Field128 (Table 3)    |
-                +-----------------+-----------------------+
 
-                      Table 10: Parameters of validity
+                      Table 12: Parameters of validity
                                 circuit Sum.
 
 7.4.3.  Prio3SumVec
+
+                +===========+=============================+
+                | Parameter | Value                       |
+                +===========+=============================+
+                | Valid     | Sum(Field128, length, bits, |
+                |           | chunk_lengh) (this section) |
+                +-----------+-----------------------------+
+                | Field     | Field128 (Table 3)          |
+                +-----------+-----------------------------+
+                | PROOFS    | 1                           |
+                +-----------+-----------------------------+
+                | Xof       | XofTurboShake128            |
+                |           | (Section 6.2.1)             |
+                +-----------+-----------------------------+
+
+                   Table 13: Parameters for Prio3SumVec.
 
    This instance of Prio3 supports summing a vector of integers.  It has
    three parameters, length, bits, and chunk_length.  Each measurement
@@ -3824,14 +3857,10 @@ Table of Contents
    range [0, 2^bits).  It is RECOMMENDED to set chunk_length to an
    integer near the square root of length * bits (see Section 7.4.3.1).
 
-   This instance uses XofTurboShake128 (Section 6.2.1) as its XOF.  Its
-   validity circuit, denoted SumVec, uses Field128 (Table 3) as its
-   finite field.
-
-   Measurements are encoded as a vector of field elements with length
-   length * bits.  The field elements in the encoded vector represent
-   all the bits of the measurement vector's elements, consecutively, in
-   LSB to MSB order:
+   The validity circuit is denoted SumVec.  Measurements are encoded as
+   a vector of field elements with length length * bits.  The field
+   elements in the encoded vector represent all the bits of the
+   measurement vector's elements, consecutively, in LSB to MSB order:
 
    def encode(self, measurement: list[int]) -> list[F]:
        if len(measurement) != self.length:
@@ -3958,10 +3987,8 @@ Table of Contents
          +-----------------+------------------------------------+
          | AggResult       | list[int]                          |
          +-----------------+------------------------------------+
-         | field           | Field128 (Table 3)                 |
-         +-----------------+------------------------------------+
 
-             Table 11: Parameters of validity circuit SumVec.
+             Table 14: Parameters of validity circuit SumVec.
 
 7.4.3.1.  Selection of ParallelSum chunk length
 
@@ -3982,6 +4009,20 @@ Table of Contents
 
 7.4.4.  Prio3Histogram
 
+     +===========+===================================================+
+     | Parameter | Value                                             |
+     +===========+===================================================+
+     | Valid     | Sum(Field128, length, chunk_lengh) (this section) |
+     +-----------+---------------------------------------------------+
+     | Field     | Field128 (Table 3)                                |
+     +-----------+---------------------------------------------------+
+     | PROOFS    | 1                                                 |
+     +-----------+---------------------------------------------------+
+     | Xof       | XofTurboShake128 (Section 6.2.1)                  |
+     +-----------+---------------------------------------------------+
+
+                  Table 15: Parameters for Prio3Histogram.
+
    This instance of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
    increments one histogram bucket, out of a set of fixed buckets.
@@ -3991,28 +4032,26 @@ Table of Contents
    into.  The aggregate result counts the number of measurements in each
    bucket.
 
-   This instance of Prio3 uses XofTurboShake128 (Section 6.2.1) as its
-   XOF.  Its validity circuit, denoted Histogram, uses Field128
-   (Table 3) as its finite field.  It has two parameters, length, the
-   number of histogram buckets, and chunk_length, which is used by by a
-   circuit optimization described below.  It is RECOMMENDED to set
-   chunk_length to an integer near the square root of length (see
+   The validity circuit is denoted Histogram.  It has two parameters,
+   length, the number of histogram buckets, and chunk_length, which is
+   used by by a circuit optimization described below.  It is RECOMMENDED
+   to set chunk_length to an integer near the square root of length (see
    Section 7.4.3.1).
 
    The measurement is encoded as a one-hot vector representing the
    bucket into which the measurement falls:
 
-   def encode(self, measurement: int) -> list[Field128]:
+   def encode(self, measurement: int) -> list[F]:
        encoded = [self.field(0)] * self.length
        encoded[measurement] = self.field(1)
        return encoded
 
-   def truncate(self, meas: list[Field128]) -> list[Field128]:
+   def truncate(self, meas: list[F]) -> list[F]:
        return meas
 
    def decode(
            self,
-           output: list[Field128],
+           output: list[F],
            _num_measurements: int) -> list[int]:
        return [bucket_count.as_unsigned() for bucket_count in output]
 
@@ -4034,9 +4073,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field128],
-           joint_rand: list[Field128],
-           num_shares: int) -> list[Field128]:
+           meas: list[F],
+           joint_rand: list[F],
+           num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
 
        # Check that each bucket is one or zero.
@@ -4045,7 +4084,7 @@ Table of Contents
        r_power = r
        shares_inv = self.field(num_shares).inv()
        for i in range(self.GADGET_CALLS[0]):
-           inputs: list[Optional[Field128]]
+           inputs: list[Optional[F]]
            inputs = [None] * (2 * self.chunk_length)
            for j in range(self.chunk_length):
                index = i * self.chunk_length + j
@@ -4061,7 +4100,7 @@ Table of Contents
 
            range_check += self.GADGETS[0].eval(
                self.field,
-               cast(list[Field128], inputs),
+               cast(list[F], inputs),
            )
 
        # Check that the buckets sum to 1.
@@ -4095,12 +4134,26 @@ Table of Contents
     +-----------------+-----------------------------------------------+
     | AggResult       | list[int]                                     |
     +-----------------+-----------------------------------------------+
-    | field           | Field128 (Table 3)                            |
-    +-----------------+-----------------------------------------------+
 
-            Table 12: Parameters of validity circuit Histogram.
+            Table 16: Parameters of validity circuit Histogram.
 
 7.4.5.  Prio3MultihotCountVec
+
+              +===========+=================================+
+              | Parameter | Value                           |
+              +===========+=================================+
+              | Valid     | Sum(Field128, length, max_eight |
+              |           | chunk_lengh) (this section)     |
+              +-----------+---------------------------------+
+              | Field     | Field128 (Table 3)              |
+              +-----------+---------------------------------+
+              | PROOFS    | 1                               |
+              +-----------+---------------------------------+
+              | Xof       | XofTurboShake128                |
+              |           | (Section 6.2.1)                 |
+              +-----------+---------------------------------+
+
+              Table 17: Parameters for Prio3MultihotCountVec.
 
    For this instance of Prio3, each measurement is a vector of ones and
    zeros, where the number of ones is bounded.  This provides a
@@ -4111,12 +4164,11 @@ Table of Contents
    each entry to one with some small probability.)
 
    Prio3MultihotCountVec uses XofTurboShake128 (Section 6.2.1) as its
-   XOF.  Its validity circuit, denoted MultihotCountVec, uses Field128
-   (Table 3) as its default finite field.  It has three parameters:
-   length, the number of of entries in the count vector; max_weight, the
-   maximum number of non-zero entries (i.e., the weight must be at most
-   max_weight); and chunk_length, used the same way as in Section 7.4.3
-   and Section 7.4.4.
+   XOF.  Its validity circuit is denoted MultihotCountVec.  It has three
+   parameters: length, the number of of entries in the count vector;
+   max_weight, the maximum number of non-zero entries (i.e., the weight
+   must be at most max_weight); and chunk_length, used the same way as
+   in Section 7.4.3 and Section 7.4.4.
 
    Validation works as follows.  Let
 
@@ -4136,7 +4188,7 @@ Table of Contents
 
    Encoding, truncation, and decoding are defined as follows:
 
-   def encode(self, measurement: list[int]) -> list[Field128]:
+   def encode(self, measurement: list[int]) -> list[F]:
        if len(measurement) != self.length:
            raise ValueError('invalid Client measurement length')
 
@@ -4153,12 +4205,12 @@ Table of Contents
            self.bits_for_weight)
        return encoded
 
-   def truncate(self, meas: list[Field128]) -> list[Field128]:
+   def truncate(self, meas: list[F]) -> list[F]:
        return meas[:self.length]
 
    def decode(
            self,
-           output: list[Field128],
+           output: list[F],
            _num_measurements: int) -> list[int]:
        return [bucket_count.as_unsigned() for bucket_count in output]
 
@@ -4166,9 +4218,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field128],
-           joint_rand: list[Field128],
-           num_shares: int) -> list[Field128]:
+           meas: list[F],
+           joint_rand: list[F],
+           num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
 
        # Check that each entry in the input vector is one or zero.
@@ -4177,7 +4229,7 @@ Table of Contents
        r_power = r
        shares_inv = self.field(num_shares).inv()
        for i in range(self.GADGET_CALLS[0]):
-           inputs: list[Optional[Field128]]
+           inputs: list[Optional[F]]
            inputs = [None] * (2 * self.chunk_length)
            for j in range(self.chunk_length):
                index = i * self.chunk_length + j
@@ -4193,7 +4245,7 @@ Table of Contents
 
            range_check += self.GADGETS[0].eval(
                self.field,
-               cast(list[Field128], inputs),
+               cast(list[F], inputs),
            )
 
        # Check that the weight `offset` plus the sum of the counters
@@ -4227,10 +4279,8 @@ Table of Contents
           +----------------+------------------------------------+
           | AggResult      | list[int]                          |
           +----------------+------------------------------------+
-          | field          | Field128 (Table 3)                 |
-          +----------------+------------------------------------+
 
-                  Table 13: Parameters of validity circuit
+                  Table 18: Parameters of validity circuit
                              MultihotCountVec.
 
 8.  Poplar1
@@ -4335,7 +4385,7 @@ Table of Contents
    "extractable" as defined in [BBCGGI21], Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 14.  In the remainder we write Output as shorthand for the type
+   Table 19.  In the remainder we write Output as shorthand for the type
    Union[list[list[FieldInner]], list[list[FieldLeaf]]].  (This type
    denotes either a vector of inner node field elements or leaf node
    field elements.)  The scheme is comprised of the following
@@ -4445,7 +4495,7 @@ Table of Contents
     | FieldVec   | Alias of Union[list[FieldInner], list[FieldLeaf]]  |
     +------------+----------------------------------------------------+
 
-         Table 14: Constants and types defined by a concrete IDPF.
+         Table 19: Constants and types defined by a concrete IDPF.
 
 8.1.1.  Encoding inputs as indices
 
@@ -4472,10 +4522,10 @@ Table of Contents
    interface (Section 5).  It is defined in terms of any Idpf
    (Section 8.1) for which SHARES == 2 and VALUE_LEN == 2 and an
    implementation of Xof (Section 6.2).  The associated constants and
-   types required by the Vdaf interface are defined in Table 15.  The
+   types required by the Vdaf interface are defined in Table 20.  The
    methods required for sharding, preparation, aggregation, and
    unsharding are described in the remaining subsections.  These methods
-   make use of constants defined in Table 16.
+   make use of constants defined in Table 21.
 
          +=================+====================================+
          | Parameter       | Value                              |
@@ -4512,7 +4562,7 @@ Table of Contents
          | PrepMessage     | Optional[FieldVec]                 |
          +-----------------+------------------------------------+
 
-                  Table 15: VDAF parameters for Poplar1.
+                  Table 20: VDAF parameters for Poplar1.
 
                     +========================+=======+
                     | Variable               | Value |
@@ -4526,7 +4576,7 @@ Table of Contents
                     | USAGE_VERIFY_RAND: int | 4     |
                     +------------------------+-------+
 
-                       Table 16: Constants used by
+                       Table 21: Constants used by
                                  Poplar1.
 
 8.2.1.  Sharding
@@ -5088,7 +5138,7 @@ Table of Contents
    [BBCGGI21].
 
    The constant and type definitions required by the Idpf interface are
-   given in Table 17.
+   given in Table 22.
 
    Our IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
@@ -5111,7 +5161,7 @@ Table of Contents
                    | FieldLeaf  | Field255 (Table 3)   |
                    +------------+----------------------+
 
-                        Table 17: Constants and type
+                        Table 22: Constants and type
                         definitions for the IDPF of
                                  BBCGGI21.
 
@@ -5703,10 +5753,10 @@ Table of Contents
      | 0xFFFFFFFF    |                       |      |               |
      +---------------+-----------------------+------+---------------+
 
-                Table 18: Unique identifiers for (V)DAFs.
+                Table 23: Unique identifiers for (V)DAFs.
 
       TODO Add IANA considerations for the codepoints summarized in
-      Table 18.
+      Table 23.
 
 11.  References
 
