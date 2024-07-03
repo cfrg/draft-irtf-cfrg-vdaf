@@ -18,11 +18,11 @@ are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
 measurement that would result in an invalid aggregate result. 
     " name="description">
-<meta content="xml2rfc 3.21.0" name="generator">
+<meta content="xml2rfc 3.22.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.21.0
+  xml2rfc 3.22.0
     Python 3.12.3
     ConfigArgParse 1.7
     google-i18n-address 3.1.0
@@ -32,9 +32,8 @@ measurement that would result in an invalid aggregate result.
     platformdirs 4.2.2
     pycountry 22.3.5
     PyYAML 6.0.1
-    requests 2.31.0
+    requests 2.32.3
     setuptools 69.5.1
-    six 1.16.0
     wcwidth 0.2.13
 -->
 <link href="draft-irtf-cfrg-vdaf.xml" rel="alternate" type="application/rfc+xml">
@@ -1038,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 3 January 2025</td>
+<td class="center">Expires 4 January 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-07-02" class="published">2 July 2024</time>
+<time datetime="2024-07-03" class="published">3 July 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-01-03">3 January 2025</time></dd>
+<dd class="expires"><time datetime="2025-01-04">4 January 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1119,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 January 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 4 January 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1288,7 +1287,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
-                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-a-general-purpose-flp" class="internal xref">A General-Purpose FLP</a></p>
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-the-flp-of" class="internal xref">The FLP of BBCGGI19</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3.2.1">
                     <p id="section-toc.1-1.7.2.3.2.1.1"><a href="#section-7.3.1" class="auto internal xref">7.3.1</a>.  <a href="#name-overview-2" class="internal xref">Overview</a></p>
@@ -1622,283 +1621,289 @@ security considerations for VDAFs.<a href="#section-1-17" class="pilcrow">¶</a>
 <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-change-log" class="section-name selfRef">Change Log</a>
         </h3>
 <p id="section-1.1-1">(*) Indicates a change that breaks wire compatibility with the previous draft.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
-<p id="section-1.1-2">09:<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">10:<a href="#section-1.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-3.1">
-            <p id="section-1.1-3.1.1">Poplar1: Make prefix tree traversal stricter by requiring each node to be a
-child of a node that was already visited. This change is intended to make it
-harder for a malicious Aggregator to steer traversal towards
-non-heavy-hitting measurements.<a href="#section-1.1-3.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-3.2">
-            <p id="section-1.1-3.2.1">Prio3: Add more explicit guidance for choosing the field size.<a href="#section-1.1-3.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-3.3">
-            <p id="section-1.1-3.3.1">IDPF: Define extractability and clarify (un)safe usage of intermediate prefix
-counts. Accordingly, add text ensuring public share consistency to security
-considerations.<a href="#section-1.1-3.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-3.1.1">Rename FlpGeneric to FlpBBCGGI19 and IdpfPoplar to IdpfBBCGGI21.<a href="#section-1.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-4">08:<a href="#section-1.1-4" class="pilcrow">¶</a></p>
+<p id="section-1.1-4">09:<a href="#section-1.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-5.1">
-            <p id="section-1.1-5.1.1">Poplar1: Bind the report nonce to the authenticator vector programmed into
-the IDPF. (*)<a href="#section-1.1-5.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-5.1.1">Poplar1: Make prefix tree traversal stricter by requiring each node to be a
+child of a node that was already visited. This change is intended to make it
+harder for a malicious Aggregator to steer traversal towards
+non-heavy-hitting measurements.<a href="#section-1.1-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-5.2">
-            <p id="section-1.1-5.2.1">IdpfPoplar: Modify <code>extend()</code> by stealing each control bit from its
-corresponding seed. This improves performance by reducing the number of AES
-calls per level from 3 to 2. The cost is a slight reduction in the concrete
-privacy bound. (*)<a href="#section-1.1-5.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-5.2.1">Prio3: Add more explicit guidance for choosing the field size.<a href="#section-1.1-5.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-5.3">
-            <p id="section-1.1-5.3.1">Prio3: Add support for generating and verifying mutliple proofs per
-measurement. This enables a trade-off between communication cost and runtime:
-if more proofs are used, then a smaller field can be used without impacting
-robustness. (*)<a href="#section-1.1-5.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-5.4">
-            <p id="section-1.1-5.4.1">Replace SHAKE128 with TurboSHAKE128. (*)<a href="#section-1.1-5.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-5.3.1">IDPF: Define extractability and clarify (un)safe usage of intermediate prefix
+counts. Accordingly, add text ensuring public share consistency to security
+considerations.<a href="#section-1.1-5.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-6">07:<a href="#section-1.1-6" class="pilcrow">¶</a></p>
+<p id="section-1.1-6">08:<a href="#section-1.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-7.1">
-            <p id="section-1.1-7.1.1">Rename PRG to XOF ("eXtendable Output Function"). Accordingly, rename PrgSha3
-to XofShake128 and PrgFixedKeyAes128 to XofFixedKeyAes128. "PRG" is a misnomer
-since we don't actually treat this object as a pseudorandom generator in
-existing security analysis.<a href="#section-1.1-7.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-7.1.1">Poplar1: Bind the report nonce to the authenticator vector programmed into
+the IDPF. (*)<a href="#section-1.1-7.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-7.2">
-            <p id="section-1.1-7.2.1">Replace cSHAKE128 with SHAKE128, re-implementing domain separation for the
-customization string using a simpler scheme. This change addresses the
-reality that implementations of cSHAKE128 are less common. (*)<a href="#section-1.1-7.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-7.2.1">IdpfPoplar: Modify <code>extend()</code> by stealing each control bit from its
+corresponding seed. This improves performance by reducing the number of AES
+calls per level from 3 to 2. The cost is a slight reduction in the concrete
+privacy bound. (*)<a href="#section-1.1-7.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-7.3">
-            <p id="section-1.1-7.3.1">Define a new VDAF, called Prio3SumVec, that generalizes Prio3Sum to a vector
-of summands.<a href="#section-1.1-7.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-7.3.1">Prio3: Add support for generating and verifying mutliple proofs per
+measurement. This enables a trade-off between communication cost and runtime:
+if more proofs are used, then a smaller field can be used without impacting
+robustness. (*)<a href="#section-1.1-7.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-7.4">
-            <p id="section-1.1-7.4.1">Prio3Histogram: Update the codepoint and use the parallel sum optimization
-introduced by Prio3SumVec to reduce the proof size. (*)<a href="#section-1.1-7.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-7.5">
-            <p id="section-1.1-7.5.1">Daf, Vdaf: Rename interface methods to match verbiage in the draft.<a href="#section-1.1-7.5.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-7.6">
-            <p id="section-1.1-7.6.1">Daf: Align with Vdaf by adding a nonce to <code>shard()</code> and <code>prep()</code>.<a href="#section-1.1-7.6.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-7.7">
-            <p id="section-1.1-7.7.1">Vdaf: Have <code>prep_init()</code> compute the first prep share. This change is
-intended to simplify the interface by making the input to <code>prep_next()</code> not
-optional.<a href="#section-1.1-7.7.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-7.8">
-            <p id="section-1.1-7.8.1">Prio3: Split sharding into two auxiliary functions, one for sharding with
-joint randomness and another without. This change is intended to improve
-readability.<a href="#section-1.1-7.8.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-7.9">
-            <p id="section-1.1-7.9.1">Fix bugs in the ping-pong interface discovered after implementing it.<a href="#section-1.1-7.9.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-7.4.1">Replace SHAKE128 with TurboSHAKE128. (*)<a href="#section-1.1-7.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-8">06:<a href="#section-1.1-8" class="pilcrow">¶</a></p>
+<p id="section-1.1-8">07:<a href="#section-1.1-8" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-9.1">
-            <p id="section-1.1-9.1.1">Vdaf: Define a wrapper interface for preparation that is suitable for the
-"ping-pong" topology in which two Aggregators exchange messages over a
-request/response protocol, like HTTP, and take turns executing the
-computation until input from the peer is required.<a href="#section-1.1-9.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-9.1.1">Rename PRG to XOF ("eXtendable Output Function"). Accordingly, rename PrgSha3
+to XofShake128 and PrgFixedKeyAes128 to XofFixedKeyAes128. "PRG" is a misnomer
+since we don't actually treat this object as a pseudorandom generator in
+existing security analysis.<a href="#section-1.1-9.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-9.2">
-            <p id="section-1.1-9.2.1">Prio3Histogram: Generalize the measurement type so that the histogram can be
-used more easily with discrete domains. (*)<a href="#section-1.1-9.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-9.2.1">Replace cSHAKE128 with SHAKE128, re-implementing domain separation for the
+customization string using a simpler scheme. This change addresses the
+reality that implementations of cSHAKE128 are less common. (*)<a href="#section-1.1-9.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-9.3">
-            <p id="section-1.1-9.3.1">Daf, Vdaf: Change the aggregation parameter validation algorithm to take the
-set of previous parameters rather than a list. (The order of the parameters
-is irrelevant.)<a href="#section-1.1-9.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-9.3.1">Define a new VDAF, called Prio3SumVec, that generalizes Prio3Sum to a vector
+of summands.<a href="#section-1.1-9.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-9.4">
-            <p id="section-1.1-9.4.1">Daf, Vdaf, Idpf: Add parameter <code>RAND_SIZE</code> that specifies the number of
-random bytes consumed by the randomized algorithm (<code>shard()</code> for Daf and Vdaf
-and <code>gen()</code> for Idpf).<a href="#section-1.1-9.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-9.4.1">Prio3Histogram: Update the codepoint and use the parallel sum optimization
+introduced by Prio3SumVec to reduce the proof size. (*)<a href="#section-1.1-9.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-9.5">
+            <p id="section-1.1-9.5.1">Daf, Vdaf: Rename interface methods to match verbiage in the draft.<a href="#section-1.1-9.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-9.6">
+            <p id="section-1.1-9.6.1">Daf: Align with Vdaf by adding a nonce to <code>shard()</code> and <code>prep()</code>.<a href="#section-1.1-9.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-9.7">
+            <p id="section-1.1-9.7.1">Vdaf: Have <code>prep_init()</code> compute the first prep share. This change is
+intended to simplify the interface by making the input to <code>prep_next()</code> not
+optional.<a href="#section-1.1-9.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-9.8">
+            <p id="section-1.1-9.8.1">Prio3: Split sharding into two auxiliary functions, one for sharding with
+joint randomness and another without. This change is intended to improve
+readability.<a href="#section-1.1-9.8.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-9.9">
+            <p id="section-1.1-9.9.1">Fix bugs in the ping-pong interface discovered after implementing it.<a href="#section-1.1-9.9.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-10">05:<a href="#section-1.1-10" class="pilcrow">¶</a></p>
+<p id="section-1.1-10">06:<a href="#section-1.1-10" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-11.1">
-            <p id="section-1.1-11.1.1">IdpfPoplar: Replace PrgSha3 with PrgFixedKeyAes128, a fixed-key mode for
-AES-128 based on a construction from <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>. This change is intended to
-improve performance of IDPF evaluation. Note that the new PRG is not suitable
-for all applications. (*)<a href="#section-1.1-11.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-11.1.1">Vdaf: Define a wrapper interface for preparation that is suitable for the
+"ping-pong" topology in which two Aggregators exchange messages over a
+request/response protocol, like HTTP, and take turns executing the
+computation until input from the peer is required.<a href="#section-1.1-11.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-11.2">
-            <p id="section-1.1-11.2.1">Idpf: Add a binder string to the key-generation and evaluation algorithms.
-This is used to plumb the nonce generated by the Client to the PRG.<a href="#section-1.1-11.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-11.2.1">Prio3Histogram: Generalize the measurement type so that the histogram can be
+used more easily with discrete domains. (*)<a href="#section-1.1-11.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-11.3">
-            <p id="section-1.1-11.3.1">Plumb random coins through the interface of randomized algorithms.
+            <p id="section-1.1-11.3.1">Daf, Vdaf: Change the aggregation parameter validation algorithm to take the
+set of previous parameters rather than a list. (The order of the parameters
+is irrelevant.)<a href="#section-1.1-11.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-11.4">
+            <p id="section-1.1-11.4.1">Daf, Vdaf, Idpf: Add parameter <code>RAND_SIZE</code> that specifies the number of
+random bytes consumed by the randomized algorithm (<code>shard()</code> for Daf and Vdaf
+and <code>gen()</code> for Idpf).<a href="#section-1.1-11.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-12">05:<a href="#section-1.1-12" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-13.1">
+            <p id="section-1.1-13.1.1">IdpfPoplar: Replace PrgSha3 with PrgFixedKeyAes128, a fixed-key mode for
+AES-128 based on a construction from <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>. This change is intended to
+improve performance of IDPF evaluation. Note that the new PRG is not suitable
+for all applications. (*)<a href="#section-1.1-13.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-13.2">
+            <p id="section-1.1-13.2.1">Idpf: Add a binder string to the key-generation and evaluation algorithms.
+This is used to plumb the nonce generated by the Client to the PRG.<a href="#section-1.1-13.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-13.3">
+            <p id="section-1.1-13.3.1">Plumb random coins through the interface of randomized algorithms.
 Specifically, add a random input to (V)DAF sharding algorithm and IDPF
 key-generation algorithm and require implementations to specify the length of
 the random input. Accordingly, update Prio3, Poplar1, and IdpfPoplar to match
 the new interface. This change is intended to improve coverage of test
-vectors.<a href="#section-1.1-11.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-11.4">
-            <p id="section-1.1-11.4.1">Use little-endian byte-order for field element encoding. (*)<a href="#section-1.1-11.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-11.5">
-            <p id="section-1.1-11.5.1">Poplar1: Move the last step of sketch evaluation from <code>prep_next()</code> to
-<code>prep_shares_to_prep()</code>.<a href="#section-1.1-11.5.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-1.1-12">04:<a href="#section-1.1-12" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-1.1-13.1">
-            <p id="section-1.1-13.1.1">Align security considerations with the security analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>.<a href="#section-1.1-13.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-13.2">
-            <p id="section-1.1-13.2.1">Vdaf: Pass the nonce to the sharding algorithm.<a href="#section-1.1-13.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-13.3">
-            <p id="section-1.1-13.3.1">Vdaf: Rather than allow the application to choose the nonce length, have each
-implementation of the Vdaf interface specify the expected nonce length. (*)<a href="#section-1.1-13.3.1" class="pilcrow">¶</a></p>
+vectors.<a href="#section-1.1-13.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-13.4">
-            <p id="section-1.1-13.4.1">Prg: Split "info string" into two components: the "customization string",
-intended for domain separation; and the "binder string", used to bind the
-output to ephemeral values, like the nonce, associated with execution of a
-(V)DAF.<a href="#section-1.1-13.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-13.4.1">Use little-endian byte-order for field element encoding. (*)<a href="#section-1.1-13.4.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-13.5">
-            <p id="section-1.1-13.5.1">Replace PrgAes128 with PrgSha3, an implementation of the Prg interface based
+            <p id="section-1.1-13.5.1">Poplar1: Move the last step of sketch evaluation from <code>prep_next()</code> to
+<code>prep_shares_to_prep()</code>.<a href="#section-1.1-13.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-14">04:<a href="#section-1.1-14" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-15.1">
+            <p id="section-1.1-15.1.1">Align security considerations with the security analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>.<a href="#section-1.1-15.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-15.2">
+            <p id="section-1.1-15.2.1">Vdaf: Pass the nonce to the sharding algorithm.<a href="#section-1.1-15.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-15.3">
+            <p id="section-1.1-15.3.1">Vdaf: Rather than allow the application to choose the nonce length, have each
+implementation of the Vdaf interface specify the expected nonce length. (*)<a href="#section-1.1-15.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-15.4">
+            <p id="section-1.1-15.4.1">Prg: Split "info string" into two components: the "customization string",
+intended for domain separation; and the "binder string", used to bind the
+output to ephemeral values, like the nonce, associated with execution of a
+(V)DAF.<a href="#section-1.1-15.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-15.5">
+            <p id="section-1.1-15.5.1">Replace PrgAes128 with PrgSha3, an implementation of the Prg interface based
 on SHA-3, and use the new scheme as the default. Accordingly, replace
 Prio3Aes128Count with Prio3Count, Poplar1Aes128 with Poplar1, and so on. SHA-3
 is a safer choice for instantiating a random oracle, which is used in the
-analysis of Prio3 of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-13.5.1" class="pilcrow">¶</a></p>
+analysis of Prio3 of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-15.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.6">
-            <p id="section-1.1-13.6.1">Prio3, Poplar1: Ensure each invocation of the Prg uses a distinct
+          <li class="normal" id="section-1.1-15.6">
+            <p id="section-1.1-15.6.1">Prio3, Poplar1: Ensure each invocation of the Prg uses a distinct
 customization string, as suggested by <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. This is intended to make
-domain separation clearer, thereby simplifying security analysis. (*)<a href="#section-1.1-13.6.1" class="pilcrow">¶</a></p>
+domain separation clearer, thereby simplifying security analysis. (*)<a href="#section-1.1-15.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.7">
-            <p id="section-1.1-13.7.1">Prio3: Replace "joint randomness hints" sent in each input share with "joint
+          <li class="normal" id="section-1.1-15.7">
+            <p id="section-1.1-15.7.1">Prio3: Replace "joint randomness hints" sent in each input share with "joint
 randomness parts" sent in the public share. This reduces communication
-overhead when the number of shares exceeds two. (*)<a href="#section-1.1-13.7.1" class="pilcrow">¶</a></p>
+overhead when the number of shares exceeds two. (*)<a href="#section-1.1-15.7.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.8">
-            <p id="section-1.1-13.8.1">Prio3: Bind nonce to joint randomness parts. This is intended to address
-birthday attacks on robustness pointed out by <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-13.8.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-15.8">
+            <p id="section-1.1-15.8.1">Prio3: Bind nonce to joint randomness parts. This is intended to address
+birthday attacks on robustness pointed out by <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-15.8.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.9">
-            <p id="section-1.1-13.9.1">Poplar1: Use different Prg invocations for producing the correlated randomness
+          <li class="normal" id="section-1.1-15.9">
+            <p id="section-1.1-15.9.1">Poplar1: Use different Prg invocations for producing the correlated randomness
 for inner and leaf nodes of the IDPF tree. This is intended to simplify
-implementations. (*)<a href="#section-1.1-13.9.1" class="pilcrow">¶</a></p>
+implementations. (*)<a href="#section-1.1-15.9.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.10">
-            <p id="section-1.1-13.10.1">Poplar1: Don't bind the candidate prefixes to the verifier randomness. This is
+          <li class="normal" id="section-1.1-15.10">
+            <p id="section-1.1-15.10.1">Poplar1: Don't bind the candidate prefixes to the verifier randomness. This is
 intended to improve performance, while not impacting security. According to
 the analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, it is necessary to restrict Poplar1 usage such
 that no report is aggregated more than once at a given level of the IDPF tree;
 otherwise, attacks on privacy may be possible. In light of this restriction,
-there is no added benefit of binding to the prefixes themselves. (*)<a href="#section-1.1-13.10.1" class="pilcrow">¶</a></p>
+there is no added benefit of binding to the prefixes themselves. (*)<a href="#section-1.1-15.10.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.11">
-            <p id="section-1.1-13.11.1">Poplar1: During preparation, assert that all candidate prefixes are unique
+          <li class="normal" id="section-1.1-15.11">
+            <p id="section-1.1-15.11.1">Poplar1: During preparation, assert that all candidate prefixes are unique
 and appear in order. Uniqueness is required to avoid erroneously rejecting a
 valid report; the ordering constraint ensures the uniqueness check can be
-performed efficiently. (*)<a href="#section-1.1-13.11.1" class="pilcrow">¶</a></p>
+performed efficiently. (*)<a href="#section-1.1-15.11.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.12">
-            <p id="section-1.1-13.12.1">Poplar1: Increase the maximum candidate prefix count in the encoding of the
-aggregation parameter. (*)<a href="#section-1.1-13.12.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-15.12">
+            <p id="section-1.1-15.12.1">Poplar1: Increase the maximum candidate prefix count in the encoding of the
+aggregation parameter. (*)<a href="#section-1.1-15.12.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.13">
-            <p id="section-1.1-13.13.1">Poplar1: Bind the nonce to the correlated randomness derivation. This is
+          <li class="normal" id="section-1.1-15.13">
+            <p id="section-1.1-15.13.1">Poplar1: Bind the nonce to the correlated randomness derivation. This is
 intended to provide defense-in-depth by ensuring the Aggregators reject the
-report if the nonce does not match what the Client used for sharding. (*)<a href="#section-1.1-13.13.1" class="pilcrow">¶</a></p>
+report if the nonce does not match what the Client used for sharding. (*)<a href="#section-1.1-15.13.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.14">
-            <p id="section-1.1-13.14.1">Poplar1: Clarify that the aggregation parameter encoding is <span class="bcp14">OPTIONAL</span>.
+          <li class="normal" id="section-1.1-15.14">
+            <p id="section-1.1-15.14.1">Poplar1: Clarify that the aggregation parameter encoding is <span class="bcp14">OPTIONAL</span>.
 Accordingly, update implementation considerations around cross-aggregation
-state.<a href="#section-1.1-13.14.1" class="pilcrow">¶</a></p>
+state.<a href="#section-1.1-15.14.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.15">
-            <p id="section-1.1-13.15.1">IdpfPoplar: Add implementation considerations around branching on the values
-of control bits.<a href="#section-1.1-13.15.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-15.15">
+            <p id="section-1.1-15.15.1">IdpfPoplar: Add implementation considerations around branching on the values
+of control bits.<a href="#section-1.1-15.15.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.16">
-            <p id="section-1.1-13.16.1">IdpfPoplar: When decoding the the control bits in the public share, assert
-that the trailing bits of the final byte are all zero. (*)<a href="#section-1.1-13.16.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-1.1-14">03:<a href="#section-1.1-14" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-1.1-15.1">
-            <p id="section-1.1-15.1.1">Define codepoints for (V)DAFs and use them for domain separation in Prio3 and
-Poplar1. (*)<a href="#section-1.1-15.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-15.2">
-            <p id="section-1.1-15.2.1">Prio3: Align joint randomness computation with revised paper <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>.
-This change mitigates an attack on robustness. (*)<a href="#section-1.1-15.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-15.3">
-            <p id="section-1.1-15.3.1">Prio3: Remove an intermediate PRG evaluation from query randomness generation.
-(*)<a href="#section-1.1-15.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-15.4">
-            <p id="section-1.1-15.4.1">Add additional guidance for choosing FFT-friendly fields.<a href="#section-1.1-15.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-15.16">
+            <p id="section-1.1-15.16.1">IdpfPoplar: When decoding the the control bits in the public share, assert
+that the trailing bits of the final byte are all zero. (*)<a href="#section-1.1-15.16.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-16">02:<a href="#section-1.1-16" class="pilcrow">¶</a></p>
+<p id="section-1.1-16">03:<a href="#section-1.1-16" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-17.1">
-            <p id="section-1.1-17.1.1">Complete the initial specification of Poplar1.<a href="#section-1.1-17.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-17.1.1">Define codepoints for (V)DAFs and use them for domain separation in Prio3 and
+Poplar1. (*)<a href="#section-1.1-17.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-17.2">
-            <p id="section-1.1-17.2.1">Extend (V)DAF syntax to include a "public share" output by the Client and
-distributed to all of the Aggregators. This is to accommodate "extractable"
-IDPFs as required for Poplar1. (See <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Section 4.3 for details.)<a href="#section-1.1-17.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-17.2.1">Prio3: Align joint randomness computation with revised paper <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>.
+This change mitigates an attack on robustness. (*)<a href="#section-1.1-17.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-17.3">
-            <p id="section-1.1-17.3.1">Extend (V)DAF syntax to allow the unsharding step to take into account the
-number of measurements aggregated.<a href="#section-1.1-17.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-17.3.1">Prio3: Remove an intermediate PRG evaluation from query randomness generation.
+(*)<a href="#section-1.1-17.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-17.4">
-            <p id="section-1.1-17.4.1">Extend FLP syntax by adding a method for decoding the aggregate result from a
-vector of field elements. The new method takes into account the number of
-measurements.<a href="#section-1.1-17.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-17.5">
-            <p id="section-1.1-17.5.1">Prio3: Align aggregate result computation with updated FLP syntax.<a href="#section-1.1-17.5.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-17.6">
-            <p id="section-1.1-17.6.1">Prg: Add a method for statefully generating a vector of field elements.<a href="#section-1.1-17.6.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-17.7">
-            <p id="section-1.1-17.7.1">Field: Require that field elements are fully reduced before decoding. (*)<a href="#section-1.1-17.7.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-17.8">
-            <p id="section-1.1-17.8.1">Define new field Field255.<a href="#section-1.1-17.8.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-17.4.1">Add additional guidance for choosing FFT-friendly fields.<a href="#section-1.1-17.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-18">01:<a href="#section-1.1-18" class="pilcrow">¶</a></p>
+<p id="section-1.1-18">02:<a href="#section-1.1-18" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-19.1">
-            <p id="section-1.1-19.1.1">Require that VDAFs specify serialization of aggregate shares.<a href="#section-1.1-19.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-19.1.1">Complete the initial specification of Poplar1.<a href="#section-1.1-19.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-19.2">
-            <p id="section-1.1-19.2.1">Define Distributed Aggregation Functions (DAFs).<a href="#section-1.1-19.2.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-19.2.1">Extend (V)DAF syntax to include a "public share" output by the Client and
+distributed to all of the Aggregators. This is to accommodate "extractable"
+IDPFs as required for Poplar1. (See <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Section 4.3 for details.)<a href="#section-1.1-19.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-19.3">
-            <p id="section-1.1-19.3.1">Prio3: Move proof verifier check from <code>prep_next()</code> to
-<code>prep_shares_to_prep()</code>. (*)<a href="#section-1.1-19.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-19.3.1">Extend (V)DAF syntax to allow the unsharding step to take into account the
+number of measurements aggregated.<a href="#section-1.1-19.3.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-19.4">
-            <p id="section-1.1-19.4.1">Remove public parameter and replace verification parameter with a
-"verification key" and "Aggregator ID".<a href="#section-1.1-19.4.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-19.4.1">Extend FLP syntax by adding a method for decoding the aggregate result from a
+vector of field elements. The new method takes into account the number of
+measurements.<a href="#section-1.1-19.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-19.5">
+            <p id="section-1.1-19.5.1">Prio3: Align aggregate result computation with updated FLP syntax.<a href="#section-1.1-19.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-19.6">
+            <p id="section-1.1-19.6.1">Prg: Add a method for statefully generating a vector of field elements.<a href="#section-1.1-19.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-19.7">
+            <p id="section-1.1-19.7.1">Field: Require that field elements are fully reduced before decoding. (*)<a href="#section-1.1-19.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-19.8">
+            <p id="section-1.1-19.8.1">Define new field Field255.<a href="#section-1.1-19.8.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-20">01:<a href="#section-1.1-20" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-21.1">
+            <p id="section-1.1-21.1.1">Require that VDAFs specify serialization of aggregate shares.<a href="#section-1.1-21.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-21.2">
+            <p id="section-1.1-21.2.1">Define Distributed Aggregation Functions (DAFs).<a href="#section-1.1-21.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-21.3">
+            <p id="section-1.1-21.3.1">Prio3: Move proof verifier check from <code>prep_next()</code> to
+<code>prep_shares_to_prep()</code>. (*)<a href="#section-1.1-21.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-21.4">
+            <p id="section-1.1-21.4.1">Remove public parameter and replace verification parameter with a
+"verification key" and "Aggregator ID".<a href="#section-1.1-21.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -3634,8 +3639,8 @@ def vec_neg(vec: list[F]) -&gt; list[F]:
           </h4>
 <p id="section-6.1.2-1">Some VDAFs require fields that are suitable for efficient computation of the
 discrete Fourier transform, as this allows for fast polynomial interpolation.
-(One example is Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) when instantiated with the generic FLP of
-<a href="#flp-generic-construction" class="auto internal xref">Section 7.3.3</a>.) Specifically, a field is said to be
+(One example is Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) when instantiated with the FLP of
+<a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.) Specifically, a field is said to be
 "FFT-friendly" if, in addition to satisfying the interface described in
 <a href="#field" class="auto internal xref">Section 6.1</a>, it implements the following method:<a href="#section-6.1.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -3850,7 +3855,7 @@ class XofTurboShake128(Xof):
 where a XOF is needed in the VDAFs described in this document, there are some
 cases where a more efficient instantiation based on fixed-key AES is possible.
 For now, this is limited to the XOF used inside the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a>
-implementation in Poplar1 <a href="#idpf-poplar" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this
+implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this
 XOF anywhere else. The length of the domain separation string <code>dst</code> passed to
 XofFixedKeyAes128 <span class="bcp14">MUST NOT</span> exceed 255 bytes. See Security Considerations
 <a href="#security" class="auto internal xref">Section 9</a> for a more detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
@@ -3874,8 +3879,7 @@ class XofFixedKeyAes128(Xof):
         # Use TurboSHAKE128 to derive a key from the binder string
         # and domain separation tag. Note that the AES key does not
         # need to be kept secret from any party. However, when used
-        # with IdpfPoplar, we require the binder to be a random
-        # nonce.
+        # with an IDPF, we require the binder to be a random nonce.
         #
         # Implementation note: This step can be cached across XOF
         # evaluations with many different seeds.
@@ -4024,7 +4028,7 @@ particular class of FLPs into a VDAF.<a href="#section-7-6" class="pilcrow">¶</
 <p id="section-7-7">The remainder of this section is structured as follows. The syntax for FLPs is
 described in <a href="#flp" class="auto internal xref">Section 7.1</a>. The generic transformation of an FLP into Prio3 is
 specified in <a href="#prio3-construction" class="auto internal xref">Section 7.2</a>. Next, a concrete FLP suitable for any
-validity circuit is specified in <a href="#flp-generic" class="auto internal xref">Section 7.3</a>. Finally, instantiations of
+validity circuit is specified in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>. Finally, instantiations of
 Prio3 for various types of measurements are specified in
 <a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-7-7" class="pilcrow">¶</a></p>
 <div id="flp">
@@ -4161,7 +4165,7 @@ algorithm.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.1-8">The query-generation algorithm includes a parameter <code>num_shares</code> that specifies
 the number of shares that were generated. If these data are not secret shared,
 then <code>num_shares == 1</code>. This parameter is useful for certain FLP constructions.
-For example, the FLP in <a href="#flp-generic" class="auto internal xref">Section 7.3</a> is defined in terms of an arithmetic
+For example, the FLP in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> is defined in terms of an arithmetic
 circuit; when the circuit contains constants, it is sometimes necessary to
 normalize those constants to ensure that the circuit's output, when run on a
 valid measurement, is the same regardless of the number of shares.<a href="#section-7.1-8" class="pilcrow">¶</a></p>
@@ -4227,7 +4231,7 @@ output is <code>False</code> with high probability. False positives are possible
 a small probability that a verifier accepts an invalid input as valid. An FLP
 is said to be "sound" if this probability is sufficiently small. The soundness
 of the FLP depends on a variety of parameters, like the length of the
-input and the size of the field. See <a href="#flp-generic" class="auto internal xref">Section 7.3</a> for details.<a href="#section-7.1-11" class="pilcrow">¶</a></p>
+input and the size of the field. See <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> for details.<a href="#section-7.1-11" class="pilcrow">¶</a></p>
 <p id="section-7.1-12">Note that soundness of an FLP system is not the same as robustness for a VDAF
 In particular, soundness of the FLP is necessary, but insufficient for
 robusntess of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>). See <a href="#security-multiproof" class="auto internal xref">Section 9.6</a> for details.<a href="#section-7.1-12" class="pilcrow">¶</a></p>
@@ -4297,7 +4301,7 @@ to the notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CG
 <p id="section-7.1.2-1">It is sometimes desirable to generate and verify multiple independent proofs
 for the same input. First, this improves the soundness of the proof system
 without having to change any of its parameters. Second, it allows a smaller
-field to be used (e.g., replace Field128 with Field64, see <a href="#flp-generic" class="auto internal xref">Section 7.3</a>)
+field to be used (e.g., replace Field128 with Field64, see <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>)
 without sacrificing soundness. Generally, choosing a smaller field can
 significantly reduce communication cost. (This is a trade-off, of course, since
 generating and verifying more proofs requires more time.) Given these benefits,
@@ -5295,38 +5299,23 @@ struct {
 </div>
 </section>
 </div>
-<div id="flp-generic">
+<div id="flp-bbcggi19">
 <section id="section-7.3">
-        <h3 id="name-a-general-purpose-flp">
-<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-a-general-purpose-flp" class="section-name selfRef">A General-Purpose FLP</a>
+        <h3 id="name-the-flp-of">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-the-flp-of" class="section-name selfRef">The FLP of <span class="cite xref">[BBCGGI19]</span></a>
         </h3>
 <p id="section-7.3-1">This section describes an FLP based on the construction from in <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
-Section 4.2. We begin in <a href="#flp-generic-overview" class="auto internal xref">Section 7.3.1</a> with an overview of their proof
+Section 4.2. We begin in <a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of their proof
 system and the extensions to their proof system made here. The construction is
-specified in <a href="#flp-generic-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+specified in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="section-7.3-2.1">
-            <p id="section-7.3-2.1.1">OPEN ISSUE We're not yet sure if specifying this general-purpose FLP is
-desirable. It might be preferable to specify specialized FLPs for each data
-type that we want to standardize, for two reasons. First, clear and concise
-specifications are likely easier to write for specialized FLPs rather than the
-general one. Second, we may end up tailoring each FLP to the measurement type
-in a way that improves performance, but breaks compatibility with the
-general-purpose FLP.<a href="#section-7.3-2.1.1" class="pilcrow">¶</a></p>
-<p id="section-7.3-2.1.2">In any case, we can't make this decision until we know which data types to
-standardize, so for now, we'll stick with the general-purpose construction.
-The reference implementation can be found at
-https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc.<a href="#section-7.3-2.1.2" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-7.3-3.1">
-            <p id="section-7.3-3.1.1">OPEN ISSUE Chris Wood points out that the this section reads more like a paper
+            <p id="section-7.3-2.1.1">OPEN ISSUE Chris Wood points out that the this section reads more like a paper
 than a standard. Eventually we'll want to work this into something that is
-readily consumable by the CFRG.<a href="#section-7.3-3.1.1" class="pilcrow">¶</a></p>
+readily consumable by the CFRG.<a href="#section-7.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<div id="flp-generic-overview">
+<div id="flp-bbcggi19-overview">
 <section id="section-7.3.1">
           <h4 id="name-overview-2">
 <a href="#section-7.3.1" class="section-number selfRef">7.3.1. </a><a href="#name-overview-2" class="section-name selfRef">Overview</a>
@@ -5396,7 +5385,7 @@ of the measurement and proof. The proof is constructed roughly as follows. Let
 the <code>k</code>th call to the gadget during the evaluation of <code>C(x)</code>. Suppose there are
 <code>M</code> such calls and fix distinct field elements <code>alpha[0], ..., alpha[M-1]</code>. (We
 will require these points to have a special property, as we'll discuss in
-<a href="#flp-generic-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>; but for the moment it is only important
+<a href="#flp-bbcggi19-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>; but for the moment it is only important
 that they are distinct.)<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-13">The prover constructs from <code>wire</code> and <code>alpha</code> a polynomial that, when evaluated
 at <code>alpha[k-1]</code>, produces the output of the <code>k</code>th call to the gadget. Let us
@@ -5410,8 +5399,8 @@ to produce a gadget polynomial that would result in <code>C(x)</code> being comp
 incorrectly, potentially resulting in an invalid measurement being accepted. To
 prevent this, the verifier performs a probabilistic test to check that the
 gadget polynomial is well-formed. This test, and the procedure for constructing
-the gadget polynomial, are described in detail in <a href="#flp-generic-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-14" class="pilcrow">¶</a></p>
-<div id="flp-generic-overview-extensions">
+the gadget polynomial, are described in detail in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-14" class="pilcrow">¶</a></p>
+<div id="flp-bbcggi19-overview-extensions">
 <section id="section-7.3.1.1">
             <h5 id="name-extensions">
 <a href="#section-7.3.1.1" class="section-number selfRef">7.3.1.1. </a><a href="#name-extensions" class="section-name selfRef">Extensions</a>
@@ -5471,12 +5460,12 @@ probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
 </div>
 </section>
 </div>
-<div id="flp-generic-valid">
+<div id="flp-bbcggi19-valid">
 <section id="section-7.3.2">
           <h4 id="name-validity-circuits">
 <a href="#section-7.3.2" class="section-number selfRef">7.3.2. </a><a href="#name-validity-circuits" class="section-name selfRef">Validity Circuits</a>
           </h4>
-<p id="section-7.3.2-1">The FLP described in <a href="#flp-generic-construction" class="auto internal xref">Section 7.3.3</a> is defined in terms of a
+<p id="section-7.3.2-1">The FLP described in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a> is defined in terms of a
 validity circuit <code>Valid</code> that implements the interface described here.<a href="#section-7.3.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.3.2-2">A concrete <code>Valid</code> defines the following parameters:<a href="#section-7.3.2-2" class="pilcrow">¶</a></p>
 <span id="name-validity-circuit-parameters"></span><table class="center" id="table-7">
@@ -5551,7 +5540,7 @@ validity circuit <code>Valid</code> that implements the interface described here
 <p id="section-7.3.2-4">Each gadget <code>G</code> in <code>GADGETS</code> defines a constant <code>DEGREE</code> that specifies the
 circuit's "arithmetic degree". This is defined to be the degree of the
 polynomial that computes it. For example, the <code>Mul</code> circuit in
-<a href="#flp-generic-overview" class="auto internal xref">Section 7.3.1</a> is defined by the polynomial <code>Mul(x) = x * x</code>, which
+<a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> is defined by the polynomial <code>Mul(x) = x * x</code>, which
 has degree <code>2</code>. Hence, the arithmetic degree of this gadget is <code>2</code>.<a href="#section-7.3.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.2-5">Each gadget also defines a parameter <code>ARITY</code> that specifies the circuit's arity
 (i.e., the number of input wires).<a href="#section-7.3.2-5" class="pilcrow">¶</a></p>
@@ -5620,55 +5609,49 @@ def check_valid_eval(
             </figcaption></figure>
 </section>
 </div>
-<div id="flp-generic-construction">
+<div id="flp-bbcggi19-construction">
 <section id="section-7.3.3">
           <h4 id="name-construction-2">
 <a href="#section-7.3.3" class="section-number selfRef">7.3.3. </a><a href="#name-construction-2" class="section-name selfRef">Construction</a>
           </h4>
-<p id="section-7.3.3-1">This section specifies <code>FlpGeneric</code>, an implementation of the <code>Flp</code> interface
-(<a href="#flp" class="auto internal xref">Section 7.1</a>). It has as a generic parameter a validity circuit <code>Valid</code> implementing
-the interface defined in <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>.<a href="#section-7.3.3-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-7.3.3-2.1">
-              <p id="section-7.3.3-2.1.1">NOTE A reference implementation can be found in
-https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/flp_generic.py.<a href="#section-7.3.3-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-7.3.3-3">The FLP parameters for <code>FlpGeneric</code> are defined in <a href="#flp-generic-param" class="auto internal xref">Table 8</a>. The
-required methods for generating the proof, generating the verifier, and deciding
-validity are specified in the remaining subsections.<a href="#section-7.3.3-3" class="pilcrow">¶</a></p>
-<p id="section-7.3.3-4">In the remainder, we let <code>[n]</code> denote the set <code>{1, ..., n}</code> for positive integer
-<code>n</code>. We also define the following constants:<a href="#section-7.3.3-4" class="pilcrow">¶</a></p>
+<p id="section-7.3.3-1">This section specifies an implementation of the <code>Flp</code> interface (<a href="#flp" class="auto internal xref">Section 7.1</a>). It
+has as a generic parameter a validity circuit <code>Valid</code> implementing the
+interface defined in <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>.<a href="#section-7.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3.3-2">The parameters are defined in <a href="#flp-bbcggi19-param" class="auto internal xref">Table 8</a>. The required methods for
+generating the proof, generating the verifier, and deciding validity are
+specified in the remaining subsections.<a href="#section-7.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.3.3-3">In the remainder, we let <code>[n]</code> denote the set <code>{1, ..., n}</code> for positive integer
+<code>n</code>. We also define the following constants:<a href="#section-7.3.3-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.3-5.1">
-              <p id="section-7.3.3-5.1.1">Let <code>H = len(valid.GADGETS)</code><a href="#section-7.3.3-5.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-7.3.3-4.1">
+              <p id="section-7.3.3-4.1.1">Let <code>H = len(valid.GADGETS)</code><a href="#section-7.3.3-4.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-7.3.3-5.2">
-              <p id="section-7.3.3-5.2.1">For each <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3-5.2.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-7.3.3-4.2">
+              <p id="section-7.3.3-4.2.1">For each <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3-4.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.3-5.2.2.1">
-                  <p id="section-7.3.3-5.2.2.1.1">Let <code>G_i = valid.GADGETS[i]</code><a href="#section-7.3.3-5.2.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-7.3.3-4.2.2.1">
+                  <p id="section-7.3.3-4.2.2.1.1">Let <code>G_i = valid.GADGETS[i]</code><a href="#section-7.3.3-4.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li class="normal" id="section-7.3.3-5.2.2.2">
-                  <p id="section-7.3.3-5.2.2.2.1">Let <code>L_i = valid.GADGETS[i].ARITY</code><a href="#section-7.3.3-5.2.2.2.1" class="pilcrow">¶</a></p>
+                <li class="normal" id="section-7.3.3-4.2.2.2">
+                  <p id="section-7.3.3-4.2.2.2.1">Let <code>L_i = valid.GADGETS[i].ARITY</code><a href="#section-7.3.3-4.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                <li class="normal" id="section-7.3.3-5.2.2.3">
-                  <p id="section-7.3.3-5.2.2.3.1">Let <code>M_i = valid.GADGET_CALLS[i]</code><a href="#section-7.3.3-5.2.2.3.1" class="pilcrow">¶</a></p>
+                <li class="normal" id="section-7.3.3-4.2.2.3">
+                  <p id="section-7.3.3-4.2.2.3.1">Let <code>M_i = valid.GADGET_CALLS[i]</code><a href="#section-7.3.3-4.2.2.3.1" class="pilcrow">¶</a></p>
 </li>
-                <li class="normal" id="section-7.3.3-5.2.2.4">
-                  <p id="section-7.3.3-5.2.2.4.1">Let <code>P_i = next_power_of_2(M_i+1)</code><a href="#section-7.3.3-5.2.2.4.1" class="pilcrow">¶</a></p>
+                <li class="normal" id="section-7.3.3-4.2.2.4">
+                  <p id="section-7.3.3-4.2.2.4.1">Let <code>P_i = next_power_of_2(M_i+1)</code><a href="#section-7.3.3-4.2.2.4.1" class="pilcrow">¶</a></p>
 </li>
-                <li class="normal" id="section-7.3.3-5.2.2.5">
-                  <p id="section-7.3.3-5.2.2.5.1">Let <code>alpha_i = Field.gen()^(Field.GEN_ORDER / P_i)</code><a href="#section-7.3.3-5.2.2.5.1" class="pilcrow">¶</a></p>
+                <li class="normal" id="section-7.3.3-4.2.2.5">
+                  <p id="section-7.3.3-4.2.2.5.1">Let <code>alpha_i = Field.gen()^(Field.GEN_ORDER / P_i)</code><a href="#section-7.3.3-4.2.2.5.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
 </li>
           </ul>
-<span id="name-flp-parameters-of-flpgeneri"></span><div id="flp-generic-param">
+<span id="name-parameters-of-flp-of-bbcggi"></span><div id="flp-bbcggi19-param">
 <table class="center" id="table-8">
             <caption>
 <a href="#table-8" class="selfRef">Table 8</a>:
-<a href="#name-flp-parameters-of-flpgeneri" class="selfRef">FLP Parameters of FlpGeneric.</a>
+<a href="#name-parameters-of-flp-of-bbcggi" class="selfRef">Parameters of FLP of BBCGGI19.</a>
             </caption>
 <thead>
               <tr>
@@ -5682,14 +5665,14 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <code>PROVE_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>valid.prove_rand_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.prove_rand_len()</code> (see <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>QUERY_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>valid.query_rand_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.query_rand_len()</code> (see <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -5720,14 +5703,14 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
                   <code>PROOF_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>valid.proof_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.proof_len()</code> (see <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>VERIFIER_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>valid.verifier_len()</code> (see <a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+                  <code>valid.verifier_len()</code> (see <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -5748,7 +5731,7 @@ validity are specified in the remaining subsections.<a href="#section-7.3.3-3" c
             </tbody>
           </table>
 </div>
-<div id="flp-generic-construction-prove">
+<div id="flp-bbcggi19-construction-prove">
 <section id="section-7.3.3.1">
             <h5 id="name-proof-generation">
 <a href="#section-7.3.3.1" class="section-number selfRef">7.3.3.1. </a><a href="#name-proof-generation" class="section-name selfRef">Proof Generation</a>
@@ -5812,7 +5795,7 @@ where <code>coeff_i</code> is the vector of coefficients of <code>poly_gadget_i<
 <code>[H]</code>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="flp-generic-construction-query">
+<div id="flp-bbcggi19-construction-query">
 <section id="section-7.3.3.2">
             <h5 id="name-query-generation">
 <a href="#section-7.3.3.2" class="section-number selfRef">7.3.3.2. </a><a href="#name-query-generation" class="section-name selfRef">Query Generation</a>
@@ -5825,7 +5808,7 @@ is generated as follows:<a href="#section-7.3.3.2-1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.3.3.2-2.2">
                 <p id="section-7.3.3.2-2.2.1">Partition <code>proof</code> into the sub-vectors <code>seed_1</code>, <code>coeff_1</code>, ..., <code>seed_H</code>,
-<code>coeff_H</code> defined in <a href="#flp-generic-construction-prove" class="auto internal xref">Section 7.3.3.1</a>.<a href="#section-7.3.3.2-2.2.1" class="pilcrow">¶</a></p>
+<code>coeff_H</code> defined in <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3.1</a>.<a href="#section-7.3.3.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.3.3.2-2.3">
                 <p id="section-7.3.3.2-2.3.1">Evaluate <code>Valid</code> on input of <code>meas</code> and <code>joint_rand</code>, recording the inputs
@@ -5877,7 +5860,7 @@ as follows:<a href="#section-7.3.3.3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-7.3.3.3-2">
 <li id="section-7.3.3.3-2.1">
                 <p id="section-7.3.3.3-2.1.1">Parse <code>verifier</code> into <code>v</code>, <code>x_1</code>, <code>y_1</code>, ..., <code>x_H</code>, <code>y_H</code> as defined in
-<a href="#flp-generic-construction-query" class="auto internal xref">Section 7.3.3.2</a>.<a href="#section-7.3.3.3-2.1.1" class="pilcrow">¶</a></p>
+<a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.3.2</a>.<a href="#section-7.3.3.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.3.3.3-2.2">
                 <p id="section-7.3.3.3-2.2.1">Check for well-formedness of the gadget polynomials. For every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.3-2.2.1" class="pilcrow">¶</a></p>
@@ -5916,15 +5899,8 @@ as follows:<a href="#section-7.3.3.3-1" class="pilcrow">¶</a></p>
 <a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-instantiations" class="section-name selfRef">Instantiations</a>
         </h3>
 <p id="section-7.4-1">This section specifies instantiations of Prio3 for various measurement types.
-Each uses <code>FlpGeneric</code> as the FLP (<a href="#flp-generic" class="auto internal xref">Section 7.3</a>) and is determined by a
-validity circuit (<a href="#flp-generic-valid" class="auto internal xref">Section 7.3.2</a>) and a XOF (<a href="#xof" class="auto internal xref">Section 6.2</a>). Test vectors for
-each can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-7.4-2.1">
-            <p id="section-7.4-2.1.1">NOTE Reference implementations of each of these VDAFs can be found in
-https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/vdaf_prio3.sage.<a href="#section-7.4-2.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
+Each is determined by a validity circuit (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>) and a XOF
+(<a href="#xof" class="auto internal xref">Section 6.2</a>). Test vectors for each can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
 <div id="prio3count">
 <section id="section-7.4.1">
           <h4 id="name-prio3count">
@@ -6249,10 +6225,10 @@ than one such subcircuit into a gadget.<a href="#section-7.4.3-5" class="pilcrow
 <code>count</code> of how many times it evaluates that subcircuit. It takes in a list of
 inputs and passes them through to instances of the subcircuit in the same order.
 It returns the sum of the subcircuit outputs. Note that only the <code>ParallelSum</code>
-gadget itself, and not its subcircuit, participates in <code>FlpGeneric</code>'s wire
-recording during evaluation, gadget consistency proofs, and proof validation,
-even though the subcircuit is provided to <code>ParallelSum</code> as an implementation
-of the <code>Gadget</code> interface.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
+gadget itself, and not its subcircuit, participates in the FLP's wire recording
+during evaluation, gadget consistency proofs, and proof validation, even though
+the subcircuit is provided to <code>ParallelSum</code> as an implementation of the
+<code>Gadget</code> interface.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.3-7">
 <pre>
 def eval(self, field: type[F], inp: list[F]) -&gt; F:
@@ -6411,7 +6387,7 @@ length is asymptotically minimized when the chunk length is near the square root
 of the length of the measurement. However, the relationship between VDAF
 parameters and proof length is complicated, involving two forms of rounding (the
 circuit pads the inputs to its last <code>ParallelSum</code> gadget call, up to the chunk
-length, and FlpGeneric rounds the degree of wire polynomials -- determined by
+length, and proof system rounds the degree of wire polynomials -- determined by
 the number of times a gadget is called -- up to the next power of two).
 Therefore, the optimal choice of <code>chunk_length</code> for a concrete measurement size
 will vary, and must be found through trial and error. Setting <code>chunk_length</code>
@@ -6865,7 +6841,7 @@ This protocol ensures that evaluating a set of input shares on a unique set of
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
 is zero everywhere except for at most one element, which is equal to one.<a href="#section-8-7" class="pilcrow">¶</a></p>
 <p id="section-8-8">The remainder of this section is structured as follows. IDPFs are defined in
-<a href="#idpf" class="auto internal xref">Section 8.1</a>; a concrete instantiation is given <a href="#idpf-poplar" class="auto internal xref">Section 8.3</a>. The Poplar1 VDAF is
+<a href="#idpf" class="auto internal xref">Section 8.1</a>; a concrete instantiation is given <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. The Poplar1 VDAF is
 defined in <a href="#poplar1-construction" class="auto internal xref">Section 8.2</a> in terms of a generic IDPF. Finally, a
 concrete instantiation of Poplar1 is specified in <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>;
 test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
@@ -6994,7 +6970,7 @@ stateless, in the sense that there is no state carried between IDPF evaluations.
 This is to align the IDPF syntax with the VDAF abstraction boundary, which does
 not include shared state across across VDAF evaluations. In practice, of course,
 it will often be beneficial to expose a stateful API for IDPFs and carry the
-state across evaluations. See <a href="#idpf-poplar" class="auto internal xref">Section 8.3</a> for details.<a href="#section-8.1-8" class="pilcrow">¶</a></p>
+state across evaluations. See <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> for details.<a href="#section-8.1-8" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-by"></span><div id="idpf-param">
 <table class="center" id="table-14">
           <caption>
@@ -7916,30 +7892,25 @@ next. This would help reduce communication overhead.<a href="#section-8.2.6.6-4"
 </div>
 </section>
 </div>
-<div id="idpf-poplar">
+<div id="idpf-bbcggi21">
 <section id="section-8.3">
         <h3 id="name-the-idpf-scheme-of">
 <a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-the-idpf-scheme-of" class="section-name selfRef">The IDPF scheme of <span class="cite xref">[BBCGGI21]</span></a>
         </h3>
-<p id="section-8.3-1">In this section we specify a concrete IDPF, called IdpfPoplar, suitable for
-instantiating Poplar1. The scheme gets its name from the name of the protocol of
+<p id="section-8.3-1">In this section we specify a concrete IDPF suitable for instantiating
+Poplar1. The scheme gets its name from the name of the protocol of
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.3-2.1">
-            <p id="section-8.3-2.1.1">TODO We should consider giving <code>IdpfPoplar</code> a more distinctive name.<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-8.3-3">The constant and type definitions required by the <code>Idpf</code> interface are given in
-<a href="#idpf-poplar-param" class="auto internal xref">Table 17</a>.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
-<p id="section-8.3-4">IdpfPoplar requires a XOF for deriving the output shares, as well as a variety
-of other artifacts used internally. For performance reasons, we instantiate
-this object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>). See
-<a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for justification of this choice.<a href="#section-8.3-4" class="pilcrow">¶</a></p>
-<span id="name-constants-and-type-definiti"></span><div id="idpf-poplar-param">
+<p id="section-8.3-2">The constant and type definitions required by the <code>Idpf</code> interface are given in
+<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 17</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+<p id="section-8.3-3">Our IDPF requires an XOF for deriving the output shares, as well as a variety of
+other artifacts used internally. For performance reasons, we instantiate this
+object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>). See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for
+justification of this choice.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
+<span id="name-constants-and-type-definiti"></span><div id="idpf-bbcggi21-param">
 <table class="center" id="table-17">
           <caption>
 <a href="#table-17" class="selfRef">Table 17</a>:
-<a href="#name-constants-and-type-definiti" class="selfRef">Constants and type definitions for IdpfPoplar.</a>
+<a href="#name-constants-and-type-definiti" class="selfRef">Constants and type definitions for the IDPF of BBCGGI21.</a>
           </caption>
 <thead>
             <tr>
@@ -7994,9 +7965,9 @@ to the high level idea.<a href="#section-8.3.1-1.1.1" class="pilcrow">¶</a></p>
           </ul>
 <p id="section-8.3.1-2">The description of the IDPF-key generation algorithm makes use of auxiliary
 functions <code>extend()</code>, <code>convert()</code>, and <code>encode_public_share()</code> defined in
-<a href="#idpf-poplar-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote the
+<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote the
 field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
-<span id="name-idpf-key-generation-algorit"></span><div id="idpf-poplar-gen">
+<span id="name-idpf-key-generation-algorit"></span><div id="idpf-bbcggi21-gen">
 <figure id="figure-28">
             <div class="breakable lang-python sourcecode" id="section-8.3.1-3.1">
 <pre>
@@ -8068,7 +8039,7 @@ def gen(
 </pre>
 </div>
 <figcaption><a href="#figure-28" class="selfRef">Figure 28</a>:
-<a href="#name-idpf-key-generation-algorit" class="selfRef">IDPF-key generation algorithm of IdpfPoplar.</a>
+<a href="#name-idpf-key-generation-algorit" class="selfRef">IDPF-key generation algorithm of BBCGGI21.</a>
             </figcaption></figure>
 </div>
 </section>
@@ -8085,8 +8056,8 @@ def gen(
           </ul>
 <p id="section-8.3.2-2">The description of the IDPF-evaluation algorithm makes use of auxiliary
 functions <code>extend()</code>, <code>convert()</code>, and <code>decode_public_share()</code> defined in
-<a href="#idpf-poplar-helper-functions" class="auto internal xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
-<span id="name-idpf-evaluation-generation-"></span><div id="idpf-poplar-eval">
+<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
+<span id="name-idpf-evaluation-generation-"></span><div id="idpf-bbcggi21-eval">
 <figure id="figure-29">
             <div class="breakable lang-python sourcecode" id="section-8.3.2-3.1">
 <pre>
@@ -8126,13 +8097,13 @@ def eval(
 
             # Implementation note: Typically the current round of
             # candidate prefixes would have been derived from
-            # aggregate results computed during previous rounds. For
-            # example, when using `IdpfPoplar` to compute heavy
-            # hitters, a string whose hit count exceeded the given
-            # threshold in the last round would be the prefix of each
-            # `prefix` in the current round. (See [BBCGGI21,
-            # Section 5.1].) In this case, part of the path would
-            # have already been traversed.
+            # aggregate results computed during previous rounds.
+            # For example, when using the IDPF to compute heavy
+            # hitters, a string whose hit count exceeded the
+            # given threshold in the last round would be the
+            # prefix of each `prefix` in the current round. (See
+            # [BBCGGI21, Section 5.1].) In this case, part of the
+            # path would have already been traversed.
             #
             # Re-computing nodes along previously traversed paths is
             # wasteful. Implementations can eliminate this added
@@ -8194,17 +8165,17 @@ def eval_next(
 </pre>
 </div>
 <figcaption><a href="#figure-29" class="selfRef">Figure 29</a>:
-<a href="#name-idpf-evaluation-generation-" class="selfRef">IDPF-evaluation generation algorithm of IdpfPoplar.</a>
+<a href="#name-idpf-evaluation-generation-" class="selfRef">IDPF-evaluation generation algorithm of BBCGGI21.</a>
             </figcaption></figure>
 </div>
 </section>
 </div>
-<div id="idpf-poplar-helper-functions">
+<div id="idpf-bbcggi21-helper-functions">
 <section id="section-8.3.3">
           <h4 id="name-auxiliary-functions-3">
 <a href="#section-8.3.3" class="section-number selfRef">8.3.3. </a><a href="#name-auxiliary-functions-3" class="section-name selfRef">Auxiliary Functions</a>
           </h4>
-<span id="name-helper-functions-for-idpfpo"></span><div id="idpf-poplar-helpers">
+<span id="name-helper-functions-for-the-id"></span><div id="idpf-bbcggi21-helpers">
 <figure id="figure-30">
             <div class="breakable lang-python sourcecode" id="section-8.3.3-1.1">
 <pre>
@@ -8276,7 +8247,7 @@ def decode_public_share(
 </pre>
 </div>
 <figcaption><a href="#figure-30" class="selfRef">Figure 30</a>:
-<a href="#name-helper-functions-for-idpfpo" class="selfRef">Helper functions for IdpfPoplar.</a>
+<a href="#name-helper-functions-for-the-id" class="selfRef">Helper functions for the IDPF.</a>
             </figcaption></figure>
 </div>
 <p id="section-8.3.3-2">Here, <code>pack_bits()</code> takes a list of bits, packs each group of eight bits into a
@@ -8296,9 +8267,9 @@ throws an error.<a href="#section-8.3.3-2" class="pilcrow">¶</a></p>
         <h3 id="name-instantiation">
 <a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-instantiation" class="section-name selfRef">Instantiation</a>
         </h3>
-<p id="section-8.4-1">By default, Poplar1 is instantiated with IdpfPoplar (<code>VALUE_LEN == 2</code>) and
-XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>). This VDAF is suitable for any
-positive value of <code>BITS</code>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+<p id="section-8.4-1">By default, Poplar1 is instantiated with the IDPF in <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> (<code>VALUE_LEN
+== 2</code>) and XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>). This VDAF is suitable for
+any positive value of <code>BITS</code>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -8549,13 +8520,13 @@ Output Functions (XOFs). In the security analyses of our protocols, these are
 usually modeled as random oracles. XofTurboShake128 is designed to be
 indifferentiable from a random oracle <span>[<a href="#MRH04" class="cite xref">MRH04</a>]</span>, making it a suitable choice
 for most situations.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
-<p id="section-9.5-2">The one exception is the Idpf implementation IdpfPoplar <a href="#idpf-poplar" class="auto internal xref">Section 8.3</a>.
-Here, a random oracle is not needed to prove privacy, since the analysis of
-<span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Proposition 1, only requires a Pseudorandom Generator (PRG).
-As observed in <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>, a PRG can be instantiated from a correlation-robust
-hash function <code>H</code>. Informally, correlation robustness requires that for a random
-<code>r</code>, <code>H(xor(r, x))</code> is computationally indistinguishable from a random function of <code>x</code>.
-A PRG can therefore be constructed as<a href="#section-9.5-2" class="pilcrow">¶</a></p>
+<p id="section-9.5-2">The one exception is the IDPF of <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. Here, a random oracle is not
+needed to prove privacy, since the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Proposition 1, only
+requires a Pseudorandom Generator (PRG). As observed in <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>, a PRG can be
+instantiated from a correlation-robust hash function <code>H</code>. Informally,
+correlation robustness requires that for a random <code>r</code>, <code>H(xor(r, x))</code> is
+computationally indistinguishable from a random function of <code>x</code>. A PRG can
+therefore be constructed as<a href="#section-9.5-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.5-3">
 <pre>
 PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...
@@ -8582,7 +8553,7 @@ evaluated by the helpers.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
         <h3 id="name-choosing-the-field-size">
 <a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-choosing-the-field-size" class="section-name selfRef">Choosing the Field Size</a>
         </h3>
-<p id="section-9.6-1">Prio3 and other systems built from FLPs (<a href="#flp-generic" class="auto internal xref">Section 7.3</a> in particular) may
+<p id="section-9.6-1">Prio3 and other systems built from FLPs (<a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> in particular) may
 benefit from choosing a field size that is as small as possible. Generally
 speaking, a smaller field results in lower communication and storage costs.
 Care must be taken, however, since a smaller field also results in degraded (or
@@ -8591,7 +8562,7 @@ even vacuous) robustness.<a href="#section-9.6-1" class="pilcrow">¶</a></p>
 uses Field64; but Prio3Sum, Prio3SumVec, and Prio3Histogram use Field128, a
 field that is twice as large as Field64. This is due to the use of joint
 randomness (<a href="#flp" class="auto internal xref">Section 7.1</a>) in the latter variants. Joint randomness allows for more
-flexible circuit design (see <a href="#flp-generic-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>), but opens up
+flexible circuit design (see <a href="#flp-bbcggi19-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>), but opens up
 Prio3 to precomputation attacks, which the larger field mitigates. (See
 <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, Theorem 1.) Note that privacy is not susceptible to such attacks.<a href="#section-9.6-2" class="pilcrow">¶</a></p>
 <p id="section-9.6-3">Another way to mitigate this issue (or improve robustness in general) is to
