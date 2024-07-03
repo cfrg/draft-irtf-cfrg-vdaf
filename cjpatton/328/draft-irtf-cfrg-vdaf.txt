@@ -3807,6 +3807,7 @@ Table of Contents
 
    def eval(self, _field: type[F], inp: list[F]) -> F:
        self.check_gadget_eval(inp)
+       return inp[0] * inp[0] - inp[0]
 
    The Sum validity circuit is defined as
 

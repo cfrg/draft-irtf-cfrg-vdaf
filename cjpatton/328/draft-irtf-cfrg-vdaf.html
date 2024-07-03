@@ -6146,7 +6146,7 @@ gadget, denoted <code>Range2</code>, is the degree-2, arity-1 gadget defined as<
 <pre>
 def eval(self, _field: type[F], inp: list[F]) -&gt; F:
     self.check_gadget_eval(inp)
-
+    return inp[0] * inp[0] - inp[0]
 </pre><a href="#section-7.4.2-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.2-7">The <code>Sum</code> validity circuit is defined as<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
