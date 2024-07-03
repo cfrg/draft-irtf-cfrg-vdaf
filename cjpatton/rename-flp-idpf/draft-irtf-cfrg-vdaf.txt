@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 3 January 2025                                             ISRG
+Expires: 4 January 2025                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             2 July 2024
+                                                             3 July 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 January 2025.
+   This Internet-Draft will expire on 4 January 2025.
 
 Copyright Notice
 
@@ -2161,7 +2161,7 @@ Table of Contents
            # Use TurboSHAKE128 to derive a key from the binder string
            # and domain separation tag. Note that the AES key does not
            # need to be kept secret from any party. However, when used
-           # with an IDPF, we require the binder to be a random # nonce.
+           # with an IDPF, we require the binder to be a random nonce.
            #
            # Implementation note: This step can be cached across XOF
            # evaluations with many different seeds.
