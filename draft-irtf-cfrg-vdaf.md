@@ -223,8 +223,8 @@ measurement that would result in an invalid aggregate result.
 
 # Introduction
 
-[TO BE REMOVED BY RFC EDITOR: The source for this draft and and the reference
-implementation can be found at https://github.com/cfrg/draft-irtf-cfrg-vdaf.]
+(TO BE REMOVED BY RFC EDITOR: The source for this draft and and the reference
+implementation can be found at https://github.com/cfrg/draft-irtf-cfrg-vdaf.)
 
 The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
@@ -5439,8 +5439,8 @@ useful feedback on and contributions to the spec.
 # Test Vectors {#test-vectors}
 {:numbered="false"}
 
-[TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be found at
-https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.]
+(TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be found at
+https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)
 
 Test vectors cover the generation of input shares and the conversion of input
 shares into output shares. Vectors specify the verification key, measurements,
