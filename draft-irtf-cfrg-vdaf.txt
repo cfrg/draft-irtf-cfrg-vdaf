@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 3 January 2025                                             ISRG
+Expires: 4 January 2025                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             2 July 2024
+                                                             3 July 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 January 2025.
+   This Internet-Draft will expire on 4 January 2025.
 
 Copyright Notice
 
@@ -110,7 +110,7 @@ Table of Contents
        7.2.5.  Unsharding
        7.2.6.  Auxiliary Functions
        7.2.7.  Message Serialization
-     7.3.  A General-Purpose FLP
+     7.3.  The FLP of BBCGGI19
        7.3.1.  Overview
        7.3.2.  Validity Circuits
        7.3.3.  Construction
@@ -335,6 +335,10 @@ Table of Contents
 
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
+
+   10:
+
+   *  Rename FlpGeneric to FlpBBCGGI19 and IdpfPoplar to IdpfBBCGGI21.
 
    09:
 
@@ -1978,9 +1982,9 @@ Table of Contents
    Some VDAFs require fields that are suitable for efficient computation
    of the discrete Fourier transform, as this allows for fast polynomial
    interpolation.  (One example is Prio3 (Section 7) when instantiated
-   with the generic FLP of Section 7.3.3.)  Specifically, a field is
-   said to be "FFT-friendly" if, in addition to satisfying the interface
-   described in Section 6.1, it implements the following method:
+   with the FLP of Section 7.3.3.)  Specifically, a field is said to be
+   "FFT-friendly" if, in addition to satisfying the interface described
+   in Section 6.1, it implements the following method:
 
    *  Field.gen() -> Field returns the generator of a large subgroup of
       the multiplicative group.  To be FFT-friendly, the order of this
@@ -2157,8 +2161,7 @@ Table of Contents
            # Use TurboSHAKE128 to derive a key from the binder string
            # and domain separation tag. Note that the AES key does not
            # need to be kept secret from any party. However, when used
-           # with IdpfPoplar, we require the binder to be a random
-           # nonce.
+           # with an IDPF, we require the binder to be a random nonce.
            #
            # Implementation note: This step can be cached across XOF
            # evaluations with many different seeds.
@@ -3259,26 +3262,12 @@ Table of Contents
        Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
-7.3.  A General-Purpose FLP
+7.3.  The FLP of [BBCGGI19]
 
    This section describes an FLP based on the construction from in
    [BBCGGI19], Section 4.2.  We begin in Section 7.3.1 with an overview
    of their proof system and the extensions to their proof system made
    here.  The construction is specified in Section 7.3.3.
-
-      OPEN ISSUE We're not yet sure if specifying this general-purpose
-      FLP is desirable.  It might be preferable to specify specialized
-      FLPs for each data type that we want to standardize, for two
-      reasons.  First, clear and concise specifications are likely
-      easier to write for specialized FLPs rather than the general one.
-      Second, we may end up tailoring each FLP to the measurement type
-      in a way that improves performance, but breaks compatibility with
-      the general-purpose FLP.
-
-      In any case, we can't make this decision until we know which data
-      types to standardize, so for now, we'll stick with the general-
-      purpose construction.  The reference implementation can be found
-      at https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc.
 
       OPEN ISSUE Chris Wood points out that the this section reads more
       like a paper than a standard.  Eventually we'll want to work this
@@ -3530,17 +3519,13 @@ Table of Contents
 
 7.3.3.  Construction
 
-   This section specifies FlpGeneric, an implementation of the Flp
-   interface (Section 7.1).  It has as a generic parameter a validity
-   circuit Valid implementing the interface defined in Section 7.3.2.
+   This section specifies an implementation of the Flp interface
+   (Section 7.1).  It has as a generic parameter a validity circuit
+   Valid implementing the interface defined in Section 7.3.2.
 
-      NOTE A reference implementation can be found in
-      https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/
-      flp_generic.py.
-
-   The FLP parameters for FlpGeneric are defined in Table 8.  The
-   required methods for generating the proof, generating the verifier,
-   and deciding validity are specified in the remaining subsections.
+   The parameters are defined in Table 8.  The required methods for
+   generating the proof, generating the verifier, and deciding validity
+   are specified in the remaining subsections.
 
    In the remainder, we let [n] denote the set {1, ..., n} for positive
    integer n.  We also define the following constants:
@@ -3581,7 +3566,7 @@ Table of Contents
       | field          | valid.field                                |
       +----------------+--------------------------------------------+
 
-                   Table 8: FLP Parameters of FlpGeneric.
+                  Table 8: Parameters of FLP of BBCGGI19.
 
 7.3.3.1.  Proof Generation
 
@@ -3693,14 +3678,9 @@ Table of Contents
 7.4.  Instantiations
 
    This section specifies instantiations of Prio3 for various
-   measurement types.  Each uses FlpGeneric as the FLP (Section 7.3) and
-   is determined by a validity circuit (Section 7.3.2) and a XOF
-   (Section 6.2).  Test vectors for each can be found in Appendix "Test
-   Vectors".
-
-      NOTE Reference implementations of each of these VDAFs can be found
-      in https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/
-      vdaf_prio3.sage.
+   measurement types.  Each is determined by a validity circuit
+   (Section 7.3.2) and a XOF (Section 6.2).  Test vectors for each can
+   be found in Appendix "Test Vectors".
 
 7.4.1.  Prio3Count
 
@@ -3894,7 +3874,7 @@ Table of Contents
    subcircuit.  It takes in a list of inputs and passes them through to
    instances of the subcircuit in the same order.  It returns the sum of
    the subcircuit outputs.  Note that only the ParallelSum gadget
-   itself, and not its subcircuit, participates in FlpGeneric's wire
+   itself, and not its subcircuit, participates in the FLP's wire
    recording during evaluation, gadget consistency proofs, and proof
    validation, even though the subcircuit is provided to ParallelSum as
    an implementation of the Gadget interface.
@@ -3991,14 +3971,14 @@ Table of Contents
    near the square root of the length of the measurement.  However, the
    relationship between VDAF parameters and proof length is complicated,
    involving two forms of rounding (the circuit pads the inputs to its
-   last ParallelSum gadget call, up to the chunk length, and FlpGeneric
-   rounds the degree of wire polynomials -- determined by the number of
-   times a gadget is called -- up to the next power of two).  Therefore,
-   the optimal choice of chunk_length for a concrete measurement size
-   will vary, and must be found through trial and error.  Setting
-   chunk_length equal to the square root of the appropriate measurement
-   length will result in proofs up to 50% larger than the optimal proof
-   size.
+   last ParallelSum gadget call, up to the chunk length, and proof
+   system rounds the degree of wire polynomials -- determined by the
+   number of times a gadget is called -- up to the next power of two).
+   Therefore, the optimal choice of chunk_length for a concrete
+   measurement size will vary, and must be found through trial and
+   error.  Setting chunk_length equal to the square root of the
+   appropriate measurement length will result in proofs up to 50% larger
+   than the optimal proof size.
 
 7.4.4.  Prio3Histogram
 
@@ -5103,19 +5083,17 @@ Table of Contents
 
 8.3.  The IDPF scheme of [BBCGGI21]
 
-   In this section we specify a concrete IDPF, called IdpfPoplar,
-   suitable for instantiating Poplar1.  The scheme gets its name from
-   the name of the protocol of [BBCGGI21].
-
-      TODO We should consider giving IdpfPoplar a more distinctive name.
+   In this section we specify a concrete IDPF suitable for instantiating
+   Poplar1.  The scheme gets its name from the name of the protocol of
+   [BBCGGI21].
 
    The constant and type definitions required by the Idpf interface are
    given in Table 17.
 
-   IdpfPoplar requires a XOF for deriving the output shares, as well as
-   a variety of other artifacts used internally.  For performance
-   reasons, we instantiate this object using XofFixedKeyAes128
-   (Section 6.2.2).  See Section 9.5 for justification of this choice.
+   Our IDPF requires an XOF for deriving the output shares, as well as a
+   variety of other artifacts used internally.  For performance reasons,
+   we instantiate this object using XofFixedKeyAes128 (Section 6.2.2).
+   See Section 9.5 for justification of this choice.
 
                    +============+======================+
                    | Parameter  | Value                |
@@ -5134,7 +5112,8 @@ Table of Contents
                    +------------+----------------------+
 
                         Table 17: Constants and type
-                        definitions for IdpfPoplar.
+                        definitions for the IDPF of
+                                 BBCGGI21.
 
 8.3.1.  Key Generation
 
@@ -5212,7 +5191,7 @@ Table of Contents
        public_share = self.encode_public_share(correction_words)
        return (public_share, key)
 
-          Figure 28: IDPF-key generation algorithm of IdpfPoplar.
+           Figure 28: IDPF-key generation algorithm of BBCGGI21.
 
 8.3.2.  Key Evaluation
 
@@ -5258,13 +5237,13 @@ Table of Contents
 
                # Implementation note: Typically the current round of
                # candidate prefixes would have been derived from
-               # aggregate results computed during previous rounds. For
-               # example, when using `IdpfPoplar` to compute heavy
-               # hitters, a string whose hit count exceeded the given
-               # threshold in the last round would be the prefix of each
-               # `prefix` in the current round. (See [BBCGGI21,
-               # Section 5.1].) In this case, part of the path would
-               # have already been traversed.
+               # aggregate results computed during previous rounds.
+               # For example, when using the IDPF to compute heavy
+               # hitters, a string whose hit count exceeded the
+               # given threshold in the last round would be the
+               # prefix of each `prefix` in the current round. (See
+               # [BBCGGI21, Section 5.1].) In this case, part of the
+               # path would have already been traversed.
                #
                # Re-computing nodes along previously traversed paths is
                # wasteful. Implementations can eliminate this added
@@ -5324,7 +5303,7 @@ Table of Contents
 
        return (next_seed, next_ctrl, cast(FieldVec, y))
 
-       Figure 29: IDPF-evaluation generation algorithm of IdpfPoplar.
+        Figure 29: IDPF-evaluation generation algorithm of BBCGGI21.
 
 8.3.3.  Auxiliary Functions
 
@@ -5394,7 +5373,7 @@ Table of Contents
            raise ValueError('trailing bytes')
        return correction_words
 
-                Figure 30: Helper functions for IdpfPoplar.
+                 Figure 30: Helper functions for the IDPF.
 
    Here, pack_bits() takes a list of bits, packs each group of eight
    bits into a byte, in LSB to MSB order, padding the most significant
@@ -5408,10 +5387,10 @@ Table of Contents
 
 8.4.  Instantiation
 
-   By default, Poplar1 is instantiated with IdpfPoplar (VALUE_LEN == 2)
-   and XofTurboShake128 (Section 6.2.1).  This VDAF is suitable for any
-   positive value of BITS.  Test vectors can be found in Appendix "Test
-   Vectors".
+   By default, Poplar1 is instantiated with the IDPF in Section 8.3
+   (VALUE_LEN == 2) and XofTurboShake128 (Section 6.2.1).  This VDAF is
+   suitable for any positive value of BITS.  Test vectors can be found
+   in Appendix "Test Vectors".
 
 9.  Security Considerations
 
@@ -5639,14 +5618,14 @@ Table of Contents
    designed to be indifferentiable from a random oracle [MRH04], making
    it a suitable choice for most situations.
 
-   The one exception is the Idpf implementation IdpfPoplar Section 8.3.
-   Here, a random oracle is not needed to prove privacy, since the
-   analysis of [BBCGGI21], Proposition 1, only requires a Pseudorandom
-   Generator (PRG).  As observed in [GKWY20], a PRG can be instantiated
-   from a correlation-robust hash function H.  Informally, correlation
-   robustness requires that for a random r, H(xor(r, x)) is
-   computationally indistinguishable from a random function of x.  A PRG
-   can therefore be constructed as
+   The one exception is the IDPF of Section 8.3.  Here, a random oracle
+   is not needed to prove privacy, since the analysis of [BBCGGI21],
+   Proposition 1, only requires a Pseudorandom Generator (PRG).  As
+   observed in [GKWY20], a PRG can be instantiated from a correlation-
+   robust hash function H.  Informally, correlation robustness requires
+   that for a random r, H(xor(r, x)) is computationally
+   indistinguishable from a random function of x.  A PRG can therefore
+   be constructed as
 
    PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...
 
