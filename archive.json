@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-04T00:46:40.879071+00:00",
+  "timestamp": "2024-07-07T00:51:56.162777+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5462,7 +5462,7 @@
       "id": "I_kwDOGKuqOc6NzhPU",
       "title": "Prio3Count circuit optimization",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/365",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -5471,8 +5471,8 @@
       ],
       "body": "The Count circuit currently computes $x^2-x$ using one `Mul` gate, and some affine gates. This could be slightly improved by instead using a polynomial evaluation gate, with arity 1 instead of 2, to compute either $x^2$ or the whole polynomial. This would save a little bit of space on the wire, and probably some computation time as well. We should benchmark the potential improvement, and then decide whether it is worth breaking wire compatibility of Prio3Count or not.",
       "createdAt": "2024-06-27T21:06:47Z",
-      "updatedAt": "2024-07-04T00:16:01Z",
-      "closedAt": null,
+      "updatedAt": "2024-07-05T19:27:58Z",
+      "closedAt": "2024-07-05T19:27:58Z",
       "comments": [
         {
           "author": "divergentdave",
