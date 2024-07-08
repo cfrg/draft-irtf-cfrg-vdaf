@@ -377,7 +377,28 @@ security considerations for VDAFs.
 
 10:
 
-* Rename FlpGeneric to FlpBBCGGI19 and IdpfPoplar to IdpfBBCGGI21.
+* Define Prio3MultihotCountVec, a variant of Prio3 for aggregating bit vectors
+  with bounded weight.
+
+* FLP: Allow the output of the circuit to be a vector. This makes it possible
+  to skip joint randomness derivation in more cases.
+
+* Poplar1: On the first round of preparation, handle `None` as an error.
+  Previously this message was interpreted as a length-3 vector of zeros.
+
+* Prio3: Move specification of the field from the FLP validity circuit to the
+  VDAF itself.
+
+* Clarify the extent to which the attacker controls the network in our threat
+  models for privacy and robustness.
+
+* Clean up various aspects of the code, including: follow existing
+  object-oriented programming patterns for Python more closely; make the type
+  hints enforceable; and avoid shadowing variables.
+
+* Poplar1: Align terminology with {{BBCGGI23}}.
+
+* IDPF: Add guidance for encoding byte strings as indices.
 
 09:
 
