@@ -4163,20 +4163,20 @@ Table of Contents
 
 7.4.5.  Prio3MultihotCountVec
 
-          +===========+========================================+
-          | Parameter | Value                                  |
-          +===========+========================================+
-          | Valid     | MultihotCountVec(Field128, length,     |
-          |           | max_eight, chunk_lengh) (this section) |
-          +-----------+----------------------------------------+
-          | Field     | Field128 (Table 3)                     |
-          +-----------+----------------------------------------+
-          | PROOFS    | 1                                      |
-          +-----------+----------------------------------------+
-          | Xof       | XofTurboShake128 (Section 6.2.1)       |
-          +-----------+----------------------------------------+
+          +===========+=========================================+
+          | Parameter | Value                                   |
+          +===========+=========================================+
+          | Valid     | MultihotCountVec(Field128, length,      |
+          |           | max_weight, chunk_lengh) (this section) |
+          +-----------+-----------------------------------------+
+          | Field     | Field128 (Table 3)                      |
+          +-----------+-----------------------------------------+
+          | PROOFS    | 1                                       |
+          +-----------+-----------------------------------------+
+          | Xof       | XofTurboShake128 (Section 6.2.1)        |
+          +-----------+-----------------------------------------+
 
-             Table 17: Parameters for Prio3MultihotCountVec.
+              Table 17: Parameters for Prio3MultihotCountVec.
 
    For this instance of Prio3, each measurement is a vector of ones and
    zeros, where the number of ones is bounded.  This provides a
