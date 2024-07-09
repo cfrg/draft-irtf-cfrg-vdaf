@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-07T00:51:56.162777+00:00",
+  "timestamp": "2024-07-09T00:46:59.542242+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -32542,6 +32542,70 @@
               "updatedAt": "2024-07-03T17:15:58Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 377,
+      "id": "PR_kwDOGKuqOc50uSOM",
+      "title": "Update change log",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/377",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-10"
+      ],
+      "body": "",
+      "createdAt": "2024-07-08T17:15:23Z",
+      "updatedAt": "2024-07-08T18:04:31Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "024de7c6a74a08b3f22316a7725f0faf924a4b88",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/vdaf-10",
+      "headRefOid": "6913d14e4f93c215f8ed0fdb6bea397bbd61eda7",
+      "closedAt": "2024-07-08T18:04:30Z",
+      "mergedAt": "2024-07-08T18:04:30Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "610eab2a4657d49dbc6e0b6a69236be1a3160060"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6A-vqT",
+          "commit": {
+            "abbreviatedOid": "6913d14"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-07-08T17:16:05Z",
+          "updatedAt": "2024-07-08T17:16:05Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "The new names names don't actually appear in the draft, ",
+              "createdAt": "2024-07-08T17:16:05Z",
+              "updatedAt": "2024-07-08T17:16:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6A_Edc",
+          "commit": {
+            "abbreviatedOid": "6913d14"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-07-08T18:01:56Z",
+          "updatedAt": "2024-07-08T18:01:56Z",
+          "comments": []
         }
       ]
     }
