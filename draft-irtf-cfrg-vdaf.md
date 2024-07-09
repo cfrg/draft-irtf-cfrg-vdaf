@@ -3645,12 +3645,12 @@ def eval(
 
 ### Prio3SumVec
 
-| Parameter         | Value                                                     |
-|:------------------|:----------------------------------------------------------|
-| `Valid`           | `Sum(Field128, length, bits, chunk_lengh)` (this section) |
-| `Field`           | `Field128` ({{fields}})                                   |
-| `PROOFS`          | `1`                                                       |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                |
+| Parameter         | Value                                                        |
+|:------------------|:-------------------------------------------------------------|
+| `Valid`           | `SumVec(Field128, length, bits, chunk_lengh)` (this section) |
+| `Field`           | `Field128` ({{fields}})                                      |
+| `PROOFS`          | `1`                                                          |
+| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                   |
 {: title="Parameters for Prio3SumVec."}
 
 This instance of Prio3 supports summing a vector of integers. It has three
@@ -3801,12 +3801,12 @@ proofs up to 50% larger than the optimal proof size.
 
 ### Prio3Histogram
 
-| Parameter         | Value                                               |
-|:------------------|:----------------------------------------------------|
-| `Valid`           | `Sum(Field128, length, chunk_lengh)` (this section) |
-| `Field`           | `Field128` ({{fields}})                             |
-| `PROOFS`          | `1`                                                 |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})          |
+| Parameter         | Value                                                     |
+|:------------------|:----------------------------------------------------------|
+| `Valid`           | `Histogram(Field128, length, chunk_lengh)` (this section) |
+| `Field`           | `Field128` ({{fields}})                                   |
+| `PROOFS`          | `1`                                                       |
+| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                |
 {: title="Parameters for Prio3Histogram."}
 
 This instance of Prio3 allows for estimating the distribution of some quantity
@@ -3916,12 +3916,12 @@ measurement is sharded. This is provided to the FLP by Prio3.
 
 ### Prio3MultihotCountVec
 
-| Parameter         | Value                                                         |
-|:------------------|:--------------------------------------------------------------|
-| `Valid`           | `Sum(Field128, length, max_eight chunk_lengh)` (this section) |
-| `Field`           | `Field128` ({{fields}})                                       |
-| `PROOFS`          | `1`                                                           |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                    |
+| Parameter         | Value                                                                       |
+|:------------------|:----------------------------------------------------------------------------|
+| `Valid`           | `MultihotCountVec(Field128, length, max_eight, chunk_lengh)` (this section) |
+| `Field`           | `Field128` ({{fields}})                                                     |
+| `PROOFS`          | `1`                                                                         |
+| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                                  |
 {: title="Parameters for Prio3MultihotCountVec."}
 
 For this instance of Prio3, each measurement is a vector of ones and zeros,
