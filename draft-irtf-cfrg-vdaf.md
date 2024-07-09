@@ -3918,7 +3918,7 @@ measurement is sharded. This is provided to the FLP by Prio3.
 
 | Parameter         | Value                                                                       |
 |:------------------|:----------------------------------------------------------------------------|
-| `Valid`           | `MultihotCountVec(Field128, length, max_eight, chunk_lengh)` (this section) |
+| `Valid`           | `MultihotCountVec(Field128, length, max_weight, chunk_lengh)` (this section) |
 | `Field`           | `Field128` ({{fields}})                                                     |
 | `PROOFS`          | `1`                                                                         |
 | `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                                  |
