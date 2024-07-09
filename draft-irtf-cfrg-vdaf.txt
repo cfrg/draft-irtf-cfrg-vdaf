@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 9 January 2025                                             ISRG
+Expires: 10 January 2025                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             8 July 2024
+                                                             9 July 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 January 2025.
+   This Internet-Draft will expire on 10 January 2025.
 
 Copyright Notice
 
@@ -3856,21 +3856,21 @@ Table of Contents
 
 7.4.3.  Prio3SumVec
 
-                +===========+=============================+
-                | Parameter | Value                       |
-                +===========+=============================+
-                | Valid     | Sum(Field128, length, bits, |
-                |           | chunk_lengh) (this section) |
-                +-----------+-----------------------------+
-                | Field     | Field128 (Table 3)          |
-                +-----------+-----------------------------+
-                | PROOFS    | 1                           |
-                +-----------+-----------------------------+
-                | Xof       | XofTurboShake128            |
-                |           | (Section 6.2.1)             |
-                +-----------+-----------------------------+
+              +===========+================================+
+              | Parameter | Value                          |
+              +===========+================================+
+              | Valid     | SumVec(Field128, length, bits, |
+              |           | chunk_lengh) (this section)    |
+              +-----------+--------------------------------+
+              | Field     | Field128 (Table 3)             |
+              +-----------+--------------------------------+
+              | PROOFS    | 1                              |
+              +-----------+--------------------------------+
+              | Xof       | XofTurboShake128               |
+              |           | (Section 6.2.1)                |
+              +-----------+--------------------------------+
 
-                   Table 13: Parameters for Prio3SumVec.
+                  Table 13: Parameters for Prio3SumVec.
 
    This instance of Prio3 supports summing a vector of integers.  It has
    three parameters, length, bits, and chunk_length.  Each measurement
@@ -4031,17 +4031,19 @@ Table of Contents
 
 7.4.4.  Prio3Histogram
 
-     +===========+===================================================+
-     | Parameter | Value                                             |
-     +===========+===================================================+
-     | Valid     | Sum(Field128, length, chunk_lengh) (this section) |
-     +-----------+---------------------------------------------------+
-     | Field     | Field128 (Table 3)                                |
-     +-----------+---------------------------------------------------+
-     | PROOFS    | 1                                                 |
-     +-----------+---------------------------------------------------+
-     | Xof       | XofTurboShake128 (Section 6.2.1)                  |
-     +-----------+---------------------------------------------------+
+                +===========+=============================+
+                | Parameter | Value                       |
+                +===========+=============================+
+                | Valid     | Histogram(Field128, length, |
+                |           | chunk_lengh) (this section) |
+                +-----------+-----------------------------+
+                | Field     | Field128 (Table 3)          |
+                +-----------+-----------------------------+
+                | PROOFS    | 1                           |
+                +-----------+-----------------------------+
+                | Xof       | XofTurboShake128            |
+                |           | (Section 6.2.1)             |
+                +-----------+-----------------------------+
 
                   Table 15: Parameters for Prio3Histogram.
 
@@ -4161,19 +4163,18 @@ Table of Contents
 
 7.4.5.  Prio3MultihotCountVec
 
-              +===========+=================================+
-              | Parameter | Value                           |
-              +===========+=================================+
-              | Valid     | Sum(Field128, length, max_eight |
-              |           | chunk_lengh) (this section)     |
-              +-----------+---------------------------------+
-              | Field     | Field128 (Table 3)              |
-              +-----------+---------------------------------+
-              | PROOFS    | 1                               |
-              +-----------+---------------------------------+
-              | Xof       | XofTurboShake128                |
-              |           | (Section 6.2.1)                 |
-              +-----------+---------------------------------+
+          +===========+=========================================+
+          | Parameter | Value                                   |
+          +===========+=========================================+
+          | Valid     | MultihotCountVec(Field128, length,      |
+          |           | max_weight, chunk_lengh) (this section) |
+          +-----------+-----------------------------------------+
+          | Field     | Field128 (Table 3)                      |
+          +-----------+-----------------------------------------+
+          | PROOFS    | 1                                       |
+          +-----------+-----------------------------------------+
+          | Xof       | XofTurboShake128 (Section 6.2.1)        |
+          +-----------+-----------------------------------------+
 
               Table 17: Parameters for Prio3MultihotCountVec.
 
