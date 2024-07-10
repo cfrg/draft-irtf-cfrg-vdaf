@@ -72,7 +72,7 @@ class Daf(
     def is_valid(
             self,
             agg_param: AggParam,
-            previous_agg_params: set[AggParam]) -> bool:
+            previous_agg_params: list[AggParam]) -> bool:
         """
         Check if `agg_param` is valid for use with an input share that has
         previously been used with all `previous_agg_params`.
