@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 10 January 2025                                            ISRG
+Expires: 12 January 2025                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             9 July 2024
+                                                            11 July 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 January 2025.
+   This Internet-Draft will expire on 12 January 2025.
 
 Copyright Notice
 
@@ -932,8 +932,8 @@ Table of Contents
    DAFs MUST implement the following function:
 
    *  daf.is_valid(agg_param: AggParam, previous_agg_params:
-      set[AggParam]) -> bool: Checks if the agg_param is compatible with
-      all elements of previous_agg_params.
+      list[AggParam]) -> bool: Checks if the agg_param is compatible
+      with all elements of previous_agg_params.
 
 4.4.  Aggregation
 
@@ -1190,9 +1190,8 @@ Table of Contents
 
 5.1.  Sharding
 
-   Sharding transforms a measurement into input shares as it does in
-   DAFs (cf.  Section 4.1); in addition, it takes a nonce as input and
-   produces a public share:
+   Sharding transforms a measurement and nonce into a public share and
+   input shares as it does in DAFs (cf.  Section 4.1):
 
    *  vdaf.shard(measurement: Measurement, nonce: bytes, rand: bytes) ->
       tuple[PublicShare, list[InputShare]] is the randomized sharding
