@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-09T00:46:59.542242+00:00",
+  "timestamp": "2024-07-11T00:47:55.176997+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -87,6 +87,11 @@
       "name": "pre-RGLC",
       "description": "",
       "color": "8E22CC"
+    },
+    {
+      "name": "draft-11",
+      "description": "",
+      "color": "D10E5A"
     }
   ],
   "issues": [
@@ -32605,6 +32610,100 @@
           "body": "",
           "createdAt": "2024-07-08T18:01:56Z",
           "updatedAt": "2024-07-08T18:01:56Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 378,
+      "id": "PR_kwDOGKuqOc50wtZx",
+      "title": "Fix copy-pasta in Prio3 variant tables",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/378",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-11"
+      ],
+      "body": "`Sum` was copied into the `SumVec`, `Histogram`, and `MulithotCountVec` sections.",
+      "createdAt": "2024-07-09T00:53:32Z",
+      "updatedAt": "2024-07-09T01:20:24Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "610eab2a4657d49dbc6e0b6a69236be1a3160060",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/edit",
+      "headRefOid": "e558882b43c74e679cfbd63d3ef98061fd67c0ee",
+      "closedAt": "2024-07-09T01:20:24Z",
+      "mergedAt": "2024-07-09T01:20:24Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "80dfdd328df5a629f7095e038300a77fe15d9e91"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6BBqma",
+          "commit": {
+            "abbreviatedOid": "b028127"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-07-09T00:57:40Z",
+          "updatedAt": "2024-07-09T00:58:10Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "One more typo\n```suggestion\n| `Valid`           | `MultihotCountVec(Field128, length, max_weight, chunk_lengh)` (this section) |\n```",
+              "createdAt": "2024-07-09T00:57:40Z",
+              "updatedAt": "2024-07-09T00:58:10Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 379,
+      "id": "PR_kwDOGKuqOc51BUD1",
+      "title": "Sync up descriptions of DAFs and VDAFs",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/379",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "This PR updates `is_valid()` for DAFs to take a list of previous aggregation parameters, following a similar change to VDAFs. It also updates the description of VDAF sharding to reflect that DAF sharding has the same sets of inputs and outputs.",
+      "createdAt": "2024-07-10T21:15:16Z",
+      "updatedAt": "2024-07-10T21:17:57Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "80dfdd328df5a629f7095e038300a77fe15d9e91",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/update-daf",
+      "headRefOid": "490b002863b5af837ea6a41afed30e0a868bbfe9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6BXPxo",
+          "commit": {
+            "abbreviatedOid": "490b002"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-07-10T21:17:57Z",
+          "updatedAt": "2024-07-10T21:17:57Z",
           "comments": []
         }
       ]
