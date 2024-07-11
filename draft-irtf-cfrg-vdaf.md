@@ -894,7 +894,7 @@ been used with the same input share.
 
 DAFs MUST implement the following function:
 
-* `daf.is_valid(agg_param: AggParam, previous_agg_params: set[AggParam]) ->
+* `daf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) ->
   bool`: Checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
@@ -1131,9 +1131,8 @@ the VDAF. (See {{xof}}.)
 
 ## Sharding {#sec-vdaf-shard}
 
-Sharding transforms a measurement into input shares as it does in DAFs
-(cf. {{sec-daf-shard}}); in addition, it takes a nonce as input and
-produces a public share:
+Sharding transforms a measurement and nonce into a public share and input shares
+as it does in DAFs (cf. {{sec-daf-shard}}):
 
 * `vdaf.shard(measurement: Measurement, nonce: bytes, rand: bytes) ->
   tuple[PublicShare, list[InputShare]]` is the randomized sharding algorithm

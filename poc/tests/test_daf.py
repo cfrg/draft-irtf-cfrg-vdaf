@@ -51,7 +51,7 @@ class TestDaf(
     def is_valid(
             self,
             _agg_param: None,
-            _previous_agg_params: set[None]) -> bool:
+            _previous_agg_params: list[None]) -> bool:
         return True
 
     def prep(
