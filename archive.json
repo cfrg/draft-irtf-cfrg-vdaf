@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-11T00:47:55.176997+00:00",
+  "timestamp": "2024-07-14T00:52:33.522862+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -32671,7 +32671,7 @@
       "id": "PR_kwDOGKuqOc51BUD1",
       "title": "Sync up descriptions of DAFs and VDAFs",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/379",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -32680,17 +32680,19 @@
       ],
       "body": "This PR updates `is_valid()` for DAFs to take a list of previous aggregation parameters, following a similar change to VDAFs. It also updates the description of VDAF sharding to reflect that DAF sharding has the same sets of inputs and outputs.",
       "createdAt": "2024-07-10T21:15:16Z",
-      "updatedAt": "2024-07-10T21:17:57Z",
+      "updatedAt": "2024-07-11T14:16:07Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "80dfdd328df5a629f7095e038300a77fe15d9e91",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/update-daf",
       "headRefOid": "490b002863b5af837ea6a41afed30e0a868bbfe9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-07-11T14:16:06Z",
+      "mergedAt": "2024-07-11T14:16:06Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "5aa7f1c2764bc600970335bc468266453329ba22"
+      },
       "comments": [],
       "reviews": [
         {
