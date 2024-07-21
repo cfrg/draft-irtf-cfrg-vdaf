@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-18T00:46:42.815870+00:00",
+  "timestamp": "2024-07-21T00:52:33.838128+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5512,6 +5512,37 @@
       "updatedAt": "2024-07-03T16:36:59Z",
       "closedAt": "2024-07-03T16:36:59Z",
       "comments": []
+    },
+    {
+      "number": 380,
+      "id": "I_kwDOGKuqOc6QPIjs",
+      "title": "Prio3: Store compressed helper input share in PrepState",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/380",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently, the PrepState for Prio3 is `tuple[list[F], Optional[bytes]]`, consisting of the output share and the recomputed joint randomness seed. We could improve the storage requirements for the helper if the helper instead stored its compressed input share seed, and then re-expanded and re-truncated it into an output share during prep_next(). I think the leader should still store its output share in the PrepState, as it may be shorter than the leader input share, depending on the Prio3 instance. This would be quasi-wire breaking, in that it would change the format of an aggregator's persistent storage, but wouldn't affect messages between parties.",
+      "createdAt": "2024-07-19T21:19:38Z",
+      "updatedAt": "2024-07-19T21:25:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Does this need to be specified, or would an implementation note suffice? libprio already does this, fwiw:\r\nhttps://github.com/divviup/libprio-rs/blob/main/src/vdaf/prio3.rs#L1045\r\n\r\nI don't think this is a wire breaking change because the prep state is never transmitted between parties.",
+          "createdAt": "2024-07-19T21:24:01Z",
+          "updatedAt": "2024-07-19T21:24:01Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Ah good point. An implementation note would be good, in that case.",
+          "createdAt": "2024-07-19T21:25:16Z",
+          "updatedAt": "2024-07-19T21:25:16Z"
+        }
+      ]
     }
   ],
   "pulls": [
