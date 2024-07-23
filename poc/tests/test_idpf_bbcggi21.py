@@ -55,14 +55,14 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         Ensure that the IDPF index is encoded in big-endian byte order.
         """
         idpf = IdpfBBCGGI21(1, 32)
-        binder = b'some nonce'
+        nonce = gen_rand(idpf.NONCE_SIZE)
 
         def shard(s: bytes) -> tuple[bytes, list[bytes]]:
             alpha = from_be_bytes(s)
             beta_inner = [[idpf.field_inner(1)]] * (idpf.BITS - 1)
             beta_leaf = [idpf.field_leaf(1)]
             rand = gen_rand(idpf.RAND_SIZE)
-            return idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
+            return idpf.gen(alpha, beta_inner, beta_leaf, nonce, rand)
 
         for (alpha_str, alpha, level) in [
             (
@@ -78,9 +78,9 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         ]:
             (public_share, keys) = shard(alpha_str)
             out_share_0 = cast(list[list[Field]], idpf.eval(
-                0, public_share, keys[0], level, (alpha,), binder))
+                0, public_share, keys[0], level, (alpha,), nonce))
             out_share_1 = cast(list[list[Field]], idpf.eval(
-                1, public_share, keys[1], level, (alpha,), binder))
+                1, public_share, keys[1], level, (alpha,), nonce))
             out = vec_add(out_share_0[0], out_share_1[0])[0]
             self.assertEqual(out.as_unsigned(), 1)
 
