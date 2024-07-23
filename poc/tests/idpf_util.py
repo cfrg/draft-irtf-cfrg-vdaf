@@ -16,13 +16,13 @@ def test_idpf(idpf: Idpf, alpha: int, level: int, prefixes: Sequence[int]) -> No
 
     # Generate the IDPF keys.
     rand = gen_rand(idpf.RAND_SIZE)
-    binder = b'some nonce'
-    (public_share, keys) = idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
+    nonce = gen_rand(idpf.NONCE_SIZE)
+    (public_share, keys) = idpf.gen(alpha, beta_inner, beta_leaf, nonce, rand)
 
     out = [idpf.current_field(level).zeros(idpf.VALUE_LEN)] * len(prefixes)
     for agg_id in range(idpf.SHARES):
         out_share = idpf.eval(
-            agg_id, public_share, keys[agg_id], level, prefixes, binder)
+            agg_id, public_share, keys[agg_id], level, prefixes, nonce)
         for i in range(len(prefixes)):
             out[i] = vec_add(out[i], out_share[i])
 
@@ -51,8 +51,8 @@ def test_idpf_exhaustive(idpf: Idpf, alpha: int) -> None:
 
     # Generate the IDPF keys.
     rand = gen_rand(idpf.RAND_SIZE)
-    binder = b"some nonce"
-    (public_share, keys) = idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
+    nonce = gen_rand(idpf.NONCE_SIZE)
+    (public_share, keys) = idpf.gen(alpha, beta_inner, beta_leaf, nonce, rand)
 
     # Evaluate the IDPF at every node of the tree.
     for level in range(idpf.BITS):
@@ -62,7 +62,7 @@ def test_idpf_exhaustive(idpf: Idpf, alpha: int) -> None:
         for agg_id in range(idpf.SHARES):
             out_shares.append(
                 idpf.eval(agg_id, public_share,
-                          keys[agg_id], level, prefixes, binder))
+                          keys[agg_id], level, prefixes, nonce))
 
         # Check that each set of output shares for each prefix sums up to the
         # correct value.
@@ -89,8 +89,8 @@ def gen_test_vec(idpf: Idpf, alpha: int, test_vec_instance: int) -> None:
         beta_inner.append([idpf.field_inner(level)] * idpf.VALUE_LEN)
     beta_leaf = [idpf.field_leaf(idpf.BITS - 1)] * idpf.VALUE_LEN
     rand = gen_rand(idpf.RAND_SIZE)
-    binder = b'some nonce'
-    (public_share, keys) = idpf.gen(alpha, beta_inner, beta_leaf, binder, rand)
+    nonce = gen_rand(idpf.NONCE_SIZE)
+    (public_share, keys) = idpf.gen(alpha, beta_inner, beta_leaf, nonce, rand)
 
     printable_beta_inner = [
         [str(elem.as_unsigned()) for elem in value] for value in beta_inner
@@ -102,7 +102,7 @@ def gen_test_vec(idpf: Idpf, alpha: int, test_vec_instance: int) -> None:
         'alpha': str(alpha),
         'beta_inner': printable_beta_inner,
         'beta_leaf': printable_beta_leaf,
-        'binder': binder.hex(),
+        'nonce': nonce.hex(),
         'public_share': public_share.hex(),
         'keys': printable_keys,
     }
