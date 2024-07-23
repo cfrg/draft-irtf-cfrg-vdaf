@@ -37,6 +37,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
     SHARES = 2
     KEY_SIZE = XofFixedKeyAes128.SEED_SIZE
     RAND_SIZE = 2 * XofFixedKeyAes128.SEED_SIZE
+    NONCE_SIZE = XofFixedKeyAes128.SEED_SIZE
     field_inner = Field64
     field_leaf = Field255
 
@@ -70,7 +71,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             alpha: int,
             beta_inner: list[list[Field64]],
             beta_leaf: list[Field255],
-            binder: bytes,
+            nonce: bytes,
             rand: bytes) -> tuple[bytes, list[bytes]]:
         if alpha not in range(2 ** self.BITS):
             raise ValueError("alpha out of range")
@@ -78,6 +79,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             raise ValueError("incorrect beta_inner length")
         if len(rand) != self.RAND_SIZE:
             raise ValueError("incorrect rand size")
+        if len(nonce) != self.NONCE_SIZE:
+            raise ValueError("incorrect nonce size")
 
         key = [
             rand[:XofFixedKeyAes128.SEED_SIZE],
@@ -94,8 +97,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             lose = 1 - keep
             bit = Field2(keep)
 
-            (s0, t0) = self.extend(seed[0], binder)
-            (s1, t1) = self.extend(seed[1], binder)
+            (s0, t0) = self.extend(seed[0], nonce)
+            (s1, t1) = self.extend(seed[1], nonce)
             seed_cw = xor(s0[lose], s1[lose])
             ctrl_cw = (
                 t0[0] + t1[0] + bit + Field2(1),
@@ -104,8 +107,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
 
             x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
             x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
-            (seed[0], w0) = self.convert(level, x0, binder)
-            (seed[1], w1) = self.convert(level, x1, binder)
+            (seed[0], w0) = self.convert(level, x0, nonce)
+            (seed[1], w1) = self.convert(level, x1, nonce)
             ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
             ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
@@ -144,7 +147,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             key: bytes,
             level: int,
             prefixes: Sequence[int],
-            binder: bytes) -> Union[
+            nonce: bytes) -> Union[
                 list[list[Field64]],
                 list[list[Field255]]]:
         if agg_id not in range(self.SHARES):
@@ -191,7 +194,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
                     correction_words[current_level],
                     current_level,
                     bit,
-                    binder,
+                    nonce,
                 )
             if agg_id == 0:
                 out_share.append(cast(list[Field], y))
@@ -209,7 +212,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             correction_word: CorrectionWordTuple,
             level: int,
             bit: int,
-            binder: bytes) -> tuple[bytes, Field2, FieldVec]:
+            nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
         """
         Compute the next node in the IDPF tree along the path determined
         by a candidate prefix. The next node is determined by `bit`, the
@@ -220,14 +223,14 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
         seed_cw = correction_word[0]
         ctrl_cw = correction_word[1]
         w_cw = cast(list[Field], correction_word[2])
-        (s, t) = self.extend(prev_seed, binder)
+        (s, t) = self.extend(prev_seed, nonce)
         s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
         s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
         t[0] += ctrl_cw[0] * prev_ctrl
         t[1] += ctrl_cw[1] * prev_ctrl
 
         next_ctrl = t[bit]
-        convert_output = self.convert(level, s[bit], binder)
+        convert_output = self.convert(level, s[bit], nonce)
         next_seed = convert_output[0]
         y = cast(list[Field], convert_output[1])
         # Implementation note: Here we add the correction word to the
@@ -248,8 +251,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
     def extend(
             self,
             seed: bytes,
-            binder: bytes) -> tuple[list[bytes], list[Field2]]:
-        xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
+            nonce: bytes) -> tuple[list[bytes], list[Field2]]:
+        xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), nonce)
         s = [
             bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
             bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
@@ -266,8 +269,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             self,
             level: int,
             seed: bytes,
-            binder: bytes) -> tuple[bytes, FieldVec]:
-        xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
+            nonce: bytes) -> tuple[bytes, FieldVec]:
+        xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), nonce)
         next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
         field = self.current_field(level)
         w = xof.next_vec(field, self.VALUE_LEN)
