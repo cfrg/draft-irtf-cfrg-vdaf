@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-23T00:48:31.873112+00:00",
+  "timestamp": "2024-07-25T00:47:59.471543+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5313,16 +5313,24 @@
       "labels": [],
       "body": "DAFs are the same as VDAFs except they don't provide robustness on their own. This feature was requested early on in the history of PPM (https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/45). However no DAF has been defined, much less deployed.\r\n\r\nWe should consider removing DAFs from the draft:\r\n1. This would reduce some maintenance cost in the draft and reference implementation.\r\n2. This would simplify https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/259, which conflicts with the current goal of writing down DAF as a \"warm-up\" to VDAFs.",
       "createdAt": "2024-06-05T23:06:10Z",
-      "updatedAt": "2024-06-05T23:07:34Z",
+      "updatedAt": "2024-07-23T19:34:58Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We got a little feedback on this from the list: https://mailarchive.ietf.org/arch/msg/cfrg/CIqmoCeaTKtxDo-qDyb5i2WwF1o/\r\n\r\nA couple of people spoke up and suggested it's fine to keep the syntax without instantiating it. Let's hold this open a little longer.",
+          "createdAt": "2024-07-23T19:34:56Z",
+          "updatedAt": "2024-07-23T19:34:56Z"
+        }
+      ]
     },
     {
       "number": 352,
       "id": "I_kwDOGKuqOc6LiXik",
       "title": "Clarify requirements for generating the IDPF binder string",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/352",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5334,8 +5342,8 @@
       ],
       "body": "We require the binder string to be generated at random, but we don't prescribe its length or say why it needs to be random:\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/3ac03623c4680b28d1517af0a16dd513e1d0c310/draft-irtf-cfrg-vdaf.md?plain=1#L3710-L3714\r\n\r\nI believe this has to do with how `XofFixedKeyAes128` affects the concrete security of `Poplar1`, but I don't remember the details. Let's make sure this is documented. Furthermore, we need to define the length so that the user knows how many bytes to sample. I'd suggest renaming the binder to `nonce` and adding `Idpf.NONCE_SIZE` as a constraint on `Idpf`. (`Poplar1` may need to be modified accordingly.)",
       "createdAt": "2024-06-07T19:27:11Z",
-      "updatedAt": "2024-06-18T11:23:29Z",
-      "closedAt": null,
+      "updatedAt": "2024-07-23T19:25:09Z",
+      "closedAt": "2024-07-23T19:25:09Z",
       "comments": [
         {
           "author": "schoppmp",
@@ -5521,11 +5529,15 @@
       "state": "OPEN",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
-      "labels": [],
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "editorial"
+      ],
       "body": "Currently, the PrepState for Prio3 is `tuple[list[F], Optional[bytes]]`, consisting of the output share and the recomputed joint randomness seed. We could improve the storage requirements for the helper if the helper instead stored its compressed input share seed, and then re-expanded and re-truncated it into an output share during prep_next(). I think the leader should still store its output share in the PrepState, as it may be shorter than the leader input share, depending on the Prio3 instance. This would be quasi-wire breaking, in that it would change the format of an aggregator's persistent storage, but wouldn't affect messages between parties.",
       "createdAt": "2024-07-19T21:19:38Z",
-      "updatedAt": "2024-07-19T21:25:17Z",
+      "updatedAt": "2024-07-23T19:29:11Z",
       "closedAt": null,
       "comments": [
         {
@@ -32737,6 +32749,50 @@
           "body": "",
           "createdAt": "2024-07-10T21:17:57Z",
           "updatedAt": "2024-07-10T21:17:57Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 381,
+      "id": "PR_kwDOGKuqOc52P-X6",
+      "title": "Rename binder string to nonce, and add a length requirement",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/381",
+      "state": "MERGED",
+      "author": "schoppmp",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Fixes #352.",
+      "createdAt": "2024-07-23T18:22:48Z",
+      "updatedAt": "2024-07-23T22:10:06Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "5aa7f1c2764bc600970335bc468266453329ba22",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "schoppmp/issue-352",
+      "headRefOid": "be713553d1e4080544f508039c49c62d0d145f78",
+      "closedAt": "2024-07-23T19:25:08Z",
+      "mergedAt": "2024-07-23T19:25:08Z",
+      "mergedBy": "schoppmp",
+      "mergeCommit": {
+        "oid": "01291c2c7c7568f8d31d01aa4d3e9df653d6b447"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6C00fZ",
+          "commit": {
+            "abbreviatedOid": "be71355"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Works for me, thanks Phillipp!",
+          "createdAt": "2024-07-23T19:24:06Z",
+          "updatedAt": "2024-07-23T19:24:06Z",
           "comments": []
         }
       ]
