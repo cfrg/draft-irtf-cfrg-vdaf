@@ -1,7 +1,7 @@
 import unittest
 
-from field import (FftField, Field, Field2, Field64, Field96, Field128,
-                   Field255, poly_eval, poly_interp)
+from vdaf_poc.field import (FftField, Field, Field2, Field64, Field96,
+                            Field128, Field255, poly_eval, poly_interp)
 
 
 def test_field(cls: type[Field]) -> None:

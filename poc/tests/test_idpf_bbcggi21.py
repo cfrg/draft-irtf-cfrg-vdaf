@@ -1,10 +1,10 @@
 import unittest
 from typing import cast
 
-from common import TEST_VECTOR, from_be_bytes, gen_rand, vec_add
-from field import Field
-from idpf_bbcggi21 import IdpfBBCGGI21
 from tests.idpf_util import gen_test_vec, test_idpf, test_idpf_exhaustive
+from vdaf_poc.common import TEST_VECTOR, from_be_bytes, gen_rand, vec_add
+from vdaf_poc.field import Field
+from vdaf_poc.idpf_bbcggi21 import IdpfBBCGGI21
 
 
 class TestIdpfBBCGGI21(unittest.TestCase):

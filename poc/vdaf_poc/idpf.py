@@ -3,7 +3,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Generic, Sequence, TypeAlias, TypeVar, Union
 
-from field import Field
+from vdaf_poc.field import Field
 
 FieldInner = TypeVar("FieldInner", bound=Field)
 FieldLeaf = TypeVar("FieldLeaf", bound=Field)

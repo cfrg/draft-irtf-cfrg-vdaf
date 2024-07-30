@@ -1,12 +1,12 @@
 import unittest
 from typing import TypeVar
 
-from common import next_power_of_2
-from field import FftField, Field64, Field96, Field128, poly_eval
-from flp import Flp, run_flp
-from flp_bbcggi19 import (Count, FlpBBCGGI19, Gadget, Histogram, Mul,
-                          MultihotCountVec, PolyEval, Range2, Sum,
-                          SumOfRangeCheckedInputs, SumVec, Valid)
+from vdaf_poc.common import next_power_of_2
+from vdaf_poc.field import FftField, Field64, Field96, Field128, poly_eval
+from vdaf_poc.flp import Flp, run_flp
+from vdaf_poc.flp_bbcggi19 import (Count, FlpBBCGGI19, Gadget, Histogram, Mul,
+                                   MultihotCountVec, PolyEval, Range2, Sum,
+                                   SumOfRangeCheckedInputs, SumVec, Valid)
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")

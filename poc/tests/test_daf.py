@@ -2,10 +2,10 @@ import unittest
 from functools import reduce
 from typing import TypeVar
 
-from common import gen_rand
-from daf import Daf, run_daf
-from field import Field128
-from xof import XofTurboShake128
+from vdaf_poc.common import gen_rand
+from vdaf_poc.daf import Daf, run_daf
+from vdaf_poc.field import Field128
+from vdaf_poc.xof import XofTurboShake128
 
 
 class TestDaf(

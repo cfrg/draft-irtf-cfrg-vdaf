@@ -1,0 +1,11 @@
+requires = ["setuptools >= 61.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vdaf_poc"
+description = "Reference implementation of draft-irtf-cfrg-vdaf"
+readme = "README.md"
+version = "0.0.1"
+dependencies = [
+    "pycryptodomex >= 3.20.0",
+]

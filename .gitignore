@@ -20,3 +20,4 @@ sagelib
 *.pyc
 *.pyo
 __pycache__
+*.egg-info

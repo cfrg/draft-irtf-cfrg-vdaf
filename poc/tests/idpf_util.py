@@ -3,8 +3,8 @@ import os
 from functools import reduce
 from typing import Sequence
 
-from common import TEST_VECTOR_PATH, gen_rand, vec_add
-from idpf import Idpf
+from vdaf_poc.common import TEST_VECTOR_PATH, gen_rand, vec_add
+from vdaf_poc.idpf import Idpf
 
 
 def test_idpf(idpf: Idpf, alpha: int, level: int, prefixes: Sequence[int]) -> None:

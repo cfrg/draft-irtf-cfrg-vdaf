@@ -4,9 +4,10 @@ import copy
 from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, Optional, TypeVar, cast
 
-from common import front, next_power_of_2
-from field import FftField, poly_eval, poly_interp, poly_mul, poly_strip
-from flp import Flp
+from vdaf_poc.common import front, next_power_of_2
+from vdaf_poc.field import (FftField, poly_eval, poly_interp, poly_mul,
+                            poly_strip)
+from vdaf_poc.flp import Flp
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")

@@ -32,4 +32,4 @@ jobs:
 
     - name: Enforce type hints
       working-directory: poc
-      run: sage -python -m mypy *.py tests/*.py
+      run: sage -python -m mypy vdaf_poc/*.py tests/*.py

@@ -6,8 +6,9 @@ from typing import TypeVar
 from Cryptodome.Cipher import AES
 from Cryptodome.Hash import TurboSHAKE128
 
-from common import concat, from_le_bytes, next_power_of_2, to_le_bytes, xor
-from field import Field
+from vdaf_poc.common import (concat, from_le_bytes, next_power_of_2,
+                             to_le_bytes, xor)
+from vdaf_poc.field import Field
 
 F = TypeVar("F", bound=Field)
 
