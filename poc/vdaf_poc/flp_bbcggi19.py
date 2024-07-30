@@ -7,7 +7,7 @@ from typing import Any, Generic, Optional, TypeVar, cast
 from vdaf_poc.common import front, next_power_of_2
 from vdaf_poc.field import (FftField, poly_eval, poly_interp, poly_mul,
                             poly_strip)
-from vdaf_poc.flp import Flp
+from vdaf_poc.flp import Flp, run_flp
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")
@@ -428,6 +428,57 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         return self.valid.test_vec_set_type_param(test_vec)
+
+
+##
+# TESTING UTILITIES
+#
+
+def test_gadget(g: Gadget, field: type[F], test_length: int) -> None:
+    """
+    Test for equivalence of `Gadget.eval()` and `Gadget.eval_poly()`.
+    """
+    meas_poly = []
+    meas = []
+    eval_at = field.rand_vec(1)[0]
+    for _ in range(g.ARITY):
+        meas_poly.append(field.rand_vec(test_length))
+        meas.append(poly_eval(field, meas_poly[-1], eval_at))
+    out_poly = g.eval_poly(field, meas_poly)
+
+    want = g.eval(field, meas)
+    got = poly_eval(field, out_poly, eval_at)
+    assert got == want
+
+
+def test_flp_bbcggi19(
+        flp: FlpBBCGGI19[Measurement, AggResult, F],
+        test_cases: list[tuple[list[F], bool]]) -> None:
+    for (g, g_calls) in zip(flp.valid.GADGETS, flp.valid.GADGET_CALLS):
+        test_gadget(g, flp.field, next_power_of_2(g_calls + 1))
+
+    for (i, (meas, expected_decision)) in enumerate(test_cases):
+        assert len(meas) == flp.MEAS_LEN
+        assert len(flp.truncate(meas)) == flp.OUTPUT_LEN
+
+        # Evaluate validity circuit.
+        joint_rand = flp.field.rand_vec(flp.JOINT_RAND_LEN)
+        v = flp.valid.eval(meas, joint_rand, 1)
+        if (v == [flp.field(0)] * flp.valid.EVAL_OUTPUT_LEN) != \
+                expected_decision:
+            print('{}: test {} failed: validity circuit returned {}'.format(
+                flp.valid.__class__.__name__, i, v))
+
+        # Run the FLP.
+        decision = run_flp(flp, meas, 2)
+        if decision != expected_decision:
+            print(
+                '{}: test {} failed: proof evaluation resulted in {}; want {}'
+                .format(
+                    flp.valid.__class__.__name__, i, decision,
+                    expected_decision,
+                )
+            )
 
 
 ##
