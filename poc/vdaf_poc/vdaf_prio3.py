@@ -3,12 +3,12 @@
 from abc import abstractmethod
 from typing import Any, Generic, Optional, TypeAlias, TypeVar, Union
 
-import flp_bbcggi19
-from common import byte, concat, front, vec_add, vec_sub, zeros
-from field import FftField, Field64, Field128
-from flp import Flp
-from vdaf import Vdaf
-from xof import Xof, XofTurboShake128
+from vdaf_poc import flp_bbcggi19
+from vdaf_poc.common import byte, concat, front, vec_add, vec_sub, zeros
+from vdaf_poc.field import FftField, Field64, Field128
+from vdaf_poc.flp import Flp
+from vdaf_poc.vdaf import Vdaf
+from vdaf_poc.xof import Xof, XofTurboShake128
 
 USAGE_MEAS_SHARE = 1
 USAGE_PROOF_SHARE = 2

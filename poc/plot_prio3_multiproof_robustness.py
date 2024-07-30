@@ -6,9 +6,9 @@ from typing import cast
 
 import matplotlib.pyplot as plt
 
-from field import Field64, Field128
-from flp_bbcggi19 import FlpBBCGGI19
-from vdaf_prio3 import Prio3SumVec
+from vdaf_poc.field import Field64, Field128
+from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19
+from vdaf_poc.vdaf_prio3 import Prio3SumVec
 
 NUM_REPORTS = 1000000000
 

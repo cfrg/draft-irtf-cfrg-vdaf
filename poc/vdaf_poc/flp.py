@@ -3,8 +3,8 @@
 from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, TypeVar
 
-from common import vec_add, vec_sub
-from field import Field
+from vdaf_poc.common import vec_add, vec_sub
+from vdaf_poc.field import Field
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")

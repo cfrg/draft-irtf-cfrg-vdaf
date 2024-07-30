@@ -2,8 +2,8 @@ import unittest
 from copy import deepcopy
 from typing import TypeVar
 
-from field import Field, Field128
-from flp import Flp, run_flp
+from vdaf_poc.field import Field, Field128
+from vdaf_poc.flp import Flp, run_flp
 
 F = TypeVar("F", bound=Field)
 

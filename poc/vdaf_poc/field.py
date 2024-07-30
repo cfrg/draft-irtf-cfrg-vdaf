@@ -5,7 +5,7 @@ from typing import Self, TypeVar, cast
 from sage.all import GF, PolynomialRing
 from sage.rings.finite_rings.finite_field_constructor import FiniteFieldFactory
 
-from common import from_le_bytes, to_le_bytes
+from vdaf_poc.common import from_le_bytes, to_le_bytes
 
 
 class Field:

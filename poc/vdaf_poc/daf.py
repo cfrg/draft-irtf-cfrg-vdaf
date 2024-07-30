@@ -3,7 +3,7 @@
 from abc import ABCMeta, abstractmethod
 from typing import Generic, TypeVar
 
-from common import gen_rand
+from vdaf_poc.common import gen_rand
 
 Measurement = TypeVar("Measurement")
 AggParam = TypeVar("AggParam")

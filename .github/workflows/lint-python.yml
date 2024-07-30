@@ -25,11 +25,11 @@ jobs:
 
     - name: Run pyflakes
       working-directory: poc
-      run: pyflakes *.py tests/*.py
+      run: pyflakes vdaf_poc/*.py tests/*.py
 
     - name: Run autopep8
       working-directory: poc
-      run: autopep8 --diff --exit-code *.py tests/*.py
+      run: autopep8 --diff --exit-code vdaf_poc/*.py tests/*.py
 
     - name: Run isort
       working-directory: poc
@@ -37,4 +37,4 @@ jobs:
 
     - name: Run pylint
       working-directory: poc
-      run: pylint --disable=all --enable=redefined-outer-name *.py tests/*.py
+      run: pylint --disable=all --enable=redefined-outer-name vdaf_poc/*.py tests/*.py

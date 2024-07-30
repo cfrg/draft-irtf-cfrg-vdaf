@@ -2,12 +2,13 @@
 
 from typing import Any, Optional, Sequence, TypeAlias, Union, cast
 
-from common import byte, from_be_bytes, front, to_be_bytes, vec_add, vec_sub
-from field import Field, Field64, Field255
-from idpf import Idpf
-from idpf_bbcggi21 import IdpfBBCGGI21
-from vdaf import Vdaf
-from xof import Xof, XofTurboShake128
+from vdaf_poc.common import (byte, from_be_bytes, front, to_be_bytes, vec_add,
+                             vec_sub)
+from vdaf_poc.field import Field, Field64, Field255
+from vdaf_poc.idpf import Idpf
+from vdaf_poc.idpf_bbcggi21 import IdpfBBCGGI21
+from vdaf_poc.vdaf import Vdaf
+from vdaf_poc.xof import Xof, XofTurboShake128
 
 USAGE_SHARD_RAND = 1
 USAGE_CORR_INNER = 2

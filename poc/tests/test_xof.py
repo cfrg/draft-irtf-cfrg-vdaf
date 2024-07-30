@@ -2,10 +2,10 @@ import json
 import os
 import unittest
 
-from common import (TEST_VECTOR, TEST_VECTOR_PATH, format_dst, gen_rand,
-                    print_wrapped_line)
-from field import Field, Field64, Field128
-from xof import Xof, XofFixedKeyAes128, XofTurboShake128
+from vdaf_poc.common import (TEST_VECTOR, TEST_VECTOR_PATH, format_dst,
+                             gen_rand, print_wrapped_line)
+from vdaf_poc.field import Field, Field64, Field128
+from vdaf_poc.xof import Xof, XofFixedKeyAes128, XofTurboShake128
 
 
 def test_xof(cls: type[Xof], field: type[Field], expanded_len: int) -> None:

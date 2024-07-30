@@ -3,10 +3,10 @@
 import itertools
 from typing import Sequence, TypeAlias, Union, cast
 
-from common import format_dst, vec_add, vec_neg, vec_sub, xor
-from field import Field, Field2, Field64, Field255
-from idpf import Idpf
-from xof import XofFixedKeyAes128
+from vdaf_poc.common import format_dst, vec_add, vec_neg, vec_sub, xor
+from vdaf_poc.field import Field, Field2, Field64, Field255
+from vdaf_poc.idpf import Idpf
+from vdaf_poc.xof import XofFixedKeyAes128
 
 # This file, and vdaf_poplar1.py, make extensive use of `typing.cast()`. This
 # acts like the identity function at runtime. During static analysis, it gives

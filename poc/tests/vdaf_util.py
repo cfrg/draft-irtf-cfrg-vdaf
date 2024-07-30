@@ -1,7 +1,7 @@
 from typing import Any, TypeVar
 
-from common import gen_rand
-from vdaf import Vdaf, run_vdaf
+from vdaf_poc.common import gen_rand
+from vdaf_poc.vdaf import Vdaf, run_vdaf
 
 Measurement = TypeVar("Measurement")
 AggParam = TypeVar("AggParam")

@@ -5,9 +5,9 @@ import os
 from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, Optional, TypedDict, TypeVar, Union, cast
 
-from common import (TEST_VECTOR_PATH, format_dst, gen_rand, print_wrapped_line,
-                    to_le_bytes)
-from field import Field
+from vdaf_poc.common import (TEST_VECTOR_PATH, format_dst, gen_rand,
+                             print_wrapped_line, to_le_bytes)
+from vdaf_poc.field import Field
 
 Measurement = TypeVar("Measurement")
 AggParam = TypeVar("AggParam")

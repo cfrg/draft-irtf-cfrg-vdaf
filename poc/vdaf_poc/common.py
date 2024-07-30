@@ -11,7 +11,7 @@ VERSION = 8
 TEST_VECTOR = os.environ.get('TEST_VECTOR', 'false').lower() == 'true'
 # The path where test vectors are generated.
 TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
-                                  'test_vec/{:02}'.format(VERSION))
+                                  '../test_vec/{:02}'.format(VERSION))
 
 
 class FieldProtocol(Protocol):

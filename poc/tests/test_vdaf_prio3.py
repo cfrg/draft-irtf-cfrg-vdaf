@@ -1,16 +1,16 @@
 import unittest
 from typing import TypeVar
 
-from common import TEST_VECTOR
-from field import FftField, Field64, Field128
-from flp_bbcggi19 import FlpBBCGGI19
 from tests.test_flp import FlpTest
 from tests.test_flp_bbcggi19 import TestAverage
 from tests.vdaf_util import test_vdaf
-from vdaf_prio3 import (Prio3, Prio3Count, Prio3Histogram,
-                        Prio3MultihotCountVec, Prio3Sum, Prio3SumVec,
-                        Prio3SumVecWithMultiproof)
-from xof import XofTurboShake128
+from vdaf_poc.common import TEST_VECTOR
+from vdaf_poc.field import FftField, Field64, Field128
+from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19
+from vdaf_poc.vdaf_prio3 import (Prio3, Prio3Count, Prio3Histogram,
+                                 Prio3MultihotCountVec, Prio3Sum, Prio3SumVec,
+                                 Prio3SumVecWithMultiproof)
+from vdaf_poc.xof import XofTurboShake128
 
 F = TypeVar("F", bound=FftField)
 
