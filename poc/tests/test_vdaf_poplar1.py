@@ -1,7 +1,7 @@
 import unittest
 
-from tests.vdaf_util import test_vdaf
 from vdaf_poc.common import TEST_VECTOR, from_be_bytes
+from vdaf_poc.vdaf import test_vdaf
 from vdaf_poc.vdaf_poplar1 import Poplar1, get_ancestor
 
 
