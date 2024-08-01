@@ -1,9 +1,6 @@
-import json
-import os
 import unittest
 
-from vdaf_poc.common import (TEST_VECTOR, TEST_VECTOR_PATH, format_dst,
-                             gen_rand, print_wrapped_line)
+from vdaf_poc.common import format_dst, gen_rand
 from vdaf_poc.field import Field, Field64, Field128
 from vdaf_poc.xof import Xof, XofFixedKeyAes128, XofTurboShake128
 
@@ -33,43 +30,6 @@ def test_xof(cls: type[Xof], field: type[Field], expanded_len: int) -> None:
     assert len(expanded_vec) == expanded_len
 
 
-def generate_test_vector(cls: type[Xof]) -> None:
-    seed = gen_rand(cls.SEED_SIZE)
-    dst = b'domain separation tag'
-    binder = b'binder string'
-    length = 40
-
-    test_vector = {
-        'seed': seed.hex(),
-        'dst': dst.hex(),
-        'binder': binder.hex(),
-        'length': length,
-        'derived_seed': None,  # set below
-        'expanded_vec_field128': None,  # set below
-    }
-
-    derived_seed = cls.derive_seed(seed, dst, binder).hex()
-    expanded_vec_field128 = Field128.encode_vec(
-        cls.expand_into_vec(Field128, seed, dst, binder, length)).hex()
-    test_vector['derived_seed'] = derived_seed
-    test_vector['expanded_vec_field128'] = expanded_vec_field128
-
-    print('{}:'.format(cls.test_vec_name))
-    print('  seed: "{}"'.format(test_vector['seed']))
-    print('  dst: "{}"'.format(test_vector['dst']))
-    print('  binder: "{}"'.format(test_vector['binder']))
-    print('  length: {}'.format(test_vector['length']))
-    print('  derived_seed: "{}"'.format(test_vector['derived_seed']))
-    print('  expanded_vec_field128: >-')
-    print_wrapped_line(expanded_vec_field128, tab=4)
-
-    os.system('mkdir -p {}'.format(TEST_VECTOR_PATH))
-    with open('{}/{}.json'.format(
-            TEST_VECTOR_PATH, cls.__name__), 'w') as f:
-        json.dump(test_vector, f, indent=4, sort_keys=True)
-        f.write('\n')
-
-
 class TestXof(unittest.TestCase):
     def test_rejection_sampling(self) -> None:
         # This test case was found through brute-force search using this tool:
@@ -86,10 +46,6 @@ class TestXof(unittest.TestCase):
 
     def test_turboshake128(self) -> None:
         test_xof(XofTurboShake128, Field128, 23)
-        if TEST_VECTOR:
-            generate_test_vector(XofTurboShake128)
 
     def test_fixedkeyaes128(self) -> None:
         test_xof(XofFixedKeyAes128, Field128, 23)
-        if TEST_VECTOR:
-            generate_test_vector(XofFixedKeyAes128)

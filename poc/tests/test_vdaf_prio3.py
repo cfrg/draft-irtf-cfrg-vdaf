@@ -3,7 +3,6 @@ from typing import TypeVar
 
 from tests.test_flp import FlpTest
 from tests.test_flp_bbcggi19 import TestAverage
-from vdaf_poc.common import TEST_VECTOR
 from vdaf_poc.field import FftField, Field64, Field128
 from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19
 from vdaf_poc.vdaf import test_vdaf
@@ -53,7 +52,6 @@ def test_prio3sumvec(num_proofs: int, field: type[F]) -> None:
             [255] * 10
         ],
         list(range(256, 266)),
-        print_test_vec=False,
     )
 
     prio3 = Prio3SumVec(3, 3, 16, 7)
@@ -66,8 +64,6 @@ def test_prio3sumvec(num_proofs: int, field: type[F]) -> None:
             [15986, 24671, 23910]
         ],
         [45328, 76286, 26980],
-        print_test_vec=False,
-        test_vec_instance=1,
     )
 
 
@@ -95,23 +91,21 @@ class TestPrio3(unittest.TestCase):
         prio3 = Prio3Count(2)
         assert prio3.ID == 0x00000000
         test_vdaf(prio3, None, [0, 1, 1, 0, 1], 3)
-        test_vdaf(prio3, None, [1], 1, print_test_vec=TEST_VECTOR)
+        test_vdaf(prio3, None, [1], 1)
 
     def test_count_3_shares(self) -> None:
         prio3 = Prio3Count(3)
-        test_vdaf(prio3, None, [1], 1, print_test_vec=TEST_VECTOR,
-                  test_vec_instance=1)
+        test_vdaf(prio3, None, [1], 1)
 
     def test_sum(self) -> None:
         prio3 = Prio3Sum(2, 8)
         assert prio3.ID == 0x00000001
         test_vdaf(prio3, None, [0, 147, 1, 0, 11, 0], 159)
-        test_vdaf(prio3, None, [100], 100, print_test_vec=TEST_VECTOR)
+        test_vdaf(prio3, None, [100], 100)
 
     def test_sum_3_shares(self) -> None:
         prio3 = Prio3Sum(3, 8)
-        test_vdaf(prio3, None, [100], 100, print_test_vec=TEST_VECTOR,
-                  test_vec_instance=1)
+        test_vdaf(prio3, None, [100], 100)
 
     def test_sum_vec(self) -> None:
         prio3 = Prio3SumVec(2, 10, 8, 9)
@@ -131,7 +125,6 @@ class TestPrio3(unittest.TestCase):
                 [255] * 10
             ],
             list(range(256, 266)),
-            print_test_vec=TEST_VECTOR,
         )
 
     def test_sum_vec_3_shares(self) -> None:
@@ -145,8 +138,6 @@ class TestPrio3(unittest.TestCase):
                 [15986, 24671, 23910]
             ],
             [45328, 76286, 26980],
-            print_test_vec=TEST_VECTOR,
-            test_vec_instance=1,
         )
 
     def test_histogram(self) -> None:
@@ -157,15 +148,13 @@ class TestPrio3(unittest.TestCase):
         test_vdaf(prio3, None, [2], [0, 0, 1, 0])
         test_vdaf(prio3, None, [3], [0, 0, 0, 1])
         test_vdaf(prio3, None, [0, 0, 1, 1, 2, 2, 3, 3], [2, 2, 2, 2])
-        test_vdaf(prio3, None, [2], [0, 0, 1, 0], print_test_vec=TEST_VECTOR)
+        test_vdaf(prio3, None, [2], [0, 0, 1, 0])
         prio3 = Prio3Histogram(3, 11, 3)
         test_vdaf(
             prio3,
             None,
             [2],
             [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-            print_test_vec=TEST_VECTOR,
-            test_vec_instance=1,
         )
 
     def test_multihot_count_vec(self) -> None:
@@ -177,9 +166,7 @@ class TestPrio3(unittest.TestCase):
         test_vdaf(prio3, None, [[0, 1, 0, 0]], [0, 1, 0, 0])
         test_vdaf(prio3, None, [[0, 1, 1, 0]], [0, 1, 1, 0])
         test_vdaf(prio3, None, [[0, 1, 1, 0], [0, 1, 0, 1]], [0, 2, 1, 1])
-        test_vdaf(
-            prio3, None, [[0, 1, 1, 0]], [0, 1, 1, 0], print_test_vec=TEST_VECTOR
-        )
+        test_vdaf(prio3, None, [[0, 1, 1, 0]], [0, 1, 1, 0])
 
     def test_multi_hot_histogram_3_shares(self) -> None:
         # Prio3MultihotCountVec with length = 11, max_weight = 5,
@@ -190,8 +177,6 @@ class TestPrio3(unittest.TestCase):
             None,
             [[1] * 5 + [0] * 6],
             [1] * 5 + [0] * 6,
-            print_test_vec=False,
-            test_vec_instance=1,
         )
 
     def test_average(self) -> None:

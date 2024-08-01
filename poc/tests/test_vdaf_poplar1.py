@@ -1,6 +1,6 @@
 import unittest
 
-from vdaf_poc.common import TEST_VECTOR, from_be_bytes
+from vdaf_poc.common import from_be_bytes
 from vdaf_poc.vdaf import test_vdaf
 from vdaf_poc.vdaf_poplar1 import Poplar1, get_ancestor
 
@@ -131,5 +131,4 @@ class TestPoplar1(unittest.TestCase):
         ]
         for (level, prefixes, expected_result) in tests:
             agg_param = (int(level), tuple(map(int, prefixes)))
-            test_vdaf(cls, agg_param, measurements, expected_result,
-                      print_test_vec=TEST_VECTOR, test_vec_instance=level)
+            test_vdaf(cls, agg_param, measurements, expected_result)
