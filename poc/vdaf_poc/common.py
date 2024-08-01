@@ -6,13 +6,6 @@ from typing import Protocol, Self, TypeVar, Union, overload
 # Document version, reved with each draft that contains breaking changes.
 VERSION = 8
 
-# If set, then test vectors will be generated. A fixed source of randomness is
-# used for `gen_rand()`.
-TEST_VECTOR = os.environ.get('TEST_VECTOR', 'false').lower() == 'true'
-# The path where test vectors are generated.
-TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
-                                  '../test_vec/{:02}'.format(VERSION))
-
 
 class FieldProtocol(Protocol):
     def __add__(self, other: Self) -> Self:
@@ -43,11 +36,6 @@ def zeros(length: int) -> bytes:
 
 def gen_rand(length: int) -> bytes:
     """Return the requested number of random bytes."""
-    if TEST_VECTOR:
-        out = []
-        for i in range(length):
-            out.append(i % 256)
-        return bytes(out)
     return os.urandom(length)
 
 
