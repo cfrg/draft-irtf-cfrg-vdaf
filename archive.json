@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-07-30T00:48:24.542231+00:00",
+  "timestamp": "2024-08-01T00:53:37.400965+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5359,17 +5359,19 @@
       "id": "I_kwDOGKuqOc6MBqlv",
       "title": "Make proof of concept code pip-installable",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/359",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "poc"
       ],
       "body": "We should rearrange the directory and module structure of the proof of concept code, and add metadata files (i.e. pyproject.toml or setup.py) to make it installable as a package. This would remove the need for other related drafts to use git submodules and Python import path hacks. I figure we'd want to provide just one top-level module, probably called `vdaf`, and then move module paths under that. Note that this would require moving around files and rewriting a lot of internal import statements. The goal is that other projects should be able to do `pip install git+https://github.com/cfrg/draft-irtf-cfrg-vdaf.git@draft-irtf-cfrg-vdaf-NN#subdirectory=poc`, and then `import vdaf`.",
       "createdAt": "2024-06-12T16:52:55Z",
-      "updatedAt": "2024-06-13T00:07:58Z",
-      "closedAt": null,
+      "updatedAt": "2024-07-31T00:14:22Z",
+      "closedAt": "2024-07-31T00:14:22Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -32793,6 +32795,238 @@
           "body": "Works for me, thanks Phillipp!",
           "createdAt": "2024-07-23T19:24:06Z",
           "updatedAt": "2024-07-23T19:24:06Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 382,
+      "id": "PR_kwDOGKuqOc527O7x",
+      "title": "Make the reference code installable via pip",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/382",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #359.\r\n\r\nProjects can now install the reference implementation via\r\n\r\n```\r\nsage -pip install git+https://github.com/cfrg/draft-irtf-cfrg-vdaf@draft-irtf-cfrg-vdaf-11#subdirectory=poc\r\n```\r\n\r\nThis avoids the need to hack a submodule into the project's import path.\r\n\r\nThis change also moves `test_vec` to the root project directory so that `pip install` can disambiguate this folder from the actual package, which is called `vdaf_poc` and exists in the same directory. We could alternatively put the package in a distinguished `src` directory, but this would require the user to install the package in order to run tests.",
+      "createdAt": "2024-07-30T21:54:44Z",
+      "updatedAt": "2024-07-31T00:22:12Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "01291c2c7c7568f8d31d01aa4d3e9df653d6b447",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/359",
+      "headRefOid": "a708034f615271668bbeba60f3142623afa4ed69",
+      "closedAt": "2024-07-31T00:14:21Z",
+      "mergedAt": "2024-07-31T00:14:21Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "489048c7d22ccb2feb08575832b8640d6ef35bfd"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Dp1JX",
+          "commit": {
+            "abbreviatedOid": "a24bc50"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-07-30T21:56:03Z",
+          "updatedAt": "2024-07-30T21:56:03Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "nit: @divergentdave is this too long / should it have periods in it? [The example I'm following](https://packaging.python.org/en/latest/tutorials/packaging-projects/#configuring-metadata) does not have periods.",
+              "createdAt": "2024-07-30T21:56:03Z",
+              "updatedAt": "2024-07-30T21:56:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Dp2cQ",
+          "commit": {
+            "abbreviatedOid": "cf1c27a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-07-30T22:00:35Z",
+          "updatedAt": "2024-07-30T22:05:47Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "@divergentdave please confirm we don't want to check this in.",
+              "createdAt": "2024-07-30T22:00:36Z",
+              "updatedAt": "2024-07-30T22:05:47Z"
+            },
+            {
+              "originalPosition": 10,
+              "body": "Reviewer note: I've confirmed this works at cf1c27aaae0d33007e0211b6fc5b5816b98e5ed8.",
+              "createdAt": "2024-07-30T22:03:55Z",
+              "updatedAt": "2024-07-30T22:05:47Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "@divergentdave do you think this will cause anyone any trouble? I  did this to help `pip` disambiguate `vdaf_poc` from `test_vec` as the package to install. Perhaps there's a better way to do this?",
+              "createdAt": "2024-07-30T22:05:43Z",
+              "updatedAt": "2024-07-30T22:05:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Dp473",
+          "commit": {
+            "abbreviatedOid": "a24bc50"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-07-30T22:09:07Z",
+          "updatedAt": "2024-07-30T22:09:07Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "It looks like this is the tagline that appears on PyPI project pages, and in search results. Thus, I think this might be on the line of \"too long\". If we want to include something longer, we could use `readme` to point at a file. I wonder if the setup.py `long_description` argument would work here as well, if we wanted to put the bigger blurb inline.",
+              "createdAt": "2024-07-30T22:09:07Z",
+              "updatedAt": "2024-07-30T22:09:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Dp7ii",
+          "commit": {
+            "abbreviatedOid": "a24bc50"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-07-30T22:18:28Z",
+          "updatedAt": "2024-07-30T22:18:28Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Shortened to \"Reference implementation of draft-irtf-cfrg-vdaf\" and added a pointer to the README.",
+              "createdAt": "2024-07-30T22:18:28Z",
+              "updatedAt": "2024-07-30T22:18:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Dp5KT",
+          "commit": {
+            "abbreviatedOid": "31c786a"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-07-30T22:09:58Z",
+          "updatedAt": "2024-07-30T22:54:31Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Yes, LGTM.",
+              "createdAt": "2024-07-30T22:09:58Z",
+              "updatedAt": "2024-07-30T22:54:31Z"
+            },
+            {
+              "originalPosition": 9,
+              "body": "From the `poc` directory, I tried running `sage -python tools/plot_prio3_multiproof_robustness.py`, and it didn't work. Running `sage -pip install -e .` first fixed it, though. I tried uninstalling the editable package, then copying the script up a directory, into `poc`, and running that worked as well. I suppose getting rid of the tools directory would be the simplest solution.",
+              "createdAt": "2024-07-30T22:30:12Z",
+              "updatedAt": "2024-07-30T22:54:31Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "I think this should be fine.",
+              "createdAt": "2024-07-30T22:33:58Z",
+              "updatedAt": "2024-07-30T22:54:31Z"
+            },
+            {
+              "originalPosition": 13,
+              "body": "This paragraph is largely duplicative now",
+              "createdAt": "2024-07-30T22:38:00Z",
+              "updatedAt": "2024-07-30T22:54:31Z"
+            },
+            {
+              "originalPosition": 66,
+              "body": "This doesn't align with the sentence above.\r\n```suggestion\r\nTEST_VECTOR=TRUE TEST_VECTOR_PATH=test_vec/00 sage -python -m unittest --quiet tests/test_vdaf_prio3.py\r\n```",
+              "createdAt": "2024-07-30T22:51:32Z",
+              "updatedAt": "2024-07-30T22:54:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6DqWUR",
+          "commit": {
+            "abbreviatedOid": "31c786a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-07-31T00:10:38Z",
+          "updatedAt": "2024-07-31T00:11:15Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "Moved the plotter to the poc directory. There you can run it without installing the package.",
+              "createdAt": "2024-07-31T00:10:38Z",
+              "updatedAt": "2024-07-31T00:11:15Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 383,
+      "id": "PR_kwDOGKuqOc527qDZ",
+      "title": "Move some test utilities into the `vdaf_poc` package",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/383",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "poc",
+        "draft-11"
+      ],
+      "body": "Pull `test_flp_bbcggi19` and `test_vdaf` into into the installable package so they can be used elsewhere.",
+      "createdAt": "2024-07-31T00:16:36Z",
+      "updatedAt": "2024-07-31T20:00:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "489048c7d22ccb2feb08575832b8640d6ef35bfd",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/poc-test-utils",
+      "headRefOid": "72227878a6fc1c9dae4d9b9e8bb1bfa1cc286bfc",
+      "closedAt": "2024-07-31T20:00:45Z",
+      "mergedAt": "2024-07-31T20:00:45Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "fefc5a2f563e70e73a74d3c57b7145e0dd1c2e3f"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6DyYIA",
+          "commit": {
+            "abbreviatedOid": "7222787"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-07-31T19:59:35Z",
+          "updatedAt": "2024-07-31T19:59:35Z",
           "comments": []
         }
       ]
