@@ -280,16 +280,6 @@ measurements that would otherwise garble the result of the computation can be
 detected and removed from the set of measurements. We refer to this property as
 "robustness".
 
-The cost of achieving these security properties is the need for multiple servers
-to participate in the protocol, and the need to ensure they do not collude to
-undermine the VDAF's privacy guarantees.  Recent implementation experience has
-shown that practical challenges of coordinating multiple servers can be
-overcome.  The Prio system {{CGB17}} (essentially a VDAF) has been deployed in
-systems supporting hundreds of millions of users: The Mozilla Origin Telemetry
-project {{OriginTelemetry}} and the Exposure Notification Private Analytics
-collaboration among the Internet Security Research Group (ISRG), Google, Apple,
-and others {{ENPA}}.
-
 The VDAF abstraction laid out in {{vdaf}} represents a class of multi-party
 protocols for privacy-preserving measurement proposed in the literature. These
 protocols vary in their operational and security requirements, sometimes in
@@ -314,9 +304,10 @@ subtle but consequential ways. This document therefore has two important goals:
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
 
-* The aforementioned Prio system {{CGB17}} allows for the privacy-preserving
-  computation of a variety aggregate statistics. The basic idea underlying Prio
-  is fairly simple:
+* The Prio system {{CGB17}} allows for the privacy-preserving computation of a
+  variety aggregate statistics. The basic idea underlying Prio is fairly
+  simple:
+
   1. Each client shards its measurement into a sequence of additive shares and
      distributes the shares among the aggregation servers.
   1. Next, each server adds up its shares locally, resulting in an additive
@@ -2212,13 +2203,6 @@ Collector sums up the aggregate shares and computes the aggregate result.
 This VDAF does not have an aggregation parameter. Instead, the output share is
 derived from the measurement share by applying a fixed map. See {{poplar1}} for
 an example of a VDAF that makes meaningful use of the aggregation parameter.
-
-As the name implies, Prio3 is a descendant of the original Prio construction.
-A second iteration was deployed in the {{ENPA}} system, and like the VDAF
-described here, the ENPA system was built from techniques introduced in
-{{BBCGGI19}} that significantly improve communication cost. That system was
-specialized for a particular aggregation function; the goal of Prio3 is to
-provide the same level of generality as the original construction.
 
 The core component of Prio3 is a "Fully Linear Proof (FLP)" system. Introduced
 by {{BBCGGI19}}, the FLP encapsulates the functionality required for encoding
@@ -5452,6 +5436,19 @@ that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
 
 # Acknowledgments
 {:numbered="false"}
+
+The impetus of this work is the success of recent deployments of predecessors
+of Prio3. The Mozilla Origin Telemetry project {{OriginTelemetry}} and the
+Exposure Notification Private Analytics collaboration among the Internet
+Security Research Group (ISRG), Google, Apple, and others {{ENPA}} have
+together aggregated data from hundreds of millions of users.
+
+As the name implies, Prio3 is a descendant of the original Prio construction
+{{CGB17}}. A second iteration was deployed in the {{ENPA}} system, and like the
+VDAF described here, the ENPA system was built from techniques introduced in
+{{BBCGGI19}} that significantly improve communication cost. That system was
+specialized for a particular aggregation function; the goal of Prio3 is to
+provide the same level of generality as the original construction.
 
 The security considerations in {{security}} are based largely on the security
 analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
