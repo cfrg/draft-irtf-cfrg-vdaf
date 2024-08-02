@@ -1,19 +1,17 @@
-import unittest
 from typing import TypeVar
 
 from vdaf_poc.field import FftField, Field64, Field96, Field128
-from vdaf_poc.flp import Flp
 from vdaf_poc.flp_bbcggi19 import (Count, FlpBBCGGI19, Histogram, Mul,
                                    MultihotCountVec, PolyEval, Range2, Sum,
-                                   SumOfRangeCheckedInputs, SumVec, Valid,
-                                   test_flp_bbcggi19, test_gadget)
+                                   SumOfRangeCheckedInputs, SumVec, Valid)
+from vdaf_poc.test_utils import TestFlpBBCGGI19
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")
 F = TypeVar("F", bound=FftField)
 
 
-class TestMultiGadget(Valid[int, int, Field64]):
+class MultiGadget(Valid[int, int, Field64]):
     # Associated parameters
     field = Field64
     GADGETS = [Mul(), Mul()]
@@ -56,58 +54,43 @@ class TestAverage(Sum):
         return total // num_measurements
 
 
-# Test encoding, truncation, then decoding.
-def test_encode_truncate_decode(
-        flp: Flp[Measurement, AggResult, F],
-        measurements: list[Measurement]) -> None:
-    for measurement in measurements:
-        assert measurement == flp.decode(
-            flp.truncate(flp.encode(measurement)), 1)
-
-
-def test_encode_truncate_decode_with_fft_fields(
-        measurements: list[list[int]],
-        length: int,
-        bits: int,
-        chunk_length: int) -> None:
-    for field in [Field64, Field96, Field128]:
-        sumvec = SumVec[FftField](field, length, bits, chunk_length)
-        assert sumvec.field == field
-        assert isinstance(sumvec, SumVec)
-        test_encode_truncate_decode(FlpBBCGGI19(sumvec), measurements)
-
-
-class TestFlpBBCGGI19(unittest.TestCase):
-    def test_count(self) -> None:
+class TestCount(TestFlpBBCGGI19):
+    def test(self) -> None:
         flp = FlpBBCGGI19(Count(Field64))
-        test_flp_bbcggi19(flp, [
+        self.run_flp_test(flp, [
             (flp.encode(0), True),
             (flp.encode(1), True),
             ([flp.field(1337)], False),
         ])
 
-    def test_sum(self) -> None:
+
+class TestSum(TestFlpBBCGGI19):
+    def test(self) -> None:
         flp = FlpBBCGGI19(Sum(Field128, 10))
-        test_flp_bbcggi19(flp, [
+        self.run_flp_test(flp, [
             (flp.encode(0), True),
             (flp.encode(100), True),
             (flp.encode(2 ** 10 - 1), True),
             (flp.field.rand_vec(10), False),
         ])
-        test_encode_truncate_decode(flp, [0, 100, 2 ** 10 - 1])
+        self.run_encode_truncate_decode_test(flp, [0, 100, 2 ** 10 - 1])
 
-    def test_sum_of_range_checked_inputs(self) -> None:
+
+class TestSumOfRangeCheckedInputs(TestFlpBBCGGI19):
+    def test(self) -> None:
         flp = FlpBBCGGI19(SumOfRangeCheckedInputs(Field128, 10_000))
-        test_flp_bbcggi19(flp, [
+        self.run_flp_test(flp, [
             (flp.encode(0), True),
             (flp.encode(1337), True),
             (flp.encode(9_999), True),
             (flp.field.zeros(flp.MEAS_LEN), False),
         ])
 
-    def test_histogram(self) -> None:
+
+class TestHistogram(TestFlpBBCGGI19):
+    def test(self) -> None:
         flp = FlpBBCGGI19(Histogram(Field128, 4, 2))
-        test_flp_bbcggi19(flp, [
+        self.run_flp_test(flp, [
             (flp.encode(0), True),
             (flp.encode(1), True),
             (flp.encode(2), True),
@@ -117,7 +100,9 @@ class TestFlpBBCGGI19(unittest.TestCase):
             (flp.field.rand_vec(4), False),
         ])
 
-    def test_multihot_count_vec(self) -> None:
+
+class TestMultihotCountVec(TestFlpBBCGGI19):
+    def test(self) -> None:
         valid = MultihotCountVec(Field128, 4, 2, 2)
         flp = FlpBBCGGI19(valid)
 
@@ -141,37 +126,54 @@ class TestFlpBBCGGI19(unittest.TestCase):
         ]
         # Failure case: pass count check but fail bit check.
         cases += [(flp.encode([flp.field.MODULUS - 1, 1, 0, 0]), False)]
-        test_flp_bbcggi19(flp, cases)
+        self.run_flp_test(flp, cases)
 
-    def test_multihot_count_vec_small(self) -> None:
+    def test_small(self) -> None:
         flp = FlpBBCGGI19(MultihotCountVec(Field128, 1, 1, 1))
 
-        test_flp_bbcggi19(flp, [
+        self.run_flp_test(flp, [
             (flp.encode([0]), True),
             (flp.encode([1]), True),
             ([flp.field(0), flp.field(1337)], False),
             ([flp.field(1), flp.field(0)], False),
         ])
 
-    def test_sumvec(self) -> None:
+
+class TestSumVec(TestFlpBBCGGI19):
+    def run_encode_truncate_decode_with_fft_fields_test(
+            self,
+            measurements: list[list[int]],
+            length: int,
+            bits: int,
+            chunk_length: int) -> None:
+        for field in [Field64, Field96, Field128]:
+            sumvec = SumVec[FftField](field, length, bits, chunk_length)
+            self.assertEqual(sumvec.field, field)
+            self.assertTrue(isinstance(sumvec, SumVec))
+            self.run_encode_truncate_decode_test(
+                FlpBBCGGI19(sumvec), measurements)
+
+    def test(self) -> None:
         # SumVec with length 2, bits 4, chunk len 1.
-        test_encode_truncate_decode_with_fft_fields(
+        self.run_encode_truncate_decode_with_fft_fields_test(
             [[1, 2], [3, 4], [5, 6], [7, 8]],
             2,
             4,
             1,
         )
 
-    def test_multigadget(self) -> None:
-        flp = FlpBBCGGI19(TestMultiGadget())
-        test_flp_bbcggi19(flp, [
+
+class TestMultiGadget(TestFlpBBCGGI19):
+    def test(self) -> None:
+        flp = FlpBBCGGI19(MultiGadget())
+        self.run_flp_test(flp, [
             (flp.encode(0), True),
         ])
 
 
-class TestGadget(unittest.TestCase):
+class TestGadgets(TestFlpBBCGGI19):
     def test_range2(self) -> None:
-        test_gadget(Range2(), Field128, 10)
+        self.run_gadget_test(Range2(), Field128, 10)
 
     def test_polyeval(self) -> None:
-        test_gadget(PolyEval([0, -23, 1, 3]), Field128, 10)
+        self.run_gadget_test(PolyEval([0, -23, 1, 3]), Field128, 10)

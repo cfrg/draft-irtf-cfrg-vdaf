@@ -307,36 +307,3 @@ def run_vdaf(
     agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
     return agg_result
-
-
-def test_vdaf(
-        vdaf: Vdaf[
-            Measurement,
-            AggParam,
-            PublicShare,
-            InputShare,
-            list[Any],  # OutShare
-            AggShare,
-            AggResult,
-            PrepState,
-            PrepShare,
-            PrepMessage,
-        ],
-        agg_param: AggParam,
-        measurements: list[Measurement],
-        expected_agg_result: AggResult) -> None:
-    # Test that the algorithm identifier is in the correct range.
-    assert 0 <= vdaf.ID and vdaf.ID < 2 ** 32
-
-    # Run the VDAF on the set of measurmenets.
-    nonces = [gen_rand(vdaf.NONCE_SIZE) for _ in range(len(measurements))]
-    verify_key = gen_rand(vdaf.VERIFY_KEY_SIZE)
-    agg_result = run_vdaf(vdaf,
-                          verify_key,
-                          agg_param,
-                          nonces,
-                          measurements)
-    if agg_result != expected_agg_result:
-        print('vdaf test failed ({} on {}): unexpected result: got {}; want {}'
-              .format(vdaf.test_vec_name, measurements, agg_result,
-                      expected_agg_result))
