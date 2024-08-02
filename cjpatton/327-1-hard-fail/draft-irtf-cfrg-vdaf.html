@@ -4872,11 +4872,18 @@ To mitigate this, the Aggregators also check that they have all computed the
 same joint randomness seed before accepting their output shares. To do so, they
 exchange their parts of the joint randomness along with their shares of
 verifier(s).<a href="#section-7.2.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.2.2-4">The definitions of constants and a few auxiliary functions are defined in
-<a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>.<a href="#section-7.2.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2.2-4">Implementation note: the preparation state for Prio3 includes the output share
+that will be released once preparation is complete. In some situations, it may be
+necessary for the Aggregator to encode this state as bytes and store it for
+retrieval later on. For all but the first Aggregator, it is possible to save
+storage by storing the measurement share rather than output share itself. It is
+relatively inexpensive to expand this seed into the input share, then truncate
+the input share to get the output share.<a href="#section-7.2.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2.2-5">The definitions of constants and a few auxiliary functions are defined in
+<a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>.<a href="#section-7.2.2-5" class="pilcrow">¶</a></p>
 <span id="name-preparation-state-for-prio3"></span><div id="prio3-prep-state">
 <figure id="figure-18">
-            <div class="breakable lang-python sourcecode" id="section-7.2.2-5.1">
+            <div class="breakable lang-python sourcecode" id="section-7.2.2-6.1">
 <pre>
 def prep_init(
         self,
