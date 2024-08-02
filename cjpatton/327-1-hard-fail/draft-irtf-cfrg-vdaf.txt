@@ -2921,6 +2921,15 @@ Table of Contents
    before accepting their output shares.  To do so, they exchange their
    parts of the joint randomness along with their shares of verifier(s).
 
+   Implementation note: the preparation state for Prio3 includes the
+   output share that will be released once preparation is complete.  In
+   some situations, it may be necessary for the Aggregator to encode
+   this state as bytes and store it for retrieval later on.  For all but
+   the first Aggregator, it is possible to save storage by storing the
+   measurement share rather than output share itself.  It is relatively
+   inexpensive to expand this seed into the input share, then truncate
+   the input share to get the output share.
+
    The definitions of constants and a few auxiliary functions are
    defined in Section 7.2.6.
 
