@@ -58,6 +58,6 @@ class FlpTest(Flp[int, int, F]):
 class TestFlp(unittest.TestCase):
     def test_flp(self) -> None:
         flp = FlpTest(Field128, 1)
-        assert run_flp(flp, flp.encode(0), 3) is True
-        assert run_flp(flp, flp.encode(4), 3) is True
-        assert run_flp(flp, [Field128(1337)], 3) is False
+        self.assertTrue(run_flp(flp, flp.encode(0), 3))
+        self.assertTrue(run_flp(flp, flp.encode(4), 3))
+        self.assertFalse(run_flp(flp, [Field128(1337)], 3))

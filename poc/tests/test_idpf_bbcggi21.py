@@ -1,52 +1,129 @@
 import unittest
-from typing import cast
+from functools import reduce
+from typing import Sequence, cast
 
-from tests.idpf_util import test_idpf, test_idpf_exhaustive
 from vdaf_poc.common import from_be_bytes, gen_rand, vec_add
 from vdaf_poc.field import Field
+from vdaf_poc.idpf import Idpf
 from vdaf_poc.idpf_bbcggi21 import IdpfBBCGGI21
 
 
 class TestIdpfBBCGGI21(unittest.TestCase):
+    def run_idpf_test(self, idpf: Idpf, alpha: int, level: int, prefixes: Sequence[int]) -> None:
+        """
+        Generate a set of IDPF keys and evaluate them on the given set of prefix.
+        """
+        beta_inner = [[idpf.field_inner(1)] * idpf.VALUE_LEN] * (idpf.BITS - 1)
+        beta_leaf = [idpf.field_leaf(1)] * idpf.VALUE_LEN
+
+        # Generate the IDPF keys.
+        rand = gen_rand(idpf.RAND_SIZE)
+        nonce = gen_rand(idpf.NONCE_SIZE)
+        (public_share, keys) = idpf.gen(
+            alpha, beta_inner, beta_leaf, nonce, rand)
+
+        out = [idpf.current_field(level).zeros(idpf.VALUE_LEN)] * len(prefixes)
+        for agg_id in range(idpf.SHARES):
+            out_share = idpf.eval(
+                agg_id, public_share, keys[agg_id], level, prefixes, nonce)
+            for i in range(len(prefixes)):
+                out[i] = vec_add(out[i], out_share[i])
+
+        for (got, prefix) in zip(out, prefixes):
+            if idpf.is_prefix(prefix, alpha, level):
+                if level < idpf.BITS - 1:
+                    want = beta_inner[level]
+                else:
+                    want = beta_leaf
+            else:
+                want = idpf.current_field(level).zeros(idpf.VALUE_LEN)
+
+            self.assertEqual(got, want)
+
+    def run_idpf_exhaustive_test(self, idpf: Idpf, alpha: int) -> None:
+        """Generate a set of IDPF keys and test every possible output."""
+
+        # Generate random outputs with which to program the IDPF.
+        beta_inner = []
+        for _ in range(idpf.BITS - 1):
+            beta_inner.append(idpf.field_inner.rand_vec(idpf.VALUE_LEN))
+        beta_leaf = idpf.field_leaf.rand_vec(idpf.VALUE_LEN)
+
+        # Generate the IDPF keys.
+        rand = gen_rand(idpf.RAND_SIZE)
+        nonce = gen_rand(idpf.NONCE_SIZE)
+        (public_share, keys) = idpf.gen(
+            alpha, beta_inner, beta_leaf, nonce, rand)
+
+        # Evaluate the IDPF at every node of the tree.
+        for level in range(idpf.BITS):
+            prefixes = tuple(range(2 ** level))
+
+            out_shares = []
+            for agg_id in range(idpf.SHARES):
+                out_shares.append(
+                    idpf.eval(agg_id, public_share,
+                              keys[agg_id], level, prefixes, nonce))
+
+            # Check that each set of output shares for each prefix sums up to the
+            # correct value.
+            for prefix in prefixes:
+                got = reduce(lambda x, y: vec_add(x, y),
+                             map(lambda x: x[prefix], out_shares))
+
+                if idpf.is_prefix(prefix, alpha, level):
+                    if level < idpf.BITS - 1:
+                        want = beta_inner[level]
+                    else:
+                        want = beta_leaf
+                else:
+                    want = idpf.current_field(level).zeros(idpf.VALUE_LEN)
+
+                self.assertEqual(got, want)
+
     def test(self) -> None:
-        test_idpf(
+        self.run_idpf_test(
             IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             15,
             (0b1111000011110000,),
         )
-        test_idpf(
+        self.run_idpf_test(
             IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             14,
             (0b111100001111000,),
         )
-        test_idpf(
+        self.run_idpf_test(
             IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             13,
             (0b11110000111100,),
         )
-        test_idpf(
+        self.run_idpf_test(
             IdpfBBCGGI21(2, 16),
             0b1111000011110000,
             12,
             (0b1111000011110,),
         )
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000,
-                  11, (0b111100001111,))
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000,
-                  10, (0b11110000111,))
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 5, (0b111100,))
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 4, (0b11110,))
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 3, (0b1111,))
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 2, (0b111,))
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 1, (0b11,))
-        test_idpf(IdpfBBCGGI21(2, 16), 0b1111000011110000, 0, (0b1,))
-        test_idpf(IdpfBBCGGI21(2, 1000), 0, 999, (0,))
-        test_idpf_exhaustive(IdpfBBCGGI21(2, 1), 0)
-        test_idpf_exhaustive(IdpfBBCGGI21(2, 1), 1)
-        test_idpf_exhaustive(IdpfBBCGGI21(2, 8), 91)
+        self.run_idpf_test(IdpfBBCGGI21(2, 16), 0b1111000011110000,
+                           11, (0b111100001111,))
+        self.run_idpf_test(IdpfBBCGGI21(2, 16), 0b1111000011110000,
+                           10, (0b11110000111,))
+        self.run_idpf_test(IdpfBBCGGI21(
+            2, 16), 0b1111000011110000, 5, (0b111100,))
+        self.run_idpf_test(IdpfBBCGGI21(
+            2, 16), 0b1111000011110000, 4, (0b11110,))
+        self.run_idpf_test(IdpfBBCGGI21(
+            2, 16), 0b1111000011110000, 3, (0b1111,))
+        self.run_idpf_test(IdpfBBCGGI21(
+            2, 16), 0b1111000011110000, 2, (0b111,))
+        self.run_idpf_test(IdpfBBCGGI21(2, 16), 0b1111000011110000, 1, (0b11,))
+        self.run_idpf_test(IdpfBBCGGI21(2, 16), 0b1111000011110000, 0, (0b1,))
+        self.run_idpf_test(IdpfBBCGGI21(2, 1000), 0, 999, (0,))
+        self.run_idpf_exhaustive_test(IdpfBBCGGI21(2, 1), 0)
+        self.run_idpf_exhaustive_test(IdpfBBCGGI21(2, 1), 1)
+        self.run_idpf_exhaustive_test(IdpfBBCGGI21(2, 8), 91)
 
     def test_index_encoding(self) -> None:
         """

@@ -4,71 +4,71 @@ from vdaf_poc.field import (FftField, Field, Field2, Field64, Field96,
                             Field128, Field255, poly_eval, poly_interp)
 
 
-def test_field(cls: type[Field]) -> None:
-    # Test constructing a field element from an integer.
-    assert cls(1337) == cls(cls.gf(1337))
-
-    # Test generating a zero-vector.
-    vec = cls.zeros(23)
-    assert len(vec) == 23
-    for x in vec:
-        assert x == cls(cls.gf.zero())
-
-    # Test generating a random vector.
-    vec = cls.rand_vec(23)
-    assert len(vec) == 23
-
-    # Test arithmetic.
-    x = cls(cls.gf.random_element())
-    y = cls(cls.gf.random_element())
-    assert x + y == cls(x.val + y.val)
-    assert x - y == cls(x.val - y.val)
-    assert -x == cls(-x.val)
-    assert x * y == cls(x.val * y.val)
-    assert x.inv() == cls(x.val**-1)
-
-    # Test serialization.
-    want = cls.rand_vec(10)
-    got = cls.decode_vec(cls.encode_vec(want))
-    assert got == want
-
-    # Test encoding integer as bit vector.
-    vals = [i for i in range(15)]
-    bits = 4
-    for val in vals:
-        encoded = cls.encode_into_bit_vector(val, bits)
-        assert cls.decode_from_bit_vector(encoded).as_unsigned() == val
-
-
-def test_fft_field(cls: type[FftField]) -> None:
-    test_field(cls)
-
-    # Test generator.
-    assert cls.gen()**cls.GEN_ORDER == cls(1)
-
-
 class TestFields(unittest.TestCase):
+    def run_field_test(self, cls: type[Field]) -> None:
+        # Test constructing a field element from an integer.
+        self.assertTrue(cls(1337) == cls(cls.gf(1337)))
+
+        # Test generating a zero-vector.
+        vec = cls.zeros(23)
+        self.assertTrue(len(vec) == 23)
+        for x in vec:
+            self.assertTrue(x == cls(cls.gf.zero()))
+
+        # Test generating a random vector.
+        vec = cls.rand_vec(23)
+        self.assertTrue(len(vec) == 23)
+
+        # Test arithmetic.
+        x = cls(cls.gf.random_element())
+        y = cls(cls.gf.random_element())
+        self.assertTrue(x + y == cls(x.val + y.val))
+        self.assertTrue(x - y == cls(x.val - y.val))
+        self.assertTrue(-x == cls(-x.val))
+        self.assertTrue(x * y == cls(x.val * y.val))
+        self.assertTrue(x.inv() == cls(x.val**-1))
+
+        # Test serialization.
+        want = cls.rand_vec(10)
+        got = cls.decode_vec(cls.encode_vec(want))
+        self.assertTrue(got == want)
+
+        # Test encoding integer as bit vector.
+        vals = [i for i in range(15)]
+        bits = 4
+        for val in vals:
+            encoded = cls.encode_into_bit_vector(val, bits)
+            self.assertTrue(cls.decode_from_bit_vector(
+                encoded).as_unsigned() == val)
+
+    def run_fft_field_test(self, cls: type[FftField]) -> None:
+        self.run_field_test(cls)
+
+        # Test generator.
+        self.assertTrue(cls.gen()**cls.GEN_ORDER == cls(1))
+
     def test_field64(self) -> None:
-        test_fft_field(Field64)
+        self.run_fft_field_test(Field64)
 
     def test_field96(self) -> None:
-        test_fft_field(Field96)
+        self.run_fft_field_test(Field96)
 
     def test_field128(self) -> None:
-        test_fft_field(Field128)
+        self.run_fft_field_test(Field128)
 
     def test_field255(self) -> None:
-        test_field(Field255)
+        self.run_field_test(Field255)
 
     def test_field2(self) -> None:
         # Test GF(2).
-        assert Field2(1).as_unsigned() == 1
-        assert Field2(0).as_unsigned() == 0
-        assert Field2(1) + Field2(1) == Field2(0)
-        assert Field2(1) * Field2(1) == Field2(1)
-        assert -Field2(1) == Field2(1)
-        assert Field2(1).conditional_select(b'hello') == b'hello'
-        assert Field2(0).conditional_select(b'hello') == bytes([0, 0, 0, 0, 0])
+        self.assertEqual(Field2(1).as_unsigned(), 1)
+        self.assertEqual(Field2(0).as_unsigned(), 0)
+        self.assertEqual(Field2(1) + Field2(1), Field2(0))
+        self.assertEqual(Field2(1) * Field2(1), Field2(1))
+        self.assertEqual(-Field2(1), Field2(1))
+        self.assertEqual(Field2(1).conditional_select(b'hello'), b'hello')
+        self.assertEqual(Field2(0).conditional_select(
+            b'hello'), bytes([0, 0, 0, 0, 0]))
 
     def test_interp(self) -> None:
         # Test polynomial interpolation.
@@ -80,4 +80,4 @@ class TestFields(unittest.TestCase):
         for x in xs:
             a = poly_eval(cls, p, x)
             b = poly_eval(cls, q, x)
-            assert a == b
+            self.assertEqual(a, b)

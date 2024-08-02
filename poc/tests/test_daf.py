@@ -91,7 +91,9 @@ AggShare = TypeVar("AggShare")
 AggResult = TypeVar("AggResult")
 
 
-def test_daf(
+class TestDafCase(unittest.TestCase):
+    def run_daf_test(
+        self,
         daf: Daf[
             Measurement,
             AggParam,
@@ -103,22 +105,17 @@ def test_daf(
         ],
         agg_param: AggParam,
         measurements: list[Measurement],
-        expected_agg_result: AggResult) -> None:
-    # Test that the algorithm identifier is in the correct range.
-    assert 0 <= daf.ID and daf.ID < 2 ** 32
+            expected_agg_result: AggResult) -> None:
+        # Test that the algorithm identifier is in the correct range.
+        self.assertTrue(0 <= daf.ID and daf.ID < 2 ** 32)
 
-    # Run the DAF on the set of measurements.
-    nonces = [gen_rand(daf.NONCE_SIZE) for _ in range(len(measurements))]
-    agg_result = run_daf(daf,
-                         agg_param,
-                         measurements,
-                         nonces)
-    if agg_result != expected_agg_result:
-        print('daf test failed ({} on {}): unexpected result: got {}; want {}'
-              .format(daf.__class__, measurements, agg_result,
-                      expected_agg_result))
+        # Run the DAF on the set of measurements.
+        nonces = [gen_rand(daf.NONCE_SIZE) for _ in range(len(measurements))]
+        agg_result = run_daf(daf,
+                             agg_param,
+                             measurements,
+                             nonces)
+        self.assertEqual(agg_result, expected_agg_result)
 
-
-class TestDafCase(unittest.TestCase):
     def test_test_daf(self) -> None:
-        test_daf(TestDaf(), None, [1, 2, 3, 4], 10)
+        self.run_daf_test(TestDaf(), None, [1, 2, 3, 4], 10)
