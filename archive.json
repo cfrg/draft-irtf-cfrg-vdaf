@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-01T00:53:37.400965+00:00",
+  "timestamp": "2024-08-04T00:53:06.711961+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4417,13 +4417,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "poc"
       ],
       "body": "              This is fine as pseudocode, but as an FYI, this won't work in actual Python. The left hand side is `<class 'tuple'>`, while the right hand side is an instance of `types.GenericAlias`. The collection types are fully dynamic to begin with, and everything in the `types` module is meant for static analysis, not RTTI.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/275#discussion_r1295061219_\r\n            ",
       "createdAt": "2023-08-16T01:01:53Z",
-      "updatedAt": "2024-01-25T17:53:34Z",
+      "updatedAt": "2024-08-02T23:48:47Z",
       "closedAt": null,
       "comments": []
     },
@@ -5110,15 +5112,25 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "poc"
       ],
       "body": "1. Adopt `unittest` for unit tests.\r\n2. Decouple test vector generation from unit tests. Requirements:\r\n     * We would like the code to set the path for the test vector (e.g., `test_vec/08`).\r\n     * Unit tests should always generate fresh randomness; for test vectors, either: (1) use the a fixed sequence of coins, as the draft suggests; or (2) publish the generated randomness with test vectors.\r\n     * We need a separate function for generating test vectors and running the VDAF.\r\n\r\ncc/ @junyechen1996 ",
       "createdAt": "2024-01-23T16:12:11Z",
-      "updatedAt": "2024-01-25T17:52:41Z",
+      "updatedAt": "2024-08-01T21:01:55Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Another issue here: Some tests, when they fail, merely dump something to stdout without triggering unittest to have a fatal exit status. This means these failures won't be noticed in CI.",
+          "createdAt": "2024-08-01T21:01:54Z",
+          "updatedAt": "2024-08-01T21:01:54Z"
+        }
+      ]
     },
     {
       "number": 328,
@@ -5223,16 +5235,40 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "pre-RGLC"
       ],
       "body": "The intro mentions the MOzilla Origin Telemtry project, ENPA, ISRG, Google, and Apple by name. I'm not sure this is appropriate for an RFC to do. ",
       "createdAt": "2024-05-01T20:51:16Z",
-      "updatedAt": "2024-06-10T15:16:57Z",
+      "updatedAt": "2024-08-03T00:27:43Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "richsalz",
+          "authorAssociation": "NONE",
+          "body": "Credit them in the acknowledgements for providing the impetus to write the draft?",
+          "createdAt": "2024-08-01T20:17:30Z",
+          "updatedAt": "2024-08-01T20:17:30Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Great idea, thanks Rich!",
+          "createdAt": "2024-08-01T20:22:46Z",
+          "updatedAt": "2024-08-01T20:22:46Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "List feedback: https://mailarchive.ietf.org/arch/msg/cfrg/4TAP3_bgDGFEy8C29qigQUwNc2A/",
+          "createdAt": "2024-08-03T00:27:43Z",
+          "updatedAt": "2024-08-03T00:27:43Z"
+        }
+      ]
     },
     {
       "number": 341,
@@ -5528,19 +5564,19 @@
       "id": "I_kwDOGKuqOc6QPIjs",
       "title": "Prio3: Store compressed helper input share in PrepState",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/380",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
-        "divergentdave"
+        "cjpatton"
       ],
       "labels": [
         "editorial"
       ],
       "body": "Currently, the PrepState for Prio3 is `tuple[list[F], Optional[bytes]]`, consisting of the output share and the recomputed joint randomness seed. We could improve the storage requirements for the helper if the helper instead stored its compressed input share seed, and then re-expanded and re-truncated it into an output share during prep_next(). I think the leader should still store its output share in the PrepState, as it may be shorter than the leader input share, depending on the Prio3 instance. This would be quasi-wire breaking, in that it would change the format of an aggregator's persistent storage, but wouldn't affect messages between parties.",
       "createdAt": "2024-07-19T21:19:38Z",
-      "updatedAt": "2024-07-23T19:29:11Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-02T17:29:38Z",
+      "closedAt": "2024-08-02T17:29:38Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -33030,6 +33066,269 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 384,
+      "id": "PR_kwDOGKuqOc53KtO8",
+      "title": "Prio3: Add an implementation note about the output share",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/384",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #380.\r\n\r\nIt may be desirable to store the measurement share seed rather than the output share.",
+      "createdAt": "2024-08-01T20:04:51Z",
+      "updatedAt": "2024-08-02T17:29:38Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "fefc5a2f563e70e73a74d3c57b7145e0dd1c2e3f",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/380",
+      "headRefOid": "95c95fb75f0e1f6ecd6c720047a815bc2122a469",
+      "closedAt": "2024-08-02T17:29:37Z",
+      "mergedAt": "2024-08-02T17:29:37Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "8355b5c54a7c0af3719c15b2a7df269b5ff42b37"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6D-QwB",
+          "commit": {
+            "abbreviatedOid": "2b16952"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-01T22:29:52Z",
+          "updatedAt": "2024-08-01T22:30:33Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\r\nthat will be released once preparation is complete. In some situations, it may be\r\n```",
+              "createdAt": "2024-08-01T22:29:52Z",
+              "updatedAt": "2024-08-01T22:30:33Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 385,
+      "id": "PR_kwDOGKuqOc53LfhY",
+      "title": "poc: Move test vector generation out of unit tests",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/385",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Partially addresses #327.\r\n\r\nRemove the TEST_VECTOR and TEST_VECTOR_PATH environment variables and move test vector generation logic into a new tool, `gen_test_vec.py`.\r\n\r\nThe test vectors are complete with the following exceptions:\r\n\r\n1. We currently don't have test vectors for Prio3MultihotCountVec. This VDAF is new as of draft 10, but we neglected to add test vectors for it. This change checks in the test vectors.\r\n\r\n2. The test vector for IdpfBBCGGI21 was regenerated after this IDPF was renamed. Also, as of 01291c2c7c7568f8d31d01aa4d3e9df653d6b447, we are generating this with a proper nonce rather than an adhoc binder. To confirm that nothing has changed, you can modify `gen_test_vec_for_idpf()` by replacing Lines\r\n\r\n    ```\r\n    nonce = gen_rand(idpf.NONCE_SIZE)\r\n    ```\r\n\r\n    with\r\n\r\n    ```\r\n    nonce = bytes([0x73,0x6f,0x6d,0x65,0x20,0x6e,0x6f,0x6e,0x63,0x65])\r\n    ```\r\n\r\nAlso, this change opts in `gen_test_vec.py` and\r\n`plot_prio3_multiproof_robustness.py` into linting and type checking.",
+      "createdAt": "2024-08-01T21:45:10Z",
+      "updatedAt": "2024-08-02T20:53:14Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "8355b5c54a7c0af3719c15b2a7df269b5ff42b37",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/327",
+      "headRefOid": "7381f8441be9eb3687b8647d10648c2da6540442",
+      "closedAt": "2024-08-02T20:53:14Z",
+      "mergedAt": "2024-08-02T20:53:14Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "4d7694e20c797817dba389a90c6fba6b0fa1182e"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> We should update the command in the README. (and cut out the second command about how to filter which test vectors you generated, since that's no longer possible)\r\n\r\nThat's odd, I thought I had checked in this change! I guess I didn't. Anyway, done now.",
+          "createdAt": "2024-08-02T20:46:43Z",
+          "updatedAt": "2024-08-02T20:46:43Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6D-F_p",
+          "commit": {
+            "abbreviatedOid": "ec6b349"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-01T21:57:40Z",
+          "updatedAt": "2024-08-01T22:01:37Z",
+          "comments": [
+            {
+              "originalPosition": 389,
+              "body": "@divergentdave I can't figure out what mypy is complaining about here. Could you take a look?",
+              "createdAt": "2024-08-01T21:57:40Z",
+              "updatedAt": "2024-08-01T22:01:37Z"
+            },
+            {
+              "originalPosition": 60,
+              "body": "Reviewer note: I copied `run_vdaf()` from `test_vec/vdaf.py` and removed the `# REMOVE ME` comments.",
+              "createdAt": "2024-08-01T21:59:17Z",
+              "updatedAt": "2024-08-01T22:01:37Z"
+            },
+            {
+              "originalPosition": 266,
+              "body": "Reviewer note: copied verbatim from the tests directory.",
+              "createdAt": "2024-08-01T21:59:48Z",
+              "updatedAt": "2024-08-01T22:01:37Z"
+            },
+            {
+              "originalPosition": 303,
+              "body": "Reviewer note: copied verbatim from the tests directory.",
+              "createdAt": "2024-08-01T22:00:01Z",
+              "updatedAt": "2024-08-01T22:01:37Z"
+            },
+            {
+              "originalPosition": 19,
+              "body": "Reviewer note: Moved this from below to here. I like the idea of having all type variables for a file in one place.",
+              "createdAt": "2024-08-01T22:01:15Z",
+              "updatedAt": "2024-08-01T22:01:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EF-Yi",
+          "commit": {
+            "abbreviatedOid": "6835255"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "We should update the command in the README. (and cut out the second command about how to filter which test vectors you generated, since that's no longer possible)",
+          "createdAt": "2024-08-02T18:21:14Z",
+          "updatedAt": "2024-08-02T19:40:42Z",
+          "comments": [
+            {
+              "originalPosition": 389,
+              "body": "This is another papercut because of Poplar1's union types of `list[Field64] | list[Field255]`. Changing the `list[F]` to `list[Any]` in the signature of `gen_test_vec_for_vdaf()` will work around this; I previously did the same in `test_vdaf()`.",
+              "createdAt": "2024-08-02T18:21:14Z",
+              "updatedAt": "2024-08-02T19:40:42Z"
+            },
+            {
+              "originalPosition": 377,
+              "body": "nit: the others use tuples, while this uses a list",
+              "createdAt": "2024-08-02T19:36:24Z",
+              "updatedAt": "2024-08-02T19:40:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EGycK",
+          "commit": {
+            "abbreviatedOid": "751207a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-02T20:41:21Z",
+          "updatedAt": "2024-08-02T20:46:17Z",
+          "comments": [
+            {
+              "originalPosition": 377,
+              "body": "Done.",
+              "createdAt": "2024-08-02T20:41:21Z",
+              "updatedAt": "2024-08-02T20:46:17Z"
+            },
+            {
+              "originalPosition": 389,
+              "body": "Done! Thanks :)",
+              "createdAt": "2024-08-02T20:43:02Z",
+              "updatedAt": "2024-08-02T20:46:17Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 386,
+      "id": "PR_kwDOGKuqOc53Th6K",
+      "title": "poc: Ensure all test failures are enforced by CI",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/386",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #327.\r\n\r\nFor some of our tests, when the test fails, it outputs something to stdout:\r\n\r\n```python\r\nif not test_succeeded:\r\n    print('test failed!')\r\n```\r\n\r\nThis does not cause `sage python -m unittest` to fail, and so will be missed by CI. To address this, replace these with an assertion:\r\n\r\n```python\r\nassert test_succeeded\r\n```\r\n\r\nIn fact, this change goes one step further: encapsulate the test in a `unittest.TestCase` so that the test runner can provide more useful feedback:\r\n\r\n```python\r\nclass MyTest(unittest.TestCase):\r\n    def test(self):\r\n       ...\r\n       self.assertTrue(test_succeeded)\r\n```\r\n\r\nThis required a bit of refactoring:\r\n\r\n1. Create a new module, `vdaf_poc/test_utils.py`, that defines a test harness for instances of `Vdaf` and `FlpBBCGGI19`.\r\n\r\n2. Likewise, move `vdaf_poc/idpf_util.py` to a test harness in `tests/test_idpf_bbcggi21.py`.\r\n\r\nFinally, replace assertions in unit tests with `unittest`-style assertions.",
+      "createdAt": "2024-08-02T22:54:35Z",
+      "updatedAt": "2024-08-02T23:03:36Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "4d7694e20c797817dba389a90c6fba6b0fa1182e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/327-1-hard-fail",
+      "headRefOid": "03e7fb2dcc3be7040881a4e6d214636c719ead90",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6EHTLf",
+          "commit": {
+            "abbreviatedOid": "03e7fb2"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-02T23:01:18Z",
+          "updatedAt": "2024-08-02T23:03:05Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Reviewer note: this is definitely easier to review with whitespace hidden.",
+              "createdAt": "2024-08-02T23:01:18Z",
+              "updatedAt": "2024-08-02T23:03:05Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 387,
+      "id": "PR_kwDOGKuqOc53TlDf",
+      "title": "Move mention of {{OriginTelemetry}} and {{ENPA}} to acks",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/387",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #338.",
+      "createdAt": "2024-08-02T23:17:31Z",
+      "updatedAt": "2024-08-02T23:51:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "4d7694e20c797817dba389a90c6fba6b0fa1182e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/338",
+      "headRefOid": "231a9a8cfd1428b00bf6c71a537f6718277745b0",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
