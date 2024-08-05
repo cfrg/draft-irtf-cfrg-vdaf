@@ -3109,7 +3109,7 @@ inputs and/or messages sent by the peers. The initial state is <code>Start</code
 terminal states are <code>Rejected</code>, which indicates that the report cannot be
 processed any further, and <code>Finished(out_share)</code>, which indicates that the
 Aggregator has recovered an output share <code>out_share</code>.<a href="#section-5.7-4" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-5.7-5">
+<div class="lang-python sourcecode" id="section-5.7-5">
 <pre>
 class State:
     pass
@@ -3117,64 +3117,20 @@ class State:
 class Start(State):
     pass
 
-class Continued(State):
-    def __init__(self, prep_state):
+class Continued(State, Generic[PrepState]):
+    def __init__(self, prep_state: PrepState):
         self.prep_state = prep_state
 
-class Finished(State):
-    def __init__(self, output_share):
-        self.output_share = output_share
-
-class Rejected(State):
-    def __init__(self):
-        pass
+class Finished(State, Generic[OutShare]):
+    def __init__(self, out_share: OutShare):
+        self.out_share = out_share
 </pre><a href="#section-5.7-5" class="pilcrow">¶</a>
 </div>
-<p id="section-5.7-6">Note that there is no representation of the <code>Start</code> state as it is never
-instantiated in the ping-pong topology.<a href="#section-5.7-6" class="pilcrow">¶</a></p>
-<p id="section-5.7-7">For convenience, the methods described in this section are defined in terms of
-opaque byte strings. A compatible <code>Vdaf</code> <span class="bcp14">MUST</span> specify methods for encoding
-public shares, input shares, prep shares, prep messages, and aggregation
-parameters. Minimally:<a href="#section-5.7-7" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.7-8.1">
-            <p id="section-5.7-8.1.1"><code>vdaf.decode_public_share(encoded: bytes) -&gt; PublicShare</code> decodes a
-public share.<a href="#section-5.7-8.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.7-8.2">
-            <p id="section-5.7-8.2.1"><code>vdaf.decode_input_share(agg_id: int, encoded: bytes) -&gt; InputShare</code>
-decodes an input share, using the aggregator ID as optional
-context.<a href="#section-5.7-8.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.7-8.3">
-            <p id="section-5.7-8.3.1"><code>vdaf.encode_prep_share(prep_share: PrepShare) -&gt; bytes</code> encodes a prep
-share.<a href="#section-5.7-8.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.7-8.4">
-            <p id="section-5.7-8.4.1"><code>vdaf.decode_prep_share(prep_state: PrepState, encoded: bytes) -&gt;
-PrepShare</code> decodes a prep share, using the prep state as optional
-context.<a href="#section-5.7-8.4.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.7-8.5">
-            <p id="section-5.7-8.5.1"><code>vdaf.encode_prep_msg(prep_msg: PrepMessage) -&gt; bytes</code> encodes a prep
-message.<a href="#section-5.7-8.5.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.7-8.6">
-            <p id="section-5.7-8.6.1"><code>vdaf.decode_prep_msg(prep_state: PrepState, encoded: bytes) -&gt;
-PrepMessage</code> decodes a prep message, using the prep state as optional
-decoding context.<a href="#section-5.7-8.6.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.7-8.7">
-            <p id="section-5.7-8.7.1"><code>vdaf.decode_agg_param(encoded: bytes) -&gt; AggParam</code> decodes an
-aggregation parameter.<a href="#section-5.7-8.7.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.7-8.8">
-            <p id="section-5.7-8.8.1"><code>vdaf.encode_agg_param(agg_param: AggParam) -&gt; bytes</code> encodes an
-aggregation parameter.<a href="#section-5.7-8.8.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-5.7-9">Implementations of Prio3 and Poplar1 <span class="bcp14">MUST</span> use the encoding scheme specified in
-<a href="#prio3-encode" class="auto internal xref">Section 7.2.7</a> and <a href="#poplar1-encode" class="auto internal xref">Section 8.2.6</a> respectively.<a href="#section-5.7-9" class="pilcrow">¶</a></p>
+<p id="section-5.7-6">The methods described in this section are defined in terms of opaque byte
+strings. A compatible <code>Vdaf</code> <span class="bcp14">MUST</span> specify methods for encoding public shares,
+input shares, prep shares, prep messages, and aggregation parameters.<a href="#section-5.7-6" class="pilcrow">¶</a></p>
+<p id="section-5.7-7">Implementations of Prio3 and Poplar1 <span class="bcp14">MUST</span> use the encoding scheme specified in
+<a href="#prio3-encode" class="auto internal xref">Section 7.2.7</a> and <a href="#poplar1-encode" class="auto internal xref">Section 8.2.6</a> respectively.<a href="#section-5.7-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="ping-pong-topology-only-two-aggregators">
