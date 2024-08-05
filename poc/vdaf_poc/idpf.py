@@ -1,7 +1,7 @@
 """Definition of IDPFs."""
 
 from abc import ABCMeta, abstractmethod
-from typing import Generic, Sequence, TypeAlias, TypeVar, Union
+from typing import Generic, Sequence, TypeAlias, TypeVar
 
 from vdaf_poc.field import Field
 
@@ -9,9 +9,9 @@ FieldInner = TypeVar("FieldInner", bound=Field)
 FieldLeaf = TypeVar("FieldLeaf", bound=Field)
 
 # Type alias for the output of `eval()`.
-Output: TypeAlias = Union[list[list[FieldInner]], list[list[FieldLeaf]]]
+Output: TypeAlias = list[list[FieldInner]] | list[list[FieldLeaf]]
 # Type alias for a vector over the inner or leaf field.
-FieldVec: TypeAlias = Union[list[FieldInner], list[FieldLeaf]]
+FieldVec: TypeAlias = list[FieldInner] | list[FieldLeaf]
 
 
 class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
@@ -131,7 +131,7 @@ class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
     # ===================================================================
     def current_field(
             self,
-            level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
+            level: int) -> type[FieldInner] | type[FieldLeaf]:
         if level < self.BITS - 1:
             return self.field_inner
         return self.field_leaf
