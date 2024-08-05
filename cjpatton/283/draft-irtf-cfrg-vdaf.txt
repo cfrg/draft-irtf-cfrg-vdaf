@@ -1633,18 +1633,8 @@ Table of Contents
    } Message;
 
    These messages are used to transition between the states described in
-   Section 5.7.  They are encoded and decoded to or from byte buffers as
-   described Section 3 of [RFC8446]) using the following routines:
-
-   *  encode_ping_pong_message(message: Message) -> bytes encodes a
-      Message into an opaque byte buffer.
-
-   *  decode_pong_pong_message(encoded: bytes) -> Message decodes an
-      opaque byte buffer into a Message, raising an error if the bytes
-      are not a valid encoding.
-
-   The Leader's initial transition is computed with the following
-   procedure:
+   Section 5.7.  The Leader's initial transition is computed with the
+   following procedure:
 
    def ping_pong_leader_init(
                vdaf,
