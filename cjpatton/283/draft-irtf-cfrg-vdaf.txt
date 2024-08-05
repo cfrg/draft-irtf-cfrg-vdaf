@@ -1500,10 +1500,10 @@ Table of Contents
 
    The state machine of each Aggregator is shown in Figure 8.
 
-                  +----------------+
-                  |                |
-                  v                |
-   Start ------> Continued(prep_state) --> Finished(out_share)
+                     +----------------+
+                     |                |
+                     v                |
+   Start ----> Continued(prep_state, prep_round) --> Finished(out_share)
     |                |
     |                |
     +--> Rejected <--+
@@ -1624,7 +1624,7 @@ Table of Contents
            outbound += byte(0)  # initialize
            outbound += to_be_bytes(len(encoded), 4)
            outbound += encoded
-           return (Continued(prep_state), outbound)
+           return (Continued(prep_state, 0), outbound)
        except:
            return (Rejected(), None)
 
@@ -1675,6 +1675,7 @@ Table of Contents
                self.decode_agg_param(agg_param),
                prep_shares,
                prep_state,
+               0,
            )
        except:
            return (Rejected(), None)
@@ -1687,11 +1688,12 @@ Table of Contents
            self,
            agg_param: AggParam,
            prep_shares: list[PrepShare],
-           prep_state: PrepState) -> tuple[State, bytes]:
+           prep_state: PrepState,
+           prep_round: int) -> tuple[State, bytes]:
        prep_msg = self.prep_shares_to_prep(agg_param,
                                            prep_shares)
        out = self.prep_next(prep_state, prep_msg)
-       if self.finished(out):
+       if prep_round+1 == self.ROUNDS:
            encoded = self.encode_prep_msg(prep_msg)
            outbound = bytes()
            outbound += byte(2)  # finish
@@ -1708,7 +1710,7 @@ Table of Contents
        outbound += encoded_prep_msg
        outbound += to_be_bytes(len(encoded_prep_share), 4)
        outbound += encoded_prep_share
-       return (Continued(prep_state), outbound)
+       return (Continued(prep_state, prep_round+1), outbound)
 
    The output is the State to which the Helper has transitioned and an
    encoded Message.  If the Helper's state is Finished or Rejected, then
@@ -1741,6 +1743,7 @@ Table of Contents
        try:
            if not isinstance(state, Continued):
                return (Rejected(), None)
+           prep_round = state.prep_round
 
            ([inbound_type], inbound) = front(1, inbound)
            if inbound_type == 0:  # initialize
@@ -1754,7 +1757,8 @@ Table of Contents
                encoded_prep_msg,
            )
            out = self.prep_next(state.prep_state, prep_msg)
-           if not self.finished(out) and inbound_type == 1:  # continue
+           if prep_round+1 < self.ROUNDS and \
+               inbound_type == 1:  # continue
                (prep_state, prep_share) = cast(
                    tuple[PrepState, PrepShare], out)
                (el, inbound) = front(4, inbound)
@@ -1774,8 +1778,10 @@ Table of Contents
                    self.decode_agg_param(agg_param),
                    prep_shares,
                    prep_state,
+                   prep_round+1,
                )
-           elif self.finished(out) and inbound_type == 2:  # finish
+           elif prep_round+1 == self.ROUNDS and \
+               inbound_type == 2:  # finish
                assert len(inbound) == 0
                return (Finished(out), None)
            else:
