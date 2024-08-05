@@ -207,7 +207,7 @@ informative:
   OriginTelemetry:
     title: "Origin Telemetry"
     date: 2020
-    target: https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
+    target: https://web.archive.org/web/20221025174046/https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
 
 --- abstract
 
