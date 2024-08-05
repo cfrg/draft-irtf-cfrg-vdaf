@@ -1523,52 +1523,18 @@ Table of Contents
    class Start(State):
        pass
 
-   class Continued(State):
-       def __init__(self, prep_state):
+   class Continued(State, Generic[PrepState]):
+       def __init__(self, prep_state: PrepState):
            self.prep_state = prep_state
 
-   class Finished(State):
-       def __init__(self, output_share):
-           self.output_share = output_share
+   class Finished(State, Generic[OutShare]):
+       def __init__(self, out_share: OutShare):
+           self.out_share = out_share
 
-   class Rejected(State):
-       def __init__(self):
-           pass
-
-   Note that there is no representation of the Start state as it is
-   never instantiated in the ping-pong topology.
-
-   For convenience, the methods described in this section are defined in
-   terms of opaque byte strings.  A compatible Vdaf MUST specify methods
-   for encoding public shares, input shares, prep shares, prep messages,
-   and aggregation parameters.  Minimally:
-
-   *  vdaf.decode_public_share(encoded: bytes) -> PublicShare decodes a
-      public share.
-
-   *  vdaf.decode_input_share(agg_id: int, encoded: bytes) -> InputShare
-      decodes an input share, using the aggregator ID as optional
-      context.
-
-   *  vdaf.encode_prep_share(prep_share: PrepShare) -> bytes encodes a
-      prep share.
-
-   *  vdaf.decode_prep_share(prep_state: PrepState, encoded: bytes) ->
-      PrepShare decodes a prep share, using the prep state as optional
-      context.
-
-   *  vdaf.encode_prep_msg(prep_msg: PrepMessage) -> bytes encodes a
-      prep message.
-
-   *  vdaf.decode_prep_msg(prep_state: PrepState, encoded: bytes) ->
-      PrepMessage decodes a prep message, using the prep state as
-      optional decoding context.
-
-   *  vdaf.decode_agg_param(encoded: bytes) -> AggParam decodes an
-      aggregation parameter.
-
-   *  vdaf.encode_agg_param(agg_param: AggParam) -> bytes encodes an
-      aggregation parameter.
+   The methods described in this section are defined in terms of opaque
+   byte strings.  A compatible Vdaf MUST specify methods for encoding
+   public shares, input shares, prep shares, prep messages, and
+   aggregation parameters.
 
    Implementations of Prio3 and Poplar1 MUST use the encoding scheme
    specified in Section 7.2.7 and Section 8.2.6 respectively.
