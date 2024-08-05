@@ -1504,79 +1504,70 @@ At the same time, VDAFs are "verifiable" in the sense that malformed
 measurements that would otherwise garble the result of the computation can be
 detected and removed from the set of measurements. We refer to this property as
 "robustness".<a href="#section-1-8" class="pilcrow">¶</a></p>
-<p id="section-1-9">The cost of achieving these security properties is the need for multiple servers
-to participate in the protocol, and the need to ensure they do not collude to
-undermine the VDAF's privacy guarantees.  Recent implementation experience has
-shown that practical challenges of coordinating multiple servers can be
-overcome.  The Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> (essentially a VDAF) has been deployed in
-systems supporting hundreds of millions of users: The Mozilla Origin Telemetry
-project <span>[<a href="#OriginTelemetry" class="cite xref">OriginTelemetry</a>]</span> and the Exposure Notification Private Analytics
-collaboration among the Internet Security Research Group (ISRG), Google, Apple,
-and others <span>[<a href="#ENPA" class="cite xref">ENPA</a>]</span>.<a href="#section-1-9" class="pilcrow">¶</a></p>
-<p id="section-1-10">The VDAF abstraction laid out in <a href="#vdaf" class="auto internal xref">Section 5</a> represents a class of multi-party
+<p id="section-1-9">The VDAF abstraction laid out in <a href="#vdaf" class="auto internal xref">Section 5</a> represents a class of multi-party
 protocols for privacy-preserving measurement proposed in the literature. These
 protocols vary in their operational and security requirements, sometimes in
-subtle but consequential ways. This document therefore has two important goals:<a href="#section-1-10" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-11">
-<li id="section-1-11.1">
-          <p id="section-1-11.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> with
+subtle but consequential ways. This document therefore has two important goals:<a href="#section-1-9" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-10">
+<li id="section-1-10.1">
+          <p id="section-1-10.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> with
 a simple, uniform interface for accessing privacy-preserving measurement
 schemes, documenting relevant operational and security requirements, and
-specifying constraints for safe usage:<a href="#section-1-11.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-11.1.2">
-<li id="section-1-11.1.2.1">
-              <p id="section-1-11.1.2.1.1">General patterns of communications among the various actors involved in
+specifying constraints for safe usage:<a href="#section-1-10.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-10.1.2">
+<li id="section-1-10.1.2.1">
+              <p id="section-1-10.1.2.1.1">General patterns of communications among the various actors involved in
 the system (clients, aggregation servers, and the collector of the
-aggregate result);<a href="#section-1-11.1.2.1.1" class="pilcrow">¶</a></p>
+aggregate result);<a href="#section-1-10.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-11.1.2.2">
-              <p id="section-1-11.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
-information about client measurements; and<a href="#section-1-11.1.2.2.1" class="pilcrow">¶</a></p>
+            <li id="section-1-10.1.2.2">
+              <p id="section-1-10.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
+information about client measurements; and<a href="#section-1-10.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-11.1.2.3">
-              <p id="section-1-11.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
-corrupt the computation.<a href="#section-1-11.1.2.3.1" class="pilcrow">¶</a></p>
+            <li id="section-1-10.1.2.3">
+              <p id="section-1-10.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
+corrupt the computation.<a href="#section-1-10.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 </li>
-        <li id="section-1-11.2">
-          <p id="section-1-11.2.1">Providing cryptographers with design criteria that provide a clear
-deployment roadmap for new constructions.<a href="#section-1-11.2.1" class="pilcrow">¶</a></p>
+        <li id="section-1-10.2">
+          <p id="section-1-10.2.1">Providing cryptographers with design criteria that provide a clear
+deployment roadmap for new constructions.<a href="#section-1-10.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-1-12">This document also specifies two concrete VDAF schemes, each based on a protocol
-from the literature.<a href="#section-1-12" class="pilcrow">¶</a></p>
+<p id="section-1-11">This document also specifies two concrete VDAF schemes, each based on a protocol
+from the literature.<a href="#section-1-11" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1-13.1">
-          <p id="section-1-13.1.1">The aforementioned Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving
-computation of a variety aggregate statistics. The basic idea underlying Prio
-is fairly simple:<a href="#section-1-13.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-13.1.2">
-<li id="section-1-13.1.2.1">
-              <p id="section-1-13.1.2.1.1">Each client shards its measurement into a sequence of additive shares and
-distributes the shares among the aggregation servers.<a href="#section-1-13.1.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1-12.1">
+          <p id="section-1-12.1.1">The Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving computation of a
+variety aggregate statistics. The basic idea underlying Prio is fairly
+simple:<a href="#section-1-12.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-12.1.2">
+<li id="section-1-12.1.2.1">
+              <p id="section-1-12.1.2.1.1">Each client shards its measurement into a sequence of additive shares and
+distributes the shares among the aggregation servers.<a href="#section-1-12.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-13.1.2.2">
-              <p id="section-1-13.1.2.2.1">Next, each server adds up its shares locally, resulting in an additive
-share of the aggregate.<a href="#section-1-13.1.2.2.1" class="pilcrow">¶</a></p>
+            <li id="section-1-12.1.2.2">
+              <p id="section-1-12.1.2.2.1">Next, each server adds up its shares locally, resulting in an additive
+share of the aggregate.<a href="#section-1-12.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-13.1.2.3">
-              <p id="section-1-13.1.2.3.1">Finally, the aggregation servers send their aggregate shares to the data
-collector, who combines them to obtain the aggregate result.<a href="#section-1-13.1.2.3.1" class="pilcrow">¶</a></p>
+            <li id="section-1-12.1.2.3">
+              <p id="section-1-12.1.2.3.1">Finally, the aggregation servers send their aggregate shares to the data
+collector, who combines them to obtain the aggregate result.<a href="#section-1-12.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
-<p id="section-1-13.1.3">
+<p id="section-1-12.1.3">
 The difficult part of this system is ensuring that the servers hold shares of
 a valid, aggregatable value, e.g., the measurement is an integer in a
 specific range. Thus Prio specifies a multi-party protocol for accomplishing
-this task.<a href="#section-1-13.1.3" class="pilcrow">¶</a></p>
-<p id="section-1-13.1.4">
+this task.<a href="#section-1-12.1.3" class="pilcrow">¶</a></p>
+<p id="section-1-12.1.4">
 In <a href="#prio3" class="auto internal xref">Section 7</a> we describe Prio3, a VDAF that follows the same overall framework
 as the original Prio protocol, but incorporates techniques introduced in
-<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-13.1.4" class="pilcrow">¶</a></p>
+<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-12.1.4" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-1-13.2">
-          <p id="section-1-13.2.1">More recently, Boneh et al. <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> described a protocol called Poplar
+        <li class="normal" id="section-1-12.2">
+          <p id="section-1-12.2.1">More recently, Boneh et al. <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> described a protocol called Poplar
 for solving the <code>t</code>-heavy-hitters problem in a privacy-preserving manner. Here
 each client holds a bit-string of length <code>n</code>, and the goal of the aggregation
 servers is to compute the set of strings that occur at least <code>t</code> times. The
@@ -1586,35 +1577,35 @@ any bit-string of length shorter than or equal to <code>n</code>. As a result of
 query, each of the servers has an additive share of a bit indicating whether
 the string is a prefix of the client's string. The protocol also specifies a
 multi-party computation for verifying that at most one string among a set of
-candidates is a prefix of the client's string.<a href="#section-1-13.2.1" class="pilcrow">¶</a></p>
-<p id="section-1-13.2.2">
+candidates is a prefix of the client's string.<a href="#section-1-12.2.1" class="pilcrow">¶</a></p>
+<p id="section-1-12.2.2">
 In <a href="#poplar1" class="auto internal xref">Section 8</a> we describe a VDAF called Poplar1 that implements this
-functionality.<a href="#section-1-13.2.2" class="pilcrow">¶</a></p>
+functionality.<a href="#section-1-12.2.2" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-14">Finally, perhaps the most complex aspect of schemes like Prio3 and Poplar1 is
+<p id="section-1-13">Finally, perhaps the most complex aspect of schemes like Prio3 and Poplar1 is
 the process by which the client-generated measurements are prepared for
 aggregation. Because these constructions are based on secret sharing, the
 servers will be required to exchange some amount of information in order to
 verify the measurement is valid and can be aggregated. Depending on the
-construction, this process may require multiple round trips over the network.<a href="#section-1-14" class="pilcrow">¶</a></p>
-<p id="section-1-15">There are applications in which this verification step may not be necessary,
+construction, this process may require multiple round trips over the network.<a href="#section-1-13" class="pilcrow">¶</a></p>
+<p id="section-1-14">There are applications in which this verification step may not be necessary,
 e.g., when the client's software is run a trusted execution environment. To
 support these applications, this document also defines Distributed Aggregation
 Functions (DAFs) as a simpler class of protocols that aim to provide the same
-privacy guarantee as VDAFs but fall short of being verifiable.<a href="#section-1-15" class="pilcrow">¶</a></p>
+privacy guarantee as VDAFs but fall short of being verifiable.<a href="#section-1-14" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-1-16.1">
-          <p id="section-1-16.1.1">OPEN ISSUE Decide if we should give one or two example DAFs. There are natural
-variants of Prio3 and Poplar1 that might be worth describing.<a href="#section-1-16.1.1" class="pilcrow">¶</a></p>
+<li class="normal ulEmpty" id="section-1-15.1">
+          <p id="section-1-15.1.1">OPEN ISSUE Decide if we should give one or two example DAFs. There are natural
+variants of Prio3 and Poplar1 that might be worth describing.<a href="#section-1-15.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-17">The remainder of this document is organized as follows: <a href="#overview" class="auto internal xref">Section 3</a> gives a
+<p id="section-1-16">The remainder of this document is organized as follows: <a href="#overview" class="auto internal xref">Section 3</a> gives a
 brief overview of DAFs and VDAFs; <a href="#daf" class="auto internal xref">Section 4</a> defines the syntax for DAFs; <a href="#vdaf" class="auto internal xref">Section 5</a>
 defines the syntax for VDAFs; <a href="#prelim" class="auto internal xref">Section 6</a> defines various functionalities that
 are common to our constructions; <a href="#prio3" class="auto internal xref">Section 7</a> describes the Prio3 construction;
 <a href="#poplar1" class="auto internal xref">Section 8</a> describes the Poplar1 construction; and <a href="#security" class="auto internal xref">Section 9</a> enumerates the
-security considerations for VDAFs.<a href="#section-1-17" class="pilcrow">¶</a></p>
+security considerations for VDAFs.<a href="#section-1-16" class="pilcrow">¶</a></p>
 <div id="change-log">
 <section id="section-1.1">
         <h3 id="name-change-log">
@@ -4005,22 +3996,16 @@ Collector sums up the aggregate shares and computes the aggregate result.<a href
 <p id="section-7-4">This VDAF does not have an aggregation parameter. Instead, the output share is
 derived from the measurement share by applying a fixed map. See <a href="#poplar1" class="auto internal xref">Section 8</a> for
 an example of a VDAF that makes meaningful use of the aggregation parameter.<a href="#section-7-4" class="pilcrow">¶</a></p>
-<p id="section-7-5">As the name implies, Prio3 is a descendant of the original Prio construction.
-A second iteration was deployed in the <span>[<a href="#ENPA" class="cite xref">ENPA</a>]</span> system, and like the VDAF
-described here, the ENPA system was built from techniques introduced in
-<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that significantly improve communication cost. That system was
-specialized for a particular aggregation function; the goal of Prio3 is to
-provide the same level of generality as the original construction.<a href="#section-7-5" class="pilcrow">¶</a></p>
-<p id="section-7-6">The core component of Prio3 is a "Fully Linear Proof (FLP)" system. Introduced
+<p id="section-7-5">The core component of Prio3 is a "Fully Linear Proof (FLP)" system. Introduced
 by <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, the FLP encapsulates the functionality required for encoding
 and validating measurements. Prio3 can be thought of as a transformation of a
-particular class of FLPs into a VDAF.<a href="#section-7-6" class="pilcrow">¶</a></p>
-<p id="section-7-7">The remainder of this section is structured as follows. The syntax for FLPs is
+particular class of FLPs into a VDAF.<a href="#section-7-5" class="pilcrow">¶</a></p>
+<p id="section-7-6">The remainder of this section is structured as follows. The syntax for FLPs is
 described in <a href="#flp" class="auto internal xref">Section 7.1</a>. The generic transformation of an FLP into Prio3 is
 specified in <a href="#prio3-construction" class="auto internal xref">Section 7.2</a>. Next, a concrete FLP suitable for any
 validity circuit is specified in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>. Finally, instantiations of
 Prio3 for various types of measurements are specified in
-<a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-7-7" class="pilcrow">¶</a></p>
+<a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-7-6" class="pilcrow">¶</a></p>
 <div id="flp">
 <section id="section-7.1">
         <h3 id="name-fully-linear-proof-flp-syst">
@@ -8953,7 +8938,7 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dd class="break"></dd>
 <dt id="OriginTelemetry">[OriginTelemetry]</dt>
       <dd>
-<span class="refTitle">"Origin Telemetry"</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html">https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html</a>&gt;</span>. </dd>
+<span class="refTitle">"Origin Telemetry"</span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://web.archive.org/web/20221025174046/https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html">https://web.archive.org/web/20221025174046/https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -8965,13 +8950,24 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">The security considerations in <a href="#security" class="auto internal xref">Section 9</a> are based largely on the security
+<p id="appendix-A-1">The impetus of this work is the success of recent deployments of predecessors
+of Prio3. The Mozilla Origin Telemetry project <span>[<a href="#OriginTelemetry" class="cite xref">OriginTelemetry</a>]</span> and the
+Exposure Notification Private Analytics collaboration among the Internet
+Security Research Group (ISRG), Google, Apple, and others <span>[<a href="#ENPA" class="cite xref">ENPA</a>]</span> have
+together aggregated data from hundreds of millions of users.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">As the name implies, Prio3 is a descendant of the original Prio construction
+<span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span>. A second iteration was deployed in the <span>[<a href="#ENPA" class="cite xref">ENPA</a>]</span> system, and like the
+VDAF described here, the ENPA system was built from techniques introduced in
+<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that significantly improve communication cost. That system was
+specialized for a particular aggregation function; the goal of Prio3 is to
+provide the same level of generality as the original construction.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-3">The security considerations in <a href="#security" class="auto internal xref">Section 9</a> are based largely on the security
 analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. Thanks to Hannah Davis and Mike Rosulek, who lent their
-time to developing definitions and security proofs.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
-<p id="appendix-A-2">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
+time to developing definitions and security proofs.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<p id="appendix-A-4">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova, Jacob
 Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and Christopher Wood for
-useful feedback on and contributions to the spec.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+useful feedback on and contributions to the spec.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="test-vectors">
