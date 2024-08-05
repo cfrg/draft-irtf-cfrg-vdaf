@@ -1637,28 +1637,28 @@ Table of Contents
    following procedure:
 
    def ping_pong_leader_init(
-               vdaf,
-               vdaf_verify_key: bytes,
-               agg_param: bytes,
-               nonce: bytes,
-               public_share: bytes,
-               input_share: bytes,
-           ) -> tuple[State, bytes]:
+           self,
+           vdaf_verify_key: bytes,
+           agg_param: bytes,
+           nonce: bytes,
+           public_share: bytes,
+           input_share: bytes) -> tuple[State, Optional[bytes]]:
+       """Called by the leader to initialize ping-ponging."""
        try:
-           (prep_state, prep_share) = vdaf.prep_init(
+           (prep_state, prep_share) = self.prep_init(
                vdaf_verify_key,
                0,
-               vdaf.decode_agg_param(agg_param),
+               self.decode_agg_param(agg_param),
                nonce,
-               vdaf.decode_public_share(public_share),
-               vdaf.decode_input_share(0, input_share),
+               self.decode_public_share(public_share),
+               self.decode_input_share(0, input_share),
            )
-           outbound = Message.initialize(
-               vdaf.encode_prep_share(prep_share))
-           return (
-               Continued(prep_state),
-               encode_ping_pong_message(outbound),
-           )
+           encoded = self.encode_prep_share(prep_share)
+           outbound = bytes()
+           outbound += byte(0)  # initialize
+           outbound += to_be_bytes(len(encoded), 4)
+           outbound += encoded
+           return (Continued(prep_state), outbound)
        except:
            return (Rejected(), None)
 
@@ -1671,35 +1671,39 @@ Table of Contents
    initial transition is computed using the following procedure:
 
    def ping_pong_helper_init(
-               vdaf,
-               vdaf_verify_key: bytes,
-               agg_param: bytes,
-               nonce: bytes,
-               public_share: bytes,
-               input_share: bytes,
-               inbound_encoded: bytes,
-           ) -> tuple[State, bytes]:
+           self,
+           vdaf_verify_key: bytes,
+           agg_param: bytes,
+           nonce: bytes,
+           public_share: bytes,
+           input_share: bytes,
+           inbound: bytes) -> tuple[State, Optional[bytes]]:
+       """Called by the helper in response to the leader's initial message."""
        try:
-           (prep_state, prep_share) = vdaf.prep_init(
+           (prep_state, prep_share) = self.prep_init(
                vdaf_verify_key,
                1,
-               vdaf.decode_agg_param(agg_param),
+               self.decode_agg_param(agg_param),
                nonce,
-               vdaf.decode_public_share(public_share),
-               vdaf.decode_input_share(1, input_share),
+               self.decode_public_share(public_share),
+               self.decode_input_share(1, input_share),
            )
 
-           inbound = decode_ping_pong_message(inbound_encoded)
-
-           if inbound.type != 0: # initialize
+           ([inbound_type], inbound) = front(1, inbound)
+           if inbound_type != 0:  # initialize
                return (Rejected(), None)
 
+           (el, inbound) = front(4, inbound)
+           l = from_be_bytes(el)
+           (encoded, inbound) = front(l, inbound)
+           assert len(inbound) == 0
+
            prep_shares = [
-               vdaf.decode_prep_share(prep_state, inbound.prep_share),
+               self.decode_prep_share(prep_state, encoded),
                prep_share,
            ]
-           return vdaf.ping_pong_transition(
-               agg_param,
+           return self.ping_pong_transition(
+               self.decode_agg_param(agg_param),
                prep_shares,
                prep_state,
            )
@@ -1711,26 +1715,31 @@ Table of Contents
    caller:
 
    def ping_pong_transition(
-               vdaf,
-               agg_param: AggParam,
-               prep_shares: list[PrepShare],
-               prep_state: PrepState,
-            ) -> (State, bytes):
-       prep_msg = vdaf.prep_shares_to_prep(agg_param,
+           self,
+           agg_param: AggParam,
+           prep_shares: list[PrepShare],
+           prep_state: PrepState) -> tuple[State, bytes]:
+       prep_msg = self.prep_shares_to_prep(agg_param,
                                            prep_shares)
-       out = vdaf.prep_next(prep_state, prep_msg)
-       if type(out) == OutShare:
-           outbound = Message.finish(vdaf.encode_prep_msg(prep_msg))
-           return (Finished(out), encode_ping_pong_message(outbound))
-       (prep_state, prep_share) = out
-       outbound = Message.continue(
-           vdaf.encode_prep_msg(prep_msg),
-           vdaf.encode_prep_share(prep_share),
-       )
-       return (
-           Continued(prep_state),
-           encode_ping_pong_message(outbound),
-       )
+       out = self.prep_next(prep_state, prep_msg)
+       if finished(out):
+           encoded = self.encode_prep_msg(prep_msg)
+           outbound = bytes()
+           outbound += byte(2)  # finish
+           outbound += to_be_bytes(len(encoded), 4)
+           outbound += encoded
+           return (Finished(out), outbound)
+       (prep_state, prep_share) = cast(
+           tuple[PrepState, PrepShare], out)
+       encoded_prep_msg = self.encode_prep_msg(prep_msg)
+       encoded_prep_share = self.encode_prep_share(prep_share)
+       outbound = bytes()
+       outbound += byte(1)  # continue
+       outbound += to_be_bytes(len(encoded_prep_msg), 4)
+       outbound += encoded_prep_msg
+       outbound += to_be_bytes(len(encoded_prep_share), 4)
+       outbound += encoded_prep_share
+       return (Continued(prep_state), outbound)
 
    The output is the State to which the Helper has transitioned and an
    encoded Message.  If the Helper's state is Finished or Rejected, then
