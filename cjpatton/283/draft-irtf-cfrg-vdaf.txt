@@ -1634,7 +1634,7 @@ Table of Contents
 
    These messages are used to transition between the states described in
    Section 5.7.  The Leader's initial transition is computed with the
-   following procedure:
+   following method, implemented on Vdaf:
 
    def ping_pong_leader_init(
            self,
@@ -1678,7 +1678,10 @@ Table of Contents
            public_share: bytes,
            input_share: bytes,
            inbound: bytes) -> tuple[State, Optional[bytes]]:
-       """Called by the helper in response to the leader's initial message."""
+       """
+       Called by the helper in response to the leader's initial
+       message.
+       """
        try:
            (prep_state, prep_share) = self.prep_init(
                vdaf_verify_key,
@@ -1710,7 +1713,7 @@ Table of Contents
        except:
            return (Rejected(), None)
 
-   Procedure ping_pong_transition() takes in the prep shares, combines
+   Procedure ping_pong_transition takes in the prep shares, combines
    them into the prep message, and computes the next prep state of the
    caller:
 
@@ -1722,7 +1725,7 @@ Table of Contents
        prep_msg = self.prep_shares_to_prep(agg_param,
                                            prep_shares)
        out = self.prep_next(prep_state, prep_msg)
-       if finished(out):
+       if self.finished(out):
            encoded = self.encode_prep_msg(prep_msg)
            outbound = bytes()
            outbound += byte(2)  # finish
@@ -1751,63 +1754,66 @@ Table of Contents
    ping_pong_leader_continued:
 
    def ping_pong_leader_continued(
-               vdaf,
-               agg_param: bytes,
-               state: State,
-               inbound_encoded: bytes,
-           ) -> (State, Optional[bytes]):
-       return vdaf.ping_pong_continued(
-           True,
-           agg_param,
-           state,
-           inbound_encoded,
-       )
+       self,
+       agg_param: bytes,
+       state: State,
+       inbound: bytes,
+   ) -> tuple[State, Optional[bytes]]:
+       """
+       Called by the leader to start the next step of ping-ponging.
+       """
+       return self.ping_pong_continued(
+           True, agg_param, state, inbound)
 
    def ping_pong_continued(
-               vdaf,
-               is_leader: bool,
-               agg_param: bytes,
-               state: State,
-               inbound_encoded: bytes,
-           ) -> (State, Optional[bytes]):
+       self,
+       is_leader: bool,
+       agg_param: bytes,
+       state: State,
+       inbound: bytes,
+   ) -> tuple[State, Optional[bytes]]:
        try:
-           inbound = decode_ping_pong_message(inbound_encoded)
-
-           if inbound.type == 0: # initialize
+           if not isinstance(state, Continued):
                return (Rejected(), None)
 
-           if !isinstance(state, Continued):
+           ([inbound_type], inbound) = front(1, inbound)
+           if inbound_type == 0:  # initialize
                return (Rejected(), None)
 
-           prep_msg = vdaf.decode_prep_msg(
+           (el, inbound) = front(4, inbound)
+           l = from_be_bytes(el)
+           (encoded_prep_msg, inbound) = front(l, inbound)
+           prep_msg = self.decode_prep_msg(
                state.prep_state,
-               inbound.prep_msg,
+               encoded_prep_msg,
            )
-           out = vdaf.prep_next(state.prep_state, prep_msg)
-           if type(out) == tuple[PrepState, PrepShare] \
-                   and inbound.type == 1:
-               # continue
-               (prep_state, prep_share) = out
+           out = self.prep_next(state.prep_state, prep_msg)
+           if not self.finished(out) and inbound_type == 1:  # continue
+               (prep_state, prep_share) = cast(
+                   tuple[PrepState, PrepShare], out)
+               (el, inbound) = front(4, inbound)
+               l = from_be_bytes(el)
+               (encoded_prep_share, inbound) = front(l, inbound)
                prep_shares = [
-                   vdaf.decode_prep_share(
+                   self.decode_prep_share(
                        prep_state,
-                       inbound.prep_share,
+                       encoded_prep_share,
                    ),
                    prep_share,
                ]
                if is_leader:
                    prep_shares.reverse()
-               return vdaf.ping_pong_transition(
-                   vdaf.decode_agg_param(agg_param),
+               assert len(inbound) == 0
+               return self.ping_pong_transition(
+                   self.decode_agg_param(agg_param),
                    prep_shares,
                    prep_state,
                )
-           elif type(out) == OutShare and inbound.type == 2:
-               # finish
+           elif self.finished(out) and inbound_type == 2:  # finish
+               assert len(inbound) == 0
                return (Finished(out), None)
            else:
                return (Rejected(), None)
-
        except:
            return (Rejected(), None)
 
@@ -1817,17 +1823,14 @@ Table of Contents
    ping_pong_helper_continued:
 
    def ping_pong_helper_continued(
-               vdaf,
-               agg_param: bytes,
-               state: State,
-               inbound_encoded: bytes,
-           ) -> (State, Optional[bytes]):
-       return vdaf.ping_pong_continued(
-           False,
-           agg_param,
-           state,
-           inbound_encoded,
-       )
+       self,
+       agg_param: bytes,
+       state: State,
+       inbound: bytes,
+   ) -> tuple[State, Optional[bytes]]:
+       """Called by the helper to continue ping-ponging."""
+       return self.ping_pong_continued(
+           False, agg_param, state, inbound)
 
    They continue in this way until processing halts.  Note that,
    depending on the number of rounds of preparation that are required,

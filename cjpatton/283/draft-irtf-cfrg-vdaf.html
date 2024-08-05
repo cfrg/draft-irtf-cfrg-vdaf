@@ -3241,7 +3241,7 @@ struct {
 </div>
 <p id="section-5.8-7">These messages are used to transition between the states described in
 <a href="#vdaf-prep-comm" class="auto internal xref">Section 5.7</a>. The Leader's initial transition is computed with the
-following procedure:<a href="#section-5.8-7" class="pilcrow">¶</a></p>
+following method, implemented on <code>Vdaf</code>:<a href="#section-5.8-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.8-8">
 <pre>
 def ping_pong_leader_init(
@@ -3286,7 +3286,10 @@ def ping_pong_helper_init(
         public_share: bytes,
         input_share: bytes,
         inbound: bytes) -&gt; tuple[State, Optional[bytes]]:
-    """Called by the helper in response to the leader's initial message."""
+    """
+    Called by the helper in response to the leader's initial
+    message.
+    """
     try:
         (prep_state, prep_share) = self.prep_init(
             vdaf_verify_key,
@@ -3319,9 +3322,9 @@ def ping_pong_helper_init(
         return (Rejected(), None)
 </pre><a href="#section-5.8-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5.8-12">Procedure <code>ping_pong_transition()</code> takes in the prep shares, combines them into
+<p id="section-5.8-12">Procedure <code>ping_pong_transition</code> takes in the prep shares, combines them into
 the prep message, and computes the next prep state of the caller:<a href="#section-5.8-12" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-5.8-13">
+<div class="lang-python sourcecode" id="section-5.8-13">
 <pre>
 def ping_pong_transition(
         self,
@@ -3331,7 +3334,7 @@ def ping_pong_transition(
     prep_msg = self.prep_shares_to_prep(agg_param,
                                         prep_shares)
     out = self.prep_next(prep_state, prep_msg)
-    if finished(out):
+    if self.finished(out):
         encoded = self.encode_prep_msg(prep_msg)
         outbound = bytes()
         outbound += byte(2)  # finish
@@ -3356,66 +3359,69 @@ def ping_pong_transition(
 halts. Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.8-14" class="pilcrow">¶</a></p>
 <p id="section-5.8-15">Next, the Helper sends the outbound message to the Leader. The Leader computes
 its next state transition using the function <code>ping_pong_leader_continued</code>:<a href="#section-5.8-15" class="pilcrow">¶</a></p>
-<div class="breakable lang-pseudocode sourcecode" id="section-5.8-16">
+<div class="breakable lang-python sourcecode" id="section-5.8-16">
 <pre>
 def ping_pong_leader_continued(
-            vdaf,
-            agg_param: bytes,
-            state: State,
-            inbound_encoded: bytes,
-        ) -&gt; (State, Optional[bytes]):
-    return vdaf.ping_pong_continued(
-        True,
-        agg_param,
-        state,
-        inbound_encoded,
-    )
+    self,
+    agg_param: bytes,
+    state: State,
+    inbound: bytes,
+) -&gt; tuple[State, Optional[bytes]]:
+    """
+    Called by the leader to start the next step of ping-ponging.
+    """
+    return self.ping_pong_continued(
+        True, agg_param, state, inbound)
 
 def ping_pong_continued(
-            vdaf,
-            is_leader: bool,
-            agg_param: bytes,
-            state: State,
-            inbound_encoded: bytes,
-        ) -&gt; (State, Optional[bytes]):
+    self,
+    is_leader: bool,
+    agg_param: bytes,
+    state: State,
+    inbound: bytes,
+) -&gt; tuple[State, Optional[bytes]]:
     try:
-        inbound = decode_ping_pong_message(inbound_encoded)
-
-        if inbound.type == 0: # initialize
+        if not isinstance(state, Continued):
             return (Rejected(), None)
 
-        if !isinstance(state, Continued):
+        ([inbound_type], inbound) = front(1, inbound)
+        if inbound_type == 0:  # initialize
             return (Rejected(), None)
 
-        prep_msg = vdaf.decode_prep_msg(
+        (el, inbound) = front(4, inbound)
+        l = from_be_bytes(el)
+        (encoded_prep_msg, inbound) = front(l, inbound)
+        prep_msg = self.decode_prep_msg(
             state.prep_state,
-            inbound.prep_msg,
+            encoded_prep_msg,
         )
-        out = vdaf.prep_next(state.prep_state, prep_msg)
-        if type(out) == tuple[PrepState, PrepShare] \
-                and inbound.type == 1:
-            # continue
-            (prep_state, prep_share) = out
+        out = self.prep_next(state.prep_state, prep_msg)
+        if not self.finished(out) and inbound_type == 1:  # continue
+            (prep_state, prep_share) = cast(
+                tuple[PrepState, PrepShare], out)
+            (el, inbound) = front(4, inbound)
+            l = from_be_bytes(el)
+            (encoded_prep_share, inbound) = front(l, inbound)
             prep_shares = [
-                vdaf.decode_prep_share(
+                self.decode_prep_share(
                     prep_state,
-                    inbound.prep_share,
+                    encoded_prep_share,
                 ),
                 prep_share,
             ]
             if is_leader:
                 prep_shares.reverse()
-            return vdaf.ping_pong_transition(
-                vdaf.decode_agg_param(agg_param),
+            assert len(inbound) == 0
+            return self.ping_pong_transition(
+                self.decode_agg_param(agg_param),
                 prep_shares,
                 prep_state,
             )
-        elif type(out) == OutShare and inbound.type == 2:
-            # finish
+        elif self.finished(out) and inbound_type == 2:  # finish
+            assert len(inbound) == 0
             return (Finished(out), None)
         else:
             return (Rejected(), None)
-
     except:
         return (Rejected(), None)
 </pre><a href="#section-5.8-16" class="pilcrow">¶</a>
@@ -3427,17 +3433,14 @@ computes its next state transition using the function
 <div class="lang-pseudocode sourcecode" id="section-5.8-18">
 <pre>
 def ping_pong_helper_continued(
-            vdaf,
-            agg_param: bytes,
-            state: State,
-            inbound_encoded: bytes,
-        ) -&gt; (State, Optional[bytes]):
-    return vdaf.ping_pong_continued(
-        False,
-        agg_param,
-        state,
-        inbound_encoded,
-    )
+    self,
+    agg_param: bytes,
+    state: State,
+    inbound: bytes,
+) -&gt; tuple[State, Optional[bytes]]:
+    """Called by the helper to continue ping-ponging."""
+    return self.ping_pong_continued(
+        False, agg_param, state, inbound)
 </pre><a href="#section-5.8-18" class="pilcrow">¶</a>
 </div>
 <p id="section-5.8-19">They continue in this way until processing halts. Note that, depending on the
