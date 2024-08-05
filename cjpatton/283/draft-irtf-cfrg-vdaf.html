@@ -3240,21 +3240,9 @@ struct {
 </pre><a href="#section-5.8-6" class="pilcrow">¶</a>
 </div>
 <p id="section-5.8-7">These messages are used to transition between the states described in
-<a href="#vdaf-prep-comm" class="auto internal xref">Section 5.7</a>. They are encoded and decoded to or from byte buffers as
-described <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>) using the following routines:<a href="#section-5.8-7" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.8-8.1">
-            <p id="section-5.8-8.1.1"><code>encode_ping_pong_message(message: Message) -&gt; bytes</code> encodes a <code>Message</code> into
-an opaque byte buffer.<a href="#section-5.8-8.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.8-8.2">
-            <p id="section-5.8-8.2.1"><code>decode_pong_pong_message(encoded: bytes) -&gt; Message</code> decodes an opaque byte
-buffer into a <code>Message</code>, raising an error if the bytes are not a valid
-encoding.<a href="#section-5.8-8.2.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-5.8-9">The Leader's initial transition is computed with the following procedure:<a href="#section-5.8-9" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-5.8-10">
+<a href="#vdaf-prep-comm" class="auto internal xref">Section 5.7</a>. The Leader's initial transition is computed with the
+following procedure:<a href="#section-5.8-7" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-5.8-8">
 <pre>
 def ping_pong_leader_init(
             vdaf,
@@ -3281,14 +3269,14 @@ def ping_pong_leader_init(
         )
     except:
         return (Rejected(), None)
-</pre><a href="#section-5.8-10" class="pilcrow">¶</a>
+</pre><a href="#section-5.8-8" class="pilcrow">¶</a>
 </div>
-<p id="section-5.8-11">The output is the <code>State</code> to which the Leader has transitioned and an encoded
+<p id="section-5.8-9">The output is the <code>State</code> to which the Leader has transitioned and an encoded
 <code>Message</code>. If the Leader's state is <code>Rejected</code>, then processing halts.
-Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.8-11" class="pilcrow">¶</a></p>
-<p id="section-5.8-12">The Leader sends the outbound message to the Helper. The Helper's initial
-transition is computed using the following procedure:<a href="#section-5.8-12" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-5.8-13">
+Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.8-9" class="pilcrow">¶</a></p>
+<p id="section-5.8-10">The Leader sends the outbound message to the Helper. The Helper's initial
+transition is computed using the following procedure:<a href="#section-5.8-10" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-5.8-11">
 <pre>
 def ping_pong_helper_init(
             vdaf,
@@ -3325,11 +3313,11 @@ def ping_pong_helper_init(
         )
     except:
         return (Rejected(), None)
-</pre><a href="#section-5.8-13" class="pilcrow">¶</a>
+</pre><a href="#section-5.8-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5.8-14">Procedure <code>ping_pong_transition()</code> takes in the prep shares, combines them into
-the prep message, and computes the next prep state of the caller:<a href="#section-5.8-14" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-5.8-15">
+<p id="section-5.8-12">Procedure <code>ping_pong_transition()</code> takes in the prep shares, combines them into
+the prep message, and computes the next prep state of the caller:<a href="#section-5.8-12" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-5.8-13">
 <pre>
 def ping_pong_transition(
             vdaf,
@@ -3352,14 +3340,14 @@ def ping_pong_transition(
         Continued(prep_state),
         encode_ping_pong_message(outbound),
     )
-</pre><a href="#section-5.8-15" class="pilcrow">¶</a>
+</pre><a href="#section-5.8-13" class="pilcrow">¶</a>
 </div>
-<p id="section-5.8-16">The output is the <code>State</code> to which the Helper has transitioned and an encoded
+<p id="section-5.8-14">The output is the <code>State</code> to which the Helper has transitioned and an encoded
 <code>Message</code>. If the Helper's state is <code>Finished</code> or <code>Rejected</code>, then processing
-halts. Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.8-16" class="pilcrow">¶</a></p>
-<p id="section-5.8-17">Next, the Helper sends the outbound message to the Leader. The Leader computes
-its next state transition using the function <code>ping_pong_leader_continued</code>:<a href="#section-5.8-17" class="pilcrow">¶</a></p>
-<div class="breakable lang-pseudocode sourcecode" id="section-5.8-18">
+halts. Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.8-14" class="pilcrow">¶</a></p>
+<p id="section-5.8-15">Next, the Helper sends the outbound message to the Leader. The Leader computes
+its next state transition using the function <code>ping_pong_leader_continued</code>:<a href="#section-5.8-15" class="pilcrow">¶</a></p>
+<div class="breakable lang-pseudocode sourcecode" id="section-5.8-16">
 <pre>
 def ping_pong_leader_continued(
             vdaf,
@@ -3421,13 +3409,13 @@ def ping_pong_continued(
 
     except:
         return (Rejected(), None)
-</pre><a href="#section-5.8-18" class="pilcrow">¶</a>
+</pre><a href="#section-5.8-16" class="pilcrow">¶</a>
 </div>
-<p id="section-5.8-19">If the Leader's state is <code>Finished</code> or <code>Rejected</code>, then processing halts.
+<p id="section-5.8-17">If the Leader's state is <code>Finished</code> or <code>Rejected</code>, then processing halts.
 Otherwise, the Leader sends the outbound message to the Helper. The Helper
 computes its next state transition using the function
-<code>ping_pong_helper_continued</code>:<a href="#section-5.8-19" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-5.8-20">
+<code>ping_pong_helper_continued</code>:<a href="#section-5.8-17" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-5.8-18">
 <pre>
 def ping_pong_helper_continued(
             vdaf,
@@ -3441,12 +3429,12 @@ def ping_pong_helper_continued(
         state,
         inbound_encoded,
     )
-</pre><a href="#section-5.8-20" class="pilcrow">¶</a>
+</pre><a href="#section-5.8-18" class="pilcrow">¶</a>
 </div>
-<p id="section-5.8-21">They continue in this way until processing halts. Note that, depending on the
+<p id="section-5.8-19">They continue in this way until processing halts. Note that, depending on the
 number of rounds of preparation that are required, there may be one more
 message to send before the peer can also finish processing (i.e., <code>outbound !=
-None</code>).<a href="#section-5.8-21" class="pilcrow">¶</a></p>
+None</code>).<a href="#section-5.8-19" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="star-topology-any-number-of-aggregators">
