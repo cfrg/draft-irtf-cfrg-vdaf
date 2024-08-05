@@ -1760,12 +1760,23 @@ None`).
 ## Star Topology (Any Number of Aggregators)
 
 The ping-pong topology of the previous section is only suitable for VDAFs
-involving exactly two Aggregators. If more Aggregators are required, the star
-topology described in this section can be used instead.
+involving exactly two Aggregators. If the VDAF supports more than two
+Aggregators, then the star topology described in this section can
+be used instead.
 
-> TODO Describe the Leader-emulated broadcast channel architecture that was
-> originally envisioned for DAP. (As of DAP-05 we are going with the ping pong
-> architecture described in the previous section.)
+We again designate an Aggregator to initiate the computation. We refer to this
+Aggregator as the Leader and to all other Aggregators as Helpers.
+
+At the start of each round, the Leader requests from each Helper its prep
+share. After gathering each of the prep shares, the Leader computes the next
+prep message (via `prep_shares_to_prep()`) and broadcasts it to the Helpers. At
+this point, each Aggregator runs `prep_next()` locally to either recover an
+output share or, if more rounds of preparation are required, compute its updated state
+and prep share. If more are required, then the Helper responds to the broadcast
+message with its next prep share.
+
+The Aggregators proceed in this way until each recovers an output share or some
+step of the computation fails.
 
 # Preliminaries {#prelim}
 
