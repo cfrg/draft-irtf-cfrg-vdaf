@@ -1225,7 +1225,7 @@ methods:
     * `nonce` MUST have length `vdaf.NONCE_SIZE`.
 
 * `vdaf.prep_next(prep_state: PrepState, prep_msg: PrepMessage) ->
-  Union[tuple[PrepState, PrepShare], OutShare]` is the deterministic
+  tuple[PrepState, PrepShare] | OutShare` is the deterministic
   preparation-state update algorithm run by each Aggregator. It updates the
   Aggregator's preparation state (`prep_state`) and returns either its next
   preparation state and its message share for the current round or, if this is
@@ -2441,7 +2441,7 @@ subsections. These methods refer to constants enumerated in
 | `Measurement`     | `Flp.Measurement`                               |
 | `AggParam`        | `None`                                          |
 | `PublicShare`     | `Optional[list[bytes]]`                         |
-| `InputShare`      | `Union[tuple[list[F], list[F], Optional[bytes]], tuple[bytes, bytes, Optional[bytes]]]` |
+| `InputShare`      | `tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, bytes, Optional[bytes]]` |
 | `OutShare`        | `list[F]`                                       |
 | `AggShare`        | `list[F]`                                       |
 | `AggResult`       | `Flp.AggResult`                                 |
@@ -2796,9 +2796,8 @@ def prep_init(
 def prep_next(
         self,
         prep_state: Prio3PrepState[F],
-        prep_msg: Optional[bytes]) -> Union[
-            tuple[Prio3PrepState[F], Prio3PrepShare[F]],
-            list[F]]:
+        prep_msg: Optional[bytes],
+    ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
     k_joint_rand = prep_msg
     (out_share, k_corrected_joint_rand) = prep_state
 
@@ -4126,7 +4125,7 @@ defined in {{BBCGGI21}}, Definition 1.)
 
 A concrete IDPF defines the types and constants enumerated in {{idpf-param}}.
 In the remainder we write `Output` as shorthand for the type
-`Union[list[list[FieldInner]], list[list[FieldLeaf]]]`. (This type
+`list[list[FieldInner]] | list[list[FieldLeaf]]`. (This type
 denotes either a vector of inner node field elements or leaf node field
 elements.) The scheme is comprised of the following algorithms:
 
@@ -4180,7 +4179,7 @@ In addition, the following method is derived for each concrete `Idpf`:
 ~~~ python
 def current_field(
         self,
-        level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
+        level: int) -> type[FieldInner] | type[FieldLeaf]:
     if level < self.BITS - 1:
         return self.field_inner
     return self.field_leaf
@@ -4203,8 +4202,8 @@ state across evaluations. See {{idpf-bbcggi21}} for details.
 | KEY_SIZE   | Size in bytes of each IDPF key |
 | FieldInner | Implementation of `Field` ({{field}}) used for values of inner nodes |
 | FieldLeaf  | Implementation of `Field` used for values of leaf nodes |
-| Output     | Alias of `Union[list[list[FieldInner]], list[list[FieldLeaf]]]` |
-| FieldVec   | Alias of `Union[list[FieldInner], list[FieldLeaf]]` |
+| Output     | Alias of `list[list[FieldInner]] | list[list[FieldLeaf]]` |
+| FieldVec   | Alias of `list[FieldInner] | list[FieldLeaf]` |
 {: #idpf-param title="Constants and types defined by a concrete IDPF."}
 
 ### Encoding inputs as indices {#poplar1-idpf-index-encoding}
@@ -4504,9 +4503,8 @@ def prep_init(
 def prep_next(
         self,
         prep_state: Poplar1PrepState,
-        prep_msg: Optional[FieldVec]) -> Union[
-            tuple[Poplar1PrepState, FieldVec],
-            FieldVec]:
+        prep_msg: Optional[FieldVec]
+    ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
     prev_sketch = cast(list[Field], prep_msg)
     (step, level, prep_mem) = prep_state
 
@@ -4964,9 +4962,8 @@ def eval(
         key: bytes,
         level: int,
         prefixes: Sequence[int],
-        nonce: bytes) -> Union[
-            list[list[Field64]],
-            list[list[Field255]]]:
+        nonce: bytes,
+    ) -> list[list[Field64]] | list[list[Field255]]:
     if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
     if level not in range(self.BITS):
@@ -5018,7 +5015,7 @@ def eval(
         else:
             out_share.append(vec_neg(cast(list[Field], y)))
     return cast(
-        Union[list[list[Field64]], list[list[Field255]]],
+        list[list[Field64]] | list[list[Field255]],
         out_share,
     )
 

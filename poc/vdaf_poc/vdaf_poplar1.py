@@ -1,6 +1,6 @@
 """The Poplar1 VDAF."""
 
-from typing import Any, Optional, Sequence, TypeAlias, Union, cast
+from typing import Any, Optional, Sequence, TypeAlias, cast
 
 from vdaf_poc.common import (byte, from_be_bytes, front, to_be_bytes, vec_add,
                              vec_sub)
@@ -15,7 +15,7 @@ USAGE_CORR_INNER = 2
 USAGE_CORR_LEAF = 3
 USAGE_VERIFY_RAND = 4
 
-FieldVec: TypeAlias = Union[list[Field64], list[Field255]]
+FieldVec: TypeAlias = list[Field64] | list[Field255]
 Poplar1AggParam: TypeAlias = tuple[
     int,  # level
     Sequence[int],  # prefixes
@@ -302,11 +302,10 @@ class Poplar1(
         )
 
     def prep_next(
-            self,
-            prep_state: Poplar1PrepState,
-            prep_msg: Optional[FieldVec]) -> Union[
-                tuple[Poplar1PrepState, FieldVec],
-                FieldVec]:
+        self,
+        prep_state: Poplar1PrepState,
+        prep_msg: Optional[FieldVec]
+    ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
         prev_sketch = cast(list[Field], prep_msg)
         (step, level, prep_mem) = prep_state
 

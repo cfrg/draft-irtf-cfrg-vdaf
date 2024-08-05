@@ -1,7 +1,7 @@
 """The IDPF of {{BBCGGI21}}, Section 6."""
 
 import itertools
-from typing import Sequence, TypeAlias, Union, cast
+from typing import Sequence, TypeAlias, cast
 
 from vdaf_poc.common import format_dst, vec_add, vec_neg, vec_sub, xor
 from vdaf_poc.field import Field, Field2, Field64, Field255
@@ -23,7 +23,7 @@ from vdaf_poc.xof import XofFixedKeyAes128
 # errors, and then casting back to union types lets us keep precise return
 # types, which aids with self-documentation.
 
-FieldVec: TypeAlias = Union[list[Field64], list[Field255]]
+FieldVec: TypeAlias = list[Field64] | list[Field255]
 CorrectionWordTuple: TypeAlias = tuple[bytes, tuple[Field2, Field2], FieldVec]
 
 
@@ -147,9 +147,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             key: bytes,
             level: int,
             prefixes: Sequence[int],
-            nonce: bytes) -> Union[
-                list[list[Field64]],
-                list[list[Field255]]]:
+            nonce: bytes) -> list[list[Field64]] | list[list[Field255]]:
         if agg_id not in range(self.SHARES):
             raise ValueError('aggregator id out of range')
         if level not in range(self.BITS):
@@ -201,7 +199,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             else:
                 out_share.append(vec_neg(cast(list[Field], y)))
         return cast(
-            Union[list[list[Field64]], list[list[Field255]]],
+            list[list[Field64]] | list[list[Field255]],
             out_share,
         )
 

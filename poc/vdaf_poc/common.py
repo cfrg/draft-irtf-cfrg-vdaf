@@ -1,7 +1,7 @@
 """Functionalities used by other modules."""
 
 import os
-from typing import Protocol, Self, TypeVar, Union, overload
+from typing import Protocol, Self, TypeVar, overload
 
 # Document version, reved with each draft that contains breaking changes.
 VERSION = 8
@@ -129,9 +129,9 @@ def front(length: int, vec: list[T]) -> tuple[list[T], list[T]]:
 
 def front(
         length: int,
-        vec: Union[bytes, list[T]]) -> tuple[
-            Union[bytes, list[T]],
-            Union[bytes, list[T]]]:
+        vec: bytes | list[T]) -> tuple[
+            bytes | list[T],
+            bytes | list[T]]:
     """
     Split list `vec` in two and return the front and remainder as a tuple. The
     length of the front is `length`.

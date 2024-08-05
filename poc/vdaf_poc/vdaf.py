@@ -1,7 +1,7 @@
 """Definition of VDAFs."""
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar
 
 from vdaf_poc.common import format_dst, gen_rand
 from vdaf_poc.field import Field
@@ -118,7 +118,7 @@ class Vdaf(
     def prep_next(self,
                   prep_state: PrepState,
                   prep_msg: PrepMessage,
-                  ) -> Union[tuple[PrepState, PrepShare], OutShare]:
+                  ) -> tuple[PrepState, PrepShare] | OutShare:
         """
         Consume the inbound message from the previous round and return the
         Aggregator's share of the next round (or the aggregator's output share

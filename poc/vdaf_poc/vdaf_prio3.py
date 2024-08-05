@@ -1,7 +1,7 @@
 """The Prio3 VDAF."""
 
 from abc import abstractmethod
-from typing import Any, Generic, Optional, TypeAlias, TypeVar, Union
+from typing import Any, Generic, Optional, TypeAlias, TypeVar
 
 from vdaf_poc import flp_bbcggi19
 from vdaf_poc.common import byte, concat, front, vec_add, vec_sub, zeros
@@ -22,18 +22,17 @@ Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")
 F = TypeVar("F", bound=FftField)
 
-Prio3InputShare: TypeAlias = Union[
+Prio3InputShare: TypeAlias = \
     tuple[  # leader input share
         list[F],  # measurement share
         list[F],  # proof share
         Optional[bytes],  # joint randomness blind
-    ],
+    ] | \
     tuple[  # helper input share
         bytes,  # measurement share seed
         bytes,  # proof share seed
         Optional[bytes],  # joint randomness blind
-    ],
-]
+    ]
 Prio3PrepState: TypeAlias = tuple[
     list[F],  # output share
     Optional[bytes],  # corrected joint randomness seed
@@ -187,11 +186,10 @@ class Prio3(
         return (prep_state, prep_share)
 
     def prep_next(
-            self,
-            prep_state: Prio3PrepState[F],
-            prep_msg: Optional[bytes]) -> Union[
-                tuple[Prio3PrepState[F], Prio3PrepShare[F]],
-                list[F]]:
+        self,
+        prep_state: Prio3PrepState[F],
+        prep_msg: Optional[bytes]
+    ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
         k_joint_rand = prep_msg
         (out_share, k_corrected_joint_rand) = prep_state
 
