@@ -1504,7 +1504,7 @@ information about any one of the measurements <span>[<a href="#MPRV09" class="ci
 <p id="section-1-8">This document describes two classes of MPC protocols, each aiming for a
 different set of goals.<a href="#section-1-8" class="pilcrow">¶</a></p>
 <p id="section-1-9">In a Distributed Aggregation Function (DAF, <a href="#daf" class="auto internal xref">Section 4</a>), each client splits its
-measurement into one of multiple secret shares, one for each aggregation
+measurement into multiple secret shares, one for each aggregation
 server. DAFs require two properties of the secret sharing scheme. First, we can
 reconstruct the underlying measurement by simply adding up all of the shares.
 (Typically the shares are vectors over some finite field.) Second, given all
@@ -1519,21 +1519,22 @@ summary statistics such as sum, mean, and standard deviation; estimation of
 quantiles, e.g., median; histograms; linear regression; or counting data
 structures, e.g., Bloom filters. However, not all functions fit into this
 rubric, as it is constrained to linear computations over the encoded
-measurements. In fact, our framework admits DAFs with slightly more
-functionality, computing aggregation functions of the form<a href="#section-1-10" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-1-11">
+measurements.<a href="#section-1-10" class="pilcrow">¶</a></p>
+<p id="section-1-11">In fact, our framework admits DAFs with slightly more
+functionality, computing aggregation functions of the form<a href="#section-1-11" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-1-12">
 <pre>
 f(agg_param, meas_1, ..., meas_N) =
     g(agg_param, meas_1) + ... + g(agg_param, meas_N)
-</pre><a href="#section-1-11" class="pilcrow">¶</a>
+</pre><a href="#section-1-12" class="pilcrow">¶</a>
 </div>
-<p id="section-1-12">where <code>meas_1, ..., meas_N</code> are the measurements, <code>g</code> is a possibly non-linear
+<p id="section-1-13">where <code>meas_1, ..., meas_N</code> are the measurements, <code>g</code> is a possibly non-linear
 function, and <code>agg_param</code> is a parameter of that function chosen by the data
 collector. This paradigm, known as function secret sharing <span>[<a href="#BGI15" class="cite xref">BGI15</a>]</span>, allows
 for more sophisticated data analysis tasks, such as grouping metrics by private
 client attributes <span>[<a href="#MPDST25" class="cite xref">MPDST25</a>]</span> or computing heavy hitters <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>. (More
-on the latter task below.)<a href="#section-1-12" class="pilcrow">¶</a></p>
-<p id="section-1-13">The second class of protocols defined in this document are called Verifiable
+on the latter task below.)<a href="#section-1-13" class="pilcrow">¶</a></p>
+<p id="section-1-14">The second class of protocols defined in this document are called Verifiable
 Distributed Aggregation Functions (VDAFs, <a href="#vdaf" class="auto internal xref">Section 5</a>). In addition to being
 private, VDAFs are verifiable in the following sense. By design, a secret
 sharing of a valid measurement, e.g., a number between 1 and 10, is
@@ -1542,76 +1543,76 @@ number larger than 10. This means that DAFs are vulnerable to attacks from
 malicious clients attempting to disrupt the computation by submitting invalid
 measurements. Thus VDAFs are designed to allow the servers to detect and remove
 these measurements prior to aggregation. We refer to this property as
-robustness.<a href="#section-1-13" class="pilcrow">¶</a></p>
-<p id="section-1-14">Achieving robustness without sacrificing privacy requires the servers to
-interact with another over a number of rounds of communication. DAFs on the
+robustness.<a href="#section-1-14" class="pilcrow">¶</a></p>
+<p id="section-1-15">Achieving robustness without sacrificing privacy requires the servers to
+interact with one another over a number of rounds of communication. DAFs on the
 other hand are non-interactive, and are therefore easier to deploy; but they do
 not provide robustness on their own. This may be tolerable in some
 applications. For instance, if the client's software is executed in a trusted
 execution environment, it may be reasonable to assume that no client is
-malicious.<a href="#section-1-14" class="pilcrow">¶</a></p>
-<p id="section-1-15">The DAF and VDAF abstractions encompass a variety of MPC techniques in the
+malicious.<a href="#section-1-15" class="pilcrow">¶</a></p>
+<p id="section-1-16">The DAF and VDAF abstractions encompass a variety of MPC techniques in the
 literature. These protocols vary in their operational and security
 requirements, sometimes in subtle but consequential ways. This document
-therefore has two important goals:<a href="#section-1-15" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-16">
-<li id="section-1-16.1">
-          <p id="section-1-16.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> (RFC
+therefore has two important goals:<a href="#section-1-16" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-17">
+<li id="section-1-17.1">
+          <p id="section-1-17.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> (RFC
 EDITOR: remove this reference if not published before the current document)
 with a simple, uniform interface for accessing privacy-preserving measurement
 schemes, documenting relevant operational and security requirements, and
-specifying constraints for safe usage:<a href="#section-1-16.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-16.1.2">
-<li id="section-1-16.1.2.1">
-              <p id="section-1-16.1.2.1.1">General patterns of communications among the various actors involved in
+specifying constraints for safe usage:<a href="#section-1-17.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-17.1.2">
+<li id="section-1-17.1.2.1">
+              <p id="section-1-17.1.2.1.1">General patterns of communications among the various actors involved in
 the system (clients, aggregation servers, and the collector of the
-aggregate result);<a href="#section-1-16.1.2.1.1" class="pilcrow">¶</a></p>
+aggregate result);<a href="#section-1-17.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-16.1.2.2">
-              <p id="section-1-16.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
-information about client measurements; and<a href="#section-1-16.1.2.2.1" class="pilcrow">¶</a></p>
+            <li id="section-1-17.1.2.2">
+              <p id="section-1-17.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
+information about client measurements; and<a href="#section-1-17.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-16.1.2.3">
-              <p id="section-1-16.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
-corrupt the computation.<a href="#section-1-16.1.2.3.1" class="pilcrow">¶</a></p>
+            <li id="section-1-17.1.2.3">
+              <p id="section-1-17.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
+corrupt the computation.<a href="#section-1-17.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 </li>
-        <li id="section-1-16.2">
-          <p id="section-1-16.2.1">Providing cryptographers with design criteria that provide a clear
-deployment roadmap for new constructions.<a href="#section-1-16.2.1" class="pilcrow">¶</a></p>
+        <li id="section-1-17.2">
+          <p id="section-1-17.2.1">Providing cryptographers with design criteria that provide a clear
+deployment roadmap for new constructions.<a href="#section-1-17.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-1-17">This document also specifies two concrete VDAF schemes, each based on a protocol
-from the literature.<a href="#section-1-17" class="pilcrow">¶</a></p>
+<p id="section-1-18">This document also specifies two concrete VDAF schemes, each based on a protocol
+from the literature.<a href="#section-1-18" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1-18.1">
-          <p id="section-1-18.1.1">The Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving computation of a
-variety aggregate statistics, combining additive secret sharing as described
+<li class="normal" id="section-1-19.1">
+          <p id="section-1-19.1.1">The Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving computation of a
+variety of aggregate statistics, combining additive secret sharing as described
 above with a mechanism for checking the validity of each measurement. In
 <a href="#prio3" class="auto internal xref">Section 7</a> we specify Prio3, a VDAF that follows the same overall framework as
 the original Prio protocol, but incorporates techniques introduced in
-<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-18.1.1" class="pilcrow">¶</a></p>
+<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-19.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-1-18.2">
-          <p id="section-1-18.2.1">The Poplar protocol <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> solves the heavy-hitters problem in a
+        <li class="normal" id="section-1-19.2">
+          <p id="section-1-19.2.1">The Poplar protocol <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> solves the heavy-hitters problem in a
 privacy-preserving manner. Here each client holds a bit-string, and the goal
 of the aggregation servers is to compute the set of strings that occur at
-least <code>t</code> times form some threshold <code>t</code>. The core primitive in their protocol
+least <code>t</code> times for some threshold <code>t</code>. The core primitive in their protocol
 is a secret sharing of a point function <span>[<a href="#GI14" class="cite xref">GI14</a>]</span> (<code>g</code> in the notation above)
 that allows the servers to privately count how many of the clients' strings
 begin with a given prefix (<code>agg_param</code> in the notation above). In <a href="#poplar1" class="auto internal xref">Section 8</a>
-we specify a VDAF called Poplar1 that implements this functionality.<a href="#section-1-18.2.1" class="pilcrow">¶</a></p>
+we specify a VDAF called Poplar1 that implements this functionality.<a href="#section-1-19.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-19">The remainder of this document is organized as follows: <a href="#conventions" class="auto internal xref">Section 2</a> lists
+<p id="section-1-20">The remainder of this document is organized as follows: <a href="#conventions" class="auto internal xref">Section 2</a> lists
 definitions and conventions used for specification; <a href="#overview" class="auto internal xref">Section 3</a> gives a brief
 overview of DAFs and VDAFs, the parties involved in the computation, and the
 requirements for non-collusion; <a href="#daf" class="auto internal xref">Section 4</a> defines the syntax for DAFs; <a href="#vdaf" class="auto internal xref">Section 5</a>
 defines the syntax for VDAFs; <a href="#prelim" class="auto internal xref">Section 6</a> defines various functionalities that
 are common to our constructions; <a href="#prio3" class="auto internal xref">Section 7</a> describes the Prio3 construction;
 <a href="#poplar1" class="auto internal xref">Section 8</a> describes the Poplar1 construction; and <a href="#security" class="auto internal xref">Section 9</a> enumerates the
-security considerations for DAFs and VDAFs.<a href="#section-1-19" class="pilcrow">¶</a></p>
+security considerations for DAFs and VDAFs.<a href="#section-1-20" class="pilcrow">¶</a></p>
 <div id="change-log">
 <section id="section-1.1">
         <h3 id="name-change-log">
@@ -8777,8 +8778,8 @@ including Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>), all
 which needs to be trusted in order for the computation to be private. To hedge
 against corruptions that happen during the course of the attack, deployments
 may consider involving more than two Aggregators as described for example in
-<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that not all schemes, including Poplar1, are
-compatible with this mode of operation.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
+<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode of operation,
+such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
