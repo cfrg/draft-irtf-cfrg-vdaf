@@ -219,8 +219,8 @@ Table of Contents
    a different set of goals.
 
    In a Distributed Aggregation Function (DAF, Section 4), each client
-   splits its measurement into one of multiple secret shares, one for
-   each aggregation server.  DAFs require two properties of the secret
+   splits its measurement into multiple secret shares, one for each
+   aggregation server.  DAFs require two properties of the secret
    sharing scheme.  First, we can reconstruct the underlying measurement
    by simply adding up all of the shares.  (Typically the shares are
    vectors over some finite field.)  Second, given all but one of the
@@ -237,9 +237,10 @@ Table of Contents
    deviation; estimation of quantiles, e.g., median; histograms; linear
    regression; or counting data structures, e.g., Bloom filters.
    However, not all functions fit into this rubric, as it is constrained
-   to linear computations over the encoded measurements.  In fact, our
-   framework admits DAFs with slightly more functionality, computing
-   aggregation functions of the form
+   to linear computations over the encoded measurements.
+
+   In fact, our framework admits DAFs with slightly more functionality,
+   computing aggregation functions of the form
 
    f(agg_param, meas_1, ..., meas_N) =
        g(agg_param, meas_1) + ... + g(agg_param, meas_N)
@@ -264,12 +265,13 @@ Table of Contents
    robustness.
 
    Achieving robustness without sacrificing privacy requires the servers
-   to interact with another over a number of rounds of communication.
-   DAFs on the other hand are non-interactive, and are therefore easier
-   to deploy; but they do not provide robustness on their own.  This may
-   be tolerable in some applications.  For instance, if the client's
-   software is executed in a trusted execution environment, it may be
-   reasonable to assume that no client is malicious.
+   to interact with one another over a number of rounds of
+   communication.  DAFs on the other hand are non-interactive, and are
+   therefore easier to deploy; but they do not provide robustness on
+   their own.  This may be tolerable in some applications.  For
+   instance, if the client's software is executed in a trusted execution
+   environment, it may be reasonable to assume that no client is
+   malicious.
 
    The DAF and VDAF abstractions encompass a variety of MPC techniques
    in the literature.  These protocols vary in their operational and
@@ -299,17 +301,17 @@ Table of Contents
    a protocol from the literature.
 
    *  The Prio system [CGB17] allows for the privacy-preserving
-      computation of a variety aggregate statistics, combining additive
-      secret sharing as described above with a mechanism for checking
-      the validity of each measurement.  In Section 7 we specify Prio3,
-      a VDAF that follows the same overall framework as the original
-      Prio protocol, but incorporates techniques introduced in
-      [BBCGGI19] that result in significant performance gains.
+      computation of a variety of aggregate statistics, combining
+      additive secret sharing as described above with a mechanism for
+      checking the validity of each measurement.  In Section 7 we
+      specify Prio3, a VDAF that follows the same overall framework as
+      the original Prio protocol, but incorporates techniques introduced
+      in [BBCGGI19] that result in significant performance gains.
 
    *  The Poplar protocol [BBCGGI21] solves the heavy-hitters problem in
       a privacy-preserving manner.  Here each client holds a bit-string,
       and the goal of the aggregation servers is to compute the set of
-      strings that occur at least t times form some threshold t.  The
+      strings that occur at least t times for some threshold t.  The
       core primitive in their protocol is a secret sharing of a point
       function [GI14] (g in the notation above) that allows the servers
       to privately count how many of the clients' strings begin with a
@@ -5751,8 +5753,8 @@ Table of Contents
    computation to be private.  To hedge against corruptions that happen
    during the course of the attack, deployments may consider involving
    more than two Aggregators as described for example in Section 5.9.
-   Note however that not all schemes, including Poplar1, are compatible
-   with this mode of operation.
+   Note however that some schemes are not compatible with this mode of
+   operation, such as Poplar1.
 
 10.  IANA Considerations
 
