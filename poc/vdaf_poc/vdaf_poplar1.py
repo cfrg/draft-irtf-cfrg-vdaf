@@ -5,8 +5,7 @@ from typing import Any, Optional, Sequence, TypeAlias, cast
 from vdaf_poc.common import (byte, from_be_bytes, front, to_be_bytes, vec_add,
                              vec_sub)
 from vdaf_poc.field import Field, Field64, Field255
-from vdaf_poc.idpf import Idpf
-from vdaf_poc.idpf_bbcggi21 import IdpfBBCGGI21
+from vdaf_poc.idpf_bbcggi21 import CorrectionWord, IdpfBBCGGI21
 from vdaf_poc.vdaf import Vdaf
 from vdaf_poc.xof import Xof, XofTurboShake128
 
@@ -20,6 +19,7 @@ Poplar1AggParam: TypeAlias = tuple[
     int,  # level
     Sequence[int],  # prefixes
 ]
+Poplar1PublicShare: TypeAlias = list[CorrectionWord]
 Poplar1InputShare: TypeAlias = tuple[
     bytes,  # IDPF key
     bytes,  # correlated randomness seed
@@ -37,7 +37,7 @@ class Poplar1(
         Vdaf[
             int,  # Measurement, `range(0, 2 ** BITS)`
             Poplar1AggParam,  # AggParam
-            bytes,  # PublicShare, encoded IDPF public share
+            Poplar1PublicShare,  # PublicShare
             Poplar1InputShare,  # InputShare
             FieldVec,  # OutShare
             FieldVec,  # AggShare
@@ -47,7 +47,7 @@ class Poplar1(
             Optional[FieldVec],  # PrepMessage
         ]):
 
-    idpf: Idpf[Field64, Field255]
+    idpf: IdpfBBCGGI21
     xof: type[Xof]
 
     ID = 0x00001000
@@ -70,10 +70,11 @@ class Poplar1(
     # avoid warnings from xml2rfc.
     # ===================================================================
     def shard(
-            self,
-            measurement: int,
-            nonce: bytes,
-            rand: bytes) -> tuple[bytes, list[Poplar1InputShare]]:
+        self,
+        measurement: int,
+        nonce: bytes,
+        rand: bytes,
+    ) -> tuple[Poplar1PublicShare, list[Poplar1InputShare]]:
         if len(nonce) != self.NONCE_SIZE:
             raise ValueError("incorrect nonce size")
         if len(rand) != self.RAND_SIZE:
@@ -227,7 +228,7 @@ class Poplar1(
             agg_id: int,
             agg_param: Poplar1AggParam,
             nonce: bytes,
-            public_share: bytes,
+            public_share: Poplar1PublicShare,
             input_share: Poplar1InputShare) -> tuple[
                 Poplar1PrepState,
                 FieldVec]:
@@ -402,11 +403,6 @@ class Poplar1(
             agg = vec_add(agg, cast(list[Field], agg_share))
         return [x.as_unsigned() for x in agg]
 
-    # NOTE: The encode_agg_param() and decode_agg_param() methods are
-    # excerpted in the document, de-indented. Their width should be
-    # limited to 69 columns after de-indenting, or 73 columns before
-    # de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
     def encode_agg_param(self, agg_param: Poplar1AggParam) -> bytes:
         level, prefixes = agg_param
         if level not in range(2 ** 16):
@@ -416,25 +412,36 @@ class Poplar1(
         encoded = bytes()
         encoded += to_be_bytes(level, 2)
         encoded += to_be_bytes(len(prefixes), 4)
+        # NOTE: The following lines are exerpted in the document. Their width
+        # should be limited to 69 columns after de-indenting, or 77 columns
+        # before de-indenting, to avoid warnings from xml2rfc.
+        # ===================================================================
         packed = 0
         for (i, prefix) in enumerate(prefixes):
             packed |= prefix << ((level + 1) * i)
-        l = ((level + 1) * len(prefixes) + 7) // 8
-        encoded += to_be_bytes(packed, l)
+        packed_len = ((level + 1) * len(prefixes) + 7) // 8
+        packed_prefixes = to_be_bytes(packed, packed_len)
+        # NOTE: End of excerpt.
+        encoded += packed_prefixes
         return encoded
 
     def decode_agg_param(self, encoded: bytes) -> Poplar1AggParam:
-        encoded_level, encoded = encoded[:2], encoded[2:]
+        encoded_level, encoded = front(2, encoded)
         level = from_be_bytes(encoded_level)
-        encoded_prefix_count, encoded = encoded[:4], encoded[4:]
-        prefix_count = from_be_bytes(encoded_prefix_count)
-        l = ((level + 1) * prefix_count + 7) // 8
-        encoded_packed, encoded = encoded[:l], encoded[l:]
-        packed = from_be_bytes(encoded_packed)
+        encoded_num_prefixes, encoded = front(4, encoded)
+        num_prefixes = from_be_bytes(encoded_num_prefixes)
+        packed_len = ((level + 1) * num_prefixes + 7) // 8
+        packed_prefixes, encoded = front(packed_len, encoded)
+        # NOTE: The following lines are exerpted in the document. Their width
+        # should be limited to 69 columns after de-indenting, or 77 columns
+        # before de-indenting, to avoid warnings from xml2rfc.
+        # ===================================================================
+        packed = from_be_bytes(packed_prefixes)
         prefixes = []
         m = 2 ** (level + 1) - 1
-        for i in range(prefix_count):
+        for i in range(num_prefixes):
             prefixes.append(packed >> ((level + 1) * i) & m)
+        # NOTE: End of excerpt.
         if len(encoded) != 0:
             raise ValueError('trailing bytes')
         return (level, tuple(prefixes))
@@ -452,8 +459,8 @@ class Poplar1(
         encoded += self.idpf.field_leaf.encode_vec(leaf)
         return encoded
 
-    def test_vec_encode_public_share(self, public_share: bytes) -> bytes:
-        return public_share
+    def test_vec_encode_public_share(self, public_share: Poplar1PublicShare) -> bytes:
+        return self.idpf.encode_public_share(public_share)
 
     def test_vec_encode_agg_share(self, agg_share: FieldVec) -> bytes:
         return encode_idpf_field_vec(agg_share)
