@@ -81,6 +81,16 @@ informative:
     seriesinfo: CRYPTO 2023
     target: https://ia.cr/2023/1012
 
+  BGI15:
+    title: "Function Secret Sharing"
+    author:
+      - ins: E. Boyle
+      - ins: N. Gilboa
+      - ins: Y. Ishai
+    date: 2015
+    seriesinfo: EUROCRYPT 2015
+    target: https://www.iacr.org/archive/eurocrypt2015/90560300/90560300.pdf
+
   CGB17:
     title: "Prio: Private, Robust, and Scalable Computation of Aggregate Statistics"
     author:
@@ -105,6 +115,8 @@ informative:
       - ins: C. Patton
       - ins: M. Rosulek
       - ins: P. Schoppmann
+    date: 2023
+    seriesinfo: PETS 2023
     target: https://ia.cr/2023/130
 
   Dwo06:
@@ -172,6 +184,18 @@ informative:
     seriesinfo: S&P 2020
     target: https://eprint.iacr.org/2019/074
 
+  MPDST25:
+    title: "Mastic: Private Weighted Heavy-Hitters and Attribute-Based Metrics"
+    author:
+      - ins: D. Mouris
+      - ins: C. Patton
+      - ins: H. Davis
+      - ins: P. Sarkar
+      - ins: N.G. Tsoutsos
+    date: 2025
+    seriesinfo: PETS 2025
+    target: https://eprint.iacr.org/2024/221
+
   MPRV09:
     title: "Computational Differential Privacy"
     author:
@@ -223,8 +247,9 @@ measurement that would result in an invalid aggregate result.
 
 # Introduction
 
-(TO BE REMOVED BY RFC EDITOR: The source for this draft and and the reference
-implementation can be found at https://github.com/cfrg/draft-irtf-cfrg-vdaf.)
+(RFC EDITOR: Remove this paragraph.) The source for this draft and and the
+reference implementation can be found at
+https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
 The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
@@ -234,12 +259,13 @@ that is valuable to measure and information that users consider private.
 For example, consider an application that provides health information to users.
 The operator of an application might want to know which parts of their
 application are used most often, as a way to guide future development of the
-application.  Specific users' patterns of usage, though, could reveal sensitive
-things about them, such as which users are researching a given health condition.
+application. Specific users' patterns of usage, though, could reveal sensitive
+things about them, such as which users are researching a given health
+condition.
 
 In many situations, the measurement collector is only interested in aggregate
 statistics, e.g., which portions of an application are most used or what
-fraction of people have experienced a given disease.  Thus systems that provide
+fraction of people have experienced a given disease. Thus systems that provide
 aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.
 
@@ -253,40 +279,88 @@ aggregation server. The aggregation server then adds up the noisy measurements,
 and because it knows the distribution from which the noise was sampled, it can
 estimate the true sum with reasonable accuracy.
 
-However, even when noise is added to the measurements, collecting them in the
-clear still reveals a significant amount of information to the collector. On
-the one hand, depending on the "amount" of noise a client adds to its
-measurement, it may be possible for a curious collector to make a reasonable
-guess of the measurement's true value. On the other hand, the more noise the
-clients add, the less reliable will be the server's estimate of the output.
-Thus systems relying solely on a DP mechanism must strike a delicate balance
-between privacy and utility.
+Even when noise is added to the measurements, collecting them in the clear
+still reveals a significant amount of information to the collector. On the one
+hand, depending on the "amount" of noise a client adds to its measurement, it
+may be possible for a curious collector to make a reasonable guess of the
+measurement's true value. On the other hand, the more noise the clients add,
+the less reliable will be the server's estimate of the aggregate. Thus systems
+relying solely on a DP mechanism must strike a delicate balance between privacy
+and utility.
 
 The ideal goal for a privacy-preserving measurement system is that of secure
-multi-party computation (MPC): No participant in the protocol should learn
+multi-party computation (MPC): no participant in the protocol should learn
 anything about an individual measurement beyond what it can deduce from the
-differentially private aggregate {{MPRV09}}. In this document, we describe
-Verifiable Distributed Aggregation Functions (VDAFs) as a general class of
-delegated MPC protocols that can be used to achieve this goal.
+aggregate. MPC achieves this goal by distributing the computation of the
+aggregate across multiple aggregation servers, one of which is presumed to be
+honest, i.e., not under control of the attacker. Moreover, MPC can be composed
+with various DP mechanisms to ensure the aggregate itself does leak too much
+information about any one of the measurements {{MPRV09}}.
 
-VDAF schemes achieve their privacy goal by distributing the computation of the
-aggregate among a number of non-colluding aggregation servers. As long as a
-subset of the servers executes the protocol honestly, VDAFs guarantee that no
-measurement is ever accessible to any party besides the client that submitted
-it. VDAFs can also be composed with various DP mechanisms, thereby ensuring the
-aggregate result does not leak too much information about any one measurmment.
-At the same time, VDAFs are "verifiable" in the sense that malformed
-measurements that would otherwise garble the result of the computation can be
-detected and removed from the set of measurements. We refer to this property as
-"robustness".
+This document describes two classes of MPC protocols, each aiming for a
+different set of goals.
 
-The VDAF abstraction laid out in {{vdaf}} represents a class of multi-party
-protocols for privacy-preserving measurement proposed in the literature. These
-protocols vary in their operational and security requirements, sometimes in
-subtle but consequential ways. This document therefore has two important goals:
+In a Distributed Aggregation Function (DAF, {{daf}}), each client splits its
+measurement into multiple secret shares, one for each aggregation
+server. DAFs require two properties of the secret sharing scheme. First, we can
+reconstruct the underlying measurement by simply adding up all of the shares.
+(Typically the shares are vectors over some finite field.) Second, given all
+but one of the shares, it is impossible to learn anything about the underlying
+measurement. These properties give rise to a simple strategy for privately
+aggregating the measurements: each aggregation server adds up its measurement
+shares locally before revealing their sum to the data collector; then all
+the data collector has to do is add up these sums to get the aggregate.
 
- 1. Providing higher-level protocols like {{?DAP=I-D.draft-ietf-ppm-dap}} with
-    a simple, uniform interface for accessing privacy-preserving measurement
+This strategy is compatible with any aggregation function that can be
+represented as the sum of some encoding of the measurements. Examples include:
+summary statistics such as sum, mean, and standard deviation; estimation of
+quantiles, e.g., median; histograms; linear regression; or counting data
+structures, e.g., Bloom filters. However, not all functions fit into this
+rubric, as it is constrained to linear computations over the encoded
+measurements.
+
+In fact, our framework admits DAFs with slightly more
+functionality, computing aggregation functions of the form
+
+~~~
+f(agg_param, meas_1, ..., meas_N) =
+    g(agg_param, meas_1) + ... + g(agg_param, meas_N)
+~~~
+
+where `meas_1, ..., meas_N` are the measurements, `g` is a possibly non-linear
+function, and `agg_param` is a parameter of that function chosen by the data
+collector. This paradigm, known as function secret sharing {{BGI15}}, allows
+for more sophisticated data analysis tasks, such as grouping metrics by private
+client attributes {{MPDST25}} or computing heavy hitters {{BBCGGI21}}. (More
+on the latter task below.)
+
+The second class of protocols defined in this document are called Verifiable
+Distributed Aggregation Functions (VDAFs, {{vdaf}}). In addition to being
+private, VDAFs are verifiable in the following sense. By design, a secret
+sharing of a valid measurement, e.g., a number between 1 and 10, is
+indistinguishable from a secret sharing of an invalid measurement, e.g., a
+number larger than 10. This means that DAFs are vulnerable to attacks from
+malicious clients attempting to disrupt the computation by submitting invalid
+measurements. Thus VDAFs are designed to allow the servers to detect and remove
+these measurements prior to aggregation. We refer to this property as
+robustness.
+
+Achieving robustness without sacrificing privacy requires the servers to
+interact with one another over a number of rounds of communication. DAFs on the
+other hand are non-interactive, and are therefore easier to deploy; but they do
+not provide robustness on their own. This may be tolerable in some
+applications. For instance, if the client's software is executed in a trusted
+execution environment, it may be reasonable to assume that no client is
+malicious.
+
+The DAF and VDAF abstractions encompass a variety of MPC techniques in the
+literature. These protocols vary in their operational and security
+requirements, sometimes in subtle but consequential ways. This document
+therefore has two important goals:
+
+ 1. Providing higher-level protocols like {{?DAP=I-D.draft-ietf-ppm-dap}} (RFC
+    EDITOR: remove this reference if not published before the current document)
+    with a simple, uniform interface for accessing privacy-preserving measurement
     schemes, documenting relevant operational and security requirements, and
     specifying constraints for safe usage:
 
@@ -305,64 +379,33 @@ This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
 
 * The Prio system {{CGB17}} allows for the privacy-preserving computation of a
-  variety aggregate statistics. The basic idea underlying Prio is fairly
-  simple:
-
-  1. Each client shards its measurement into a sequence of additive shares and
-     distributes the shares among the aggregation servers.
-  1. Next, each server adds up its shares locally, resulting in an additive
-     share of the aggregate.
-  1. Finally, the aggregation servers send their aggregate shares to the data
-     collector, who combines them to obtain the aggregate result.
-
-  The difficult part of this system is ensuring that the servers hold shares of
-  a valid, aggregatable value, e.g., the measurement is an integer in a
-  specific range. Thus Prio specifies a multi-party protocol for accomplishing
-  this task.
-
-  In {{prio3}} we describe Prio3, a VDAF that follows the same overall framework
-  as the original Prio protocol, but incorporates techniques introduced in
+  variety of aggregate statistics, combining additive secret sharing as described
+  above with a mechanism for checking the validity of each measurement. In
+  {{prio3}} we specify Prio3, a VDAF that follows the same overall framework as
+  the original Prio protocol, but incorporates techniques introduced in
   {{BBCGGI19}} that result in significant performance gains.
 
-* More recently, Boneh et al. {{BBCGGI21}} described a protocol called Poplar
-  for solving the `t`-heavy-hitters problem in a privacy-preserving manner. Here
-  each client holds a bit-string of length `n`, and the goal of the aggregation
-  servers is to compute the set of strings that occur at least `t` times. The
-  core primitive used in their protocol is a specialized Distributed Point
-  Function (DPF) {{GI14}} that allows the servers to "query" their DPF shares on
-  any bit-string of length shorter than or equal to `n`. As a result of this
-  query, each of the servers has an additive share of a bit indicating whether
-  the string is a prefix of the client's string. The protocol also specifies a
-  multi-party computation for verifying that at most one string among a set of
-  candidates is a prefix of the client's string.
+* The Poplar protocol {{BBCGGI21}} solves the heavy-hitters problem in a
+  privacy-preserving manner. Here each client holds a bit-string, and the goal
+  of the aggregation servers is to compute the set of strings that occur at
+  least `t` times for some threshold `t`. The core primitive in their protocol
+  is a secret sharing of a point function {{GI14}} (`g` in the notation above)
+  that allows the servers to privately count how many of the clients' strings
+  begin with a given prefix (`agg_param` in the notation above). In {{poplar1}}
+  we specify a VDAF called Poplar1 that implements this functionality.
 
-  In {{poplar1}} we describe a VDAF called Poplar1 that implements this
-  functionality.
-
-Finally, perhaps the most complex aspect of schemes like Prio3 and Poplar1 is
-the process by which the client-generated measurements are prepared for
-aggregation. Because these constructions are based on secret sharing, the
-servers will be required to exchange some amount of information in order to
-verify the measurement is valid and can be aggregated. Depending on the
-construction, this process may require multiple round trips over the network.
-
-There are applications in which this verification step may not be necessary,
-e.g., when the client's software is run a trusted execution environment. To
-support these applications, this document also defines Distributed Aggregation
-Functions (DAFs) as a simpler class of protocols that aim to provide the same
-privacy guarantee as VDAFs but fall short of being verifiable.
-
-> OPEN ISSUE Decide if we should give one or two example DAFs. There are natural
-> variants of Prio3 and Poplar1 that might be worth describing.
-
-The remainder of this document is organized as follows: {{overview}} gives a
-brief overview of DAFs and VDAFs; {{daf}} defines the syntax for DAFs; {{vdaf}}
+The remainder of this document is organized as follows: {{conventions}} lists
+definitions and conventions used for specification; {{overview}} gives a brief
+overview of DAFs and VDAFs, the parties involved in the computation, and the
+requirements for non-collusion; {{daf}} defines the syntax for DAFs; {{vdaf}}
 defines the syntax for VDAFs; {{prelim}} defines various functionalities that
 are common to our constructions; {{prio3}} describes the Prio3 construction;
 {{poplar1}} describes the Poplar1 construction; and {{security}} enumerates the
-security considerations for VDAFs.
+security considerations for DAFs and VDAFs.
 
 ## Change Log
+
+(RFC EDITOR: Remove this section.)
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
@@ -604,7 +647,7 @@ security considerations for VDAFs.
 * Remove public parameter and replace verification parameter with a
   "verification key" and "Aggregator ID".
 
-# Conventions and Definitions
+# Conventions and Definitions {#conventions}
 
 {::boilerplate bcp14-tagged}
 
@@ -731,7 +774,8 @@ correctness of the measurements obtained.  The privacy properties of the system
 are assured by non-collusion among Aggregators, and Aggregators are the entities
 that perform validation of Client measurements.  Thus Clients trust Aggregators
 not to collude (typically it is required that at least one Aggregator is
-honest), and Collectors trust Aggregators to correctly run the protocol.
+honest; see {{num-aggregators}}), and Collectors trust Aggregators to correctly
+run the protocol.
 
 Within the bounds of the non-collusion requirements of a given (V)DAF instance,
 it is possible for the same entity to play more than one role.  For example, the
@@ -1757,7 +1801,7 @@ number of rounds of preparation that are required, there may be one more
 message to send before the peer can also finish processing (i.e., `outbound !=
 None`).
 
-## Star Topology (Any Number of Aggregators)
+## Star Topology (Any Number of Aggregators) {#star-topo}
 
 The ping-pong topology of the previous section is only suitable for VDAFs
 involving exactly two Aggregators. If the VDAF supports more than two
@@ -5157,7 +5201,7 @@ any positive value of `BITS`. Test vectors can be found in {{test-vectors}}.
 
 # Security Considerations {#security}
 
-VDAFs have two essential security goals:
+VDAFs ({{vdaf}}) have two essential security goals:
 
 1. Privacy: An attacker that controls the Collector and a subset of Clients and
    Aggregators learns nothing about the measurements of honest Clients beyond
@@ -5420,6 +5464,16 @@ joint randomness (`JOINT_RAND_LEN > 0`) and `PROOFS == 1`. Field64 MAY be used
 instead, but `PROOFS` MUST be set to at least `3`. Breaking robustness for
 `PROOFS == 2` is feasible, if impractical; but `PROOFS == 1` is completely
 broken for such a small field.
+
+## Choosing the Number of Aggregators {#num-aggregators}
+
+Two Aggregators are required for privacy in our threat model, but some (V)DAFs,
+including Prio3 ({{prio3}}), allow for any number of Aggregators, only one of
+which needs to be trusted in order for the computation to be private. To hedge
+against corruptions that happen during the course of the attack, deployments
+may consider involving more than two Aggregators as described for example in
+{{star-topo}}. Note however that some schemes are not compatible with this mode of operation,
+such as Poplar1.
 
 # IANA Considerations
 
