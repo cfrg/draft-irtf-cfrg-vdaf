@@ -7,6 +7,7 @@ from vdaf_poc.field import Field
 
 FieldInner = TypeVar("FieldInner", bound=Field)
 FieldLeaf = TypeVar("FieldLeaf", bound=Field)
+PublicShare = TypeVar("PublicShare")
 
 # Type alias for the output of `eval()`.
 Output: TypeAlias = list[list[FieldInner]] | list[list[FieldLeaf]]
@@ -14,7 +15,7 @@ Output: TypeAlias = list[list[FieldInner]] | list[list[FieldLeaf]]
 FieldVec: TypeAlias = list[FieldInner] | list[FieldLeaf]
 
 
-class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
+class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
     """
     An Incremental Distributed Point Function (IDPF).
 
@@ -70,7 +71,7 @@ class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
             beta_inner: list[list[FieldInner]],
             beta_leaf: list[FieldLeaf],
             nonce: bytes,
-            rand: bytes) -> tuple[bytes, list[bytes]]:
+            rand: bytes) -> tuple[PublicShare, list[bytes]]:
         """
         Generates an IDPF public share and sequence of IDPF-keys of length
         `SHARES`. Input `alpha` is the index to encode. Inputs `beta_inner` and
@@ -91,7 +92,7 @@ class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
     @abstractmethod
     def eval(self,
              agg_id: int,
-             public_share: bytes,
+             public_share: PublicShare,
              key: bytes,
              level: int,
              prefixes: Sequence[int],
@@ -145,3 +146,7 @@ class Idpf(Generic[FieldInner, FieldLeaf], metaclass=ABCMeta):
             - `level` in `range(self.BITS)`
         """
         return y >> (self.BITS - 1 - level) == x
+
+    @abstractmethod
+    def test_vec_encode_public_share(self, public_share: PublicShare) -> bytes:
+        pass

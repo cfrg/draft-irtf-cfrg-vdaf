@@ -24,10 +24,10 @@ from vdaf_poc.xof import XofFixedKeyAes128
 # types, which aids with self-documentation.
 
 FieldVec: TypeAlias = list[Field64] | list[Field255]
-CorrectionWordTuple: TypeAlias = tuple[bytes, tuple[Field2, Field2], FieldVec]
+CorrectionWord: TypeAlias = tuple[bytes, tuple[Field2, Field2], FieldVec]
 
 
-class IdpfBBCGGI21(Idpf[Field64, Field255]):
+class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
     """
     The IDPF of {{BBCGGI21}}, Section 6. It is identical except that the output
     shares may be tuples rather than single field elements. In particular, the
@@ -72,7 +72,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             beta_inner: list[list[Field64]],
             beta_leaf: list[Field255],
             nonce: bytes,
-            rand: bytes) -> tuple[bytes, list[bytes]]:
+            rand: bytes) -> tuple[list[CorrectionWord], list[bytes]]:
         if alpha not in range(2 ** self.BITS):
             raise ValueError("alpha out of range")
         if len(beta_inner) != self.BITS - 1:
@@ -89,7 +89,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
 
         seed = key.copy()
         ctrl = [Field2(0), Field2(1)]
-        correction_words = []
+        public_share = []
         for level in range(self.BITS):
             field: type[Field]
             field = cast(type[Field], self.current_field(level))
@@ -129,9 +129,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             for i in range(len(w_cw)):
                 w_cw[i] *= mask
 
-            correction_words.append((seed_cw, ctrl_cw, w_cw))
-
-        public_share = self.encode_public_share(correction_words)
+            public_share.append((seed_cw, ctrl_cw, w_cw))
         return (public_share, key)
 
     # NOTE: The eval() and eval_next(), and prep_shares_to_prep() methods
@@ -143,7 +141,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
     def eval(
             self,
             agg_id: int,
-            public_share: bytes,
+            public_share: list[CorrectionWord],
             key: bytes,
             level: int,
             prefixes: Sequence[int],
@@ -155,7 +153,6 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
         if len(set(prefixes)) != len(prefixes):
             raise ValueError('prefixes must be unique')
 
-        correction_words = self.decode_public_share(public_share)
         out_share = []
         for prefix in prefixes:
             if prefix not in range(2 ** (level + 1)):
@@ -189,7 +186,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
                 (seed, ctrl, y) = self.eval_next(
                     seed,
                     ctrl,
-                    correction_words[current_level],
+                    public_share[current_level],
                     current_level,
                     bit,
                     nonce,
@@ -207,7 +204,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             self,
             prev_seed: bytes,
             prev_ctrl: Field2,
-            correction_word: CorrectionWordTuple,
+            correction_word: CorrectionWord,
             level: int,
             bit: int,
             nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
@@ -240,10 +237,9 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
 
         return (next_seed, next_ctrl, cast(FieldVec, y))
 
-    # NOTE: The extend(), convert(), encode_public_share(), and
-    # decode_public_share() methods are excerpted in the document,
-    # de-indented, as figure {{idpf-poplar-helpers}}. Their width should
-    # be limited to 69 columns after de-indenting, or 73 columns before
+    # NOTE: The extend() and convert() methods are excerpted in the document,
+    # de-indented, as figure {{idpf-poplar-helpers}}. Their width should be
+    # limited to 69 columns after de-indenting, or 73 columns before
     # de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
     def extend(
@@ -276,14 +272,14 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
 
     def encode_public_share(
             self,
-            correction_words: list[CorrectionWordTuple]) -> bytes:
+            public_share: list[CorrectionWord]) -> bytes:
         encoded = bytes()
         control_bits = list(itertools.chain.from_iterable(
-            cw[1] for cw in correction_words
+            cw[1] for cw in public_share
         ))
         encoded += pack_bits(control_bits)
         for (level, (seed_cw, _, w_cw)) \
-                in enumerate(correction_words):
+                in enumerate(public_share):
             field = cast(type[Field], self.current_field(level))
             encoded += seed_cw
             encoded += field.encode_vec(cast(list[Field], w_cw))
@@ -291,11 +287,11 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
 
     def decode_public_share(
             self,
-            encoded: bytes) -> list[CorrectionWordTuple]:
+            encoded: bytes) -> list[CorrectionWord]:
         l = (2 * self.BITS + 7) // 8
         encoded_ctrl, encoded = encoded[:l], encoded[l:]
         control_bits = unpack_bits(encoded_ctrl, 2 * self.BITS)
-        correction_words = []
+        public_share = []
         for level in range(self.BITS):
             field = self.current_field(level)
             ctrl_cw = (
@@ -307,29 +303,44 @@ class IdpfBBCGGI21(Idpf[Field64, Field255]):
             l = field.ENCODED_SIZE * self.VALUE_LEN
             encoded_w_cw, encoded = encoded[:l], encoded[l:]
             w_cw = field.decode_vec(encoded_w_cw)
-            correction_words.append((seed_cw, ctrl_cw, w_cw))
+            public_share.append((seed_cw, ctrl_cw, w_cw))
         if len(encoded) != 0:
             raise ValueError('trailing bytes')
-        return correction_words
+        return public_share
+
+    def test_vec_encode_public_share(self, public_share: list[CorrectionWord]) -> bytes:
+        return self.encode_public_share(public_share)
 
 
-def pack_bits(bits: list[Field2]) -> bytes:
-    byte_len = (len(bits) + 7) // 8
-    packed = [int(0)] * byte_len
-    for i, bit in enumerate(bits):
-        packed[i // 8] |= bit.as_unsigned() << (i % 8)
-    return bytes(packed)
+def pack_bits(control_bits: list[Field2]) -> bytes:
+    packed_len = (len(control_bits) + 7) // 8
+    # NOTE: The following is excerpted in the document, de-indented. Thee width
+    # should be limited to 69 columns after de-indenting, or 73 columns before,
+    # to avoid warnings from xml2rfc.
+    # ===================================================================
+    packed_control_buf = [int(0)] * packed_len
+    for i, bit in enumerate(control_bits):
+        packed_control_buf[i // 8] |= bit.as_unsigned() << (i % 8)
+    packed_control_bits = bytes(packed_control_buf)
+    # NOTE: End of exerpt.
+    return packed_control_bits
 
 
-def unpack_bits(packed: bytes, length: int) -> list[Field2]:
-    bits = []
+def unpack_bits(packed_control_bits: bytes, length: int) -> list[Field2]:
+    # NOTE: The following is excerpted in the document, de-indented. Thee width
+    # should be limited to 69 columns after de-indenting, or 73 columns before,
+    # to avoid warnings from xml2rfc.
+    # ===================================================================
+    control_bits = []
     for i in range(length):
-        bits.append(Field2(
-            (packed[i // 8] >> (i % 8)) & 1
+        control_bits.append(Field2(
+            (packed_control_bits[i // 8] >> (i % 8)) & 1
         ))
-    leftover_bits = packed[-1] >> (
+    leftover_bits = packed_control_bits[-1] >> (
         (length + 7) % 8 + 1
     )
-    if (length + 7) // 8 != len(packed) or leftover_bits != 0:
+    if (length + 7) // 8 != len(packed_control_bits) or \
+            leftover_bits != 0:
         raise ValueError('trailing bits')
-    return bits
+    # NOTE: End of exerpt.
+    return control_bits
