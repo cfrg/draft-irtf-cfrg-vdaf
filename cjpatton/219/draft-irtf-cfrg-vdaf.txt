@@ -144,6 +144,7 @@ Table of Contents
        9.4.2.  Safe Usage of IDPF Outputs
      9.5.  Requirements for XOFs
      9.6.  Choosing the Field Size
+     9.7.  Choosing the Number of Aggregators
    10. IANA Considerations
    11. References
      11.1.  Normative References
@@ -739,8 +740,8 @@ Table of Contents
    collusion among Aggregators, and Aggregators are the entities that
    perform validation of Client measurements.  Thus Clients trust
    Aggregators not to collude (typically it is required that at least
-   one Aggregator is honest), and Collectors trust Aggregators to
-   correctly run the protocol.
+   one Aggregator is honest; see Section 9.7), and Collectors trust
+   Aggregators to correctly run the protocol.
 
    Within the bounds of the non-collusion requirements of a given (V)DAF
    instance, it is possible for the same entity to play more than one
@@ -5461,7 +5462,7 @@ Table of Contents
 
 9.  Security Considerations
 
-   VDAFs have two essential security goals:
+   VDAFs (Section 5) have two essential security goals:
 
    1.  Privacy: An attacker that controls the Collector and a subset of
        Clients and Aggregators learns nothing about the measurements of
@@ -5732,7 +5733,7 @@ Table of Contents
    attacks.
 
    Another way to mitigate this issue (or improve robustness in general)
-   is to generate and verify multiple, independent proofs.  (See
+   is to:wq generate and verify multiple, independent proofs.  (See
    Section 7.1.2.)  For Prio3, the PROOFS parameter controls the number
    of proofs (at least one) that are generated and verified.
 
@@ -5741,6 +5742,17 @@ Table of Contents
    MAY be used instead, but PROOFS MUST be set to at least 3.  Breaking
    robustness for PROOFS == 2 is feasible, if impractical; but PROOFS ==
    1 is completely broken for such a small field.
+
+9.7.  Choosing the Number of Aggregators
+
+   Two Aggregators are required for privacy in our threat model, but
+   some (V)DAFs, including Prio3 (Section 7), allow for any number of
+   Aggregators, only one of which needs to be trusted in order for the
+   computation to be private.  To hedge against corruptions that happen
+   during the course of the attack, deployments may consider involving
+   more than two Aggregators as described for example in Section 5.9.
+   Note however that not all schemes, including Poplar1, are compatible
+   with this mode of operation.
 
 10.  IANA Considerations
 

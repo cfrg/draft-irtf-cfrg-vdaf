@@ -1404,6 +1404,9 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.6">
                 <p id="section-toc.1-1.9.2.6.1"><a href="#section-9.6" class="auto internal xref">9.6</a>.  <a href="#name-choosing-the-field-size" class="internal xref">Choosing the Field Size</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.7">
+                <p id="section-toc.1-1.9.2.7.1"><a href="#section-9.7" class="auto internal xref">9.7</a>.  <a href="#name-choosing-the-number-of-aggr" class="internal xref">Choosing the Number of Aggregators</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
@@ -2104,7 +2107,8 @@ correctness of the measurements obtained.  The privacy properties of the system
 are assured by non-collusion among Aggregators, and Aggregators are the entities
 that perform validation of Client measurements.  Thus Clients trust Aggregators
 not to collude (typically it is required that at least one Aggregator is
-honest), and Collectors trust Aggregators to correctly run the protocol.<a href="#section-3-4" class="pilcrow">¶</a></p>
+honest; see <a href="#num-aggregators" class="auto internal xref">Section 9.7</a>), and Collectors trust Aggregators to correctly
+run the protocol.<a href="#section-3-4" class="pilcrow">¶</a></p>
 <p id="section-3-5">Within the bounds of the non-collusion requirements of a given (V)DAF instance,
 it is possible for the same entity to play more than one role.  For example, the
 Collector could also act as an Aggregator, effectively using the other
@@ -3444,7 +3448,7 @@ message to send before the peer can also finish processing (i.e., <code>outbound
 None</code>).<a href="#section-5.8-21" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="star-topology-any-number-of-aggregators">
+<div id="star-topo">
 <section id="section-5.9">
         <h3 id="name-star-topology-any-number-of">
 <a href="#section-5.9" class="section-number selfRef">5.9. </a><a href="#name-star-topology-any-number-of" class="section-name selfRef">Star Topology (Any Number of Aggregators)</a>
@@ -8466,7 +8470,7 @@ any positive value of <code>BITS</code>. Test vectors can be found in <a href="#
       <h2 id="name-security-considerations">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-9-1">VDAFs have two essential security goals:<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-1">VDAFs (<a href="#vdaf" class="auto internal xref">Section 5</a>) have two essential security goals:<a href="#section-9-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9-2">
 <li id="section-9-2.1">
           <p id="section-9-2.1.1">Privacy: An attacker that controls the Collector and a subset of Clients and
@@ -8752,7 +8756,7 @@ randomness (<a href="#flp" class="auto internal xref">Section 7.1</a>) in the la
 flexible circuit design (see <a href="#flp-bbcggi19-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>), but opens up
 Prio3 to precomputation attacks, which the larger field mitigates. (See
 <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, Theorem 1.) Note that privacy is not susceptible to such attacks.<a href="#section-9.6-2" class="pilcrow">¶</a></p>
-<p id="section-9.6-3">Another way to mitigate this issue (or improve robustness in general) is to
+<p id="section-9.6-3">Another way to mitigate this issue (or improve robustness in general) is to:wq
 generate and verify multiple, independent proofs. (See <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>.) For
 Prio3, the <code>PROOFS</code> parameter controls the number of proofs (at least one) that
 are generated and verified.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
@@ -8761,6 +8765,20 @@ joint randomness (<code>JOINT_RAND_LEN &gt; 0</code>) and <code>PROOFS == 1</cod
 instead, but <code>PROOFS</code> <span class="bcp14">MUST</span> be set to at least <code>3</code>. Breaking robustness for
 <code>PROOFS == 2</code> is feasible, if impractical; but <code>PROOFS == 1</code> is completely
 broken for such a small field.<a href="#section-9.6-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="num-aggregators">
+<section id="section-9.7">
+        <h3 id="name-choosing-the-number-of-aggr">
+<a href="#section-9.7" class="section-number selfRef">9.7. </a><a href="#name-choosing-the-number-of-aggr" class="section-name selfRef">Choosing the Number of Aggregators</a>
+        </h3>
+<p id="section-9.7-1">Two Aggregators are required for privacy in our threat model, but some (V)DAFs,
+including Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>), allow for any number of Aggregators, only one of
+which needs to be trusted in order for the computation to be private. To hedge
+against corruptions that happen during the course of the attack, deployments
+may consider involving more than two Aggregators as described for example in
+<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that not all schemes, including Poplar1, are
+compatible with this mode of operation.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
