@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 6 February 2025                                            ISRG
+Expires: 7 February 2025                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                           5 August 2024
+                                                           6 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 February 2025.
+   This Internet-Draft will expire on 7 February 2025.
 
 Copyright Notice
 
@@ -1289,7 +1289,7 @@ Table of Contents
       -  nonce MUST have length vdaf.NONCE_SIZE.
 
    *  vdaf.prep_next(prep_state: PrepState, prep_msg: PrepMessage) ->
-      Union[tuple[PrepState, PrepShare], OutShare] is the deterministic
+      tuple[PrepState, PrepShare] | OutShare is the deterministic
       preparation-state update algorithm run by each Aggregator.  It
       updates the Aggregator's preparation state (prep_state) and
       returns either its next preparation state and its message share
@@ -2577,9 +2577,8 @@ Table of Contents
      +-----------------+--------------------------------------------+
      | PublicShare     | Optional[list[bytes]]                      |
      +-----------------+--------------------------------------------+
-     | InputShare      | Union[tuple[list[F], list[F],              |
-     |                 | Optional[bytes]], tuple[bytes, bytes,      |
-     |                 | Optional[bytes]]]                          |
+     | InputShare      | tuple[list[F], list[F], Optional[bytes]] | |
+     |                 | tuple[bytes, bytes, Optional[bytes]]       |
      +-----------------+--------------------------------------------+
      | OutShare        | list[F]                                    |
      +-----------------+--------------------------------------------+
@@ -2968,9 +2967,8 @@ Table of Contents
    def prep_next(
            self,
            prep_state: Prio3PrepState[F],
-           prep_msg: Optional[bytes]) -> Union[
-               tuple[Prio3PrepState[F], Prio3PrepShare[F]],
-               list[F]]:
+           prep_msg: Optional[bytes],
+       ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
        k_joint_rand = prep_msg
        (out_share, k_corrected_joint_rand) = prep_state
 
@@ -4398,10 +4396,9 @@ Table of Contents
 
    A concrete IDPF defines the types and constants enumerated in
    Table 19.  In the remainder we write Output as shorthand for the type
-   Union[list[list[FieldInner]], list[list[FieldLeaf]]].  (This type
-   denotes either a vector of inner node field elements or leaf node
-   field elements.)  The scheme is comprised of the following
-   algorithms:
+   list[list[FieldInner]] | list[list[FieldLeaf]].  (This type denotes
+   either a vector of inner node field elements or leaf node field
+   elements.)  The scheme is comprised of the following algorithms:
 
    *  idpf.gen(alpha: int, beta_inner: list[list[FieldInner]],
       beta_leaf: list[FieldLeaf], nonce: bytes, rand: bytes) ->
@@ -4464,7 +4461,7 @@ Table of Contents
 
    def current_field(
            self,
-           level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
+           level: int) -> type[FieldInner] | type[FieldLeaf]:
        if level < self.BITS - 1:
            return self.field_inner
        return self.field_leaf
@@ -4499,10 +4496,10 @@ Table of Contents
     | FieldLeaf  | Implementation of Field used for values of leaf    |
     |            | nodes                                              |
     +------------+----------------------------------------------------+
-    | Output     | Alias of Union[list[list[FieldInner]],             |
-    |            | list[list[FieldLeaf]]]                             |
+    | Output     | Alias of list[list[FieldInner]] |                  |
+    |            | list[list[FieldLeaf]]                              |
     +------------+----------------------------------------------------+
-    | FieldVec   | Alias of Union[list[FieldInner], list[FieldLeaf]]  |
+    | FieldVec   | Alias of list[FieldInner] | list[FieldLeaf]        |
     +------------+----------------------------------------------------+
 
          Table 19: Constants and types defined by a concrete IDPF.
@@ -4825,9 +4822,8 @@ Table of Contents
    def prep_next(
            self,
            prep_state: Poplar1PrepState,
-           prep_msg: Optional[FieldVec]) -> Union[
-               tuple[Poplar1PrepState, FieldVec],
-               FieldVec]:
+           prep_msg: Optional[FieldVec]
+       ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
        prev_sketch = cast(list[Field], prep_msg)
        (step, level, prep_mem) = prep_state
 
@@ -5268,9 +5264,8 @@ Table of Contents
            key: bytes,
            level: int,
            prefixes: Sequence[int],
-           nonce: bytes) -> Union[
-               list[list[Field64]],
-               list[list[Field255]]]:
+           nonce: bytes,
+       ) -> list[list[Field64]] | list[list[Field255]]:
        if agg_id not in range(self.SHARES):
            raise ValueError('aggregator id out of range')
        if level not in range(self.BITS):
@@ -5322,7 +5317,7 @@ Table of Contents
            else:
                out_share.append(vec_neg(cast(list[Field], y)))
        return cast(
-           Union[list[list[Field64]], list[list[Field255]]],
+           list[list[Field64]] | list[list[Field255]],
            out_share,
        )
 
