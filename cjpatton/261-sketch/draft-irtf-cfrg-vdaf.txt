@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 6 February 2025                                            ISRG
+Expires: 7 February 2025                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                           5 August 2024
+                                                           6 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 February 2025.
+   This Internet-Draft will expire on 7 February 2025.
 
 Copyright Notice
 
@@ -1828,8 +1828,8 @@ Table of Contents
 
    The ping-pong topology of the previous section is only suitable for
    VDAFs involving exactly two Aggregators.  If the VDAF supports more
-   than two Aggregators are required, then the star topology described
-   in this section can be used instead.
+   than two Aggregators, then the star topology described in this
+   section can be used instead.
 
    We again designate an Aggregator to initiate the computation.  We
    refer to this Aggregator as the Leader and to all other Aggregators
@@ -1840,9 +1840,9 @@ Table of Contents
    computes the next prep message (via prep_shares_to_prep()) and
    broadcasts it to the Helpers.  At this point, each Aggregator runs
    prep_next() locally to either recover an output share or, if more
-   rounds of preparation are required, its updated state and prep share.
-   If more are required, then the Helper responds to the broadcast
-   message with its next prep share.
+   rounds of preparation are required, compute its updated state and
+   prep share.  If more are required, then the Helper responds to the
+   broadcast message with its next prep share.
 
    The Aggregators proceed in this way until each recovers an output
    share or some step of the computation fails.
