@@ -5735,7 +5735,7 @@ Table of Contents
    attacks.
 
    Another way to mitigate this issue (or improve robustness in general)
-   is to:wq generate and verify multiple, independent proofs.  (See
+   is to generate and verify multiple, independent proofs.  (See
    Section 7.1.2.)  For Prio3, the PROOFS parameter controls the number
    of proofs (at least one) that are generated and verified.
 
