@@ -36,7 +36,7 @@ def gen_test_vec_for_idpf(idpf: Idpf,
         'beta_inner': printable_beta_inner,
         'beta_leaf': printable_beta_leaf,
         'nonce': nonce.hex(),
-        'public_share': public_share.hex(),
+        'public_share': idpf.test_vec_encode_public_share(public_share).hex(),
         'keys': printable_keys,
     }
 

@@ -5,7 +5,7 @@ from typing import Sequence, cast
 from vdaf_poc.common import from_be_bytes, gen_rand, vec_add
 from vdaf_poc.field import Field
 from vdaf_poc.idpf import Idpf
-from vdaf_poc.idpf_bbcggi21 import IdpfBBCGGI21
+from vdaf_poc.idpf_bbcggi21 import CorrectionWord, IdpfBBCGGI21
 
 
 class TestIdpfBBCGGI21(unittest.TestCase):
@@ -132,7 +132,7 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         idpf = IdpfBBCGGI21(1, 32)
         nonce = gen_rand(idpf.NONCE_SIZE)
 
-        def shard(s: bytes) -> tuple[bytes, list[bytes]]:
+        def shard(s: bytes) -> tuple[list[CorrectionWord], list[bytes]]:
             alpha = from_be_bytes(s)
             beta_inner = [[idpf.field_inner(1)]] * (idpf.BITS - 1)
             beta_leaf = [idpf.field_leaf(1)]
@@ -167,3 +167,17 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         self.assertTrue(idpf.is_prefix(0b1100, 0b11000001, 3))
         self.assertFalse(idpf.is_prefix(0b111, 0b11000001, 2))
         self.assertFalse(idpf.is_prefix(0b1101, 0b11000001, 3))
+
+    def test_public_share_roundtrip(self) -> None:
+        idpf = IdpfBBCGGI21(1, 32)
+        alpha = from_be_bytes(b"cool")
+        beta_inner = [[idpf.field_inner(23)]] * (idpf.BITS - 1)
+        beta_leaf = [idpf.field_leaf(97)]
+        nonce = gen_rand(idpf.NONCE_SIZE)
+        rand = gen_rand(idpf.RAND_SIZE)
+        (public_share, _keys) = idpf.gen(
+            alpha, beta_inner, beta_leaf, nonce, rand)
+        self.assertEqual(
+            idpf.decode_public_share(idpf.encode_public_share(public_share)),
+            public_share,
+        )
