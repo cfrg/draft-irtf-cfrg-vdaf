@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-04T00:53:06.711961+00:00",
+  "timestamp": "2024-08-06T00:48:51.408298+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -3796,13 +3796,15 @@
       "state": "OPEN",
       "author": "wangshan",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": "Some of the commonly used types are not explicitly defined using TLS syntax, or mentioned in \"Conventions and Definitions\". For example:  \r\n\r\n- prep share\r\n- prep msg\r\n- input share\r\n- public share\r\n\r\nwhile similar ones like OutShare, Measurement is.\r\n\r\nother types like `Prep` is treated like a type but it's content not specified when it's mentioned, but only at a later time, for e.g https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/draft-irtf-cfrg-vdaf.md#communication-patterns-for-preparation-vdaf-prep-comm.\r\n\r\n\r\n",
       "createdAt": "2023-06-19T21:08:01Z",
-      "updatedAt": "2023-10-17T01:11:03Z",
+      "updatedAt": "2024-08-06T00:19:21Z",
       "closedAt": null,
       "comments": [
         {
@@ -4093,13 +4095,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "feature"
       ],
       "body": "We spelled out \"ping pong\" because we needed it for DAP-05. We also [need to spell out the \"star\" topology](https://www.ietf.org/archive/id/draft-irtf-cfrg-vdaf-06.html#name-star-topology-any-number-of).",
       "createdAt": "2023-07-11T16:38:28Z",
-      "updatedAt": "2023-07-11T21:38:07Z",
+      "updatedAt": "2024-08-05T21:23:35Z",
       "closedAt": null,
       "comments": []
     },
@@ -5109,7 +5113,7 @@
       "id": "I_kwDOGKuqOc589SUl",
       "title": "Testing improvements",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/327",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5120,8 +5124,8 @@
       ],
       "body": "1. Adopt `unittest` for unit tests.\r\n2. Decouple test vector generation from unit tests. Requirements:\r\n     * We would like the code to set the path for the test vector (e.g., `test_vec/08`).\r\n     * Unit tests should always generate fresh randomness; for test vectors, either: (1) use the a fixed sequence of coins, as the draft suggests; or (2) publish the generated randomness with test vectors.\r\n     * We need a separate function for generating test vectors and running the VDAF.\r\n\r\ncc/ @junyechen1996 ",
       "createdAt": "2024-01-23T16:12:11Z",
-      "updatedAt": "2024-08-01T21:01:55Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-05T23:14:40Z",
+      "closedAt": "2024-08-05T23:14:40Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5232,7 +5236,7 @@
       "id": "I_kwDOGKuqOc6HjT5y",
       "title": "Is it OK to mention specific companies/projects?",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/338",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5244,8 +5248,8 @@
       ],
       "body": "The intro mentions the MOzilla Origin Telemtry project, ENPA, ISRG, Google, and Apple by name. I'm not sure this is appropriate for an RFC to do. ",
       "createdAt": "2024-05-01T20:51:16Z",
-      "updatedAt": "2024-08-03T00:27:43Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-05T16:10:48Z",
+      "closedAt": "2024-08-05T16:10:48Z",
       "comments": [
         {
           "author": "richsalz",
@@ -5593,6 +5597,26 @@
           "updatedAt": "2024-07-19T21:25:16Z"
         }
       ]
+    },
+    {
+      "number": 389,
+      "id": "I_kwDOGKuqOc6R_-_a",
+      "title": "Replace `Union[TypeA, TypeB]` with `TypeA | TypeB`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/389",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "poc"
+      ],
+      "body": "A little nit-picky, but recent versions of Python allow `|` to be used to express union types.",
+      "createdAt": "2024-08-05T20:58:06Z",
+      "updatedAt": "2024-08-05T23:16:27Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -33258,7 +33282,7 @@
       "id": "PR_kwDOGKuqOc53Th6K",
       "title": "poc: Ensure all test failures are enforced by CI",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/386",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -33267,17 +33291,19 @@
       ],
       "body": "Closes #327.\r\n\r\nFor some of our tests, when the test fails, it outputs something to stdout:\r\n\r\n```python\r\nif not test_succeeded:\r\n    print('test failed!')\r\n```\r\n\r\nThis does not cause `sage python -m unittest` to fail, and so will be missed by CI. To address this, replace these with an assertion:\r\n\r\n```python\r\nassert test_succeeded\r\n```\r\n\r\nIn fact, this change goes one step further: encapsulate the test in a `unittest.TestCase` so that the test runner can provide more useful feedback:\r\n\r\n```python\r\nclass MyTest(unittest.TestCase):\r\n    def test(self):\r\n       ...\r\n       self.assertTrue(test_succeeded)\r\n```\r\n\r\nThis required a bit of refactoring:\r\n\r\n1. Create a new module, `vdaf_poc/test_utils.py`, that defines a test harness for instances of `Vdaf` and `FlpBBCGGI19`.\r\n\r\n2. Likewise, move `vdaf_poc/idpf_util.py` to a test harness in `tests/test_idpf_bbcggi21.py`.\r\n\r\nFinally, replace assertions in unit tests with `unittest`-style assertions.",
       "createdAt": "2024-08-02T22:54:35Z",
-      "updatedAt": "2024-08-02T23:03:36Z",
+      "updatedAt": "2024-08-05T23:14:40Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "4d7694e20c797817dba389a90c6fba6b0fa1182e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/327-1-hard-fail",
       "headRefOid": "03e7fb2dcc3be7040881a4e6d214636c719ead90",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-08-05T23:14:39Z",
+      "mergedAt": "2024-08-05T23:14:39Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "452ae27e7295d78eff9aefb28d9472b07f80195c"
+      },
       "comments": [],
       "reviews": [
         {
@@ -33299,6 +33325,19 @@
               "updatedAt": "2024-08-02T23:03:05Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EUidK",
+          "commit": {
+            "abbreviatedOid": "03e7fb2"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "I checked the code coverage as well, and it looks good. (to make sure all the test code is properly discovered and run, after being rearranged)",
+          "createdAt": "2024-08-05T22:59:56Z",
+          "updatedAt": "2024-08-05T22:59:56Z",
+          "comments": []
         }
       ]
     },
@@ -33307,7 +33346,7 @@
       "id": "PR_kwDOGKuqOc53TlDf",
       "title": "Move mention of {{OriginTelemetry}} and {{ENPA}} to acks",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/387",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -33316,13 +33355,222 @@
       ],
       "body": "Closes #338.",
       "createdAt": "2024-08-02T23:17:31Z",
-      "updatedAt": "2024-08-02T23:51:45Z",
+      "updatedAt": "2024-08-05T16:10:47Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "4d7694e20c797817dba389a90c6fba6b0fa1182e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/338",
-      "headRefOid": "231a9a8cfd1428b00bf6c71a537f6718277745b0",
+      "headRefOid": "ecd7b7d2cf2e3dfe80404f6ac20ad7941ba563b8",
+      "closedAt": "2024-08-05T16:10:47Z",
+      "mergedAt": "2024-08-05T16:10:47Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "82997647a9b34115ba16847ae07664f17e9c7f95"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6ERMc3",
+          "commit": {
+            "abbreviatedOid": "231a9a8"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "The origin telemetry link is broken now, by the way. It's archived at https://web.archive.org/web/20221025174046/https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html.",
+          "createdAt": "2024-08-05T14:04:20Z",
+          "updatedAt": "2024-08-05T14:04:20Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 388,
+      "id": "PR_kwDOGKuqOc53fulA",
+      "title": "Replace pseudocode for ping-pong topology with Python",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/388",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #283.\r\nBased on #386 (merge that first).\r\n\r\nAdd an implementation of the ping-pong API to the reference code. The\r\npseudocode currently in the draft doesn't compile, so replace it with\r\nthe tested, type-checked, and linted Python.\r\n\r\nAlso, in the draft, we don't need to list the encoding methods used by\r\nthe ping-pong API; these should be clear in context.",
+      "createdAt": "2024-08-05T20:51:14Z",
+      "updatedAt": "2024-08-05T23:15:38Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/283",
+      "headRefOid": "49421a9d9ef8d1e64a891aeca33d25c4ef2e2e35",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6EUMLr",
+          "commit": {
+            "abbreviatedOid": "30c30b2"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-05T21:22:11Z",
+          "updatedAt": "2024-08-05T21:22:12Z",
+          "comments": [
+            {
+              "originalPosition": 261,
+              "body": "@divergentdave I can use your help here figuring out how to wrangle type hints. In the ping-pong API, we need to be able to condition the code on the type of `out` (a prep state and share or an output share). We can't do `type(out) == OutShare` here because `OutShare` is a type variable. `type != tuple` is a heuristic, and it fails if the output share is a tuple.\r\n\r\nAny ideas? ",
+              "createdAt": "2024-08-05T21:22:11Z",
+              "updatedAt": "2024-08-05T21:22:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EUPfz",
+          "commit": {
+            "abbreviatedOid": "30c30b2"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-05T21:34:04Z",
+          "updatedAt": "2024-08-05T21:34:04Z",
+          "comments": [
+            {
+              "originalPosition": 261,
+              "body": "We could avoid the problem by tracking rounds in the ping pong state, and interpreting `out` based on that. Alternately, we could change `prep_next()` to be explicit by adding a boolean or enum to its output, though that would be more disruptive to the whole document.",
+              "createdAt": "2024-08-05T21:34:04Z",
+              "updatedAt": "2024-08-05T21:34:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EUQTj",
+          "commit": {
+            "abbreviatedOid": "30c30b2"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-05T21:37:12Z",
+          "updatedAt": "2024-08-05T21:37:12Z",
+          "comments": [
+            {
+              "originalPosition": 261,
+              "body": "I like the idea of tracking the round.",
+              "createdAt": "2024-08-05T21:37:12Z",
+              "updatedAt": "2024-08-05T21:37:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EUZIH",
+          "commit": {
+            "abbreviatedOid": "30c30b2"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-05T22:13:48Z",
+          "updatedAt": "2024-08-05T22:13:48Z",
+          "comments": [
+            {
+              "originalPosition": 261,
+              "body": "Done.",
+              "createdAt": "2024-08-05T22:13:48Z",
+              "updatedAt": "2024-08-05T22:13:48Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 390,
+      "id": "PR_kwDOGKuqOc53gIoT",
+      "title": "Sketch the star topology for VDAF preparation",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/390",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #261.",
+      "createdAt": "2024-08-05T22:30:01Z",
+      "updatedAt": "2024-08-05T22:30:23Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "82997647a9b34115ba16847ae07664f17e9c7f95",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/261-sketch",
+      "headRefOid": "66091806e74137839661ffea51f719feb5e925fd",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 391,
+      "id": "PR_kwDOGKuqOc53gUOM",
+      "title": "Replace `Union[TypeA, TypeB]` with `TypeA | TypeB`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/391",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #389.",
+      "createdAt": "2024-08-05T23:27:14Z",
+      "updatedAt": "2024-08-06T00:27:43Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/389",
+      "headRefOid": "a2628836b1f4a32bdff398fe0d0d3abf4590e978",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 392,
+      "id": "PR_kwDOGKuqOc53gfvn",
+      "title": "Resolve open issues for #255",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/392",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Close #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, should we define a type for the public share output by `Idpf.gen()` or continue to treat it as an opaque byte string? It doesn't seem to matter from the point of view of the spec, so do nothing here. It would complicated to express the correction words in TLS-syntax since we split the control bits out into their own, packed integer.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
+      "createdAt": "2024-08-06T00:23:50Z",
+      "updatedAt": "2024-08-06T00:26:15Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/255-finish-it",
+      "headRefOid": "4ecef01d53d898bb29e9fa5974e0e6cfacd6a125",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
