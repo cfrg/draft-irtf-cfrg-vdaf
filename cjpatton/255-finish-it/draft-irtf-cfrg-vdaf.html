@@ -7912,17 +7912,17 @@ tightly as possible. The encoded public share is structured as follows:<a href="
 struct {
     Poplar1Seed seed;
     Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
-} CtrlWordSeedAndPayloadInner;
+} Poplar1CWSeedAndPayloadInner;
 
 struct {
     Poplar1Seed seed;
     Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
-} CtrlWordSeedAndPayloadLeaf;
+} Poplar1CWSeedAndPayloadLeaf;
 
 struct {
     opaque packed_control_bits[packed_len];
-    CtrlWordSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
-    CtrlWordSeedAndPayloadLeaf leaf;
+    Poplar1CWSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
+    Poplar1CWSeedAndPayloadLeaf leaf;
 } Poplar1PublicShare;
 </pre><a href="#section-8.2.6.1-4" class="pilcrow">¶</a>
 </div>
@@ -7932,12 +7932,10 @@ control bits.<a href="#section-8.2.6.1-5" class="pilcrow">¶</a></p>
 <p id="section-8.2.6.1-6">Field <code>packed_control_bits</code> is encoded with the following function:<a href="#section-8.2.6.1-6" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-8.2.6.1-7">
 <pre>
-def pack_bits(bits: list[Field2]) -&gt; bytes:
-    byte_len = (len(bits) + 7) // 8
-    packed = [int(0)] * byte_len
-    for i, bit in enumerate(bits):
-        packed[i // 8] |= bit.as_unsigned() &lt;&lt; (i % 8)
-    return bytes(packed)
+packed_control_buf = [int(0)] * packed_len
+for i, bit in enumerate(control_bits):
+    packed_control_buf[i // 8] |= bit.as_unsigned() &lt;&lt; (i % 8)
+packed_control_bits = bytes(packed_control_bits)
 </pre><a href="#section-8.2.6.1-7" class="pilcrow">¶</a>
 </div>
 <p id="section-8.2.6.1-8">Each group of eight bits into a byte, in LSB to MSB order, padding the most
@@ -7947,20 +7945,19 @@ and a number of bits, and returns a list of bits, extracting eight bits from
 each byte in turn, in LSB to MSB order, and stopping after the requested number
 of bits. If the byte array has an incorrect length, or if unused bits in the
 last bytes are not zero, it throws an error:<a href="#section-8.2.6.1-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2.6.1-9">
+<div class="lang-python sourcecode" id="section-8.2.6.1-9">
 <pre>
-def unpack_bits(packed: bytes, length: int) -&gt; list[Field2]:
-    bits = []
+control_bits = []
     for i in range(length):
-        bits.append(Field2(
-            (packed[i // 8] &gt;&gt; (i % 8)) &amp; 1
+        control_bits.append(Field2(
+            (packed_control_bits[i // 8] &gt;&gt; (i % 8)) &amp; 1
         ))
-    leftover_bits = packed[-1] &gt;&gt; (
+    leftover_bits = packed_control_bits[-1] &gt;&gt; (
         (length + 7) % 8 + 1
     )
-    if (length + 7) // 8 != len(packed) or leftover_bits != 0:
+    if (length + 7) // 8 != len(packed_control_bits) or \
+        leftover_bits != 0:
         raise ValueError('trailing bits')
-    return bits
 </pre><a href="#section-8.2.6.1-9" class="pilcrow">¶</a>
 </div>
 </section>

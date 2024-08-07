@@ -5023,17 +5023,17 @@ Table of Contents
    struct {
        Poplar1Seed seed;
        Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
-   } CtrlWordSeedAndPayloadInner;
+   } Poplar1CWSeedAndPayloadInner;
 
    struct {
        Poplar1Seed seed;
        Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
-   } CtrlWordSeedAndPayloadLeaf;
+   } Poplar1CWSeedAndPayloadLeaf;
 
    struct {
        opaque packed_control_bits[packed_len];
-       CtrlWordSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
-       CtrlWordSeedAndPayloadLeaf leaf;
+       Poplar1CWSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
+       Poplar1CWSeedAndPayloadLeaf leaf;
    } Poplar1PublicShare;
 
    Here Ci denotes the length of Poplar1ControlWordSeedAndPayloadInner
@@ -5042,12 +5042,10 @@ Table of Contents
 
    Field packed_control_bits is encoded with the following function:
 
-   def pack_bits(bits: list[Field2]) -> bytes:
-       byte_len = (len(bits) + 7) // 8
-       packed = [int(0)] * byte_len
-       for i, bit in enumerate(bits):
-           packed[i // 8] |= bit.as_unsigned() << (i % 8)
-       return bytes(packed)
+   packed_control_buf = [int(0)] * packed_len
+   for i, bit in enumerate(control_bits):
+       packed_control_buf[i // 8] |= bit.as_unsigned() << (i % 8)
+   packed_control_bits = bytes(packed_control_bits)
 
    Each group of eight bits into a byte, in LSB to MSB order, padding
    the most significant bits of the last byte with zeros as necessary,
@@ -5058,18 +5056,17 @@ Table of Contents
    array has an incorrect length, or if unused bits in the last bytes
    are not zero, it throws an error:
 
-   def unpack_bits(packed: bytes, length: int) -> list[Field2]:
-       bits = []
+   control_bits = []
        for i in range(length):
-           bits.append(Field2(
-               (packed[i // 8] >> (i % 8)) & 1
+           control_bits.append(Field2(
+               (packed_control_bits[i // 8] >> (i % 8)) & 1
            ))
-       leftover_bits = packed[-1] >> (
+       leftover_bits = packed_control_bits[-1] >> (
            (length + 7) % 8 + 1
        )
-       if (length + 7) // 8 != len(packed) or leftover_bits != 0:
+       if (length + 7) // 8 != len(packed_control_bits) or \
+           leftover_bits != 0:
            raise ValueError('trailing bits')
-       return bits
 
 8.2.6.2.  Input Share
 
