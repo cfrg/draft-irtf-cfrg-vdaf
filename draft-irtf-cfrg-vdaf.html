@@ -1404,6 +1404,9 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.6">
                 <p id="section-toc.1-1.9.2.6.1"><a href="#section-9.6" class="auto internal xref">9.6</a>.  <a href="#name-choosing-the-field-size" class="internal xref">Choosing the Field Size</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.7">
+                <p id="section-toc.1-1.9.2.7.1"><a href="#section-9.7" class="auto internal xref">9.7</a>.  <a href="#name-choosing-the-number-of-aggr" class="internal xref">Choosing the Number of Aggregators</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
@@ -1455,8 +1458,9 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">(TO BE REMOVED BY RFC EDITOR: The source for this draft and and the reference
-implementation can be found at https://github.com/cfrg/draft-irtf-cfrg-vdaf.)<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-1">(RFC EDITOR: Remove this paragraph.) The source for this draft and and the
+reference implementation can be found at
+https://github.com/cfrg/draft-irtf-cfrg-vdaf.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">The ubiquity of the Internet makes it an ideal platform for measurement of
 large-scale phenomena, whether public health trends or the behavior of computer
 systems at scale. There is substantial overlap, however, between information
@@ -1464,11 +1468,12 @@ that is valuable to measure and information that users consider private.<a href=
 <p id="section-1-3">For example, consider an application that provides health information to users.
 The operator of an application might want to know which parts of their
 application are used most often, as a way to guide future development of the
-application.  Specific users' patterns of usage, though, could reveal sensitive
-things about them, such as which users are researching a given health condition.<a href="#section-1-3" class="pilcrow">¶</a></p>
+application. Specific users' patterns of usage, though, could reveal sensitive
+things about them, such as which users are researching a given health
+condition.<a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">In many situations, the measurement collector is only interested in aggregate
 statistics, e.g., which portions of an application are most used or what
-fraction of people have experienced a given disease.  Thus systems that provide
+fraction of people have experienced a given disease. Thus systems that provide
 aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <p id="section-1-5">This problem is often formulated in terms of differential privacy (DP)
@@ -1480,456 +1485,459 @@ distribution and adds it to their measurement before submitting to the
 aggregation server. The aggregation server then adds up the noisy measurements,
 and because it knows the distribution from which the noise was sampled, it can
 estimate the true sum with reasonable accuracy.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">However, even when noise is added to the measurements, collecting them in the
-clear still reveals a significant amount of information to the collector. On
-the one hand, depending on the "amount" of noise a client adds to its
-measurement, it may be possible for a curious collector to make a reasonable
-guess of the measurement's true value. On the other hand, the more noise the
-clients add, the less reliable will be the server's estimate of the output.
-Thus systems relying solely on a DP mechanism must strike a delicate balance
-between privacy and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-6">Even when noise is added to the measurements, collecting them in the clear
+still reveals a significant amount of information to the collector. On the one
+hand, depending on the "amount" of noise a client adds to its measurement, it
+may be possible for a curious collector to make a reasonable guess of the
+measurement's true value. On the other hand, the more noise the clients add,
+the less reliable will be the server's estimate of the aggregate. Thus systems
+relying solely on a DP mechanism must strike a delicate balance between privacy
+and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
 <p id="section-1-7">The ideal goal for a privacy-preserving measurement system is that of secure
-multi-party computation (MPC): No participant in the protocol should learn
+multi-party computation (MPC): no participant in the protocol should learn
 anything about an individual measurement beyond what it can deduce from the
-differentially private aggregate <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span>. In this document, we describe
-Verifiable Distributed Aggregation Functions (VDAFs) as a general class of
-delegated MPC protocols that can be used to achieve this goal.<a href="#section-1-7" class="pilcrow">¶</a></p>
-<p id="section-1-8">VDAF schemes achieve their privacy goal by distributing the computation of the
-aggregate among a number of non-colluding aggregation servers. As long as a
-subset of the servers executes the protocol honestly, VDAFs guarantee that no
-measurement is ever accessible to any party besides the client that submitted
-it. VDAFs can also be composed with various DP mechanisms, thereby ensuring the
-aggregate result does not leak too much information about any one measurmment.
-At the same time, VDAFs are "verifiable" in the sense that malformed
-measurements that would otherwise garble the result of the computation can be
-detected and removed from the set of measurements. We refer to this property as
-"robustness".<a href="#section-1-8" class="pilcrow">¶</a></p>
-<p id="section-1-9">The VDAF abstraction laid out in <a href="#vdaf" class="auto internal xref">Section 5</a> represents a class of multi-party
-protocols for privacy-preserving measurement proposed in the literature. These
-protocols vary in their operational and security requirements, sometimes in
-subtle but consequential ways. This document therefore has two important goals:<a href="#section-1-9" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-10">
-<li id="section-1-10.1">
-          <p id="section-1-10.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> with
-a simple, uniform interface for accessing privacy-preserving measurement
+aggregate. MPC achieves this goal by distributing the computation of the
+aggregate across multiple aggregation servers, one of which is presumed to be
+honest, i.e., not under control of the attacker. Moreover, MPC can be composed
+with various DP mechanisms to ensure the aggregate itself does leak too much
+information about any one of the measurements <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span>.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-8">This document describes two classes of MPC protocols, each aiming for a
+different set of goals.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<p id="section-1-9">In a Distributed Aggregation Function (DAF, <a href="#daf" class="auto internal xref">Section 4</a>), each client splits its
+measurement into multiple secret shares, one for each aggregation
+server. DAFs require two properties of the secret sharing scheme. First, we can
+reconstruct the underlying measurement by simply adding up all of the shares.
+(Typically the shares are vectors over some finite field.) Second, given all
+but one of the shares, it is impossible to learn anything about the underlying
+measurement. These properties give rise to a simple strategy for privately
+aggregating the measurements: each aggregation server adds up its measurement
+shares locally before revealing their sum to the data collector; then all
+the data collector has to do is add up these sums to get the aggregate.<a href="#section-1-9" class="pilcrow">¶</a></p>
+<p id="section-1-10">This strategy is compatible with any aggregation function that can be
+represented as the sum of some encoding of the measurements. Examples include:
+summary statistics such as sum, mean, and standard deviation; estimation of
+quantiles, e.g., median; histograms; linear regression; or counting data
+structures, e.g., Bloom filters. However, not all functions fit into this
+rubric, as it is constrained to linear computations over the encoded
+measurements.<a href="#section-1-10" class="pilcrow">¶</a></p>
+<p id="section-1-11">In fact, our framework admits DAFs with slightly more
+functionality, computing aggregation functions of the form<a href="#section-1-11" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-1-12">
+<pre>
+f(agg_param, meas_1, ..., meas_N) =
+    g(agg_param, meas_1) + ... + g(agg_param, meas_N)
+</pre><a href="#section-1-12" class="pilcrow">¶</a>
+</div>
+<p id="section-1-13">where <code>meas_1, ..., meas_N</code> are the measurements, <code>g</code> is a possibly non-linear
+function, and <code>agg_param</code> is a parameter of that function chosen by the data
+collector. This paradigm, known as function secret sharing <span>[<a href="#BGI15" class="cite xref">BGI15</a>]</span>, allows
+for more sophisticated data analysis tasks, such as grouping metrics by private
+client attributes <span>[<a href="#MPDST25" class="cite xref">MPDST25</a>]</span> or computing heavy hitters <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>. (More
+on the latter task below.)<a href="#section-1-13" class="pilcrow">¶</a></p>
+<p id="section-1-14">The second class of protocols defined in this document are called Verifiable
+Distributed Aggregation Functions (VDAFs, <a href="#vdaf" class="auto internal xref">Section 5</a>). In addition to being
+private, VDAFs are verifiable in the following sense. By design, a secret
+sharing of a valid measurement, e.g., a number between 1 and 10, is
+indistinguishable from a secret sharing of an invalid measurement, e.g., a
+number larger than 10. This means that DAFs are vulnerable to attacks from
+malicious clients attempting to disrupt the computation by submitting invalid
+measurements. Thus VDAFs are designed to allow the servers to detect and remove
+these measurements prior to aggregation. We refer to this property as
+robustness.<a href="#section-1-14" class="pilcrow">¶</a></p>
+<p id="section-1-15">Achieving robustness without sacrificing privacy requires the servers to
+interact with one another over a number of rounds of communication. DAFs on the
+other hand are non-interactive, and are therefore easier to deploy; but they do
+not provide robustness on their own. This may be tolerable in some
+applications. For instance, if the client's software is executed in a trusted
+execution environment, it may be reasonable to assume that no client is
+malicious.<a href="#section-1-15" class="pilcrow">¶</a></p>
+<p id="section-1-16">The DAF and VDAF abstractions encompass a variety of MPC techniques in the
+literature. These protocols vary in their operational and security
+requirements, sometimes in subtle but consequential ways. This document
+therefore has two important goals:<a href="#section-1-16" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-17">
+<li id="section-1-17.1">
+          <p id="section-1-17.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> (RFC
+EDITOR: remove this reference if not published before the current document)
+with a simple, uniform interface for accessing privacy-preserving measurement
 schemes, documenting relevant operational and security requirements, and
-specifying constraints for safe usage:<a href="#section-1-10.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-10.1.2">
-<li id="section-1-10.1.2.1">
-              <p id="section-1-10.1.2.1.1">General patterns of communications among the various actors involved in
+specifying constraints for safe usage:<a href="#section-1-17.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-1-17.1.2">
+<li id="section-1-17.1.2.1">
+              <p id="section-1-17.1.2.1.1">General patterns of communications among the various actors involved in
 the system (clients, aggregation servers, and the collector of the
-aggregate result);<a href="#section-1-10.1.2.1.1" class="pilcrow">¶</a></p>
+aggregate result);<a href="#section-1-17.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-10.1.2.2">
-              <p id="section-1-10.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
-information about client measurements; and<a href="#section-1-10.1.2.2.1" class="pilcrow">¶</a></p>
+            <li id="section-1-17.1.2.2">
+              <p id="section-1-17.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
+information about client measurements; and<a href="#section-1-17.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-10.1.2.3">
-              <p id="section-1-10.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
-corrupt the computation.<a href="#section-1-10.1.2.3.1" class="pilcrow">¶</a></p>
+            <li id="section-1-17.1.2.3">
+              <p id="section-1-17.1.2.3.1">Conditions that are necessary to ensure that malicious clients cannot
+corrupt the computation.<a href="#section-1-17.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
 </li>
-        <li id="section-1-10.2">
-          <p id="section-1-10.2.1">Providing cryptographers with design criteria that provide a clear
-deployment roadmap for new constructions.<a href="#section-1-10.2.1" class="pilcrow">¶</a></p>
+        <li id="section-1-17.2">
+          <p id="section-1-17.2.1">Providing cryptographers with design criteria that provide a clear
+deployment roadmap for new constructions.<a href="#section-1-17.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-1-11">This document also specifies two concrete VDAF schemes, each based on a protocol
-from the literature.<a href="#section-1-11" class="pilcrow">¶</a></p>
+<p id="section-1-18">This document also specifies two concrete VDAF schemes, each based on a protocol
+from the literature.<a href="#section-1-18" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1-12.1">
-          <p id="section-1-12.1.1">The Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving computation of a
-variety aggregate statistics. The basic idea underlying Prio is fairly
-simple:<a href="#section-1-12.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-1-12.1.2">
-<li id="section-1-12.1.2.1">
-              <p id="section-1-12.1.2.1.1">Each client shards its measurement into a sequence of additive shares and
-distributes the shares among the aggregation servers.<a href="#section-1-12.1.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1-19.1">
+          <p id="section-1-19.1.1">The Prio system <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> allows for the privacy-preserving computation of a
+variety of aggregate statistics, combining additive secret sharing as described
+above with a mechanism for checking the validity of each measurement. In
+<a href="#prio3" class="auto internal xref">Section 7</a> we specify Prio3, a VDAF that follows the same overall framework as
+the original Prio protocol, but incorporates techniques introduced in
+<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-19.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li id="section-1-12.1.2.2">
-              <p id="section-1-12.1.2.2.1">Next, each server adds up its shares locally, resulting in an additive
-share of the aggregate.<a href="#section-1-12.1.2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li id="section-1-12.1.2.3">
-              <p id="section-1-12.1.2.3.1">Finally, the aggregation servers send their aggregate shares to the data
-collector, who combines them to obtain the aggregate result.<a href="#section-1-12.1.2.3.1" class="pilcrow">¶</a></p>
-</li>
-          </ol>
-<p id="section-1-12.1.3">
-The difficult part of this system is ensuring that the servers hold shares of
-a valid, aggregatable value, e.g., the measurement is an integer in a
-specific range. Thus Prio specifies a multi-party protocol for accomplishing
-this task.<a href="#section-1-12.1.3" class="pilcrow">¶</a></p>
-<p id="section-1-12.1.4">
-In <a href="#prio3" class="auto internal xref">Section 7</a> we describe Prio3, a VDAF that follows the same overall framework
-as the original Prio protocol, but incorporates techniques introduced in
-<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-12.1.4" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-1-12.2">
-          <p id="section-1-12.2.1">More recently, Boneh et al. <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> described a protocol called Poplar
-for solving the <code>t</code>-heavy-hitters problem in a privacy-preserving manner. Here
-each client holds a bit-string of length <code>n</code>, and the goal of the aggregation
-servers is to compute the set of strings that occur at least <code>t</code> times. The
-core primitive used in their protocol is a specialized Distributed Point
-Function (DPF) <span>[<a href="#GI14" class="cite xref">GI14</a>]</span> that allows the servers to "query" their DPF shares on
-any bit-string of length shorter than or equal to <code>n</code>. As a result of this
-query, each of the servers has an additive share of a bit indicating whether
-the string is a prefix of the client's string. The protocol also specifies a
-multi-party computation for verifying that at most one string among a set of
-candidates is a prefix of the client's string.<a href="#section-1-12.2.1" class="pilcrow">¶</a></p>
-<p id="section-1-12.2.2">
-In <a href="#poplar1" class="auto internal xref">Section 8</a> we describe a VDAF called Poplar1 that implements this
-functionality.<a href="#section-1-12.2.2" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-1-19.2">
+          <p id="section-1-19.2.1">The Poplar protocol <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> solves the heavy-hitters problem in a
+privacy-preserving manner. Here each client holds a bit-string, and the goal
+of the aggregation servers is to compute the set of strings that occur at
+least <code>t</code> times for some threshold <code>t</code>. The core primitive in their protocol
+is a secret sharing of a point function <span>[<a href="#GI14" class="cite xref">GI14</a>]</span> (<code>g</code> in the notation above)
+that allows the servers to privately count how many of the clients' strings
+begin with a given prefix (<code>agg_param</code> in the notation above). In <a href="#poplar1" class="auto internal xref">Section 8</a>
+we specify a VDAF called Poplar1 that implements this functionality.<a href="#section-1-19.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-1-13">Finally, perhaps the most complex aspect of schemes like Prio3 and Poplar1 is
-the process by which the client-generated measurements are prepared for
-aggregation. Because these constructions are based on secret sharing, the
-servers will be required to exchange some amount of information in order to
-verify the measurement is valid and can be aggregated. Depending on the
-construction, this process may require multiple round trips over the network.<a href="#section-1-13" class="pilcrow">¶</a></p>
-<p id="section-1-14">There are applications in which this verification step may not be necessary,
-e.g., when the client's software is run a trusted execution environment. To
-support these applications, this document also defines Distributed Aggregation
-Functions (DAFs) as a simpler class of protocols that aim to provide the same
-privacy guarantee as VDAFs but fall short of being verifiable.<a href="#section-1-14" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-1-15.1">
-          <p id="section-1-15.1.1">OPEN ISSUE Decide if we should give one or two example DAFs. There are natural
-variants of Prio3 and Poplar1 that might be worth describing.<a href="#section-1-15.1.1" class="pilcrow">¶</a></p>
-</li>
-      </ul>
-<p id="section-1-16">The remainder of this document is organized as follows: <a href="#overview" class="auto internal xref">Section 3</a> gives a
-brief overview of DAFs and VDAFs; <a href="#daf" class="auto internal xref">Section 4</a> defines the syntax for DAFs; <a href="#vdaf" class="auto internal xref">Section 5</a>
+<p id="section-1-20">The remainder of this document is organized as follows: <a href="#conventions" class="auto internal xref">Section 2</a> lists
+definitions and conventions used for specification; <a href="#overview" class="auto internal xref">Section 3</a> gives a brief
+overview of DAFs and VDAFs, the parties involved in the computation, and the
+requirements for non-collusion; <a href="#daf" class="auto internal xref">Section 4</a> defines the syntax for DAFs; <a href="#vdaf" class="auto internal xref">Section 5</a>
 defines the syntax for VDAFs; <a href="#prelim" class="auto internal xref">Section 6</a> defines various functionalities that
 are common to our constructions; <a href="#prio3" class="auto internal xref">Section 7</a> describes the Prio3 construction;
 <a href="#poplar1" class="auto internal xref">Section 8</a> describes the Poplar1 construction; and <a href="#security" class="auto internal xref">Section 9</a> enumerates the
-security considerations for VDAFs.<a href="#section-1-16" class="pilcrow">¶</a></p>
+security considerations for DAFs and VDAFs.<a href="#section-1-20" class="pilcrow">¶</a></p>
 <div id="change-log">
 <section id="section-1.1">
         <h3 id="name-change-log">
 <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-change-log" class="section-name selfRef">Change Log</a>
         </h3>
-<p id="section-1.1-1">(*) Indicates a change that breaks wire compatibility with the previous draft.<a href="#section-1.1-1" class="pilcrow">¶</a></p>
-<p id="section-1.1-2">10:<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-1">(RFC EDITOR: Remove this section.)<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-2">(*) Indicates a change that breaks wire compatibility with the previous draft.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
+<p id="section-1.1-3">10:<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-3.1">
-            <p id="section-1.1-3.1.1">Define Prio3MultihotCountVec, a variant of Prio3 for aggregating bit vectors
-with bounded weight.<a href="#section-1.1-3.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1.1-4.1">
+            <p id="section-1.1-4.1.1">Define Prio3MultihotCountVec, a variant of Prio3 for aggregating bit vectors
+with bounded weight.<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.2">
-            <p id="section-1.1-3.2.1">FLP: Allow the output of the circuit to be a vector. This makes it possible
-to skip joint randomness derivation in more cases.<a href="#section-1.1-3.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-4.2">
+            <p id="section-1.1-4.2.1">FLP: Allow the output of the circuit to be a vector. This makes it possible
+to skip joint randomness derivation in more cases.<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.3">
-            <p id="section-1.1-3.3.1">Poplar1: On the first round of preparation, handle <code>None</code> as an error.
-Previously this message was interpreted as a length-3 vector of zeros.<a href="#section-1.1-3.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-4.3">
+            <p id="section-1.1-4.3.1">Poplar1: On the first round of preparation, handle <code>None</code> as an error.
+Previously this message was interpreted as a length-3 vector of zeros.<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.4">
-            <p id="section-1.1-3.4.1">Prio3: Move specification of the field from the FLP validity circuit to the
-VDAF itself.<a href="#section-1.1-3.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-4.4">
+            <p id="section-1.1-4.4.1">Prio3: Move specification of the field from the FLP validity circuit to the
+VDAF itself.<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.5">
-            <p id="section-1.1-3.5.1">Clarify the extent to which the attacker controls the network in our threat
-models for privacy and robustness.<a href="#section-1.1-3.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-4.5">
+            <p id="section-1.1-4.5.1">Clarify the extent to which the attacker controls the network in our threat
+models for privacy and robustness.<a href="#section-1.1-4.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.6">
-            <p id="section-1.1-3.6.1">Clean up various aspects of the code, including: follow existing
+          <li class="normal" id="section-1.1-4.6">
+            <p id="section-1.1-4.6.1">Clean up various aspects of the code, including: follow existing
 object-oriented programming patterns for Python more closely; make the type
-hints enforceable; and avoid shadowing variables.<a href="#section-1.1-3.6.1" class="pilcrow">¶</a></p>
+hints enforceable; and avoid shadowing variables.<a href="#section-1.1-4.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.7">
-            <p id="section-1.1-3.7.1">Poplar1: Align terminology with <span>[<a href="#BBCGGI23" class="cite xref">BBCGGI23</a>]</span>.<a href="#section-1.1-3.7.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-4.7">
+            <p id="section-1.1-4.7.1">Poplar1: Align terminology with <span>[<a href="#BBCGGI23" class="cite xref">BBCGGI23</a>]</span>.<a href="#section-1.1-4.7.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-3.8">
-            <p id="section-1.1-3.8.1">IDPF: Add guidance for encoding byte strings as indices.<a href="#section-1.1-3.8.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-4.8">
+            <p id="section-1.1-4.8.1">IDPF: Add guidance for encoding byte strings as indices.<a href="#section-1.1-4.8.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-4">09:<a href="#section-1.1-4" class="pilcrow">¶</a></p>
+<p id="section-1.1-5">09:<a href="#section-1.1-5" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-5.1">
-            <p id="section-1.1-5.1.1">Poplar1: Make prefix tree traversal stricter by requiring each node to be a
+<li class="normal" id="section-1.1-6.1">
+            <p id="section-1.1-6.1.1">Poplar1: Make prefix tree traversal stricter by requiring each node to be a
 child of a node that was already visited. This change is intended to make it
 harder for a malicious Aggregator to steer traversal towards
-non-heavy-hitting measurements.<a href="#section-1.1-5.1.1" class="pilcrow">¶</a></p>
+non-heavy-hitting measurements.<a href="#section-1.1-6.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-5.2">
-            <p id="section-1.1-5.2.1">Prio3: Add more explicit guidance for choosing the field size.<a href="#section-1.1-5.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-6.2">
+            <p id="section-1.1-6.2.1">Prio3: Add more explicit guidance for choosing the field size.<a href="#section-1.1-6.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-5.3">
-            <p id="section-1.1-5.3.1">IDPF: Define extractability and clarify (un)safe usage of intermediate prefix
+          <li class="normal" id="section-1.1-6.3">
+            <p id="section-1.1-6.3.1">IDPF: Define extractability and clarify (un)safe usage of intermediate prefix
 counts. Accordingly, add text ensuring public share consistency to security
-considerations.<a href="#section-1.1-5.3.1" class="pilcrow">¶</a></p>
+considerations.<a href="#section-1.1-6.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-6">08:<a href="#section-1.1-6" class="pilcrow">¶</a></p>
+<p id="section-1.1-7">08:<a href="#section-1.1-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-7.1">
-            <p id="section-1.1-7.1.1">Poplar1: Bind the report nonce to the authenticator vector programmed into
-the IDPF. (*)<a href="#section-1.1-7.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1.1-8.1">
+            <p id="section-1.1-8.1.1">Poplar1: Bind the report nonce to the authenticator vector programmed into
+the IDPF. (*)<a href="#section-1.1-8.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-7.2">
-            <p id="section-1.1-7.2.1">IdpfPoplar: Modify <code>extend()</code> by stealing each control bit from its
+          <li class="normal" id="section-1.1-8.2">
+            <p id="section-1.1-8.2.1">IdpfPoplar: Modify <code>extend()</code> by stealing each control bit from its
 corresponding seed. This improves performance by reducing the number of AES
 calls per level from 3 to 2. The cost is a slight reduction in the concrete
-privacy bound. (*)<a href="#section-1.1-7.2.1" class="pilcrow">¶</a></p>
+privacy bound. (*)<a href="#section-1.1-8.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-7.3">
-            <p id="section-1.1-7.3.1">Prio3: Add support for generating and verifying mutliple proofs per
+          <li class="normal" id="section-1.1-8.3">
+            <p id="section-1.1-8.3.1">Prio3: Add support for generating and verifying mutliple proofs per
 measurement. This enables a trade-off between communication cost and runtime:
 if more proofs are used, then a smaller field can be used without impacting
-robustness. (*)<a href="#section-1.1-7.3.1" class="pilcrow">¶</a></p>
+robustness. (*)<a href="#section-1.1-8.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-7.4">
-            <p id="section-1.1-7.4.1">Replace SHAKE128 with TurboSHAKE128. (*)<a href="#section-1.1-7.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-8.4">
+            <p id="section-1.1-8.4.1">Replace SHAKE128 with TurboSHAKE128. (*)<a href="#section-1.1-8.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-8">07:<a href="#section-1.1-8" class="pilcrow">¶</a></p>
+<p id="section-1.1-9">07:<a href="#section-1.1-9" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-9.1">
-            <p id="section-1.1-9.1.1">Rename PRG to XOF ("eXtendable Output Function"). Accordingly, rename PrgSha3
+<li class="normal" id="section-1.1-10.1">
+            <p id="section-1.1-10.1.1">Rename PRG to XOF ("eXtendable Output Function"). Accordingly, rename PrgSha3
 to XofShake128 and PrgFixedKeyAes128 to XofFixedKeyAes128. "PRG" is a misnomer
 since we don't actually treat this object as a pseudorandom generator in
-existing security analysis.<a href="#section-1.1-9.1.1" class="pilcrow">¶</a></p>
+existing security analysis.<a href="#section-1.1-10.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.2">
-            <p id="section-1.1-9.2.1">Replace cSHAKE128 with SHAKE128, re-implementing domain separation for the
+          <li class="normal" id="section-1.1-10.2">
+            <p id="section-1.1-10.2.1">Replace cSHAKE128 with SHAKE128, re-implementing domain separation for the
 customization string using a simpler scheme. This change addresses the
-reality that implementations of cSHAKE128 are less common. (*)<a href="#section-1.1-9.2.1" class="pilcrow">¶</a></p>
+reality that implementations of cSHAKE128 are less common. (*)<a href="#section-1.1-10.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.3">
-            <p id="section-1.1-9.3.1">Define a new VDAF, called Prio3SumVec, that generalizes Prio3Sum to a vector
-of summands.<a href="#section-1.1-9.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-10.3">
+            <p id="section-1.1-10.3.1">Define a new VDAF, called Prio3SumVec, that generalizes Prio3Sum to a vector
+of summands.<a href="#section-1.1-10.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.4">
-            <p id="section-1.1-9.4.1">Prio3Histogram: Update the codepoint and use the parallel sum optimization
-introduced by Prio3SumVec to reduce the proof size. (*)<a href="#section-1.1-9.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-10.4">
+            <p id="section-1.1-10.4.1">Prio3Histogram: Update the codepoint and use the parallel sum optimization
+introduced by Prio3SumVec to reduce the proof size. (*)<a href="#section-1.1-10.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.5">
-            <p id="section-1.1-9.5.1">Daf, Vdaf: Rename interface methods to match verbiage in the draft.<a href="#section-1.1-9.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-10.5">
+            <p id="section-1.1-10.5.1">Daf, Vdaf: Rename interface methods to match verbiage in the draft.<a href="#section-1.1-10.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.6">
-            <p id="section-1.1-9.6.1">Daf: Align with Vdaf by adding a nonce to <code>shard()</code> and <code>prep()</code>.<a href="#section-1.1-9.6.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-10.6">
+            <p id="section-1.1-10.6.1">Daf: Align with Vdaf by adding a nonce to <code>shard()</code> and <code>prep()</code>.<a href="#section-1.1-10.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.7">
-            <p id="section-1.1-9.7.1">Vdaf: Have <code>prep_init()</code> compute the first prep share. This change is
+          <li class="normal" id="section-1.1-10.7">
+            <p id="section-1.1-10.7.1">Vdaf: Have <code>prep_init()</code> compute the first prep share. This change is
 intended to simplify the interface by making the input to <code>prep_next()</code> not
-optional.<a href="#section-1.1-9.7.1" class="pilcrow">¶</a></p>
+optional.<a href="#section-1.1-10.7.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.8">
-            <p id="section-1.1-9.8.1">Prio3: Split sharding into two auxiliary functions, one for sharding with
+          <li class="normal" id="section-1.1-10.8">
+            <p id="section-1.1-10.8.1">Prio3: Split sharding into two auxiliary functions, one for sharding with
 joint randomness and another without. This change is intended to improve
-readability.<a href="#section-1.1-9.8.1" class="pilcrow">¶</a></p>
+readability.<a href="#section-1.1-10.8.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-9.9">
-            <p id="section-1.1-9.9.1">Fix bugs in the ping-pong interface discovered after implementing it.<a href="#section-1.1-9.9.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-10.9">
+            <p id="section-1.1-10.9.1">Fix bugs in the ping-pong interface discovered after implementing it.<a href="#section-1.1-10.9.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-10">06:<a href="#section-1.1-10" class="pilcrow">¶</a></p>
+<p id="section-1.1-11">06:<a href="#section-1.1-11" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-11.1">
-            <p id="section-1.1-11.1.1">Vdaf: Define a wrapper interface for preparation that is suitable for the
+<li class="normal" id="section-1.1-12.1">
+            <p id="section-1.1-12.1.1">Vdaf: Define a wrapper interface for preparation that is suitable for the
 "ping-pong" topology in which two Aggregators exchange messages over a
 request/response protocol, like HTTP, and take turns executing the
-computation until input from the peer is required.<a href="#section-1.1-11.1.1" class="pilcrow">¶</a></p>
+computation until input from the peer is required.<a href="#section-1.1-12.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-11.2">
-            <p id="section-1.1-11.2.1">Prio3Histogram: Generalize the measurement type so that the histogram can be
-used more easily with discrete domains. (*)<a href="#section-1.1-11.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-12.2">
+            <p id="section-1.1-12.2.1">Prio3Histogram: Generalize the measurement type so that the histogram can be
+used more easily with discrete domains. (*)<a href="#section-1.1-12.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-11.3">
-            <p id="section-1.1-11.3.1">Daf, Vdaf: Change the aggregation parameter validation algorithm to take the
+          <li class="normal" id="section-1.1-12.3">
+            <p id="section-1.1-12.3.1">Daf, Vdaf: Change the aggregation parameter validation algorithm to take the
 set of previous parameters rather than a list. (The order of the parameters
-is irrelevant.)<a href="#section-1.1-11.3.1" class="pilcrow">¶</a></p>
+is irrelevant.)<a href="#section-1.1-12.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-11.4">
-            <p id="section-1.1-11.4.1">Daf, Vdaf, Idpf: Add parameter <code>RAND_SIZE</code> that specifies the number of
+          <li class="normal" id="section-1.1-12.4">
+            <p id="section-1.1-12.4.1">Daf, Vdaf, Idpf: Add parameter <code>RAND_SIZE</code> that specifies the number of
 random bytes consumed by the randomized algorithm (<code>shard()</code> for Daf and Vdaf
-and <code>gen()</code> for Idpf).<a href="#section-1.1-11.4.1" class="pilcrow">¶</a></p>
+and <code>gen()</code> for Idpf).<a href="#section-1.1-12.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-12">05:<a href="#section-1.1-12" class="pilcrow">¶</a></p>
+<p id="section-1.1-13">05:<a href="#section-1.1-13" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-13.1">
-            <p id="section-1.1-13.1.1">IdpfPoplar: Replace PrgSha3 with PrgFixedKeyAes128, a fixed-key mode for
+<li class="normal" id="section-1.1-14.1">
+            <p id="section-1.1-14.1.1">IdpfPoplar: Replace PrgSha3 with PrgFixedKeyAes128, a fixed-key mode for
 AES-128 based on a construction from <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>. This change is intended to
 improve performance of IDPF evaluation. Note that the new PRG is not suitable
-for all applications. (*)<a href="#section-1.1-13.1.1" class="pilcrow">¶</a></p>
+for all applications. (*)<a href="#section-1.1-14.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.2">
-            <p id="section-1.1-13.2.1">Idpf: Add a binder string to the key-generation and evaluation algorithms.
-This is used to plumb the nonce generated by the Client to the PRG.<a href="#section-1.1-13.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-14.2">
+            <p id="section-1.1-14.2.1">Idpf: Add a binder string to the key-generation and evaluation algorithms.
+This is used to plumb the nonce generated by the Client to the PRG.<a href="#section-1.1-14.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.3">
-            <p id="section-1.1-13.3.1">Plumb random coins through the interface of randomized algorithms.
+          <li class="normal" id="section-1.1-14.3">
+            <p id="section-1.1-14.3.1">Plumb random coins through the interface of randomized algorithms.
 Specifically, add a random input to (V)DAF sharding algorithm and IDPF
 key-generation algorithm and require implementations to specify the length of
 the random input. Accordingly, update Prio3, Poplar1, and IdpfPoplar to match
 the new interface. This change is intended to improve coverage of test
-vectors.<a href="#section-1.1-13.3.1" class="pilcrow">¶</a></p>
+vectors.<a href="#section-1.1-14.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.4">
-            <p id="section-1.1-13.4.1">Use little-endian byte-order for field element encoding. (*)<a href="#section-1.1-13.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-14.4">
+            <p id="section-1.1-14.4.1">Use little-endian byte-order for field element encoding. (*)<a href="#section-1.1-14.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-13.5">
-            <p id="section-1.1-13.5.1">Poplar1: Move the last step of sketch evaluation from <code>prep_next()</code> to
-<code>prep_shares_to_prep()</code>.<a href="#section-1.1-13.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-14.5">
+            <p id="section-1.1-14.5.1">Poplar1: Move the last step of sketch evaluation from <code>prep_next()</code> to
+<code>prep_shares_to_prep()</code>.<a href="#section-1.1-14.5.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-14">04:<a href="#section-1.1-14" class="pilcrow">¶</a></p>
+<p id="section-1.1-15">04:<a href="#section-1.1-15" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-15.1">
-            <p id="section-1.1-15.1.1">Align security considerations with the security analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>.<a href="#section-1.1-15.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1.1-16.1">
+            <p id="section-1.1-16.1.1">Align security considerations with the security analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>.<a href="#section-1.1-16.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.2">
-            <p id="section-1.1-15.2.1">Vdaf: Pass the nonce to the sharding algorithm.<a href="#section-1.1-15.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-16.2">
+            <p id="section-1.1-16.2.1">Vdaf: Pass the nonce to the sharding algorithm.<a href="#section-1.1-16.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.3">
-            <p id="section-1.1-15.3.1">Vdaf: Rather than allow the application to choose the nonce length, have each
-implementation of the Vdaf interface specify the expected nonce length. (*)<a href="#section-1.1-15.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-16.3">
+            <p id="section-1.1-16.3.1">Vdaf: Rather than allow the application to choose the nonce length, have each
+implementation of the Vdaf interface specify the expected nonce length. (*)<a href="#section-1.1-16.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.4">
-            <p id="section-1.1-15.4.1">Prg: Split "info string" into two components: the "customization string",
+          <li class="normal" id="section-1.1-16.4">
+            <p id="section-1.1-16.4.1">Prg: Split "info string" into two components: the "customization string",
 intended for domain separation; and the "binder string", used to bind the
 output to ephemeral values, like the nonce, associated with execution of a
-(V)DAF.<a href="#section-1.1-15.4.1" class="pilcrow">¶</a></p>
+(V)DAF.<a href="#section-1.1-16.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.5">
-            <p id="section-1.1-15.5.1">Replace PrgAes128 with PrgSha3, an implementation of the Prg interface based
+          <li class="normal" id="section-1.1-16.5">
+            <p id="section-1.1-16.5.1">Replace PrgAes128 with PrgSha3, an implementation of the Prg interface based
 on SHA-3, and use the new scheme as the default. Accordingly, replace
 Prio3Aes128Count with Prio3Count, Poplar1Aes128 with Poplar1, and so on. SHA-3
 is a safer choice for instantiating a random oracle, which is used in the
-analysis of Prio3 of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-15.5.1" class="pilcrow">¶</a></p>
+analysis of Prio3 of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-16.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.6">
-            <p id="section-1.1-15.6.1">Prio3, Poplar1: Ensure each invocation of the Prg uses a distinct
+          <li class="normal" id="section-1.1-16.6">
+            <p id="section-1.1-16.6.1">Prio3, Poplar1: Ensure each invocation of the Prg uses a distinct
 customization string, as suggested by <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. This is intended to make
-domain separation clearer, thereby simplifying security analysis. (*)<a href="#section-1.1-15.6.1" class="pilcrow">¶</a></p>
+domain separation clearer, thereby simplifying security analysis. (*)<a href="#section-1.1-16.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.7">
-            <p id="section-1.1-15.7.1">Prio3: Replace "joint randomness hints" sent in each input share with "joint
+          <li class="normal" id="section-1.1-16.7">
+            <p id="section-1.1-16.7.1">Prio3: Replace "joint randomness hints" sent in each input share with "joint
 randomness parts" sent in the public share. This reduces communication
-overhead when the number of shares exceeds two. (*)<a href="#section-1.1-15.7.1" class="pilcrow">¶</a></p>
+overhead when the number of shares exceeds two. (*)<a href="#section-1.1-16.7.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.8">
-            <p id="section-1.1-15.8.1">Prio3: Bind nonce to joint randomness parts. This is intended to address
-birthday attacks on robustness pointed out by <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-15.8.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-16.8">
+            <p id="section-1.1-16.8.1">Prio3: Bind nonce to joint randomness parts. This is intended to address
+birthday attacks on robustness pointed out by <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. (*)<a href="#section-1.1-16.8.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.9">
-            <p id="section-1.1-15.9.1">Poplar1: Use different Prg invocations for producing the correlated randomness
+          <li class="normal" id="section-1.1-16.9">
+            <p id="section-1.1-16.9.1">Poplar1: Use different Prg invocations for producing the correlated randomness
 for inner and leaf nodes of the IDPF tree. This is intended to simplify
-implementations. (*)<a href="#section-1.1-15.9.1" class="pilcrow">¶</a></p>
+implementations. (*)<a href="#section-1.1-16.9.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.10">
-            <p id="section-1.1-15.10.1">Poplar1: Don't bind the candidate prefixes to the verifier randomness. This is
+          <li class="normal" id="section-1.1-16.10">
+            <p id="section-1.1-16.10.1">Poplar1: Don't bind the candidate prefixes to the verifier randomness. This is
 intended to improve performance, while not impacting security. According to
 the analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, it is necessary to restrict Poplar1 usage such
 that no report is aggregated more than once at a given level of the IDPF tree;
 otherwise, attacks on privacy may be possible. In light of this restriction,
-there is no added benefit of binding to the prefixes themselves. (*)<a href="#section-1.1-15.10.1" class="pilcrow">¶</a></p>
+there is no added benefit of binding to the prefixes themselves. (*)<a href="#section-1.1-16.10.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.11">
-            <p id="section-1.1-15.11.1">Poplar1: During preparation, assert that all candidate prefixes are unique
+          <li class="normal" id="section-1.1-16.11">
+            <p id="section-1.1-16.11.1">Poplar1: During preparation, assert that all candidate prefixes are unique
 and appear in order. Uniqueness is required to avoid erroneously rejecting a
 valid report; the ordering constraint ensures the uniqueness check can be
-performed efficiently. (*)<a href="#section-1.1-15.11.1" class="pilcrow">¶</a></p>
+performed efficiently. (*)<a href="#section-1.1-16.11.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.12">
-            <p id="section-1.1-15.12.1">Poplar1: Increase the maximum candidate prefix count in the encoding of the
-aggregation parameter. (*)<a href="#section-1.1-15.12.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-16.12">
+            <p id="section-1.1-16.12.1">Poplar1: Increase the maximum candidate prefix count in the encoding of the
+aggregation parameter. (*)<a href="#section-1.1-16.12.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.13">
-            <p id="section-1.1-15.13.1">Poplar1: Bind the nonce to the correlated randomness derivation. This is
+          <li class="normal" id="section-1.1-16.13">
+            <p id="section-1.1-16.13.1">Poplar1: Bind the nonce to the correlated randomness derivation. This is
 intended to provide defense-in-depth by ensuring the Aggregators reject the
-report if the nonce does not match what the Client used for sharding. (*)<a href="#section-1.1-15.13.1" class="pilcrow">¶</a></p>
+report if the nonce does not match what the Client used for sharding. (*)<a href="#section-1.1-16.13.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.14">
-            <p id="section-1.1-15.14.1">Poplar1: Clarify that the aggregation parameter encoding is <span class="bcp14">OPTIONAL</span>.
+          <li class="normal" id="section-1.1-16.14">
+            <p id="section-1.1-16.14.1">Poplar1: Clarify that the aggregation parameter encoding is <span class="bcp14">OPTIONAL</span>.
 Accordingly, update implementation considerations around cross-aggregation
-state.<a href="#section-1.1-15.14.1" class="pilcrow">¶</a></p>
+state.<a href="#section-1.1-16.14.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.15">
-            <p id="section-1.1-15.15.1">IdpfPoplar: Add implementation considerations around branching on the values
-of control bits.<a href="#section-1.1-15.15.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-16.15">
+            <p id="section-1.1-16.15.1">IdpfPoplar: Add implementation considerations around branching on the values
+of control bits.<a href="#section-1.1-16.15.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-15.16">
-            <p id="section-1.1-15.16.1">IdpfPoplar: When decoding the the control bits in the public share, assert
-that the trailing bits of the final byte are all zero. (*)<a href="#section-1.1-15.16.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-1.1-16">03:<a href="#section-1.1-16" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-1.1-17.1">
-            <p id="section-1.1-17.1.1">Define codepoints for (V)DAFs and use them for domain separation in Prio3 and
-Poplar1. (*)<a href="#section-1.1-17.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-17.2">
-            <p id="section-1.1-17.2.1">Prio3: Align joint randomness computation with revised paper <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>.
-This change mitigates an attack on robustness. (*)<a href="#section-1.1-17.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-17.3">
-            <p id="section-1.1-17.3.1">Prio3: Remove an intermediate PRG evaluation from query randomness generation.
-(*)<a href="#section-1.1-17.3.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-1.1-17.4">
-            <p id="section-1.1-17.4.1">Add additional guidance for choosing FFT-friendly fields.<a href="#section-1.1-17.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-16.16">
+            <p id="section-1.1-16.16.1">IdpfPoplar: When decoding the the control bits in the public share, assert
+that the trailing bits of the final byte are all zero. (*)<a href="#section-1.1-16.16.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-18">02:<a href="#section-1.1-18" class="pilcrow">¶</a></p>
+<p id="section-1.1-17">03:<a href="#section-1.1-17" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-19.1">
-            <p id="section-1.1-19.1.1">Complete the initial specification of Poplar1.<a href="#section-1.1-19.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1.1-18.1">
+            <p id="section-1.1-18.1.1">Define codepoints for (V)DAFs and use them for domain separation in Prio3 and
+Poplar1. (*)<a href="#section-1.1-18.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-19.2">
-            <p id="section-1.1-19.2.1">Extend (V)DAF syntax to include a "public share" output by the Client and
+          <li class="normal" id="section-1.1-18.2">
+            <p id="section-1.1-18.2.1">Prio3: Align joint randomness computation with revised paper <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>.
+This change mitigates an attack on robustness. (*)<a href="#section-1.1-18.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-18.3">
+            <p id="section-1.1-18.3.1">Prio3: Remove an intermediate PRG evaluation from query randomness generation.
+(*)<a href="#section-1.1-18.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-18.4">
+            <p id="section-1.1-18.4.1">Add additional guidance for choosing FFT-friendly fields.<a href="#section-1.1-18.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-1.1-19">02:<a href="#section-1.1-19" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1.1-20.1">
+            <p id="section-1.1-20.1.1">Complete the initial specification of Poplar1.<a href="#section-1.1-20.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-20.2">
+            <p id="section-1.1-20.2.1">Extend (V)DAF syntax to include a "public share" output by the Client and
 distributed to all of the Aggregators. This is to accommodate "extractable"
-IDPFs as required for Poplar1. (See <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Section 4.3 for details.)<a href="#section-1.1-19.2.1" class="pilcrow">¶</a></p>
+IDPFs as required for Poplar1. (See <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Section 4.3 for details.)<a href="#section-1.1-20.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-19.3">
-            <p id="section-1.1-19.3.1">Extend (V)DAF syntax to allow the unsharding step to take into account the
-number of measurements aggregated.<a href="#section-1.1-19.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-20.3">
+            <p id="section-1.1-20.3.1">Extend (V)DAF syntax to allow the unsharding step to take into account the
+number of measurements aggregated.<a href="#section-1.1-20.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-19.4">
-            <p id="section-1.1-19.4.1">Extend FLP syntax by adding a method for decoding the aggregate result from a
+          <li class="normal" id="section-1.1-20.4">
+            <p id="section-1.1-20.4.1">Extend FLP syntax by adding a method for decoding the aggregate result from a
 vector of field elements. The new method takes into account the number of
-measurements.<a href="#section-1.1-19.4.1" class="pilcrow">¶</a></p>
+measurements.<a href="#section-1.1-20.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-19.5">
-            <p id="section-1.1-19.5.1">Prio3: Align aggregate result computation with updated FLP syntax.<a href="#section-1.1-19.5.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-20.5">
+            <p id="section-1.1-20.5.1">Prio3: Align aggregate result computation with updated FLP syntax.<a href="#section-1.1-20.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-19.6">
-            <p id="section-1.1-19.6.1">Prg: Add a method for statefully generating a vector of field elements.<a href="#section-1.1-19.6.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-20.6">
+            <p id="section-1.1-20.6.1">Prg: Add a method for statefully generating a vector of field elements.<a href="#section-1.1-20.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-19.7">
-            <p id="section-1.1-19.7.1">Field: Require that field elements are fully reduced before decoding. (*)<a href="#section-1.1-19.7.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-20.7">
+            <p id="section-1.1-20.7.1">Field: Require that field elements are fully reduced before decoding. (*)<a href="#section-1.1-20.7.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-19.8">
-            <p id="section-1.1-19.8.1">Define new field Field255.<a href="#section-1.1-19.8.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-20.8">
+            <p id="section-1.1-20.8.1">Define new field Field255.<a href="#section-1.1-20.8.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-1.1-20">01:<a href="#section-1.1-20" class="pilcrow">¶</a></p>
+<p id="section-1.1-21">01:<a href="#section-1.1-21" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-1.1-21.1">
-            <p id="section-1.1-21.1.1">Require that VDAFs specify serialization of aggregate shares.<a href="#section-1.1-21.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-1.1-22.1">
+            <p id="section-1.1-22.1.1">Require that VDAFs specify serialization of aggregate shares.<a href="#section-1.1-22.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-21.2">
-            <p id="section-1.1-21.2.1">Define Distributed Aggregation Functions (DAFs).<a href="#section-1.1-21.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-22.2">
+            <p id="section-1.1-22.2.1">Define Distributed Aggregation Functions (DAFs).<a href="#section-1.1-22.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-21.3">
-            <p id="section-1.1-21.3.1">Prio3: Move proof verifier check from <code>prep_next()</code> to
-<code>prep_shares_to_prep()</code>. (*)<a href="#section-1.1-21.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-22.3">
+            <p id="section-1.1-22.3.1">Prio3: Move proof verifier check from <code>prep_next()</code> to
+<code>prep_shares_to_prep()</code>. (*)<a href="#section-1.1-22.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-1.1-21.4">
-            <p id="section-1.1-21.4.1">Remove public parameter and replace verification parameter with a
-"verification key" and "Aggregator ID".<a href="#section-1.1-21.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-1.1-22.4">
+            <p id="section-1.1-22.4.1">Remove public parameter and replace verification parameter with a
+"verification key" and "Aggregator ID".<a href="#section-1.1-22.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 </section>
 </div>
-<div id="conventions-and-definitions">
+<div id="conventions">
 <section id="section-2">
       <h2 id="name-conventions-and-definitions">
 <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
@@ -2100,7 +2108,8 @@ correctness of the measurements obtained.  The privacy properties of the system
 are assured by non-collusion among Aggregators, and Aggregators are the entities
 that perform validation of Client measurements.  Thus Clients trust Aggregators
 not to collude (typically it is required that at least one Aggregator is
-honest), and Collectors trust Aggregators to correctly run the protocol.<a href="#section-3-4" class="pilcrow">¶</a></p>
+honest; see <a href="#num-aggregators" class="auto internal xref">Section 9.7</a>), and Collectors trust Aggregators to correctly
+run the protocol.<a href="#section-3-4" class="pilcrow">¶</a></p>
 <p id="section-3-5">Within the bounds of the non-collusion requirements of a given (V)DAF instance,
 it is possible for the same entity to play more than one role.  For example, the
 Collector could also act as an Aggregator, effectively using the other
@@ -3440,7 +3449,7 @@ message to send before the peer can also finish processing (i.e., <code>outbound
 None</code>).<a href="#section-5.8-21" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="star-topology-any-number-of-aggregators">
+<div id="star-topo">
 <section id="section-5.9">
         <h3 id="name-star-topology-any-number-of">
 <a href="#section-5.9" class="section-number selfRef">5.9. </a><a href="#name-star-topology-any-number-of" class="section-name selfRef">Star Topology (Any Number of Aggregators)</a>
@@ -8464,7 +8473,7 @@ any positive value of <code>BITS</code>. Test vectors can be found in <a href="#
       <h2 id="name-security-considerations">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-9-1">VDAFs have two essential security goals:<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-1">VDAFs (<a href="#vdaf" class="auto internal xref">Section 5</a>) have two essential security goals:<a href="#section-9-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9-2">
 <li id="section-9-2.1">
           <p id="section-9-2.1.1">Privacy: An attacker that controls the Collector and a subset of Clients and
@@ -8761,6 +8770,20 @@ instead, but <code>PROOFS</code> <span class="bcp14">MUST</span> be set to at le
 broken for such a small field.<a href="#section-9.6-4" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="num-aggregators">
+<section id="section-9.7">
+        <h3 id="name-choosing-the-number-of-aggr">
+<a href="#section-9.7" class="section-number selfRef">9.7. </a><a href="#name-choosing-the-number-of-aggr" class="section-name selfRef">Choosing the Number of Aggregators</a>
+        </h3>
+<p id="section-9.7-1">Two Aggregators are required for privacy in our threat model, but some (V)DAFs,
+including Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>), allow for any number of Aggregators, only one of
+which needs to be trusted in order for the computation to be private. To hedge
+against corruptions that happen during the course of the attack, deployments
+may consider involving more than two Aggregators as described for example in
+<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode of operation,
+such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="iana-considerations">
@@ -8923,6 +8946,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
         <dd>
 <span class="refAuthor">Boneh, D.</span>, <span class="refAuthor">Boyle, E.</span>, <span class="refAuthor">Corrigan-Gibbs, H.</span>, <span class="refAuthor">Gilboa, N.</span>, and <span class="refAuthor">Y. Ishai</span>, <span class="refTitle">"Arithmetic Sketching"</span>, <span class="seriesInfo">CRYPTO 2023 </span>, <time datetime="2023" class="refDate">2023</time>, <span>&lt;<a href="https://ia.cr/2023/1012">https://ia.cr/2023/1012</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="BGI15">[BGI15]</dt>
+        <dd>
+<span class="refAuthor">Boyle, E.</span>, <span class="refAuthor">Gilboa, N.</span>, and <span class="refAuthor">Y. Ishai</span>, <span class="refTitle">"Function Secret Sharing"</span>, <span class="seriesInfo">EUROCRYPT 2015 </span>, <time datetime="2015" class="refDate">2015</time>, <span>&lt;<a href="https://www.iacr.org/archive/eurocrypt2015/90560300/90560300.pdf">https://www.iacr.org/archive/eurocrypt2015/90560300/90560300.pdf</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="CGB17">[CGB17]</dt>
         <dd>
 <span class="refAuthor">Corrigan-Gibbs, H.</span> and <span class="refAuthor">D. Boneh</span>, <span class="refTitle">"Prio: Private, Robust, and Scalable Computation of Aggregate Statistics"</span>, <span class="seriesInfo">NSDI 2017 </span>, <time datetime="2017" class="refDate">2017</time>, <span>&lt;<a href="https://dl.acm.org/doi/10.5555/3154630.3154652">https://dl.acm.org/doi/10.5555/3154630.3154652</a>&gt;</span>. </dd>
@@ -8937,7 +8964,7 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dd class="break"></dd>
 <dt id="DPRS23">[DPRS23]</dt>
         <dd>
-<span class="refAuthor">Davis, H.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Rosulek, M.</span>, and <span class="refAuthor">P. Schoppmann</span>, <span class="refTitle">"Verifiable Distributed Aggregation Functions"</span>, <span>n.d.</span>, <span>&lt;<a href="https://ia.cr/2023/130">https://ia.cr/2023/130</a>&gt;</span>. </dd>
+<span class="refAuthor">Davis, H.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Rosulek, M.</span>, and <span class="refAuthor">P. Schoppmann</span>, <span class="refTitle">"Verifiable Distributed Aggregation Functions"</span>, <span class="seriesInfo">PETS 2023 </span>, <time datetime="2023" class="refDate">2023</time>, <span>&lt;<a href="https://ia.cr/2023/130">https://ia.cr/2023/130</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Dwo06">[Dwo06]</dt>
         <dd>
@@ -8966,6 +8993,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dt id="GSZ20">[GSZ20]</dt>
         <dd>
 <span class="refAuthor">Goyal, V.</span>, <span class="refAuthor">Song, Y.</span>, and <span class="refAuthor">C. Zhu</span>, <span class="refTitle">"Guaranteed Output Delivery Comes Free in Honest Majority MPC"</span>, <span class="seriesInfo">CRYPTO 2020 </span>, <time datetime="2020" class="refDate">2020</time>, <span>&lt;<a href="https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22">https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="MPDST25">[MPDST25]</dt>
+        <dd>
+<span class="refAuthor">Mouris, D.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Davis, H.</span>, <span class="refAuthor">Sarkar, P.</span>, and <span class="refAuthor">N. G. Tsoutsos</span>, <span class="refTitle">"Mastic: Private Weighted Heavy-Hitters and Attribute-Based Metrics"</span>, <span class="seriesInfo">PETS 2025 </span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://eprint.iacr.org/2024/221">https://eprint.iacr.org/2024/221</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MPRV09">[MPRV09]</dt>
         <dd>
