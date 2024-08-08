@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 6 February 2025                                            ISRG
+Expires: 9 February 2025                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                           5 August 2024
+                                                           8 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 February 2025.
+   This Internet-Draft will expire on 9 February 2025.
 
 Copyright Notice
 
@@ -1681,17 +1681,16 @@ Table of Contents
            prep_round: int) -> tuple[State, bytes]:
        prep_msg = self.prep_shares_to_prep(agg_param,
                                            prep_shares)
+       encoded_prep_msg = self.encode_prep_msg(prep_msg)
        out = self.prep_next(prep_state, prep_msg)
        if prep_round+1 == self.ROUNDS:
-           encoded = self.encode_prep_msg(prep_msg)
            outbound = bytes()
            outbound += byte(2)  # finish
-           outbound += to_be_bytes(len(encoded), 4)
-           outbound += encoded
+           outbound += to_be_bytes(len(encoded_prep_msg), 4)
+           outbound += encoded_prep_msg
            return (Finished(out), outbound)
        (prep_state, prep_share) = cast(
            tuple[PrepState, PrepShare], out)
-       encoded_prep_msg = self.encode_prep_msg(prep_msg)
        encoded_prep_share = self.encode_prep_share(prep_share)
        outbound = bytes()
        outbound += byte(1)  # continue
