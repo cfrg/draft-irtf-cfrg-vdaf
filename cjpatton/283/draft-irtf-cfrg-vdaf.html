@@ -3208,20 +3208,20 @@ def ping_pong_leader_init(
             self.decode_public_share(public_share),
             self.decode_input_share(0, input_share),
         )
-        encoded = self.encode_prep_share(prep_share)
-        outbound = bytes()
-        outbound += byte(0)  # initialize
-        outbound += to_be_bytes(len(encoded), 4)
-        outbound += encoded
-        return (Continued(prep_state, 0), outbound)
+        encoded_prep_share = self.encode_prep_share(prep_share)
+        return (
+            Continued(prep_state, 0),
+            encode(0, encoded_prep_share),  # initialize
+        )
     except:
         return (Rejected(), None)
-
 </pre><a href="#section-5.8-8" class="pilcrow">¶</a>
 </div>
 <p id="section-5.8-9">The output is the <code>State</code> to which the Leader has transitioned and an encoded
 <code>Message</code>. If the Leader's state is <code>Rejected</code>, then processing halts.
-Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.8-9" class="pilcrow">¶</a></p>
+Otherwise, if the state is <code>Continued</code>, then processing continues. Function
+<code>encode</code>  is used to encode the outbound message, here the <code>initialize</code> variant
+(hence <code>0</code>).<a href="#section-5.8-9" class="pilcrow">¶</a></p>
 <p id="section-5.8-10">The Leader sends the outbound message to the Helper. The Helper's initial
 transition is computed using the following procedure:<a href="#section-5.8-10" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.8-11">
@@ -3248,17 +3248,13 @@ def ping_pong_helper_init(
             self.decode_input_share(1, input_share),
         )
 
-        ([inbound_type], inbound) = front(1, inbound)
+        (inbound_type, inbound_items) = decode(inbound)
         if inbound_type != 0:  # initialize
             return (Rejected(), None)
 
-        (el, inbound) = front(4, inbound)
-        l = from_be_bytes(el)
-        (encoded, inbound) = front(l, inbound)
-        assert len(inbound) == 0
-
+        encoded_prep_share = inbound_items[0]
         prep_shares = [
-            self.decode_prep_share(prep_state, encoded),
+            self.decode_prep_share(prep_state, encoded_prep_share),
             prep_share,
         ]
         return self.ping_pong_transition(
@@ -3271,8 +3267,10 @@ def ping_pong_helper_init(
         return (Rejected(), None)
 </pre><a href="#section-5.8-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5.8-12">Procedure <code>ping_pong_transition</code> takes in the prep shares, combines them into
-the prep message, and computes the next prep state of the caller:<a href="#section-5.8-12" class="pilcrow">¶</a></p>
+<p id="section-5.8-12">Procedure <code>decode</code> decodes the inbound message and returns the variant
+(<code>initialize</code>, <code>continue</code>, or <code>finalize</code>) and the sequence of fields. Procedure
+<code>ping_pong_transition</code> takes in the prep shares, combines them into the prep
+message, and computes the next prep state of the caller:<a href="#section-5.8-12" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.8-13">
 <pre>
 def ping_pong_transition(
@@ -3286,21 +3284,17 @@ def ping_pong_transition(
     encoded_prep_msg = self.encode_prep_msg(prep_msg)
     out = self.prep_next(prep_state, prep_msg)
     if prep_round+1 == self.ROUNDS:
-        outbound = bytes()
-        outbound += byte(2)  # finish
-        outbound += to_be_bytes(len(encoded_prep_msg), 4)
-        outbound += encoded_prep_msg
-        return (Finished(out), outbound)
+        return (
+            Finished(out),
+            encode(2, encoded_prep_msg),  # finalize
+        )
     (prep_state, prep_share) = cast(
         tuple[PrepState, PrepShare], out)
     encoded_prep_share = self.encode_prep_share(prep_share)
-    outbound = bytes()
-    outbound += byte(1)  # continue
-    outbound += to_be_bytes(len(encoded_prep_msg), 4)
-    outbound += encoded_prep_msg
-    outbound += to_be_bytes(len(encoded_prep_share), 4)
-    outbound += encoded_prep_share
-    return (Continued(prep_state, prep_round+1), outbound)
+    return (
+        Continued(prep_state, prep_round+1),
+        encode(1, encoded_prep_msg, encoded_prep_share)  # continue
+    )
 </pre><a href="#section-5.8-13" class="pilcrow">¶</a>
 </div>
 <p id="section-5.8-14">The output is the <code>State</code> to which the Helper has transitioned and an encoded
@@ -3334,25 +3328,21 @@ def ping_pong_continued(
             return (Rejected(), None)
         prep_round = state.prep_round
 
-        ([inbound_type], inbound) = front(1, inbound)
+        (inbound_type, inbound_items) = decode(inbound)
         if inbound_type == 0:  # initialize
             return (Rejected(), None)
 
-        (el, inbound) = front(4, inbound)
-        l = from_be_bytes(el)
-        (encoded_prep_msg, inbound) = front(l, inbound)
+        encoded_prep_msg = inbound_items[0]
         prep_msg = self.decode_prep_msg(
             state.prep_state,
             encoded_prep_msg,
         )
         out = self.prep_next(state.prep_state, prep_msg)
         if prep_round+1 &lt; self.ROUNDS and \
-            inbound_type == 1:  # continue
+                inbound_type == 1:  # continue
             (prep_state, prep_share) = cast(
                 tuple[PrepState, PrepShare], out)
-            (el, inbound) = front(4, inbound)
-            l = from_be_bytes(el)
-            (encoded_prep_share, inbound) = front(l, inbound)
+            encoded_prep_share = inbound_items[1]
             prep_shares = [
                 self.decode_prep_share(
                     prep_state,
@@ -3362,7 +3352,6 @@ def ping_pong_continued(
             ]
             if is_leader:
                 prep_shares.reverse()
-            assert len(inbound) == 0
             return self.ping_pong_transition(
                 self.decode_agg_param(agg_param),
                 prep_shares,
@@ -3370,8 +3359,7 @@ def ping_pong_continued(
                 prep_round+1,
             )
         elif prep_round+1 == self.ROUNDS and \
-            inbound_type == 2:  # finish
-            assert len(inbound) == 0
+                inbound_type == 2:  # finish
             return (Finished(out), None)
         else:
             return (Rejected(), None)
