@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-06T00:48:51.408298+00:00",
+  "timestamp": "2024-08-08T00:49:42.888684+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -3102,9 +3102,31 @@
       ],
       "body": "We currently use separate seeds for the helper's measurement share, proof share, and blind. It is likely safe to use the same PRG seed for all three.\r\n\r\nThe upshot is that this reduce bandwdith and simplify the Prio3 spec. However, it is not immediately clear how this change would impact known security analysis. See comments on https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/129 for discussion.\r\n",
       "createdAt": "2023-03-02T01:19:20Z",
-      "updatedAt": "2023-07-17T15:31:00Z",
+      "updatedAt": "2024-08-07T15:23:29Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "martinthomson",
+          "authorAssociation": "NONE",
+          "body": "\"likely\" safe?  If you are able to use a PRG for any of them, then the same seed will work for all of them equally well.  You just need very clear rules for separation.",
+          "createdAt": "2024-08-07T02:00:44Z",
+          "updatedAt": "2024-08-07T02:00:44Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yeah I think that's right, though @hannahdaviscrypto, who did the privacy analysis for Prio3, [points out that this probably weakens the concrete security somewhat](https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/129#issuecomment-1382428426). ",
+          "createdAt": "2024-08-07T15:19:17Z",
+          "updatedAt": "2024-08-07T15:19:17Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm inclined to not make this change unless folks are strongly motivated by the bandwidth savings.",
+          "createdAt": "2024-08-07T15:23:27Z",
+          "updatedAt": "2024-08-07T15:23:27Z"
+        }
+      ]
     },
     {
       "number": 190,
@@ -3356,19 +3378,20 @@
       "id": "I_kwDOGKuqOc5ioIwI",
       "title": "Review 05: Chris Wood: Ideas for intro",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/219",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
         "cjpatton"
       ],
       "labels": [
-        "editorial"
+        "editorial",
+        "security consideration"
       ],
       "body": ">The overview of Prio3 and Poplar1 in the introduction feels a bit too out of place, especially as it comes before the generic overview. I would suggest removing this content, as it's somewhat redundant with the section in {{prio3}} and {{poplar1}}.\r\n>\r\n> Moreover, to align with the structure of the document, I might try to reframe the intro to first introduce DAFs, and then introduce malicious clients and the need for verifiability, and then introduce VDAFs. I can propose some text for this if you'd be interested.\r\n",
       "createdAt": "2023-04-04T23:04:50Z",
-      "updatedAt": "2024-06-05T20:48:58Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-07T23:35:04Z",
+      "closedAt": "2024-08-07T23:35:04Z",
       "comments": [
         {
           "author": "bkmgit",
@@ -3383,6 +3406,13 @@
           "body": "@chris-wood would you like to take a swing at this, since you offered?",
           "createdAt": "2023-07-15T00:07:52Z",
           "updatedAt": "2023-07-15T00:07:52Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> @bkmgit: Some requirements on non-colluding servers would also be helpful, in particular how many servers have been used/should be used in practice and whether there is a time period where collusion can be problematic.\r\n\r\nThere's a PR up to address this. I ended up sticking the discussion about non-collusion and the number of aggregators into security considerations, where I feel this discussion is more appropriate.",
+          "createdAt": "2024-08-06T17:29:19Z",
+          "updatedAt": "2024-08-06T17:29:19Z"
         }
       ]
     },
@@ -4092,7 +4122,7 @@
       "id": "I_kwDOGKuqOc5rP5bX",
       "title": "Spell out star topology for VDAFs",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/261",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -4103,8 +4133,8 @@
       ],
       "body": "We spelled out \"ping pong\" because we needed it for DAP-05. We also [need to spell out the \"star\" topology](https://www.ietf.org/archive/id/draft-irtf-cfrg-vdaf-06.html#name-star-topology-any-number-of).",
       "createdAt": "2023-07-11T16:38:28Z",
-      "updatedAt": "2024-08-05T21:23:35Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-07T15:35:40Z",
+      "closedAt": "2024-08-07T15:35:40Z",
       "comments": []
     },
     {
@@ -5346,15 +5376,15 @@
       "id": "I_kwDOGKuqOc6LS0_2",
       "title": "Consider removing definition of DAFs",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/346",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "DAFs are the same as VDAFs except they don't provide robustness on their own. This feature was requested early on in the history of PPM (https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/45). However no DAF has been defined, much less deployed.\r\n\r\nWe should consider removing DAFs from the draft:\r\n1. This would reduce some maintenance cost in the draft and reference implementation.\r\n2. This would simplify https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/259, which conflicts with the current goal of writing down DAF as a \"warm-up\" to VDAFs.",
       "createdAt": "2024-06-05T23:06:10Z",
-      "updatedAt": "2024-07-23T19:34:58Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-07T23:35:04Z",
+      "closedAt": "2024-08-07T23:35:04Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5603,7 +5633,7 @@
       "id": "I_kwDOGKuqOc6R_-_a",
       "title": "Replace `Union[TypeA, TypeB]` with `TypeA | TypeB`",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/389",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5614,8 +5644,8 @@
       ],
       "body": "A little nit-picky, but recent versions of Python allow `|` to be used to express union types.",
       "createdAt": "2024-08-05T20:58:06Z",
-      "updatedAt": "2024-08-05T23:16:27Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-06T17:33:48Z",
+      "closedAt": "2024-08-06T17:33:48Z",
       "comments": []
     }
   ],
@@ -33399,7 +33429,7 @@
       ],
       "body": "Closes #283.\r\nBased on #386 (merge that first).\r\n\r\nAdd an implementation of the ping-pong API to the reference code. The\r\npseudocode currently in the draft doesn't compile, so replace it with\r\nthe tested, type-checked, and linted Python.\r\n\r\nAlso, in the draft, we don't need to list the encoding methods used by\r\nthe ping-pong API; these should be clear in context.",
       "createdAt": "2024-08-05T20:51:14Z",
-      "updatedAt": "2024-08-05T23:15:38Z",
+      "updatedAt": "2024-08-08T00:24:38Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
@@ -33491,6 +33521,32 @@
               "updatedAt": "2024-08-05T22:13:48Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Es-EE",
+          "commit": {
+            "abbreviatedOid": "49421a9"
+          },
+          "author": "branlwyd",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-07T23:53:56Z",
+          "updatedAt": "2024-08-08T00:24:38Z",
+          "comments": [
+            {
+              "originalPosition": 140,
+              "body": "IMO, it would read easier if we kept a helper function for encoding/decoding ping-pong messages -- maybe the interface would be to take the type (e.g. 0 for initialize, 1 for continue, 2 for finsih) & a sequence of byte strings which would be length-prefix-encoded? Otherwise, this somewhat-hairy byte-wrangling code is repeated a few times throughout these functions.\r\n\r\nAnother approach would be a series of helper functions, one for each type of ping-pong message (initialize/continue/finish), but that might be too wordy.",
+              "createdAt": "2024-08-07T23:53:56Z",
+              "updatedAt": "2024-08-08T00:24:38Z"
+            },
+            {
+              "originalPosition": 263,
+              "body": "nit: the `prep_msg` is encoded here, and in the `if` block above. we could save a bit of code if we encoded it once, before the `if`.",
+              "createdAt": "2024-08-08T00:04:23Z",
+              "updatedAt": "2024-08-08T00:24:38Z"
+            }
+          ]
         }
       ]
     },
@@ -33499,7 +33555,7 @@
       "id": "PR_kwDOGKuqOc53gIoT",
       "title": "Sketch the star topology for VDAF preparation",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/390",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -33508,26 +33564,55 @@
       ],
       "body": "Closes #261.",
       "createdAt": "2024-08-05T22:30:01Z",
-      "updatedAt": "2024-08-05T22:30:23Z",
+      "updatedAt": "2024-08-07T15:35:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "82997647a9b34115ba16847ae07664f17e9c7f95",
+      "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/261-sketch",
-      "headRefOid": "66091806e74137839661ffea51f719feb5e925fd",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "71cc65b1b54704431d868f6488b99c44a2335c68",
+      "closedAt": "2024-08-07T15:35:39Z",
+      "mergedAt": "2024-08-07T15:35:39Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "45b75e584d402496988130130b8755a742e5c096"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6EbW6y",
+          "commit": {
+            "abbreviatedOid": "6609180"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Some copyedits:",
+          "createdAt": "2024-08-06T16:26:00Z",
+          "updatedAt": "2024-08-06T16:28:46Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "```suggestion\r\nAggregators, then the star topology described in this section can\r\n```",
+              "createdAt": "2024-08-06T16:26:00Z",
+              "updatedAt": "2024-08-06T16:28:47Z"
+            },
+            {
+              "originalPosition": 21,
+              "body": "```suggestion\r\noutput share or, if more rounds of preparation are required, compute its updated state\r\n```",
+              "createdAt": "2024-08-06T16:28:18Z",
+              "updatedAt": "2024-08-06T16:28:47Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 391,
       "id": "PR_kwDOGKuqOc53gUOM",
       "title": "Replace `Union[TypeA, TypeB]` with `TypeA | TypeB`",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/391",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -33536,19 +33621,42 @@
       ],
       "body": "Closes #389.",
       "createdAt": "2024-08-05T23:27:14Z",
-      "updatedAt": "2024-08-06T00:27:43Z",
+      "updatedAt": "2024-08-06T17:33:48Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/389",
-      "headRefOid": "a2628836b1f4a32bdff398fe0d0d3abf4590e978",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "e4c9aaaf495ad3088d06f9d10d33401c711d2094",
+      "closedAt": "2024-08-06T17:33:47Z",
+      "mergedAt": "2024-08-06T17:33:47Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "5591b148094299688c4eb7f50e063408dcd8ff1b"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6EaTQ4",
+          "commit": {
+            "abbreviatedOid": "a262883"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-06T14:30:46Z",
+          "updatedAt": "2024-08-06T15:48:35Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "This change is at the wrong bracket depth\r\n```suggestion\r\n| `InputShare`      | `tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, bytes, Optional[bytes]]` |\r\n```",
+              "createdAt": "2024-08-06T14:30:46Z",
+              "updatedAt": "2024-08-06T15:48:35Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 392,
@@ -33562,21 +33670,263 @@
       "labels": [
         "draft-11"
       ],
-      "body": "Close #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, should we define a type for the public share output by `Idpf.gen()` or continue to treat it as an opaque byte string? It doesn't seem to matter from the point of view of the spec, so do nothing here. It would complicated to express the correction words in TLS-syntax since we split the control bits out into their own, packed integer.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
+      "body": "Close #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, for consistency with other sections, allow the IDPF to define its own type for the public share and express the encoding correction words for {{BBCGG21}} in TLS-syntax.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
       "createdAt": "2024-08-06T00:23:50Z",
-      "updatedAt": "2024-08-06T00:26:15Z",
+      "updatedAt": "2024-08-08T00:03:32Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
+      "baseRefOid": "9ccd7545b7c2697fac983c72ac896cd87630cbef",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/255-finish-it",
-      "headRefOid": "4ecef01d53d898bb29e9fa5974e0e6cfacd6a125",
+      "headRefOid": "d194e29d8c6d2f6b4e601778b6866536d808ad10",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@divergentdave let me know if you'd like me to change the public share type for `Idpf` from `bytes` to generic `PublicShare`.",
+          "createdAt": "2024-08-07T16:06:19Z",
+          "updatedAt": "2024-08-07T16:06:19Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and squashed.",
+          "createdAt": "2024-08-07T23:47:03Z",
+          "updatedAt": "2024-08-07T23:47:03Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Addressed all of the lints. To compare to what you last reviewed:\r\n```\r\ngit range-diff 452ae27e..7ba120c cjpatton/255-finish-it^..cjpatton/255-finish-it\r\n```",
+          "createdAt": "2024-08-08T00:03:31Z",
+          "updatedAt": "2024-08-08T00:03:31Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6EseVk",
+          "commit": {
+            "abbreviatedOid": "4ecef01"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-07T21:43:31Z",
+          "updatedAt": "2024-08-07T21:59:55Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "This is still excerpted, so we should keep this note.",
+              "createdAt": "2024-08-07T21:43:32Z",
+              "updatedAt": "2024-08-07T21:59:55Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "I think it would be worthwhile to separate public share encoding/decoding from the sharding and preparation routines, and using a type other than `bytes` for the public share internally. This is now the last composite data structure we represent as a byte string in the API, so it would be good to clean this up for consistency.",
+              "createdAt": "2024-08-07T21:57:04Z",
+              "updatedAt": "2024-08-07T21:59:55Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "typo fix and rephrasing:\r\n```suggestion\r\n`packed_prefixes`, the sequence of prefixes packed into a byte string of\r\nlength `packed_len`. The prefixes are encoded with the following procedure:\r\n```",
+              "createdAt": "2024-08-07T21:59:11Z",
+              "updatedAt": "2024-08-07T21:59:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Es26B",
+          "commit": {
+            "abbreviatedOid": "4ecef01"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-07T23:31:06Z",
+          "updatedAt": "2024-08-07T23:31:06Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Done.",
+              "createdAt": "2024-08-07T23:31:06Z",
+              "updatedAt": "2024-08-07T23:31:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Es7kM",
+          "commit": {
+            "abbreviatedOid": "6751d9e"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-07T23:48:46Z",
+          "updatedAt": "2024-08-07T23:48:46Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "@divergentdave I can revert this if you like. CorrectionWord seems just as accurate to me and is a bit pithier.",
+              "createdAt": "2024-08-07T23:48:46Z",
+              "updatedAt": "2024-08-07T23:48:46Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 393,
+      "id": "PR_kwDOGKuqOc53mQVO",
+      "title": "Address feedback on the intro",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/393",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #219.\r\nCloses #346 (the new intro rework leans into DAF being a core part of the draft).\r\n\r\n* Introduce DAFs first, in order to mirror the document structure.\r\n\r\n* Explain (function) secret sharing and give examples of aggregation functions that can be computed with (V)DAFs\r\n\r\n* Give less detail about Prio3 and Poplar1\r\n\r\n* Point to discussion about non-collusion in {{overview}}\r\n\r\nAlso, in security considerations, discuss dealing with non-static corruptions and how to pick the number of aggregators. This addresses an idea for the intro, but resolving it seems to require a proper security consideration.",
+      "createdAt": "2024-08-06T17:27:03Z",
+      "updatedAt": "2024-08-07T23:35:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "45b75e584d402496988130130b8755a742e5c096",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/219",
+      "headRefOid": "62807b5a9f24e7a689431f70f96cb80a4a15f7fe",
+      "closedAt": "2024-08-07T23:35:03Z",
+      "mergedAt": "2024-08-07T23:35:03Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "9ccd7545b7c2697fac983c72ac896cd87630cbef"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and squashed.",
+          "createdAt": "2024-08-07T23:32:01Z",
+          "updatedAt": "2024-08-07T23:32:01Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6EdeMA",
+          "commit": {
+            "abbreviatedOid": "35b00a0"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-06T22:08:59Z",
+          "updatedAt": "2024-08-06T23:02:26Z",
+          "comments": [
+            {
+              "originalPosition": 131,
+              "body": "This seems misleading, as sharding always produces multiple shares.\n```suggestion\nmeasurement into multiple secret shares, one for each aggregation\n```",
+              "createdAt": "2024-08-06T22:08:59Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            },
+            {
+              "originalPosition": 147,
+              "body": "I think starting a new paragraph here may help. The \"in fact\" coming right after a \"however\" seems like it's going to be contradicting the statement about linear functions of the encoding, but that's not the case, and instead it introduces the aggregation parameter, which is orthogonal to the aggregation part.\n```suggestion\nmeasurements.\n\nIn fact, our framework admits DAFs with slightly more\n```\n",
+              "createdAt": "2024-08-06T22:19:15Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            },
+            {
+              "originalPosition": 174,
+              "body": "```suggestion\ninteract with one another over a number of rounds of communication. DAFs on the\n```\n",
+              "createdAt": "2024-08-06T22:21:32Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            },
+            {
+              "originalPosition": 213,
+              "body": "Pre-existing typo\n```suggestion\n  variety of aggregate statistics, combining additive secret sharing as described\n```\n",
+              "createdAt": "2024-08-06T22:23:54Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            },
+            {
+              "originalPosition": 256,
+              "body": "Actually the point function is the partial application of g on the measurement, $g(\\cdot, meas)$, but I don't know if we need to split that hair here.",
+              "createdAt": "2024-08-06T22:26:29Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            },
+            {
+              "originalPosition": 255,
+              "body": "nit: typo\n```suggestion\n  least `t` times for some threshold `t`. The core primitive in their protocol\n```\n",
+              "createdAt": "2024-08-06T22:48:43Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            },
+            {
+              "originalPosition": 320,
+              "body": "Typo, lol",
+              "createdAt": "2024-08-06T22:59:21Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            },
+            {
+              "originalPosition": 336,
+              "body": "I found \"including\" to be confusing here, so I rephrased it.\n```suggestion\n{{star-topo}}. Note however that some schemes are not compatible with this mode of operation,\nsuch as Poplar1.\n```",
+              "createdAt": "2024-08-06T23:02:19Z",
+              "updatedAt": "2024-08-06T23:02:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EdvAh",
+          "commit": {
+            "abbreviatedOid": "d995a17"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-06T23:28:04Z",
+          "updatedAt": "2024-08-06T23:30:16Z",
+          "comments": [
+            {
+              "originalPosition": 256,
+              "body": "The operative word is \"allows\", as in \"they evaluate point function shares on each of their input shares and add up the output shares to get share of the count\". Is this is clear enough or do we need to fix it?",
+              "createdAt": "2024-08-06T23:28:04Z",
+              "updatedAt": "2024-08-06T23:30:16Z"
+            },
+            {
+              "originalPosition": 320,
+              "body": "\ud83d\ude2c ",
+              "createdAt": "2024-08-06T23:29:10Z",
+              "updatedAt": "2024-08-06T23:30:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Esk3A",
+          "commit": {
+            "abbreviatedOid": "62807b5"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-07T22:07:24Z",
+          "updatedAt": "2024-08-07T23:31:51Z",
+          "comments": [
+            {
+              "originalPosition": 256,
+              "body": "I think it's fine as-is",
+              "createdAt": "2024-08-07T22:07:24Z",
+              "updatedAt": "2024-08-07T22:17:46Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
