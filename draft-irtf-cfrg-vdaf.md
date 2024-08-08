@@ -1209,30 +1209,30 @@ input shares to output shares. The Aggregators need to agree on this parameter
 before they can begin preparing the measurement shares for aggregation.
 
 ~~~~
-    Aggregator 0   Aggregator 1        Aggregator SHARES-1
-    ============   ============        ===================
+    Aggregator 0   Aggregator 1           Aggregator SHARES-1
+    ============   ============           ===================
 
-    input_share_0  input_share_1       input_share_[SHARES-1]
-      |              |              ...  |
-      V              V                   V
-    +-----------+  +-----------+       +-----------+
-    | prep_init |  | prep_init |       | prep_init |
-    +-----------+  +------------+      +-----------+
-      |              |              ...  |
-      V              V                   V
-    +----------------------------------------------+   \
-    | prep_shares_to_prep                          |   |
-    +----------------------------------------------+   |
-      |              |              ...  |             |
-      V              V                   V             | x ROUNDS
-    +-----------+  +-----------+       +-----------+   |
-    | prep_next |  | prep_next |       | prep_next |   |
-    +-----------+  +-----------+       +-----------+   |
-      |              |              ...  |             |
-      V              V                   V             /
-     ...            ...                 ...
-      |              |              ...  |
-      V              V                   V
+    input_share_0  input_share_1          input_share_[SHARES-1]
+      |              |                 ...  |
+      V              V                      V
+    +-----------+  +-----------+          +-----------+
+    | prep_init |  | prep_init |          | prep_init |
+    +-----------+  +-----------+          +-----------+
+      |       |      |       |         ...  |       |
+      V       |      V       |              V       |
+    +---------|--------------|----------------------|-+   \
+    |         |              | prep_shares_to_prep  | |   |
+    +---------|--------------|----------------------|-+   |
+      |       |      |       |         ...  |       |     |
+      V       V      V       V              V       |     | x ROUNDS
+    +-----------+  +-----------+          +-----------+   |
+    | prep_next |  | prep_next |          | prep_next |   |
+    +-----------+  +-----------+          +-----------+   |
+      |       |      |                 ...  |       |     |
+      V       V      V                      V       V     /
+     ...            ...                    ...
+      |              |                 ...  |
+      V              V                      V
     out_share_0    out_share_1         out_share_[SHARES-1]
 ~~~~
 {: #prep-flow title="VDAF preparation process on the input shares for a single
