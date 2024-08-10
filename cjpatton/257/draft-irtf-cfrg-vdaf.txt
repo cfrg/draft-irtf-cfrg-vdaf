@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 3 January 2025                                             ISRG
+Expires: 11 February 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                             2 July 2024
+                                                          10 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 January 2025.
+   This Internet-Draft will expire on 11 February 2025.
 
 Copyright Notice
 
@@ -64,10 +64,7 @@ Copyright Notice
    Provisions Relating to IETF Documents (https://trustee.ietf.org/
    license-info) in effect on the date of publication of this document.
    Please review these documents carefully, as they describe your rights
-   and restrictions with respect to this document.  Code Components
-   extracted from this document must include Revised BSD License text as
-   described in Section 4.e of the Trust Legal Provisions and are
-   provided without warranty as described in the Revised BSD License.
+   and restrictions with respect to this document.
 
 Table of Contents
 
@@ -113,7 +110,7 @@ Table of Contents
        7.2.5.  Unsharding
        7.2.6.  Auxiliary Functions
        7.2.7.  Message Serialization
-     7.3.  A General-Purpose FLP
+     7.3.  The FLP of BBCGGI19
        7.3.1.  Overview
        7.3.2.  Validity Circuits
        7.3.3.  Construction
@@ -147,6 +144,7 @@ Table of Contents
        9.4.2.  Safe Usage of IDPF Outputs
      9.5.  Requirements for XOFs
      9.6.  Choosing the Field Size
+     9.7.  Choosing the Number of Aggregators
    10. IANA Considerations
    11. References
      11.1.  Normative References
@@ -162,9 +160,9 @@ Table of Contents
 
 1.  Introduction
 
-   [TO BE REMOVED BY RFC EDITOR: The source for this draft and and the
-   reference implementation can be found at https://github.com/cfrg/
-   draft-irtf-cfrg-vdaf.]
+   (RFC EDITOR: Remove this paragraph.)  The source for this draft and
+   and the reference implementation can be found at
+   https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
    The ubiquity of the Internet makes it an ideal platform for
    measurement of large-scale phenomena, whether public health trends or
@@ -197,57 +195,94 @@ Table of Contents
    and because it knows the distribution from which the noise was
    sampled, it can estimate the true sum with reasonable accuracy.
 
-   However, even when noise is added to the measurements, collecting
-   them in the clear still reveals a significant amount of information
-   to the collector.  On the one hand, depending on the "amount" of
-   noise a client adds to its measurement, it may be possible for a
-   curious collector to make a reasonable guess of the measurement's
-   true value.  On the other hand, the more noise the clients add, the
-   less reliable will be the server's estimate of the output.  Thus
-   systems relying solely on a DP mechanism must strike a delicate
-   balance between privacy and utility.
+   Even when noise is added to the measurements, collecting them in the
+   clear still reveals a significant amount of information to the
+   collector.  On the one hand, depending on the "amount" of noise a
+   client adds to its measurement, it may be possible for a curious
+   collector to make a reasonable guess of the measurement's true value.
+   On the other hand, the more noise the clients add, the less reliable
+   will be the server's estimate of the aggregate.  Thus systems relying
+   solely on a DP mechanism must strike a delicate balance between
+   privacy and utility.
 
    The ideal goal for a privacy-preserving measurement system is that of
-   secure multi-party computation (MPC): No participant in the protocol
+   secure multi-party computation (MPC): no participant in the protocol
    should learn anything about an individual measurement beyond what it
-   can deduce from the differentially private aggregate [MPRV09].  In
-   this document, we describe Verifiable Distributed Aggregation
-   Functions (VDAFs) as a general class of delegated MPC protocols that
-   can be used to achieve this goal.
+   can deduce from the aggregate.  MPC achieves this goal by
+   distributing the computation of the aggregate across multiple
+   aggregation servers, one of which is presumed to be honest, i.e., not
+   under control of the attacker.  Moreover, MPC can be composed with
+   various DP mechanisms to ensure the aggregate itself does leak too
+   much information about any one of the measurements [MPRV09].
 
-   VDAF schemes achieve their privacy goal by distributing the
-   computation of the aggregate among a number of non-colluding
-   aggregation servers.  As long as a subset of the servers executes the
-   protocol honestly, VDAFs guarantee that no measurement is ever
-   accessible to any party besides the client that submitted it.  VDAFs
-   can also be composed with various DP mechanisms, thereby ensuring the
-   aggregate result does not leak too much information about any one
-   measurmment.  At the same time, VDAFs are "verifiable" in the sense
-   that malformed measurements that would otherwise garble the result of
-   the computation can be detected and removed from the set of
-   measurements.  We refer to this property as "robustness".
+   This document describes two classes of MPC protocols, each aiming for
+   a different set of goals.
 
-   The cost of achieving these security properties is the need for
-   multiple servers to participate in the protocol, and the need to
-   ensure they do not collude to undermine the VDAF's privacy
-   guarantees.  Recent implementation experience has shown that
-   practical challenges of coordinating multiple servers can be
-   overcome.  The Prio system [CGB17] (essentially a VDAF) has been
-   deployed in systems supporting hundreds of millions of users: The
-   Mozilla Origin Telemetry project [OriginTelemetry] and the Exposure
-   Notification Private Analytics collaboration among the Internet
-   Security Research Group (ISRG), Google, Apple, and others [ENPA].
+   In a Distributed Aggregation Function (DAF, Section 4), each client
+   splits its measurement into multiple secret shares, one for each
+   aggregation server.  DAFs require two properties of the secret
+   sharing scheme.  First, we can reconstruct the underlying measurement
+   by simply adding up all of the shares.  (Typically the shares are
+   vectors over some finite field.)  Second, given all but one of the
+   shares, it is impossible to learn anything about the underlying
+   measurement.  These properties give rise to a simple strategy for
+   privately aggregating the measurements: each aggregation server adds
+   up its measurement shares locally before revealing their sum to the
+   data collector; then all the data collector has to do is add up these
+   sums to get the aggregate.
 
-   The VDAF abstraction laid out in Section 5 represents a class of
-   multi-party protocols for privacy-preserving measurement proposed in
-   the literature.  These protocols vary in their operational and
+   This strategy is compatible with any aggregation function that can be
+   represented as the sum of some encoding of the measurements.
+   Examples include: summary statistics such as sum, mean, and standard
+   deviation; estimation of quantiles, e.g., median; histograms; linear
+   regression; or counting data structures, e.g., Bloom filters.
+   However, not all functions fit into this rubric, as it is constrained
+   to linear computations over the encoded measurements.
+
+   In fact, our framework admits DAFs with slightly more functionality,
+   computing aggregation functions of the form
+
+   f(agg_param, meas_1, ..., meas_N) =
+       g(agg_param, meas_1) + ... + g(agg_param, meas_N)
+
+   where meas_1, ..., meas_N are the measurements, g is a possibly non-
+   linear function, and agg_param is a parameter of that function chosen
+   by the data collector.  This paradigm, known as function secret
+   sharing [BGI15], allows for more sophisticated data analysis tasks,
+   such as grouping metrics by private client attributes [MPDST25] or
+   computing heavy hitters [BBCGGI21].  (More on the latter task below.)
+
+   The second class of protocols defined in this document are called
+   Verifiable Distributed Aggregation Functions (VDAFs, Section 5).  In
+   addition to being private, VDAFs are verifiable in the following
+   sense.  By design, a secret sharing of a valid measurement, e.g., a
+   number between 1 and 10, is indistinguishable from a secret sharing
+   of an invalid measurement, e.g., a number larger than 10.  This means
+   that DAFs are vulnerable to attacks from malicious clients attempting
+   to disrupt the computation by submitting invalid measurements.  Thus
+   VDAFs are designed to allow the servers to detect and remove these
+   measurements prior to aggregation. We refer to this property as
+   robustness.
+
+   Achieving robustness without sacrificing privacy requires the servers
+   to interact with one another over a number of rounds of
+   communication.  DAFs on the other hand are non-interactive, and are
+   therefore easier to deploy; but they do not provide robustness on
+   their own.  This may be tolerable in some applications.  For
+   instance, if the client's software is executed in a trusted execution
+   environment, it may be reasonable to assume that no client is
+   malicious.
+
+   The DAF and VDAF abstractions encompass a variety of MPC techniques
+   in the literature.  These protocols vary in their operational and
    security requirements, sometimes in subtle but consequential ways.
    This document therefore has two important goals:
 
-   1.  Providing higher-level protocols like [DAP] with a simple,
-       uniform interface for accessing privacy-preserving measurement
-       schemes, documenting relevant operational and security
-       requirements, and specifying constraints for safe usage:
+   1.  Providing higher-level protocols like [DAP] (RFC EDITOR: remove
+       this reference if not published before the current document) with
+       a simple, uniform interface for accessing privacy-preserving
+       measurement schemes, documenting relevant operational and
+       security requirements, and specifying constraints for safe usage:
 
        1.  General patterns of communications among the various actors
            involved in the system (clients, aggregation servers, and the
@@ -265,79 +300,66 @@ Table of Contents
    This document also specifies two concrete VDAF schemes, each based on
    a protocol from the literature.
 
-   *  The aforementioned Prio system [CGB17] allows for the privacy-
-      preserving computation of a variety aggregate statistics.  The
-      basic idea underlying Prio is fairly simple:
+   *  The Prio system [CGB17] allows for the privacy-preserving
+      computation of a variety of aggregate statistics, combining
+      additive secret sharing as described above with a mechanism for
+      checking the validity of each measurement.  In Section 7 we
+      specify Prio3, a VDAF that follows the same overall framework as
+      the original Prio protocol, but incorporates techniques introduced
+      in [BBCGGI19] that result in significant performance gains.
 
-      1.  Each client shards its measurement into a sequence of additive
-          shares and distributes the shares among the aggregation
-          servers.
+   *  The Poplar protocol [BBCGGI21] solves the heavy-hitters problem in
+      a privacy-preserving manner.  Here each client holds a bit-string,
+      and the goal of the aggregation servers is to compute the set of
+      strings that occur at least t times for some threshold t.  The
+      core primitive in their protocol is a secret sharing of a point
+      function [GI14] (g in the notation above) that allows the servers
+      to privately count how many of the clients' strings begin with a
+      given prefix (agg_param in the notation above).  In Section 8 we
+      specify a VDAF called Poplar1 that implements this functionality.
 
-      2.  Next, each server adds up its shares locally, resulting in an
-          additive share of the aggregate.
-
-      3.  Finally, the aggregation servers send their aggregate shares
-          to the data collector, who combines them to obtain the
-          aggregate result.
-
-      The difficult part of this system is ensuring that the servers
-      hold shares of a valid, aggregatable value, e.g., the measurement
-      is an integer in a specific range.  Thus Prio specifies a multi-
-      party protocol for accomplishing this task.
-
-      In Section 7 we describe Prio3, a VDAF that follows the same
-      overall framework as the original Prio protocol, but incorporates
-      techniques introduced in [BBCGGI19] that result in significant
-      performance gains.
-
-   *  More recently, Boneh et al.  [BBCGGI21] described a protocol
-      called Poplar for solving the t-heavy-hitters problem in a
-      privacy-preserving manner.  Here each client holds a bit-string of
-      length n, and the goal of the aggregation servers is to compute
-      the set of strings that occur at least t times.  The core
-      primitive used in their protocol is a specialized Distributed
-      Point Function (DPF) [GI14] that allows the servers to "query"
-      their DPF shares on any bit-string of length shorter than or equal
-      to n.  As a result of this query, each of the servers has an
-      additive share of a bit indicating whether the string is a prefix
-      of the client's string.  The protocol also specifies a multi-party
-      computation for verifying that at most one string among a set of
-      candidates is a prefix of the client's string.
-
-      In Section 8 we describe a VDAF called Poplar1 that implements
-      this functionality.
-
-   Finally, perhaps the most complex aspect of schemes like Prio3 and
-   Poplar1 is the process by which the client-generated measurements are
-   prepared for aggregation.  Because these constructions are based on
-   secret sharing, the servers will be required to exchange some amount
-   of information in order to verify the measurement is valid and can be
-   aggregated.  Depending on the construction, this process may require
-   multiple round trips over the network.
-
-   There are applications in which this verification step may not be
-   necessary, e.g., when the client's software is run a trusted
-   execution environment.  To support these applications, this document
-   also defines Distributed Aggregation Functions (DAFs) as a simpler
-   class of protocols that aim to provide the same privacy guarantee as
-   VDAFs but fall short of being verifiable.
-
-      OPEN ISSUE Decide if we should give one or two example DAFs.
-      There are natural variants of Prio3 and Poplar1 that might be
-      worth describing.
-
-   The remainder of this document is organized as follows: Section 3
-   gives a brief overview of DAFs and VDAFs; Section 4 defines the
-   syntax for DAFs; Section 5 defines the syntax for VDAFs; Section 6
-   defines various functionalities that are common to our constructions;
-   Section 7 describes the Prio3 construction; Section 8 describes the
-   Poplar1 construction; and Section 9 enumerates the security
-   considerations for VDAFs.
+   The remainder of this document is organized as follows: Section 2
+   lists definitions and conventions used for specification; Section 3
+   gives a brief overview of DAFs and VDAFs, the parties involved in the
+   computation, and the requirements for non-collusion; Section 4
+   defines the syntax for DAFs; Section 5 defines the syntax for VDAFs;
+   Section 6 defines various functionalities that are common to our
+   constructions; Section 7 describes the Prio3 construction; Section 8
+   describes the Poplar1 construction; and Section 9 enumerates the
+   security considerations for DAFs and VDAFs.
 
 1.1.  Change Log
 
+   (RFC EDITOR: Remove this section.)
+
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
+
+   10:
+
+   *  Define Prio3MultihotCountVec, a variant of Prio3 for aggregating
+      bit vectors with bounded weight.
+
+   *  FLP: Allow the output of the circuit to be a vector.  This makes
+      it possible to skip joint randomness derivation in more cases.
+
+   *  Poplar1: On the first round of preparation, handle None as an
+      error.  Previously this message was interpreted as a length-3
+      vector of zeros.
+
+   *  Prio3: Move specification of the field from the FLP validity
+      circuit to the VDAF itself.
+
+   *  Clarify the extent to which the attacker controls the network in
+      our threat models for privacy and robustness.
+
+   *  Clean up various aspects of the code, including: follow existing
+      object-oriented programming patterns for Python more closely; make
+      the type hints enforceable; and avoid shadowing variables.
+
+   *  Poplar1: Align terminology with [BBCGGI23].
+
+   *  IDPF: Add guidance for encoding byte strings as indices.
 
    09:
 
@@ -720,8 +742,8 @@ Table of Contents
    collusion among Aggregators, and Aggregators are the entities that
    perform validation of Client measurements.  Thus Clients trust
    Aggregators not to collude (typically it is required that at least
-   one Aggregator is honest), and Collectors trust Aggregators to
-   correctly run the protocol.
+   one Aggregator is honest; see Section 9.7), and Collectors trust
+   Aggregators to correctly run the protocol.
 
    Within the bounds of the non-collusion requirements of a given (V)DAF
    instance, it is possible for the same entity to play more than one
@@ -822,7 +844,7 @@ Table of Contents
    AggShare.
 
    Each DAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 18.
+   for each (V)DAF specified in this document are defined in Table 23.
 
 4.1.  Sharding
 
@@ -909,8 +931,8 @@ Table of Contents
    DAFs MUST implement the following function:
 
    *  daf.is_valid(agg_param: AggParam, previous_agg_params:
-      set[AggParam]) -> bool: Checks if the agg_param is compatible with
-      all elements of previous_agg_params.
+      list[AggParam]) -> bool: Checks if the agg_param is compatible
+      with all elements of previous_agg_params.
 
 4.4.  Aggregation
 
@@ -1149,7 +1171,7 @@ Table of Contents
    PrepMessage.
 
    Each VDAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 18.
+   for each (V)DAF specified in this document are defined in Table 23.
    The following method is defined for every VDAF:
 
    def domain_separation_tag(self, usage: int) -> bytes:
@@ -1167,9 +1189,8 @@ Table of Contents
 
 5.1.  Sharding
 
-   Sharding transforms a measurement into input shares as it does in
-   DAFs (cf.  Section 4.1); in addition, it takes a nonce as input and
-   produces a public share:
+   Sharding transforms a measurement and nonce into a public share and
+   input shares as it does in DAFs (cf.  Section 4.1):
 
    *  vdaf.shard(measurement: Measurement, nonce: bytes, rand: bytes) ->
       tuple[PublicShare, list[InputShare]] is the randomized sharding
@@ -1214,30 +1235,30 @@ Table of Contents
    agree on this parameter before they can begin preparing the
    measurement shares for aggregation.
 
-       Aggregator 0   Aggregator 1        Aggregator SHARES-1
-       ============   ============        ===================
+       Aggregator 0   Aggregator 1           Aggregator SHARES-1
+       ============   ============           ===================
 
-       input_share_0  input_share_1       input_share_[SHARES-1]
-         |              |              ...  |
-         V              V                   V
-       +-----------+  +-----------+       +-----------+
-       | prep_init |  | prep_init |       | prep_init |
-       +-----------+  +------------+      +-----------+
-         |              |              ...  |
-         V              V                   V
-       +----------------------------------------------+   \
-       | prep_shares_to_prep                          |   |
-       +----------------------------------------------+   |
-         |              |              ...  |             |
-         V              V                   V             | x ROUNDS
-       +-----------+  +-----------+       +-----------+   |
-       | prep_next |  | prep_next |       | prep_next |   |
-       +-----------+  +-----------+       +-----------+   |
-         |              |              ...  |             |
-         V              V                   V             /
-        ...            ...                 ...
-         |              |              ...  |
-         V              V                   V
+       input_share_0  input_share_1          input_share_[SHARES-1]
+         |              |                 ...  |
+         V              V                      V
+       +-----------+  +-----------+          +-----------+
+       | prep_init |  | prep_init |          | prep_init |
+       +-----------+  +-----------+          +-----------+
+         |       |      |       |         ...  |       |
+         V       |      V       |              V       |
+       +---------|--------------|----------------------|-+   \
+       |         |              | prep_shares_to_prep  | |   |
+       +---------|--------------|----------------------|-+   |
+         |       |      |       |         ...  |       |     |
+         V       V      V       V              V       |     | x ROUNDS
+       +-----------+  +-----------+          +-----------+   |
+       | prep_next |  | prep_next |          | prep_next |   |
+       +-----------+  +-----------+          +-----------+   |
+         |       |      |                 ...  |       |     |
+         V       V      V                      V       V     /
+        ...            ...                    ...
+         |              |                 ...  |
+         V              V                      V
        out_share_0    out_share_1         out_share_[SHARES-1]
 
     Figure 6: VDAF preparation process on the input shares for a single
@@ -1278,7 +1299,7 @@ Table of Contents
       -  nonce MUST have length vdaf.NONCE_SIZE.
 
    *  vdaf.prep_next(prep_state: PrepState, prep_msg: PrepMessage) ->
-      Union[tuple[PrepState, PrepShare], OutShare] is the deterministic
+      tuple[PrepState, PrepShare] | OutShare is the deterministic
       preparation-state update algorithm run by each Aggregator.  It
       updates the Aggregator's preparation state (prep_state) and
       returns either its next preparation state and its message share
@@ -1643,7 +1664,10 @@ Table of Contents
            )
            outbound = Message.initialize(
                vdaf.encode_prep_share(prep_share))
-           return (Continued(prep_state), encode_ping_pong_message(outbound))
+           return (
+               Continued(prep_state),
+               encode_ping_pong_message(outbound),
+           )
        except:
            return (Rejected(), None)
 
@@ -1712,7 +1736,10 @@ Table of Contents
            vdaf.encode_prep_msg(prep_msg),
            vdaf.encode_prep_share(prep_share),
        )
-       return (Continued(prep_state), encode_ping_pong_message(outbound))
+       return (
+           Continued(prep_state),
+           encode_ping_pong_message(outbound),
+       )
 
    The output is the State to which the Helper has transitioned and an
    encoded Message.  If the Helper's state is Finished or Rejected, then
@@ -1752,14 +1779,20 @@ Table of Contents
            if !isinstance(state, Continued):
                return (Rejected(), None)
 
-           prep_msg = vdaf.decode_prep_msg(state.prep_state, inbound.prep_msg)
+           prep_msg = vdaf.decode_prep_msg(
+               state.prep_state,
+               inbound.prep_msg,
+           )
            out = vdaf.prep_next(state.prep_state, prep_msg)
            if type(out) == tuple[PrepState, PrepShare] \
                    and inbound.type == 1:
                # continue
                (prep_state, prep_share) = out
                prep_shares = [
-                   vdaf.decode_prep_share(prep_state, inbound.prep_share),
+                   vdaf.decode_prep_share(
+                       prep_state,
+                       inbound.prep_share,
+                   ),
                    prep_share,
                ]
                if is_leader:
@@ -1804,14 +1837,25 @@ Table of Contents
 5.9.  Star Topology (Any Number of Aggregators)
 
    The ping-pong topology of the previous section is only suitable for
-   VDAFs involving exactly two Aggregators.  If more Aggregators are
-   required, the star topology described in this section can be used
-   instead.
+   VDAFs involving exactly two Aggregators.  If the VDAF supports more
+   than two Aggregators, then the star topology described in this
+   section can be used instead.
 
-      TODO Describe the Leader-emulated broadcast channel architecture
-      that was originally envisioned for DAP.  (As of DAP-05 we are
-      going with the ping pong architecture described in the previous
-      section.)
+   We again designate an Aggregator to initiate the computation.  We
+   refer to this Aggregator as the Leader and to all other Aggregators
+   as Helpers.
+
+   At the start of each round, the Leader requests from each Helper its
+   prep share.  After gathering each of the prep shares, the Leader
+   computes the next prep message (via prep_shares_to_prep()) and
+   broadcasts it to the Helpers.  At this point, each Aggregator runs
+   prep_next() locally to either recover an output share or, if more
+   rounds of preparation are required, compute its updated state and
+   prep share.  If more are required, then the Helper responds to the
+   broadcast message with its next prep share.
+
+   The Aggregators proceed in this way until each recovers an output
+   share or some step of the computation fails.
 
 6.  Preliminaries
 
@@ -1948,10 +1992,14 @@ Table of Contents
        """
        Subtract the right operand from the left and return the result.
        """
+       if len(left) != len(right):
+           raise ValueError("mismatched vector sizes")
        return list(map(lambda x: x[0] - x[1], zip(left, right)))
 
    def vec_add(left: list[F], right: list[F]) -> list[F]:
        """Add the right operand to the left and return the result."""
+       if len(left) != len(right):
+           raise ValueError("mismatched vector sizes")
        return list(map(lambda x: x[0] + x[1], zip(left, right)))
 
    def vec_neg(vec: list[F]) -> list[F]:
@@ -1965,9 +2013,9 @@ Table of Contents
    Some VDAFs require fields that are suitable for efficient computation
    of the discrete Fourier transform, as this allows for fast polynomial
    interpolation.  (One example is Prio3 (Section 7) when instantiated
-   with the generic FLP of Section 7.3.3.)  Specifically, a field is
-   said to be "FFT-friendly" if, in addition to satisfying the interface
-   described in Section 6.1, it implements the following method:
+   with the FLP of Section 7.3.3.)  Specifically, a field is said to be
+   "FFT-friendly" if, in addition to satisfying the interface described
+   in Section 6.1, it implements the following method:
 
    *  Field.gen() -> Field returns the generator of a large subgroup of
       the multiplicative group.  To be FFT-friendly, the order of this
@@ -2144,13 +2192,16 @@ Table of Contents
            # Use TurboSHAKE128 to derive a key from the binder string
            # and domain separation tag. Note that the AES key does not
            # need to be kept secret from any party. However, when used
-           # with IdpfPoplar, we require the binder to be a random
-           # nonce.
+           # with an IDPF, we require the binder to be a random nonce.
            #
            # Implementation note: This step can be cached across XOF
            # evaluations with many different seeds.
            dst_length = to_le_bytes(len(dst), 1)
-           self.fixed_key = TurboSHAKE128(dst_length + dst + binder, 2, 16)
+           self.fixed_key = TurboSHAKE128(
+               dst_length + dst + binder,
+               2,
+               16,
+           )
            self.seed = seed
 
        def next(self, length: int) -> bytes:
@@ -2261,14 +2312,6 @@ Table of Contents
    fixed map.  See Section 8 for an example of a VDAF that makes
    meaningful use of the aggregation parameter.
 
-   As the name implies, Prio3 is a descendant of the original Prio
-   construction.  A second iteration was deployed in the [ENPA] system,
-   and like the VDAF described here, the ENPA system was built from
-   techniques introduced in [BBCGGI19] that significantly improve
-   communication cost.  That system was specialized for a particular
-   aggregation function; the goal of Prio3 is to provide the same level
-   of generality as the original construction.
-
    The core component of Prio3 is a "Fully Linear Proof (FLP)" system.
    Introduced by [BBCGGI19], the FLP encapsulates the functionality
    required for encoding and validating measurements.  Prio3 can be
@@ -2332,7 +2375,7 @@ Table of Contents
        +----------------+------------------------------------------+
        | AggResult      | Type of the aggregate result             |
        +----------------+------------------------------------------+
-       | field          | As defined in (Section 6.1)              |
+       | field          | Class object for the field (Section 6.1) |
        +----------------+------------------------------------------+
 
           Table 4: Constants and types defined by a concrete FLP.
@@ -2341,25 +2384,24 @@ Table of Contents
    verifying proofs of validity (encoding is described below in
    Section 7.1.1):
 
-   *  flp.prove(meas: list[Field], prove_rand: list[Field], joint_rand:
-      list[Field]) -> list[Field] is the deterministic proof-generation
-      algorithm run by the prover.  Its inputs are the encoded
-      measurement, the "prover randomness" prove_rand, and the "joint
-      randomness" joint_rand.  The prover randomness is used only by the
-      prover, but the joint randomness is shared by both the prover and
-      verifier.
+   *  flp.prove(meas: list[F], prove_rand: list[F], joint_rand: list[F])
+      -> list[F] is the deterministic proof-generation algorithm run by
+      the prover.  Its inputs are the encoded measurement, the "prover
+      randomness" prove_rand, and the "joint randomness" joint_rand.
+      The prover randomness is used only by the prover, but the joint
+      randomness is shared by both the prover and verifier.
 
-   *  flp.query(meas: list[Field], proof: list[Field], query_rand:
-      list[Field], joint_rand: list[Field], num_shares: int) ->
-      list[Field] is the query-generation algorithm run by the verifier.
-      This is used to "query" the measurement and proof.  The result of
-      the query (i.e., the output of this function) is called the
-      "verifier message".  In addition to the measurement and proof,
-      this algorithm takes as input the query randomness query_rand and
-      the joint randomness joint_rand.  The former is used only by the
-      verifier. num_shares specifies how many shares were generated.
+   *  flp.query(meas: list[F], proof: list[F], query_rand: list[F],
+      joint_rand: list[F], num_shares: int) -> list[F] is the query-
+      generation algorithm run by the verifier.  This is used to "query"
+      the measurement and proof.  The result of the query (i.e., the
+      output of this function) is called the "verifier message".  In
+      addition to the measurement and proof, this algorithm takes as
+      input the query randomness query_rand and the joint randomness
+      joint_rand.  The former is used only by the verifier. num_shares
+      specifies how many shares were generated.
 
-   *  flp.decide(verifier: list[Field]) -> bool is the deterministic
+   *  flp.decide(verifier: list[F]) -> bool is the deterministic
       decision algorithm run by the verifier.  It takes as input the
       verifier message and outputs a boolean indicating if the
       measurement from which it was generated is valid.
@@ -2460,7 +2502,7 @@ Table of Contents
    Hence, the FLP also specifies a method of encoding raw measurements
    as a vector of field elements:
 
-   *  flp.encode(measurement: Measurement) -> list[Field] encodes a raw
+   *  flp.encode(measurement: Measurement) -> list[F] encodes a raw
       measurement as a vector of field elements.  The return value MUST
       be of length MEAS_LEN.
 
@@ -2474,19 +2516,19 @@ Table of Contents
    represents.  Thus the FLP defines an algorithm for truncating the
    encoded measurement to the length of the aggregated output:
 
-   *  flp.truncate(meas: list[Field]) -> list[Field] maps an encoded
-      measurement (e.g., the bit-encoding of the measurement) to an
-      aggregatable output (e.g., the singleton vector containing the
-      measurement).  The length of the input MUST be MEAS_LEN and the
-      length of the output MUST be OUTPUT_LEN.
+   *  flp.truncate(meas: list[F]) -> list[F] maps an encoded measurement
+      (e.g., the bit-encoding of the measurement) to an aggregatable
+      output (e.g., the singleton vector containing the measurement).
+      The length of the input MUST be MEAS_LEN and the length of the
+      output MUST be OUTPUT_LEN.
 
    Once the aggregate shares have been computed and combined together,
    their sum can be converted into the aggregate result.  This could be
    a projection from the FLP's field to the integers, or it could
    include additional post-processing.
 
-   *  flp.decode(output: list[Field], num_measurements: int) ->
-      AggResult maps a sum of aggregate shares to an aggregate result.
+   *  flp.decode(output: list[F], num_measurements: int) -> AggResult
+      maps a sum of aggregate shares to an aggregate result.
 
       Pre-conditions:
 
@@ -2524,11 +2566,11 @@ Table of Contents
 7.2.  Construction
 
    This section specifies Prio3, an implementation of the Vdaf interface
-   (Section 5).  It has two generic parameters: an Flp (Section 7.1) and
-   a Xof (Section 6.2).  It also has an associated constant, PROOFS,
-   with a value within the range of [1, 256), denoting the number of
-   FLPs generated by the Client (Section 7.1.2).  The value of PROOFS is
-   1 unless explicitly specified.
+   (Section 5).  It has three generic parameters: an FftField ({{fft-
+   field}}), anFlp({{flp}}) and aXof({{xof}}).  It also has an
+   associated constant,PROOFS, with a value within the range of[1,
+   256)`, denoting the number of FLPs generated by the Client
+   (Section 7.1.2).
 
    The associated constants and types required by the Vdaf interface are
    defined in Table 5.  The methods required for sharding, preparation,
@@ -2556,19 +2598,18 @@ Table of Contents
      +-----------------+--------------------------------------------+
      | PublicShare     | Optional[list[bytes]]                      |
      +-----------------+--------------------------------------------+
-     | InputShare      | Union[tuple[list[Flp.field],               |
-     |                 | list[Flp.field], Optional[bytes]],         |
-     |                 | tuple[bytes, bytes, Optional[bytes]]]      |
+     | InputShare      | tuple[list[F], list[F], Optional[bytes]] | |
+     |                 | tuple[bytes, bytes, Optional[bytes]]       |
      +-----------------+--------------------------------------------+
-     | OutShare        | list[Flp.field]                            |
+     | OutShare        | list[F]                                    |
      +-----------------+--------------------------------------------+
-     | AggShare        | list[Flp.field]                            |
+     | AggShare        | list[F]                                    |
      +-----------------+--------------------------------------------+
      | AggResult       | Flp.AggResult                              |
      +-----------------+--------------------------------------------+
-     | PrepState       | tuple[list[Flp.field], Optional[bytes]]    |
+     | PrepState       | tuple[list[F], Optional[bytes]]            |
      +-----------------+--------------------------------------------+
-     | PrepShare       | tuple[list[Flp.field], Optional[bytes]]    |
+     | PrepShare       | tuple[list[F], Optional[bytes]]            |
      +-----------------+--------------------------------------------+
      | PrepMessage     | Optional[bytes]                            |
      +-----------------+--------------------------------------------+
@@ -2881,6 +2922,15 @@ Table of Contents
    before accepting their output shares.  To do so, they exchange their
    parts of the joint randomness along with their shares of verifier(s).
 
+   Implementation note: the preparation state for Prio3 includes the
+   output share that will be released once preparation is complete.  In
+   some situations, it may be necessary for the Aggregator to encode
+   this state as bytes and store it for retrieval later on.  For all but
+   the first Aggregator, it is possible to save storage by storing the
+   measurement share rather than output share itself.  It is relatively
+   inexpensive to expand this seed into the input share, then truncate
+   the input share to get the output share.
+
    The definitions of constants and a few auxiliary functions are
    defined in Section 7.2.6.
 
@@ -2938,9 +2988,8 @@ Table of Contents
    def prep_next(
            self,
            prep_state: Prio3PrepState[F],
-           prep_msg: Optional[bytes]) -> Union[
-               tuple[Prio3PrepState[F], Prio3PrepShare[F]],
-               list[F]]:
+           prep_msg: Optional[bytes],
+       ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
        k_joint_rand = prep_msg
        (out_share, k_corrected_joint_rand) = prep_state
 
@@ -3209,14 +3258,18 @@ Table of Contents
    follows:
 
    struct {
-       Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
+       Prio3Field verifiers_share[
+           F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+       ];
    } Prio3PrepShare;
 
    When joint randomness is used, the prep share includes the
    Aggregator's joint randomness part and is structured as follows:
 
    struct {
-       Prio3Field verifiers_share[F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS];
+       Prio3Field verifiers_share[
+           F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+       ];
        Prio3Seed k_joint_rand_part;
    } Prio3PrepShareWithJointRand;
 
@@ -3238,26 +3291,49 @@ Table of Contents
        Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
-7.3.  A General-Purpose FLP
+7.3.  The FLP of [BBCGGI19]
+
+   +------------------+
+   | Prove            |
+   | +-------------+  |
+   | | Valid       |<---- input
+   | | +--------+  |<---- joint rand
+   | | | Gadget |  |  |<- prove rand
+   | | +--------+  |  |
+   | +-------------+  |
+   +------------------+
+    |
+    V proof
+
+    | proof (share)
+    V
+   +------------------+
+   | Query            |
+   | +-------------+  |
+   | | Valid       |<---- input (share)
+   | | +--------+  |<---- joint rand
+   | | | Gadget |  |  |<- query rand
+   | | +--------+  |  |
+   | +-------------+  |
+   +------------------+
+    |
+    V verifier (share)
+
+
+    | verifier
+    V
+   +------------------+
+   | Decide           |
+   +------------------+
+    |
+    V is_valid
+
+                               Figure 22: XXX
 
    This section describes an FLP based on the construction from in
    [BBCGGI19], Section 4.2.  We begin in Section 7.3.1 with an overview
    of their proof system and the extensions to their proof system made
    here.  The construction is specified in Section 7.3.3.
-
-      OPEN ISSUE We're not yet sure if specifying this general-purpose
-      FLP is desirable.  It might be preferable to specify specialized
-      FLPs for each data type that we want to standardize, for two
-      reasons.  First, clear and concise specifications are likely
-      easier to write for specialized FLPs rather than the general one.
-      Second, we may end up tailoring each FLP to the measurement type
-      in a way that improves performance, but breaks compatibility with
-      the general-purpose FLP.
-
-      In any case, we can't make this decision until we know which data
-      types to standardize, so for now, we'll stick with the general-
-      purpose construction.  The reference implementation can be found
-      at https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc.
 
       OPEN ISSUE Chris Wood points out that the this section reads more
       like a paper than a standard.  Eventually we'll want to work this
@@ -3435,8 +3511,7 @@ Table of Contents
         +-----------------+---------------------------------------+
         | AggResult       | Type of the aggregate result          |
         +-----------------+---------------------------------------+
-        | field           | An FFT-friendly finite field as       |
-        |                 | defined in Section 6.1.2              |
+        | field           | Class object for the field            |
         +-----------------+---------------------------------------+
 
                    Table 7: Validity circuit parameters.
@@ -3459,14 +3534,14 @@ Table of Contents
    length of an aggregatable output, and converting an aggregated output
    to an aggregate result:
 
-   *  valid.encode(measurement: Measurement) -> list[Field] returns a
-      vector of length MEAS_LEN representing a measurement.
+   *  valid.encode(measurement: Measurement) -> list[F] returns a vector
+      of length MEAS_LEN representing a measurement.
 
-   *  valid.truncate(meas: list[Field]) -> list[Field] returns a vector
-      of length OUTPUT_LEN representing an aggregatable output.
+   *  valid.truncate(meas: list[F]) -> list[F] returns a vector of
+      length OUTPUT_LEN representing an aggregatable output.
 
-   *  valid.decode(output: list[Field], num_measurements: int) ->
-      AggResult returns an aggregate result.
+   *  valid.decode(output: list[F], num_measurements: int) -> AggResult
+      returns an aggregate result.
 
    Finally, the following methods are derived for each concrete Valid:
 
@@ -3505,21 +3580,17 @@ Table of Contents
        if len(joint_rand) != self.JOINT_RAND_LEN:
            raise ValueError('incorrect joint randomness length')
 
-             Figure 22: Derived methods for validity circuits.
+             Figure 23: Derived methods for validity circuits.
 
 7.3.3.  Construction
 
-   This section specifies FlpGeneric, an implementation of the Flp
-   interface (Section 7.1).  It has as a generic parameter a validity
-   circuit Valid implementing the interface defined in Section 7.3.2.
+   This section specifies an implementation of the Flp interface
+   (Section 7.1).  It has as a generic parameter a validity circuit
+   Valid implementing the interface defined in Section 7.3.2.
 
-      NOTE A reference implementation can be found in
-      https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/
-      flp_generic.py.
-
-   The FLP parameters for FlpGeneric are defined in Table 8.  The
-   required methods for generating the proof, generating the verifier,
-   and deciding validity are specified in the remaining subsections.
+   The parameters are defined in Table 8.  The required methods for
+   generating the proof, generating the verifier, and deciding validity
+   are specified in the remaining subsections.
 
    In the remainder, we let [n] denote the set {1, ..., n} for positive
    integer n.  We also define the following constants:
@@ -3536,7 +3607,7 @@ Table of Contents
 
       -  Let P_i = next_power_of_2(M_i+1)
 
-      -  Let alpha_i = Field.gen()^(Field.GEN_ORDER / P_i)
+      -  Let alpha_i = field.gen()^(field.GEN_ORDER / P_i)
 
       +================+============================================+
       | Parameter      | Value                                      |
@@ -3557,10 +3628,8 @@ Table of Contents
       +----------------+--------------------------------------------+
       | Measurement    | valid.Measurement                          |
       +----------------+--------------------------------------------+
-      | field          | valid.field                                |
-      +----------------+--------------------------------------------+
 
-                   Table 8: FLP Parameters of FlpGeneric.
+                  Table 8: Parameters of FLP of BBCGGI19.
 
 7.3.3.1.  Proof Generation
 
@@ -3584,7 +3653,7 @@ Table of Contents
 
        *  Let w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]].
 
-       *  Let padded_w = w + Field.zeros(P_i - len(w)).
+       *  Let padded_w = w + field.zeros(P_i - len(w)).
 
           NOTE We pad w to the nearest power of 2 so that we can use FFT
           for interpolating the wire polynomials.  Perhaps there is some
@@ -3599,7 +3668,7 @@ Table of Contents
        *  Let poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-
           1]).  That is, evaluate the circuit G_i on the wire
           polynomials for the ith gadget.  (Arithmetic is in the ring of
-          polynomials over Field.)
+          polynomials over field.)
 
    The proof is the vector proof = seed_1 + coeff_1 + ... + seed_H +
    coeff_H, where coeff_i is the vector of coefficients of poly_gadget_i
@@ -3672,25 +3741,33 @@ Table of Contents
 7.4.  Instantiations
 
    This section specifies instantiations of Prio3 for various
-   measurement types.  Each uses FlpGeneric as the FLP (Section 7.3) and
-   is determined by a validity circuit (Section 7.3.2) and a XOF
-   (Section 6.2).  Test vectors for each can be found in Appendix "Test
-   Vectors".
-
-      NOTE Reference implementations of each of these VDAFs can be found
-      in https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/poc/
-      vdaf_prio3.sage.
+   measurement types.  Each is determined by a field (Section 6.1), a
+   validity circuit (Section 7.3.2), an XOF (Section 6.2). and the
+   number of proofs to generate and verify.  Test vectors for each can
+   be found in Appendix "Test Vectors".
 
 7.4.1.  Prio3Count
+
+             +===========+==================================+
+             | Parameter | Value                            |
+             +===========+==================================+
+             | Valid     | Count(Field64) (this section)    |
+             +-----------+----------------------------------+
+             | Field     | Field64 (Table 3)                |
+             +-----------+----------------------------------+
+             | PROOFS    | 1                                |
+             +-----------+----------------------------------+
+             | Xof       | XofTurboShake128 (Section 6.2.1) |
+             +-----------+----------------------------------+
+
+                   Table 9: Parameters for Prio3Count.
 
    Our first instance of Prio3 is for a simple counter: Each measurement
    is either one or zero and the aggregate result is the sum of the
    measurements.
 
-   This instance uses XofTurboShake128 (Section 6.2.1) as its XOF.  Its
-   validity circuit, denoted Count, uses Field64 (Table 3) as its finite
-   field.  Its gadget, denoted Mul, is the degree-2, arity-2 gadget
-   defined as
+   Its validity circuit, denoted Count, uses the following degree-2,
+   arity-2 gadget, denoted Mul:
 
    def eval(self, _field: type[F], inp: list[F]) -> F:
        self.check_gadget_eval(inp)
@@ -3703,9 +3780,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field64],
-           joint_rand: list[Field64],
-           _num_shares: int) -> list[Field64]:
+           meas: list[F],
+           joint_rand: list[F],
+           _num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
        squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
        return [squared - meas[0]]
@@ -3713,56 +3790,66 @@ Table of Contents
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.
 
-                  +=================+===================+
-                  | Parameter       | Value             |
-                  +=================+===================+
-                  | GADGETS         | [Mul]             |
-                  +-----------------+-------------------+
-                  | GADGET_CALLS    | [1]               |
-                  +-----------------+-------------------+
-                  | MEAS_LEN        | 1                 |
-                  +-----------------+-------------------+
-                  | OUTPUT_LEN      | 1                 |
-                  +-----------------+-------------------+
-                  | JOINT_RAND_LEN  | 0                 |
-                  +-----------------+-------------------+
-                  | EVAL_OUTPUT_LEN | 1                 |
-                  +-----------------+-------------------+
-                  | Measurement     | int in range(2)   |
-                  +-----------------+-------------------+
-                  | AggResult       | int               |
-                  +-----------------+-------------------+
-                  | field           | Field64 (Table 3) |
-                  +-----------------+-------------------+
+                   +=================+=================+
+                   | Parameter       | Value           |
+                   +=================+=================+
+                   | GADGETS         | [Mul]           |
+                   +-----------------+-----------------+
+                   | GADGET_CALLS    | [1]             |
+                   +-----------------+-----------------+
+                   | MEAS_LEN        | 1               |
+                   +-----------------+-----------------+
+                   | OUTPUT_LEN      | 1               |
+                   +-----------------+-----------------+
+                   | JOINT_RAND_LEN  | 0               |
+                   +-----------------+-----------------+
+                   | EVAL_OUTPUT_LEN | 1               |
+                   +-----------------+-----------------+
+                   | Measurement     | int in range(2) |
+                   +-----------------+-----------------+
+                   | AggResult       | int             |
+                   +-----------------+-----------------+
 
-                      Table 9: Parameters of validity
+                      Table 10: Parameters of validity
                                circuit Count.
 
 7.4.2.  Prio3Sum
+
+            +===========+====================================+
+            | Parameter | Value                              |
+            +===========+====================================+
+            | Valid     | Sum(Field128, bits) (this section) |
+            +-----------+------------------------------------+
+            | Field     | Field128 (Table 3)                 |
+            +-----------+------------------------------------+
+            | PROOFS    | 1                                  |
+            +-----------+------------------------------------+
+            | Xof       | XofTurboShake128 (Section 6.2.1)   |
+            +-----------+------------------------------------+
+
+                    Table 11: Parameters for Prio3Sum.
 
    The next instance of Prio3 supports summing of integers in a pre-
    determined range.  Each measurement is an integer in range [0,
    2^bits), where bits is an associated parameter.
 
-   This instance of Prio3 uses XofTurboShake128 (Section 6.2.1) as its
-   XOF.  Its validity circuit, denoted Sum, uses Field128 (Table 3) as
-   its finite field.  The measurement is encoded as a length-bits vector
-   of field elements, where the lth element of the vector represents the
-   lth bit of the summand:
+   The validity circuit is denoted Sum. The measurement is encoded as a
+   length-bits vector of field elements, where the lth element of the
+   vector represents the lth bit of the summand:
 
-   def encode(self, measurement: int) -> list[Field128]:
+   def encode(self, measurement: int) -> list[F]:
        if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
            raise ValueError('measurement out of range')
 
        return self.field.encode_into_bit_vector(measurement,
                                                 self.MEAS_LEN)
 
-   def truncate(self, meas: list[Field128]) -> list[Field128]:
+   def truncate(self, meas: list[F]) -> list[F]:
        return [self.field.decode_from_bit_vector(meas)]
 
    def decode(
            self,
-           output: list[Field128],
+           output: list[F],
            _num_measurements: int) -> int:
        return output[0].as_unsigned()
 
@@ -3778,9 +3865,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field128],
-           joint_rand: list[Field128],
-           _num_shares: int) -> list[Field128]:
+           meas: list[F],
+           joint_rand: list[F],
+           _num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
        out = self.field(0)
        r = joint_rand[0]
@@ -3808,13 +3895,27 @@ Table of Contents
                 +-----------------+-----------------------+
                 | AggResult       | int                   |
                 +-----------------+-----------------------+
-                | field           | Field128 (Table 3)    |
-                +-----------------+-----------------------+
 
-                      Table 10: Parameters of validity
+                      Table 12: Parameters of validity
                                 circuit Sum.
 
 7.4.3.  Prio3SumVec
+
+              +===========+================================+
+              | Parameter | Value                          |
+              +===========+================================+
+              | Valid     | SumVec(Field128, length, bits, |
+              |           | chunk_lengh) (this section)    |
+              +-----------+--------------------------------+
+              | Field     | Field128 (Table 3)             |
+              +-----------+--------------------------------+
+              | PROOFS    | 1                              |
+              +-----------+--------------------------------+
+              | Xof       | XofTurboShake128               |
+              |           | (Section 6.2.1)                |
+              +-----------+--------------------------------+
+
+                  Table 13: Parameters for Prio3SumVec.
 
    This instance of Prio3 supports summing a vector of integers.  It has
    three parameters, length, bits, and chunk_length.  Each measurement
@@ -3823,14 +3924,10 @@ Table of Contents
    range [0, 2^bits).  It is RECOMMENDED to set chunk_length to an
    integer near the square root of length * bits (see Section 7.4.3.1).
 
-   This instance uses XofTurboShake128 (Section 6.2.1) as its XOF.  Its
-   validity circuit, denoted SumVec, uses Field128 (Table 3) as its
-   finite field.
-
-   Measurements are encoded as a vector of field elements with length
-   length * bits.  The field elements in the encoded vector represent
-   all the bits of the measurement vector's elements, consecutively, in
-   LSB to MSB order:
+   The validity circuit is denoted SumVec.  Measurements are encoded as
+   a vector of field elements with length length * bits.  The field
+   elements in the encoded vector represent all the bits of the
+   measurement vector's elements, consecutively, in LSB to MSB order:
 
    def encode(self, measurement: list[int]) -> list[F]:
        if len(measurement) != self.length:
@@ -3873,7 +3970,7 @@ Table of Contents
    subcircuit.  It takes in a list of inputs and passes them through to
    instances of the subcircuit in the same order.  It returns the sum of
    the subcircuit outputs.  Note that only the ParallelSum gadget
-   itself, and not its subcircuit, participates in FlpGeneric's wire
+   itself, and not its subcircuit, participates in the FLP's wire
    recording during evaluation, gadget consistency proofs, and proof
    validation, even though the subcircuit is provided to ParallelSum as
    an implementation of the Gadget interface.
@@ -3957,10 +4054,8 @@ Table of Contents
          +-----------------+------------------------------------+
          | AggResult       | list[int]                          |
          +-----------------+------------------------------------+
-         | field           | Field128 (Table 3)                 |
-         +-----------------+------------------------------------+
 
-             Table 11: Parameters of validity circuit SumVec.
+             Table 14: Parameters of validity circuit SumVec.
 
 7.4.3.1.  Selection of ParallelSum chunk length
 
@@ -3970,16 +4065,32 @@ Table of Contents
    near the square root of the length of the measurement.  However, the
    relationship between VDAF parameters and proof length is complicated,
    involving two forms of rounding (the circuit pads the inputs to its
-   last ParallelSum gadget call, up to the chunk length, and FlpGeneric
-   rounds the degree of wire polynomials -- determined by the number of
-   times a gadget is called -- up to the next power of two).  Therefore,
-   the optimal choice of chunk_length for a concrete measurement size
-   will vary, and must be found through trial and error.  Setting
-   chunk_length equal to the square root of the appropriate measurement
-   length will result in proofs up to 50% larger than the optimal proof
-   size.
+   last ParallelSum gadget call, up to the chunk length, and proof
+   system rounds the degree of wire polynomials -- determined by the
+   number of times a gadget is called -- up to the next power of two).
+   Therefore, the optimal choice of chunk_length for a concrete
+   measurement size will vary, and must be found through trial and
+   error.  Setting chunk_length equal to the square root of the
+   appropriate measurement length will result in proofs up to 50% larger
+   than the optimal proof size.
 
 7.4.4.  Prio3Histogram
+
+                +===========+=============================+
+                | Parameter | Value                       |
+                +===========+=============================+
+                | Valid     | Histogram(Field128, length, |
+                |           | chunk_lengh) (this section) |
+                +-----------+-----------------------------+
+                | Field     | Field128 (Table 3)          |
+                +-----------+-----------------------------+
+                | PROOFS    | 1                           |
+                +-----------+-----------------------------+
+                | Xof       | XofTurboShake128            |
+                |           | (Section 6.2.1)             |
+                +-----------+-----------------------------+
+
+                  Table 15: Parameters for Prio3Histogram.
 
    This instance of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
@@ -3990,28 +4101,26 @@ Table of Contents
    into.  The aggregate result counts the number of measurements in each
    bucket.
 
-   This instance of Prio3 uses XofTurboShake128 (Section 6.2.1) as its
-   XOF.  Its validity circuit, denoted Histogram, uses Field128
-   (Table 3) as its finite field.  It has two parameters, length, the
-   number of histogram buckets, and chunk_length, which is used by by a
-   circuit optimization described below.  It is RECOMMENDED to set
-   chunk_length to an integer near the square root of length (see
+   The validity circuit is denoted Histogram.  It has two parameters,
+   length, the number of histogram buckets, and chunk_length, which is
+   used by by a circuit optimization described below.  It is RECOMMENDED
+   to set chunk_length to an integer near the square root of length (see
    Section 7.4.3.1).
 
    The measurement is encoded as a one-hot vector representing the
    bucket into which the measurement falls:
 
-   def encode(self, measurement: int) -> list[Field128]:
+   def encode(self, measurement: int) -> list[F]:
        encoded = [self.field(0)] * self.length
        encoded[measurement] = self.field(1)
        return encoded
 
-   def truncate(self, meas: list[Field128]) -> list[Field128]:
+   def truncate(self, meas: list[F]) -> list[F]:
        return meas
 
    def decode(
            self,
-           output: list[Field128],
+           output: list[F],
            _num_measurements: int) -> list[int]:
        return [bucket_count.as_unsigned() for bucket_count in output]
 
@@ -4033,9 +4142,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field128],
-           joint_rand: list[Field128],
-           num_shares: int) -> list[Field128]:
+           meas: list[F],
+           joint_rand: list[F],
+           num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
 
        # Check that each bucket is one or zero.
@@ -4044,7 +4153,7 @@ Table of Contents
        r_power = r
        shares_inv = self.field(num_shares).inv()
        for i in range(self.GADGET_CALLS[0]):
-           inputs: list[Optional[Field128]]
+           inputs: list[Optional[F]]
            inputs = [None] * (2 * self.chunk_length)
            for j in range(self.chunk_length):
                index = i * self.chunk_length + j
@@ -4060,7 +4169,7 @@ Table of Contents
 
            range_check += self.GADGETS[0].eval(
                self.field,
-               cast(list[Field128], inputs),
+               cast(list[F], inputs),
            )
 
        # Check that the buckets sum to 1.
@@ -4094,12 +4203,25 @@ Table of Contents
     +-----------------+-----------------------------------------------+
     | AggResult       | list[int]                                     |
     +-----------------+-----------------------------------------------+
-    | field           | Field128 (Table 3)                            |
-    +-----------------+-----------------------------------------------+
 
-            Table 12: Parameters of validity circuit Histogram.
+            Table 16: Parameters of validity circuit Histogram.
 
 7.4.5.  Prio3MultihotCountVec
+
+          +===========+=========================================+
+          | Parameter | Value                                   |
+          +===========+=========================================+
+          | Valid     | MultihotCountVec(Field128, length,      |
+          |           | max_weight, chunk_lengh) (this section) |
+          +-----------+-----------------------------------------+
+          | Field     | Field128 (Table 3)                      |
+          +-----------+-----------------------------------------+
+          | PROOFS    | 1                                       |
+          +-----------+-----------------------------------------+
+          | Xof       | XofTurboShake128 (Section 6.2.1)        |
+          +-----------+-----------------------------------------+
+
+              Table 17: Parameters for Prio3MultihotCountVec.
 
    For this instance of Prio3, each measurement is a vector of ones and
    zeros, where the number of ones is bounded.  This provides a
@@ -4110,12 +4232,11 @@ Table of Contents
    each entry to one with some small probability.)
 
    Prio3MultihotCountVec uses XofTurboShake128 (Section 6.2.1) as its
-   XOF.  Its validity circuit, denoted MultihotCountVec, uses Field128
-   (Table 3) as its default finite field.  It has three parameters:
-   length, the number of of entries in the count vector; max_weight, the
-   maximum number of non-zero entries (i.e., the weight must be at most
-   max_weight); and chunk_length, used the same way as in Section 7.4.3
-   and Section 7.4.4.
+   XOF.  Its validity circuit is denoted MultihotCountVec.  It has three
+   parameters: length, the number of of entries in the count vector;
+   max_weight, the maximum number of non-zero entries (i.e., the weight
+   must be at most max_weight); and chunk_length, used the same way as
+   in Section 7.4.3 and Section 7.4.4.
 
    Validation works as follows.  Let
 
@@ -4135,7 +4256,7 @@ Table of Contents
 
    Encoding, truncation, and decoding are defined as follows:
 
-   def encode(self, measurement: list[int]) -> list[Field128]:
+   def encode(self, measurement: list[int]) -> list[F]:
        if len(measurement) != self.length:
            raise ValueError('invalid Client measurement length')
 
@@ -4152,12 +4273,12 @@ Table of Contents
            self.bits_for_weight)
        return encoded
 
-   def truncate(self, meas: list[Field128]) -> list[Field128]:
+   def truncate(self, meas: list[F]) -> list[F]:
        return meas[:self.length]
 
    def decode(
            self,
-           output: list[Field128],
+           output: list[F],
            _num_measurements: int) -> list[int]:
        return [bucket_count.as_unsigned() for bucket_count in output]
 
@@ -4165,9 +4286,9 @@ Table of Contents
 
    def eval(
            self,
-           meas: list[Field128],
-           joint_rand: list[Field128],
-           num_shares: int) -> list[Field128]:
+           meas: list[F],
+           joint_rand: list[F],
+           num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
 
        # Check that each entry in the input vector is one or zero.
@@ -4176,7 +4297,7 @@ Table of Contents
        r_power = r
        shares_inv = self.field(num_shares).inv()
        for i in range(self.GADGET_CALLS[0]):
-           inputs: list[Optional[Field128]]
+           inputs: list[Optional[F]]
            inputs = [None] * (2 * self.chunk_length)
            for j in range(self.chunk_length):
                index = i * self.chunk_length + j
@@ -4192,7 +4313,7 @@ Table of Contents
 
            range_check += self.GADGETS[0].eval(
                self.field,
-               cast(list[Field128], inputs),
+               cast(list[F], inputs),
            )
 
        # Check that the weight `offset` plus the sum of the counters
@@ -4226,10 +4347,8 @@ Table of Contents
           +----------------+------------------------------------+
           | AggResult      | list[int]                          |
           +----------------+------------------------------------+
-          | field          | Field128 (Table 3)                 |
-          +----------------+------------------------------------+
 
-                  Table 13: Parameters of validity circuit
+                  Table 18: Parameters of validity circuit
                              MultihotCountVec.
 
 8.  Poplar1
@@ -4334,17 +4453,16 @@ Table of Contents
    "extractable" as defined in [BBCGGI21], Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 14.  In the remainder we write Output as shorthand for the type
-   Union[list[list[FieldInner]], list[list[FieldLeaf]]].  (This type
-   denotes either a vector of inner node field elements or leaf node
-   field elements.)  The scheme is comprised of the following
-   algorithms:
+   Table 19.  In the remainder we write Output as shorthand for the type
+   list[list[FieldInner]] | list[list[FieldLeaf]].  (This type denotes
+   either a vector of inner node field elements or leaf node field
+   elements.)  The scheme is comprised of the following algorithms:
 
    *  idpf.gen(alpha: int, beta_inner: list[list[FieldInner]],
-      beta_leaf: list[FieldLeaf], binder: bytes, rand: bytes) ->
+      beta_leaf: list[FieldLeaf], nonce: bytes, rand: bytes) ->
       tuple[bytes, list[bytes]] is the randomized IDPF-key generation
       algorithm.  Its inputs are the index alpha the values beta, and a
-      binder string.
+      nonce string.
 
       The output is a public part that is sent to all Aggregators and a
       vector of private IDPF keys, one for each aggregator.  The binder
@@ -4365,23 +4483,19 @@ Table of Contents
 
       -  rand MUST be generated by a CSPRNG and have length RAND_SIZE.
 
-      -  binder MUST be chosen uniformly at random by the Client (see
-         Section 9.2).
-
-            TODO If the binder needs to be random, then we need to
-            specify its length so that the user knows how many bytes to
-            sample.
+      -  nonce MUST be of length Idpf.NONCE_SIZE and chosen uniformly at
+         random by the Client (see Section 9.2).
 
          TODO(issue #255) Decide whether to treat the public share as an
          opaque byte string or to replace it with an explicit type.
 
    *  idpf.eval(agg_id: int, public_share: bytes, key: bytes, level:
-      int, prefixes: tuple[int, ...], binder: bytes) -> Output is the
+      int, prefixes: tuple[int, ...], nonce: bytes) -> Output is the
       deterministic, stateless IDPF-key evaluation algorithm run by each
       Aggregator.  Its inputs are the Aggregator's unique identifier,
       the public share distributed to all of the Aggregators, the
       Aggregator's IDPF key, the "level" at which to evaluate the IDPF,
-      the sequence of candidate prefixes, and a binder string.  It
+      the sequence of candidate prefixes, and a nonce string.  It
       returns the share of the value corresponding to each candidate
       prefix.
 
@@ -4405,7 +4519,7 @@ Table of Contents
 
    def current_field(
            self,
-           level: int) -> Union[type[FieldInner], type[FieldLeaf]]:
+           level: int) -> type[FieldInner] | type[FieldLeaf]:
        if level < self.BITS - 1:
            return self.field_inner
        return self.field_leaf
@@ -4430,6 +4544,8 @@ Table of Contents
     | RAND_SIZE  | Size of the random string consumed by the IDPF-key |
     |            | generator.  Equal to twice the XOF's seed size.    |
     +------------+----------------------------------------------------+
+    | NONCE_SIZE | Size of the randon nonce generated by the Client.  |
+    +------------+----------------------------------------------------+
     | KEY_SIZE   | Size in bytes of each IDPF key                     |
     +------------+----------------------------------------------------+
     | FieldInner | Implementation of Field (Section 6.1) used for     |
@@ -4438,13 +4554,13 @@ Table of Contents
     | FieldLeaf  | Implementation of Field used for values of leaf    |
     |            | nodes                                              |
     +------------+----------------------------------------------------+
-    | Output     | Alias of Union[list[list[FieldInner]],             |
-    |            | list[list[FieldLeaf]]]                             |
+    | Output     | Alias of list[list[FieldInner]] |                  |
+    |            | list[list[FieldLeaf]]                              |
     +------------+----------------------------------------------------+
-    | FieldVec   | Alias of Union[list[FieldInner], list[FieldLeaf]]  |
+    | FieldVec   | Alias of list[FieldInner] | list[FieldLeaf]        |
     +------------+----------------------------------------------------+
 
-         Table 14: Constants and types defined by a concrete IDPF.
+         Table 19: Constants and types defined by a concrete IDPF.
 
 8.1.1.  Encoding inputs as indices
 
@@ -4471,10 +4587,10 @@ Table of Contents
    interface (Section 5).  It is defined in terms of any Idpf
    (Section 8.1) for which SHARES == 2 and VALUE_LEN == 2 and an
    implementation of Xof (Section 6.2).  The associated constants and
-   types required by the Vdaf interface are defined in Table 15.  The
+   types required by the Vdaf interface are defined in Table 20.  The
    methods required for sharding, preparation, aggregation, and
    unsharding are described in the remaining subsections.  These methods
-   make use of constants defined in Table 16.
+   make use of constants defined in Table 21.
 
          +=================+====================================+
          | Parameter       | Value                              |
@@ -4511,7 +4627,7 @@ Table of Contents
          | PrepMessage     | Optional[FieldVec]                 |
          +-----------------+------------------------------------+
 
-                  Table 15: VDAF parameters for Poplar1.
+                  Table 20: VDAF parameters for Poplar1.
 
                     +========================+=======+
                     | Variable               | Value |
@@ -4525,7 +4641,7 @@ Table of Contents
                     | USAGE_VERIFY_RAND: int | 4     |
                     +------------------------+-------+
 
-                       Table 16: Constants used by
+                       Table 21: Constants used by
                                  Poplar1.
 
 8.2.1.  Sharding
@@ -4660,7 +4776,7 @@ Table of Contents
        input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
        return (public_share, input_shares)
 
-               Figure 23: The sharding algorithm for Poplar1.
+               Figure 24: The sharding algorithm for Poplar1.
 
 8.2.2.  Preparation
 
@@ -4764,15 +4880,14 @@ Table of Contents
    def prep_next(
            self,
            prep_state: Poplar1PrepState,
-           prep_msg: Optional[FieldVec]) -> Union[
-               tuple[Poplar1PrepState, FieldVec],
-               FieldVec]:
+           prep_msg: Optional[FieldVec]
+       ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
        prev_sketch = cast(list[Field], prep_msg)
        (step, level, prep_mem) = prep_state
 
        if step == b'evaluate sketch':
            if prev_sketch is None:
-               prev_sketch = self.idpf.current_field(level).zeros(3)
+               raise ValueError('expected value, got none')
            elif len(prev_sketch) != 3:
                raise ValueError('incorrect sketch length')
            A_share = cast(Field, prep_mem[0])
@@ -4830,7 +4945,7 @@ Table of Contents
        else:
            raise ValueError('incorrect sketch length')
 
-                 Figure 24: Preparation state for Poplar1.
+                 Figure 25: Preparation state for Poplar1.
 
 8.2.3.  Validity of Aggregation Parameters
 
@@ -4880,7 +4995,7 @@ Table of Contents
                return False
        return True
 
-         Figure 25: Validity of aggregation parameters for Poplar1.
+         Figure 26: Validity of aggregation parameters for Poplar1.
 
 8.2.4.  Aggregation
 
@@ -4897,7 +5012,7 @@ Table of Contents
            agg_share = vec_add(agg_share, cast(list[Field], out_share))
        return cast(FieldVec, agg_share)
 
-               Figure 26: Aggregation algorithm for Poplar1.
+               Figure 27: Aggregation algorithm for Poplar1.
 
 8.2.5.  Unsharding
 
@@ -4916,7 +5031,7 @@ Table of Contents
            agg = vec_add(agg, cast(list[Field], agg_share))
        return [x.as_unsigned() for x in agg]
 
-        Figure 27: Computation of the aggregate result for Poplar1.
+        Figure 28: Computation of the aggregate result for Poplar1.
 
 8.2.6.  Message Serialization
 
@@ -5082,19 +5197,17 @@ Table of Contents
 
 8.3.  The IDPF scheme of [BBCGGI21]
 
-   In this section we specify a concrete IDPF, called IdpfPoplar,
-   suitable for instantiating Poplar1.  The scheme gets its name from
-   the name of the protocol of [BBCGGI21].
-
-      TODO We should consider giving IdpfPoplar a more distinctive name.
+   In this section we specify a concrete IDPF suitable for instantiating
+   Poplar1.  The scheme gets its name from the name of the protocol of
+   [BBCGGI21].
 
    The constant and type definitions required by the Idpf interface are
-   given in Table 17.
+   given in Table 22.
 
-   IdpfPoplar requires a XOF for deriving the output shares, as well as
-   a variety of other artifacts used internally.  For performance
-   reasons, we instantiate this object using XofFixedKeyAes128
-   (Section 6.2.2).  See Section 9.5 for justification of this choice.
+   Our IDPF requires an XOF for deriving the output shares, as well as a
+   variety of other artifacts used internally.  For performance reasons,
+   we instantiate this object using XofFixedKeyAes128 (Section 6.2.2).
+   See Section 9.5 for justification of this choice.
 
                    +============+======================+
                    | Parameter  | Value                |
@@ -5112,8 +5225,9 @@ Table of Contents
                    | FieldLeaf  | Field255 (Table 3)   |
                    +------------+----------------------+
 
-                        Table 17: Constants and type
-                        definitions for IdpfPoplar.
+                        Table 22: Constants and type
+                        definitions for the IDPF of
+                                 BBCGGI21.
 
 8.3.1.  Key Generation
 
@@ -5130,7 +5244,7 @@ Table of Contents
            alpha: int,
            beta_inner: list[list[Field64]],
            beta_leaf: list[Field255],
-           binder: bytes,
+           nonce: bytes,
            rand: bytes) -> tuple[bytes, list[bytes]]:
        if alpha not in range(2 ** self.BITS):
            raise ValueError("alpha out of range")
@@ -5154,8 +5268,8 @@ Table of Contents
            lose = 1 - keep
            bit = Field2(keep)
 
-           (s0, t0) = self.extend(seed[0], binder)
-           (s1, t1) = self.extend(seed[1], binder)
+           (s0, t0) = self.extend(seed[0], nonce)
+           (s1, t1) = self.extend(seed[1], nonce)
            seed_cw = xor(s0[lose], s1[lose])
            ctrl_cw = (
                t0[0] + t1[0] + bit + Field2(1),
@@ -5164,8 +5278,8 @@ Table of Contents
 
            x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
            x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
-           (seed[0], w0) = self.convert(level, x0, binder)
-           (seed[1], w1) = self.convert(level, x1, binder)
+           (seed[0], w0) = self.convert(level, x0, nonce)
+           (seed[1], w1) = self.convert(level, x1, nonce)
            ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
            ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
@@ -5191,7 +5305,7 @@ Table of Contents
        public_share = self.encode_public_share(correction_words)
        return (public_share, key)
 
-          Figure 28: IDPF-key generation algorithm of IdpfPoplar.
+           Figure 29: IDPF-key generation algorithm of BBCGGI21.
 
 8.3.2.  Key Evaluation
 
@@ -5208,9 +5322,8 @@ Table of Contents
            key: bytes,
            level: int,
            prefixes: Sequence[int],
-           binder: bytes) -> Union[
-               list[list[Field64]],
-               list[list[Field255]]]:
+           nonce: bytes,
+       ) -> list[list[Field64]] | list[list[Field255]]:
        if agg_id not in range(self.SHARES):
            raise ValueError('aggregator id out of range')
        if level not in range(self.BITS):
@@ -5237,13 +5350,13 @@ Table of Contents
 
                # Implementation note: Typically the current round of
                # candidate prefixes would have been derived from
-               # aggregate results computed during previous rounds. For
-               # example, when using `IdpfPoplar` to compute heavy
-               # hitters, a string whose hit count exceeded the given
-               # threshold in the last round would be the prefix of each
-               # `prefix` in the current round. (See [BBCGGI21,
-               # Section 5.1].) In this case, part of the path would
-               # have already been traversed.
+               # aggregate results computed during previous rounds.
+               # For example, when using the IDPF to compute heavy
+               # hitters, a string whose hit count exceeded the
+               # given threshold in the last round would be the
+               # prefix of each `prefix` in the current round. (See
+               # [BBCGGI21, Section 5.1].) In this case, part of the
+               # path would have already been traversed.
                #
                # Re-computing nodes along previously traversed paths is
                # wasteful. Implementations can eliminate this added
@@ -5255,14 +5368,14 @@ Table of Contents
                    correction_words[current_level],
                    current_level,
                    bit,
-                   binder,
+                   nonce,
                )
            if agg_id == 0:
                out_share.append(cast(list[Field], y))
            else:
                out_share.append(vec_neg(cast(list[Field], y)))
        return cast(
-           Union[list[list[Field64]], list[list[Field255]]],
+           list[list[Field64]] | list[list[Field255]],
            out_share,
        )
 
@@ -5273,7 +5386,7 @@ Table of Contents
            correction_word: CorrectionWordTuple,
            level: int,
            bit: int,
-           binder: bytes) -> tuple[bytes, Field2, FieldVec]:
+           nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
        """
        Compute the next node in the IDPF tree along the path determined
        by a candidate prefix. The next node is determined by `bit`, the
@@ -5284,14 +5397,14 @@ Table of Contents
        seed_cw = correction_word[0]
        ctrl_cw = correction_word[1]
        w_cw = cast(list[Field], correction_word[2])
-       (s, t) = self.extend(prev_seed, binder)
+       (s, t) = self.extend(prev_seed, nonce)
        s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
        s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
        t[0] += ctrl_cw[0] * prev_ctrl
        t[1] += ctrl_cw[1] * prev_ctrl
 
        next_ctrl = t[bit]
-       convert_output = self.convert(level, s[bit], binder)
+       convert_output = self.convert(level, s[bit], nonce)
        next_seed = convert_output[0]
        y = cast(list[Field], convert_output[1])
        # Implementation note: Here we add the correction word to the
@@ -5303,15 +5416,15 @@ Table of Contents
 
        return (next_seed, next_ctrl, cast(FieldVec, y))
 
-       Figure 29: IDPF-evaluation generation algorithm of IdpfPoplar.
+        Figure 30: IDPF-evaluation generation algorithm of BBCGGI21.
 
 8.3.3.  Auxiliary Functions
 
    def extend(
            self,
            seed: bytes,
-           binder: bytes) -> tuple[list[bytes], list[Field2]]:
-       xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), binder)
+           nonce: bytes) -> tuple[list[bytes], list[Field2]]:
+       xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), nonce)
        s = [
            bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
            bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
@@ -5328,8 +5441,8 @@ Table of Contents
            self,
            level: int,
            seed: bytes,
-           binder: bytes) -> tuple[bytes, FieldVec]:
-       xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), binder)
+           nonce: bytes) -> tuple[bytes, FieldVec]:
+       xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), nonce)
        next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
        field = self.current_field(level)
        w = xof.next_vec(field, self.VALUE_LEN)
@@ -5373,7 +5486,7 @@ Table of Contents
            raise ValueError('trailing bytes')
        return correction_words
 
-                Figure 30: Helper functions for IdpfPoplar.
+                 Figure 31: Helper functions for the IDPF.
 
    Here, pack_bits() takes a list of bits, packs each group of eight
    bits into a byte, in LSB to MSB order, padding the most significant
@@ -5387,14 +5500,14 @@ Table of Contents
 
 8.4.  Instantiation
 
-   By default, Poplar1 is instantiated with IdpfPoplar (VALUE_LEN == 2)
-   and XofTurboShake128 (Section 6.2.1).  This VDAF is suitable for any
-   positive value of BITS.  Test vectors can be found in Appendix "Test
-   Vectors".
+   By default, Poplar1 is instantiated with the IDPF in Section 8.3
+   (VALUE_LEN == 2) and XofTurboShake128 (Section 6.2.1).  This VDAF is
+   suitable for any positive value of BITS.  Test vectors can be found
+   in Appendix "Test Vectors".
 
 9.  Security Considerations
 
-   VDAFs have two essential security goals:
+   VDAFs (Section 5) have two essential security goals:
 
    1.  Privacy: An attacker that controls the Collector and a subset of
        Clients and Aggregators learns nothing about the measurements of
@@ -5618,14 +5731,14 @@ Table of Contents
    designed to be indifferentiable from a random oracle [MRH04], making
    it a suitable choice for most situations.
 
-   The one exception is the Idpf implementation IdpfPoplar Section 8.3.
-   Here, a random oracle is not needed to prove privacy, since the
-   analysis of [BBCGGI21], Proposition 1, only requires a Pseudorandom
-   Generator (PRG).  As observed in [GKWY20], a PRG can be instantiated
-   from a correlation-robust hash function H.  Informally, correlation
-   robustness requires that for a random r, H(xor(r, x)) is
-   computationally indistinguishable from a random function of x.  A PRG
-   can therefore be constructed as
+   The one exception is the IDPF of Section 8.3.  Here, a random oracle
+   is not needed to prove privacy, since the analysis of [BBCGGI21],
+   Proposition 1, only requires a Pseudorandom Generator (PRG).  As
+   observed in [GKWY20], a PRG can be instantiated from a correlation-
+   robust hash function H.  Informally, correlation robustness requires
+   that for a random r, H(xor(r, x)) is computationally
+   indistinguishable from a random function of x.  A PRG can therefore
+   be constructed as
 
    PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...
 
@@ -5675,6 +5788,17 @@ Table of Contents
    robustness for PROOFS == 2 is feasible, if impractical; but PROOFS ==
    1 is completely broken for such a small field.
 
+9.7.  Choosing the Number of Aggregators
+
+   Two Aggregators are required for privacy in our threat model, but
+   some (V)DAFs, including Prio3 (Section 7), allow for any number of
+   Aggregators, only one of which needs to be trusted in order for the
+   computation to be private.  To hedge against corruptions that happen
+   during the course of the attack, deployments may consider involving
+   more than two Aggregators as described for example in Section 5.9.
+   Note however that some schemes are not compatible with this mode of
+   operation, such as Poplar1.
+
 10.  IANA Considerations
 
    A codepoint for each (V)DAF in this document is defined in the table
@@ -5703,10 +5827,10 @@ Table of Contents
      | 0xFFFFFFFF    |                       |      |               |
      +---------------+-----------------------+------+---------------+
 
-                Table 18: Unique identifiers for (V)DAFs.
+                Table 23: Unique identifiers for (V)DAFs.
 
       TODO Add IANA considerations for the codepoints summarized in
-      Table 18.
+      Table 23.
 
 11.  References
 
@@ -5752,6 +5876,11 @@ Table of Contents
               Y. Ishai, "Arithmetic Sketching", CRYPTO 2023 , 2023,
               <https://ia.cr/2023/1012>.
 
+   [BGI15]    Boyle, E., Gilboa, N., and Y. Ishai, "Function Secret
+              Sharing", EUROCRYPT 2015 , 2015,
+              <https://www.iacr.org/archive/
+              eurocrypt2015/90560300/90560300.pdf>.
+
    [CGB17]    Corrigan-Gibbs, H. and D. Boneh, "Prio: Private, Robust,
               and Scalable Computation of Aggregate Statistics", NSDI
               2017 , 2017,
@@ -5768,8 +5897,8 @@ Table of Contents
               <https://doi.org/10.1007/3-540-45748-8_24>.
 
    [DPRS23]   Davis, H., Patton, C., Rosulek, M., and P. Schoppmann,
-              "Verifiable Distributed Aggregation Functions", n.d.,
-              <https://ia.cr/2023/130>.
+              "Verifiable Distributed Aggregation Functions", PETS
+              2023 , 2023, <https://ia.cr/2023/130>.
 
    [Dwo06]    Dwork, C., "Differential Privacy", ICALP 2006 , 2006,
               <https://link.springer.com/chapter/10.1007/11787006_1>.
@@ -5805,6 +5934,11 @@ Table of Contents
               2020, <https://link.springer.com/
               chapter/10.1007/978-3-030-56880-1_22>.
 
+   [MPDST25]  Mouris, D., Patton, C., Davis, H., Sarkar, P., and N. G.
+              Tsoutsos, "Mastic: Private Weighted Heavy-Hitters and
+              Attribute-Based Metrics", PETS 2025 , 2025,
+              <https://eprint.iacr.org/2024/221>.
+
    [MPRV09]   Mironov, I., Pandey, O., Reingold, O., and S. Vadhan,
               "Computational Differential Privacy", CRYPTO 2009 , n.d.,
               <https://link.springer.com/
@@ -5818,11 +5952,28 @@ Table of Contents
               <https://doi.org/10.1007/978-3-540-24638-1_2>.
 
    [OriginTelemetry]
-              "Origin Telemetry", 2020, <https://firefox-source-
+              "Origin Telemetry", 2020,
+              <https://web.archive.org/web/20221025174046/
+              https://firefox-source-
               docs.mozilla.org/toolkit/components/telemetry/collection/
               origin.html>.
 
 Acknowledgments
+
+   The impetus of this work is the success of recent deployments of
+   predecessors of Prio3.  The Mozilla Origin Telemetry project
+   [OriginTelemetry] and the Exposure Notification Private Analytics
+   collaboration among the Internet Security Research Group (ISRG),
+   Google, Apple, and others [ENPA] have together aggregated data from
+   hundreds of millions of users.
+
+   As the name implies, Prio3 is a descendant of the original Prio
+   construction [CGB17].  A second iteration was deployed in the [ENPA]
+   system, and like the VDAF described here, the ENPA system was built
+   from techniques introduced in [BBCGGI19] that significantly improve
+   communication cost.  That system was specialized for a particular
+   aggregation function; the goal of Prio3 is to provide the same level
+   of generality as the original construction.
 
    The security considerations in Section 9 are based largely on the
    security analysis of [DPRS23].  Thanks to Hannah Davis and Mike
@@ -5837,9 +5988,9 @@ Acknowledgments
 
 Test Vectors
 
-   [TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be
+   (TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be
    found at https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
-   test_vec.]
+   test_vec.)
 
    Test vectors cover the generation of input shares and the conversion
    of input shares into output shares.  Vectors specify the verification
