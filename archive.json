@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-08T00:49:42.888684+00:00",
+  "timestamp": "2024-08-11T00:53:44.060084+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -33429,18 +33429,26 @@
       ],
       "body": "Closes #283.\r\nBased on #386 (merge that first).\r\n\r\nAdd an implementation of the ping-pong API to the reference code. The\r\npseudocode currently in the draft doesn't compile, so replace it with\r\nthe tested, type-checked, and linted Python.\r\n\r\nAlso, in the draft, we don't need to list the encoding methods used by\r\nthe ping-pong API; these should be clear in context.",
       "createdAt": "2024-08-05T20:51:14Z",
-      "updatedAt": "2024-08-08T00:24:38Z",
+      "updatedAt": "2024-08-08T20:25:30Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "452ae27e7295d78eff9aefb28d9472b07f80195c",
+      "baseRefOid": "9ccd7545b7c2697fac983c72ac896cd87630cbef",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/283",
-      "headRefOid": "49421a9d9ef8d1e64a891aeca33d25c4ef2e2e35",
+      "headRefOid": "37177d1dadd134f134c384a6876a0ff5c371b8e5",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and squashed.",
+          "createdAt": "2024-08-08T20:25:29Z",
+          "updatedAt": "2024-08-08T20:25:29Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc6EUMLr",
@@ -33547,6 +33555,119 @@
               "updatedAt": "2024-08-08T00:24:38Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6EzpA4",
+          "commit": {
+            "abbreviatedOid": "49421a9"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-08T14:52:55Z",
+          "updatedAt": "2024-08-08T14:52:55Z",
+          "comments": [
+            {
+              "originalPosition": 263,
+              "body": "Nice, done.",
+              "createdAt": "2024-08-08T14:52:55Z",
+              "updatedAt": "2024-08-08T14:52:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6E0tAL",
+          "commit": {
+            "abbreviatedOid": "49421a9"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-08T16:53:21Z",
+          "updatedAt": "2024-08-08T16:53:21Z",
+          "comments": [
+            {
+              "originalPosition": 140,
+              "body": "Hmm, I'm exploring two options here, neither of which I think is very good.\r\n\r\nOption 1: define encoder/decoders for each message type:\r\n* encode_init_msg(prep_share)\r\n* encode_cont_msg(prep_msg, prep_share)\r\n* encode_finish_msg(prep_msg)\r\n\r\nOption 2: a single function for encoding each message type:\r\n```python3\r\ndef encode_msg(encoded_prep_msg: Optional[bytes],\r\n               encoded_prep_share: Optional[bytes]) -> bytes:\r\n    encoded = bytes()\r\n    if encoded_prep_msg == None and encoded_prep_share != None:\r\n        encoded += byte(0)  # initialize\r\n    elif encoded_prep_msg != None and encoded_prep_share != None:\r\n        encoded += byte(1)  # continue\r\n    elif encoded_prep_msg != None and encoded_prep_share == None:\r\n        encoded += byte(2)  # finish\r\n    else:\r\n        raise ValueError(\"cannot send empty message\")\r\n    if encoded_prep_msg != None:\r\n        encoded_prep_msg = cast(bytes, encoded_prep_msg)\r\n        encoded += to_be_bytes(len(encoded_prep_msg), 4)\r\n        encoded += encoded_prep_msg\r\n    if encoded_prep_share != None:\r\n        encoded_prep_share = cast(bytes, encoded_prep_share)\r\n        encoded += to_be_bytes(len(encoded_prep_share), 4)\r\n        encoded += encoded_prep_share\r\n    return encoded\r\n```\r\n\r\nThe decoder would return `tuple[Optional[bytes], Optional[bytes]]` and the caller has to check if it has it was it needs to proceed.\r\n\r\n",
+              "createdAt": "2024-08-08T16:53:21Z",
+              "updatedAt": "2024-08-08T16:54:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6E0tzx",
+          "commit": {
+            "abbreviatedOid": "49421a9"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-08T16:55:06Z",
+          "updatedAt": "2024-08-08T16:55:06Z",
+          "comments": [
+            {
+              "originalPosition": 140,
+              "body": "What I like about what we have currently is that it's explicit, relatively concise, and don't have a bunch of `if` statements.",
+              "createdAt": "2024-08-08T16:55:06Z",
+              "updatedAt": "2024-08-08T16:55:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6E1r7i",
+          "commit": {
+            "abbreviatedOid": "49421a9"
+          },
+          "author": "branlwyd",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-08T19:14:11Z",
+          "updatedAt": "2024-08-08T19:14:11Z",
+          "comments": [
+            {
+              "originalPosition": 140,
+              "body": "I like Option 1, but I think an even simpler approach for encoding would be a function that takes the \"type\" byte (initialize/continue/finish) & a sequence of byte strings, and encodes the type byte followed by each of the byte strings with prefixed length. This would be a very simple function (one loop, I suppose).\r\n\r\nDecoding would look similar: it could be a function that returns the type byte & a sequence of byte strings (decoded as you would expect). Then the program logic could handle parsing the byte strings, and the byte wrangling would be deduplicated & hid behind a function.\r\n\r\nWhat I don't like about the existing approach is that it duplicates the encoding/decoding logic in each location, and the encoding/decoding logic is inline with the \"processing\" logic, which makes it harder to follow. If this argument isn't compelling to you, I won't hold the PR up over it. WDYT?",
+              "createdAt": "2024-08-08T19:14:11Z",
+              "updatedAt": "2024-08-08T19:14:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6E2Ggc",
+          "commit": {
+            "abbreviatedOid": "2b5aa5c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-08T20:14:02Z",
+          "updatedAt": "2024-08-08T20:14:02Z",
+          "comments": [
+            {
+              "originalPosition": 140,
+              "body": "You're right, that's much nicer. Done.",
+              "createdAt": "2024-08-08T20:14:02Z",
+              "updatedAt": "2024-08-08T20:14:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6E2Kp0",
+          "commit": {
+            "abbreviatedOid": "37177d1"
+          },
+          "author": "branlwyd",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-08T20:23:16Z",
+          "updatedAt": "2024-08-08T20:25:18Z",
+          "comments": []
         }
       ]
     },
@@ -33670,9 +33791,9 @@
       "labels": [
         "draft-11"
       ],
-      "body": "Close #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, for consistency with other sections, allow the IDPF to define its own type for the public share and express the encoding correction words for {{BBCGG21}} in TLS-syntax.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
+      "body": "Closes #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, for consistency with other sections, allow the IDPF to define its own type for the public share and express the encoding correction words for {{BBCGG21}} in TLS-syntax.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
       "createdAt": "2024-08-06T00:23:50Z",
-      "updatedAt": "2024-08-08T00:03:32Z",
+      "updatedAt": "2024-08-08T22:56:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9ccd7545b7c2697fac983c72ac896cd87630cbef",
@@ -33925,6 +34046,64 @@
               "updatedAt": "2024-08-07T22:17:46Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 394,
+      "id": "PR_kwDOGKuqOc5340op",
+      "title": "Add prep state to prep diagram",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/394",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-11"
+      ],
+      "body": "These arrows are important for the diagram because they have implications for how you architect a protocol around a VDAF.\r\n\r\nfyi/ @bhalleycf",
+      "createdAt": "2024-08-08T22:32:07Z",
+      "updatedAt": "2024-08-09T15:09:00Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9ccd7545b7c2697fac983c72ac896cd87630cbef",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/prep-fig",
+      "headRefOid": "821c090ca2fc13ff3452a2801cc182ffad2da4fe",
+      "closedAt": "2024-08-09T15:09:00Z",
+      "mergedAt": "2024-08-09T15:09:00Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "bb104e39792d7dd7400a492b3217d13784a0625b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6E3Me5",
+          "commit": {
+            "abbreviatedOid": "821c090"
+          },
+          "author": "branlwyd",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-08T23:55:38Z",
+          "updatedAt": "2024-08-08T23:55:38Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6E8bFz",
+          "commit": {
+            "abbreviatedOid": "821c090"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-09T15:00:45Z",
+          "updatedAt": "2024-08-09T15:00:45Z",
+          "comments": []
         }
       ]
     }
