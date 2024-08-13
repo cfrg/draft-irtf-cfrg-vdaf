@@ -5,7 +5,7 @@ from typing import Any, Generic, Optional, TypeAlias, TypeVar
 
 from vdaf_poc import flp_bbcggi19
 from vdaf_poc.common import byte, concat, front, vec_add, vec_sub, zeros
-from vdaf_poc.field import FftField, Field64, Field128
+from vdaf_poc.field import Field64, Field128, NttField
 from vdaf_poc.flp import Flp
 from vdaf_poc.vdaf import Vdaf
 from vdaf_poc.xof import Xof, XofTurboShake128
@@ -20,7 +20,7 @@ USAGE_JOINT_RAND_PART = 7
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")
-F = TypeVar("F", bound=FftField)
+F = TypeVar("F", bound=NttField)
 
 Prio3InputShare: TypeAlias = \
     tuple[  # leader input share

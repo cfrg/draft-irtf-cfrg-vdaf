@@ -5,13 +5,13 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Generic, Optional, TypeVar, cast
 
 from vdaf_poc.common import front, next_power_of_2
-from vdaf_poc.field import (FftField, poly_eval, poly_interp, poly_mul,
+from vdaf_poc.field import (NttField, poly_eval, poly_interp, poly_mul,
                             poly_strip)
 from vdaf_poc.flp import Flp
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")
-F = TypeVar("F", bound=FftField)
+F = TypeVar("F", bound=NttField)
 
 
 class Gadget(Generic[F], metaclass=ABCMeta):
@@ -52,10 +52,10 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
     Generic type parameters:
     Measurement -- the measurement type
     AggResult -- the aggregate result type
-    Field -- An FFT-friendly field
+    Field -- An NTT-friendly field
 
     Attributes:
-    field -- Class object for the FFT-friendly field.
+    field -- Class object for the NTT-friendly field.
     MEAS_LEN -- Length of the encoded measurement input to the validity
         circuit.
     JOINT_RAND_LEN -- Length of the random input of the validity circuit.
@@ -320,9 +320,7 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
             # Compute the wire polynomials for this gadget.
             #
             # NOTE We pad the wire inputs to the nearest power of 2 so that we
-            # can use FFT for interpolating the wire polynomials. Perhaps there
-            # is some clever math for picking `wire_inp` in a way that avoids
-            # having to pad.
+            # can use NTT for interpolating the wire polynomials.
             assert self.field.GEN_ORDER % P == 0
             alpha = self.field.gen() ** (self.field.GEN_ORDER // P)
             wire_inp = [alpha ** k for k in range(P)]
