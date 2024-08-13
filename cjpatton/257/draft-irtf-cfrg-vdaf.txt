@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 11 February 2025                                           ISRG
+Expires: 14 February 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          10 August 2024
+                                                          13 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 February 2025.
+   This Internet-Draft will expire on 14 February 2025.
 
 Copyright Notice
 
@@ -3330,26 +3330,34 @@ Table of Contents
 
                                Figure 22: XXX
 
-   This section describes an FLP based on the construction from in
+   This section describes an FLP based on the construction from
    [BBCGGI19], Section 4.2.  We begin in Section 7.3.1 with an overview
-   of their proof system and the extensions to their proof system made
-   here.  The construction is specified in Section 7.3.3.
-
-      OPEN ISSUE Chris Wood points out that the this section reads more
-      like a paper than a standard.  Eventually we'll want to work this
-      into something that is readily consumable by the CFRG.
+   of their proof system and some extensions to it.  The construction is
+   specified in Section 7.3.3.
 
 7.3.1.  Overview
 
-   In the proof system of [BBCGGI19], validity is defined via an
-   arithmetic circuit evaluated over the encoded measurement: If the
+   Conventional zero-knowledge proof systems involve two parties:
+
+   *  The prover with a private measurement who generates proof of the
+      input's validity.
+
+   *  The verifier with either an encryption of or commitment to the
+      measurement who checks the proof.
+
+   Our proof system is much the same, except the verifier is split among
+   multiple Aggregators, each of which has a secret share of the
+   measurement.
+
+   Also like other proof systems, validity is defined in terms of an
+   arithmetic circuit evaluated over the input measurement: if the
    circuit output is zero, then the measurement is deemed valid;
    otherwise, if the circuit output is non-zero, then the measurement is
-   deemed invalid.  Thus the goal of the proof system is merely to allow
-   the verifier to evaluate the validity circuit over the measurement.
-   For our application (Section 7), this computation is distributed
-   among multiple Aggregators, each of which has only a share of the
-   measurement.
+   deemed invalid.  The main goal of the proof system is to allow each
+   Aggregator to correctly compute secret shares of the circuit output
+   from their share of the measurement.
+
+   XXX
 
    Suppose for a moment that the validity circuit C is affine, meaning
    its only operations are addition and multiplication-by-constant.  In
