@@ -5750,18 +5750,9 @@ call to gadget <code>G_i</code>.<a href="#section-7.3.3.1-2.3.1" class="pilcrow"
                   <li class="normal" id="section-7.3.3.1-2.4.2.2">
                     <p id="section-7.3.3.1-2.4.2.2.1">Let <code>padded_w = w + field.zeros(P_i - len(w))</code>.<a href="#section-7.3.3.1-2.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                </ul>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-7.3.3.1-2.4.3.1">
-                    <p id="section-7.3.3.1-2.4.3.1.1">NOTE We pad <code>w</code> to the nearest power of 2 so that we can use NTT for
-interpolating the wire polynomials. Perhaps there is some clever math for
-picking <code>wire_inp</code> in a way that avoids having to pad.<a href="#section-7.3.3.1-2.4.3.1.1" class="pilcrow">¶</a></p>
-</li>
-                </ul>
-<ul class="normal">
-<li class="normal" id="section-7.3.3.1-2.4.4.1">
-                    <p id="section-7.3.3.1-2.4.4.1.1">Let <code>poly_wire_i[j-1]</code> be the lowest degree polynomial for which
-<code>poly_wire_i[j-1](alpha_i^k) == padded_w[k]</code> for all <code>k</code> in <code>[P_i]</code>.<a href="#section-7.3.3.1-2.4.4.1.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.1-2.4.2.3">
+                    <p id="section-7.3.3.1-2.4.2.3.1">Let <code>poly_wire_i[j-1]</code> be the lowest degree polynomial for which
+<code>poly_wire_i[j-1](alpha_i^k) == padded_w[k]</code> for all <code>k</code> in <code>[P_i]</code>.<a href="#section-7.3.3.1-2.4.2.3.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
