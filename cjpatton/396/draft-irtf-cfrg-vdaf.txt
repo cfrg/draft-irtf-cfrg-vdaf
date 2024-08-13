@@ -2403,7 +2403,7 @@ Table of Contents
    An FLP is executed by the prover and verifier as follows:
 
    def run_flp(
-           flp: flp[Measurement, AggResult, F],
+           flp: Flp[Measurement, AggResult, F],
            meas: list[F],
            num_shares: int) -> bool:
        """Run the FLP on an encoded measurement."""
@@ -2476,7 +2476,7 @@ Table of Contents
    Hence, the FLP also specifies a method of encoding raw measurements
    as a vector of field elements:
 
-   *  flp.encode(measurement: measurement) -> list[F] encodes a raw
+   *  flp.encode(measurement: Measurement) -> list[F] encodes a raw
       measurement as a vector of field elements.  The return value MUST
       be of length MEAS_LEN.
 
@@ -2654,7 +2654,7 @@ Table of Contents
 
    def shard(
            self,
-           measurement: measurement,
+           measurement: Measurement,
            nonce: bytes,
            rand: bytes) -> tuple[
                Optional[list[bytes]],
@@ -2912,10 +2912,10 @@ Table of Contents
            self,
            verify_key: bytes,
            agg_id: int,
-           _agg_param: none,
+           _agg_param: None,
            nonce: bytes,
-           public_share: optional[list[bytes]],
-           input_share: prio3InputShare[F]) -> tuple[
+           public_share: Optional[list[bytes]],
+           input_share: Prio3InputShare[F]) -> tuple[
                Prio3PrepState[F],
                Prio3PrepShare[F]]:
        k_joint_rand_parts = public_share
@@ -2962,7 +2962,7 @@ Table of Contents
    def prep_next(
            self,
            prep_state: prio3PrepState[F],
-           prep_msg: optional[bytes],
+           prep_msg: Optional[bytes],
        ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
        k_joint_rand = prep_msg
        (out_share, k_corrected_joint_rand) = prep_state
@@ -3087,7 +3087,7 @@ Table of Contents
    def expand_input_share(
            self,
            agg_id: int,
-           input_share: prio3InputShare[F]) -> tuple[
+           input_share: Prio3InputShare[F]) -> tuple[
                list[F],
                list[F],
                Optional[bytes]]:
@@ -4817,7 +4817,7 @@ Table of Contents
    def prep_next(
            self,
            prep_state: poplar1PrepState,
-           prep_msg: optional[FieldVec]
+           prep_msg: Optional[FieldVec]
        ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
        prev_sketch = cast(list[Field], prep_msg)
        (step, level, prep_mem) = prep_state

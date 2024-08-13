@@ -4164,7 +4164,7 @@ valid measurement, is the same regardless of the number of shares.<a href="#sect
           <div class="lang-python sourcecode" id="section-7.1-10.1">
 <pre>
 def run_flp(
-        flp: flp[Measurement, AggResult, F],
+        flp: Flp[Measurement, AggResult, F],
         meas: list[F],
         num_shares: int) -&gt; bool:
     """Run the FLP on an encoded measurement."""
@@ -4237,7 +4237,7 @@ also specifies a method of encoding raw measurements as a vector of field
 elements:<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-2.1">
-              <p id="section-7.1.1-2.1.1"><code>flp.encode(measurement: measurement) -&gt; list[F]</code> encodes a raw measurement
+              <p id="section-7.1.1-2.1.1"><code>flp.encode(measurement: Measurement) -&gt; list[F]</code> encodes a raw measurement
 as a vector of field elements. The return value <span class="bcp14">MUST</span> be of length <code>MEAS_LEN</code>.<a href="#section-7.1.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
@@ -4568,7 +4568,7 @@ robustness of Prio3.) To support this, in Prio3:<a href="#section-7.2.1-4" class
 <pre>
 def shard(
         self,
-        measurement: measurement,
+        measurement: Measurement,
         nonce: bytes,
         rand: bytes) -&gt; tuple[
             Optional[list[bytes]],
@@ -4851,10 +4851,10 @@ def prep_init(
         self,
         verify_key: bytes,
         agg_id: int,
-        _agg_param: none,
+        _agg_param: None,
         nonce: bytes,
-        public_share: optional[list[bytes]],
-        input_share: prio3InputShare[F]) -&gt; tuple[
+        public_share: Optional[list[bytes]],
+        input_share: Prio3InputShare[F]) -&gt; tuple[
             Prio3PrepState[F],
             Prio3PrepShare[F]]:
     k_joint_rand_parts = public_share
@@ -4901,7 +4901,7 @@ def prep_init(
 def prep_next(
         self,
         prep_state: prio3PrepState[F],
-        prep_msg: optional[bytes],
+        prep_msg: Optional[bytes],
     ) -&gt; tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
     k_joint_rand = prep_msg
     (out_share, k_corrected_joint_rand) = prep_state
@@ -5065,7 +5065,7 @@ def helper_proofs_share(
 def expand_input_share(
         self,
         agg_id: int,
-        input_share: prio3InputShare[F]) -&gt; tuple[
+        input_share: Prio3InputShare[F]) -&gt; tuple[
             list[F],
             list[F],
             Optional[bytes]]:
@@ -7643,7 +7643,7 @@ def prep_init(
 def prep_next(
         self,
         prep_state: poplar1PrepState,
-        prep_msg: optional[FieldVec]
+        prep_msg: Optional[FieldVec]
     ) -&gt; tuple[Poplar1PrepState, FieldVec] | FieldVec:
     prev_sketch = cast(list[Field], prep_msg)
     (step, level, prep_mem) = prep_state
