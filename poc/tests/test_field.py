@@ -1,7 +1,7 @@
 import unittest
 
-from vdaf_poc.field import (FftField, Field, Field2, Field64, Field96,
-                            Field128, Field255, poly_eval, poly_interp)
+from vdaf_poc.field import (Field, Field2, Field64, Field96, Field128,
+                            Field255, NttField, poly_eval, poly_interp)
 
 
 class TestFields(unittest.TestCase):
@@ -41,20 +41,20 @@ class TestFields(unittest.TestCase):
             self.assertTrue(cls.decode_from_bit_vector(
                 encoded).as_unsigned() == val)
 
-    def run_fft_field_test(self, cls: type[FftField]) -> None:
+    def run_ntt_field_test(self, cls: type[NttField]) -> None:
         self.run_field_test(cls)
 
         # Test generator.
         self.assertTrue(cls.gen()**cls.GEN_ORDER == cls(1))
 
     def test_field64(self) -> None:
-        self.run_fft_field_test(Field64)
+        self.run_ntt_field_test(Field64)
 
     def test_field96(self) -> None:
-        self.run_fft_field_test(Field96)
+        self.run_ntt_field_test(Field96)
 
     def test_field128(self) -> None:
-        self.run_fft_field_test(Field128)
+        self.run_ntt_field_test(Field128)
 
     def test_field255(self) -> None:
         self.run_field_test(Field255)

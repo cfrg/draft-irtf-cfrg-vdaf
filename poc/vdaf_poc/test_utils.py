@@ -5,7 +5,7 @@ from typing import Any, Generic, Optional, TypedDict, TypeVar, cast
 
 from vdaf_poc.common import (gen_rand, next_power_of_2, print_wrapped_line,
                              to_le_bytes)
-from vdaf_poc.field import FftField, poly_eval
+from vdaf_poc.field import NttField, poly_eval
 from vdaf_poc.flp import Flp, run_flp
 from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19, Gadget
 from vdaf_poc.vdaf import Vdaf, run_vdaf
@@ -20,7 +20,7 @@ AggResult = TypeVar("AggResult")
 PrepState = TypeVar("PrepState")
 PrepShare = TypeVar("PrepShare")
 PrepMessage = TypeVar("PrepMessage")
-F = TypeVar("F", bound=FftField)
+F = TypeVar("F", bound=NttField)
 
 
 def test_vec_gen_rand(length: int) -> bytes:

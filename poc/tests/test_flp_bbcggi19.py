@@ -1,6 +1,6 @@
 from typing import TypeVar
 
-from vdaf_poc.field import FftField, Field64, Field96, Field128
+from vdaf_poc.field import Field64, Field96, Field128, NttField
 from vdaf_poc.flp_bbcggi19 import (Count, FlpBBCGGI19, Histogram, Mul,
                                    MultihotCountVec, PolyEval, Range2, Sum,
                                    SumOfRangeCheckedInputs, SumVec, Valid)
@@ -8,7 +8,7 @@ from vdaf_poc.test_utils import TestFlpBBCGGI19
 
 Measurement = TypeVar("Measurement")
 AggResult = TypeVar("AggResult")
-F = TypeVar("F", bound=FftField)
+F = TypeVar("F", bound=NttField)
 
 
 class MultiGadget(Valid[int, int, Field64]):
@@ -140,14 +140,14 @@ class TestMultihotCountVec(TestFlpBBCGGI19):
 
 
 class TestSumVec(TestFlpBBCGGI19):
-    def run_encode_truncate_decode_with_fft_fields_test(
+    def run_encode_truncate_decode_with_ntt_fields_test(
             self,
             measurements: list[list[int]],
             length: int,
             bits: int,
             chunk_length: int) -> None:
         for field in [Field64, Field96, Field128]:
-            sumvec = SumVec[FftField](field, length, bits, chunk_length)
+            sumvec = SumVec[NttField](field, length, bits, chunk_length)
             self.assertEqual(sumvec.field, field)
             self.assertTrue(isinstance(sumvec, SumVec))
             self.run_encode_truncate_decode_test(
@@ -155,7 +155,7 @@ class TestSumVec(TestFlpBBCGGI19):
 
     def test(self) -> None:
         # SumVec with length 2, bits 4, chunk len 1.
-        self.run_encode_truncate_decode_with_fft_fields_test(
+        self.run_encode_truncate_decode_with_ntt_fields_test(
             [[1, 2], [3, 4], [5, 6], [7, 8]],
             2,
             4,
