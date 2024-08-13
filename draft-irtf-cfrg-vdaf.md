@@ -3024,8 +3024,8 @@ network while executing Prio3. It is RECOMMENDED that implementations provide
 serialization methods for them.
 
 Message structures are defined following {{Section 3 of !RFC8446}}). In the
-remainder we use `S` as an alias for `Prio3.xof.SEED_SIZE` and `F` as an alias
-for `Prio3.field.ENCODED_SIZE`. XOF seeds are represented as follows:
+remainder we use `S` as an alias for `prio3.xof.SEED_SIZE` and `F` as an alias
+for `prio3.field.ENCODED_SIZE`. XOF seeds are represented as follows:
 
 ~~~ tls-presentation
 opaque Prio3Seed[S];
@@ -3041,14 +3041,14 @@ opaque Prio3Field[F];
 #### Public Share
 
 The encoding of the public share depends on whether joint randomness is
-required for the underlying FLP (i.e., `Prio3.flp.JOINT_RAND_LEN > 0`). If
+required for the underlying FLP (i.e., `prio3.flp.JOINT_RAND_LEN > 0`). If
 joint randomness is not used, then the public share is the empty string. If
 joint randomness is used, then the public share encodes the joint randomness
 parts as follows:
 
 ~~~ tls-presentation
 struct {
-    Prio3Seed k_joint_rand_parts[S * Prio3.SHARES];
+    Prio3Seed k_joint_rand_parts[S * prio3.SHARES];
 } Prio3PublicShareWithJointRand;
 ~~~
 
@@ -3070,8 +3070,8 @@ not used, the Leader's share is structured as follows:
 
 ~~~ tls-presentation
 struct {
-    Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
-    Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
+    Prio3Field meas_share[F * prio3.flp.MEAS_LEN];
+    Prio3Field proofs_share[F * prio3.flp.PROOF_LEN * prio3.PROOFS];
 } Prio3LeaderShare;
 ~~~
 
@@ -3112,7 +3112,7 @@ When joint randomness is not used, the prep share is structured as follows:
 ~~~ tls-presentation
 struct {
     Prio3Field verifiers_share[
-        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
     ];
 } Prio3PrepShare;
 ~~~
@@ -3123,7 +3123,7 @@ randomness part and is structured as follows:
 ~~~ tls-presentation
 struct {
     Prio3Field verifiers_share[
-        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
     ];
     Prio3Seed k_joint_rand_part;
 } Prio3PrepShareWithJointRand;
@@ -3147,7 +3147,7 @@ Aggregate shares are structured as follows:
 
 ~~~ tls-presentation
 struct {
-    Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
+    Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
 } Prio3AggShare;
 ~~~
 
@@ -4696,9 +4696,10 @@ network while executing `Poplar1`. It is RECOMMENDED that implementations
 provide serialization methods for them.
 
 Message structures are defined following {{Section 3 of !RFC8446}}). In the
-remainder we use `S` as an alias for `Poplar1.xof.SEED_SIZE`, `Fi` as an alias
-for `Poplar1.idpf.field_inner` and `Fl` as an alias for
-`Poplar1.idpf.field_leaf`. XOF seeds are represented as follows:
+remainder we use `S` as an alias for `poplar1.xof.SEED_SIZE`, `Fi` as an alias
+for `poplar1.idpf.field_inner.ENCODED_SIZE` and `Fl` as an alias for
+`poplar1.idpf.field_leaf.ENCODED_SIZE`. XOF seeds are represented as
+follows:
 
 ~~~ tls-presentation
 opaque Poplar1Seed[S];
@@ -4729,9 +4730,9 @@ Each input share is structured as follows:
 
 ~~~ tls-presentation
 struct {
-    opaque idpf_key[Poplar1.Idpf.KEY_SIZE];
+    opaque idpf_key[poplar1.Idpf.KEY_SIZE];
     Poplar1Seed corr_seed;
-    Poplar1FieldInner corr_inner[Fi * 2 * (Poplar1.Idpf.BITS - 1)];
+    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
 ~~~
