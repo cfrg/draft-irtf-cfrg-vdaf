@@ -3296,29 +3296,31 @@ Table of Contents
    +------------------+
    | Prove            |
    | +-------------+  |
-   | | Valid       |<---- input
+   | | Valid       |<---- meas
    | | +--------+  |<---- joint rand
    | | | Gadget |  |  |<- prove rand
    | | +--------+  |  |
    | +-------------+  |
    +------------------+
     |
-    V proof
-
-    | proof (share)
     V
-   +------------------+
-   | Query            |
-   | +-------------+  |
-   | | Valid       |<---- input (share)
+   proof
+
+   proof (share)
+    |        |
+    V        |
+   +---------|--------+
+   | Query   |        |
+   | +-------|-----+  |
+   | | Valid V     |<---- encoded measurement (share)
    | | +--------+  |<---- joint rand
    | | | Gadget |  |  |<- query rand
    | | +--------+  |  |
    | +-------------+  |
    +------------------+
     |
-    V verifier (share)
-
+    V
+   verifier (share)
 
     | verifier
     V
@@ -3339,45 +3341,55 @@ Table of Contents
 
    Conventional zero-knowledge proof systems involve two parties:
 
-   *  The prover with a private measurement who generates proof of the
-      input's validity.
+   *  The prover who holds a private measurement and generates a proof
+      of the measurement's validity
 
-   *  The verifier with either an encryption of or commitment to the
-      measurement who checks the proof.
+   *  The verifier who holds an encryption of, or commitment to, the
+      measurement and who checks the proof
 
-   Our proof system is much the same, except the verifier is split among
-   multiple Aggregators, each of which has a secret share of the
+   Our proof system is much the same, except the verifier is split
+   across multiple Aggregators, each of which has a secret share of the
    measurement.
 
-   Also like other proof systems, validity is defined in terms of an
-   arithmetic circuit evaluated over the input measurement: if the
-   circuit output is zero, then the measurement is deemed valid;
-   otherwise, if the circuit output is non-zero, then the measurement is
-   deemed invalid.  The main goal of the proof system is to allow each
-   Aggregator to correctly compute secret shares of the circuit output
-   from their share of the measurement.
+   Validity is defined in terms of an arithmetic circuit evaluated over
+   the measurement.  The measurement is encoded as a vector over some
+   finite field, the elements of which comprise the inputs to the
+   circuit; the gates of the circuit are multiplication, addition, and
+   negation operations.  The output is a field element: if the value is
+   zero, then the measurement is deemed valid; otherwise, if the output
+   is non-zero, then the measurement is deemed invalid.
 
-   XXX
+   For example, the simplest circuit specified in this document
+   (Section 7.4.1) recognizes measurements equal to either 0 or 1:
+
+   C(x) = x * (x-1)
+
+   This circuit contains one negation gate (-1), one addition gate (x +
+   (-1)), and one multiplication gate (x * (x + (-1))).  Observe that
+   C(x) = 0 if and only if x in [0, 1].
+
+   Our goal is to allow each Aggregator, who holds a secret share of x,
+   to correctly compute a secret share of C(x).  Then validity is
+   decided by simply combining their shares of the output.
 
    Suppose for a moment that the validity circuit C is affine, meaning
-   its only operations are addition and multiplication-by-constant.  In
-   particular, suppose the circuit does not contain a multiplication
-   gate whose operands are both non-constant.  Then to decide if a
-   measurement x is valid, each Aggregator could evaluate C on its share
-   of x locally, broadcast the output share to its peers, then combine
-   the output shares locally to recover C(x).  This is true because for
-   any SHARES-way secret sharing of x it holds that
+   its only operations are negation, addition, and multiplication-by-
+   constant.  (The circuit above is non-affine because it contains a
+   multiplication gate with non-constant inputs.)  Then each Aggregator
+   can compute its share locally, since
 
    C(x_shares[0] + ... + x_shares[SHARES-1]) =
        C(x_shares[0]) + ... + C(x_shares[SHARES-1])
 
-   (Note that, for this equality to hold, it may be necessary to scale
-   any constants in the circuit by SHARES.)  However this is not the
-   case if C is not-affine (i.e., it contains at least one
-   multiplication gate whose operands are non-constant).  In the proof
-   system of [BBCGGI19], the proof is designed to allow the
-   (distributed) verifier to compute the non-affine operations using
-   only linear operations on (its share of) the measurement and proof.
+   (Note that, for this equality to hold, it is necessary to scale any
+   constants in the circuit by 1/SHARES.)  However, this is not the case
+   if C is multiplication gates with non-constant inputs, as is the case
+   for most measurement types we are interested in.  Thus our main goal
+   is to transform evaluation of these multiplication gates into
+   computations on secret shared data that each Aggregator can perform
+   locally.
+
+   XXX
 
    To make this work, the proof system is restricted to validity
    circuits that exhibit a special structure.  Specifically, an

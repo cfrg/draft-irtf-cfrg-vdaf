@@ -5343,29 +5343,31 @@ struct {
 +------------------+
 | Prove            |
 | +-------------+  |
-| | Valid       |&lt;---- input
+| | Valid       |&lt;---- meas
 | | +--------+  |&lt;---- joint rand
 | | | Gadget |  |  |&lt;- prove rand
 | | +--------+  |  |
 | +-------------+  |
 +------------------+
  |
- V proof
-
- | proof (share)
  V
-+------------------+
-| Query            |
-| +-------------+  |
-| | Valid       |&lt;---- input (share)
+proof
+
+proof (share)
+ |        |
+ V        |
++---------|--------+
+| Query   |        |
+| +-------|-----+  |
+| | Valid V     |&lt;---- encoded measurement (share)
 | | +--------+  |&lt;---- joint rand
 | | | Gadget |  |  |&lt;- query rand
 | | +--------+  |  |
 | +-------------+  |
 +------------------+
  |
- V verifier (share)
-
+ V
+verifier (share)
 
  | verifier
  V
@@ -5392,73 +5394,83 @@ proof system and some extensions to it. The construction is specified in
 <p id="section-7.3.1-1">Conventional zero-knowledge proof systems involve two parties:<a href="#section-7.3.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.1-2.1">
-              <p id="section-7.3.1-2.1.1">The prover with a private measurement who generates proof of the input's
-validity.<a href="#section-7.3.1-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-7.3.1-2.1.1">The prover who holds a private measurement and generates a proof of the
+measurement's validity<a href="#section-7.3.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.1-2.2">
-              <p id="section-7.3.1-2.2.1">The verifier with either an encryption of or commitment to the measurement
-who checks the proof.<a href="#section-7.3.1-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-7.3.1-2.2.1">The verifier who holds an encryption of, or commitment to, the measurement
+and who checks the proof<a href="#section-7.3.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-7.3.1-3">Our proof system is much the same, except the verifier is split among multiple
+<p id="section-7.3.1-3">Our proof system is much the same, except the verifier is split across multiple
 Aggregators, each of which has a secret share of the measurement.<a href="#section-7.3.1-3" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-4">Also like other proof systems, validity is defined in terms of an arithmetic
-circuit evaluated over the input measurement: if the circuit output is zero,
-then the measurement is deemed valid; otherwise, if the circuit output is
-non-zero, then the measurement is deemed invalid. The main goal of the proof
-system is to allow each Aggregator to correctly compute secret shares of the
-circuit output from their share of the measurement.<a href="#section-7.3.1-4" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-5">XXX<a href="#section-7.3.1-5" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-6">Suppose for a moment that the validity circuit <code>C</code> is affine, meaning its only
-operations are addition and multiplication-by-constant. In particular, suppose
-the circuit does not contain a multiplication gate whose operands are both
-non-constant. Then to decide if a measurement <code>x</code> is valid, each Aggregator
-could evaluate <code>C</code> on its share of <code>x</code> locally, broadcast the output share to
-its peers, then combine the output shares locally to recover <code>C(x)</code>. This is
-true because for any <code>SHARES</code>-way secret sharing of <code>x</code> it holds that<a href="#section-7.3.1-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-7">
+<p id="section-7.3.1-4">Validity is defined in terms of an arithmetic circuit evaluated over the
+measurement. The measurement is encoded as a vector over some finite field, the
+elements of which comprise the inputs to the circuit; the gates of the circuit
+are multiplication, addition, and negation operations. The output is a field
+element: if the value is zero, then the measurement is deemed valid; otherwise,
+if the output is non-zero, then the measurement is deemed invalid.<a href="#section-7.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-5">For example, the simplest circuit specified in this document (<a href="#prio3count" class="auto internal xref">Section 7.4.1</a>)
+recognizes measurements equal to either <code>0</code> or <code>1</code>:<a href="#section-7.3.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-6">
+<pre>
+C(x) = x * (x-1)
+</pre><a href="#section-7.3.1-6" class="pilcrow">¶</a>
+</div>
+<p id="section-7.3.1-7">This circuit contains one negation gate (<code>-1</code>), one addition gate (<code>x + (-1)</code>),
+and one multiplication gate (<code>x * (x + (-1))</code>). Observe that <code>C(x) = 0</code> if and
+only if <code>x in [0, 1]</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-8">Our goal is to allow each Aggregator, who holds a secret share of <code>x</code>, to
+correctly compute a secret share of <code>C(x)</code>. Then validity is decided by simply
+combining their shares of the output.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-9">Suppose for a moment that the validity circuit <code>C</code> is affine, meaning its only
+operations are negation, addition, and multiplication-by-constant. (The circuit
+above is non-affine because it contains a multiplication gate with non-constant
+inputs.) Then each Aggregator can compute its share locally, since<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-10">
 <pre>
 C(x_shares[0] + ... + x_shares[SHARES-1]) =
     C(x_shares[0]) + ... + C(x_shares[SHARES-1])
-</pre><a href="#section-7.3.1-7" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-10" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1-8">(Note that, for this equality to hold, it may be necessary to scale any
-constants in the circuit by <code>SHARES</code>.) However this is not the case if <code>C</code> is
-not-affine (i.e., it contains at least one multiplication gate whose operands
-are non-constant). In the proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, the proof is designed to
-allow the (distributed) verifier to compute the non-affine operations using only
-linear operations on (its share of) the measurement and proof.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-9">To make this work, the proof system is restricted to validity circuits that
+<p id="section-7.3.1-11">(Note that, for this equality to hold, it is necessary to scale any constants
+in the circuit by <code>1/SHARES</code>.) However, this is not the case if <code>C</code> is
+multiplication gates with non-constant inputs, as is the case for most
+measurement types we are interested in. Thus our main goal is to transform
+evaluation of these multiplication gates into computations on secret shared
+data that each Aggregator can perform locally.<a href="#section-7.3.1-11" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-12">XXX<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-13">To make this work, the proof system is restricted to validity circuits that
 exhibit a special structure. Specifically, an arithmetic circuit with "G-gates"
 (see <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Definition 5.2) is composed of affine gates and any number of
 instances of a distinguished gate <code>G</code>, which may be non-affine. We will refer to
-this class of circuits as 'gadget circuits' and to <code>G</code> as the "gadget".<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-10">As an illustrative example, consider a validity circuit <code>C</code> that recognizes the
+this class of circuits as 'gadget circuits' and to <code>G</code> as the "gadget".<a href="#section-7.3.1-13" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-14">As an illustrative example, consider a validity circuit <code>C</code> that recognizes the
 set <code>L = set([0], [1])</code>. That is, <code>C</code> takes as input a length-1 vector <code>x</code> and
 returns 0 if <code>x[0]</code> is in <code>[0,2)</code> and outputs something else otherwise. This
-circuit can be expressed as the following degree-2 polynomial:<a href="#section-7.3.1-10" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-11">
+circuit can be expressed as the following degree-2 polynomial:<a href="#section-7.3.1-14" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-15">
 <pre>
 C(x) = (x[0] - 1) * x[0] = x[0]^2 - x[0]
-</pre><a href="#section-7.3.1-11" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-15" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1-12">This polynomial recognizes <code>L</code> because <code>x[0]^2 = x[0]</code> is only true if <code>x[0] ==
+<p id="section-7.3.1-16">This polynomial recognizes <code>L</code> because <code>x[0]^2 = x[0]</code> is only true if <code>x[0] ==
 0</code> or <code>x[0] == 1</code>. Notice that the polynomial involves a non-affine operation,
 <code>x[0]^2</code>. In order to apply <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 4.3, the circuit needs to be
 rewritten in terms of a gadget that subsumes this non-affine operation. For
-example, the gadget might be multiplication:<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-13">
+example, the gadget might be multiplication:<a href="#section-7.3.1-16" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-17">
 <pre>
 Mul(left, right) = left * right
-</pre><a href="#section-7.3.1-13" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-17" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1-14">The validity circuit can then be rewritten in terms of <code>Mul</code> like so:<a href="#section-7.3.1-14" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-15">
+<p id="section-7.3.1-18">The validity circuit can then be rewritten in terms of <code>Mul</code> like so:<a href="#section-7.3.1-18" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-19">
 <pre>
 C(x[0]) = Mul(x[0], x[0]) - x[0]
-</pre><a href="#section-7.3.1-15" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-19" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1-16">The proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> allows the verifier to evaluate each instance
+<p id="section-7.3.1-20">The proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> allows the verifier to evaluate each instance
 of the gadget (i.e., <code>Mul(x[0], x[0])</code> in our example) using a linear function
 of the measurement and proof. The proof is constructed roughly as follows. Let
 <code>C</code> be the validity circuit and suppose the gadget is arity-<code>L</code> (i.e., it has
@@ -5467,20 +5479,20 @@ the <code>k</code>th call to the gadget during the evaluation of <code>C(x)</cod
 <code>M</code> such calls and fix distinct field elements <code>alpha[0], ..., alpha[M-1]</code>. (We
 will require these points to have a special property, as we'll discuss in
 <a href="#flp-bbcggi19-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>; but for the moment it is only important
-that they are distinct.)<a href="#section-7.3.1-16" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-17">The prover constructs from <code>wire</code> and <code>alpha</code> a polynomial that, when evaluated
+that they are distinct.)<a href="#section-7.3.1-20" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-21">The prover constructs from <code>wire</code> and <code>alpha</code> a polynomial that, when evaluated
 at <code>alpha[k-1]</code>, produces the output of the <code>k</code>th call to the gadget. Let us
 call this the "gadget polynomial". Polynomial evaluation is linear, which means
 that, in the distributed setting, the Client can disseminate additive shares of
 the gadget polynomial that the Aggregators then use to compute additive shares
 of each gadget output, allowing each Aggregator to compute its share of <code>C(x)</code>
-locally.<a href="#section-7.3.1-17" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-18">There is one more wrinkle, however: It is still possible for a malicious prover
+locally.<a href="#section-7.3.1-21" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-22">There is one more wrinkle, however: It is still possible for a malicious prover
 to produce a gadget polynomial that would result in <code>C(x)</code> being computed
 incorrectly, potentially resulting in an invalid measurement being accepted. To
 prevent this, the verifier performs a probabilistic test to check that the
 gadget polynomial is well-formed. This test, and the procedure for constructing
-the gadget polynomial, are described in detail in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-18" class="pilcrow">¶</a></p>
+the gadget polynomial, are described in detail in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-22" class="pilcrow">¶</a></p>
 <div id="flp-bbcggi19-overview-extensions">
 <section id="section-7.3.1.1">
             <h5 id="name-extensions">
