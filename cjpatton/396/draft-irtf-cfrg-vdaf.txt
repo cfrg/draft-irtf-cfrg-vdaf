@@ -2961,7 +2961,7 @@ Table of Contents
 
    def prep_next(
            self,
-           prep_state: prio3PrepState[F],
+           prep_state: Prio3PrepState[F],
            prep_msg: Optional[bytes],
        ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
        k_joint_rand = prep_msg
@@ -2976,7 +2976,7 @@ Table of Contents
 
    def prep_shares_to_prep(
            self,
-           _agg_param: none,
+           _agg_param: None,
            prep_shares: list[Prio3PrepShare[F]]) -> Optional[bytes]:
        # Unshard the verifier shares into the verifier message.
        verifiers = self.flp.field.zeros(
@@ -3011,7 +3011,7 @@ Table of Contents
 
    def is_valid(
            self,
-           _agg_param: none,
+           _agg_param: None,
            previous_agg_params: list[None]) -> bool:
        """
        Checks if `previous_agg_params` is empty, as input shares in
@@ -3028,7 +3028,7 @@ Table of Contents
 
    def aggregate(
            self,
-           _agg_param: none,
+           _agg_param: None,
            out_shares: list[list[F]]) -> list[F]:
        agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
        for out_share in out_shares:
@@ -3045,7 +3045,7 @@ Table of Contents
 
    def unshard(
            self,
-           _agg_param: none,
+           _agg_param: None,
            agg_shares: list[list[F]],
            num_measurements: int) -> AggResult:
        agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
@@ -4741,7 +4741,7 @@ Table of Contents
            agg_param: Poplar1AggParam,
            nonce: bytes,
            public_share: bytes,
-           input_share: poplar1InputShare) -> tuple[
+           input_share: Poplar1InputShare) -> tuple[
                Poplar1PrepState,
                FieldVec]:
        (level, prefixes) = agg_param
