@@ -3471,7 +3471,7 @@ Table of Contents
    length of an aggregatable output, and converting an aggregated output
    to an aggregate result:
 
-   *  valid.encode(measurement: measurement) -> list[F] returns a vector
+   *  valid.encode(measurement: Measurement) -> list[F] returns a vector
       of length MEAS_LEN representing a measurement.
 
    *  valid.truncate(meas: list[F]) -> list[F] returns a vector of
@@ -4738,7 +4738,7 @@ Table of Contents
            self,
            verify_key: bytes,
            agg_id: int,
-           agg_param: poplar1AggParam,
+           agg_param: Poplar1AggParam,
            nonce: bytes,
            public_share: bytes,
            input_share: poplar1InputShare) -> tuple[
@@ -4816,7 +4816,7 @@ Table of Contents
 
    def prep_next(
            self,
-           prep_state: poplar1PrepState,
+           prep_state: Poplar1PrepState,
            prep_msg: Optional[FieldVec]
        ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
        prev_sketch = cast(list[Field], prep_msg)
@@ -4860,7 +4860,7 @@ Table of Contents
 
    def prep_shares_to_prep(
            self,
-           agg_param: poplar1AggParam,
+           agg_param: Poplar1AggParam,
            prep_shares: list[FieldVec]) -> Optional[FieldVec]:
        if len(prep_shares) != 2:
            raise ValueError('incorrect number of prep shares')
@@ -4906,7 +4906,7 @@ Table of Contents
 
    def is_valid(
            self,
-           agg_param: poplar1AggParam,
+           agg_param: Poplar1AggParam,
            previous_agg_params: list[Poplar1AggParam]) -> bool:
        """
        Checks that levels are increasing between calls, and also
@@ -4940,7 +4940,7 @@ Table of Contents
 
    def aggregate(
            self,
-           agg_param: poplar1AggParam,
+           agg_param: Poplar1AggParam,
            out_shares: list[FieldVec]) -> FieldVec:
        (level, prefixes) = agg_param
        field = self.idpf.current_field(level)
@@ -4958,7 +4958,7 @@ Table of Contents
 
    def unshard(
            self,
-           agg_param: poplar1AggParam,
+           agg_param: Poplar1AggParam,
            agg_shares: list[FieldVec],
            _num_measurements: int) -> list[int]:
        (level, prefixes) = agg_param
@@ -5092,7 +5092,7 @@ Table of Contents
       syntax.  Decide whether to RECOMMEND this encoding, and if so, add
       it to test vectors.
 
-   def encode_agg_param(self, agg_param: poplar1AggParam) -> bytes:
+   def encode_agg_param(self, agg_param: Poplar1AggParam) -> bytes:
        level, prefixes = agg_param
        if level not in range(2 ** 16):
            raise ValueError('level out of range')
@@ -5258,7 +5258,7 @@ Table of Contents
            public_share: bytes,
            key: bytes,
            level: int,
-           prefixes: sequence[int],
+           prefixes: Sequence[int],
            nonce: bytes,
        ) -> list[list[Field64]] | list[list[Field255]]:
        if agg_id not in range(self.SHARES):
@@ -5281,7 +5281,7 @@ Table of Contents
            # (`seed`) and a control bit (`ctrl`).
            seed = key
            ctrl = Field2(agg_id)
-           y: fieldVec
+           y: FieldVec
            for current_level in range(level + 1):
                bit = (prefix >> (level - current_level)) & 1
 
@@ -5319,8 +5319,8 @@ Table of Contents
    def eval_next(
            self,
            prev_seed: bytes,
-           prev_ctrl: field2,
-           correction_word: correctionWordTuple,
+           prev_ctrl: Field2,
+           correction_word: CorrectionWordTuple,
            level: int,
            bit: int,
            nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
@@ -5705,7 +5705,7 @@ Table of Contents
    field also results in degraded (or even vacuous) robustness.
 
    Different variants of Prio3 (Section 7) use different field sizes:
-   prio3Count uses Field64; but Prio3Sum, Prio3SumVec, and
+   Prio3Count uses Field64; but Prio3Sum, Prio3SumVec, and
    Prio3Histogram use Field128, a field that is twice as large as
    Field64.  This is due to the use of joint randomness (Section 7.1) in
    the latter variants.  Joint randomness allows for more flexible
