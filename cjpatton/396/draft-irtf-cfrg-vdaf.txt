@@ -3177,7 +3177,7 @@ Table of Contents
    encodes the joint randomness parts as follows:
 
    struct {
-       Prio3Seed k_joint_rand_parts[S * Prio3.SHARES];
+       Prio3Seed k_joint_rand_parts[S * prio3.SHARES];
    } Prio3PublicShareWithJointRand;
 
 7.2.7.2.  Input share
@@ -3198,8 +3198,8 @@ Table of Contents
    randomness is not used, the Leader's share is structured as follows:
 
    struct {
-       Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
-       Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
+       Prio3Field meas_share[F * prio3.flp.MEAS_LEN];
+       Prio3Field proofs_share[F * prio3.flp.PROOF_LEN * prio3.PROOFS];
    } Prio3LeaderShare;
 
    When joint randomness is not used, the Helpers' shares are structured
@@ -3233,7 +3233,7 @@ Table of Contents
 
    struct {
        Prio3Field verifiers_share[
-           F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+           F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
        ];
    } Prio3PrepShare;
 
@@ -3242,7 +3242,7 @@ Table of Contents
 
    struct {
        Prio3Field verifiers_share[
-           F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+           F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
        ];
        Prio3Seed k_joint_rand_part;
    } Prio3PrepShareWithJointRand;
@@ -3262,7 +3262,7 @@ Table of Contents
    Aggregate shares are structured as follows:
 
    struct {
-       Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
+       Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
 7.3.  The FLP of [BBCGGI19]
@@ -5004,9 +5004,9 @@ Table of Contents
    Each input share is structured as follows:
 
    struct {
-       opaque idpf_key[Poplar1.Idpf.KEY_SIZE];
+       opaque idpf_key[poplar1.Idpf.KEY_SIZE];
        Poplar1Seed corr_seed;
-       Poplar1FieldInner corr_inner[Fi * 2 * (Poplar1.Idpf.BITS - 1)];
+       Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
        Poplar1FieldLeaf corr_leaf[Fl * 2];
    } Poplar1InputShare;
 
