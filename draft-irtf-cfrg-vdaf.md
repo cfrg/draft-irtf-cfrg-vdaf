@@ -247,7 +247,7 @@ measurement that would result in an invalid aggregate result.
 
 # Introduction
 
-(RFC EDITOR: Remove this paragraph.) The source for this draft and and the
+(RFC EDITOR: remove this paragraph.) The source for this draft and and the
 reference implementation can be found at
 https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
@@ -405,7 +405,7 @@ security considerations for DAFs and VDAFs.
 
 ## Change Log
 
-(RFC EDITOR: Remove this section.)
+(RFC EDITOR: remove this section.)
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
@@ -426,7 +426,7 @@ security considerations for DAFs and VDAFs.
 * Clarify the extent to which the attacker controls the network in our threat
   models for privacy and robustness.
 
-* Clean up various aspects of the code, including: follow existing
+* Clean up various aspects of the code, including: Follow existing
   object-oriented programming patterns for Python more closely; make the type
   hints enforceable; and avoid shadowing variables.
 
@@ -930,7 +930,7 @@ been used with the same input share.
 DAFs MUST implement the following function:
 
 * `daf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) ->
-  bool`: Checks if the `agg_param` is compatible with all elements of
+  bool`: checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
 ## Aggregation {#sec-daf-aggregate}
@@ -968,7 +968,7 @@ For simplicity, we have written this algorithm in a "one-shot" form, where all
 output shares for a batch are provided at the same time. Many DAFs may also
 support a "streaming" form, where shares are processed one at a time.
 
-Implementation note: For most natural DAFs (and VDAFs) it is not necessary for
+Implementation note: for most natural DAFs (and VDAFs) it is not necessary for
 an Aggregator to store all output shares individually before aggregating.
 Typically it is possible to merge output shares into aggregate shares as they
 arrive, merge these into other aggregate shares, and so on. In particular, this
@@ -1013,11 +1013,6 @@ shares."}
 
 Securely executing a DAF involves emulating the following procedure.
 
-<!--
-Simon Friedberger: I think this would be easier to understand (also a bit
-longer) if there was an Aggregator class which behaved like an actual aggregator
-but with messages being sent by calling functions.
--->
 ~~~ python
 def run_daf(
         daf: Daf[
@@ -1082,7 +1077,7 @@ def run_daf(
 {: #run-daf title="Execution of a DAF."}
 
 The inputs to this procedure are the same as the aggregation function computed by
-the DAF: An aggregation parameter and a sequence of measurements. The procedure
+the DAF: an aggregation parameter and a sequence of measurements. The procedure
 prescribes how a DAF is executed in a "benign" environment in which there is no
 adversary and the messages are passed among the protocol participants over
 secure point-to-point channels. In reality, these channels need to be
@@ -1113,7 +1108,7 @@ Overall execution of a VDAF comprises the following stages:
   result
 
 In contrast to DAFs, the Preparation stage for VDAFs now performs an additional
-task: Verification of the validity of the recovered output shares. This process
+task: verification of the validity of the recovered output shares. This process
 ensures that aggregating the output shares will not lead to a garbled aggregate
 result.
 
@@ -1313,7 +1308,7 @@ been used with the same input share.
 VDAFs MUST implement the following function:
 
 * `vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) ->
-  bool`: Checks if the `agg_param` is compatible with all elements of
+  bool`: checks if the `agg_param` is compatible with all elements of
   `previous_agg_params`.
 
 ## Aggregation {#sec-vdaf-aggregate}
@@ -2084,7 +2079,7 @@ class XofTurboShake128(Xof):
         # Function `TurboSHAKE128(M, D, L)` is as defined in
         # Section 2.2 of [TurboSHAKE].
         #
-        # Implementation note: Rather than re-generate the output
+        # Implementation note: rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
         # of TurboSHAKE128 will expose an "absorb-then-squeeze" API
         # that allows stateful handling of the stream.
@@ -2125,7 +2120,7 @@ class XofFixedKeyAes128(Xof):
         # need to be kept secret from any party. However, when used
         # with an IDPF, we require the binder to be a random nonce.
         #
-        # Implementation note: This step can be cached across XOF
+        # Implementation note: this step can be cached across XOF
         # evaluations with many different seeds.
         dst_length = to_le_bytes(len(dst), 1)
         self.fixed_key = TurboSHAKE128(
@@ -3165,7 +3160,7 @@ specified in {{flp-bbcggi19-construction}}.
 ### Overview {#flp-bbcggi19-overview}
 
 In the proof system of {{BBCGGI19}}, validity is defined via an arithmetic
-circuit evaluated over the encoded measurement: If the circuit output is zero,
+circuit evaluated over the encoded measurement: if the circuit output is zero,
 then the measurement is deemed valid; otherwise, if the circuit output is
 non-zero, then the measurement is deemed invalid. Thus the goal of the proof
 system is merely to allow the verifier to evaluate the validity circuit over
@@ -3243,7 +3238,7 @@ the gadget polynomial that the Aggregators then use to compute additive shares
 of each gadget output, allowing each Aggregator to compute its share of `C(x)`
 locally.
 
-There is one more wrinkle, however: It is still possible for a malicious prover
+There is one more wrinkle, however: it is still possible for a malicious prover
 to produce a gadget polynomial that would result in `C(x)` being computed
 incorrectly, potentially resulting in an invalid measurement being accepted. To
 prevent this, the verifier performs a probabilistic test to check that the
@@ -3496,7 +3491,7 @@ is generated as follows:
 1. Compute the tests for well-formedness of the gadget polynomials. That is, for
    every `i` in `[H]`:
 
-    * Let `t = query_rand[i]`. Check if `t^(P_i) == 1`: If so, then raise
+    * Let `t = query_rand[i]`. Check if `t^(P_i) == 1`: if so, then raise
       ERR_ABORT and halt. (This prevents the verifier from inadvertently leaking
       a gadget output in the verifier message.)
 
@@ -3546,7 +3541,7 @@ generate and verify. Test vectors for each can be found in {{test-vectors}}.
 | `Xof`             | `XofTurboShake128` ({{xof-turboshake128}}) |
 {: title="Parameters for Prio3Count."}
 
-Our first instance of Prio3 is for a simple counter: Each measurement is either
+Our first instance of Prio3 is for a simple counter: each measurement is either
 one or zero and the aggregate result is the sum of the measurements.
 
 Its validity circuit, denoted `Count`, uses the following degree-2, arity-2
@@ -4101,7 +4096,7 @@ An IDPF generalizes this "point" to a path on a full binary tree from the root
 to one of the leaves. It is evaluated on an "index" representing a unique node
 of the tree. If the node is on the programmed path, then the function evaluates
 to a non-zero value; otherwise it evaluates to zero. This structure allows an
-IDPF to provide the functionality required for the above protocol: To compute
+IDPF to provide the functionality required for the above protocol: to compute
 the hit count for an index, just evaluate each set of IDPF shares at that index
 and add up the results.
 
@@ -4147,7 +4142,7 @@ significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is the
 length-3 prefix of 25 (11001), but 7 (111) is not.
 
 Each of the programmed points `beta` is a vector of elements of some finite
-field. We distinguish two types of fields: One for inner nodes (denoted
+field. We distinguish two types of fields: one for inner nodes (denoted
 `FieldInner`), and one for leaf nodes (`FieldLeaf`). (Our
 instantiation of Poplar1 ({{poplar1-inst}}) will use a much larger field for
 leaf nodes than for inner nodes. This is to ensure the IDPF is "extractable" as
@@ -4192,7 +4187,7 @@ elements.) The scheme is comprised of the following algorithms:
   and a nonce string. It returns the share of the value corresponding to each
   candidate prefix.
 
-  The output type (i.e., `Output`) depends on the value of `level`: If `level <
+  The output type (i.e., `Output`) depends on the value of `level`: if `level <
   BITS-1`, the output is the value for an inner node, which has type
   `list[list[FieldInner]]`; otherwise, if `level == BITS-1`, then the output is
   the value for a leaf node, which has type `list[list[FieldLeaf]]`.
@@ -4866,7 +4861,7 @@ def decode_agg_param(self, encoded: bytes) -> Poplar1AggParam:
     return (level, tuple(prefixes))
 ~~~
 
-Implementation note: The aggregation parameter includes the level of the IDPF
+Implementation note: the aggregation parameter includes the level of the IDPF
 tree and the sequence of indices to evaluate. For implementations that perform
 per-report caching across executions of the VDAF, this may be more information
 than is strictly needed. In particular, it may be sufficient to convey which
@@ -4962,7 +4957,7 @@ def gen(
             )
 
         w_cw = vec_add(vec_sub(b, w0), w1)
-        # Implementation note: Here we negate the correction word if
+        # Implementation note: here we negate the correction word if
         # the control bit `ctrl[1]` is set. We avoid branching on the
         # value in order to reduce leakage via timing side channels.
         mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
@@ -5018,7 +5013,7 @@ def eval(
         for current_level in range(level + 1):
             bit = (prefix >> (level - current_level)) & 1
 
-            # Implementation note: Typically the current round of
+            # Implementation note: typically the current round of
             # candidate prefixes would have been derived from
             # aggregate results computed during previous rounds.
             # For example, when using the IDPF to compute heavy
@@ -5077,7 +5072,7 @@ def eval_next(
     convert_output = self.convert(level, s[bit], nonce)
     next_seed = convert_output[0]
     y = cast(list[Field], convert_output[1])
-    # Implementation note: Here we add the correction word to the
+    # Implementation note: here we add the correction word to the
     # output if `next_ctrl` is set. We avoid branching on the value
     # of the control bit in order to reduce side channel leakage.
     mask = cast(Field, field(next_ctrl.as_unsigned()))
@@ -5178,14 +5173,14 @@ any positive value of `BITS`. Test vectors can be found in {{test-vectors}}.
 
 VDAFs ({{vdaf}}) have two essential security goals:
 
-1. Privacy: An attacker that controls the Collector and a subset of Clients and
+1. Privacy: an attacker that controls the Collector and a subset of Clients and
    Aggregators learns nothing about the measurements of honest Clients beyond
    what it can deduce from the aggregate result. We assume the attacker
    controls the entire network except for channels between honest Clients and
    honest Aggregators. In particular, it cannot forge or prevent transmission
    of messages on these channels.
 
-1. Robustness: An attacker that controls a subset of Clients cannot cause the
+1. Robustness: an attacker that controls a subset of Clients cannot cause the
    Collector to compute anything other than the aggregate of the measurements
    of honest Clients. We assume the attacker eavesdrops on the network but does
    not control transmission of messages between honest parties.
@@ -5209,7 +5204,7 @@ application will need to assure a few security properties, for example:
 * Enforcing the non-collusion properties required of the specific VDAF in use.
 
 In such an environment, a VDAF provides the high-level privacy property
-described above: The Collector learns only the aggregate measurement, and
+described above: the Collector learns only the aggregate measurement, and
 nothing about individual measurements aside from what can be inferred from the
 aggregate result.  The Aggregators learn neither individual measurements nor the
 aggregate result.  The Collector is assured that the aggregate statistic
@@ -5499,7 +5494,7 @@ useful feedback on and contributions to the spec.
 # Test Vectors {#test-vectors}
 {:numbered="false"}
 
-(TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be found at
+(TO BE REMOVED BY RFC EDITOR: machine-readable test vectors can be found at
 https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)
 
 Test vectors cover the generation of input shares and the conversion of input
