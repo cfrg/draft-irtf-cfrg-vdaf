@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-11T00:53:44.060084+00:00",
+  "timestamp": "2024-08-13T00:50:46.527158+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5646,6 +5646,24 @@
       "createdAt": "2024-08-05T20:58:06Z",
       "updatedAt": "2024-08-06T17:33:48Z",
       "closedAt": "2024-08-06T17:33:48Z",
+      "comments": []
+    },
+    {
+      "number": 396,
+      "id": "I_kwDOGKuqOc6SwJAX",
+      "title": "Capitalization after colon",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/396",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "Sometimes we capitalize the first letter after a colon, other times we don't. Let's be consistent. (The latter is probably the correct one.)",
+      "createdAt": "2024-08-13T00:05:17Z",
+      "updatedAt": "2024-08-13T00:05:22Z",
+      "closedAt": null,
       "comments": []
     }
   ],
@@ -34106,6 +34124,35 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 395,
+      "id": "PR_kwDOGKuqOc54KEcc",
+      "title": "Move test vector generator to test utils",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/395",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "poc",
+        "draft-11"
+      ],
+      "body": "This makes it easier for other projects to generate VDAF test vectors with the same format.",
+      "createdAt": "2024-08-12T21:27:41Z",
+      "updatedAt": "2024-08-12T21:31:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "bb104e39792d7dd7400a492b3217d13784a0625b",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/test-util-vdaf-test-vec",
+      "headRefOid": "9d6e51a46ea60a5e466ba9b3f21b5fac35629d11",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
