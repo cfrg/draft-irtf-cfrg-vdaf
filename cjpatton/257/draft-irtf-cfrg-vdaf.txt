@@ -3580,8 +3580,7 @@ Table of Contents
    | +-------------+  |
    +------------------+
     |
-    V
-   proof
+    V proof
 
        Figure 23: The proof generation algorithm invokes the validity
        circuit on the encoded measurement and joint randomness.  The
@@ -3632,8 +3631,8 @@ Table of Contents
 
 7.3.3.2.  Query Generation
 
-   proof (share)
-    |        |
+    | proof (share)
+    +--------+
     V        |
    +---------|--------+
    | Query   |        |
@@ -3645,8 +3644,7 @@ Table of Contents
    | +-------------+  |
    +------------------+
     |
-    V
-   verifier (share)
+    V verifier (share)
 
        Figure 24: The query generation algorithm invokes the validity
         circuit on the encoded measurement and joint randomness.  It
