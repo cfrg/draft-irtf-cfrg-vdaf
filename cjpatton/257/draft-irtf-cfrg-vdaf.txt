@@ -3267,45 +3267,6 @@ Table of Contents
 
 7.3.  The FLP of [BBCGGI19]
 
-   +------------------+
-   | Prove            |
-   | +-------------+  |
-   | | Valid       |<---- meas
-   | | +--------+  |<---- joint rand
-   | | | Gadget |  |  |<- prove rand
-   | | +--------+  |  |
-   | +-------------+  |
-   +------------------+
-    |
-    V
-   proof
-
-   proof (share)
-    |        |
-    V        |
-   +---------|--------+
-   | Query   |        |
-   | +-------|-----+  |
-   | | Valid V     |<---- encoded measurement (share)
-   | | +--------+  |<---- joint rand
-   | | | Gadget |  |  |<- query rand
-   | | +--------+  |  |
-   | +-------------+  |
-   +------------------+
-    |
-    V
-   verifier (share)
-
-    | verifier
-    V
-   +------------------+
-   | Decide           |
-   +------------------+
-    |
-    V is_valid
-
-                               Figure 22: XXX
-
    This section describes an FLP based on the construction from
    [BBCGGI19], Section 4.2.  We begin in Section 7.3.1 with an overview
    of their proof system and some extensions to it.  The construction is
@@ -3315,36 +3276,37 @@ Table of Contents
 
    Conventional zero-knowledge proof systems involve two parties:
 
-   *  The prover who holds a private measurement and generates a proof
-      of the measurement's validity
+   *  The prover, who holds a measurement and generates a proof of the
+      measurement's validity
 
    *  The verifier who holds an encryption of, or commitment to, the
-      measurement and who checks the proof
+      measurement and checks the proof
 
    Our proof system is much the same, except the verifier is split
    across multiple Aggregators, each of which has a secret share of the
-   measurement.
+   measurement rather than an encryption of it.
 
    Validity is defined in terms of an arithmetic circuit evaluated over
-   the measurement.  The measurement is encoded as a vector over some
-   finite field, the elements of which comprise the inputs to the
-   circuit; the gates of the circuit are multiplication, addition, and
-   negation operations.  The output is a field element: if the value is
-   zero, then the measurement is deemed valid; otherwise, if the output
-   is non-zero, then the measurement is deemed invalid.
+   the measurement.  The inputs to this circuit are elements of finite
+   field that comprise the encoded measurement; the gates of the circuit
+   are multiplication, addition, and negation operations; and the output
+   of the circuit is a single field element.  If the value is zero, then
+   the measurement is deemed valid; otherwise, if the output is non-
+   zero, then the measurement is deemed invalid.
 
-   For example, the simplest circuit specified in this document
-   (Section 7.4.1) recognizes measurements equal to either 0 or 1:
+   For example, the simplest circuit specified in this document is the
+   following (Section 7.4.1):
 
    C(x) = x * (x-1)
 
    This circuit contains one negation gate (-1), one addition gate (x +
    (-1)), and one multiplication gate (x * (x + (-1))).  Observe that
-   C(x) = 0 if and only if x in [0, 1].
+   C(x) = 0 if and only if x in range(2).
 
    Our goal is to allow each Aggregator, who holds a secret share of x,
-   to correctly compute a secret share of C(x).  Then validity is
-   decided by simply combining their shares of the output.
+   to correctly compute a secret share of C(x).  This allows the
+   Aggregators to determine validity by combining their shares of the
+   output.
 
    Suppose for a moment that the validity circuit C is affine, meaning
    its only operations are negation, addition, and multiplication-by-
@@ -3357,75 +3319,56 @@ Table of Contents
 
    (Note that, for this equality to hold, it is necessary to scale any
    constants in the circuit by 1/SHARES.)  However, this is not the case
-   if C is multiplication gates with non-constant inputs, as is the case
-   for most measurement types we are interested in.  Thus our main goal
-   is to transform evaluation of these multiplication gates into
-   computations on secret shared data that each Aggregator can perform
-   locally.
+   if C is multiplication gates with non-constant inputs.  Thus or goal
+   is to transform these multiplication gates into computations on
+   secret shared data that each Aggregator can perform locally.
 
-   XXX
+   The key idea is to have the prover construct a polynomial p such that
+   p(j) is equal to the output of the j-th multiplication gate.
+   Polynomial evaluation is fully linear, which means the coefficients
+   of the polynomial can be secret shared in a way that allows each
+   Aggregator to compute a share of p(j) for any j.  These intermediate
+   results can then be combined with the affine operations of the
+   validity circuit to produce the final output.
 
-   To make this work, the proof system is restricted to validity
-   circuits that exhibit a special structure.  Specifically, an
-   arithmetic circuit with "G-gates" (see [BBCGGI19], Definition 5.2) is
-   composed of affine gates and any number of instances of a
-   distinguished gate G, which may be non-affine.  We will refer to this
-   class of circuits as 'gadget circuits' and to G as the "gadget".
+   Applying this idea to the example circuit C above:
 
-   As an illustrative example, consider a validity circuit C that
-   recognizes the set L = set([0], [1]).  That is, C takes as input a
-   length-1 vector x and returns 0 if x[0] is in [0,2) and outputs
-   something else otherwise.  This circuit can be expressed as the
-   following degree-2 polynomial:
+   1.  The Client, given its measurement x, constructs the lowest degree
+       polynomial p for which p(0) = x * (x - 1).  It then sends secret
+       shares of x and the coefficients of p and sends a set of shares
+       to each of the Aggregators.
 
-   C(x) = (x[0] - 1) * x[0] = x[0]^2 - x[0]
+   2.  Each Aggregator locally computes and broadcasts its share of
+       p(0), which is equal to its share of C(x).
 
-   This polynomial recognizes L because x[0]^2 = x[0] is only true if
-   x[0] == 0 or x[0] == 1.  Notice that the polynomial involves a non-
-   affine operation, x[0]^2.  In order to apply [BBCGGI19], Theorem 4.3,
-   the circuit needs to be rewritten in terms of a gadget that subsumes
-   this non-affine operation.  For example, the gadget might be
-   multiplication:
+   In fact, our FLP is slightly more general than this.  We can replace
+   the multiplication gate with any non-affine sub-circuit and apply the
+   same idea.  For example, in Section 7.4.2, the circuit uses an
+   operation the following sub-circuit multiple times:
 
-   Mul(left, right) = left * right
+   Range2(x) = x * (x -1) = x^2 - x
 
-   The validity circuit can then be rewritten in terms of Mul like so:
+   (This is the same functionality computed by the example circuit C
+   above.)  Here again we can interpolate the lowest degree polynomial p
+   for which p(j) is the value of the j-th call to Range2 in the
+   validity circuit.
 
-   C(x[0]) = Mul(x[0], x[0]) - x[0]
+   Each validity circuit defines a sub-circuit that encapsulates its
+   non-affine functionality.  We refer to this sub-circuit as the
+   "gadget".
 
-   The proof system of [BBCGGI19] allows the verifier to evaluate each
-   instance of the gadget (i.e., Mul(x[0], x[0]) in our example) using a
-   linear function of the measurement and proof.  The proof is
-   constructed roughly as follows.  Let C be the validity circuit and
-   suppose the gadget is arity-L (i.e., it has L input wires.).  Let
-   wire[j-1,k-1] denote the value of the jth wire of the kth call to the
-   gadget during the evaluation of C(x).  Suppose there are M such calls
-   and fix distinct field elements alpha[0], ..., alpha[M-1].  (We will
-   require these points to have a special property, as we'll discuss in
-   Section 7.3.1.1; but for the moment it is only important that they
-   are distinct.)
-
-   The prover constructs from wire and alpha a polynomial that, when
-   evaluated at alpha[k-1], produces the output of the kth call to the
-   gadget.  Let us call this the "gadget polynomial".  Polynomial
-   evaluation is linear, which means that, in the distributed setting,
-   the Client can disseminate additive shares of the gadget polynomial
-   that the Aggregators then use to compute additive shares of each
-   gadget output, allowing each Aggregator to compute its share of C(x)
-   locally.
-
-   There is one more wrinkle, however: It is still possible for a
-   malicious prover to produce a gadget polynomial that would result in
-   C(x) being computed incorrectly, potentially resulting in an invalid
-   measurement being accepted.  To prevent this, the verifier performs a
-   probabilistic test to check that the gadget polynomial is well-
-   formed.  This test, and the procedure for constructing the gadget
-   polynomial, are described in detail in Section 7.3.3.
+   There is one more wrinkle, however: It is possible for a malicious
+   Client to produce a gadget polynomial p that would result in C(x)
+   being computed incorrectly, potentially resulting in an invalid
+   measurement being accepted.  To prevent this, the Aggregators perform
+   a probabilistic test to check that the gadget polynomial was
+   constructed properly.  This test, and the procedure for constructing
+   the polynomial, are described in detail in Section 7.3.3.
 
 7.3.1.1.  Extensions
 
-   The FLP described in the next section extends the proof system of
-   [BBCGGI19], Section 4.2 in a few ways.
+   The FLP described in {#flp-bbcggi19-construction} extends the proof
+   system of [BBCGGI19], Section 4.2 in a few ways.
 
    First, the validity circuit in our construction includes an
    additional, random input (this is the "joint randomness" derived from
@@ -3439,37 +3382,37 @@ Table of Contents
    details).  A much shorter proof can be constructed for the following
    randomized circuit:
 
-   C(meas, r) = r * Range2(meas[0]) + ... + r^N * Range2(meas[N-1])
+   C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
 
    (Note that this is a special case of [BBCGGI19], Theorem 5.2.)  Here
-   meas is the length-N input and r is a random field element.  The
-   gadget circuit Range2 is the "range-check" polynomial described
-   above, i.e., Range2(x) = x^2 - x.  The idea is that, if meas is valid
-   (i.e., each meas[j] is in [0,2)), then the circuit will evaluate to 0
-   regardless of the value of r; but if meas[j] is not in [0,2) for some
-   j, the output will be non-zero with high probability.
+   x is the length-N input and r is a random field element.  The gadget
+   circuit Range2 is the "range-check" polynomial described above, i.e.,
+   Range2(x) = x^2 - x.  The idea is that, if x is valid (i.e., each
+   x[j] is in range(2)), then the circuit will evaluate to 0 regardless
+   of the value of r; but if some x[j] is not in range(2), then output
+   will be non-zero with high probability.
 
    The second extension implemented by our FLP allows the validity
    circuit to contain multiple gadget types.  (This generalization was
    suggested in [BBCGGI19], Remark 4.5.)  This provides additional
    flexibility for designing circuits by allowing multiple, non-affine
-   sub-components.  For example, the following circuit is allowed:
+   sub-circuits.  For example, the following circuit is allowed:
 
    C(meas, r) = r * Range2(meas[0]) + ... + r^L * Range2(meas[L-1]) + \
                r^(L+1) * Range3(meas[L]) + ... + r^N * Range3(meas[N-1])
 
    where Range3(x) = x^3 - 3x^2 + 2x.  This circuit checks that the
    first L inputs are in range [0,2) and the last N-L inputs are in
-   range [0,3).  Of course, the same circuit can be expressed using a
-   sub-component that the gadgets have in common, namely Mul, but the
-   resulting proof would be longer.
+   range [0,3).  The same circuit can be expressed using a sub-component
+   that the gadgets have in common, namely Mul (as defined in
+   Section 7.4.1), but the resulting proof would be longer.
 
-   Third, [BBCGGI19], Theorem 4.3 makes no restrictions on the choice of
-   the fixed points alpha[0], ..., alpha[M-1], other than to require
-   that the points are distinct.  In this document, the fixed points are
-   chosen so that the gadget polynomial can be constructed efficiently
-   using the Cooley-Tukey FFT ("Fast Fourier Transform") algorithm.
-   Note that this requires the field to be "FFT-friendly" as defined in
+   Third, rather than interpolate the gadget polynomial at inputs 1, 2,
+   ..., j, ..., where j is the j-th invocation of the gadget, we use
+   powers of alpha, where alpha is a root of unity for the field.  This
+   allows us to construct the gadget polynomial via the number theoretic
+   transform [SML24], which is far more efficient than generic formulas.
+   This requires the field to be "FFT-friendly" as defined in
    Section 6.1.2.
 
    Finally, the validity circuit in our FLP may have any number of
@@ -3574,7 +3517,7 @@ Table of Contents
        if len(joint_rand) != self.JOINT_RAND_LEN:
            raise ValueError('incorrect joint randomness length')
 
-             Figure 23: Derived methods for validity circuits.
+             Figure 22: Derived methods for validity circuits.
 
 7.3.3.  Construction
 
@@ -3627,6 +3570,25 @@ Table of Contents
 
 7.3.3.1.  Proof Generation
 
+   +------------------+
+   | Prove            |
+   | +-------------+  |
+   | | Valid       |<---- meas
+   | | +--------+  |<---- joint rand
+   | | | Gadget |  |  |<- prove rand
+   | | +--------+  |  |
+   | +-------------+  |
+   +------------------+
+    |
+    V
+   proof
+
+       Figure 23: The proof generation algorithm invokes the validity
+       circuit on the encoded measurement and joint randomness.  The
+       validity circuit in turn invokes the gadget(s) defined by the
+       circuit.  The prove randomness is used to construct the gadget
+                               polynomial(s).
+
    On input of meas, prove_rand, and joint_rand, the proof is computed
    as follows:
 
@@ -3670,6 +3632,30 @@ Table of Contents
 
 7.3.3.2.  Query Generation
 
+   proof (share)
+    |        |
+    V        |
+   +---------|--------+
+   | Query   |        |
+   | +-------|-----+  |
+   | | Valid |     |<---- meas (share)
+   | | +-----|--+  |<---- joint rand
+   | | |     V  |  |  |<- query rand
+   | | +--------+  |  |
+   | +-------------+  |
+   +------------------+
+    |
+    V
+   verifier (share)
+
+       Figure 24: The query generation algorithm invokes the validity
+        circuit on the encoded measurement and joint randomness.  It
+      evaluates the gadget polynomials(s) encoded by the proof (share)
+     to produce (a share of) each gadget output.  The verifier (share)
+       consists of (a share of) the validity circuit's output and (a
+          share of) each gadget test.  The tests consume the query
+                                randomness.
+
    On input of meas, proof, query_rand, and joint_rand, the verifier
    message is generated as follows:
 
@@ -3710,6 +3696,19 @@ Table of Contents
    + x_H + [y_H].
 
 7.3.3.3.  Decision
+
+    | verifier
+    V
+   +------------------+
+   | Decide           |
+   +------------------+
+    |
+    V is_valid
+
+          Figure 25: The decision algorithm consumes the verifier,
+     consisting of the reduced output of the validity circuit and each
+      gadget test.  The verifier is produced by adding up the verifier
+                     shares output by each Aggregator.
 
    On input of vector verifier, the verifier decides if the measurement
    is valid as follows:
@@ -4770,7 +4769,7 @@ Table of Contents
        input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
        return (public_share, input_shares)
 
-               Figure 24: The sharding algorithm for Poplar1.
+               Figure 26: The sharding algorithm for Poplar1.
 
 8.2.2.  Preparation
 
@@ -4939,7 +4938,7 @@ Table of Contents
        else:
            raise ValueError('incorrect sketch length')
 
-                 Figure 25: Preparation state for Poplar1.
+                 Figure 27: Preparation state for Poplar1.
 
 8.2.3.  Validity of Aggregation Parameters
 
@@ -4989,7 +4988,7 @@ Table of Contents
                return False
        return True
 
-         Figure 26: Validity of aggregation parameters for Poplar1.
+         Figure 28: Validity of aggregation parameters for Poplar1.
 
 8.2.4.  Aggregation
 
@@ -5006,7 +5005,7 @@ Table of Contents
            agg_share = vec_add(agg_share, cast(list[Field], out_share))
        return cast(FieldVec, agg_share)
 
-               Figure 27: Aggregation algorithm for Poplar1.
+               Figure 29: Aggregation algorithm for Poplar1.
 
 8.2.5.  Unsharding
 
@@ -5025,7 +5024,7 @@ Table of Contents
            agg = vec_add(agg, cast(list[Field], agg_share))
        return [x.as_unsigned() for x in agg]
 
-        Figure 28: Computation of the aggregate result for Poplar1.
+        Figure 30: Computation of the aggregate result for Poplar1.
 
 8.2.6.  Message Serialization
 
@@ -5299,7 +5298,7 @@ Table of Contents
        public_share = self.encode_public_share(correction_words)
        return (public_share, key)
 
-           Figure 29: IDPF-key generation algorithm of BBCGGI21.
+           Figure 31: IDPF-key generation algorithm of BBCGGI21.
 
 8.3.2.  Key Evaluation
 
@@ -5410,7 +5409,7 @@ Table of Contents
 
        return (next_seed, next_ctrl, cast(FieldVec, y))
 
-        Figure 30: IDPF-evaluation generation algorithm of BBCGGI21.
+        Figure 32: IDPF-evaluation generation algorithm of BBCGGI21.
 
 8.3.3.  Auxiliary Functions
 
@@ -5480,7 +5479,7 @@ Table of Contents
            raise ValueError('trailing bytes')
        return correction_words
 
-                 Figure 31: Helper functions for the IDPF.
+                 Figure 33: Helper functions for the IDPF.
 
    Here, pack_bits() takes a list of bits, packs each group of eight
    bits into a byte, in LSB to MSB order, padding the most significant
@@ -5951,6 +5950,10 @@ Table of Contents
               https://firefox-source-
               docs.mozilla.org/toolkit/components/telemetry/collection/
               origin.html>.
+
+   [SML24]    Satriawan, A., Mareta, R., and H. Lee, "A Complete
+              Beginner Guide to the Number Theoretic Transform (NTT)",
+              2024, <https://eprint.iacr.org/2024/585>.
 
 Acknowledgments
 
