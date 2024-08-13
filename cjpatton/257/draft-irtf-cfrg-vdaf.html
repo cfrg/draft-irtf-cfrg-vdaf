@@ -5323,7 +5323,7 @@ and checks the proof<a href="#section-7.3.1-2.2.1" class="pilcrow">¶</a></p>
 Aggregators, each of which has a secret share of the measurement rather than an
 encryption of it.<a href="#section-7.3.1-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-4">Validity is defined in terms of an arithmetic circuit evaluated over the
-measurement. The inputs to this circuit are elements of finite field that
+measurement. The inputs to this circuit are elements of a finite field that
 comprise the encoded measurement; the gates of the circuit are multiplication,
 addition, and negation operations; and the output of the circuit is a single
 field element. If the value is zero, then the measurement is deemed valid;
@@ -5366,9 +5366,8 @@ operations of the validity circuit to produce the final output.<a href="#section
 <ol start="1" type="1" class="normal type-1" id="section-7.3.1-14">
 <li id="section-7.3.1-14.1">
               <p id="section-7.3.1-14.1.1">The Client, given its measurement <code>x</code>, constructs the lowest degree
-polynomial <code>p</code> for which <code>p(0) = x * (x - 1)</code>. It then sends secret shares
-of <code>x</code> and the coefficients of <code>p</code> and sends a set of shares to each of the
-Aggregators.<a href="#section-7.3.1-14.1.1" class="pilcrow">¶</a></p>
+polynomial <code>p</code> for which <code>p(0) = x * (x - 1)</code>. It sends secret shares of <code>x</code>
+and the coefficients of <code>p</code> to each of the Aggregators.<a href="#section-7.3.1-14.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-7.3.1-14.2">
               <p id="section-7.3.1-14.2.1">Each Aggregator locally computes and broadcasts its share of <code>p(0)</code>, which
@@ -5377,7 +5376,7 @@ is equal to its share of <code>C(x)</code>.<a href="#section-7.3.1-14.2.1" class
           </ol>
 <p id="section-7.3.1-15">In fact, our FLP is slightly more general than this. We can replace the
 multiplication gate with any non-affine sub-circuit and apply the same idea.
-For example, in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>, the circuit uses an operation the following
+For example, in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>, the validity circuit uses the following
 sub-circuit multiple times:<a href="#section-7.3.1-15" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-16">
 <pre>
@@ -5386,16 +5385,16 @@ Range2(x) = x * (x -1) = x^2 - x
 </div>
 <p id="section-7.3.1-17">(This is the same functionality computed by the example circuit <code>C</code> above.)
 Here again we can interpolate the lowest degree polynomial <code>p</code> for which <code>p(j)</code>
-is the value of the <code>j</code>-th call to <code>Range2</code> in the validity circuit.<a href="#section-7.3.1-17" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-18">Each validity circuit defines a sub-circuit that encapsulates its non-affine
-functionality. We refer to this sub-circuit as the "gadget".<a href="#section-7.3.1-18" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-19">There is one more wrinkle, however: It is possible for a malicious Client to
-produce a gadget polynomial <code>p</code> that would result in <code>C(x)</code> being computed
-incorrectly, potentially resulting in an invalid measurement being accepted. To
-prevent this, the Aggregators perform a probabilistic test to check that the
-gadget polynomial was constructed properly. This test, and the procedure for
-constructing the polynomial, are described in detail in
-<a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-19" class="pilcrow">¶</a></p>
+is the value of the <code>j</code>-th call to <code>Range2</code> in the validity circuit. Each
+validity circuit defines a sub-circuit that encapsulates its non-affine
+functionality. We refer to this sub-circuit as the "gadget".<a href="#section-7.3.1-17" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-18">This idea provides the needed functionality, but it has one more problem: it is
+possible for a malicious Client to produce a gadget polynomial <code>p</code> that would
+result in <code>C(x)</code> being computed incorrectly, potentially resulting in an
+invalid measurement being accepted. To prevent this, the Aggregators perform a
+probabilistic test to check that the gadget polynomial was constructed
+properly. This "gadget test", and the procedure for constructing the
+polynomial, are described in detail in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-18" class="pilcrow">¶</a></p>
 <div id="flp-bbcggi19-overview-extensions">
 <section id="section-7.3.1.1">
             <h5 id="name-extensions">
@@ -5438,13 +5437,12 @@ C(meas, r) = r * Range2(meas[0]) + ... + r^L * Range2(meas[L-1]) + \
 </div>
 <p id="section-7.3.1.1-7">where <code>Range3(x) = x^3 - 3x^2 + 2x</code>. This circuit checks that the first <code>L</code>
 inputs are in range <code>[0,2)</code> and the last <code>N-L</code> inputs are in range <code>[0,3)</code>. The
-same circuit can be expressed using a sub-component that the gadgets have in
-common, namely <code>Mul</code> (as defined in <a href="#prio3count" class="auto internal xref">Section 7.4.1</a>), but the resulting proof
-would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
+same circuit can be expressed using a simpler gadget, namely multiplication,
+but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-8">Third, rather than interpolate the gadget polynomial at inputs <code>1</code>, <code>2</code>, ...,
 <code>j</code>, ..., where <code>j</code> is the <code>j</code>-th invocation of the gadget, we use powers of
 <code>alpha</code>, where <code>alpha</code> is a root of unity for the field. This allows us to
-construct the gadget polynomial via the number theoretic transform <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>,
+construct each gadget polynomial via the number theoretic transform <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>,
 which is far more efficient than  generic formulas. This requires the field to
 be "FFT-friendly" as defined in <a href="#field-fft-friendly" class="auto internal xref">Section 6.1.2</a>.<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-9">Finally, the validity circuit in our FLP may have any number of outputs (at
