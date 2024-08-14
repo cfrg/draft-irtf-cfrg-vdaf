@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 February 2025                                           ISRG
+Expires: 15 February 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          13 August 2024
+                                                          14 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 February 2025.
+   This Internet-Draft will expire on 15 February 2025.
 
 Copyright Notice
 
@@ -340,51 +340,51 @@ Table of Contents
    *  Define Prio3MultihotCountVec, a variant of Prio3 for aggregating
       bit vectors with bounded weight.
 
-   *  FLP: allow the output of the circuit to be a vector.  This makes
+   *  FLP: Allow the output of the circuit to be a vector.  This makes
       it possible to skip joint randomness derivation in more cases.
 
-   *  Poplar1: on the first round of preparation, handle None as an
+   *  Poplar1: On the first round of preparation, handle None as an
       error.  Previously this message was interpreted as a length-3
       vector of zeros.
 
-   *  Prio3: move specification of the field from the FLP validity
+   *  Prio3: Move specification of the field from the FLP validity
       circuit to the VDAF itself.
 
    *  Clarify the extent to which the attacker controls the network in
       our threat models for privacy and robustness.
 
-   *  Clean up various aspects of the code, including: follow existing
+   *  Clean up various aspects of the code, including: Follow existing
       object-oriented programming patterns for Python more closely; make
       the type hints enforceable; and avoid shadowing variables.
 
-   *  Poplar1: align terminology with [BBCGGI23].
+   *  Poplar1: Align terminology with [BBCGGI23].
 
-   *  IDPF: add guidance for encoding byte strings as indices.
+   *  IDPF: Add guidance for encoding byte strings as indices.
 
    09:
 
-   *  Poplar1: make prefix tree traversal stricter by requiring each
+   *  Poplar1: Make prefix tree traversal stricter by requiring each
       node to be a child of a node that was already visited.  This
       change is intended to make it harder for a malicious Aggregator to
       steer traversal towards non-heavy-hitting measurements.
 
-   *  Prio3: add more explicit guidance for choosing the field size.
+   *  Prio3: Add more explicit guidance for choosing the field size.
 
-   *  IDPF: define extractability and clarify (un)safe usage of
+   *  IDPF: Define extractability and clarify (un)safe usage of
       intermediate prefix counts.  Accordingly, add text ensuring public
       share consistency to security considerations.
 
    08:
 
-   *  Poplar1: bind the report nonce to the authenticator vector
+   *  Poplar1: Bind the report nonce to the authenticator vector
       programmed into the IDPF. (*)
 
-   *  IdpfPoplar: modify extend() by stealing each control bit from its
+   *  IdpfPoplar: Modify extend() by stealing each control bit from its
       corresponding seed.  This improves performance by reducing the
       number of AES calls per level from 3 to 2.  The cost is a slight
       reduction in the concrete privacy bound. (*)
 
-   *  Prio3: add support for generating and verifying mutliple proofs
+   *  Prio3: Add support for generating and verifying mutliple proofs
       per measurement.  This enables a trade-off between communication
       cost and runtime: if more proofs are used, then a smaller field
       can be used without impacting robustness. (*)
@@ -407,20 +407,20 @@ Table of Contents
    *  Define a new VDAF, called Prio3SumVec, that generalizes Prio3Sum
       to a vector of summands.
 
-   *  Prio3Histogram: update the codepoint and use the parallel sum
+   *  Prio3Histogram: Update the codepoint and use the parallel sum
       optimization introduced by Prio3SumVec to reduce the proof size.
       (*)
 
-   *  Daf, Vdaf: rename interface methods to match verbiage in the
+   *  Daf, Vdaf: Rename interface methods to match verbiage in the
       draft.
 
-   *  Daf: align with Vdaf by adding a nonce to shard() and prep().
+   *  Daf: Align with Vdaf by adding a nonce to shard() and prep().
 
-   *  Vdaf: have prep_init() compute the first prep share.  This change
+   *  Vdaf: Have prep_init() compute the first prep share.  This change
       is intended to simplify the interface by making the input to
       prep_next() not optional.
 
-   *  Prio3: split sharding into two auxiliary functions, one for
+   *  Prio3: Split sharding into two auxiliary functions, one for
       sharding with joint randomness and another without.  This change
       is intended to improve readability.
 
@@ -429,31 +429,31 @@ Table of Contents
 
    06:
 
-   *  Vdaf: define a wrapper interface for preparation that is suitable
+   *  Vdaf: Define a wrapper interface for preparation that is suitable
       for the "ping-pong" topology in which two Aggregators exchange
       messages over a request/response protocol, like HTTP, and take
       turns executing the computation until input from the peer is
       required.
 
-   *  Prio3Histogram: generalize the measurement type so that the
+   *  Prio3Histogram: Generalize the measurement type so that the
       histogram can be used more easily with discrete domains. (*)
 
-   *  Daf, Vdaf: change the aggregation parameter validation algorithm
+   *  Daf, Vdaf: Change the aggregation parameter validation algorithm
       to take the set of previous parameters rather than a list.  (The
       order of the parameters is irrelevant.)
 
-   *  Daf, Vdaf, Idpf: add parameter RAND_SIZE that specifies the number
+   *  Daf, Vdaf, Idpf: Add parameter RAND_SIZE that specifies the number
       of random bytes consumed by the randomized algorithm (shard() for
       Daf and Vdaf and gen() for Idpf).
 
    05:
 
-   *  IdpfPoplar: replace PrgSha3 with PrgFixedKeyAes128, a fixed-key
+   *  IdpfPoplar: Replace PrgSha3 with PrgFixedKeyAes128, a fixed-key
       mode for AES-128 based on a construction from [GKWWY20].  This
       change is intended to improve performance of IDPF evaluation.
       Note that the new PRG is not suitable for all applications. (*)
 
-   *  Idpf: add a binder string to the key-generation and evaluation
+   *  Idpf: Add a binder string to the key-generation and evaluation
       algorithms.  This is used to plumb the nonce generated by the
       Client to the PRG.
 
@@ -466,7 +466,7 @@ Table of Contents
 
    *  Use little-endian byte-order for field element encoding. (*)
 
-   *  Poplar1: move the last step of sketch evaluation from prep_next()
+   *  Poplar1: Move the last step of sketch evaluation from prep_next()
       to prep_shares_to_prep().
 
    04:
@@ -474,13 +474,13 @@ Table of Contents
    *  Align security considerations with the security analysis of
       [DPRS23].
 
-   *  Vdaf: pass the nonce to the sharding algorithm.
+   *  Vdaf: Pass the nonce to the sharding algorithm.
 
-   *  Vdaf: rather than allow the application to choose the nonce
+   *  Vdaf: Rather than allow the application to choose the nonce
       length, have each implementation of the Vdaf interface specify the
       expected nonce length. (*)
 
-   *  Prg: split "info string" into two components: the "customization
+   *  Prg: Split "info string" into two components: the "customization
       string", intended for domain separation; and the "binder string",
       used to bind the output to ephemeral values, like the nonce,
       associated with execution of a (V)DAF.
@@ -492,25 +492,25 @@ Table of Contents
       for instantiating a random oracle, which is used in the analysis
       of Prio3 of [DPRS23]. (*)
 
-   *  Prio3, Poplar1: ensure each invocation of the Prg uses a distinct
+   *  Prio3, Poplar1: Ensure each invocation of the Prg uses a distinct
       customization string, as suggested by [DPRS23].  This is intended
       to make domain separation clearer, thereby simplifying security
       analysis. (*)
 
-   *  Prio3: replace "joint randomness hints" sent in each input share
+   *  Prio3: Replace "joint randomness hints" sent in each input share
       with "joint randomness parts" sent in the public share.  This
       reduces communication overhead when the number of shares exceeds
       two. (*)
 
-   *  Prio3: bind nonce to joint randomness parts.  This is intended to
+   *  Prio3: Bind nonce to joint randomness parts.  This is intended to
       address birthday attacks on robustness pointed out by [DPRS23].
       (*)
 
-   *  Poplar1: use different Prg invocations for producing the
+   *  Poplar1: Use different Prg invocations for producing the
       correlated randomness for inner and leaf nodes of the IDPF tree.
       This is intended to simplify implementations. (*)
 
-   *  Poplar1: don't bind the candidate prefixes to the verifier
+   *  Poplar1: Don't bind the candidate prefixes to the verifier
       randomness.  This is intended to improve performance, while not
       impacting security.  According to the analysis of [DPRS23], it is
       necessary to restrict Poplar1 usage such that no report is
@@ -519,27 +519,27 @@ Table of Contents
       restriction, there is no added benefit of binding to the prefixes
       themselves. (*)
 
-   *  Poplar1: during preparation, assert that all candidate prefixes
+   *  Poplar1: During preparation, assert that all candidate prefixes
       are unique and appear in order.  Uniqueness is required to avoid
       erroneously rejecting a valid report; the ordering constraint
       ensures the uniqueness check can be performed efficiently. (*)
 
-   *  Poplar1: increase the maximum candidate prefix count in the
+   *  Poplar1: Increase the maximum candidate prefix count in the
       encoding of the aggregation parameter. (*)
 
-   *  Poplar1: bind the nonce to the correlated randomness derivation.
+   *  Poplar1: Bind the nonce to the correlated randomness derivation.
       This is intended to provide defense-in-depth by ensuring the
       Aggregators reject the report if the nonce does not match what the
       Client used for sharding. (*)
 
-   *  Poplar1: clarify that the aggregation parameter encoding is
+   *  Poplar1: Clarify that the aggregation parameter encoding is
       OPTIONAL.  Accordingly, update implementation considerations
       around cross-aggregation state.
 
-   *  IdpfPoplar: add implementation considerations around branching on
+   *  IdpfPoplar: Add implementation considerations around branching on
       the values of control bits.
 
-   *  IdpfPoplar: when decoding the the control bits in the public
+   *  IdpfPoplar: When decoding the the control bits in the public
       share, assert that the trailing bits of the final byte are all
       zero. (*)
 
@@ -548,10 +548,10 @@ Table of Contents
    *  Define codepoints for (V)DAFs and use them for domain separation
       in Prio3 and Poplar1. (*)
 
-   *  Prio3: align joint randomness computation with revised paper
+   *  Prio3: Align joint randomness computation with revised paper
       [BBCGGI19].  This change mitigates an attack on robustness. (*)
 
-   *  Prio3: remove an intermediate PRG evaluation from query randomness
+   *  Prio3: Remove an intermediate PRG evaluation from query randomness
       generation. (*)
 
    *  Add additional guidance for choosing FFT-friendly fields.
@@ -572,12 +572,12 @@ Table of Contents
       result from a vector of field elements.  The new method takes into
       account the number of measurements.
 
-   *  Prio3: align aggregate result computation with updated FLP syntax.
+   *  Prio3: Align aggregate result computation with updated FLP syntax.
 
-   *  Prg: add a method for statefully generating a vector of field
+   *  Prg: Add a method for statefully generating a vector of field
       elements.
 
-   *  Field: require that field elements are fully reduced before
+   *  Field: Require that field elements are fully reduced before
       decoding. (*)
 
    *  Define new field Field255.
@@ -588,7 +588,7 @@ Table of Contents
 
    *  Define Distributed Aggregation Functions (DAFs).
 
-   *  Prio3: move proof verifier check from prep_next() to
+   *  Prio3: Move proof verifier check from prep_next() to
       prep_shares_to_prep(). (*)
 
    *  Remove public parameter and replace verification parameter with a
@@ -3177,7 +3177,7 @@ Table of Contents
    encodes the joint randomness parts as follows:
 
    struct {
-       Prio3Seed k_joint_rand_parts[S * prio3.SHARES];
+       Prio3Seed k_joint_rand_parts[S * Prio3.SHARES];
    } Prio3PublicShareWithJointRand;
 
 7.2.7.2.  Input share
@@ -3198,8 +3198,8 @@ Table of Contents
    randomness is not used, the Leader's share is structured as follows:
 
    struct {
-       Prio3Field meas_share[F * prio3.flp.MEAS_LEN];
-       Prio3Field proofs_share[F * prio3.flp.PROOF_LEN * prio3.PROOFS];
+       Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
+       Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
    } Prio3LeaderShare;
 
    When joint randomness is not used, the Helpers' shares are structured
@@ -3233,7 +3233,7 @@ Table of Contents
 
    struct {
        Prio3Field verifiers_share[
-           F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
+           F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
        ];
    } Prio3PrepShare;
 
@@ -3242,7 +3242,7 @@ Table of Contents
 
    struct {
        Prio3Field verifiers_share[
-           F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
+           F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
        ];
        Prio3Seed k_joint_rand_part;
    } Prio3PrepShareWithJointRand;
@@ -3262,7 +3262,7 @@ Table of Contents
    Aggregate shares are structured as follows:
 
    struct {
-       Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
+       Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
 7.3.  The FLP of [BBCGGI19]
@@ -5004,9 +5004,9 @@ Table of Contents
    Each input share is structured as follows:
 
    struct {
-       opaque idpf_key[poplar1.Idpf.KEY_SIZE];
+       opaque idpf_key[Poplar1.Idpf.KEY_SIZE];
        Poplar1Seed corr_seed;
-       Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
+       Poplar1FieldInner corr_inner[Fi * 2 * (Poplar1.Idpf.BITS - 1)];
        Poplar1FieldLeaf corr_leaf[Fl * 2];
    } Poplar1InputShare;
 
