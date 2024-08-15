@@ -418,6 +418,23 @@ security considerations for DAFs and VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+11:
+
+* Define message formats for the Poplar1 aggregation parameter and IDPF public
+  share.
+
+* IDPF: Require the IDPF binder must be a random nonce.
+
+* VDAF: Replace the pseudocode description of the ping-ping topology with
+  Python and sketch the star topology.
+
+* DAF: Align aggregation parameter validation with VDAF.
+
+* Replace `Union[A, B]` type with `A | B`.
+
+* Rename FFT ("Fast Fourier Transform") with NTT ("Number Theoretic
+  Transform").
+
 10:
 
 * Define Prio3MultihotCountVec, a variant of Prio3 for aggregating bit vectors
