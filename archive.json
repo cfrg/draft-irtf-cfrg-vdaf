@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-13T00:50:46.527158+00:00",
+  "timestamp": "2024-08-15T00:46:50.094607+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -92,6 +92,11 @@
       "name": "draft-11",
       "description": "",
       "color": "D10E5A"
+    },
+    {
+      "name": "draft-12",
+      "description": "",
+      "color": "36D415"
     }
   ],
   "issues": [
@@ -3098,11 +3103,12 @@
       "assignees": [],
       "labels": [
         "wire change",
-        "needs security analysis"
+        "needs security analysis",
+        "draft-12"
       ],
       "body": "We currently use separate seeds for the helper's measurement share, proof share, and blind. It is likely safe to use the same PRG seed for all three.\r\n\r\nThe upshot is that this reduce bandwdith and simplify the Prio3 spec. However, it is not immediately clear how this change would impact known security analysis. See comments on https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/129 for discussion.\r\n",
       "createdAt": "2023-03-02T01:19:20Z",
-      "updatedAt": "2024-08-07T15:23:29Z",
+      "updatedAt": "2024-08-14T15:45:44Z",
       "closedAt": null,
       "comments": [
         {
@@ -4448,7 +4454,7 @@
       "id": "I_kwDOGKuqOc5uaIML",
       "title": "poc: Test (and add test vectors for?) ping-pong API",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/283",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -4459,8 +4465,8 @@
       ],
       "body": "              This is fine as pseudocode, but as an FYI, this won't work in actual Python. The left hand side is `<class 'tuple'>`, while the right hand side is an instance of `types.GenericAlias`. The collection types are fully dynamic to begin with, and everything in the `types` module is meant for static analysis, not RTTI.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/275#discussion_r1295061219_\r\n            ",
       "createdAt": "2023-08-16T01:01:53Z",
-      "updatedAt": "2024-08-02T23:48:47Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-13T18:43:27Z",
+      "closedAt": "2024-08-13T18:43:27Z",
       "comments": []
     },
     {
@@ -4792,11 +4798,12 @@
       "assignees": [],
       "labels": [
         "wire change",
-        "idea"
+        "idea",
+        "draft-12"
       ],
       "body": "In Prio3Sum and Prio3SumVec we do a simple $[0, 2^k)$ range check by encoding the integer as a $k$-bit string and checking each bit is $0$ or $1$. In #287 we devised a simple strategy for generalizing this check to $[0, C)$ for any $C > 0$, even if $C$ is not a power of $2$. What's more, this check is concretely efficient in that it doesn't change the input length or the number of gadget calls. (The affine part of the computation is a bit more complex.)\r\n\r\nCould we, and would it be worth it to, do the same for Prio3Sum and Prio3SumVec? It seems to me this would be a valuable improvement.\r\n\r\ncc/ @divergentdave, @junyechen1996 ",
       "createdAt": "2023-10-25T21:43:29Z",
-      "updatedAt": "2024-06-12T23:51:57Z",
+      "updatedAt": "2024-08-14T15:45:53Z",
       "closedAt": null,
       "comments": [
         {
@@ -5094,13 +5101,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
-        "wire change"
+        "wire change",
+        "draft-12"
       ],
       "body": "When thinking about Prio3 robustness (ia.cr/2023/130, Theorem 1) we (err, I, really) have been ignoring the term that depends on the size of the seed: $(q_\\text{RG} + {q_{\\text{Prep}}}^2) / 2^{\\kappa -1}$\r\n\r\n* $q_\\text{RG}$ - the number of random oracle queries (XofTurboShake128 is modeled as an RO)\r\n* $q_\\text{Prep}$ - the number of (potentially malicious) reports consumed in a given DAP task\r\n* $\\kappa$ - the seed size (16 bytes for XofTurboShake128)\r\n\r\nAs @albertpl pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/318#discussion_r1416669600, the bound becomes vacuous after $q_\\text{Prep}=2^{63.5}$ reports (since $(2^{63.5})^2 = 2^{\\kappa -1}$).\r\n\r\nWhile it's doubtful that we'd ever consume so many reports in a single task, it's not a bad idea to have a more conservative safety margin. 32 bytes seems like a reasonable choice.",
       "createdAt": "2023-12-07T22:57:31Z",
-      "updatedAt": "2023-12-07T22:59:48Z",
+      "updatedAt": "2024-08-14T15:46:46Z",
       "closedAt": null,
       "comments": []
     },
@@ -5234,10 +5244,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-12"
+      ],
       "body": "The draft specifies a constant `VERSION` that is used for domain separation in Prio3 and Poplar1. This is intended to force incompatibility across drafts such that an old version of Prio3 doesn't interop with a new version. (Likewise for Poplar1.)\r\n\r\nWe're considering two breaking changes for Poplar1 in the next draft:\r\n- #316\r\n- #333\r\n\r\nHowever we're not likely to see breaking changes for Prio3.  VDAF-08-Prio3 is already deployed:  I propose that, for VDAF-09, we keep the version tag for Prio3 the same and only bump the version tag for Poplar1. If breaking changes for Prio3 are required in the future, then we can bump the version tag then.",
       "createdAt": "2024-04-03T19:29:27Z",
-      "updatedAt": "2024-04-03T19:29:27Z",
+      "updatedAt": "2024-08-14T15:47:31Z",
       "closedAt": null,
       "comments": []
     },
@@ -5314,11 +5326,12 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "wire change"
+        "wire change",
+        "draft-12"
       ],
       "body": "This is needed for IDPF to be extractable.\r\n\r\n_Originally posted by @schoppmp in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336#discussion_r1588266127_\r\n            ",
       "createdAt": "2024-05-06T14:36:25Z",
-      "updatedAt": "2024-05-06T14:37:03Z",
+      "updatedAt": "2024-08-14T15:47:18Z",
       "closedAt": null,
       "comments": []
     },
@@ -5653,16 +5666,59 @@
       "id": "I_kwDOGKuqOc6SwJAX",
       "title": "Capitalization after colon",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/396",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": "Sometimes we capitalize the first letter after a colon, other times we don't. Let's be consistent. (The latter is probably the correct one.)",
       "createdAt": "2024-08-13T00:05:17Z",
-      "updatedAt": "2024-08-13T00:05:22Z",
+      "updatedAt": "2024-08-14T15:55:03Z",
+      "closedAt": "2024-08-14T15:55:03Z",
+      "comments": []
+    },
+    {
+      "number": 397,
+      "id": "I_kwDOGKuqOc6S4TXn",
+      "title": "Gentle introduction to IDPF generation/evaluation",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/397",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "schoppmp"
+      ],
+      "labels": [
+        "editorial"
+      ],
+      "body": "We need text that conveys the intuition of how IDPFs work, and whey they're private:\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4902-L4903\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4981",
+      "createdAt": "2024-08-13T21:13:44Z",
+      "updatedAt": "2024-08-13T21:13:44Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 398,
+      "id": "I_kwDOGKuqOc6S4oCp",
+      "title": "Replace \"FFT\" with \"NTT\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/398",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "editorial",
+        "poc"
+      ],
+      "body": "Number theoretic transform is the terminology used much more widely in cryptography: https://eprint.iacr.org/2024/585",
+      "createdAt": "2024-08-13T22:11:25Z",
+      "updatedAt": "2024-08-13T23:12:58Z",
       "closedAt": null,
       "comments": []
     }
@@ -33438,7 +33494,7 @@
       "id": "PR_kwDOGKuqOc53fulA",
       "title": "Replace pseudocode for ping-pong topology with Python",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/388",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -33447,17 +33503,19 @@
       ],
       "body": "Closes #283.\r\nBased on #386 (merge that first).\r\n\r\nAdd an implementation of the ping-pong API to the reference code. The\r\npseudocode currently in the draft doesn't compile, so replace it with\r\nthe tested, type-checked, and linted Python.\r\n\r\nAlso, in the draft, we don't need to list the encoding methods used by\r\nthe ping-pong API; these should be clear in context.",
       "createdAt": "2024-08-05T20:51:14Z",
-      "updatedAt": "2024-08-08T20:25:30Z",
+      "updatedAt": "2024-08-13T18:43:26Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "9ccd7545b7c2697fac983c72ac896cd87630cbef",
+      "baseRefOid": "bb104e39792d7dd7400a492b3217d13784a0625b",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/283",
-      "headRefOid": "37177d1dadd134f134c384a6876a0ff5c371b8e5",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "956ee965ecb92979ee5f8ee9b0960e7e613c8532",
+      "closedAt": "2024-08-13T18:43:26Z",
+      "mergedAt": "2024-08-13T18:43:26Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "a0dfe1dcfb6daf038540a3b299a758b9b5978bc7"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -33686,6 +33744,70 @@
           "createdAt": "2024-08-08T20:23:16Z",
           "updatedAt": "2024-08-08T20:25:18Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Esrhg",
+          "commit": {
+            "abbreviatedOid": "37177d1"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-07T22:33:59Z",
+          "updatedAt": "2024-08-13T17:30:39Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "I think we should keep this, as it's referenced below",
+              "createdAt": "2024-08-07T22:33:59Z",
+              "updatedAt": "2024-08-13T17:30:39Z"
+            },
+            {
+              "originalPosition": 31,
+              "body": "This is missing the new field\r\n```suggestion\r\n    def __init__(self, prep_state: PrepState, prep_round: int):\r\n        self.prep_state = prep_state\r\n        self.prep_round = prep_round\r\n```",
+              "createdAt": "2024-08-13T13:19:44Z",
+              "updatedAt": "2024-08-13T17:30:39Z"
+            },
+            {
+              "originalPosition": 219,
+              "body": "A pointer back to the enum would be nice for clarity.\r\n```suggestion\r\nProcedure `decode` decodes the inbound message and returns the MessageType variant\r\n```",
+              "createdAt": "2024-08-13T13:22:05Z",
+              "updatedAt": "2024-08-13T17:30:39Z"
+            },
+            {
+              "originalPosition": 280,
+              "body": "This comment is incorrect\r\n```suggestion\r\n        num_counts = 1   # prep_msg\r\n```",
+              "createdAt": "2024-08-13T16:49:39Z",
+              "updatedAt": "2024-08-13T17:30:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6FShxq",
+          "commit": {
+            "abbreviatedOid": "37177d1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-13T18:00:32Z",
+          "updatedAt": "2024-08-13T18:03:20Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "Done. I also added a NOTE in the code to remind us that these are excerpted.",
+              "createdAt": "2024-08-13T18:00:32Z",
+              "updatedAt": "2024-08-13T18:03:20Z"
+            },
+            {
+              "originalPosition": 39,
+              "body": "Yup, this was a goof. Fixed.",
+              "createdAt": "2024-08-13T18:01:12Z",
+              "updatedAt": "2024-08-13T18:03:20Z"
+            }
+          ]
         }
       ]
     },
@@ -34130,7 +34252,7 @@
       "id": "PR_kwDOGKuqOc54KEcc",
       "title": "Move test vector generator to test utils",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/395",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -34140,13 +34262,192 @@
       ],
       "body": "This makes it easier for other projects to generate VDAF test vectors with the same format.",
       "createdAt": "2024-08-12T21:27:41Z",
-      "updatedAt": "2024-08-12T21:31:42Z",
+      "updatedAt": "2024-08-13T18:51:49Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "bb104e39792d7dd7400a492b3217d13784a0625b",
+      "baseRefOid": "a0dfe1dcfb6daf038540a3b299a758b9b5978bc7",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/test-util-vdaf-test-vec",
-      "headRefOid": "9d6e51a46ea60a5e466ba9b3f21b5fac35629d11",
+      "headRefOid": "5245c612d2b131a0ca2a220ba8aa3475ab8ba8d1",
+      "closedAt": "2024-08-13T18:51:49Z",
+      "mergedAt": "2024-08-13T18:51:49Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6FSmkl",
+          "commit": {
+            "abbreviatedOid": "9d6e51a"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-13T18:10:41Z",
+          "updatedAt": "2024-08-13T18:13:00Z",
+          "comments": [
+            {
+              "originalPosition": 73,
+              "body": "nit: extra line",
+              "createdAt": "2024-08-13T18:10:41Z",
+              "updatedAt": "2024-08-13T18:13:00Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 399,
+      "id": "PR_kwDOGKuqOc54SbIm",
+      "title": "Add diagrams for FLP and rework overview/extensions",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/399",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #257.\r\nPartially addresses #226.\r\n\r\nThis commit includes editorial improvements for `FlpBBCGGI19`:\r\n\r\n1. Add diagrams to show concepts relate to one another: validity circuit, gadgets, encoded measurement, joint, prove, and query randomness, and so on.\r\n\r\n2. Improve the overview section, building up each of the concepts one by one.\r\n\r\n3. Do an editorial pass of the extensions section, some of which is a little out of date. Also, add a reference for NTT.",
+      "createdAt": "2024-08-13T22:41:24Z",
+      "updatedAt": "2024-08-13T23:21:39Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/257",
+      "headRefOid": "d7f27dda85abe12537383920ccb68caddb0814c6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 400,
+      "id": "PR_kwDOGKuqOc54Sg06",
+      "title": "Use lower case after colon",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/400",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #396.",
+      "createdAt": "2024-08-13T22:55:08Z",
+      "updatedAt": "2024-08-14T15:55:02Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/396",
+      "headRefOid": "503958e7f828fc766f9eb76e4f896a177d11afff",
+      "closedAt": "2024-08-14T15:55:02Z",
+      "mergedAt": "2024-08-14T15:55:02Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "34e248229d68188bc3bf286a7d4857c414a83316"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6FbLqx",
+          "commit": {
+            "abbreviatedOid": "8cc2d03"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-14T15:16:22Z",
+          "updatedAt": "2024-08-14T15:17:59Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "I lean towards leaving these occurrences in the changelog as-is, because I view the sentence as starting with \"Allow\", for example, and the \"FLP:\" that comes before it as a label, outside of the sentence structure.",
+              "createdAt": "2024-08-14T15:16:22Z",
+              "updatedAt": "2024-08-14T15:17:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6FbWdy",
+          "commit": {
+            "abbreviatedOid": "8cc2d03"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-14T15:28:53Z",
+          "updatedAt": "2024-08-14T15:28:53Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Done.",
+              "createdAt": "2024-08-14T15:28:53Z",
+              "updatedAt": "2024-08-14T15:28:53Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 401,
+      "id": "PR_kwDOGKuqOc54Sj4D",
+      "title": "Refer to an instance, not the class in msssage encoding sections",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/401",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-11"
+      ],
+      "body": "To define message encoding, we need to be able to refer to attributes of the VDAF, e.g., the value of `SHARES`. Previously we referred to the class in this section, e.g., `Prio3`, but since getting rid of the class-factor pattern, it is now necessary to refer to an instance of the class.\r\n\r\nTo make this clear, replace upper case `Prio3` with lowercase `prio3`, to imply that we an instance of a sub-class of `Vdaf` rather than the sub-class itself.",
+      "createdAt": "2024-08-13T23:01:38Z",
+      "updatedAt": "2024-08-13T23:21:15Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/message-encoding-nits",
+      "headRefOid": "1063f7b2e7916a73739806416da3c7c28f25fc3d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 402,
+      "id": "PR_kwDOGKuqOc54SoJZ",
+      "title": "Rename FFT to NTT",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/402",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "Closes #398 \r\n\r\n\"Number theoretic transform\" is the term preferred by most cryptographers.\r\n\r\nAlso, remove an out of date comment related to NTT and padding.",
+      "createdAt": "2024-08-13T23:18:06Z",
+      "updatedAt": "2024-08-13T23:21:04Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/398",
+      "headRefOid": "1ddb55bcc86639345a62985f27aeb484a26094d6",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
