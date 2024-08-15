@@ -340,17 +340,17 @@ Table of Contents
    *  Define message formats for the Poplar1 aggregation parameter and
       IDPF public share.
 
-   *  Rename FFT ("Fast Fourier Transform") with NTT ("Number Theoretic
-      Transform").
-
-   *  Replace Union[A, B] type with A | B.
+   *  IDPF: Require the IDPF binder must be a random nonce.
 
    *  VDAF: Replace the pseudocode description of the ping-ping topology
       with Python and sketch the star topology.
 
-   *  IDPF: Require the IDPF binder must be a random nonce.
-
    *  DAF: Align aggregation parameter validation with VDAF.
+
+   *  Replace Union[A, B] type with A | B.
+
+   *  Rename FFT ("Fast Fourier Transform") with NTT ("Number Theoretic
+      Transform").
 
    10:
 
