@@ -8177,9 +8177,9 @@ to the high level idea.<a href="#section-8.3.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-8.3.1-2">The description of the IDPF-key generation algorithm makes use of auxiliary
-functions <code>extend()</code>, <code>convert()</code>, and <code>encode_public_share()</code> defined in
-<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote the
-field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
+functions <code>extend()</code> and <code>convert()</code> defined in
+<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote
+the field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-key-generation-algorit"></span><div id="idpf-bbcggi21-gen">
 <figure id="figure-28">
             <div class="breakable lang-python sourcecode" id="section-8.3.1-3.1">
@@ -8215,8 +8215,8 @@ def gen(
         lose = 1 - keep
         bit = Field2(keep)
 
-        (s0, t0) = self.extend(seed[0], nonce)
-        (s1, t1) = self.extend(seed[1], nonce)
+        (s0, t0) = self.extend(level, seed[0], nonce)
+        (s1, t1) = self.extend(level, seed[1], nonce)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
             t0[0] + t1[0] + bit + Field2(1),
@@ -8240,7 +8240,7 @@ def gen(
             )
 
         w_cw = vec_add(vec_sub(b, w0), w1)
-        # Implementation note: here we negate the correction word if
+        # Implementation note: Here we negate the correction word if
         # the control bit `ctrl[1]` is set. We avoid branching on the
         # value in order to reduce leakage via timing side channels.
         mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
@@ -8268,7 +8268,7 @@ def gen(
 </li>
           </ul>
 <p id="section-8.3.2-2">The description of the IDPF-evaluation algorithm makes use of auxiliary
-functions <code>extend()</code>, <code>convert()</code>, and <code>decode_public_share()</code> defined in
+functions <code>extend()</code>, and <code>convert()</code> defined in
 <a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-evaluation-generation-"></span><div id="idpf-bbcggi21-eval">
 <figure id="figure-29">
@@ -8281,8 +8281,7 @@ def eval(
         key: bytes,
         level: int,
         prefixes: Sequence[int],
-        nonce: bytes,
-    ) -&gt; list[list[Field64]] | list[list[Field255]]:
+        nonce: bytes) -&gt; list[list[Field64]] | list[list[Field255]]:
     if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
     if level not in range(self.BITS):
@@ -8306,7 +8305,7 @@ def eval(
         for current_level in range(level + 1):
             bit = (prefix &gt;&gt; (level - current_level)) &amp; 1
 
-            # Implementation note: typically the current round of
+            # Implementation note: Typically the current round of
             # candidate prefixes would have been derived from
             # aggregate results computed during previous rounds.
             # For example, when using the IDPF to compute heavy
@@ -8355,7 +8354,7 @@ def eval_next(
     seed_cw = correction_word[0]
     ctrl_cw = correction_word[1]
     w_cw = cast(list[Field], correction_word[2])
-    (s, t) = self.extend(prev_seed, nonce)
+    (s, t) = self.extend(level, prev_seed, nonce)
     s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
     s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
     t[0] += ctrl_cw[0] * prev_ctrl
@@ -8365,7 +8364,7 @@ def eval_next(
     convert_output = self.convert(level, s[bit], nonce)
     next_seed = convert_output[0]
     y = cast(list[Field], convert_output[1])
-    # Implementation note: here we add the correction word to the
+    # Implementation note: Here we add the correction word to the
     # output if `next_ctrl` is set. We avoid branching on the value
     # of the control bit in order to reduce side channel leakage.
     mask = cast(Field, field(next_ctrl.as_unsigned()))
@@ -8392,12 +8391,13 @@ def eval_next(
 <pre>
 def extend(
         self,
+        level: int,
         seed: bytes,
         nonce: bytes) -&gt; tuple[list[bytes], list[Field2]]:
-    xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), nonce)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
     s = [
-        bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
-        bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
+        bytearray(xof.next(xof.SEED_SIZE)),
+        bytearray(xof.next(xof.SEED_SIZE)),
     ]
     # Use the least significant bits as the control bit correction,
     # and then zero it out. This gives effectively 127 bits of
@@ -8412,11 +8412,20 @@ def convert(
         level: int,
         seed: bytes,
         nonce: bytes) -&gt; tuple[bytes, FieldVec]:
-    xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), nonce)
-    next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
+    next_seed = xof.next(xof.SEED_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
     return (next_seed, cast(FieldVec, w))
+
+def current_xof(self,
+                level: int,
+                seed: bytes,
+                dst: bytes,
+                nonce: bytes) -&gt; Xof:
+    if level &lt; self.BITS-1:
+        return XofFixedKeyAes128(seed, dst, nonce)
+    return XofTurboShake128(seed, dst, nonce)
 </pre>
 </div>
 <figcaption><a href="#figure-30" class="selfRef">Figure 30</a>:
