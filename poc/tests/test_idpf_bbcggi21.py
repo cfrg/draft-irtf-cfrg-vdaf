@@ -6,6 +6,7 @@ from vdaf_poc.common import from_be_bytes, gen_rand, vec_add
 from vdaf_poc.field import Field
 from vdaf_poc.idpf import Idpf
 from vdaf_poc.idpf_bbcggi21 import CorrectionWord, IdpfBBCGGI21
+from vdaf_poc.xof import XofFixedKeyAes128, XofTurboShake128
 
 
 class TestIdpfBBCGGI21(unittest.TestCase):
@@ -181,3 +182,11 @@ class TestIdpfBBCGGI21(unittest.TestCase):
             idpf.decode_public_share(idpf.encode_public_share(public_share)),
             public_share,
         )
+
+    def test_seed_size(self) -> None:
+        """
+        Ensure that the seed size is the same for XofTurobShake128 and
+        XofTurobShake128. The is assumbed in the design of IdpfBBCGGI21.
+        """
+        self.assertEqual(XofTurboShake128.SEED_SIZE,
+                         XofFixedKeyAes128.SEED_SIZE)
