@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 9 February 2025                                            ISRG
+Expires: 17 February 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                           8 August 2024
+                                                          16 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 February 2025.
+   This Internet-Draft will expire on 17 February 2025.
 
 Copyright Notice
 
@@ -160,7 +160,7 @@ Table of Contents
 
 1.  Introduction
 
-   (RFC EDITOR: Remove this paragraph.)  The source for this draft and
+   (RFC EDITOR: remove this paragraph.)  The source for this draft and
    and the reference implementation can be found at
    https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
@@ -330,7 +330,7 @@ Table of Contents
 
 1.1.  Change Log
 
-   (RFC EDITOR: Remove this section.)
+   (RFC EDITOR: remove this section.)
 
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
@@ -353,7 +353,7 @@ Table of Contents
    *  Clarify the extent to which the attacker controls the network in
       our threat models for privacy and robustness.
 
-   *  Clean up various aspects of the code, including: follow existing
+   *  Clean up various aspects of the code, including: Follow existing
       object-oriented programming patterns for Python more closely; make
       the type hints enforceable; and avoid shadowing variables.
 
@@ -931,7 +931,7 @@ Table of Contents
    DAFs MUST implement the following function:
 
    *  daf.is_valid(agg_param: AggParam, previous_agg_params:
-      list[AggParam]) -> bool: Checks if the agg_param is compatible
+      list[AggParam]) -> bool: checks if the agg_param is compatible
       with all elements of previous_agg_params.
 
 4.4.  Aggregation
@@ -969,7 +969,7 @@ Table of Contents
    Many DAFs may also support a "streaming" form, where shares are
    processed one at a time.
 
-   Implementation note: For most natural DAFs (and VDAFs) it is not
+   Implementation note: for most natural DAFs (and VDAFs) it is not
    necessary for an Aggregator to store all output shares individually
    before aggregating.  Typically it is possible to merge output shares
    into aggregate shares as they arrive, merge these into other
@@ -1077,7 +1077,7 @@ Table of Contents
                        Figure 5: Execution of a DAF.
 
    The inputs to this procedure are the same as the aggregation function
-   computed by the DAF: An aggregation parameter and a sequence of
+   computed by the DAF: an aggregation parameter and a sequence of
    measurements.  The procedure prescribes how a DAF is executed in a
    "benign" environment in which there is no adversary and the messages
    are passed among the protocol participants over secure point-to-point
@@ -1115,7 +1115,7 @@ Table of Contents
       aggregate result
 
    In contrast to DAFs, the Preparation stage for VDAFs now performs an
-   additional task: Verification of the validity of the recovered output
+   additional task: verification of the validity of the recovered output
    shares.  This process ensures that aggregating the output shares will
    not lead to a garbled aggregate result.
 
@@ -1235,30 +1235,30 @@ Table of Contents
    agree on this parameter before they can begin preparing the
    measurement shares for aggregation.
 
-       Aggregator 0   Aggregator 1        Aggregator SHARES-1
-       ============   ============        ===================
+       Aggregator 0   Aggregator 1           Aggregator SHARES-1
+       ============   ============           ===================
 
-       input_share_0  input_share_1       input_share_[SHARES-1]
-         |              |              ...  |
-         V              V                   V
-       +-----------+  +-----------+       +-----------+
-       | prep_init |  | prep_init |       | prep_init |
-       +-----------+  +------------+      +-----------+
-         |              |              ...  |
-         V              V                   V
-       +----------------------------------------------+   \
-       | prep_shares_to_prep                          |   |
-       +----------------------------------------------+   |
-         |              |              ...  |             |
-         V              V                   V             | x ROUNDS
-       +-----------+  +-----------+       +-----------+   |
-       | prep_next |  | prep_next |       | prep_next |   |
-       +-----------+  +-----------+       +-----------+   |
-         |              |              ...  |             |
-         V              V                   V             /
-        ...            ...                 ...
-         |              |              ...  |
-         V              V                   V
+       input_share_0  input_share_1          input_share_[SHARES-1]
+         |              |                 ...  |
+         V              V                      V
+       +-----------+  +-----------+          +-----------+
+       | prep_init |  | prep_init |          | prep_init |
+       +-----------+  +-----------+          +-----------+
+         |       |      |       |         ...  |       |
+         V       |      V       |              V       |
+       +---------|--------------|----------------------|-+   \
+       |         |              | prep_shares_to_prep  | |   |
+       +---------|--------------|----------------------|-+   |
+         |       |      |       |         ...  |       |     |
+         V       V      V       V              V       |     | x ROUNDS
+       +-----------+  +-----------+          +-----------+   |
+       | prep_next |  | prep_next |          | prep_next |   |
+       +-----------+  +-----------+          +-----------+   |
+         |       |      |                 ...  |       |     |
+         V       V      V                      V       V     /
+        ...            ...                    ...
+         |              |                 ...  |
+         V              V                      V
        out_share_0    out_share_1         out_share_[SHARES-1]
 
     Figure 6: VDAF preparation process on the input shares for a single
@@ -1347,7 +1347,7 @@ Table of Contents
    VDAFs MUST implement the following function:
 
    *  vdaf.is_valid(agg_param: AggParam, previous_agg_params:
-      list[AggParam]) -> bool: Checks if the agg_param is compatible
+      list[AggParam]) -> bool: checks if the agg_param is compatible
       with all elements of previous_agg_params.
 
 5.4.  Aggregation
@@ -1499,10 +1499,10 @@ Table of Contents
 
    The state machine of each Aggregator is shown in Figure 8.
 
-                  +----------------+
-                  |                |
-                  v                |
-   Start ------> Continued(prep_state) --> Finished(out_share)
+                     +----------------+
+                     |                |
+                     v                |
+   Start ----> Continued(prep_state, prep_round) --> Finished(out_share)
     |                |
     |                |
     +--> Rejected <--+
@@ -1522,52 +1522,31 @@ Table of Contents
    class Start(State):
        pass
 
-   class Continued(State):
-       def __init__(self, prep_state):
+   class Continued(State, Generic[PrepState]):
+       def __init__(self, prep_state: PrepState, prep_round: int):
            self.prep_state = prep_state
+           self.prep_round = prep_round
 
-   class Finished(State):
-       def __init__(self, output_share):
-           self.output_share = output_share
+       def __eq__(self, other: object) -> bool:
+           return isinstance(other, Continued) and \
+               self.prep_state == other.prep_state and \
+               self.prep_round == other.prep_round
+
+   class Finished(State, Generic[OutShare]):
+       def __init__(self, out_share: OutShare):
+           self.out_share = out_share
+
+       def __eq__(self, other: object) -> bool:
+           return isinstance(other, Finished) and \
+               self.out_share == other.out_share
 
    class Rejected(State):
-       def __init__(self):
-           pass
+       pass
 
-   Note that there is no representation of the Start state as it is
-   never instantiated in the ping-pong topology.
-
-   For convenience, the methods described in this section are defined in
-   terms of opaque byte strings.  A compatible Vdaf MUST specify methods
-   for encoding public shares, input shares, prep shares, prep messages,
-   and aggregation parameters.  Minimally:
-
-   *  vdaf.decode_public_share(encoded: bytes) -> PublicShare decodes a
-      public share.
-
-   *  vdaf.decode_input_share(agg_id: int, encoded: bytes) -> InputShare
-      decodes an input share, using the aggregator ID as optional
-      context.
-
-   *  vdaf.encode_prep_share(prep_share: PrepShare) -> bytes encodes a
-      prep share.
-
-   *  vdaf.decode_prep_share(prep_state: PrepState, encoded: bytes) ->
-      PrepShare decodes a prep share, using the prep state as optional
-      context.
-
-   *  vdaf.encode_prep_msg(prep_msg: PrepMessage) -> bytes encodes a
-      prep message.
-
-   *  vdaf.decode_prep_msg(prep_state: PrepState, encoded: bytes) ->
-      PrepMessage decodes a prep message, using the prep state as
-      optional decoding context.
-
-   *  vdaf.decode_agg_param(encoded: bytes) -> AggParam decodes an
-      aggregation parameter.
-
-   *  vdaf.encode_agg_param(agg_param: AggParam) -> bytes encodes an
-      aggregation parameter.
+   The methods described in this section are defined in terms of opaque
+   byte strings.  A compatible Vdaf MUST specify methods for encoding
+   public shares, input shares, prep shares, prep messages, and
+   aggregation parameters.
 
    Implementations of Prio3 and Poplar1 MUST use the encoding scheme
    specified in Section 7.2.7 and Section 8.2.6 respectively.
@@ -1632,41 +1611,30 @@ Table of Contents
    } Message;
 
    These messages are used to transition between the states described in
-   Section 5.7.  They are encoded and decoded to or from byte buffers as
-   described Section 3 of [RFC8446]) using the following routines:
-
-   *  encode_ping_pong_message(message: Message) -> bytes encodes a
-      Message into an opaque byte buffer.
-
-   *  decode_pong_pong_message(encoded: bytes) -> Message decodes an
-      opaque byte buffer into a Message, raising an error if the bytes
-      are not a valid encoding.
-
-   The Leader's initial transition is computed with the following
-   procedure:
+   Section 5.7.  The Leader's initial transition is computed with the
+   following method, implemented on Vdaf:
 
    def ping_pong_leader_init(
-               vdaf,
-               vdaf_verify_key: bytes,
-               agg_param: bytes,
-               nonce: bytes,
-               public_share: bytes,
-               input_share: bytes,
-           ) -> tuple[State, bytes]:
+           self,
+           vdaf_verify_key: bytes,
+           agg_param: bytes,
+           nonce: bytes,
+           public_share: bytes,
+           input_share: bytes) -> tuple[State, Optional[bytes]]:
+       """Called by the leader to initialize ping-ponging."""
        try:
-           (prep_state, prep_share) = vdaf.prep_init(
+           (prep_state, prep_share) = self.prep_init(
                vdaf_verify_key,
                0,
-               vdaf.decode_agg_param(agg_param),
+               self.decode_agg_param(agg_param),
                nonce,
-               vdaf.decode_public_share(public_share),
-               vdaf.decode_input_share(0, input_share),
+               self.decode_public_share(public_share),
+               self.decode_input_share(0, input_share),
            )
-           outbound = Message.initialize(
-               vdaf.encode_prep_share(prep_share))
+           encoded_prep_share = self.encode_prep_share(prep_share)
            return (
-               Continued(prep_state),
-               encode_ping_pong_message(outbound),
+               Continued(prep_state, 0),
+               encode(0, encoded_prep_share),  # initialize
            )
        except:
            return (Rejected(), None)
@@ -1674,71 +1642,79 @@ Table of Contents
    The output is the State to which the Leader has transitioned and an
    encoded Message.  If the Leader's state is Rejected, then processing
    halts.  Otherwise, if the state is Continued, then processing
-   continues.
+   continues.  Function encode is used to encode the outbound message,
+   here the initialize variant (hence 0).
 
    The Leader sends the outbound message to the Helper.  The Helper's
    initial transition is computed using the following procedure:
 
    def ping_pong_helper_init(
-               vdaf,
-               vdaf_verify_key: bytes,
-               agg_param: bytes,
-               nonce: bytes,
-               public_share: bytes,
-               input_share: bytes,
-               inbound_encoded: bytes,
-           ) -> tuple[State, bytes]:
+           self,
+           vdaf_verify_key: bytes,
+           agg_param: bytes,
+           nonce: bytes,
+           public_share: bytes,
+           input_share: bytes,
+           inbound: bytes) -> tuple[State, Optional[bytes]]:
+       """
+       Called by the helper in response to the leader's initial
+       message.
+       """
        try:
-           (prep_state, prep_share) = vdaf.prep_init(
+           (prep_state, prep_share) = self.prep_init(
                vdaf_verify_key,
                1,
-               vdaf.decode_agg_param(agg_param),
+               self.decode_agg_param(agg_param),
                nonce,
-               vdaf.decode_public_share(public_share),
-               vdaf.decode_input_share(1, input_share),
+               self.decode_public_share(public_share),
+               self.decode_input_share(1, input_share),
            )
 
-           inbound = decode_ping_pong_message(inbound_encoded)
-
-           if inbound.type != 0: # initialize
+           (inbound_type, inbound_items) = decode(inbound)
+           if inbound_type != 0:  # initialize
                return (Rejected(), None)
 
+           encoded_prep_share = inbound_items[0]
            prep_shares = [
-               vdaf.decode_prep_share(prep_state, inbound.prep_share),
+               self.decode_prep_share(prep_state, encoded_prep_share),
                prep_share,
            ]
-           return vdaf.ping_pong_transition(
-               agg_param,
+           return self.ping_pong_transition(
+               self.decode_agg_param(agg_param),
                prep_shares,
                prep_state,
+               0,
            )
        except:
            return (Rejected(), None)
 
-   Procedure ping_pong_transition() takes in the prep shares, combines
-   them into the prep message, and computes the next prep state of the
-   caller:
+   Procedure decode decodes the inbound message and returns the
+   MessageType variant (initialize, continue, or finalize) and the
+   sequence of fields.  Procedure ping_pong_transition takes in the prep
+   shares, combines them into the prep message, and computes the next
+   prep state of the caller:
 
    def ping_pong_transition(
-               vdaf,
-               agg_param: AggParam,
-               prep_shares: list[PrepShare],
-               prep_state: PrepState,
-            ) -> (State, bytes):
-       prep_msg = vdaf.prep_shares_to_prep(agg_param,
+           self,
+           agg_param: AggParam,
+           prep_shares: list[PrepShare],
+           prep_state: PrepState,
+           prep_round: int) -> tuple[State, bytes]:
+       prep_msg = self.prep_shares_to_prep(agg_param,
                                            prep_shares)
-       out = vdaf.prep_next(prep_state, prep_msg)
-       if type(out) == OutShare:
-           outbound = Message.finish(vdaf.encode_prep_msg(prep_msg))
-           return (Finished(out), encode_ping_pong_message(outbound))
-       (prep_state, prep_share) = out
-       outbound = Message.continue(
-           vdaf.encode_prep_msg(prep_msg),
-           vdaf.encode_prep_share(prep_share),
-       )
+       encoded_prep_msg = self.encode_prep_msg(prep_msg)
+       out = self.prep_next(prep_state, prep_msg)
+       if prep_round+1 == self.ROUNDS:
+           return (
+               Finished(out),
+               encode(2, encoded_prep_msg),  # finalize
+           )
+       (prep_state, prep_share) = cast(
+           tuple[PrepState, PrepShare], out)
+       encoded_prep_share = self.encode_prep_share(prep_share)
        return (
-           Continued(prep_state),
-           encode_ping_pong_message(outbound),
+           Continued(prep_state, prep_round+1),
+           encode(1, encoded_prep_msg, encoded_prep_share)  # continue
        )
 
    The output is the State to which the Helper has transitioned and an
@@ -1751,63 +1727,64 @@ Table of Contents
    ping_pong_leader_continued:
 
    def ping_pong_leader_continued(
-               vdaf,
-               agg_param: bytes,
-               state: State,
-               inbound_encoded: bytes,
-           ) -> (State, Optional[bytes]):
-       return vdaf.ping_pong_continued(
-           True,
-           agg_param,
-           state,
-           inbound_encoded,
-       )
+       self,
+       agg_param: bytes,
+       state: State,
+       inbound: bytes,
+   ) -> tuple[State, Optional[bytes]]:
+       """
+       Called by the leader to start the next step of ping-ponging.
+       """
+       return self.ping_pong_continued(
+           True, agg_param, state, inbound)
 
    def ping_pong_continued(
-               vdaf,
-               is_leader: bool,
-               agg_param: bytes,
-               state: State,
-               inbound_encoded: bytes,
-           ) -> (State, Optional[bytes]):
+       self,
+       is_leader: bool,
+       agg_param: bytes,
+       state: State,
+       inbound: bytes,
+   ) -> tuple[State, Optional[bytes]]:
        try:
-           inbound = decode_ping_pong_message(inbound_encoded)
+           if not isinstance(state, Continued):
+               return (Rejected(), None)
+           prep_round = state.prep_round
 
-           if inbound.type == 0: # initialize
+           (inbound_type, inbound_items) = decode(inbound)
+           if inbound_type == 0:  # initialize
                return (Rejected(), None)
 
-           if !isinstance(state, Continued):
-               return (Rejected(), None)
-
-           prep_msg = vdaf.decode_prep_msg(
+           encoded_prep_msg = inbound_items[0]
+           prep_msg = self.decode_prep_msg(
                state.prep_state,
-               inbound.prep_msg,
+               encoded_prep_msg,
            )
-           out = vdaf.prep_next(state.prep_state, prep_msg)
-           if type(out) == tuple[PrepState, PrepShare] \
-                   and inbound.type == 1:
-               # continue
-               (prep_state, prep_share) = out
+           out = self.prep_next(state.prep_state, prep_msg)
+           if prep_round+1 < self.ROUNDS and \
+                   inbound_type == 1:  # continue
+               (prep_state, prep_share) = cast(
+                   tuple[PrepState, PrepShare], out)
+               encoded_prep_share = inbound_items[1]
                prep_shares = [
-                   vdaf.decode_prep_share(
+                   self.decode_prep_share(
                        prep_state,
-                       inbound.prep_share,
+                       encoded_prep_share,
                    ),
                    prep_share,
                ]
                if is_leader:
                    prep_shares.reverse()
-               return vdaf.ping_pong_transition(
-                   vdaf.decode_agg_param(agg_param),
+               return self.ping_pong_transition(
+                   self.decode_agg_param(agg_param),
                    prep_shares,
                    prep_state,
+                   prep_round+1,
                )
-           elif type(out) == OutShare and inbound.type == 2:
-               # finish
+           elif prep_round+1 == self.ROUNDS and \
+                   inbound_type == 2:  # finish
                return (Finished(out), None)
            else:
                return (Rejected(), None)
-
        except:
            return (Rejected(), None)
 
@@ -1817,17 +1794,14 @@ Table of Contents
    ping_pong_helper_continued:
 
    def ping_pong_helper_continued(
-               vdaf,
-               agg_param: bytes,
-               state: State,
-               inbound_encoded: bytes,
-           ) -> (State, Optional[bytes]):
-       return vdaf.ping_pong_continued(
-           False,
-           agg_param,
-           state,
-           inbound_encoded,
-       )
+       self,
+       agg_param: bytes,
+       state: State,
+       inbound: bytes,
+   ) -> tuple[State, Optional[bytes]]:
+       """Called by the helper to continue ping-ponging."""
+       return self.ping_pong_continued(
+           False, agg_param, state, inbound)
 
    They continue in this way until processing halts.  Note that,
    depending on the number of rounds of preparation that are required,
@@ -2153,7 +2127,7 @@ Table of Contents
            # Function `TurboSHAKE128(M, D, L)` is as defined in
            # Section 2.2 of [TurboSHAKE].
            #
-           # Implementation note: Rather than re-generate the output
+           # Implementation note: rather than re-generate the output
            # stream each time `next()` is invoked, most implementations
            # of TurboSHAKE128 will expose an "absorb-then-squeeze" API
            # that allows stateful handling of the stream.
@@ -2194,7 +2168,7 @@ Table of Contents
            # need to be kept secret from any party. However, when used
            # with an IDPF, we require the binder to be a random nonce.
            #
-           # Implementation note: This step can be cached across XOF
+           # Implementation note: this step can be cached across XOF
            # evaluations with many different seeds.
            dst_length = to_le_bytes(len(dst), 1)
            self.fixed_key = TurboSHAKE128(
@@ -3305,7 +3279,7 @@ Table of Contents
 7.3.1.  Overview
 
    In the proof system of [BBCGGI19], validity is defined via an
-   arithmetic circuit evaluated over the encoded measurement: If the
+   arithmetic circuit evaluated over the encoded measurement: if the
    circuit output is zero, then the measurement is deemed valid;
    otherwise, if the circuit output is non-zero, then the measurement is
    deemed invalid.  Thus the goal of the proof system is merely to allow
@@ -3383,7 +3357,7 @@ Table of Contents
    gadget output, allowing each Aggregator to compute its share of C(x)
    locally.
 
-   There is one more wrinkle, however: It is still possible for a
+   There is one more wrinkle, however: it is still possible for a
    malicious prover to produce a gadget polynomial that would result in
    C(x) being computed incorrectly, potentially resulting in an invalid
    measurement being accepted.  To prevent this, the verifier performs a
@@ -3666,7 +3640,7 @@ Table of Contents
    6.  Compute the tests for well-formedness of the gadget polynomials.
        That is, for every i in [H]:
 
-       *  Let t = query_rand[i].  Check if t^(P_i) == 1: If so, then
+       *  Let t = query_rand[i].  Check if t^(P_i) == 1: if so, then
           raise ERR_ABORT and halt.  (This prevents the verifier from
           inadvertently leaking a gadget output in the verifier
           message.)
@@ -3725,7 +3699,7 @@ Table of Contents
 
                    Table 9: Parameters for Prio3Count.
 
-   Our first instance of Prio3 is for a simple counter: Each measurement
+   Our first instance of Prio3 is for a simple counter: each measurement
    is either one or zero and the aggregate result is the sum of the
    measurements.
 
@@ -4359,7 +4333,7 @@ Table of Contents
    representing a unique node of the tree.  If the node is on the
    programmed path, then the function evaluates to a non-zero value;
    otherwise it evaluates to zero.  This structure allows an IDPF to
-   provide the functionality required for the above protocol: To compute
+   provide the functionality required for the above protocol: to compute
    the hit count for an index, just evaluate each set of IDPF shares at
    that index and add up the results.
 
@@ -4409,7 +4383,7 @@ Table of Contents
    binary) is the length-3 prefix of 25 (11001), but 7 (111) is not.
 
    Each of the programmed points beta is a vector of elements of some
-   finite field.  We distinguish two types of fields: One for inner
+   finite field.  We distinguish two types of fields: one for inner
    nodes (denoted FieldInner), and one for leaf nodes (FieldLeaf).  (Our
    instantiation of Poplar1 (Section 8.4) will use a much larger field
    for leaf nodes than for inner nodes.  This is to ensure the IDPF is
@@ -4459,7 +4433,7 @@ Table of Contents
       string.  It returns the share of the value corresponding to each
       candidate prefix.
 
-      The output type (i.e., Output) depends on the value of level: If
+      The output type (i.e., Output) depends on the value of level: if
       level < BITS-1, the output is the value for an inner node, which
       has type list[list[FieldInner]]; otherwise, if level == BITS-1,
       then the output is the value for a leaf node, which has type
@@ -5200,7 +5174,7 @@ Table of Contents
    for i in range(num_prefixes):
        prefixes.append(packed >> ((level + 1) * i) & m)
 
-   Implementation note: The aggregation parameter includes the level of
+   Implementation note: the aggregation parameter includes the level of
    the IDPF tree and the sequence of indices to evaluate.  For
    implementations that perform per-report caching across executions of
    the VDAF, this may be more information than is strictly needed.  In
@@ -5308,7 +5282,7 @@ Table of Contents
                )
 
            w_cw = vec_add(vec_sub(b, w0), w1)
-           # Implementation note: Here we negate the correction word if
+           # Implementation note: here we negate the correction word if
            # the control bit `ctrl[1]` is set. We avoid branching on the
            # value in order to reduce leakage via timing side channels.
            mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
@@ -5360,7 +5334,7 @@ Table of Contents
            for current_level in range(level + 1):
                bit = (prefix >> (level - current_level)) & 1
 
-               # Implementation note: Typically the current round of
+               # Implementation note: typically the current round of
                # candidate prefixes would have been derived from
                # aggregate results computed during previous rounds.
                # For example, when using the IDPF to compute heavy
@@ -5419,7 +5393,7 @@ Table of Contents
        convert_output = self.convert(level, s[bit], nonce)
        next_seed = convert_output[0]
        y = cast(list[Field], convert_output[1])
-       # Implementation note: Here we add the correction word to the
+       # Implementation note: here we add the correction word to the
        # output if `next_ctrl` is set. We avoid branching on the value
        # of the control bit in order to reduce side channel leakage.
        mask = cast(Field, field(next_ctrl.as_unsigned()))
@@ -5473,7 +5447,7 @@ Table of Contents
 
    VDAFs (Section 5) have two essential security goals:
 
-   1.  Privacy: An attacker that controls the Collector and a subset of
+   1.  Privacy: an attacker that controls the Collector and a subset of
        Clients and Aggregators learns nothing about the measurements of
        honest Clients beyond what it can deduce from the aggregate
        result.  We assume the attacker controls the entire network
@@ -5481,7 +5455,7 @@ Table of Contents
        Aggregators.  In particular, it cannot forge or prevent
        transmission of messages on these channels.
 
-   2.  Robustness: An attacker that controls a subset of Clients cannot
+   2.  Robustness: an attacker that controls a subset of Clients cannot
        cause the Collector to compute anything other than the aggregate
        of the measurements of honest Clients.  We assume the attacker
        eavesdrops on the network but does not control transmission of
@@ -5508,7 +5482,7 @@ Table of Contents
       VDAF in use.
 
    In such an environment, a VDAF provides the high-level privacy
-   property described above: The Collector learns only the aggregate
+   property described above: the Collector learns only the aggregate
    measurement, and nothing about individual measurements aside from
    what can be inferred from the aggregate result.  The Aggregators
    learn neither individual measurements nor the aggregate result.  The
@@ -5952,7 +5926,7 @@ Acknowledgments
 
 Test Vectors
 
-   (TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be
+   (TO BE REMOVED BY RFC EDITOR: machine-readable test vectors can be
    found at https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
    test_vec.)
 
