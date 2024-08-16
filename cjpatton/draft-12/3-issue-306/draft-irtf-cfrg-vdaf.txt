@@ -3752,42 +3752,62 @@ Table of Contents
 
 7.4.2.  Prio3Sum
 
-            +===========+====================================+
-            | Parameter | Value                              |
-            +===========+====================================+
-            | Valid     | Sum(Field128, bits) (this section) |
-            +-----------+------------------------------------+
-            | Field     | Field128 (Table 3)                 |
-            +-----------+------------------------------------+
-            | PROOFS    | 1                                  |
-            +-----------+------------------------------------+
-            | Xof       | XofTurboShake128 (Section 6.2.1)   |
-            +-----------+------------------------------------+
+       +===========+==============================================+
+       | Parameter | Value                                        |
+       +===========+==============================================+
+       | Valid     | Sum(Field64, max_measurement) (this section) |
+       +-----------+----------------------------------------------+
+       | Field     | Field64 (Table 3)                            |
+       +-----------+----------------------------------------------+
+       | PROOFS    | 1                                            |
+       +-----------+----------------------------------------------+
+       | Xof       | XofTurboShake128 (Section 6.2.1)             |
+       +-----------+----------------------------------------------+
 
                     Table 11: Parameters for Prio3Sum.
 
    The next instance of Prio3 supports summing of integers in a pre-
-   determined range.  Each measurement is an integer in range [0,
-   2^bits), where bits is an associated parameter.
+   determined range.  Each measurement is an integer in
+   range(max_measurement+1), where max_measurement is an associated
+   parameter equal to the largest valid measurement.
 
-   The validity circuit is denoted Sum. The measurement is encoded as a
-   length-bits vector of field elements, where the lth element of the
-   vector represents the lth bit of the summand:
+   The range check is accomplished by encoding the measurement in a way
+   that ensures it is in range, then comparing the reported measurement
+   to the range checked measurement.  Let
+
+   *  bits = max_measurement.bit_length(), the number of bits needed to
+      encode the largest valid measurement
+
+   *  offset = 2**bits - 1 - max_measurement
+
+   The range checked measurement is the bit-encoding of offset plus the
+   measurement.  Observe that only measurements between 0 and
+   max_measurement inclusive can be encoded this way with bits bits.
+
+   The circuit, denoted Sum, first checks that each entry of this bit
+   vector is a one or a zero.  It then decodes it and subtracts it from
+   offset plus the reported value.  Since the range checked measurement
+   is in the correct range, equality implies that the reported
+   measurement is as well.
+
+   The measurement is encoded in 2*bits field elements as follows:
 
    def encode(self, measurement: int) -> list[F]:
-       if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
-           raise ValueError('measurement out of range')
-
-       return self.field.encode_into_bit_vector(measurement,
-                                                self.MEAS_LEN)
+       encoded = []
+       encoded += self.field.encode_into_bit_vector(
+           measurement,
+           self.bits
+       )
+       encoded += self.field.encode_into_bit_vector(
+           measurement + self.offset.as_unsigned(),
+           self.bits
+       )
+       return encoded
 
    def truncate(self, meas: list[F]) -> list[F]:
-       return [self.field.decode_from_bit_vector(meas)]
+       return [self.field.decode_from_bit_vector(meas[:self.bits])]
 
-   def decode(
-           self,
-           output: list[F],
-           _num_measurements: int) -> int:
+   def decode(self, output: list[F], _num_measurements: int) -> int:
        return output[0].as_unsigned()
 
    The validity circuit checks that the input consists of ones and
@@ -3804,37 +3824,41 @@ Table of Contents
            self,
            meas: list[F],
            joint_rand: list[F],
-           _num_shares: int) -> list[F]:
+           num_shares: int) -> list[F]:
        self.check_valid_eval(meas, joint_rand)
-       out = self.field(0)
-       r = joint_rand[0]
+       shares_inv = self.field(num_shares).inv()
+
+       out = []
        for b in meas:
-           out += r * self.GADGETS[0].eval(self.field, [b])
-           r *= joint_rand[0]
-       return [out]
+           out.append(self.GADGETS[0].eval(self.field, [b]))
 
-                +=================+=======================+
-                | Parameter       | Value                 |
-                +=================+=======================+
-                | GADGETS         | [Range2]              |
-                +-----------------+-----------------------+
-                | GADGET_CALLS    | [bits]                |
-                +-----------------+-----------------------+
-                | MEAS_LEN        | bits                  |
-                +-----------------+-----------------------+
-                | OUTPUT_LEN      | 1                     |
-                +-----------------+-----------------------+
-                | JOINT_RAND_LEN  | 1                     |
-                +-----------------+-----------------------+
-                | EVAL_OUTPUT_LEN | 1                     |
-                +-----------------+-----------------------+
-                | Measurement     | int in range(2**bits) |
-                +-----------------+-----------------------+
-                | AggResult       | int                   |
-                +-----------------+-----------------------+
+       range_check = self.offset * shares_inv + \
+           self.field.decode_from_bit_vector(meas[:self.bits]) - \
+           self.field.decode_from_bit_vector(meas[self.bits:])
+       out.append(range_check)
+       return out
 
-                      Table 12: Parameters of validity
-                                circuit Sum.
+            +=================+===============================+
+            | Parameter       | Value                         |
+            +=================+===============================+
+            | GADGETS         | [Range2]                      |
+            +-----------------+-------------------------------+
+            | GADGET_CALLS    | [2*bits]                      |
+            +-----------------+-------------------------------+
+            | MEAS_LEN        | 2*bits                        |
+            +-----------------+-------------------------------+
+            | OUTPUT_LEN      | 1                             |
+            +-----------------+-------------------------------+
+            | JOINT_RAND_LEN  | 0                             |
+            +-----------------+-------------------------------+
+            | EVAL_OUTPUT_LEN | 2*bits + 1                    |
+            +-----------------+-------------------------------+
+            | Measurement     | int in range(max_measurement) |
+            +-----------------+-------------------------------+
+            | AggResult       | int                           |
+            +-----------------+-------------------------------+
+
+               Table 12: Parameters of validity circuit Sum.
 
 7.4.3.  Prio3SumVec
 
