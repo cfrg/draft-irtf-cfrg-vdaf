@@ -65,13 +65,13 @@ class TestPrio3Count(TestVdaf):
 
 class TestPrio3Sum(TestVdaf):
     def test(self) -> None:
-        prio3 = Prio3Sum(2, 8)
+        prio3 = Prio3Sum(2, 147)
         self.assertEqual(prio3.ID, 0x00000001)
         self.run_vdaf_test(prio3, None, [0, 147, 1, 0, 11, 0], 159)
         self.run_vdaf_test(prio3, None, [100], 100)
 
     def test_3_shares(self) -> None:
-        prio3 = Prio3Sum(3, 8)
+        prio3 = Prio3Sum(3, 100)
         self.run_vdaf_test(prio3, None, [100], 100)
 
 
@@ -156,7 +156,7 @@ class TestPrio3MultihotCountVec(TestVdaf):
 
 class TestPrio3Average(TestVdaf):
     def test(self) -> None:
-        prio3 = Prio3Average(2, 3)
+        prio3 = Prio3Average(2, 5)
         self.run_vdaf_test(prio3, None, [1, 5, 1, 1, 4, 1, 3, 2], 2)
 
     def test_is_valid(self) -> None:

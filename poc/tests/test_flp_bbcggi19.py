@@ -3,7 +3,7 @@ from typing import TypeVar
 from vdaf_poc.field import Field64, Field96, Field128, NttField
 from vdaf_poc.flp_bbcggi19 import (Count, FlpBBCGGI19, Histogram, Mul,
                                    MultihotCountVec, PolyEval, Range2, Sum,
-                                   SumOfRangeCheckedInputs, SumVec, Valid)
+                                   SumVec, Valid)
 from vdaf_poc.test_utils import TestFlpBBCGGI19
 
 Measurement = TypeVar("Measurement")
@@ -49,7 +49,7 @@ class TestAverage(Sum):
     down.
     """
 
-    def decode(self, output: list[Field128], num_measurements: int) -> int:
+    def decode(self, output: list[Field64], num_measurements: int) -> int:
         total = super().decode(output, num_measurements)
         return total // num_measurements
 
@@ -66,23 +66,12 @@ class TestCount(TestFlpBBCGGI19):
 
 class TestSum(TestFlpBBCGGI19):
     def test(self) -> None:
-        flp = FlpBBCGGI19(Sum(Field128, 10))
-        self.run_flp_test(flp, [
-            (flp.encode(0), True),
-            (flp.encode(100), True),
-            (flp.encode(2 ** 10 - 1), True),
-            (flp.field.rand_vec(10), False),
-        ])
-        self.run_encode_truncate_decode_test(flp, [0, 100, 2 ** 10 - 1])
-
-
-class TestSumOfRangeCheckedInputs(TestFlpBBCGGI19):
-    def test(self) -> None:
-        flp = FlpBBCGGI19(SumOfRangeCheckedInputs(Field128, 10_000))
+        flp = FlpBBCGGI19(Sum(Field64, 10_000))
         self.run_flp_test(flp, [
             (flp.encode(0), True),
             (flp.encode(1337), True),
-            (flp.encode(9_999), True),
+            (flp.encode(9999), True),
+            (flp.encode(10000), True),
             (flp.field.zeros(flp.MEAS_LEN), False),
         ])
 
