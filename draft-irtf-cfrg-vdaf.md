@@ -5065,8 +5065,8 @@ def gen(
         lose = 1 - keep
         bit = Field2(keep)
 
-        (s0, t0) = self.extend(seed[0], nonce)
-        (s1, t1) = self.extend(seed[1], nonce)
+        (s0, t0) = self.extend(level, seed[0], nonce)
+        (s1, t1) = self.extend(level, seed[1], nonce)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
             t0[0] + t1[0] + bit + Field2(1),
@@ -5118,8 +5118,7 @@ def eval(
         key: bytes,
         level: int,
         prefixes: Sequence[int],
-        nonce: bytes,
-    ) -> list[list[Field64]] | list[list[Field255]]:
+        nonce: bytes) -> list[list[Field64]] | list[list[Field255]]:
     if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
     if level not in range(self.BITS):
@@ -5192,7 +5191,7 @@ def eval_next(
     seed_cw = correction_word[0]
     ctrl_cw = correction_word[1]
     w_cw = cast(list[Field], correction_word[2])
-    (s, t) = self.extend(prev_seed, nonce)
+    (s, t) = self.extend(level, prev_seed, nonce)
     s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
     s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
     t[0] += ctrl_cw[0] * prev_ctrl
@@ -5218,12 +5217,13 @@ def eval_next(
 ~~~ python
 def extend(
         self,
+        level: int,
         seed: bytes,
         nonce: bytes) -> tuple[list[bytes], list[Field2]]:
-    xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), nonce)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
     s = [
-        bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
-        bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
+        bytearray(xof.next(xof.SEED_SIZE)),
+        bytearray(xof.next(xof.SEED_SIZE)),
     ]
     # Use the least significant bits as the control bit correction,
     # and then zero it out. This gives effectively 127 bits of
@@ -5238,11 +5238,20 @@ def convert(
         level: int,
         seed: bytes,
         nonce: bytes) -> tuple[bytes, FieldVec]:
-    xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), nonce)
-    next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
+    next_seed = xof.next(xof.SEED_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
     return (next_seed, cast(FieldVec, w))
+
+def current_xof(self,
+                level: int,
+                seed: bytes,
+                dst: bytes,
+                nonce: bytes) -> Xof:
+    if level < self.BITS-1:
+        return XofFixedKeyAes128(seed, dst, nonce)
+    return XofTurboShake128(seed, dst, nonce)
 ~~~
 {: #idpf-bbcggi21-helpers title="Helper functions for the IDPF."}
 
@@ -5441,8 +5450,9 @@ pseudorandom function.)
 
 The IDPF specified in {{idpf}} only guarantees extractability at the last level
 of the tree. (This is by virtue of using a larger field for the leaves than for
-the inner nodes.) For intermediate levels, it is feasible for a client to
-produce IDPF shares with two controlled non-zero nodes.
+inner nodes and using an XOF to derive leaves that is safe to model as a random
+oracle (see {{xof-vs-ro}}).) For intermediate levels, it is feasible for a
+client to produce IDPF shares with two controlled non-zero nodes.
 
 This is not an issue for running heavy hitters, since (1) each node in the
 prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
