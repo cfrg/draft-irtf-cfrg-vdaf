@@ -4,7 +4,7 @@ import os
 from typing import Protocol, Self, TypeVar, overload
 
 # Document version, reved with each draft that contains breaking changes.
-VERSION = 8
+VERSION = 12
 
 
 class FieldProtocol(Protocol):
