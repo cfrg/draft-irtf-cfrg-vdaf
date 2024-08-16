@@ -560,7 +560,7 @@ class Prio3Count(Prio3[int, int, Field64]):
         super().__init__(shares, flp, 1)
 
 
-class Prio3Sum(Prio3[int, int, Field128]):
+class Prio3Sum(Prio3[int, int, Field64]):
     ID = 0x00000001
     xof = XofTurboShake128
     VERIFY_KEY_SIZE = xof.SEED_SIZE
@@ -568,9 +568,9 @@ class Prio3Sum(Prio3[int, int, Field128]):
     # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3Sum'
 
-    def __init__(self, shares: int, bits: int):
-        flp = flp_bbcggi19.FlpBBCGGI19[int, int, Field128](
-            flp_bbcggi19.Sum(Field128, bits)
+    def __init__(self, shares: int, max_measurement: int):
+        flp = flp_bbcggi19.FlpBBCGGI19[int, int, Field64](
+            flp_bbcggi19.Sum(Field64, max_measurement)
         )
         super().__init__(shares, flp, 1)
 

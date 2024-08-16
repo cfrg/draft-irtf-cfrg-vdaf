@@ -629,76 +629,6 @@ class Count(
         return output[0].as_unsigned()
 
 
-class Sum(
-        Valid[
-            int,  # Measurement, `range(2 ** self.bits)`
-            int,  # AggResult
-            F,
-        ]):
-    GADGETS: list[Gadget[F]] = [Range2()]
-    JOINT_RAND_LEN = 1
-    OUTPUT_LEN = 1
-    EVAL_OUTPUT_LEN = 1
-
-    # Class object for the field.
-    field: type[F]
-
-    def __init__(self, field: type[F], bits: int):
-        """
-        Instantiate an instace of the `Sum` circuit for measurements in range `[0,
-        2^bits)`.
-        """
-
-        if 2 ** bits >= field.MODULUS:
-            raise ValueError('bit size exceeds field modulus')
-
-        self.field = field
-        self.GADGET_CALLS = [bits]
-        self.MEAS_LEN = bits
-
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
-    def eval(
-            self,
-            meas: list[F],
-            joint_rand: list[F],
-            _num_shares: int) -> list[F]:
-        self.check_valid_eval(meas, joint_rand)
-        out = self.field(0)
-        r = joint_rand[0]
-        for b in meas:
-            out += r * self.GADGETS[0].eval(self.field, [b])
-            r *= joint_rand[0]
-        return [out]
-
-    # NOTE: The encode(), truncate(), and decode() methods are excerpted
-    # in the document, de-indented. Their width should be limited to 69
-    # columns after de-indenting, or 73 columns before de-indenting, to
-    # avoid warnings from xml2rfc.
-    # ===================================================================
-    def encode(self, measurement: int) -> list[F]:
-        if 0 > measurement or measurement >= 2 ** self.MEAS_LEN:
-            raise ValueError('measurement out of range')
-
-        return self.field.encode_into_bit_vector(measurement,
-                                                 self.MEAS_LEN)
-
-    def truncate(self, meas: list[F]) -> list[F]:
-        return [self.field.decode_from_bit_vector(meas)]
-
-    def decode(
-            self,
-            output: list[F],
-            _num_measurements: int) -> int:
-        return output[0].as_unsigned()
-
-    def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
-        test_vec['bits'] = int(self.MEAS_LEN)
-        return ['bits']
-
-
 class Histogram(
         Valid[
             int,        # Measurement, `range(length)`
@@ -1092,8 +1022,7 @@ class SumVec(
         return ['length', 'bits', 'chunk_length']
 
 
-# TODO(issue #306) Replace `Sum` with this type.
-class SumOfRangeCheckedInputs(
+class Sum(
         Valid[
             int,  # Measurement, `range(self.max_measurement + 1)`
             int,  # AggResult
@@ -1106,33 +1035,36 @@ class SumOfRangeCheckedInputs(
 
     def __init__(self, field: type[F], max_measurement: int):
         """
-        Similar to `Sum` but with an arbitrary bound.
-
-        The circuit checks that the measurement is in
+        A circuit that checks that the measurement is in
         `range(max_measurement+1)`. This is accomplished by encoding the
-        measurement in a way that ensures it is in range, then comparing the
-        reported measurement to the range checked measurement.
+        measurement as a bit vector, encoding the measurement plus an
+        offset as a bit vector, then checking that the two encoded
+        integers are consistent.
 
         Let
 
         - `bits = max_measurement.bit_length()`
         - `offset = 2**bits - 1 - max_measurement`
 
-        The range checked measurement is the bit-encoding of `offset` plus the
-        measurement. Observe that only measurements in at most
-        `max_measurement` can be encoded with `bits` bits.
+        The first bit-encoded integer is the measurement itself. Note
+        that only measurements between `0` and `2**bits - 1` can be
+        encoded this way with `bits` bits. The second bit-encoded integer
+        is the sum of the measurement and `offset`. Observe that only
+        measurements between `-offset` and `max_measurement` inclusive
+        can be encoded this way with `bits` bits.
 
-        To do the range check, the circuit first checks that each
-        entry of this bit vector is a one or a zero. It then decodes
-        it and subtracts it from `offset` plus the reported value.
-        Since the range checked measurement is in the correct range,
-        equality implies that the reported measurement is as well.
+        To do the range check, the circuit first checks that each entry
+        of both bit vectors is a one or a zero. It then decodes both the
+        measurement and the offset measurement, and subtracts `offset`
+        from the latter. It then checks if these two values are equal.
+        Since both the measurement and the measurement plus `offset` are
+        in the same range of `0` to `2**bits - 1`, this means that the
+        measurement itself is between `0` and `max_measurement`.
         """
         self.field = field
         self.bits = max_measurement.bit_length()
         self.offset = self.field(2 ** self.bits - 1 - max_measurement)
         self.max_measurement = max_measurement
-
         if 2 ** self.bits >= self.field.MODULUS:
             raise ValueError('bound exceeds field modulus')
 
