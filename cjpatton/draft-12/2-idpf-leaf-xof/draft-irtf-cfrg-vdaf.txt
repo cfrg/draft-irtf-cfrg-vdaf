@@ -5281,7 +5281,7 @@ Table of Contents
                )
 
            w_cw = vec_add(vec_sub(b, w0), w1)
-           # Implementation note: Here we negate the correction word if
+           # Implementation note: here we negate the correction word if
            # the control bit `ctrl[1]` is set. We avoid branching on the
            # value in order to reduce leakage via timing side channels.
            mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
@@ -5331,7 +5331,7 @@ Table of Contents
            for current_level in range(level + 1):
                bit = (prefix >> (level - current_level)) & 1
 
-               # Implementation note: Typically the current round of
+               # Implementation note: typically the current round of
                # candidate prefixes would have been derived from
                # aggregate results computed during previous rounds.
                # For example, when using the IDPF to compute heavy
@@ -5390,7 +5390,7 @@ Table of Contents
        convert_output = self.convert(level, s[bit], nonce)
        next_seed = convert_output[0]
        y = cast(list[Field], convert_output[1])
-       # Implementation note: Here we add the correction word to the
+       # Implementation note: here we add the correction word to the
        # output if `next_ctrl` is set. We avoid branching on the value
        # of the control bit in order to reduce side channel leakage.
        mask = cast(Field, field(next_ctrl.as_unsigned()))
