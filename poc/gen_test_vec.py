@@ -107,14 +107,14 @@ if __name__ == '__main__':
     )
     gen_test_vec_for_vdaf(
         TEST_VECTOR_PATH,
-        vdaf_prio3.Prio3Sum(2, 8),
+        vdaf_prio3.Prio3Sum(2, 255),
         None,
         [100],
         0,
     )
     gen_test_vec_for_vdaf(
         TEST_VECTOR_PATH,
-        vdaf_prio3.Prio3Sum(3, 8),
+        vdaf_prio3.Prio3Sum(3, 255),
         None,
         [100],
         1,
