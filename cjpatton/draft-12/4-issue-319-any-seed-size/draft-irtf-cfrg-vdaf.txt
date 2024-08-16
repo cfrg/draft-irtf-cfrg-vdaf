@@ -5001,7 +5001,7 @@ Table of Contents
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for Poplar1.xof.SEED_SIZE, Fi as
+   the remainder we use S as an alias for poplar1.idpf.SEED_SIZE, Fi as
    an alias for Poplar1.idpf.field_inner and Fl as an alias for
    Poplar1.idpf.field_leaf.  XOF seeds are represented as follows:
 
@@ -5229,7 +5229,7 @@ Table of Contents
                    +------------+----------------------+
                    | VALUE_LEN  | any positive integer |
                    +------------+----------------------+
-                   | KEY_SIZE   | Xof.SEED_SIZE        |
+                   | KEY_SIZE   | 16                   |
                    +------------+----------------------+
                    | FieldInner | Field64 (Table 3)    |
                    +------------+----------------------+
@@ -5266,8 +5266,8 @@ Table of Contents
            raise ValueError("incorrect nonce size")
 
        key = [
-           rand[:XofFixedKeyAes128.SEED_SIZE],
-           rand[XofFixedKeyAes128.SEED_SIZE:],
+           rand[:self.SEED_SIZE],
+           rand[self.SEED_SIZE:],
        ]
 
        seed = key.copy()
@@ -5434,8 +5434,8 @@ Table of Contents
            nonce: bytes) -> tuple[list[bytes], list[Field2]]:
        xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
        s = [
-           bytearray(xof.next(xof.SEED_SIZE)),
-           bytearray(xof.next(xof.SEED_SIZE)),
+           bytearray(xof.next(self.SEED_SIZE)),
+           bytearray(xof.next(self.SEED_SIZE)),
        ]
        # Use the least significant bits as the control bit correction,
        # and then zero it out. This gives effectively 127 bits of
@@ -5451,7 +5451,7 @@ Table of Contents
            seed: bytes,
            nonce: bytes) -> tuple[bytes, FieldVec]:
        xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
-       next_seed = xof.next(xof.SEED_SIZE)
+       next_seed = xof.next(self.SEED_SIZE)
        field = self.current_field(level)
        w = xof.next_vec(field, self.VALUE_LEN)
        return (next_seed, cast(FieldVec, w))

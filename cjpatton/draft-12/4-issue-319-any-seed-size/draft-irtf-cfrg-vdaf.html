@@ -7864,7 +7864,7 @@ def unshard(
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
+remainder we use <code>S</code> as an alias for <code>poplar1.idpf.SEED_SIZE</code>, <code>Fi</code> as an alias
 for <code>Poplar1.idpf.field_inner</code> and <code>Fl</code> as an alias for
 <code>Poplar1.idpf.field_leaf</code>. XOF seeds are represented as follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6-3">
@@ -8174,7 +8174,7 @@ justification of this choice.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">KEY_SIZE</td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE</code>
+                <code>16</code>
 </td>
             </tr>
             <tr>
@@ -8226,8 +8226,8 @@ def gen(
         raise ValueError("incorrect nonce size")
 
     key = [
-        rand[:XofFixedKeyAes128.SEED_SIZE],
-        rand[XofFixedKeyAes128.SEED_SIZE:],
+        rand[:self.SEED_SIZE],
+        rand[self.SEED_SIZE:],
     ]
 
     seed = key.copy()
@@ -8421,8 +8421,8 @@ def extend(
         nonce: bytes) -&gt; tuple[list[bytes], list[Field2]]:
     xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
     s = [
-        bytearray(xof.next(xof.SEED_SIZE)),
-        bytearray(xof.next(xof.SEED_SIZE)),
+        bytearray(xof.next(self.SEED_SIZE)),
+        bytearray(xof.next(self.SEED_SIZE)),
     ]
     # Use the least significant bits as the control bit correction,
     # and then zero it out. This gives effectively 127 bits of
@@ -8438,7 +8438,7 @@ def convert(
         seed: bytes,
         nonce: bytes) -&gt; tuple[bytes, FieldVec]:
     xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
-    next_seed = xof.next(xof.SEED_SIZE)
+    next_seed = xof.next(self.SEED_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
     return (next_seed, cast(FieldVec, w))
