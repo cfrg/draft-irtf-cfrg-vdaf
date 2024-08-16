@@ -2031,40 +2031,26 @@ Table of Contents
    strings and expand seeds into long output strings.  We specify a
    single interface that is suitable for both purposes.
 
-   XOFs are defined by a class Xof with the following associated
-   parameter and methods:
-
-   *  SEED_SIZE: int is the size (in bytes) of a seed.
+   XOFs are defined by a class Xof with the methods:
 
    *  Xof(seed: bytes, dst: bytes, binder: bytes) constructs an instance
       of Xof from the given seed, domain separation tag, and binder
-      string.  (See below for definitions of these.)  The seed MUST be
-      of length SEED_SIZE and MUST be generated securely (i.e., it is
-      either the output of a CSPRNG or a previous invocation of the
-      XOF).
+      string.  (See below for definitions of these.)  The seed length is
+      specified by the caller: implementations of Xof MUST ensure that
+      they can securely accommodate a seed of any length.  For example,
+      the constructor may treat a seed with an unexpected length as an
+      error.
+
+      The seed MUST be generated securely (i.e., it is either the output
+      of a CSPRNG or a previous invocation of the XOF).
 
    *  xof.next(length: int) returns the next length bytes of output of
       xof.
 
-   Each Xof has three derived methods.  The first is used to derive a
-   fresh seed from an existing one.  The second is used to compute a
-   sequence of field elements.  The third is a convenience method to
+   Each Xof has two derived methods.  The first is used to compute a
+   sequence of field elements.  The second is a convenience method to
    construct an Xof from a seed, domain separation tag, and binder
    string, and then use it to compute a sequence of field elements.
-
-   def derive_seed(cls,
-                   seed: bytes,
-                   dst: bytes,
-                   binder: bytes) -> bytes:
-       """
-       Derive a new seed.
-
-       Pre-conditions:
-
-           - `len(seed) == Xof.SEED_SIZE`
-       """
-       xof = cls(seed, dst, binder)
-       return xof.next(cls.SEED_SIZE)
 
    def next_vec(self, field: type[F], length: int) -> list[F]:
        """
@@ -2114,12 +2100,10 @@ Table of Contents
    class XofTurboShake128(Xof):
        """XOF wrapper for TurboSHAKE128."""
 
-       # Associated parameters
-       SEED_SIZE = 16
-
        def __init__(self, seed: bytes, dst: bytes, binder: bytes):
            self.l = 0
-           self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
+           self.m = to_le_bytes(len(seed), 1) + seed + \
+                    to_le_bytes(len(dst), 1) + dst + binder
 
        def next(self, length: int) -> bytes:
            self.l += length
@@ -2154,11 +2138,8 @@ Table of Contents
        fixed-key AES.
        """
 
-       # Associated parameters
-       SEED_SIZE = 16
-
        def __init__(self, seed: bytes, dst: bytes, binder: bytes):
-           if len(seed) != self.SEED_SIZE:
+           if len(seed) != 16:
                raise ValueError("incorrect seed size")
 
            self.length_consumed = 0
@@ -2551,44 +2532,45 @@ Table of Contents
    aggregation, and unsharding are described in the remaining
    subsections.  These methods refer to constants enumerated in Table 6.
 
-     +=================+============================================+
-     | Parameter       | Value                                      |
-     +=================+============================================+
-     | VERIFY_KEY_SIZE | Xof.SEED_SIZE                              |
-     +-----------------+--------------------------------------------+
-     | RAND_SIZE       | Xof.SEED_SIZE * (1 + 2 * (SHARES - 1)) if  |
-     |                 | flp.JOINT_RAND_LEN == 0 else Xof.SEED_SIZE |
-     |                 | * (1 + 2 * (SHARES - 1) + SHARES)          |
-     +-----------------+--------------------------------------------+
-     | NONCE_SIZE      | 16                                         |
-     +-----------------+--------------------------------------------+
-     | ROUNDS          | 1                                          |
-     +-----------------+--------------------------------------------+
-     | SHARES          | in [2, 256)                                |
-     +-----------------+--------------------------------------------+
-     | Measurement     | Flp.Measurement                            |
-     +-----------------+--------------------------------------------+
-     | AggParam        | None                                       |
-     +-----------------+--------------------------------------------+
-     | PublicShare     | Optional[list[bytes]]                      |
-     +-----------------+--------------------------------------------+
-     | InputShare      | tuple[list[F], list[F], Optional[bytes]] | |
-     |                 | tuple[bytes, bytes, Optional[bytes]]       |
-     +-----------------+--------------------------------------------+
-     | OutShare        | list[F]                                    |
-     +-----------------+--------------------------------------------+
-     | AggShare        | list[F]                                    |
-     +-----------------+--------------------------------------------+
-     | AggResult       | Flp.AggResult                              |
-     +-----------------+--------------------------------------------+
-     | PrepState       | tuple[list[F], Optional[bytes]]            |
-     +-----------------+--------------------------------------------+
-     | PrepShare       | tuple[list[F], Optional[bytes]]            |
-     +-----------------+--------------------------------------------+
-     | PrepMessage     | Optional[bytes]                            |
-     +-----------------+--------------------------------------------+
+          +=================+===================================+
+          | Parameter       | Value                             |
+          +=================+===================================+
+          | VERIFY_KEY_SIZE | 16                                |
+          +-----------------+-----------------------------------+
+          | RAND_SIZE       | 16 * (1 + 2 * (SHARES - 1)) if    |
+          |                 | flp.JOINT_RAND_LEN == 0 else 16 * |
+          |                 | (1 + 2 * (SHARES - 1) + SHARES)   |
+          +-----------------+-----------------------------------+
+          | NONCE_SIZE      | 16                                |
+          +-----------------+-----------------------------------+
+          | ROUNDS          | 1                                 |
+          +-----------------+-----------------------------------+
+          | SHARES          | in [2, 256)                       |
+          +-----------------+-----------------------------------+
+          | Measurement     | Flp.Measurement                   |
+          +-----------------+-----------------------------------+
+          | AggParam        | None                              |
+          +-----------------+-----------------------------------+
+          | PublicShare     | Optional[list[bytes]]             |
+          +-----------------+-----------------------------------+
+          | InputShare      | tuple[list[F], list[F],           |
+          |                 | Optional[bytes]] | tuple[bytes,   |
+          |                 | bytes, Optional[bytes]]           |
+          +-----------------+-----------------------------------+
+          | OutShare        | list[F]                           |
+          +-----------------+-----------------------------------+
+          | AggShare        | list[F]                           |
+          +-----------------+-----------------------------------+
+          | AggResult       | Flp.AggResult                     |
+          +-----------------+-----------------------------------+
+          | PrepState       | tuple[list[F], Optional[bytes]]   |
+          +-----------------+-----------------------------------+
+          | PrepShare       | tuple[list[F], Optional[bytes]]   |
+          +-----------------+-----------------------------------+
+          | PrepMessage     | Optional[bytes]                   |
+          +-----------------+-----------------------------------+
 
-                   Table 5: VDAF parameters for Prio3.
+                    Table 5: VDAF parameters for Prio3.
 
                   +=============================+=======+
                   | Variable                    | Value |
@@ -2606,6 +2588,8 @@ Table of Contents
                   | USAGE_JOINT_RAND_SEED: int  | 6     |
                   +-----------------------------+-------+
                   | USAGE_JOINT_RAND_PART: int  | 7     |
+                  +-----------------------------+-------+
+                  | SEED_SIZE: int              | 16    |
                   +-----------------------------+-------+
 
                      Table 6: Constants used by Prio3.
@@ -2664,7 +2648,7 @@ Table of Contents
        if len(rand) != self.RAND_SIZE:
            raise ValueError("incorrect size of random bytes argument")
 
-       l = self.xof.SEED_SIZE
+       l = self.SEED_SIZE
        seeds = [rand[i:i + l] for i in range(0, self.RAND_SIZE, l)]
 
        meas = self.flp.encode(measurement)
@@ -3126,19 +3110,19 @@ Table of Contents
            k_blind: bytes,
            meas_share: list[F],
            nonce: bytes) -> bytes:
-       return self.xof.derive_seed(
+       return self.xof(
            k_blind,
            self.domain_separation_tag(USAGE_JOINT_RAND_PART),
            byte(agg_id) + nonce + self.flp.field.encode_vec(meas_share),
-       )
+       ).next(self.SEED_SIZE)
 
    def joint_rand_seed(self, k_joint_rand_parts: list[bytes]) -> bytes:
        """Derive the joint randomness seed from its parts."""
-       return self.xof.derive_seed(
-           zeros(self.xof.SEED_SIZE),
+       return self.xof(
+           bytes(),  # empty seed
            self.domain_separation_tag(USAGE_JOINT_RAND_SEED),
            concat(k_joint_rand_parts),
-       )
+       ).next(self.SEED_SIZE)
 
    def joint_rands(self, k_joint_rand_seed: bytes) -> list[F]:
        """Derive the joint randomness from its seed."""
@@ -3157,8 +3141,8 @@ Table of Contents
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for Prio3.xof.SEED_SIZE and F as
-   an alias for Prio3.field.ENCODED_SIZE.  XOF seeds are represented as
+   the remainder we use S as an alias for prio3.SEED_SIZE and F as an
+   alias for Prio3.field.ENCODED_SIZE.  XOF seeds are represented as
    follows:
 
    opaque Prio3Seed[S];
@@ -4552,42 +4536,42 @@ Table of Contents
    unsharding are described in the remaining subsections.  These methods
    make use of constants defined in Table 21.
 
-         +=================+====================================+
-         | Parameter       | Value                              |
-         +=================+====================================+
-         | VERIFY_KEY_SIZE | Xof.SEED_SIZE                      |
-         +-----------------+------------------------------------+
-         | RAND_SIZE       | Xof.SEED_SIZE * 3 + Idpf.RAND_SIZE |
-         +-----------------+------------------------------------+
-         | NONCE_SIZE      | 16                                 |
-         +-----------------+------------------------------------+
-         | ROUNDS          | 2                                  |
-         +-----------------+------------------------------------+
-         | SHARES          | 2                                  |
-         +-----------------+------------------------------------+
-         | Measurement     | int                                |
-         +-----------------+------------------------------------+
-         | AggParam        | tuple[int, Sequence[int]]          |
-         +-----------------+------------------------------------+
-         | PublicShare     | same as the IDPF                   |
-         +-----------------+------------------------------------+
-         | InputShare      | tuple[bytes, bytes,                |
-         |                 | list[FieldInner], list[FieldLeaf]] |
-         +-----------------+------------------------------------+
-         | OutShare        | FieldVec                           |
-         +-----------------+------------------------------------+
-         | AggShare        | FieldVec                           |
-         +-----------------+------------------------------------+
-         | AggResult       | list[int]                          |
-         +-----------------+------------------------------------+
-         | PrepState       | tuple[bytes, int, FieldVec]        |
-         +-----------------+------------------------------------+
-         | PrepShare       | FieldVec                           |
-         +-----------------+------------------------------------+
-         | PrepMessage     | Optional[FieldVec]                 |
-         +-----------------+------------------------------------+
+         +=================+=====================================+
+         | Parameter       | Value                               |
+         +=================+=====================================+
+         | VERIFY_KEY_SIZE | idpf.SEED_SIZE                      |
+         +-----------------+-------------------------------------+
+         | RAND_SIZE       | idpf.SEED_SIZE * 3 + idpf.RAND_SIZE |
+         +-----------------+-------------------------------------+
+         | NONCE_SIZE      | 16                                  |
+         +-----------------+-------------------------------------+
+         | ROUNDS          | 2                                   |
+         +-----------------+-------------------------------------+
+         | SHARES          | 2                                   |
+         +-----------------+-------------------------------------+
+         | Measurement     | int                                 |
+         +-----------------+-------------------------------------+
+         | AggParam        | tuple[int, Sequence[int]]           |
+         +-----------------+-------------------------------------+
+         | PublicShare     | same as the IDPF                    |
+         +-----------------+-------------------------------------+
+         | InputShare      | tuple[bytes, bytes,                 |
+         |                 | list[FieldInner], list[FieldLeaf]]  |
+         +-----------------+-------------------------------------+
+         | OutShare        | FieldVec                            |
+         +-----------------+-------------------------------------+
+         | AggShare        | FieldVec                            |
+         +-----------------+-------------------------------------+
+         | AggResult       | list[int]                           |
+         +-----------------+-------------------------------------+
+         | PrepState       | tuple[bytes, int, FieldVec]         |
+         +-----------------+-------------------------------------+
+         | PrepShare       | FieldVec                            |
+         +-----------------+-------------------------------------+
+         | PrepMessage     | Optional[FieldVec]                  |
+         +-----------------+-------------------------------------+
 
-                  Table 20: VDAF parameters for Poplar1.
+                   Table 20: VDAF parameters for Poplar1.
 
                     +========================+=======+
                     | Variable               | Value |
@@ -4634,7 +4618,7 @@ Table of Contents
        if len(rand) != self.RAND_SIZE:
            raise ValueError("incorrect size of random bytes argument")
 
-       l = self.xof.SEED_SIZE
+       l = self.idpf.SEED_SIZE
 
        # Split the random input into the random input for IDPF key
        # generation, correlated randomness, and sharding.

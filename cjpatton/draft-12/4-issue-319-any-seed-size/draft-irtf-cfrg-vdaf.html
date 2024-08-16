@@ -3717,47 +3717,32 @@ with order at least <code>2^20</code>.<a href="#section-6.1.2-2.1.1" class="pilc
 short, fixed-length strings we call "seeds" from long input strings and expand
 seeds into long output strings. We specify a single interface that is suitable
 for both purposes.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
-<p id="section-6.2-2">XOFs are defined by a class <code>Xof</code> with the following associated parameter and
-methods:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">XOFs are defined by a class <code>Xof</code> with the methods:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.2-3.1">
-            <p id="section-6.2-3.1.1"><code>SEED_SIZE: int</code> is the size (in bytes) of a seed.<a href="#section-6.2-3.1.1" class="pilcrow">¶</a></p>
+            <p id="section-6.2-3.1.1"><code>Xof(seed: bytes, dst: bytes, binder: bytes)</code> constructs an instance of <code>Xof</code>
+from the given seed, domain separation tag, and binder string. (See below for
+definitions of these.) The seed length is specified by the caller:
+implementations of <code>Xof</code> <span class="bcp14">MUST</span> ensure that they can securely accommodate a
+seed of any length. For example, the constructor may treat a seed with an
+unexpected length as an error.<a href="#section-6.2-3.1.1" class="pilcrow">¶</a></p>
+<p id="section-6.2-3.1.2">
+The seed <span class="bcp14">MUST</span> be generated securely (i.e., it is either the output of a
+CSPRNG or a previous invocation of the XOF).<a href="#section-6.2-3.1.2" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-6.2-3.2">
-            <p id="section-6.2-3.2.1"><code>Xof(seed: bytes, dst: bytes, binder: bytes)</code> constructs an instance of <code>Xof</code>
-from the given seed, domain separation tag, and binder string. (See below for
-definitions of these.) The seed <span class="bcp14">MUST</span> be of length <code>SEED_SIZE</code> and <span class="bcp14">MUST</span> be
-generated securely (i.e., it is either the output of a CSPRNG or a previous
-invocation of the XOF).<a href="#section-6.2-3.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-6.2-3.3">
-            <p id="section-6.2-3.3.1"><code>xof.next(length: int)</code> returns the next <code>length</code> bytes of output of
-<code>xof</code>.<a href="#section-6.2-3.3.1" class="pilcrow">¶</a></p>
+            <p id="section-6.2-3.2.1"><code>xof.next(length: int)</code> returns the next <code>length</code> bytes of output of
+<code>xof</code>.<a href="#section-6.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.2-4">Each <code>Xof</code> has three derived methods. The first is used to derive a fresh seed
-from an existing one. The second is used to compute a sequence of field
-elements. The third is a convenience method to construct an <code>Xof</code> from a seed,
-domain separation tag, and binder string, and then use it to compute a sequence
-of field elements.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+<p id="section-6.2-4">Each <code>Xof</code> has two derived methods. The first is used to compute a sequence of
+field elements. The second is a convenience method to construct an <code>Xof</code> from a
+seed, domain separation tag, and binder string, and then use it to compute a
+sequence of field elements.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <span id="name-derived-methods-for-xofs"></span><div id="xof-derived-methods">
 <figure id="figure-12">
-          <div class="breakable lang-python sourcecode" id="section-6.2-5.1">
+          <div class="lang-python sourcecode" id="section-6.2-5.1">
 <pre>
-def derive_seed(cls,
-                seed: bytes,
-                dst: bytes,
-                binder: bytes) -&gt; bytes:
-    """
-    Derive a new seed.
-
-    Pre-conditions:
-
-        - `len(seed) == Xof.SEED_SIZE`
-    """
-    xof = cls(seed, dst, binder)
-    return xof.next(cls.SEED_SIZE)
-
 def next_vec(self, field: type[F], length: int) -&gt; list[F]:
     """
     Output the next `length` field elements.
@@ -3815,12 +3800,10 @@ exceed 255 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
 class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
 
-    # Associated parameters
-    SEED_SIZE = 16
-
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         self.l = 0
-        self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
+        self.m = to_le_bytes(len(seed), 1) + seed + \
+                 to_le_bytes(len(dst), 1) + dst + binder
 
     def next(self, length: int) -&gt; bytes:
         self.l += length
@@ -3862,11 +3845,8 @@ class XofFixedKeyAes128(Xof):
     fixed-key AES.
     """
 
-    # Associated parameters
-    SEED_SIZE = 16
-
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
-        if len(seed) != self.SEED_SIZE:
+        if len(seed) != 16:
             raise ValueError("incorrect seed size")
 
         self.length_consumed = 0
@@ -4339,7 +4319,7 @@ subsections. These methods refer to constants enumerated in
                 <code>VERIFY_KEY_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE</code>
+                <code>16</code>
 </td>
             </tr>
             <tr>
@@ -4347,7 +4327,7 @@ subsections. These methods refer to constants enumerated in
                 <code>RAND_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE * (1 + 2 * (SHARES - 1)) if flp.JOINT_RAND_LEN == 0 else Xof.SEED_SIZE * (1 + 2 * (SHARES - 1) + SHARES)</code>
+                <code>16 * (1 + 2 * (SHARES - 1)) if flp.JOINT_RAND_LEN == 0 else 16 * (1 + 2 * (SHARES - 1) + SHARES)</code>
 </td>
             </tr>
             <tr>
@@ -4511,6 +4491,12 @@ subsections. These methods refer to constants enumerated in
 </td>
               <td class="text-left" rowspan="1" colspan="1">7</td>
             </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>SEED_SIZE: int</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">16</td>
+            </tr>
           </tbody>
         </table>
 </div>
@@ -4578,7 +4564,7 @@ def shard(
     if len(rand) != self.RAND_SIZE:
         raise ValueError("incorrect size of random bytes argument")
 
-    l = self.xof.SEED_SIZE
+    l = self.SEED_SIZE
     seeds = [rand[i:i + l] for i in range(0, self.RAND_SIZE, l)]
 
     meas = self.flp.encode(measurement)
@@ -5104,19 +5090,19 @@ def joint_rand_part(
         k_blind: bytes,
         meas_share: list[F],
         nonce: bytes) -&gt; bytes:
-    return self.xof.derive_seed(
+    return self.xof(
         k_blind,
         self.domain_separation_tag(USAGE_JOINT_RAND_PART),
         byte(agg_id) + nonce + self.flp.field.encode_vec(meas_share),
-    )
+    ).next(self.SEED_SIZE)
 
 def joint_rand_seed(self, k_joint_rand_parts: list[bytes]) -&gt; bytes:
     """Derive the joint randomness seed from its parts."""
-    return self.xof.derive_seed(
-        zeros(self.xof.SEED_SIZE),
+    return self.xof(
+        bytes(),  # empty seed
         self.domain_separation_tag(USAGE_JOINT_RAND_SEED),
         concat(k_joint_rand_parts),
-    )
+    ).next(self.SEED_SIZE)
 
 def joint_rands(self, k_joint_rand_seed: bytes) -&gt; list[F]:
     """Derive the joint randomness from its seed."""
@@ -5140,8 +5126,8 @@ def joint_rands(self, k_joint_rand_seed: bytes) -&gt; list[F]:
 network while executing Prio3. It is <span class="bcp14">RECOMMENDED</span> that implementations provide
 serialization methods for them.<a href="#section-7.2.7-1" class="pilcrow">¶</a></p>
 <p id="section-7.2.7-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
-for <code>Prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>prio3.SEED_SIZE</code> and <code>F</code> as an alias for
+<code>Prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7-3">
 <pre>
 opaque Prio3Seed[S];
@@ -7264,7 +7250,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>VERIFY_KEY_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE</code>
+                <code>idpf.SEED_SIZE</code>
 </td>
             </tr>
             <tr>
@@ -7272,7 +7258,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>RAND_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE * 3 + Idpf.RAND_SIZE</code>
+                <code>idpf.SEED_SIZE * 3 + idpf.RAND_SIZE</code>
 </td>
             </tr>
             <tr>
@@ -7450,7 +7436,7 @@ def shard(
     if len(rand) != self.RAND_SIZE:
         raise ValueError("incorrect size of random bytes argument")
 
-    l = self.xof.SEED_SIZE
+    l = self.idpf.SEED_SIZE
 
     # Split the random input into the random input for IDPF key
     # generation, correlated randomness, and sharding.
