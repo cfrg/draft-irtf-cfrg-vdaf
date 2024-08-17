@@ -2748,7 +2748,8 @@ The joint randomness computation involves the following steps:
 
 1. Compute a "joint randomness part" from each measurement share and blind
 1. Compute a "joint randomness seed" from the joint randomness parts
-1. Compute the joint randomness for each proof evaluation from the joint randomness seed
+1. Compute the joint randomness for each proof evaluation from the joint
+   randomness seed
 
 This three-step process is designed to ensure that the joint randomness does
 not leak the measurement to the Aggregators while preventing a malicious Client
@@ -2777,8 +2778,8 @@ Aggregator a "hint" consisting of the joint randomness parts. This leaves open
 the possibility that the Client cheated by, say, forcing the Aggregators to use
 joint randomness that biases the proof check procedure some way in its favor.
 To mitigate this, the Aggregators also check that they have all computed the
-same joint randomness seed before accepting their output shares. To do so, they
-exchange their parts of the joint randomness along with their shares of
+same joint randomness seed before accepting their output shares. To do so,
+they exchange their parts of the joint randomness along with their shares of
 verifier(s).
 
 Implementation note: the preparation state for Prio3 includes the output share
@@ -3021,19 +3022,19 @@ def joint_rand_part(
 
 def joint_rand_seed(self, k_joint_rand_parts: list[bytes]) -> bytes:
     """Derive the joint randomness seed from its parts."""
-    return self.xof.derive_seed(
+    return self.xof(
         zeros(self.xof.SEED_SIZE),
         self.domain_separation_tag(USAGE_JOINT_RAND_SEED),
         concat(k_joint_rand_parts),
-    )
+    ).next(2*self.xof.SEED_SIZE)
 
 def joint_rands(self, k_joint_rand_seed: bytes) -> list[F]:
     """Derive the joint randomness from its seed."""
     return self.xof.expand_into_vec(
         self.flp.field,
-        k_joint_rand_seed,
+        zeros(self.xof.SEED_SIZE),
         self.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
-        byte(self.PROOFS),
+        k_joint_rand_seed + byte(self.PROOFS),
         self.flp.JOINT_RAND_LEN * self.PROOFS,
     )
 ~~~

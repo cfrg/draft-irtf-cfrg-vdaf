@@ -481,19 +481,19 @@ class Prio3(
 
     def joint_rand_seed(self, k_joint_rand_parts: list[bytes]) -> bytes:
         """Derive the joint randomness seed from its parts."""
-        return self.xof.derive_seed(
+        return self.xof(
             zeros(self.xof.SEED_SIZE),
             self.domain_separation_tag(USAGE_JOINT_RAND_SEED),
             concat(k_joint_rand_parts),
-        )
+        ).next(2*self.xof.SEED_SIZE)
 
     def joint_rands(self, k_joint_rand_seed: bytes) -> list[F]:
         """Derive the joint randomness from its seed."""
         return self.xof.expand_into_vec(
             self.flp.field,
-            k_joint_rand_seed,
+            zeros(self.xof.SEED_SIZE),
             self.domain_separation_tag(USAGE_JOINT_RANDOMNESS),
-            byte(self.PROOFS),
+            k_joint_rand_seed + byte(self.PROOFS),
             self.flp.JOINT_RAND_LEN * self.PROOFS,
         )
 
