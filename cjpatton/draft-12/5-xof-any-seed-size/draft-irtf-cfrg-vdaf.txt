@@ -2844,7 +2844,7 @@ Table of Contents
    2.  Compute a "joint randomness seed" from the joint randomness parts
 
    3.  Compute the joint randomness for each proof evaluation from the
-       joint randomness binder
+       joint randomness seed
 
    This three-step process is designed to ensure that the joint
    randomness does not leak the measurement to the Aggregators while
