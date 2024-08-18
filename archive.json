@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-15T00:46:50.094607+00:00",
+  "timestamp": "2024-08-18T00:53:03.390532+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5324,14 +5324,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "wire change",
         "draft-12"
       ],
       "body": "This is needed for IDPF to be extractable.\r\n\r\n_Originally posted by @schoppmp in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336#discussion_r1588266127_\r\n            ",
       "createdAt": "2024-05-06T14:36:25Z",
-      "updatedAt": "2024-08-14T15:47:18Z",
+      "updatedAt": "2024-08-16T19:52:14Z",
       "closedAt": null,
       "comments": []
     },
@@ -33933,13 +33935,13 @@
       ],
       "body": "Closes #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, for consistency with other sections, allow the IDPF to define its own type for the public share and express the encoding correction words for {{BBCGG21}} in TLS-syntax.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
       "createdAt": "2024-08-06T00:23:50Z",
-      "updatedAt": "2024-08-08T22:56:51Z",
+      "updatedAt": "2024-08-16T18:21:30Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "9ccd7545b7c2697fac983c72ac896cd87630cbef",
+      "baseRefOid": "34e248229d68188bc3bf286a7d4857c414a83316",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/255-finish-it",
-      "headRefOid": "d194e29d8c6d2f6b4e601778b6866536d808ad10",
+      "headRefOid": "717137852fc9fe114e2239586ed7dcfc74836491",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -33965,6 +33967,13 @@
           "body": "Addressed all of the lints. To compare to what you last reviewed:\r\n```\r\ngit range-diff 452ae27e..7ba120c cjpatton/255-finish-it^..cjpatton/255-finish-it\r\n```",
           "createdAt": "2024-08-08T00:03:31Z",
           "updatedAt": "2024-08-08T00:03:31Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-08-16T18:12:59Z",
+          "updatedAt": "2024-08-16T18:12:59Z"
         }
       ],
       "reviews": [
@@ -34037,6 +34046,26 @@
               "body": "@divergentdave I can revert this if you like. CorrectionWord seems just as accurate to me and is a bit pithier.",
               "createdAt": "2024-08-07T23:48:46Z",
               "updatedAt": "2024-08-07T23:48:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Ftlt9",
+          "commit": {
+            "abbreviatedOid": "7171378"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-16T18:21:29Z",
+          "updatedAt": "2024-08-16T18:21:30Z",
+          "comments": [
+            {
+              "originalPosition": 146,
+              "body": "```suggestion\r\nHere `Ci` denotes the length of `Poplar1CWSeedAndPayloadInner` and\r\n```",
+              "createdAt": "2024-08-16T18:21:30Z",
+              "updatedAt": "2024-08-16T18:21:30Z"
             }
           ]
         }
@@ -34448,6 +34477,34 @@
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/398",
       "headRefOid": "1ddb55bcc86639345a62985f27aeb484a26094d6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 403,
+      "id": "PR_kwDOGKuqOc54e5jr",
+      "title": "Update change log for draft 11",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/403",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-11"
+      ],
+      "body": "",
+      "createdAt": "2024-08-15T16:00:42Z",
+      "updatedAt": "2024-08-15T16:00:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "34e248229d68188bc3bf286a7d4857c414a83316",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-11/cl",
+      "headRefOid": "836795d844c20fd3c3fc7df864ea7af3c1c6512c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
