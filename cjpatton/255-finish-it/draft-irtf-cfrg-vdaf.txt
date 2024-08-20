@@ -5222,9 +5222,8 @@ Table of Contents
       introduction to the high level idea.
 
    The description of the IDPF-key generation algorithm makes use of
-   auxiliary functions extend(), convert(), and encode_public_share()
-   defined in Section 8.3.3.  In the following, we let Field2 denote the
-   field GF(2).
+   auxiliary functions extend() and convert() defined in Section 8.3.3.
+   In the following, we let Field2 denote the field GF(2).
 
    def gen(
            self,
@@ -5299,8 +5298,7 @@ Table of Contents
       TODO Describe in prose how IDPF-key evaluation algorithm works.
 
    The description of the IDPF-evaluation algorithm makes use of
-   auxiliary functions extend(), convert(), and decode_public_share()
-   defined in Section 8.3.3.
+   auxiliary functions extend() and convert() defined in Section 8.3.3.
 
    def eval(
            self,
