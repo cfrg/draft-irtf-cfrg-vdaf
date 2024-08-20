@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 February 2025                                           ISRG
+Expires: 21 February 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          13 August 2024
+                                                          20 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 February 2025.
+   This Internet-Draft will expire on 21 February 2025.
 
 Copyright Notice
 
@@ -3157,8 +3157,8 @@ Table of Contents
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for Prio3.xof.SEED_SIZE and F as
-   an alias for Prio3.field.ENCODED_SIZE.  XOF seeds are represented as
+   the remainder we use S as an alias for prio3.xof.SEED_SIZE and F as
+   an alias for prio3.field.ENCODED_SIZE.  XOF seeds are represented as
    follows:
 
    opaque Prio3Seed[S];
@@ -3171,7 +3171,7 @@ Table of Contents
 7.2.7.1.  Public Share
 
    The encoding of the public share depends on whether joint randomness
-   is required for the underlying FLP (i.e., Prio3.flp.JOINT_RAND_LEN >
+   is required for the underlying FLP (i.e., prio3.flp.JOINT_RAND_LEN >
    0).  If joint randomness is not used, then the public share is the
    empty string.  If joint randomness is used, then the public share
    encodes the joint randomness parts as follows:
@@ -4977,9 +4977,10 @@ Table of Contents
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for Poplar1.xof.SEED_SIZE, Fi as
-   an alias for Poplar1.idpf.field_inner and Fl as an alias for
-   Poplar1.idpf.field_leaf.  XOF seeds are represented as follows:
+   the remainder we use S as an alias for poplar1.xof.SEED_SIZE, Fi as
+   an alias for poplar1.idpf.field_inner.ENCODED_SIZE and Fl as an alias
+   for poplar1.idpf.field_leaf.ENCODED_SIZE.  XOF seeds are represented
+   as follows:
 
    opaque Poplar1Seed[S];
 
