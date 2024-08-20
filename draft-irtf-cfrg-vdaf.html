@@ -5140,8 +5140,8 @@ def joint_rands(self, k_joint_rand_seed: bytes) -&gt; list[F]:
 network while executing Prio3. It is <span class="bcp14">RECOMMENDED</span> that implementations provide
 serialization methods for them.<a href="#section-7.2.7-1" class="pilcrow">¶</a></p>
 <p id="section-7.2.7-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
-for <code>Prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
+for <code>prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7-3">
 <pre>
 opaque Prio3Seed[S];
@@ -5160,14 +5160,14 @@ opaque Prio3Field[F];
 <a href="#section-7.2.7.1" class="section-number selfRef">7.2.7.1. </a><a href="#name-public-share" class="section-name selfRef">Public Share</a>
             </h5>
 <p id="section-7.2.7.1-1">The encoding of the public share depends on whether joint randomness is
-required for the underlying FLP (i.e., <code>Prio3.flp.JOINT_RAND_LEN &gt; 0</code>). If
+required for the underlying FLP (i.e., <code>prio3.flp.JOINT_RAND_LEN &gt; 0</code>). If
 joint randomness is not used, then the public share is the empty string. If
 joint randomness is used, then the public share encodes the joint randomness
 parts as follows:<a href="#section-7.2.7.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.1-2">
 <pre>
 struct {
-    Prio3Seed k_joint_rand_parts[S * Prio3.SHARES];
+    Prio3Seed k_joint_rand_parts[S * prio3.SHARES];
 } Prio3PublicShareWithJointRand;
 </pre><a href="#section-7.2.7.1-2" class="pilcrow">¶</a>
 </div>
@@ -5192,8 +5192,8 @@ not used, the Leader's share is structured as follows:<a href="#section-7.2.7.2-
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.2-4">
 <pre>
 struct {
-    Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
-    Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
+    Prio3Field meas_share[F * prio3.flp.MEAS_LEN];
+    Prio3Field proofs_share[F * prio3.flp.PROOF_LEN * prio3.PROOFS];
 } Prio3LeaderShare;
 </pre><a href="#section-7.2.7.2-4" class="pilcrow">¶</a>
 </div>
@@ -5239,7 +5239,7 @@ struct {
 <pre>
 struct {
     Prio3Field verifiers_share[
-        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
     ];
 } Prio3PrepShare;
 </pre><a href="#section-7.2.7.3-2" class="pilcrow">¶</a>
@@ -5250,7 +5250,7 @@ randomness part and is structured as follows:<a href="#section-7.2.7.3-3" class=
 <pre>
 struct {
     Prio3Field verifiers_share[
-        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
     ];
     Prio3Seed k_joint_rand_part;
 } Prio3PrepShareWithJointRand;
@@ -5284,7 +5284,7 @@ struct {
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.5-2">
 <pre>
 struct {
-    Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
+    Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
 } Prio3AggShare;
 </pre><a href="#section-7.2.7.5-2" class="pilcrow">¶</a>
 </div>
@@ -7839,9 +7839,10 @@ def unshard(
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
-for <code>Poplar1.idpf.field_inner</code> and <code>Fl</code> as an alias for
-<code>Poplar1.idpf.field_leaf</code>. XOF seeds are represented as follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
+for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code> and <code>Fl</code> as an alias for
+<code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>. XOF seeds are represented as
+follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6-3">
 <pre>
 opaque Poplar1Seed[S];
@@ -7946,9 +7947,9 @@ if (length + 7) // 8 != len(packed_control_bits) or \
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.2-2">
 <pre>
 struct {
-    opaque idpf_key[Poplar1.Idpf.KEY_SIZE];
+    opaque idpf_key[poplar1.Idpf.KEY_SIZE];
     Poplar1Seed corr_seed;
-    Poplar1FieldInner corr_inner[Fi * 2 * (Poplar1.Idpf.BITS - 1)];
+    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
 </pre><a href="#section-8.2.6.2-2" class="pilcrow">¶</a>
