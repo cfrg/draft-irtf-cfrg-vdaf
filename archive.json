@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-18T00:53:03.390532+00:00",
+  "timestamp": "2024-08-20T00:49:21.419770+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -33935,7 +33935,7 @@
       ],
       "body": "Closes #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, for consistency with other sections, allow the IDPF to define its own type for the public share and express the encoding correction words for {{BBCGG21}} in TLS-syntax.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
       "createdAt": "2024-08-06T00:23:50Z",
-      "updatedAt": "2024-08-16T18:21:30Z",
+      "updatedAt": "2024-08-19T19:52:36Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "34e248229d68188bc3bf286a7d4857c414a83316",
@@ -34066,6 +34066,50 @@
               "body": "```suggestion\r\nHere `Ci` denotes the length of `Poplar1CWSeedAndPayloadInner` and\r\n```",
               "createdAt": "2024-08-16T18:21:30Z",
               "updatedAt": "2024-08-16T18:21:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6F4h5c",
+          "commit": {
+            "abbreviatedOid": "7171378"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-19T18:21:56Z",
+          "updatedAt": "2024-08-19T19:52:36Z",
+          "comments": [
+            {
+              "originalPosition": 161,
+              "body": "nit: grammar\r\n```suggestion\r\nIt encodes each group of eight bits into a byte, in LSB to MSB order, padding the most\r\nsignificant bits of the last byte with zeros as necessary, and returns the byte\r\narray. Decoding performs the reverse operation: it takes in a byte array\r\n```",
+              "createdAt": "2024-08-19T18:21:56Z",
+              "updatedAt": "2024-08-19T19:52:36Z"
+            },
+            {
+              "originalPosition": 178,
+              "body": "nit: inconsistent indentation\r\n```suggestion\r\ncontrol_bits = []\r\nfor i in range(length):\r\n    control_bits.append(Field2(\r\n        (packed_control_bits[i // 8] >> (i % 8)) & 1\r\n    ))\r\nleftover_bits = packed_control_bits[-1] >> (\r\n    (length + 7) % 8 + 1\r\n)\r\nif (length + 7) // 8 != len(packed_control_bits) or \\\r\n        leftover_bits != 0:\r\n    raise ValueError('trailing bits')\r\n```",
+              "createdAt": "2024-08-19T18:24:15Z",
+              "updatedAt": "2024-08-19T19:52:36Z"
+            },
+            {
+              "originalPosition": 252,
+              "body": "The preamble before this shouldn't mention `encode_public_share()` anymore",
+              "createdAt": "2024-08-19T19:36:41Z",
+              "updatedAt": "2024-08-19T19:52:36Z"
+            },
+            {
+              "originalPosition": 289,
+              "body": "Similarly, the preamble before this shouldn't mention `decode_public_share()` anymore",
+              "createdAt": "2024-08-19T19:37:27Z",
+              "updatedAt": "2024-08-19T19:52:36Z"
+            },
+            {
+              "originalPosition": 156,
+              "body": "nit: typo\r\n```suggestion\r\npacked_control_bits = bytes(packed_control_buf)\r\n```",
+              "createdAt": "2024-08-19T19:41:43Z",
+              "updatedAt": "2024-08-19T19:52:36Z"
             }
           ]
         }
@@ -34342,7 +34386,7 @@
       ],
       "body": "Closes #257.\r\nPartially addresses #226.\r\n\r\nThis commit includes editorial improvements for `FlpBBCGGI19`:\r\n\r\n1. Add diagrams to show concepts relate to one another: validity circuit, gadgets, encoded measurement, joint, prove, and query randomness, and so on.\r\n\r\n2. Improve the overview section, building up each of the concepts one by one.\r\n\r\n3. Do an editorial pass of the extensions section, some of which is a little out of date. Also, add a reference for NTT.",
       "createdAt": "2024-08-13T22:41:24Z",
-      "updatedAt": "2024-08-13T23:21:39Z",
+      "updatedAt": "2024-08-19T21:45:36Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
@@ -34354,7 +34398,58 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6F5hdv",
+          "commit": {
+            "abbreviatedOid": "d7f27dd"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-19T20:59:14Z",
+          "updatedAt": "2024-08-19T21:45:36Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "After #355, we should either say the circuit output is a vector of field elements here, or introduce it as one of our extensions below.",
+              "createdAt": "2024-08-19T20:59:14Z",
+              "updatedAt": "2024-08-19T21:45:36Z"
+            },
+            {
+              "originalPosition": 80,
+              "body": "This formulation of a circuit seems unusual, I think either 'multiplication and addition' or 'multiplication, addition, and subtraction' would be more conventional.",
+              "createdAt": "2024-08-19T21:17:31Z",
+              "updatedAt": "2024-08-19T21:45:36Z"
+            },
+            {
+              "originalPosition": 121,
+              "body": "Constants used in constant multiplications are fine as-is, but constants that get added need to be scaled, since this is one way of replacing them with additive shares of themselves.\r\n```suggestion\r\n(Note that, for this equality to hold, it is necessary to scale any addition of a constant\r\n```",
+              "createdAt": "2024-08-19T21:26:43Z",
+              "updatedAt": "2024-08-19T21:45:36Z"
+            },
+            {
+              "originalPosition": 122,
+              "body": "nit: typo\r\n```suggestion\r\nin the circuit by `1/SHARES`.) However, this is not the case if `C` has\r\n```",
+              "createdAt": "2024-08-19T21:29:42Z",
+              "updatedAt": "2024-08-19T21:45:36Z"
+            },
+            {
+              "originalPosition": 123,
+              "body": "nit: typo\r\n```suggestion\r\nmultiplication gates with non-constant inputs. Thus our goal is to transform\r\n```",
+              "createdAt": "2024-08-19T21:29:54Z",
+              "updatedAt": "2024-08-19T21:45:36Z"
+            },
+            {
+              "originalPosition": 138,
+              "body": "This isn't quite right, because the wire polynomials evaluated at the first point produce blinding values. (and the gadget polynomial evaluated at the first point outputs some function of the blinding values) I think we should probably mention or allude to the blinding here, since it's necessary for zero knowledge, and it's not mentioned below.",
+              "createdAt": "2024-08-19T21:34:38Z",
+              "updatedAt": "2024-08-19T21:45:36Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 400,
@@ -34442,7 +34537,7 @@
       ],
       "body": "To define message encoding, we need to be able to refer to attributes of the VDAF, e.g., the value of `SHARES`. Previously we referred to the class in this section, e.g., `Prio3`, but since getting rid of the class-factor pattern, it is now necessary to refer to an instance of the class.\r\n\r\nTo make this clear, replace upper case `Prio3` with lowercase `prio3`, to imply that we an instance of a sub-class of `Vdaf` rather than the sub-class itself.",
       "createdAt": "2024-08-13T23:01:38Z",
-      "updatedAt": "2024-08-13T23:21:15Z",
+      "updatedAt": "2024-08-19T20:17:20Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
@@ -34454,7 +34549,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6F5RaC",
+          "commit": {
+            "abbreviatedOid": "1063f7b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Other candidates:\r\n\r\n- `Prio3.xof.SEED_SIZE` on line 3027\r\n- `Prio3.field.ENCODED_SIZE` on line 3028\r\n- `Prio3.flp.JOINT_RAND_LEN > 0` on line 3044\r\n- `Poplar1.xof.SEED_SIZE` on line 4699\r\n- `Poplar1.idpf.field_inner` on line 4700\r\n- `Poplar1.idpf.field_leaf` on line 4701\r\n\r\nActually, these last two `Fi`/`Fl` aliases should be for `poplar1.idpf.field_inner.ENCODED_SIZE` and `poplar1.idpf.field_leaf.ENCODED_SIZE`, now that I'm looking at it.",
+          "createdAt": "2024-08-19T20:17:20Z",
+          "updatedAt": "2024-08-19T20:17:20Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 402,
@@ -34470,7 +34579,7 @@
       ],
       "body": "Closes #398 \r\n\r\n\"Number theoretic transform\" is the term preferred by most cryptographers.\r\n\r\nAlso, remove an out of date comment related to NTT and padding.",
       "createdAt": "2024-08-13T23:18:06Z",
-      "updatedAt": "2024-08-13T23:21:04Z",
+      "updatedAt": "2024-08-19T20:42:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
@@ -34482,7 +34591,34 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6F5VtA",
+          "commit": {
+            "abbreviatedOid": "1ddb55b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-19T20:28:00Z",
+          "updatedAt": "2024-08-19T20:42:53Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Should we leave this as-is since it's part of the changelog, or is this fine?",
+              "createdAt": "2024-08-19T20:28:00Z",
+              "updatedAt": "2024-08-19T20:42:53Z"
+            },
+            {
+              "originalPosition": 36,
+              "body": "I think we can delete this note here too",
+              "createdAt": "2024-08-19T20:42:20Z",
+              "updatedAt": "2024-08-19T20:42:53Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 403,
