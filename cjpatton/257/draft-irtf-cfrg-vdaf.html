@@ -33,7 +33,7 @@ measurement that would result in an invalid aggregate result.
     pycountry 22.3.5
     PyYAML 6.0.1
     requests 2.32.3
-    setuptools 69.5.1
+    setuptools 70.3.0
     wcwidth 0.2.13
 -->
 <link href="draft-irtf-cfrg-vdaf.xml" rel="alternate" type="application/rfc+xml">
@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 14 February 2025</td>
+<td class="center">Expires 21 February 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-08-13" class="published">13 August 2024</time>
+<time datetime="2024-08-20" class="published">20 August 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-02-14">14 February 2025</time></dd>
+<dd class="expires"><time datetime="2025-02-21">21 February 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 February 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 21 February 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1223,7 +1223,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                     <p id="section-toc.1-1.6.2.1.2.1.1"><a href="#section-6.1.1" class="auto internal xref">6.1.1</a>.  <a href="#name-auxiliary-functions" class="internal xref">Auxiliary Functions</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1.2.2">
-                    <p id="section-toc.1-1.6.2.1.2.2.1"><a href="#section-6.1.2" class="auto internal xref">6.1.2</a>.  <a href="#name-fft-friendly-fields" class="internal xref">FFT-Friendly Fields</a></p>
+                    <p id="section-toc.1-1.6.2.1.2.2.1"><a href="#section-6.1.2" class="auto internal xref">6.1.2</a>.  <a href="#name-ntt-friendly-fields" class="internal xref">NTT-Friendly Fields</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1.2.3">
                     <p id="section-toc.1-1.6.2.1.2.3.1"><a href="#section-6.1.3" class="auto internal xref">6.1.3</a>.  <a href="#name-parameters" class="internal xref">Parameters</a></p>
@@ -1458,7 +1458,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">(RFC EDITOR: Remove this paragraph.) The source for this draft and and the
+<p id="section-1-1">(RFC EDITOR: remove this paragraph.) The source for this draft and and the
 reference implementation can be found at
 https://github.com/cfrg/draft-irtf-cfrg-vdaf.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">The ubiquity of the Internet makes it an ideal platform for measurement of
@@ -1618,7 +1618,7 @@ security considerations for DAFs and VDAFs.<a href="#section-1-20" class="pilcro
         <h3 id="name-change-log">
 <a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-change-log" class="section-name selfRef">Change Log</a>
         </h3>
-<p id="section-1.1-1">(RFC EDITOR: Remove this section.)<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+<p id="section-1.1-1">(RFC EDITOR: remove this section.)<a href="#section-1.1-1" class="pilcrow">¶</a></p>
 <p id="section-1.1-2">(*) Indicates a change that breaks wire compatibility with the previous draft.<a href="#section-1.1-2" class="pilcrow">¶</a></p>
 <p id="section-1.1-3">10:<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -1643,7 +1643,7 @@ VDAF itself.<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></p>
 models for privacy and robustness.<a href="#section-1.1-4.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.6">
-            <p id="section-1.1-4.6.1">Clean up various aspects of the code, including: follow existing
+            <p id="section-1.1-4.6.1">Clean up various aspects of the code, including: Follow existing
 object-oriented programming patterns for Python more closely; make the type
 hints enforceable; and avoid shadowing variables.<a href="#section-1.1-4.6.1" class="pilcrow">¶</a></p>
 </li>
@@ -2370,7 +2370,7 @@ been used with the same input share.<a href="#section-4.3-1" class="pilcrow">¶<
 <ul class="normal">
 <li class="normal" id="section-4.3-3.1">
             <p id="section-4.3-3.1.1"><code>daf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) -&gt;
-bool</code>: Checks if the <code>agg_param</code> is compatible with all elements of
+bool</code>: checks if the <code>agg_param</code> is compatible with all elements of
 <code>previous_agg_params</code>.<a href="#section-4.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
@@ -2420,7 +2420,7 @@ set of recovered output shares.<a href="#section-4.4-2.1.1" class="pilcrow">¶</
 <p id="section-4.4-4">For simplicity, we have written this algorithm in a "one-shot" form, where all
 output shares for a batch are provided at the same time. Many DAFs may also
 support a "streaming" form, where shares are processed one at a time.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
-<p id="section-4.4-5">Implementation note: For most natural DAFs (and VDAFs) it is not necessary for
+<p id="section-4.4-5">Implementation note: for most natural DAFs (and VDAFs) it is not necessary for
 an Aggregator to store all output shares individually before aggregating.
 Typically it is possible to merge output shares into aggregate shares as they
 arrive, merge these into other aggregate shares, and so on. In particular, this
@@ -2550,7 +2550,7 @@ def run_daf(
           </figcaption></figure>
 </div>
 <p id="section-4.6-3">The inputs to this procedure are the same as the aggregation function computed by
-the DAF: An aggregation parameter and a sequence of measurements. The procedure
+the DAF: an aggregation parameter and a sequence of measurements. The procedure
 prescribes how a DAF is executed in a "benign" environment in which there is no
 adversary and the messages are passed among the protocol participants over
 secure point-to-point channels. In reality, these channels need to be
@@ -2594,7 +2594,7 @@ result<a href="#section-5-3.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-5-4">In contrast to DAFs, the Preparation stage for VDAFs now performs an additional
-task: Verification of the validity of the recovered output shares. This process
+task: verification of the validity of the recovered output shares. This process
 ensures that aggregating the output shares will not lead to a garbled aggregate
 result.<a href="#section-5-4" class="pilcrow">¶</a></p>
 <p id="section-5-5">The remainder of this section defines the VDAF interface. The attributes are
@@ -2914,7 +2914,7 @@ been used with the same input share.<a href="#section-5.3-1" class="pilcrow">¶<
 <ul class="normal">
 <li class="normal" id="section-5.3-3.1">
             <p id="section-5.3-3.1.1"><code>vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) -&gt;
-bool</code>: Checks if the <code>agg_param</code> is compatible with all elements of
+bool</code>: checks if the <code>agg_param</code> is compatible with all elements of
 <code>previous_agg_params</code>.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
@@ -3627,27 +3627,27 @@ def vec_neg(vec: list[F]) -&gt; list[F]:
 </div>
 </section>
 </div>
-<div id="field-fft-friendly">
+<div id="field-ntt-friendly">
 <section id="section-6.1.2">
-          <h4 id="name-fft-friendly-fields">
-<a href="#section-6.1.2" class="section-number selfRef">6.1.2. </a><a href="#name-fft-friendly-fields" class="section-name selfRef">FFT-Friendly Fields</a>
+          <h4 id="name-ntt-friendly-fields">
+<a href="#section-6.1.2" class="section-number selfRef">6.1.2. </a><a href="#name-ntt-friendly-fields" class="section-name selfRef">NTT-Friendly Fields</a>
           </h4>
 <p id="section-6.1.2-1">Some VDAFs require fields that are suitable for efficient computation of the
-discrete Fourier transform, as this allows for fast polynomial interpolation.
-(One example is Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) when instantiated with the FLP of
-<a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.) Specifically, a field is said to be
-"FFT-friendly" if, in addition to satisfying the interface described in
+number theoretic transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>, as this allows for fast polynomial
+interpolation. (One example is Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) when instantiated with the FLP
+of <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.) Specifically, a field is said to be
+"NTT-friendly" if, in addition to satisfying the interface described in
 <a href="#field" class="auto internal xref">Section 6.1</a>, it implements the following method:<a href="#section-6.1.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1.2-2.1">
               <p id="section-6.1.2-2.1.1"><code>Field.gen() -&gt; Field</code> returns the generator of a large subgroup of the
-multiplicative group. To be FFT-friendly, the order of this subgroup <span class="bcp14">MUST</span> be a
+multiplicative group. To be NTT-friendly, the order of this subgroup <span class="bcp14">MUST</span> be a
 power of 2. In addition, the size of the subgroup dictates how large
 interpolated polynomials can be. It is <span class="bcp14">RECOMMENDED</span> that a generator is chosen
 with order at least <code>2^20</code>.<a href="#section-6.1.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-6.1.2-3">FFT-friendly fields also define the following parameter:<a href="#section-6.1.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.1.2-3">NTT-friendly fields also define the following parameter:<a href="#section-6.1.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1.2-4.1">
               <p id="section-6.1.2-4.1.1"><code>GEN_ORDER: int</code> is the order of a multiplicative subgroup generated by
@@ -3828,7 +3828,7 @@ class XofTurboShake128(Xof):
         # Function `TurboSHAKE128(M, D, L)` is as defined in
         # Section 2.2 of [TurboSHAKE].
         #
-        # Implementation note: Rather than re-generate the output
+        # Implementation note: rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
         # of TurboSHAKE128 will expose an "absorb-then-squeeze" API
         # that allows stateful handling of the stream.
@@ -3876,7 +3876,7 @@ class XofFixedKeyAes128(Xof):
         # need to be kept secret from any party. However, when used
         # with an IDPF, we require the binder to be a random nonce.
         #
-        # Implementation note: This step can be cached across XOF
+        # Implementation note: this step can be cached across XOF
         # evaluations with many different seeds.
         dst_length = to_le_bytes(len(dst), 1)
         self.fixed_key = TurboSHAKE128(
@@ -4312,7 +4312,7 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-construction" class="section-name selfRef">Construction</a>
         </h3>
 <p id="section-7.2-1">This section specifies <code>Prio3</code>, an implementation of the <code>Vdaf</code> interface
-(<a href="#vdaf" class="auto internal xref">Section 5</a>). It has three generic parameters: an <code>FftField ({{fft-field}}), an
+(<a href="#vdaf" class="auto internal xref">Section 5</a>). It has three generic parameters: an <code>NttField ({{ntt-field}}), an
 </code>Flp<code> ({{flp}}) and a </code>Xof<code> ({{xof}}). It also has an associated constant,
 </code>PROOFS<code>, with a value within the range of </code>[1, 256)`, denoting the number of
 FLPs generated by the Client (<a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>).<a href="#section-7.2-1" class="pilcrow">¶</a></p>
@@ -5140,8 +5140,8 @@ def joint_rands(self, k_joint_rand_seed: bytes) -&gt; list[F]:
 network while executing Prio3. It is <span class="bcp14">RECOMMENDED</span> that implementations provide
 serialization methods for them.<a href="#section-7.2.7-1" class="pilcrow">¶</a></p>
 <p id="section-7.2.7-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
-for <code>Prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
+for <code>prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7-3">
 <pre>
 opaque Prio3Seed[S];
@@ -5160,14 +5160,14 @@ opaque Prio3Field[F];
 <a href="#section-7.2.7.1" class="section-number selfRef">7.2.7.1. </a><a href="#name-public-share" class="section-name selfRef">Public Share</a>
             </h5>
 <p id="section-7.2.7.1-1">The encoding of the public share depends on whether joint randomness is
-required for the underlying FLP (i.e., <code>Prio3.flp.JOINT_RAND_LEN &gt; 0</code>). If
+required for the underlying FLP (i.e., <code>prio3.flp.JOINT_RAND_LEN &gt; 0</code>). If
 joint randomness is not used, then the public share is the empty string. If
 joint randomness is used, then the public share encodes the joint randomness
 parts as follows:<a href="#section-7.2.7.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.1-2">
 <pre>
 struct {
-    Prio3Seed k_joint_rand_parts[S * Prio3.SHARES];
+    Prio3Seed k_joint_rand_parts[S * prio3.SHARES];
 } Prio3PublicShareWithJointRand;
 </pre><a href="#section-7.2.7.1-2" class="pilcrow">¶</a>
 </div>
@@ -5192,8 +5192,8 @@ not used, the Leader's share is structured as follows:<a href="#section-7.2.7.2-
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.2-4">
 <pre>
 struct {
-    Prio3Field meas_share[F * Prio3.flp.MEAS_LEN];
-    Prio3Field proofs_share[F * Prio3.flp.PROOF_LEN * Prio3.PROOFS];
+    Prio3Field meas_share[F * prio3.flp.MEAS_LEN];
+    Prio3Field proofs_share[F * prio3.flp.PROOF_LEN * prio3.PROOFS];
 } Prio3LeaderShare;
 </pre><a href="#section-7.2.7.2-4" class="pilcrow">¶</a>
 </div>
@@ -5239,7 +5239,7 @@ struct {
 <pre>
 struct {
     Prio3Field verifiers_share[
-        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
     ];
 } Prio3PrepShare;
 </pre><a href="#section-7.2.7.3-2" class="pilcrow">¶</a>
@@ -5250,7 +5250,7 @@ randomness part and is structured as follows:<a href="#section-7.2.7.3-3" class=
 <pre>
 struct {
     Prio3Field verifiers_share[
-        F * Prio3.flp.VERIFIER_LEN * Prio3.PROOFS
+        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
     ];
     Prio3Seed k_joint_rand_part;
 } Prio3PrepShareWithJointRand;
@@ -5284,7 +5284,7 @@ struct {
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.5-2">
 <pre>
 struct {
-    Prio3Field agg_share[F * Prio3.flp.OUTPUT_LEN];
+    Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
 } Prio3AggShare;
 </pre><a href="#section-7.2.7.5-2" class="pilcrow">¶</a>
 </div>
@@ -5444,7 +5444,7 @@ but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilc
 <code>alpha</code>, where <code>alpha</code> is a root of unity for the field. This allows us to
 construct each gadget polynomial via the number theoretic transform <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>,
 which is far more efficient than  generic formulas. This requires the field to
-be "FFT-friendly" as defined in <a href="#field-fft-friendly" class="auto internal xref">Section 6.1.2</a>.<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
+be "NTT-friendly" as defined in <a href="#field-ntt-friendly" class="auto internal xref">Section 6.1.2</a>.<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-9">Finally, the validity circuit in our FLP may have any number of outputs (at
 least one). The input is said to be valid if each of the outputs is zero. To
 save bandwidth, we take a random linear combination of the outputs. If each of
@@ -5771,18 +5771,9 @@ call to gadget <code>G_i</code>.<a href="#section-7.3.3.1-3.3.1" class="pilcrow"
                   <li class="normal" id="section-7.3.3.1-3.4.2.2">
                     <p id="section-7.3.3.1-3.4.2.2.1">Let <code>padded_w = w + field.zeros(P_i - len(w))</code>.<a href="#section-7.3.3.1-3.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                </ul>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-7.3.3.1-3.4.3.1">
-                    <p id="section-7.3.3.1-3.4.3.1.1">NOTE We pad <code>w</code> to the nearest power of 2 so that we can use FFT for
-interpolating the wire polynomials. Perhaps there is some clever math for
-picking <code>wire_inp</code> in a way that avoids having to pad.<a href="#section-7.3.3.1-3.4.3.1.1" class="pilcrow">¶</a></p>
-</li>
-                </ul>
-<ul class="normal">
-<li class="normal" id="section-7.3.3.1-3.4.4.1">
-                    <p id="section-7.3.3.1-3.4.4.1.1">Let <code>poly_wire_i[j-1]</code> be the lowest degree polynomial for which
-<code>poly_wire_i[j-1](alpha_i^k) == padded_w[k]</code> for all <code>k</code> in <code>[P_i]</code>.<a href="#section-7.3.3.1-3.4.4.1.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.1-3.4.2.3">
+                    <p id="section-7.3.3.1-3.4.2.3.1">Let <code>poly_wire_i[j-1]</code> be the lowest degree polynomial for which
+<code>poly_wire_i[j-1](alpha_i^k) == padded_w[k]</code> for all <code>k</code> in <code>[P_i]</code>.<a href="#section-7.3.3.1-3.4.2.3.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
@@ -5864,7 +5855,7 @@ evaluate polynomial <code>f(x)*x</code> at a random point <code>r</code>.<a href
 every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.2-3.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.3.2-3.6.2.1">
-                    <p id="section-7.3.3.2-3.6.2.1.1">Let <code>t = query_rand[i]</code>. Check if <code>t^(P_i) == 1</code>: If so, then raise
+                    <p id="section-7.3.3.2-3.6.2.1.1">Let <code>t = query_rand[i]</code>. Check if <code>t^(P_i) == 1</code>: if so, then raise
 ERR_ABORT and halt. (This prevents the verifier from inadvertently leaking
 a gadget output in the verifier message.)<a href="#section-7.3.3.2-3.6.2.1.1" class="pilcrow">¶</a></p>
 </li>
@@ -5998,7 +5989,7 @@ generate and verify. Test vectors for each can be found in <a href="#test-vector
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.1-2">Our first instance of Prio3 is for a simple counter: Each measurement is either
+<p id="section-7.4.1-2">Our first instance of Prio3 is for a simple counter: each measurement is either
 one or zero and the aggregate result is the sum of the measurements.<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.1-3">Its validity circuit, denoted <code>Count</code>, uses the following degree-2, arity-2
 gadget, denoted <code>Mul</code>:<a href="#section-7.4.1-3" class="pilcrow">¶</a></p>
@@ -7046,7 +7037,7 @@ such a way that no one party knows either the point or what it evaluates to.<a h
 to one of the leaves. It is evaluated on an "index" representing a unique node
 of the tree. If the node is on the programmed path, then the function evaluates
 to a non-zero value; otherwise it evaluates to zero. This structure allows an
-IDPF to provide the functionality required for the above protocol: To compute
+IDPF to provide the functionality required for the above protocol: to compute
 the hit count for an index, just evaluate each set of IDPF shares at that index
 and add up the results.<a href="#section-8-5" class="pilcrow">¶</a></p>
 <p id="section-8-6">Consider the sub-tree constructed from a set of input strings and a target
@@ -7089,7 +7080,7 @@ positive integer <code>0 &lt;= y &lt; 2^BITS</code> if <code>LSB(x, L)</code> is
 significant <code>L</code> bits of <code>LSB(y, BITS)</code>, For example, 6 (110 in binary) is the
 length-3 prefix of 25 (11001), but 7 (111) is not.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1-3">Each of the programmed points <code>beta</code> is a vector of elements of some finite
-field. We distinguish two types of fields: One for inner nodes (denoted
+field. We distinguish two types of fields: one for inner nodes (denoted
 <code>FieldInner</code>), and one for leaf nodes (<code>FieldLeaf</code>). (Our
 instantiation of Poplar1 (<a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>) will use a much larger field for
 leaf nodes than for inner nodes. This is to ensure the IDPF is "extractable" as
@@ -7102,14 +7093,14 @@ elements.) The scheme is comprised of the following algorithms:<a href="#section
 <ul class="normal">
 <li class="normal" id="section-8.1-5.1">
             <p id="section-8.1-5.1.1"><code>idpf.gen(alpha: int, beta_inner: list[list[FieldInner]], beta_leaf:
-list[FieldLeaf], nonce: bytes, rand: bytes) -&gt; tuple[bytes,
-list[bytes]]</code> is the randomized IDPF-key generation algorithm. Its inputs are the index <code>alpha</code>
-the values <code>beta</code>, and a nonce string.<a href="#section-8.1-5.1.1" class="pilcrow">¶</a></p>
+list[FieldLeaf], nonce: bytes, rand: bytes) -&gt; tuple[PublicShare,
+list[bytes]]</code> is the randomized IDPF-key generation algorithm. Its inputs are
+the index <code>alpha</code> the values <code>beta</code>, and a nonce string.<a href="#section-8.1-5.1.1" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.1.2">
-The output is a public part that is sent to all Aggregators
-and a vector of private IDPF keys, one for each aggregator. The binder string
-is used to derive the key in the underlying XofFixedKeyAes128 XOF that is used
-for expanding seeds at each level.<a href="#section-8.1-5.1.2" class="pilcrow">¶</a></p>
+The output is a public part (of type <code>PublicShare</code>) that is sent to all
+Aggregators and a vector of private IDPF keys, one for each aggregator. The
+binder string is used to derive the key in the underlying XofFixedKeyAes128
+XOF that is used for expanding seeds at each level.<a href="#section-8.1-5.1.2" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.1.3">
 Pre-conditions:<a href="#section-8.1-5.1.3" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -7130,28 +7121,21 @@ Pre-conditions:<a href="#section-8.1-5.1.3" class="pilcrow">¶</a></p>
                 <p id="section-8.1-5.1.4.5.1"><code>rand</code> <span class="bcp14">MUST</span> be generated by a CSPRNG and have length <code>RAND_SIZE</code>.<a href="#section-8.1-5.1.4.5.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-5.1.4.6">
-                <p id="section-8.1-5.1.4.6.1"><code>nonce</code> <span class="bcp14">MUST</span> be of length <code>Idpf.NONCE_SIZE</code> and chosen uniformly at random by the Client (see
-<a href="#nonce-requirements" class="auto internal xref">Section 9.2</a>).<a href="#section-8.1-5.1.4.6.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.1-5.1.5.1">
-                <p id="section-8.1-5.1.5.1.1">TODO(issue #255) Decide whether to treat the public share as an opaque byte
-string or to replace it with an explicit type.<a href="#section-8.1-5.1.5.1.1" class="pilcrow">¶</a></p>
+                <p id="section-8.1-5.1.4.6.1"><code>nonce</code> <span class="bcp14">MUST</span> be of length <code>Idpf.NONCE_SIZE</code> and chosen uniformly at
+random by the Client (see <a href="#nonce-requirements" class="auto internal xref">Section 9.2</a>).<a href="#section-8.1-5.1.4.6.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
           <li class="normal" id="section-8.1-5.2">
-            <p id="section-8.1-5.2.1"><code>idpf.eval(agg_id: int, public_share: bytes, key: bytes, level:
-int, prefixes: tuple[int, ...], nonce: bytes) -&gt; Output</code> is the
-deterministic, stateless IDPF-key evaluation algorithm run by each
-Aggregator. Its inputs are the Aggregator's unique identifier, the public
-share distributed to all of the Aggregators, the Aggregator's IDPF key, the
-"level" at which to evaluate the IDPF, the sequence of candidate prefixes,
-and a nonce string. It returns the share of the value corresponding to each
-candidate prefix.<a href="#section-8.1-5.2.1" class="pilcrow">¶</a></p>
+            <p id="section-8.1-5.2.1"><code>idpf.eval(agg_id: int, public_share: PublicShare, key: bytes, level: int,
+prefixes: tuple[int, ...], nonce: bytes) -&gt; Output</code> is the deterministic,
+stateless IDPF-key evaluation algorithm run by each Aggregator. Its inputs
+are the Aggregator's unique identifier, the public share distributed to all
+of the Aggregators, the Aggregator's IDPF key, the "level" at which to
+evaluate the IDPF, the sequence of candidate prefixes, and a nonce string. It
+returns the share of the value corresponding to each candidate prefix.<a href="#section-8.1-5.2.1" class="pilcrow">¶</a></p>
 <p id="section-8.1-5.2.2">
-The output type (i.e., <code>Output</code>) depends on the value of <code>level</code>: If <code>level &lt;
+The output type (i.e., <code>Output</code>) depends on the value of <code>level</code>: if <code>level &lt;
 BITS-1</code>, the output is the value for an inner node, which has type
 <code>list[list[FieldInner]]</code>; otherwise, if <code>level == BITS-1</code>, then the output is
 the value for a leaf node, which has type <code>list[list[FieldLeaf]]</code>.<a href="#section-8.1-5.2.2" class="pilcrow">¶</a></p>
@@ -7232,6 +7216,10 @@ state across evaluations. See <a href="#idpf-bbcggi21" class="auto internal xref
             <tr>
               <td class="text-left" rowspan="1" colspan="1">FieldLeaf</td>
               <td class="text-left" rowspan="1" colspan="1">Implementation of <code>Field</code> used for values of leaf nodes</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">PublicShare</td>
+              <td class="text-left" rowspan="1" colspan="1">Type of public share for this IDPF</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">Output</td>
@@ -7359,8 +7347,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
               <td class="text-left" rowspan="1" colspan="1">
                 <code>PublicShare</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>bytes</code> (IDPF public share)</td>
+              <td class="text-left" rowspan="1" colspan="1">same as the IDPF</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
@@ -7484,7 +7471,8 @@ def shard(
         self,
         measurement: int,
         nonce: bytes,
-        rand: bytes) -&gt; tuple[bytes, list[Poplar1InputShare]]:
+        rand: bytes,
+    ) -&gt; tuple[Poplar1PublicShare, list[Poplar1InputShare]]:
     if len(nonce) != self.NONCE_SIZE:
         raise ValueError("incorrect nonce size")
     if len(rand) != self.RAND_SIZE:
@@ -7628,7 +7616,7 @@ def prep_init(
         agg_id: int,
         agg_param: Poplar1AggParam,
         nonce: bytes,
-        public_share: bytes,
+        public_share: Poplar1PublicShare,
         input_share: Poplar1InputShare) -&gt; tuple[
             Poplar1PrepState,
             FieldVec]:
@@ -7904,9 +7892,10 @@ def unshard(
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>Poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
-for <code>Poplar1.idpf.field_inner</code> and <code>Fl</code> as an alias for
-<code>Poplar1.idpf.field_leaf</code>. XOF seeds are represented as follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
+remainder we use <code>S</code> as an alias for <code>poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
+for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code> and <code>Fl</code> as an alias for
+<code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>. XOF seeds are represented as
+follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6-3">
 <pre>
 opaque Poplar1Seed[S];
@@ -7931,8 +7920,75 @@ opaque Poplar1FieldLeaf[Fl];
             <h5 id="name-public-share-2">
 <a href="#section-8.2.6.1" class="section-number selfRef">8.2.6.1. </a><a href="#name-public-share-2" class="section-name selfRef">Public Share</a>
             </h5>
-<p id="section-8.2.6.1-1">The public share is equal to the IDPF public share, which is a byte string.
-(See <a href="#idpf" class="auto internal xref">Section 8.1</a>.)<a href="#section-8.2.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.2.6.1-1">The public share of the IDPF scheme in <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> consists of a sequence
+of "correction words". A correction word has three components:<a href="#section-8.2.6.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.2.6.1-2">
+<li id="section-8.2.6.1-2.1">
+                <p id="section-8.2.6.1-2.1.1">the XOF seed of type <code>bytes</code>;<a href="#section-8.2.6.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-8.2.6.1-2.2">
+                <p id="section-8.2.6.1-2.2.1">the control bits of type <code>tuple[Field2, Field2]</code>; and<a href="#section-8.2.6.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-8.2.6.1-2.3">
+                <p id="section-8.2.6.1-2.3.1">the payload of type <code>list[Field64]</code> for the first <code>BITS-1</code> words and
+<code>list[Field255]</code> for the last word.<a href="#section-8.2.6.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
+<p id="section-8.2.6.1-3">The encoding is straightforward, except that the control bits are packed as
+tightly as possible. The encoded public share is structured as follows:<a href="#section-8.2.6.1-3" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-8.2.6.1-4">
+<pre>
+struct {
+    Poplar1Seed seed;
+    Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
+} Poplar1CWSeedAndPayloadInner;
+
+struct {
+    Poplar1Seed seed;
+    Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
+} Poplar1CWSeedAndPayloadLeaf;
+
+struct {
+    opaque packed_control_bits[packed_len];
+    Poplar1CWSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
+    Poplar1CWSeedAndPayloadLeaf leaf;
+} Poplar1PublicShare;
+</pre><a href="#section-8.2.6.1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-8.2.6.1-5">Here <code>Ci</code> denotes the length of <code>Poplar1CWSeedAndPayloadInner</code> and
+<code>packed_len = (2*Poplar1.Idpf.BITS + 7) // 8</code> is the length of the packed
+control bits.<a href="#section-8.2.6.1-5" class="pilcrow">¶</a></p>
+<p id="section-8.2.6.1-6">Field <code>packed_control_bits</code> is encoded with the following function:<a href="#section-8.2.6.1-6" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-8.2.6.1-7">
+<pre>
+packed_control_buf = [int(0)] * packed_len
+for i, bit in enumerate(control_bits):
+    packed_control_buf[i // 8] |= bit.as_unsigned() &lt;&lt; (i % 8)
+packed_control_bits = bytes(packed_control_buf)
+</pre><a href="#section-8.2.6.1-7" class="pilcrow">¶</a>
+</div>
+<p id="section-8.2.6.1-8">It encodes each group of eight bits into a byte, in LSB to MSB order, padding the most
+significant bits of the last byte with zeros as necessary, and returns the byte
+array. Decoding performs the reverse operation: it takes in a byte array
+and a number of bits, and returns a list of bits, extracting eight bits from
+each byte in turn, in LSB to MSB order, and stopping after the requested number
+of bits. If the byte array has an incorrect length, or if unused bits in the
+last bytes are not zero, it throws an error:<a href="#section-8.2.6.1-8" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-8.2.6.1-9">
+<pre>
+control_bits = []
+for i in range(length):
+    control_bits.append(Field2(
+        (packed_control_bits[i // 8] &gt;&gt; (i % 8)) &amp; 1
+    ))
+leftover_bits = packed_control_bits[-1] &gt;&gt; (
+    (length + 7) % 8 + 1
+)
+if (length + 7) // 8 != len(packed_control_bits) or \
+        leftover_bits != 0:
+    raise ValueError('trailing bits')
+</pre><a href="#section-8.2.6.1-9" class="pilcrow">¶</a>
+</div>
 </section>
 </div>
 <div id="input-share-1">
@@ -7944,9 +8000,9 @@ opaque Poplar1FieldLeaf[Fl];
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.2-2">
 <pre>
 struct {
-    opaque idpf_key[Poplar1.Idpf.KEY_SIZE];
+    opaque idpf_key[poplar1.Idpf.KEY_SIZE];
     Poplar1Seed corr_seed;
-    Poplar1FieldInner corr_inner[Fi * 2 * (Poplar1.Idpf.BITS - 1)];
+    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
 </pre><a href="#section-8.2.6.2-2" class="pilcrow">¶</a>
@@ -8059,53 +8115,44 @@ struct {
 <a href="#section-8.2.6.6" class="section-number selfRef">8.2.6.6. </a><a href="#name-aggregation-parameter" class="section-name selfRef">Aggregation Parameter</a>
             </h5>
 <p id="section-8.2.6.6-1">The aggregation parameter is encoded as follows:<a href="#section-8.2.6.6-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.2.6.6-2.1">
-                <p id="section-8.2.6.6-2.1.1">TODO(issue #255) Express the aggregation parameter encoding in TLS syntax.
-Decide whether to RECOMMEND this encoding, and if so, add it to test vectors.<a href="#section-8.2.6.6-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
-<div class="lang-python sourcecode" id="section-8.2.6.6-3">
+<div class="lang-tls-presentation sourcecode" id="section-8.2.6.6-2">
 <pre>
-def encode_agg_param(self, agg_param: Poplar1AggParam) -&gt; bytes:
-    level, prefixes = agg_param
-    if level not in range(2 ** 16):
-        raise ValueError('level out of range')
-    if len(prefixes) not in range(2 ** 32):
-        raise ValueError('number of prefixes out of range')
-    encoded = bytes()
-    encoded += to_be_bytes(level, 2)
-    encoded += to_be_bytes(len(prefixes), 4)
-    packed = 0
-    for (i, prefix) in enumerate(prefixes):
-        packed |= prefix &lt;&lt; ((level + 1) * i)
-    l = ((level + 1) * len(prefixes) + 7) // 8
-    encoded += to_be_bytes(packed, l)
-    return encoded
-
-def decode_agg_param(self, encoded: bytes) -&gt; Poplar1AggParam:
-    encoded_level, encoded = encoded[:2], encoded[2:]
-    level = from_be_bytes(encoded_level)
-    encoded_prefix_count, encoded = encoded[:4], encoded[4:]
-    prefix_count = from_be_bytes(encoded_prefix_count)
-    l = ((level + 1) * prefix_count + 7) // 8
-    encoded_packed, encoded = encoded[:l], encoded[l:]
-    packed = from_be_bytes(encoded_packed)
-    prefixes = []
-    m = 2 ** (level + 1) - 1
-    for i in range(prefix_count):
-        prefixes.append(packed &gt;&gt; ((level + 1) * i) &amp; m)
-    if len(encoded) != 0:
-        raise ValueError('trailing bytes')
-    return (level, tuple(prefixes))
-</pre><a href="#section-8.2.6.6-3" class="pilcrow">¶</a>
+struct {
+    uint16_t level;
+    uint32_t num_prefixes;
+    opaque packed_prefixes[packed_len];
+} Poplar1AggParam;
+</pre><a href="#section-8.2.6.6-2" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2.6.6-4">Implementation note: The aggregation parameter includes the level of the IDPF
+<p id="section-8.2.6.6-3">The fields in this struct are: <code>level</code>, the level of the IDPF tree of each
+prefixes; <code>num_prefixes</code>, the number of prefixes to evaluate; and
+<code>packed_prefixes</code>, the sequence of prefixes packed into a byte string of
+length <code>packed_len</code>. The prefixes are encoded with the following procedure:<a href="#section-8.2.6.6-3" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-8.2.6.6-4">
+<pre>
+packed = 0
+for (i, prefix) in enumerate(prefixes):
+    packed |= prefix &lt;&lt; ((level + 1) * i)
+packed_len = ((level + 1) * len(prefixes) + 7) // 8
+packed_prefixes = to_be_bytes(packed, packed_len)
+</pre><a href="#section-8.2.6.6-4" class="pilcrow">¶</a>
+</div>
+<p id="section-8.2.6.6-5">Decoding involves the following procedure:<a href="#section-8.2.6.6-5" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-8.2.6.6-6">
+<pre>
+packed = from_be_bytes(packed_prefixes)
+prefixes = []
+m = 2 ** (level + 1) - 1
+for i in range(num_prefixes):
+    prefixes.append(packed &gt;&gt; ((level + 1) * i) &amp; m)
+</pre><a href="#section-8.2.6.6-6" class="pilcrow">¶</a>
+</div>
+<p id="section-8.2.6.6-7">Implementation note: the aggregation parameter includes the level of the IDPF
 tree and the sequence of indices to evaluate. For implementations that perform
 per-report caching across executions of the VDAF, this may be more information
 than is strictly needed. In particular, it may be sufficient to convey which
 indices from the previous execution will have their children included in the
-next. This would help reduce communication overhead.<a href="#section-8.2.6.6-4" class="pilcrow">¶</a></p>
+next. This would help reduce communication overhead.<a href="#section-8.2.6.6-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -8184,9 +8231,9 @@ to the high level idea.<a href="#section-8.3.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-8.3.1-2">The description of the IDPF-key generation algorithm makes use of auxiliary
-functions <code>extend()</code>, <code>convert()</code>, and <code>encode_public_share()</code> defined in
-<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote the
-field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
+functions <code>extend()</code> and <code>convert()</code> defined in
+<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote
+the field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-key-generation-algorit"></span><div id="idpf-bbcggi21-gen">
 <figure id="figure-31">
             <div class="breakable lang-python sourcecode" id="section-8.3.1-3.1">
@@ -8197,13 +8244,15 @@ def gen(
         beta_inner: list[list[Field64]],
         beta_leaf: list[Field255],
         nonce: bytes,
-        rand: bytes) -&gt; tuple[bytes, list[bytes]]:
+        rand: bytes) -&gt; tuple[list[CorrectionWord], list[bytes]]:
     if alpha not in range(2 ** self.BITS):
         raise ValueError("alpha out of range")
     if len(beta_inner) != self.BITS - 1:
         raise ValueError("incorrect beta_inner length")
     if len(rand) != self.RAND_SIZE:
         raise ValueError("incorrect rand size")
+    if len(nonce) != self.NONCE_SIZE:
+        raise ValueError("incorrect nonce size")
 
     key = [
         rand[:XofFixedKeyAes128.SEED_SIZE],
@@ -8212,7 +8261,7 @@ def gen(
 
     seed = key.copy()
     ctrl = [Field2(0), Field2(1)]
-    correction_words = []
+    public_share = []
     for level in range(self.BITS):
         field: type[Field]
         field = cast(type[Field], self.current_field(level))
@@ -8245,16 +8294,14 @@ def gen(
             )
 
         w_cw = vec_add(vec_sub(b, w0), w1)
-        # Implementation note: Here we negate the correction word if
+        # Implementation note: here we negate the correction word if
         # the control bit `ctrl[1]` is set. We avoid branching on the
         # value in order to reduce leakage via timing side channels.
         mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
         for i in range(len(w_cw)):
             w_cw[i] *= mask
 
-        correction_words.append((seed_cw, ctrl_cw, w_cw))
-
-    public_share = self.encode_public_share(correction_words)
+        public_share.append((seed_cw, ctrl_cw, w_cw))
     return (public_share, key)
 </pre>
 </div>
@@ -8275,7 +8322,7 @@ def gen(
 </li>
           </ul>
 <p id="section-8.3.2-2">The description of the IDPF-evaluation algorithm makes use of auxiliary
-functions <code>extend()</code>, <code>convert()</code>, and <code>decode_public_share()</code> defined in
+functions <code>extend()</code> and <code>convert()</code> defined in
 <a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-evaluation-generation-"></span><div id="idpf-bbcggi21-eval">
 <figure id="figure-32">
@@ -8284,7 +8331,7 @@ functions <code>extend()</code>, <code>convert()</code>, and <code>decode_public
 def eval(
         self,
         agg_id: int,
-        public_share: bytes,
+        public_share: list[CorrectionWord],
         key: bytes,
         level: int,
         prefixes: Sequence[int],
@@ -8297,7 +8344,6 @@ def eval(
     if len(set(prefixes)) != len(prefixes):
         raise ValueError('prefixes must be unique')
 
-    correction_words = self.decode_public_share(public_share)
     out_share = []
     for prefix in prefixes:
         if prefix not in range(2 ** (level + 1)):
@@ -8314,7 +8360,7 @@ def eval(
         for current_level in range(level + 1):
             bit = (prefix &gt;&gt; (level - current_level)) &amp; 1
 
-            # Implementation note: Typically the current round of
+            # Implementation note: typically the current round of
             # candidate prefixes would have been derived from
             # aggregate results computed during previous rounds.
             # For example, when using the IDPF to compute heavy
@@ -8331,7 +8377,7 @@ def eval(
             (seed, ctrl, y) = self.eval_next(
                 seed,
                 ctrl,
-                correction_words[current_level],
+                public_share[current_level],
                 current_level,
                 bit,
                 nonce,
@@ -8349,7 +8395,7 @@ def eval_next(
         self,
         prev_seed: bytes,
         prev_ctrl: Field2,
-        correction_word: CorrectionWordTuple,
+        correction_word: CorrectionWord,
         level: int,
         bit: int,
         nonce: bytes) -&gt; tuple[bytes, Field2, FieldVec]:
@@ -8373,7 +8419,7 @@ def eval_next(
     convert_output = self.convert(level, s[bit], nonce)
     next_seed = convert_output[0]
     y = cast(list[Field], convert_output[1])
-    # Implementation note: Here we add the correction word to the
+    # Implementation note: here we add the correction word to the
     # output if `next_ctrl` is set. We avoid branching on the value
     # of the control bit in order to reduce side channel leakage.
     mask = cast(Field, field(next_ctrl.as_unsigned()))
@@ -8396,7 +8442,7 @@ def eval_next(
           </h4>
 <span id="name-helper-functions-for-the-id"></span><div id="idpf-bbcggi21-helpers">
 <figure id="figure-33">
-            <div class="breakable lang-python sourcecode" id="section-8.3.3-1.1">
+            <div class="lang-python sourcecode" id="section-8.3.3-1.1">
 <pre>
 def extend(
         self,
@@ -8425,58 +8471,12 @@ def convert(
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
     return (next_seed, cast(FieldVec, w))
-
-def encode_public_share(
-        self,
-        correction_words: list[CorrectionWordTuple]) -&gt; bytes:
-    encoded = bytes()
-    control_bits = list(itertools.chain.from_iterable(
-        cw[1] for cw in correction_words
-    ))
-    encoded += pack_bits(control_bits)
-    for (level, (seed_cw, _, w_cw)) \
-            in enumerate(correction_words):
-        field = cast(type[Field], self.current_field(level))
-        encoded += seed_cw
-        encoded += field.encode_vec(cast(list[Field], w_cw))
-    return encoded
-
-def decode_public_share(
-        self,
-        encoded: bytes) -&gt; list[CorrectionWordTuple]:
-    l = (2 * self.BITS + 7) // 8
-    encoded_ctrl, encoded = encoded[:l], encoded[l:]
-    control_bits = unpack_bits(encoded_ctrl, 2 * self.BITS)
-    correction_words = []
-    for level in range(self.BITS):
-        field = self.current_field(level)
-        ctrl_cw = (
-            control_bits[level * 2],
-            control_bits[level * 2 + 1],
-        )
-        l = XofFixedKeyAes128.SEED_SIZE
-        seed_cw, encoded = encoded[:l], encoded[l:]
-        l = field.ENCODED_SIZE * self.VALUE_LEN
-        encoded_w_cw, encoded = encoded[:l], encoded[l:]
-        w_cw = field.decode_vec(encoded_w_cw)
-        correction_words.append((seed_cw, ctrl_cw, w_cw))
-    if len(encoded) != 0:
-        raise ValueError('trailing bytes')
-    return correction_words
 </pre>
 </div>
 <figcaption><a href="#figure-33" class="selfRef">Figure 33</a>:
 <a href="#name-helper-functions-for-the-id" class="selfRef">Helper functions for the IDPF.</a>
             </figcaption></figure>
 </div>
-<p id="section-8.3.3-2">Here, <code>pack_bits()</code> takes a list of bits, packs each group of eight bits into a
-byte, in LSB to MSB order, padding the most significant bits of the last byte
-with zeros as necessary, and returns the byte array. <code>unpack_bits()</code> performs
-the reverse operation: it takes in a byte array and a number of bits, and
-returns a list of bits, extracting eight bits from each byte in turn, in LSB to
-MSB order, and stopping after the requested number of bits. If the byte array
-has an incorrect length, or if unused bits in the last bytes are not zero, it
-throws an error.<a href="#section-8.3.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -8501,7 +8501,7 @@ any positive value of <code>BITS</code>. Test vectors can be found in <a href="#
 <p id="section-9-1">VDAFs (<a href="#vdaf" class="auto internal xref">Section 5</a>) have two essential security goals:<a href="#section-9-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9-2">
 <li id="section-9-2.1">
-          <p id="section-9-2.1.1">Privacy: An attacker that controls the Collector and a subset of Clients and
+          <p id="section-9-2.1.1">Privacy: an attacker that controls the Collector and a subset of Clients and
 Aggregators learns nothing about the measurements of honest Clients beyond
 what it can deduce from the aggregate result. We assume the attacker
 controls the entire network except for channels between honest Clients and
@@ -8509,7 +8509,7 @@ honest Aggregators. In particular, it cannot forge or prevent transmission
 of messages on these channels.<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-9-2.2">
-          <p id="section-9-2.2.1">Robustness: An attacker that controls a subset of Clients cannot cause the
+          <p id="section-9-2.2.1">Robustness: an attacker that controls a subset of Clients cannot cause the
 Collector to compute anything other than the aggregate of the measurements
 of honest Clients. We assume the attacker eavesdrops on the network but does
 not control transmission of messages between honest parties.<a href="#section-9-2.2.1" class="pilcrow">¶</a></p>
@@ -8542,7 +8542,7 @@ Aggregators.<a href="#section-9-4.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-9-5">In such an environment, a VDAF provides the high-level privacy property
-described above: The Collector learns only the aggregate measurement, and
+described above: the Collector learns only the aggregate measurement, and
 nothing about individual measurements aside from what can be inferred from the
 aggregate result.  The Aggregators learn neither individual measurements nor the
 aggregate result.  The Collector is assured that the aggregate statistic
@@ -9074,7 +9074,7 @@ useful feedback on and contributions to the spec.<a href="#appendix-A-4" class="
       <h2 id="name-test-vectors">
 <a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
       </h2>
-<p id="appendix-B-1">(TO BE REMOVED BY RFC EDITOR: Machine-readable test vectors can be found at
+<p id="appendix-B-1">(TO BE REMOVED BY RFC EDITOR: machine-readable test vectors can be found at
 https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 <p id="appendix-B-2">Test vectors cover the generation of input shares and the conversion of input
 shares into output shares. Vectors specify the verification key, measurements,
