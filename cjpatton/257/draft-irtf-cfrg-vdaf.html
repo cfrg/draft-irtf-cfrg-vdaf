@@ -5325,7 +5325,7 @@ encryption of it.<a href="#section-7.3.1-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-4">Validity is defined in terms of an arithmetic circuit evaluated over the
 measurement. The inputs to this circuit are elements of a finite field that
 comprise the encoded measurement; the gates of the circuit are multiplication,
-addition, and negation operations; and the output of the circuit is a single
+addition, and subtraction operations; and the output of the circuit is a single
 field element. If the value is zero, then the measurement is deemed valid;
 otherwise, if the output is non-zero, then the measurement is deemed invalid.<a href="#section-7.3.1-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-5">For example, the simplest circuit specified in this document is the following
@@ -5335,16 +5335,15 @@ otherwise, if the output is non-zero, then the measurement is deemed invalid.<a 
 C(x) = x * (x-1)
 </pre><a href="#section-7.3.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1-7">This circuit contains one negation gate (<code>-1</code>), one addition gate (<code>x + (-1)</code>),
-and one multiplication gate (<code>x * (x + (-1))</code>). Observe that <code>C(x) = 0</code> if and
-only if <code>x in range(2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-7">This circuit contains one subtraction gate (<code>x -1</code>) and one multiplication
+gate (<code>x * (x -1)</code>). Observe that <code>C(x) = 0</code> if and only if <code>x in range(2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-8">Our goal is to allow each Aggregator, who holds a secret share of <code>x</code>, to
 correctly compute a secret share of <code>C(x)</code>. This allows the Aggregators to
 determine validity by combining their shares of the output.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-9">Suppose for a moment that the validity circuit <code>C</code> is affine, meaning its only
-operations are negation, addition, and multiplication-by-constant. (The circuit
-above is non-affine because it contains a multiplication gate with non-constant
-inputs.) Then each Aggregator can compute its share locally, since<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
+operations are addition, subtraction, and multiplication-by-constant. (The
+circuit above is non-affine because it contains a multiplication gate with
+non-constant inputs.) Then each Aggregator can compute its share locally, since<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-10">
 <pre>
 C(x_shares[0] + ... + x_shares[SHARES-1]) =
