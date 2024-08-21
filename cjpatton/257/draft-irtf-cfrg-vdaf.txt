@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 21 February 2025                                           ISRG
+Expires: 22 February 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          20 August 2024
+                                                          21 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 February 2025.
+   This Internet-Draft will expire on 22 February 2025.
 
 Copyright Notice
 
@@ -3343,14 +3343,14 @@ Table of Contents
        Aggregators.
 
    2.  Each Aggregator locally computes and broadcasts its share of
-       p(0), which is equal to its share of C(x).
+       p(1), which is equal to its share of C(x).
 
    In fact, our FLP is slightly more general than this.  We can replace
    the multiplication gate with any non-affine sub-circuit and apply the
    same idea.  For example, in Section 7.4.2, the validity circuit uses
    the following sub-circuit multiple times:
 
-   Range2(x) = x * (x -1) = x^2 - x
+   Range2(x) = x * (x - 1) = x^2 - x
 
    (This is the same functionality computed by the example circuit C
    above.)  Here again we can interpolate the lowest degree polynomial p
