@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 22 February 2025                                           ISRG
+Expires: 23 February 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          21 August 2024
+                                                          22 August 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 February 2025.
+   This Internet-Draft will expire on 23 February 2025.
 
 Copyright Notice
 
@@ -3300,8 +3300,8 @@ Table of Contents
 
    C(x) = x * (x-1)
 
-   This circuit contains one subtraction gate (x -1) and one
-   multiplication gate (x * (x -1)).  Observe that C(x) = 0 if and only
+   This circuit contains one subtraction gate (x - 1) and one
+   multiplication gate (x * (x - 1)).  Observe that C(x) = 0 if and only
    if x in range(2).
 
    Our goal is to allow each Aggregator, who holds a secret share of x,
@@ -3312,15 +3312,15 @@ Table of Contents
    Suppose for a moment that the validity circuit C is affine, meaning
    its only operations are addition, subtraction, and multiplication-by-
    constant.  (The circuit above is non-affine because it contains a
-   multiplication gate with non-constant inputs.)  Then each Aggregator
-   can compute its share locally, since
+   multiplication gate with two non-constant inputs.)  Then each
+   Aggregator can compute its share locally, since
 
    C(x_shares[0] + ... + x_shares[SHARES-1]) =
        C(x_shares[0]) + ... + C(x_shares[SHARES-1])
 
    (Note that, for this equality to hold, it is necessary to scale any
    addition of a constant in the circuit by 1/SHARES.)  However, this is
-   not the case if C contains multiplication gates with non-constant
+   not the case if C contains multiplication gates with two non-constant
    inputs.  Thus our goal is to transform these multiplication gates
    into computations on secret shared data that each Aggregator can
    perform locally.
