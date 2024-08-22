@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-20T00:49:21.419770+00:00",
+  "timestamp": "2024-08-22T00:51:01.064230+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -3829,7 +3829,7 @@
       "id": "I_kwDOGKuqOc5pJ_TJ",
       "title": "Define more common types",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/255",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "wangshan",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -3840,8 +3840,8 @@
       ],
       "body": "Some of the commonly used types are not explicitly defined using TLS syntax, or mentioned in \"Conventions and Definitions\". For example:  \r\n\r\n- prep share\r\n- prep msg\r\n- input share\r\n- public share\r\n\r\nwhile similar ones like OutShare, Measurement is.\r\n\r\nother types like `Prep` is treated like a type but it's content not specified when it's mentioned, but only at a later time, for e.g https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/draft-irtf-cfrg-vdaf.md#communication-patterns-for-preparation-vdaf-prep-comm.\r\n\r\n\r\n",
       "createdAt": "2023-06-19T21:08:01Z",
-      "updatedAt": "2024-08-06T00:19:21Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-20T01:43:06Z",
+      "closedAt": "2024-08-20T01:43:06Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5110,9 +5110,17 @@
       ],
       "body": "When thinking about Prio3 robustness (ia.cr/2023/130, Theorem 1) we (err, I, really) have been ignoring the term that depends on the size of the seed: $(q_\\text{RG} + {q_{\\text{Prep}}}^2) / 2^{\\kappa -1}$\r\n\r\n* $q_\\text{RG}$ - the number of random oracle queries (XofTurboShake128 is modeled as an RO)\r\n* $q_\\text{Prep}$ - the number of (potentially malicious) reports consumed in a given DAP task\r\n* $\\kappa$ - the seed size (16 bytes for XofTurboShake128)\r\n\r\nAs @albertpl pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/318#discussion_r1416669600, the bound becomes vacuous after $q_\\text{Prep}=2^{63.5}$ reports (since $(2^{63.5})^2 = 2^{\\kappa -1}$).\r\n\r\nWhile it's doubtful that we'd ever consume so many reports in a single task, it's not a bad idea to have a more conservative safety margin. 32 bytes seems like a reasonable choice.",
       "createdAt": "2023-12-07T22:57:31Z",
-      "updatedAt": "2024-08-14T15:46:46Z",
+      "updatedAt": "2024-08-20T22:01:14Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Update: the term we're looking at here deals with the probability of two reports deriving the same joint randomness. While our main concern here was the number of online attacks against robustness (and whether a birthday attack is too close for comfort, given the current seed size), @bwesterb pointed out the possibility of an offline attacker finding pair of distinct reports that derive the same joint randomness seed. This is clearly a possibility: an offline attacker can try to find joint randomness hints that produce the same joint randomness seed, or two reports that produce the same joint randomness hints.\r\n\r\nThis points to a bug in the current proof. The ${q_\\text{Prep}}^2/2^\\kappa$ is actually more like $(q_\\text{RG} + q_\\text{Prep})^2/2^\\kappa$. @hannahdaviscrypto and I are updating the paper and will put it on eprint soon.\r\n\r\nCertainly ${q_\\text{RO}}^2/2^\\kappa$ is too weak, so we'll need to fix this. Rather than double the seed size for `XofTurboShake128`, we propose a more targeted fix: to double the size of the joint randomness seed only, and adjust the joint randomness derivation accordingly. See PR #407.",
+          "createdAt": "2024-08-20T22:01:13Z",
+          "updatedAt": "2024-08-20T22:01:13Z"
+        }
+      ]
     },
     {
       "number": 321,
@@ -5708,7 +5716,7 @@
       "id": "I_kwDOGKuqOc6S4oCp",
       "title": "Replace \"FFT\" with \"NTT\"",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/398",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5720,8 +5728,8 @@
       ],
       "body": "Number theoretic transform is the terminology used much more widely in cryptography: https://eprint.iacr.org/2024/585",
       "createdAt": "2024-08-13T22:11:25Z",
-      "updatedAt": "2024-08-13T23:12:58Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-20T01:47:29Z",
+      "closedAt": "2024-08-20T01:47:29Z",
       "comments": []
     }
   ],
@@ -33926,7 +33934,7 @@
       "id": "PR_kwDOGKuqOc53gfvn",
       "title": "Resolve open issues for #255",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/392",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -33935,17 +33943,19 @@
       ],
       "body": "Closes #255.\r\n\r\nTwo questions remain.\r\n\r\nFirst, for consistency with other sections, allow the IDPF to define its own type for the public share and express the encoding correction words for {{BBCGG21}} in TLS-syntax.\r\n\r\nSecond, for consistency with other sections, we express the encoding of `Poplar1`'s aggregation parameter in TLS-syntax. This is slightly hairy because of the prefix packing procedure, but this can be factored out pretty nicely.",
       "createdAt": "2024-08-06T00:23:50Z",
-      "updatedAt": "2024-08-19T19:52:36Z",
+      "updatedAt": "2024-08-20T01:43:05Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "34e248229d68188bc3bf286a7d4857c414a83316",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/255-finish-it",
-      "headRefOid": "717137852fc9fe114e2239586ed7dcfc74836491",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "109ec2ec58cb4cae276a4fa5aeda820f8110d6f7",
+      "closedAt": "2024-08-20T01:43:05Z",
+      "mergedAt": "2024-08-20T01:43:05Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "14edbfb22b356a1daf73a4efb987f594b7f12eb6"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -34110,6 +34120,26 @@
               "body": "nit: typo\r\n```suggestion\r\npacked_control_bits = bytes(packed_control_buf)\r\n```",
               "createdAt": "2024-08-19T19:41:43Z",
               "updatedAt": "2024-08-19T19:52:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6F65ln",
+          "commit": {
+            "abbreviatedOid": "109ec2e"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-20T01:33:47Z",
+          "updatedAt": "2024-08-20T01:42:57Z",
+          "comments": [
+            {
+              "originalPosition": 156,
+              "body": "I'd hardly call that a nit \ud83d\ude2c ",
+              "createdAt": "2024-08-20T01:33:47Z",
+              "updatedAt": "2024-08-20T01:42:57Z"
             }
           ]
         }
@@ -34386,18 +34416,26 @@
       ],
       "body": "Closes #257.\r\nPartially addresses #226.\r\n\r\nThis commit includes editorial improvements for `FlpBBCGGI19`:\r\n\r\n1. Add diagrams to show concepts relate to one another: validity circuit, gadgets, encoded measurement, joint, prove, and query randomness, and so on.\r\n\r\n2. Improve the overview section, building up each of the concepts one by one.\r\n\r\n3. Do an editorial pass of the extensions section, some of which is a little out of date. Also, add a reference for NTT.",
       "createdAt": "2024-08-13T22:41:24Z",
-      "updatedAt": "2024-08-19T21:45:36Z",
+      "updatedAt": "2024-08-21T16:20:44Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
+      "baseRefOid": "e37da53af7092a9c6c91b4dba6b9c0dc64466dcf",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/257",
-      "headRefOid": "d7f27dda85abe12537383920ccb68caddb0814c6",
+      "headRefOid": "c8a0089c06f3b45d2c955a6ed7aa29b45c833868",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for the careful review here! Note that I've rebased to resolve conflicts, while at it I decided to squash as well.",
+          "createdAt": "2024-08-20T02:04:30Z",
+          "updatedAt": "2024-08-20T02:04:30Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc6F5hdv",
@@ -34446,6 +34484,172 @@
               "body": "This isn't quite right, because the wire polynomials evaluated at the first point produce blinding values. (and the gadget polynomial evaluated at the first point outputs some function of the blinding values) I think we should probably mention or allude to the blinding here, since it's necessary for zero knowledge, and it's not mentioned below.",
               "createdAt": "2024-08-19T21:34:38Z",
               "updatedAt": "2024-08-19T21:45:36Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6F6-MI",
+          "commit": {
+            "abbreviatedOid": "d7f27dd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-20T01:55:05Z",
+          "updatedAt": "2024-08-20T01:55:05Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "This is introduced in the extensions section, in the very first paragraph. Do you think we should either introduce it here or say more about it there? I figured we should keep the overview as conceptually close to the paper as possible.",
+              "createdAt": "2024-08-20T01:55:05Z",
+              "updatedAt": "2024-08-20T01:55:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6F6-pv",
+          "commit": {
+            "abbreviatedOid": "d7f27dd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-20T01:56:57Z",
+          "updatedAt": "2024-08-20T01:56:57Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Hmm, I think of addition, multiplication, and negation as analogues of OR, AND, and NOT respectively for boolean circuits, which to me is more intuitive. What about stating this analogy here, and maybe me mentioning that subtraction is negation followed by addition?",
+              "createdAt": "2024-08-20T01:56:57Z",
+              "updatedAt": "2024-08-20T01:56:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6F6-5F",
+          "commit": {
+            "abbreviatedOid": "d7f27dd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-20T01:58:11Z",
+          "updatedAt": "2024-08-20T01:58:11Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "Good catch.",
+              "createdAt": "2024-08-20T01:58:11Z",
+              "updatedAt": "2024-08-20T01:58:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6F6_7h",
+          "commit": {
+            "abbreviatedOid": "d7f27dd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-20T02:03:53Z",
+          "updatedAt": "2024-08-20T02:03:53Z",
+          "comments": [
+            {
+              "originalPosition": 138,
+              "body": "Nice catch :) Please take another look: I used `s` to denote the blinding factor, which is short for `seed`, the word we use in the actual specification.",
+              "createdAt": "2024-08-20T02:03:53Z",
+              "updatedAt": "2024-08-20T02:03:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6GK6GW",
+          "commit": {
+            "abbreviatedOid": "d7f27dd"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-21T14:38:44Z",
+          "updatedAt": "2024-08-21T14:38:44Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "I missed it on my first read (probably because it wasn't part of the diff), but this is addressed as the fourth extension in 7.3.1.1. LGTM.",
+              "createdAt": "2024-08-21T14:38:44Z",
+              "updatedAt": "2024-08-21T14:38:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6GLBw_",
+          "commit": {
+            "abbreviatedOid": "d7f27dd"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-21T14:49:03Z",
+          "updatedAt": "2024-08-21T14:49:03Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "I don't think we need to draw direct parallels to boolean circuits. Besides, if we were to project a boolean circuit into an arithmetic circuit, logical negation would probably be implemented with (1 - x), so I think the analogy doesn't hold up.\r\n\r\nLooking at the 2019 Prio paper, it says in section 7.1 that arithmetic circuits over a ring R \"may contain addition, subtraction and multiplication gates, as well as constants from R.\" The Wikipedia page for [Arithmetic circuit complexity](https://en.wikipedia.org/wiki/Arithmetic_circuit_complexity) says that circuits are made up of input gates, sum gates, and product gates.",
+              "createdAt": "2024-08-21T14:49:03Z",
+              "updatedAt": "2024-08-21T14:49:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6GLe2Q",
+          "commit": {
+            "abbreviatedOid": "f873881"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-21T15:14:54Z",
+          "updatedAt": "2024-08-21T15:16:08Z",
+          "comments": [
+            {
+              "originalPosition": 126,
+              "body": "This needs to be updated to match the above changes.\r\n```suggestion\r\n1. Each Aggregator locally computes and broadcasts its share of `p(1)`, which\r\n```",
+              "createdAt": "2024-08-21T15:14:54Z",
+              "updatedAt": "2024-08-21T15:16:08Z"
+            },
+            {
+              "originalPosition": 136,
+              "body": "nit: formatting\r\n```suggestion\r\nRange2(x) = x * (x - 1) = x^2 - x\r\n```",
+              "createdAt": "2024-08-21T15:15:06Z",
+              "updatedAt": "2024-08-21T15:16:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6GMHlL",
+          "commit": {
+            "abbreviatedOid": "032e14c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-21T16:20:27Z",
+          "updatedAt": "2024-08-21T16:20:32Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "I'm not sure I aqgree, but I don't feel strongly either way. I replaced \"negation\" with \"subtraction\".",
+              "createdAt": "2024-08-21T16:20:27Z",
+              "updatedAt": "2024-08-21T16:20:32Z"
             }
           ]
         }
@@ -34527,7 +34731,7 @@
       "id": "PR_kwDOGKuqOc54Sj4D",
       "title": "Refer to an instance, not the class in msssage encoding sections",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/401",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -34537,17 +34741,19 @@
       ],
       "body": "To define message encoding, we need to be able to refer to attributes of the VDAF, e.g., the value of `SHARES`. Previously we referred to the class in this section, e.g., `Prio3`, but since getting rid of the class-factor pattern, it is now necessary to refer to an instance of the class.\r\n\r\nTo make this clear, replace upper case `Prio3` with lowercase `prio3`, to imply that we an instance of a sub-class of `Vdaf` rather than the sub-class itself.",
       "createdAt": "2024-08-13T23:01:38Z",
-      "updatedAt": "2024-08-19T20:17:20Z",
+      "updatedAt": "2024-08-20T01:46:45Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
+      "baseRefOid": "34e248229d68188bc3bf286a7d4857c414a83316",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/message-encoding-nits",
-      "headRefOid": "1063f7b2e7916a73739806416da3c7c28f25fc3d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "be7009d526daf6dbb908ee0a1e8e06f467c35496",
+      "closedAt": "2024-08-20T01:46:45Z",
+      "mergedAt": "2024-08-20T01:46:45Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "8736056c0f655cd66711c932681c76645877191a"
+      },
       "comments": [],
       "reviews": [
         {
@@ -34570,7 +34776,7 @@
       "id": "PR_kwDOGKuqOc54SoJZ",
       "title": "Rename FFT to NTT",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/402",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -34579,17 +34785,19 @@
       ],
       "body": "Closes #398 \r\n\r\n\"Number theoretic transform\" is the term preferred by most cryptographers.\r\n\r\nAlso, remove an out of date comment related to NTT and padding.",
       "createdAt": "2024-08-13T23:18:06Z",
-      "updatedAt": "2024-08-19T20:42:53Z",
+      "updatedAt": "2024-08-20T01:47:28Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "beaaffec1d066157deac9fe6b6367a4eaec2f2f3",
+      "baseRefOid": "14edbfb22b356a1daf73a4efb987f594b7f12eb6",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/398",
-      "headRefOid": "1ddb55bcc86639345a62985f27aeb484a26094d6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "150dfcfe1fea59095325dd066e40efa4a37c1ff8",
+      "closedAt": "2024-08-20T01:47:28Z",
+      "mergedAt": "2024-08-20T01:47:28Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "e37da53af7092a9c6c91b4dba6b9c0dc64466dcf"
+      },
       "comments": [],
       "reviews": [
         {
@@ -34617,6 +34825,26 @@
               "updatedAt": "2024-08-19T20:42:53Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6F67yr",
+          "commit": {
+            "abbreviatedOid": "1ddb55b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-20T01:45:09Z",
+          "updatedAt": "2024-08-20T01:45:09Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Good catch. it depends on whether we mention renaming FFT to NTT in the change log: I decided to, so I think we should here. Fixed.",
+              "createdAt": "2024-08-20T01:45:09Z",
+              "updatedAt": "2024-08-20T01:45:09Z"
+            }
+          ]
         }
       ]
     },
@@ -34634,7 +34862,7 @@
       ],
       "body": "",
       "createdAt": "2024-08-15T16:00:42Z",
-      "updatedAt": "2024-08-15T16:00:42Z",
+      "updatedAt": "2024-08-21T15:18:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "34e248229d68188bc3bf286a7d4857c414a83316",
@@ -34646,6 +34874,182 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6GLiN1",
+          "commit": {
+            "abbreviatedOid": "836795d"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-21T15:18:54Z",
+          "updatedAt": "2024-08-21T15:18:54Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 404,
+      "id": "PR_kwDOGKuqOc546LEm",
+      "title": "Bump VERSION to 12 (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/404",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "",
+      "createdAt": "2024-08-20T21:54:22Z",
+      "updatedAt": "2024-08-20T21:54:22Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "e37da53af7092a9c6c91b4dba6b9c0dc64466dcf",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/1-ver",
+      "headRefOid": "4b89b0ac1d65998eee404815f2d7ef01cb0fcd0f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 405,
+      "id": "PR_kwDOGKuqOc546LRo",
+      "title": "idpf: Use XofTurboShake128 for the leaf nodes (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/405",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Based on #404.\r\nCloses #341.\r\n\r\nThis is a safer choice for ensuring the IDPF is extracatible.",
+      "createdAt": "2024-08-20T21:55:16Z",
+      "updatedAt": "2024-08-20T21:55:50Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-12/1-ver",
+      "baseRefOid": "4b89b0ac1d65998eee404815f2d7ef01cb0fcd0f",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/2-idpf-leaf-xof",
+      "headRefOid": "a27581ddd023b0b1fb1d3b0ef700d1a7070bfd70",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 406,
+      "id": "PR_kwDOGKuqOc546LvD",
+      "title": "Improve circuit for `Prio3Sum` (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/406",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Based on #405.\r\nCloses #306.\r\n\r\nReplace `Sum` with `SumOfRangeCheckedInputs`. The new circuit has two improvements:\r\n\r\n1. No joint randomness is used, so it's safe to use a smaller field.\r\n\r\n2. The largest measurement can be any positive integer, not just a power of two.\r\n\r\nUpdate `Prio3Sum` accordingly by switching from `Field128` to `Field64`.",
+      "createdAt": "2024-08-20T21:57:17Z",
+      "updatedAt": "2024-08-20T21:58:29Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-12/2-idpf-leaf-xof",
+      "baseRefOid": "a27581ddd023b0b1fb1d3b0ef700d1a7070bfd70",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/3-issue-306",
+      "headRefOid": "bad646dd7a478c65f472fcb0a34bb69c160b7ab4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 407,
+      "id": "PR_kwDOGKuqOc546Mn7",
+      "title": "Prio3: Double the length of the joint randomness seed (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/407",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Based on #406.\r\nCloses #319.\r\n\r\nA robustness attacker can try to find two distinct reports that derive the joint randomness seed by an offline birthday attack. By increasing the seed size from 16 to 32 bytes, we ensure this probability is negligible (in the random oracle model) even when the attacker can do a lot of computation (make many random oracle queries).",
+      "createdAt": "2024-08-20T22:00:49Z",
+      "updatedAt": "2024-08-21T17:46:35Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-12/3-issue-306",
+      "baseRefOid": "bad646dd7a478c65f472fcb0a34bb69c160b7ab4",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/4-larger-joint-rand-seed",
+      "headRefOid": "0e241f9c14452d9cb63dc0e74522a79b280e62cf",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Wouldn't we need to make joint randomness hints 32 bytes as well? I think a similar offline birthday attack could be mounted against either seed derivation, whether it be the input share => joint randomness hint RO call, or the joint randomness hints => joint randomness seed RO call.",
+          "createdAt": "2024-08-21T15:47:30Z",
+          "updatedAt": "2024-08-21T15:47:30Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Wouldn't we need to make joint randomness hints 32 bytes as well? I think a similar offline birthday attack could be mounted against either seed derivation, whether it be the input share => joint randomness hint RO call, or the joint randomness hints => joint randomness seed RO call.\r\n\r\n@hannahdaviscrypto can correct me if I'm wrong, but I believe the reasoning here is that you have to find a collision on the entire vector of hints, of which there are at least 2 (`SHARES >= 2`). Since the seed sizes is `16`, that's at least `2*16` bytes. Does this make sense or am I missing something?",
+          "createdAt": "2024-08-21T16:23:44Z",
+          "updatedAt": "2024-08-21T16:23:44Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "You could still hold one input share constant, and then search for a collision in the other hint. That will randomize your measurement, though. I'm not sure whether it's feasible to mount an attack starting from such a joint randomness collision, with two different measurements. Intuitively, I think it would make sense to account for random oracle collision on both queries to be safe. ",
+          "createdAt": "2024-08-21T16:48:15Z",
+          "updatedAt": "2024-08-21T16:48:15Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> You could still hold one input share constant, and then search for a collision in the other hint. That will randomize your measurement, though. I'm not sure whether it's feasible to mount an attack starting from such a joint randomness collision, with two different measurements. Intuitively, I think it would make sense to account for random oracle collision on both queries to be safe.\r\n\r\nWell, you still have to cause a collision on the first hint, right? You have to get lucky twice: you first find a collision on the first hint (i.e., part), then you fix that measurement share and blind, then you find the measurement share and blind for the other aggregator that causes a collision for the second hint.",
+          "createdAt": "2024-08-21T16:58:17Z",
+          "updatedAt": "2024-08-21T16:58:17Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Hmm, good points, I had forgotten that the attacker can search by just changing the blind, not necessarily the input share. I'm also not sure at the moment how you would build an entire robustness attack from a birthday attack on the joint randomness seed. However, I still don't see why the same attack pattern couldn't build on a birthday attack on one joint randomness part. If you keep all inputs for one hint fixed, then the birthday attack on the other hint has a cost of $2^{128/2}$ queries. If you do two separate birthday attacks on both hints as you say, then that has a cost of $2^{1+128/2}$ queries, which is not much better.",
+          "createdAt": "2024-08-21T17:21:36Z",
+          "updatedAt": "2024-08-21T17:21:36Z"
+        },
+        {
+          "author": "hannahdaviscrypto",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> I think a similar offline birthday attack could be mounted against either seed derivation, whether it be the input share => joint randomness hint RO call, or the joint randomness hints => joint randomness seed RO call.\r\n\r\nMaking the joint randomness seed 32 bytes covers the second case here, and a collision in the first case only matters if all hints collide, as Chris said. So the advantage of an attack that searches for collisions one-at-a-time is going to be on the order of q^4/2^256 for two aggregators, and drop more as the number of aggregators increases. That said, the attack wouldn't have to randomize the measurement share; it could fix the nonces and measurement shares and just search among blinds to find collisions (as long as we have three seeds, not one as in the other proposed change). ",
+          "createdAt": "2024-08-21T17:21:52Z",
+          "updatedAt": "2024-08-21T17:21:52Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> > I think a similar offline birthday attack could be mounted against either seed derivation, whether it be the input share => joint randomness hint RO call, or the joint randomness hints => joint randomness seed RO call.\r\n> \r\n> Making the joint randomness seed 32 bytes covers the second case here, and a collision in the first case only matters if all hints collide, as Chris said. So the advantage of an attack that searches for collisions one-at-a-time is going to be on the order of q^4/2^256 for two aggregators, and drop more as the number of aggregators increases. That said, the attack wouldn't have to randomize the measurement share; it could fix the nonces and measurement shares and just search among blinds to find collisions (as long as we have three seeds, not one as in the other proposed change).\r\n\r\nWhy $q^4$? This being the case, we definitely need to bump the joint randomness hints. At which point I wonder if we should just bump all seeds to 32 bytes, for consistency if nothing else.",
+          "createdAt": "2024-08-21T17:46:34Z",
+          "updatedAt": "2024-08-21T17:46:34Z"
+        }
+      ],
       "reviews": []
     }
   ]
