@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 21 February 2025</td>
+<td class="center">Expires 23 February 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-08-20" class="published">20 August 2024</time>
+<time datetime="2024-08-22" class="published">22 August 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-02-21">21 February 2025</time></dd>
+<dd class="expires"><time datetime="2025-02-23">23 February 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 21 February 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 23 February 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -5299,109 +5299,110 @@ struct {
         <h3 id="name-the-flp-of">
 <a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-the-flp-of" class="section-name selfRef">The FLP of <span class="cite xref">[BBCGGI19]</span></a>
         </h3>
-<p id="section-7.3-1">This section describes an FLP based on the construction from in <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
-Section 4.2. We begin in <a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of their proof
-system and the extensions to their proof system made here. The construction is
-specified in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-7.3-2.1">
-            <p id="section-7.3-2.1.1">OPEN ISSUE Chris Wood points out that the this section reads more like a paper
-than a standard. Eventually we'll want to work this into something that is
-readily consumable by the CFRG.<a href="#section-7.3-2.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
+<p id="section-7.3-1">This section describes an FLP based on the construction from <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
+Section 4.2. We begin in <a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of their
+proof system and some extensions to it. The construction is specified in
+<a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 <div id="flp-bbcggi19-overview">
 <section id="section-7.3.1">
           <h4 id="name-overview-2">
 <a href="#section-7.3.1" class="section-number selfRef">7.3.1. </a><a href="#name-overview-2" class="section-name selfRef">Overview</a>
           </h4>
-<p id="section-7.3.1-1">In the proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, validity is defined via an arithmetic
-circuit evaluated over the encoded measurement: if the circuit output is zero,
-then the measurement is deemed valid; otherwise, if the circuit output is
-non-zero, then the measurement is deemed invalid. Thus the goal of the proof
-system is merely to allow the verifier to evaluate the validity circuit over
-the measurement. For our application (<a href="#prio3" class="auto internal xref">Section 7</a>), this computation is
-distributed among multiple Aggregators, each of which has only a share of the
-measurement.<a href="#section-7.3.1-1" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-2">Suppose for a moment that the validity circuit <code>C</code> is affine, meaning its only
-operations are addition and multiplication-by-constant. In particular, suppose
-the circuit does not contain a multiplication gate whose operands are both
-non-constant. Then to decide if a measurement <code>x</code> is valid, each Aggregator
-could evaluate <code>C</code> on its share of <code>x</code> locally, broadcast the output share to
-its peers, then combine the output shares locally to recover <code>C(x)</code>. This is
-true because for any <code>SHARES</code>-way secret sharing of <code>x</code> it holds that<a href="#section-7.3.1-2" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-3">
+<p id="section-7.3.1-1">Conventional zero-knowledge proof systems involve two parties:<a href="#section-7.3.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.3.1-2.1">
+              <p id="section-7.3.1-2.1.1">The prover, who holds a measurement and generates a proof of the
+measurement's validity<a href="#section-7.3.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.3.1-2.2">
+              <p id="section-7.3.1-2.2.1">The verifier who holds an encryption of, or commitment to, the measurement
+and checks the proof<a href="#section-7.3.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-7.3.1-3">Our proof system is much the same, except the verifier is split across multiple
+Aggregators, each of which has a secret share of the measurement rather than an
+encryption of it.<a href="#section-7.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-4">Validity is defined in terms of an arithmetic circuit evaluated over the
+measurement. The inputs to this circuit are elements of a finite field that
+comprise the encoded measurement; the gates of the circuit are multiplication,
+addition, and subtraction operations; and the output of the circuit is a single
+field element. If the value is zero, then the measurement is deemed valid;
+otherwise, if the output is non-zero, then the measurement is deemed invalid.<a href="#section-7.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-5">For example, the simplest circuit specified in this document is the following
+(<a href="#prio3count" class="auto internal xref">Section 7.4.1</a>):<a href="#section-7.3.1-5" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-6">
+<pre>
+C(x) = x * (x-1)
+</pre><a href="#section-7.3.1-6" class="pilcrow">¶</a>
+</div>
+<p id="section-7.3.1-7">This circuit contains one subtraction gate (<code>x - 1</code>) and one multiplication
+gate (<code>x * (x - 1)</code>). Observe that <code>C(x) = 0</code> if and only if <code>x in range(2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-8">Our goal is to allow each Aggregator, who holds a secret share of <code>x</code>, to
+correctly compute a secret share of <code>C(x)</code>. This allows the Aggregators to
+determine validity by combining their shares of the output.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-9">Suppose for a moment that the validity circuit <code>C</code> is affine, meaning its only
+operations are addition, subtraction, and multiplication-by-constant. (The
+circuit above is non-affine because it contains a multiplication gate with
+two non-constant inputs.) Then each Aggregator can compute its share locally, since<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-10">
 <pre>
 C(x_shares[0] + ... + x_shares[SHARES-1]) =
     C(x_shares[0]) + ... + C(x_shares[SHARES-1])
-</pre><a href="#section-7.3.1-3" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.1-10" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1-4">(Note that, for this equality to hold, it may be necessary to scale any
-constants in the circuit by <code>SHARES</code>.) However this is not the case if <code>C</code> is
-not-affine (i.e., it contains at least one multiplication gate whose operands
-are non-constant). In the proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, the proof is designed to
-allow the (distributed) verifier to compute the non-affine operations using only
-linear operations on (its share of) the measurement and proof.<a href="#section-7.3.1-4" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-5">To make this work, the proof system is restricted to validity circuits that
-exhibit a special structure. Specifically, an arithmetic circuit with "G-gates"
-(see <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Definition 5.2) is composed of affine gates and any number of
-instances of a distinguished gate <code>G</code>, which may be non-affine. We will refer to
-this class of circuits as 'gadget circuits' and to <code>G</code> as the "gadget".<a href="#section-7.3.1-5" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-6">As an illustrative example, consider a validity circuit <code>C</code> that recognizes the
-set <code>L = set([0], [1])</code>. That is, <code>C</code> takes as input a length-1 vector <code>x</code> and
-returns 0 if <code>x[0]</code> is in <code>[0,2)</code> and outputs something else otherwise. This
-circuit can be expressed as the following degree-2 polynomial:<a href="#section-7.3.1-6" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-7">
+<p id="section-7.3.1-11">(Note that, for this equality to hold, it is necessary to scale any addition of
+a constant in the circuit by <code>1/SHARES</code>.) However, this is not the case if <code>C</code>
+contains multiplication gates with two non-constant inputs. Thus our goal is to
+transform these multiplication gates into computations on secret shared data
+that each Aggregator can perform locally.<a href="#section-7.3.1-11" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-12">The key idea is to have the prover construct a polynomial <code>p</code> such that <code>p(j)</code>
+is equal to the output of the <code>j</code>-th multiplication gate. Polynomial evaluation
+is fully linear, which means the coefficients of the polynomial can be secret
+shared in a way that allows each Aggregator to compute a share of <code>p(j)</code> for
+any <code>j</code>. These intermediate results can then be combined with the affine
+operations of the validity circuit to produce the final output.<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-13">Applying this idea to the example circuit <code>C</code> above:<a href="#section-7.3.1-13" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-7.3.1-14">
+<li id="section-7.3.1-14.1">
+              <p id="section-7.3.1-14.1.1">The Client, given its measurement <code>x</code>, constructs the lowest degree
+polynomial <code>p</code> for which <code>p(0) = s</code> and <code>p(1) = x * (x - 1)</code>, where <code>s</code> is a
+random blinding value generated by the Client. (The blinding value is to
+protect the privacy of the measurement.) It sends secret shares of <code>x</code> and
+the coefficients of <code>p</code> to each of the Aggregators.<a href="#section-7.3.1-14.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-7.3.1-14.2">
+              <p id="section-7.3.1-14.2.1">Each Aggregator locally computes and broadcasts its share of <code>p(1)</code>, which
+is equal to its share of <code>C(x)</code>.<a href="#section-7.3.1-14.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+<p id="section-7.3.1-15">In fact, our FLP is slightly more general than this. We can replace the
+multiplication gate with any non-affine sub-circuit and apply the same idea.
+For example, in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>, the validity circuit uses the following
+sub-circuit multiple times:<a href="#section-7.3.1-15" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.3.1-16">
 <pre>
-C(x) = (x[0] - 1) * x[0] = x[0]^2 - x[0]
-</pre><a href="#section-7.3.1-7" class="pilcrow">¶</a>
+Range2(x) = x * (x - 1) = x^2 - x
+</pre><a href="#section-7.3.1-16" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1-8">This polynomial recognizes <code>L</code> because <code>x[0]^2 = x[0]</code> is only true if <code>x[0] ==
-0</code> or <code>x[0] == 1</code>. Notice that the polynomial involves a non-affine operation,
-<code>x[0]^2</code>. In order to apply <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 4.3, the circuit needs to be
-rewritten in terms of a gadget that subsumes this non-affine operation. For
-example, the gadget might be multiplication:<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-9">
-<pre>
-Mul(left, right) = left * right
-</pre><a href="#section-7.3.1-9" class="pilcrow">¶</a>
-</div>
-<p id="section-7.3.1-10">The validity circuit can then be rewritten in terms of <code>Mul</code> like so:<a href="#section-7.3.1-10" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.3.1-11">
-<pre>
-C(x[0]) = Mul(x[0], x[0]) - x[0]
-</pre><a href="#section-7.3.1-11" class="pilcrow">¶</a>
-</div>
-<p id="section-7.3.1-12">The proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> allows the verifier to evaluate each instance
-of the gadget (i.e., <code>Mul(x[0], x[0])</code> in our example) using a linear function
-of the measurement and proof. The proof is constructed roughly as follows. Let
-<code>C</code> be the validity circuit and suppose the gadget is arity-<code>L</code> (i.e., it has
-<code>L</code> input wires.). Let <code>wire[j-1,k-1]</code> denote the value of the <code>j</code>th wire of
-the <code>k</code>th call to the gadget during the evaluation of <code>C(x)</code>. Suppose there are
-<code>M</code> such calls and fix distinct field elements <code>alpha[0], ..., alpha[M-1]</code>. (We
-will require these points to have a special property, as we'll discuss in
-<a href="#flp-bbcggi19-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>; but for the moment it is only important
-that they are distinct.)<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-13">The prover constructs from <code>wire</code> and <code>alpha</code> a polynomial that, when evaluated
-at <code>alpha[k-1]</code>, produces the output of the <code>k</code>th call to the gadget. Let us
-call this the "gadget polynomial". Polynomial evaluation is linear, which means
-that, in the distributed setting, the Client can disseminate additive shares of
-the gadget polynomial that the Aggregators then use to compute additive shares
-of each gadget output, allowing each Aggregator to compute its share of <code>C(x)</code>
-locally.<a href="#section-7.3.1-13" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-14">There is one more wrinkle, however: it is still possible for a malicious prover
-to produce a gadget polynomial that would result in <code>C(x)</code> being computed
-incorrectly, potentially resulting in an invalid measurement being accepted. To
-prevent this, the verifier performs a probabilistic test to check that the
-gadget polynomial is well-formed. This test, and the procedure for constructing
-the gadget polynomial, are described in detail in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-14" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-17">(This is the same functionality computed by the example circuit <code>C</code> above.)
+Here again we can interpolate the lowest degree polynomial <code>p</code> for which <code>p(j)</code>
+is the value of the <code>j</code>-th call to <code>Range2</code> in the validity circuit. Each
+validity circuit defines a sub-circuit that encapsulates its non-affine
+functionality. We refer to this sub-circuit as the "gadget".<a href="#section-7.3.1-17" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-18">This idea provides the needed functionality, but it has one more problem: it is
+possible for a malicious Client to produce a gadget polynomial <code>p</code> that would
+result in <code>C(x)</code> being computed incorrectly, potentially resulting in an
+invalid measurement being accepted. To prevent this, the Aggregators perform a
+probabilistic test to check that the gadget polynomial was constructed
+properly. This "gadget test", and the procedure for constructing the
+polynomial, are described in detail in <a href="#flp-bbcggi19-construction" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-18" class="pilcrow">¶</a></p>
 <div id="flp-bbcggi19-overview-extensions">
 <section id="section-7.3.1.1">
             <h5 id="name-extensions">
 <a href="#section-7.3.1.1" class="section-number selfRef">7.3.1.1. </a><a href="#name-extensions" class="section-name selfRef">Extensions</a>
             </h5>
-<p id="section-7.3.1.1-1">The FLP described in the next section extends the proof system of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
-Section 4.2 in a few ways.<a href="#section-7.3.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.3.1.1-1">The FLP described in {#flp-bbcggi19-construction} extends the proof system of
+<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Section 4.2 in a few ways.<a href="#section-7.3.1.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-2">First, the validity circuit in our construction includes an additional, random
 input (this is the "joint randomness" derived from the measurement shares in
 Prio3; see <a href="#prio3-construction" class="auto internal xref">Section 7.2</a>). This allows for circuit optimizations that
@@ -5414,20 +5415,20 @@ details). A much shorter proof can be constructed for the following randomized
 circuit:<a href="#section-7.3.1.1-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1.1-3">
 <pre>
-C(meas, r) = r * Range2(meas[0]) + ... + r^N * Range2(meas[N-1])
+C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
 </pre><a href="#section-7.3.1.1-3" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1.1-4">(Note that this is a special case of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 5.2.) Here <code>meas</code> is
+<p id="section-7.3.1.1-4">(Note that this is a special case of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 5.2.) Here <code>x</code> is
 the length-<code>N</code> input and <code>r</code> is a random field element. The gadget circuit
 <code>Range2</code> is the "range-check" polynomial described above, i.e., <code>Range2(x) =
-x^2 - x</code>. The idea is that, if <code>meas</code> is valid (i.e., each <code>meas[j]</code> is in
-<code>[0,2)</code>), then the circuit will evaluate to 0 regardless of the value of <code>r</code>;
-but if <code>meas[j]</code> is not in <code>[0,2)</code> for some <code>j</code>, the output will be non-zero
-with high probability.<a href="#section-7.3.1.1-4" class="pilcrow">¶</a></p>
+x^2 - x</code>. The idea is that, if <code>x</code> is valid (i.e., each <code>x[j]</code> is in
+<code>range(2)</code>), then the circuit will evaluate to 0 regardless of the value of
+<code>r</code>; but if some <code>x[j]</code> is not in <code>range(2)</code>, then output will be non-zero with
+high probability.<a href="#section-7.3.1.1-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-5">The second extension implemented by our FLP allows the validity circuit to
 contain multiple gadget types. (This generalization was suggested in
 <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Remark 4.5.) This provides additional flexibility for designing
-circuits by allowing multiple, non-affine sub-components. For example, the
+circuits by allowing multiple, non-affine sub-circuits. For example, the
 following circuit is allowed:<a href="#section-7.3.1.1-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1.1-6">
 <pre>
@@ -5436,15 +5437,15 @@ C(meas, r) = r * Range2(meas[0]) + ... + r^L * Range2(meas[L-1]) + \
 </pre><a href="#section-7.3.1.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.3.1.1-7">where <code>Range3(x) = x^3 - 3x^2 + 2x</code>. This circuit checks that the first <code>L</code>
-inputs are in range <code>[0,2)</code> and the last <code>N-L</code> inputs are in range <code>[0,3)</code>. Of
-course, the same circuit can be expressed using a sub-component that the
-gadgets have in common, namely <code>Mul</code>, but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
-<p id="section-7.3.1.1-8">Third, <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 4.3 makes no restrictions on the choice of the
-fixed points <code>alpha[0], ..., alpha[M-1]</code>, other than to require that the points
-are distinct. In this document, the fixed points are chosen so that the gadget
-polynomial can be constructed efficiently using the Cooley-Tukey FFT ("Fast
-Fourier Transform") algorithm. Note that this requires the field to be
-"NTT-friendly" as defined in <a href="#field-ntt-friendly" class="auto internal xref">Section 6.1.2</a>.<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
+inputs are in range <code>[0,2)</code> and the last <code>N-L</code> inputs are in range <code>[0,3)</code>. The
+same circuit can be expressed using a simpler gadget, namely multiplication,
+but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.3.1.1-8">Third, rather than interpolate the gadget polynomial at inputs <code>1</code>, <code>2</code>, ...,
+<code>j</code>, ..., where <code>j</code> is the <code>j</code>-th invocation of the gadget, we use powers of
+<code>alpha</code>, where <code>alpha</code> is a root of unity for the field. This allows us to
+construct each gadget polynomial via the number theoretic transform <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>,
+which is far more efficient than  generic formulas. This requires the field to
+be "NTT-friendly" as defined in <a href="#field-ntt-friendly" class="auto internal xref">Section 6.1.2</a>.<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-9">Finally, the validity circuit in our FLP may have any number of outputs (at
 least one). The input is said to be valid if each of the outputs is zero. To
 save bandwidth, we take a random linear combination of the outputs. If each of
@@ -5722,54 +5723,75 @@ specified in the remaining subsections.<a href="#section-7.3.3-2" class="pilcrow
             <h5 id="name-proof-generation">
 <a href="#section-7.3.3.1" class="section-number selfRef">7.3.3.1. </a><a href="#name-proof-generation" class="section-name selfRef">Proof Generation</a>
             </h5>
-<p id="section-7.3.3.1-1">On input of <code>meas</code>, <code>prove_rand</code>, and <code>joint_rand</code>, the proof is computed as
-follows:<a href="#section-7.3.3.1-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.3.3.1-2">
-<li id="section-7.3.3.1-2.1">
-                <p id="section-7.3.3.1-2.1.1">For each <code>i</code> in <code>[H]</code> create an empty table <code>wire_i</code>.<a href="#section-7.3.3.1-2.1.1" class="pilcrow">¶</a></p>
+<span id="name-the-proof-generation-algori"></span><div id="flp-bbcggi19-prove-illustration">
+<figure id="figure-23">
+              <div class="alignLeft art-text artwork" id="section-7.3.3.1-1.1">
+<pre>
++------------------+
+| Prove            |
+| +-------------+  |
+| | Valid       |&lt;---- meas
+| | +--------+  |&lt;---- joint rand
+| | | Gadget |  |  |&lt;- prove rand
+| | +--------+  |  |
+| +-------------+  |
++------------------+
+ |
+ V proof
+</pre>
+</div>
+<figcaption><a href="#figure-23" class="selfRef">Figure 23</a>:
+<a href="#name-the-proof-generation-algori" class="selfRef">The proof generation algorithm invokes the validity circuit on the encoded measurement and joint randomness. The validity circuit in turn invokes the gadget(s) defined by the circuit. The prove randomness is used to construct the gadget polynomial(s).</a>
+              </figcaption></figure>
+</div>
+<p id="section-7.3.3.1-2">On input of <code>meas</code>, <code>prove_rand</code>, and <code>joint_rand</code>, the proof is computed as
+follows:<a href="#section-7.3.3.1-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-7.3.3.1-3">
+<li id="section-7.3.3.1-3.1">
+                <p id="section-7.3.3.1-3.1.1">For each <code>i</code> in <code>[H]</code> create an empty table <code>wire_i</code>.<a href="#section-7.3.3.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.1-2.2">
-                <p id="section-7.3.3.1-2.2.1">Partition the prover randomness <code>prove_rand</code> into sub-vectors <code>seed_1, ...,
+              <li id="section-7.3.3.1-3.2">
+                <p id="section-7.3.3.1-3.2.1">Partition the prover randomness <code>prove_rand</code> into sub-vectors <code>seed_1, ...,
 seed_H</code> where <code>len(seed_i) == L_i</code> for all <code>i</code> in <code>[H]</code>. Let us call these
-the "wire seeds" of each gadget.<a href="#section-7.3.3.1-2.2.1" class="pilcrow">¶</a></p>
+the "wire seeds" of each gadget.<a href="#section-7.3.3.1-3.2.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.1-2.3">
-                <p id="section-7.3.3.1-2.3.1">Evaluate <code>Valid</code> on input of <code>meas</code> and <code>joint_rand</code>, recording the inputs
+              <li id="section-7.3.3.1-3.3">
+                <p id="section-7.3.3.1-3.3.1">Evaluate <code>Valid</code> on input of <code>meas</code> and <code>joint_rand</code>, recording the inputs
 of each gadget in the corresponding table. Specifically, for every <code>i</code> in
 <code>[H]</code>, set <code>wire_i[j-1,k-1]</code> to the value on the <code>j</code>th wire into the <code>k</code>th
-call to gadget <code>G_i</code>.<a href="#section-7.3.3.1-2.3.1" class="pilcrow">¶</a></p>
+call to gadget <code>G_i</code>.<a href="#section-7.3.3.1-3.3.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.1-2.4">
-                <p id="section-7.3.3.1-2.4.1">Compute the "wire polynomials". That is, for every <code>i</code> in <code>[H]</code> and <code>j</code> in
+              <li id="section-7.3.3.1-3.4">
+                <p id="section-7.3.3.1-3.4.1">Compute the "wire polynomials". That is, for every <code>i</code> in <code>[H]</code> and <code>j</code> in
 <code>[L_i]</code>, construct <code>poly_wire_i[j-1]</code>, the <code>j</code>th wire polynomial for the
-<code>i</code>th gadget, as follows:<a href="#section-7.3.3.1-2.4.1" class="pilcrow">¶</a></p>
+<code>i</code>th gadget, as follows:<a href="#section-7.3.3.1-3.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.3.1-2.4.2.1">
-                    <p id="section-7.3.3.1-2.4.2.1.1">Let <code>w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]]</code>.<a href="#section-7.3.3.1-2.4.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-7.3.3.1-3.4.2.1">
+                    <p id="section-7.3.3.1-3.4.2.1.1">Let <code>w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]]</code>.<a href="#section-7.3.3.1-3.4.2.1.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="normal" id="section-7.3.3.1-2.4.2.2">
-                    <p id="section-7.3.3.1-2.4.2.2.1">Let <code>padded_w = w + field.zeros(P_i - len(w))</code>.<a href="#section-7.3.3.1-2.4.2.2.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.1-3.4.2.2">
+                    <p id="section-7.3.3.1-3.4.2.2.1">Let <code>padded_w = w + field.zeros(P_i - len(w))</code>.<a href="#section-7.3.3.1-3.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="normal" id="section-7.3.3.1-2.4.2.3">
-                    <p id="section-7.3.3.1-2.4.2.3.1">Let <code>poly_wire_i[j-1]</code> be the lowest degree polynomial for which
-<code>poly_wire_i[j-1](alpha_i^k) == padded_w[k]</code> for all <code>k</code> in <code>[P_i]</code>.<a href="#section-7.3.3.1-2.4.2.3.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.1-3.4.2.3">
+                    <p id="section-7.3.3.1-3.4.2.3.1">Let <code>poly_wire_i[j-1]</code> be the lowest degree polynomial for which
+<code>poly_wire_i[j-1](alpha_i^k) == padded_w[k]</code> for all <code>k</code> in <code>[P_i]</code>.<a href="#section-7.3.3.1-3.4.2.3.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
-              <li id="section-7.3.3.1-2.5">
-                <p id="section-7.3.3.1-2.5.1">Compute the "gadget polynomials". That is, for every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.1-2.5.1" class="pilcrow">¶</a></p>
+              <li id="section-7.3.3.1-3.5">
+                <p id="section-7.3.3.1-3.5.1">Compute the "gadget polynomials". That is, for every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.1-3.5.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.3.1-2.5.2.1">
-                    <p id="section-7.3.3.1-2.5.2.1.1">Let <code>poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-1])</code>. That
+<li class="normal" id="section-7.3.3.1-3.5.2.1">
+                    <p id="section-7.3.3.1-3.5.2.1.1">Let <code>poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-1])</code>. That
 is, evaluate the circuit <code>G_i</code> on the wire polynomials for the <code>i</code>th
-gadget. (Arithmetic is in the ring of polynomials over <code>field</code>.)<a href="#section-7.3.3.1-2.5.2.1.1" class="pilcrow">¶</a></p>
+gadget. (Arithmetic is in the ring of polynomials over <code>field</code>.)<a href="#section-7.3.3.1-3.5.2.1.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
             </ol>
-<p id="section-7.3.3.1-3">The proof is the vector <code>proof = seed_1 + coeff_1 + ... + seed_H + coeff_H</code>,
+<p id="section-7.3.3.1-4">The proof is the vector <code>proof = seed_1 + coeff_1 + ... + seed_H + coeff_H</code>,
 where <code>coeff_i</code> is the vector of coefficients of <code>poly_gadget_i</code> for each <code>i</code> in
-<code>[H]</code>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
+<code>[H]</code>.<a href="#section-7.3.3.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="flp-bbcggi19-construction-query">
@@ -5777,54 +5799,78 @@ where <code>coeff_i</code> is the vector of coefficients of <code>poly_gadget_i<
             <h5 id="name-query-generation">
 <a href="#section-7.3.3.2" class="section-number selfRef">7.3.3.2. </a><a href="#name-query-generation" class="section-name selfRef">Query Generation</a>
             </h5>
-<p id="section-7.3.3.2-1">On input of <code>meas</code>, <code>proof</code>, <code>query_rand</code>, and <code>joint_rand</code>, the verifier message
-is generated as follows:<a href="#section-7.3.3.2-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.3.3.2-2">
-<li id="section-7.3.3.2-2.1">
-                <p id="section-7.3.3.2-2.1.1">For every <code>i</code> in <code>[H]</code> create an empty table <code>wire_i</code>.<a href="#section-7.3.3.2-2.1.1" class="pilcrow">¶</a></p>
+<span id="name-the-query-generation-algori"></span><div id="flp-bbcggi19-query-illustration">
+<figure id="figure-24">
+              <div class="alignLeft art-text artwork" id="section-7.3.3.2-1.1">
+<pre>
+ | proof (share)
+ +--------+
+ V        |
++---------|--------+
+| Query   |        |
+| +-------|-----+  |
+| | Valid |     |&lt;---- meas (share)
+| | +-----|--+  |&lt;---- joint rand
+| | |     V  |  |  |&lt;- query rand
+| | +--------+  |  |
+| +-------------+  |
++------------------+
+ |
+ V verifier (share)
+</pre>
+</div>
+<figcaption><a href="#figure-24" class="selfRef">Figure 24</a>:
+<a href="#name-the-query-generation-algori" class="selfRef">The query generation algorithm invokes the validity circuit on the encoded measurement and joint randomness. It evaluates the gadget polynomials(s) encoded by the proof (share) to produce (a share of) each gadget output. The verifier (share) consists of (a share of) the validity circuit's output and (a share of) each gadget test. The tests consume the query randomness.</a>
+              </figcaption></figure>
+</div>
+<p id="section-7.3.3.2-2">On input of <code>meas</code>, <code>proof</code>, <code>query_rand</code>, and <code>joint_rand</code>, the verifier message
+is generated as follows:<a href="#section-7.3.3.2-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-7.3.3.2-3">
+<li id="section-7.3.3.2-3.1">
+                <p id="section-7.3.3.2-3.1.1">For every <code>i</code> in <code>[H]</code> create an empty table <code>wire_i</code>.<a href="#section-7.3.3.2-3.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.2-2.2">
-                <p id="section-7.3.3.2-2.2.1">Partition <code>proof</code> into the sub-vectors <code>seed_1</code>, <code>coeff_1</code>, ..., <code>seed_H</code>,
-<code>coeff_H</code> defined in <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3.1</a>.<a href="#section-7.3.3.2-2.2.1" class="pilcrow">¶</a></p>
+              <li id="section-7.3.3.2-3.2">
+                <p id="section-7.3.3.2-3.2.1">Partition <code>proof</code> into the sub-vectors <code>seed_1</code>, <code>coeff_1</code>, ..., <code>seed_H</code>,
+<code>coeff_H</code> defined in <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3.1</a>.<a href="#section-7.3.3.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.2-2.3">
-                <p id="section-7.3.3.2-2.3.1">Evaluate <code>Valid</code> on input of <code>meas</code> and <code>joint_rand</code>, recording the inputs
+              <li id="section-7.3.3.2-3.3">
+                <p id="section-7.3.3.2-3.3.1">Evaluate <code>Valid</code> on input of <code>meas</code> and <code>joint_rand</code>, recording the inputs
 of each gadget in the corresponding table. This step is similar to the
 prover's step (3.) except the verifier does not evaluate the gadgets.
 Instead, it computes the output of the <code>k</code>th call to <code>G_i</code> by evaluating
 <code>poly_gadget_i(alpha_i^k)</code>. Let <code>out</code> denote the output of the circuit
-evaluation.<a href="#section-7.3.3.2-2.3.1" class="pilcrow">¶</a></p>
+evaluation.<a href="#section-7.3.3.2-3.3.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.2-2.4">
-                <p id="section-7.3.3.2-2.4.1">Next, reduce <code>out</code> as follows. If <code>EVAL_OUTPUT_LEN &gt; 1</code>, then consume the
+              <li id="section-7.3.3.2-3.4">
+                <p id="section-7.3.3.2-3.4.1">Next, reduce <code>out</code> as follows. If <code>EVAL_OUTPUT_LEN &gt; 1</code>, then consume the
 first element of <code>query_rand</code> by letting <code>[r], query_rand = front(1,
 query_rand)</code>. Then let <code>v = r*out[0] + r**2*out[1] + r**3*out[2] + ...</code>.
 That is, interpret the outputs as coefficients of a polynomial <code>f(x)</code> and
-evaluate polynomial <code>f(x)*x</code> at a random point <code>r</code>.<a href="#section-7.3.3.2-2.4.1" class="pilcrow">¶</a></p>
+evaluate polynomial <code>f(x)*x</code> at a random point <code>r</code>.<a href="#section-7.3.3.2-3.4.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.2-2.5">
-                <p id="section-7.3.3.2-2.5.1">Compute the wire polynomials just as in the prover's step (4.).<a href="#section-7.3.3.2-2.5.1" class="pilcrow">¶</a></p>
+              <li id="section-7.3.3.2-3.5">
+                <p id="section-7.3.3.2-3.5.1">Compute the wire polynomials just as in the prover's step (4.).<a href="#section-7.3.3.2-3.5.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.2-2.6">
-                <p id="section-7.3.3.2-2.6.1">Compute the tests for well-formedness of the gadget polynomials. That is, for
-every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.2-2.6.1" class="pilcrow">¶</a></p>
+              <li id="section-7.3.3.2-3.6">
+                <p id="section-7.3.3.2-3.6.1">Compute the tests for well-formedness of the gadget polynomials. That is, for
+every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.2-3.6.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.3.2-2.6.2.1">
-                    <p id="section-7.3.3.2-2.6.2.1.1">Let <code>t = query_rand[i]</code>. Check if <code>t^(P_i) == 1</code>: if so, then raise
+<li class="normal" id="section-7.3.3.2-3.6.2.1">
+                    <p id="section-7.3.3.2-3.6.2.1.1">Let <code>t = query_rand[i]</code>. Check if <code>t^(P_i) == 1</code>: if so, then raise
 ERR_ABORT and halt. (This prevents the verifier from inadvertently leaking
-a gadget output in the verifier message.)<a href="#section-7.3.3.2-2.6.2.1.1" class="pilcrow">¶</a></p>
+a gadget output in the verifier message.)<a href="#section-7.3.3.2-3.6.2.1.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="normal" id="section-7.3.3.2-2.6.2.2">
-                    <p id="section-7.3.3.2-2.6.2.2.1">Let <code>y_i = poly_gadget_i(t)</code>.<a href="#section-7.3.3.2-2.6.2.2.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.2-3.6.2.2">
+                    <p id="section-7.3.3.2-3.6.2.2.1">Let <code>y_i = poly_gadget_i(t)</code>.<a href="#section-7.3.3.2-3.6.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="normal" id="section-7.3.3.2-2.6.2.3">
-                    <p id="section-7.3.3.2-2.6.2.3.1">For each <code>j</code> in <code>[0,L_i)</code> let <code>x_i[j-1] = poly_wire_i[j-1](t)</code>.<a href="#section-7.3.3.2-2.6.2.3.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.2-3.6.2.3">
+                    <p id="section-7.3.3.2-3.6.2.3.1">For each <code>j</code> in <code>[0,L_i)</code> let <code>x_i[j-1] = poly_wire_i[j-1](t)</code>.<a href="#section-7.3.3.2-3.6.2.3.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
             </ol>
-<p id="section-7.3.3.2-3">The verifier message is the vector <code>verifier = [v] + x_1 + [y_1] + ... + x_H +
-[y_H]</code>.<a href="#section-7.3.3.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.3.3.2-4">The verifier message is the vector <code>verifier = [v] + x_1 + [y_1] + ... + x_H +
+[y_H]</code>.<a href="#section-7.3.3.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="decision">
@@ -5832,27 +5878,44 @@ a gadget output in the verifier message.)<a href="#section-7.3.3.2-2.6.2.1.1" cl
             <h5 id="name-decision">
 <a href="#section-7.3.3.3" class="section-number selfRef">7.3.3.3. </a><a href="#name-decision" class="section-name selfRef">Decision</a>
             </h5>
-<p id="section-7.3.3.3-1">On input of vector <code>verifier</code>, the verifier decides if the measurement is valid
-as follows:<a href="#section-7.3.3.3-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.3.3.3-2">
-<li id="section-7.3.3.3-2.1">
-                <p id="section-7.3.3.3-2.1.1">Parse <code>verifier</code> into <code>v</code>, <code>x_1</code>, <code>y_1</code>, ..., <code>x_H</code>, <code>y_H</code> as defined in
-<a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.3.2</a>.<a href="#section-7.3.3.3-2.1.1" class="pilcrow">¶</a></p>
+<span id="name-the-decision-algorithm-cons"></span><div id="flp-bbcggi19-decide-illustration">
+<figure id="figure-25">
+              <div class="alignLeft art-text artwork" id="section-7.3.3.3-1.1">
+<pre>
+ | verifier
+ V
++------------------+
+| Decide           |
++------------------+
+ |
+ V is_valid
+</pre>
+</div>
+<figcaption><a href="#figure-25" class="selfRef">Figure 25</a>:
+<a href="#name-the-decision-algorithm-cons" class="selfRef">The decision algorithm consumes the verifier, consisting of the reduced output of the validity circuit and each gadget test. The verifier is produced by adding up the verifier shares output by each Aggregator.</a>
+              </figcaption></figure>
+</div>
+<p id="section-7.3.3.3-2">On input of vector <code>verifier</code>, the verifier decides if the measurement is valid
+as follows:<a href="#section-7.3.3.3-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-7.3.3.3-3">
+<li id="section-7.3.3.3-3.1">
+                <p id="section-7.3.3.3-3.1.1">Parse <code>verifier</code> into <code>v</code>, <code>x_1</code>, <code>y_1</code>, ..., <code>x_H</code>, <code>y_H</code> as defined in
+<a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.3.2</a>.<a href="#section-7.3.3.3-3.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-7.3.3.3-2.2">
-                <p id="section-7.3.3.3-2.2.1">Check for well-formedness of the gadget polynomials. For every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.3-2.2.1" class="pilcrow">¶</a></p>
+              <li id="section-7.3.3.3-3.2">
+                <p id="section-7.3.3.3-3.2.1">Check for well-formedness of the gadget polynomials. For every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.3-3.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.3.3-2.2.2.1">
-                    <p id="section-7.3.3.3-2.2.2.1.1">Let <code>z = G_i(x_i)</code>. That is, evaluate the circuit <code>G_i</code> on <code>x_i</code> and set
-<code>z</code> to the output.<a href="#section-7.3.3.3-2.2.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-7.3.3.3-3.2.2.1">
+                    <p id="section-7.3.3.3-3.2.2.1.1">Let <code>z = G_i(x_i)</code>. That is, evaluate the circuit <code>G_i</code> on <code>x_i</code> and set
+<code>z</code> to the output.<a href="#section-7.3.3.3-3.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="normal" id="section-7.3.3.3-2.2.2.2">
-                    <p id="section-7.3.3.3-2.2.2.2.1">If <code>z != y_i</code>, then return <code>False</code> and halt.<a href="#section-7.3.3.3-2.2.2.2.1" class="pilcrow">¶</a></p>
+                  <li class="normal" id="section-7.3.3.3-3.2.2.2">
+                    <p id="section-7.3.3.3-3.2.2.2.1">If <code>z != y_i</code>, then return <code>False</code> and halt.<a href="#section-7.3.3.3-3.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
-              <li id="section-7.3.3.3-2.3">
-                <p id="section-7.3.3.3-2.3.1">Return <code>True</code> if <code>v == 0</code> and <code>False</code> otherwise.<a href="#section-7.3.3.3-2.3.1" class="pilcrow">¶</a></p>
+              <li id="section-7.3.3.3-3.3">
+                <p id="section-7.3.3.3-3.3.1">Return <code>True</code> if <code>v == 0</code> and <code>False</code> otherwise.<a href="#section-7.3.3.3-3.3.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
 </section>
@@ -7402,7 +7465,7 @@ addition, for each level of the tree, the prover generates random elements <code
 Putting everything together, the sharding algorithm is defined as
 follows.<a href="#section-8.2.1-3" class="pilcrow">¶</a></p>
 <span id="name-the-sharding-algorithm-for-"></span><div id="poplar1-mes2inp">
-<figure id="figure-23">
+<figure id="figure-26">
             <div class="breakable lang-python sourcecode" id="section-8.2.1-4.1">
 <pre>
 def shard(
@@ -7520,7 +7583,7 @@ def shard(
     return (public_share, input_shares)
 </pre>
 </div>
-<figcaption><a href="#figure-23" class="selfRef">Figure 23</a>:
+<figcaption><a href="#figure-26" class="selfRef">Figure 26</a>:
 <a href="#name-the-sharding-algorithm-for-" class="selfRef">The sharding algorithm for Poplar1.</a>
             </figcaption></figure>
 </div>
@@ -7545,7 +7608,7 @@ verification might fail, causing the Aggregators to erroneously reject a report
 that is actually valid. Note that enforcing the order is not strictly necessary,
 but this does allow uniqueness to be determined more efficiently.<a href="#section-8.2.2-2" class="pilcrow">¶</a></p>
 <span id="name-preparation-state-for-popla"></span><div id="poplar1-prep-state">
-<figure id="figure-24">
+<figure id="figure-27">
             <div class="breakable lang-python sourcecode" id="section-8.2.2-3.1">
 <pre>
 def prep_init(
@@ -7697,7 +7760,7 @@ def prep_shares_to_prep(
         raise ValueError('incorrect sketch length')
 </pre>
 </div>
-<figcaption><a href="#figure-24" class="selfRef">Figure 24</a>:
+<figcaption><a href="#figure-27" class="selfRef">Figure 27</a>:
 <a href="#name-preparation-state-for-popla" class="selfRef">Preparation state for Poplar1.</a>
             </figcaption></figure>
 </div>
@@ -7715,7 +7778,7 @@ combination of input share and level. This function checks that levels are
 increasing between calls, and also enforces that the prefixes at each level are
 suffixes of the previous level's prefixes.<a href="#section-8.2.3-1" class="pilcrow">¶</a></p>
 <span id="name-validity-of-aggregation-paramete"></span><div id="poplar1-validity-scope">
-<figure id="figure-25">
+<figure id="figure-28">
             <div class="lang-python sourcecode" id="section-8.2.3-2.1">
 <pre>
 def get_ancestor(
@@ -7757,7 +7820,7 @@ def is_valid(
     return True
 </pre>
 </div>
-<figcaption><a href="#figure-25" class="selfRef">Figure 25</a>:
+<figcaption><a href="#figure-28" class="selfRef">Figure 28</a>:
 <a href="#name-validity-of-aggregation-paramete" class="selfRef">Validity of aggregation parameters for Poplar1.</a>
             </figcaption></figure>
 </div>
@@ -7770,7 +7833,7 @@ def is_valid(
           </h4>
 <p id="section-8.2.4-1">Aggregation involves simply adding up the output shares.<a href="#section-8.2.4-1" class="pilcrow">¶</a></p>
 <span id="name-aggregation-algorithm-for-po"></span><div id="poplar1-out2agg">
-<figure id="figure-26">
+<figure id="figure-29">
             <div class="lang-python sourcecode" id="section-8.2.4-2.1">
 <pre>
 def aggregate(
@@ -7785,7 +7848,7 @@ def aggregate(
     return cast(FieldVec, agg_share)
 </pre>
 </div>
-<figcaption><a href="#figure-26" class="selfRef">Figure 26</a>:
+<figcaption><a href="#figure-29" class="selfRef">Figure 29</a>:
 <a href="#name-aggregation-algorithm-for-po" class="selfRef">Aggregation algorithm for Poplar1.</a>
             </figcaption></figure>
 </div>
@@ -7799,7 +7862,7 @@ def aggregate(
 <p id="section-8.2.5-1">Finally, the Collector unshards the aggregate result by adding up the aggregate
 shares.<a href="#section-8.2.5-1" class="pilcrow">¶</a></p>
 <span id="name-computation-of-the-aggregate"></span><div id="poplar1-agg-output">
-<figure id="figure-27">
+<figure id="figure-30">
             <div class="lang-python sourcecode" id="section-8.2.5-2.1">
 <pre>
 def unshard(
@@ -7815,7 +7878,7 @@ def unshard(
     return [x.as_unsigned() for x in agg]
 </pre>
 </div>
-<figcaption><a href="#figure-27" class="selfRef">Figure 27</a>:
+<figcaption><a href="#figure-30" class="selfRef">Figure 30</a>:
 <a href="#name-computation-of-the-aggregate" class="selfRef">Computation of the aggregate result for Poplar1.</a>
             </figcaption></figure>
 </div>
@@ -8173,7 +8236,7 @@ functions <code>extend()</code> and <code>convert()</code> defined in
 <a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote
 the field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-key-generation-algorit"></span><div id="idpf-bbcggi21-gen">
-<figure id="figure-28">
+<figure id="figure-31">
             <div class="breakable lang-python sourcecode" id="section-8.3.1-3.1">
 <pre>
 def gen(
@@ -8243,7 +8306,7 @@ def gen(
     return (public_share, key)
 </pre>
 </div>
-<figcaption><a href="#figure-28" class="selfRef">Figure 28</a>:
+<figcaption><a href="#figure-31" class="selfRef">Figure 31</a>:
 <a href="#name-idpf-key-generation-algorit" class="selfRef">IDPF-key generation algorithm of BBCGGI21.</a>
             </figcaption></figure>
 </div>
@@ -8263,7 +8326,7 @@ def gen(
 functions <code>extend()</code> and <code>convert()</code> defined in
 <a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
 <span id="name-idpf-evaluation-generation-"></span><div id="idpf-bbcggi21-eval">
-<figure id="figure-29">
+<figure id="figure-32">
             <div class="breakable lang-python sourcecode" id="section-8.3.2-3.1">
 <pre>
 def eval(
@@ -8367,7 +8430,7 @@ def eval_next(
     return (next_seed, next_ctrl, cast(FieldVec, y))
 </pre>
 </div>
-<figcaption><a href="#figure-29" class="selfRef">Figure 29</a>:
+<figcaption><a href="#figure-32" class="selfRef">Figure 32</a>:
 <a href="#name-idpf-evaluation-generation-" class="selfRef">IDPF-evaluation generation algorithm of BBCGGI21.</a>
             </figcaption></figure>
 </div>
@@ -8379,7 +8442,7 @@ def eval_next(
 <a href="#section-8.3.3" class="section-number selfRef">8.3.3. </a><a href="#name-auxiliary-functions-3" class="section-name selfRef">Auxiliary Functions</a>
           </h4>
 <span id="name-helper-functions-for-the-id"></span><div id="idpf-bbcggi21-helpers">
-<figure id="figure-30">
+<figure id="figure-33">
             <div class="lang-python sourcecode" id="section-8.3.3-1.1">
 <pre>
 def extend(
@@ -8411,7 +8474,7 @@ def convert(
     return (next_seed, cast(FieldVec, w))
 </pre>
 </div>
-<figcaption><a href="#figure-30" class="selfRef">Figure 30</a>:
+<figcaption><a href="#figure-33" class="selfRef">Figure 33</a>:
 <a href="#name-helper-functions-for-the-id" class="selfRef">Helper functions for the IDPF.</a>
             </figcaption></figure>
 </div>
