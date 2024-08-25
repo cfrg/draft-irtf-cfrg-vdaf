@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-22T00:51:01.064230+00:00",
+  "timestamp": "2024-08-25T00:54:07.576029+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -3976,7 +3976,7 @@
       "id": "I_kwDOGKuqOc5qRRUU",
       "title": "A diagram to show the relationship of different terms in FLP",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/257",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "wangshan",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -3987,8 +3987,8 @@
       ],
       "body": "There are many terms discussed in the generic FLP section (https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/draft-irtf-cfrg-vdaf.md#a-general-purpose-flp-flp-generic):\r\nGadgets, Validity Circuits, Proof, Prover, Verifier, etc. A diagram shows the relationship between them would make the text easier to follow.",
       "createdAt": "2023-06-30T17:42:20Z",
-      "updatedAt": "2023-07-14T21:23:30Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-22T16:18:53Z",
+      "closedAt": "2024-08-22T16:18:53Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -4795,7 +4795,9 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "wire change",
         "idea",
@@ -4803,7 +4805,7 @@
       ],
       "body": "In Prio3Sum and Prio3SumVec we do a simple $[0, 2^k)$ range check by encoding the integer as a $k$-bit string and checking each bit is $0$ or $1$. In #287 we devised a simple strategy for generalizing this check to $[0, C)$ for any $C > 0$, even if $C$ is not a power of $2$. What's more, this check is concretely efficient in that it doesn't change the input length or the number of gadget calls. (The affine part of the computation is a bit more complex.)\r\n\r\nCould we, and would it be worth it to, do the same for Prio3Sum and Prio3SumVec? It seems to me this would be a valuable improvement.\r\n\r\ncc/ @divergentdave, @junyechen1996 ",
       "createdAt": "2023-10-25T21:43:29Z",
-      "updatedAt": "2024-08-14T15:45:53Z",
+      "updatedAt": "2024-08-22T16:20:41Z",
       "closedAt": null,
       "comments": [
         {
@@ -34407,7 +34409,7 @@
       "id": "PR_kwDOGKuqOc54SbIm",
       "title": "Add diagrams for FLP and rework overview/extensions",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/399",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -34416,17 +34418,19 @@
       ],
       "body": "Closes #257.\r\nPartially addresses #226.\r\n\r\nThis commit includes editorial improvements for `FlpBBCGGI19`:\r\n\r\n1. Add diagrams to show concepts relate to one another: validity circuit, gadgets, encoded measurement, joint, prove, and query randomness, and so on.\r\n\r\n2. Improve the overview section, building up each of the concepts one by one.\r\n\r\n3. Do an editorial pass of the extensions section, some of which is a little out of date. Also, add a reference for NTT.",
       "createdAt": "2024-08-13T22:41:24Z",
-      "updatedAt": "2024-08-21T16:20:44Z",
+      "updatedAt": "2024-08-22T16:18:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e37da53af7092a9c6c91b4dba6b9c0dc64466dcf",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/257",
-      "headRefOid": "c8a0089c06f3b45d2c955a6ed7aa29b45c833868",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "9a73ae2ed4c3198d80f0f17a86ee432a2a863e03",
+      "closedAt": "2024-08-22T16:18:52Z",
+      "mergedAt": "2024-08-22T16:18:52Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b3bbb5c793cf101f5b7e8d0ceb55f935431e646e"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -34652,6 +34656,38 @@
               "updatedAt": "2024-08-21T16:20:32Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6GYdcd",
+          "commit": {
+            "abbreviatedOid": "c8a0089"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-22T13:39:54Z",
+          "updatedAt": "2024-08-22T13:59:06Z",
+          "comments": [
+            {
+              "originalPosition": 86,
+              "body": "nit: formatting\r\n```suggestion\r\nThis circuit contains one subtraction gate (`x - 1`) and one multiplication\r\ngate (`x * (x - 1)`). Observe that `C(x) = 0` if and only if `x in range(2)`.\r\n```",
+              "createdAt": "2024-08-22T13:39:54Z",
+              "updatedAt": "2024-08-22T13:59:06Z"
+            },
+            {
+              "originalPosition": 95,
+              "body": "Note that one constant input and one non-constant input is affine\r\n```suggestion\r\ntwo non-constant inputs.) Then each Aggregator can compute its share locally, since\r\n```",
+              "createdAt": "2024-08-22T13:40:40Z",
+              "updatedAt": "2024-08-22T13:59:06Z"
+            },
+            {
+              "originalPosition": 106,
+              "body": "Same as above\r\n```suggestion\r\ncontains multiplication gates with two non-constant inputs. Thus our goal is to\r\n```",
+              "createdAt": "2024-08-22T13:42:06Z",
+              "updatedAt": "2024-08-22T13:59:06Z"
+            }
+          ]
         }
       ]
     },
@@ -34853,7 +34889,7 @@
       "id": "PR_kwDOGKuqOc54e5jr",
       "title": "Update change log for draft 11",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/403",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -34862,17 +34898,19 @@
       ],
       "body": "",
       "createdAt": "2024-08-15T16:00:42Z",
-      "updatedAt": "2024-08-21T15:18:54Z",
+      "updatedAt": "2024-08-22T16:19:15Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "34e248229d68188bc3bf286a7d4857c414a83316",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-11/cl",
       "headRefOid": "836795d844c20fd3c3fc7df864ea7af3c1c6512c",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-08-22T16:19:15Z",
+      "mergedAt": "2024-08-22T16:19:14Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "e5b156fb211934fea9e63f40a1c87b4210bd6611"
+      },
       "comments": [],
       "reviews": [
         {
@@ -34904,7 +34942,7 @@
       ],
       "body": "",
       "createdAt": "2024-08-20T21:54:22Z",
-      "updatedAt": "2024-08-20T21:54:22Z",
+      "updatedAt": "2024-08-23T22:05:25Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e37da53af7092a9c6c91b4dba6b9c0dc64466dcf",
@@ -34916,7 +34954,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6GmOit",
+          "commit": {
+            "abbreviatedOid": "4b89b0a"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-23T22:05:25Z",
+          "updatedAt": "2024-08-23T22:05:25Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 405,
@@ -34932,7 +34984,7 @@
       ],
       "body": "Based on #404.\r\nCloses #341.\r\n\r\nThis is a safer choice for ensuring the IDPF is extracatible.",
       "createdAt": "2024-08-20T21:55:16Z",
-      "updatedAt": "2024-08-20T21:55:50Z",
+      "updatedAt": "2024-08-22T16:25:50Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "cjpatton/draft-12/1-ver",
       "baseRefOid": "4b89b0ac1d65998eee404815f2d7ef01cb0fcd0f",
@@ -34960,7 +35012,7 @@
       ],
       "body": "Based on #405.\r\nCloses #306.\r\n\r\nReplace `Sum` with `SumOfRangeCheckedInputs`. The new circuit has two improvements:\r\n\r\n1. No joint randomness is used, so it's safe to use a smaller field.\r\n\r\n2. The largest measurement can be any positive integer, not just a power of two.\r\n\r\nUpdate `Prio3Sum` accordingly by switching from `Field128` to `Field64`.",
       "createdAt": "2024-08-20T21:57:17Z",
-      "updatedAt": "2024-08-20T21:58:29Z",
+      "updatedAt": "2024-08-22T16:26:04Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "cjpatton/draft-12/2-idpf-leaf-xof",
       "baseRefOid": "a27581ddd023b0b1fb1d3b0ef700d1a7070bfd70",
