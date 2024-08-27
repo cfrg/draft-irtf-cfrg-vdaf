@@ -2137,7 +2137,10 @@ Table of Contents
 
        def __init__(self, seed: bytes, dst: bytes, binder: bytes):
            self.l = 0
-           self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
+           self.m = \
+               to_le_bytes(len(dst), 1) + dst \
+               to_le_bytes(len(seed), 1) + seed + \
+               binder
 
        def next(self, length: int) -> bytes:
            self.l += length
@@ -5380,7 +5383,7 @@ Table of Contents
                )
 
            w_cw = vec_add(vec_sub(b, w0), w1)
-           # Implementation note: here we negate the correction word if
+           # Implementation note: Here we negate the correction word if
            # the control bit `ctrl[1]` is set. We avoid branching on the
            # value in order to reduce leakage via timing side channels.
            mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
@@ -5509,8 +5512,8 @@ Table of Contents
            nonce: bytes) -> tuple[list[bytes], list[Field2]]:
        xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
        s = [
-           bytearray(xof.next(xof.SEED_SIZE)),
-           bytearray(xof.next(xof.SEED_SIZE)),
+           bytearray(xof.next(self.KEY_SIZE)),
+           bytearray(xof.next(self.KEY_SIZE)),
        ]
        # Use the least significant bits as the control bit correction,
        # and then zero it out. This gives effectively 127 bits of
@@ -5526,7 +5529,7 @@ Table of Contents
            seed: bytes,
            nonce: bytes) -> tuple[bytes, FieldVec]:
        xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
-       next_seed = xof.next(xof.SEED_SIZE)
+       next_seed = xof.next(self.KEY_SIZE)
        field = self.current_field(level)
        w = xof.next_vec(field, self.VALUE_LEN)
        return (next_seed, cast(FieldVec, w))
@@ -5538,7 +5541,7 @@ Table of Contents
                    nonce: bytes) -> Xof:
        if level < self.BITS-1:
            return XofFixedKeyAes128(seed, dst, nonce)
-       return XofTurboShake128(seed, dst, nonce)
+       return XofTurboShake128(seed + zeros(16), dst, nonce)
 
                  Figure 33: Helper functions for the IDPF.
 
