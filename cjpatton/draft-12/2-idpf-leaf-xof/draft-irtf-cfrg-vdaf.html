@@ -8748,10 +8748,10 @@ IDPF such that it takes on chosen non-zero values at more than one node. (It
 can practically only achieve the zero function, a point function, or a
 pseudorandom function.)<a href="#section-9.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-9.4.2-3">The IDPF specified in <a href="#idpf" class="auto internal xref">Section 8.1</a> only guarantees extractability at the last level
-of the tree. (This is by virtue of using a larger field and XofTurboShake128
-(see <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a>) for the leaves than for the inner nodes.) For intermediate
-levels, it is feasible for a client to produce IDPF shares with two controlled
-non-zero nodes.<a href="#section-9.4.2-3" class="pilcrow">¶</a></p>
+of the tree. (This is by virtue of using a larger field for the leaves than for
+inner nodes and using an XOF to derive leaves that is safe to model as a random
+oracle (see <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a>).) For intermediate levels, it is feasible for a
+client to produce IDPF shares with two controlled non-zero nodes.<a href="#section-9.4.2-3" class="pilcrow">¶</a></p>
 <p id="section-9.4.2-4">This is not an issue for running heavy hitters, since (1) each node in the
 prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
 would detect double voting at every level of the prefix tree, and (3) the IDPF
