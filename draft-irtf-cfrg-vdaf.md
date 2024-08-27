@@ -2014,9 +2014,10 @@ methods:
 
 * `Xof(seed: bytes, dst: bytes, binder: bytes)` constructs an instance of `Xof`
   from the given seed, domain separation tag, and binder string. (See below for
-  definitions of these.) The seed MUST be of length `SEED_SIZE` and MUST be
-  generated securely (i.e., it is either the output of a CSPRNG or a previous
-  invocation of the XOF).
+  definitions of these.) The length of the seed will typically be `SEED_SIZE`,
+  but some XOFs may support multiple seed sizes. The seed MUST be generated
+  securely (i.e., it is either the output of a CSPRNG or a previous invocation
+  of the XOF).
 
 * `xof.next(length: int)` returns the next `length` bytes of output of
   `xof`.
@@ -2093,11 +2094,14 @@ class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
 
     # Associated parameters
-    SEED_SIZE = 16
+    SEED_SIZE = 32
 
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         self.l = 0
-        self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
+        self.m = \
+            to_le_bytes(len(dst), 1) + dst \
+            to_le_bytes(len(seed), 1) + seed + \
+            binder
 
     def next(self, length: int) -> bytes:
         self.l += length
@@ -4795,14 +4799,8 @@ network while executing `Poplar1`. It is RECOMMENDED that implementations
 provide serialization methods for them.
 
 Message structures are defined following {{Section 3 of !RFC8446}}). In the
-remainder we use `S` as an alias for `poplar1.xof.SEED_SIZE`, `Fi` as an alias
-for `poplar1.idpf.field_inner.ENCODED_SIZE` and `Fl` as an alias for
-`poplar1.idpf.field_leaf.ENCODED_SIZE`. XOF seeds are represented as
-follows:
-
-~~~ tls-presentation
-opaque Poplar1Seed[S];
-~~~
+remainder we use `Fi` as an alias for `poplar1.idpf.field_inner.ENCODED_SIZE`
+and `Fl` as an alias for `poplar1.idpf.field_leaf.ENCODED_SIZE`.
 
 Elements of the inner field are encoded in little-endian byte order (as defined
 in {{field}}) and are represented as follows:
@@ -4833,18 +4831,18 @@ tightly as possible. The encoded public share is structured as follows:
 
 ~~~ tls-presentation
 struct {
-    Poplar1Seed seed;
-    Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
+    opaque seed[poplar1.idpf.KEY_SIZE];
+    Poplar1FieldInner payload[Fi * poplar1.idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadInner;
 
 struct {
-    Poplar1Seed seed;
-    Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
+    opaque seed[poplar1.idpf.KEY_SIZE];
+    Poplar1FieldLeaf payload[Fl * poplar1.idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadLeaf;
 
 struct {
     opaque packed_control_bits[packed_len];
-    Poplar1CWSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
+    Poplar1CWSeedAndPayloadInner inner[Ci * (poplar1.idpf.BITS-1)];
     Poplar1CWSeedAndPayloadLeaf leaf;
 } Poplar1PublicShare;
 ~~~
@@ -4890,9 +4888,9 @@ Each input share is structured as follows:
 
 ~~~ tls-presentation
 struct {
-    opaque idpf_key[poplar1.Idpf.KEY_SIZE];
-    Poplar1Seed corr_seed;
-    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
+    opaque idpf_key[poplar1.idpf.KEY_SIZE];
+    opaque corr_seed[poplar1.xof.SEED_SIZE];
+    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.idpf.BITS - 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
 ~~~
@@ -5251,8 +5249,8 @@ def extend(
         nonce: bytes) -> tuple[list[bytes], list[Field2]]:
     xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
     s = [
-        bytearray(xof.next(xof.SEED_SIZE)),
-        bytearray(xof.next(xof.SEED_SIZE)),
+        bytearray(xof.next(self.KEY_SIZE)),
+        bytearray(xof.next(self.KEY_SIZE)),
     ]
     # Use the least significant bits as the control bit correction,
     # and then zero it out. This gives effectively 127 bits of
@@ -5268,7 +5266,7 @@ def convert(
         seed: bytes,
         nonce: bytes) -> tuple[bytes, FieldVec]:
     xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
-    next_seed = xof.next(xof.SEED_SIZE)
+    next_seed = xof.next(self.KEY_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
     return (next_seed, cast(FieldVec, w))

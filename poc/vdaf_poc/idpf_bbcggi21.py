@@ -249,8 +249,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             nonce: bytes) -> tuple[list[bytes], list[Field2]]:
         xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
         s = [
-            bytearray(xof.next(xof.SEED_SIZE)),
-            bytearray(xof.next(xof.SEED_SIZE)),
+            bytearray(xof.next(self.KEY_SIZE)),
+            bytearray(xof.next(self.KEY_SIZE)),
         ]
         # Use the least significant bits as the control bit correction,
         # and then zero it out. This gives effectively 127 bits of
@@ -266,7 +266,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             seed: bytes,
             nonce: bytes) -> tuple[bytes, FieldVec]:
         xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
-        next_seed = xof.next(xof.SEED_SIZE)
+        next_seed = xof.next(self.KEY_SIZE)
         field = self.current_field(level)
         w = xof.next_vec(field, self.VALUE_LEN)
         return (next_seed, cast(FieldVec, w))
