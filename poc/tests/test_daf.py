@@ -23,7 +23,7 @@ class TestDaf(
     ID = 0xFFFFFFFF
     SHARES = 2
     NONCE_SIZE = 0
-    RAND_SIZE = 16
+    RAND_SIZE = 32
 
     def shard(
             self,

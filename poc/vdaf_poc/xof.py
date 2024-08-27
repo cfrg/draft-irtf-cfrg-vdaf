@@ -116,7 +116,7 @@ class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
 
     # Associated parameters
-    SEED_SIZE = 16
+    SEED_SIZE = 32
 
     # Name of the XOF, for use in test vector filenames.
     test_vec_name = 'XofTurboShake128'
@@ -124,16 +124,16 @@ class XofTurboShake128(Xof):
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         '''
         self.l = 0
-        self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
+        self.m = \
+            to_le_bytes(len(dst), 1) + dst \
+            to_le_bytes(len(seed), 1) + seed + \
+            binder
         '''
-
-        if len(seed) != self.SEED_SIZE:
-            raise ValueError("incorrect seed size")
-
         self.length_consumed = 0
         self.h = TurboSHAKE128.new(domain=1)
         self.h.update(to_le_bytes(len(dst), 1))
         self.h.update(dst)
+        self.h.update(to_le_bytes(len(seed), 1))
         self.h.update(seed)
         self.h.update(binder)
 

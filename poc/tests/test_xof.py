@@ -36,13 +36,15 @@ class TestXof(unittest.TestCase):
         # https://github.com/divergentdave/vdaf-rejection-sampling-search
         expanded_vec = XofTurboShake128.expand_into_vec(
             Field64,
-            bytes([0xd1, 0x95, 0xec, 0x90, 0xc1, 0xbc, 0xf1, 0xf2, 0xcb, 0x2c,
-                   0x7e, 0x74, 0xc5, 0xc5, 0xf6, 0xda]),
+            bytes([0x86, 0x1e, 0x9e, 0x8e, 0x49, 0x44, 0xa2, 0x9f, 0xa4, 0x07,
+                   0x43, 0x23, 0xaf, 0x39, 0xaa, 0xcf, 0xeb, 0xf5, 0xc8, 0x88,
+                   0xa9, 0xe5, 0x5f, 0x0f, 0x9a, 0x9e, 0x4c, 0x70, 0x7d, 0xcd,
+                   0x95, 0x55]),
             b'',  # domain separation tag
             b'',  # binder
-            140,
+            18262,
         )
-        assert expanded_vec[-1] == Field64(9734340616212735019)
+        assert expanded_vec[-1] == Field64(6866317754138817667)
 
     def test_turboshake128(self) -> None:
         test_xof(XofTurboShake128, Field128, 23)
