@@ -5753,9 +5753,10 @@ Table of Contents
 
    The IDPF specified in Section 8.1 only guarantees extractability at
    the last level of the tree.  (This is by virtue of using a larger
-   field for the leaves than for the inner nodes.)  For intermediate
-   levels, it is feasible for a client to produce IDPF shares with two
-   controlled non-zero nodes.
+   field for the leaves than for inner nodes and using an XOF to derive
+   leaves that is safe to model as a random oracle (see Section 9.5).)
+   For intermediate levels, it is feasible for a client to produce IDPF
+   shares with two controlled non-zero nodes.
 
    This is not an issue for running heavy hitters, since (1) each node
    in the prefix tree is a child of a previously traversed node, (2) the
