@@ -6189,8 +6189,8 @@ the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</
 <p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
 measurements between <code>0</code> and <code>2**bits - 1</code> can be encoded this way with
 <code>bits</code> bits. The second bit-encoded integer is the sum of the measurement and
-<code>offset</code>. Observe that this sum can only be encoded this way if it is between 0
-and 2**bits - 1, which implies that the measurement is between <code>-offset</code> and
+<code>offset</code>. Observe that this sum can only be encoded this way if it is between <code>0</code>
+and <code>2**bits - 1</code>, which implies that the measurement is between <code>-offset</code> and
 <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-6">The circuit, denoted <code>Sum</code>, first checks that each entry of both bit vectors is
 a one or a zero. It then decodes both the measurement and the offset
