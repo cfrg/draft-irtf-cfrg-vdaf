@@ -6144,14 +6144,14 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
                   <code>Valid</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Sum(Field128, bits)</code> (this section)</td>
+                  <code>Sum(Field64, max_measurement)</code> (this section)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6171,55 +6171,85 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
             </tbody>
           </table>
 <p id="section-7.4.2-2">The next instance of Prio3 supports summing of integers in a pre-determined
-range. Each measurement is an integer in range <code>[0, 2^bits)</code>, where <code>bits</code> is an
-associated parameter.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-3">The validity circuit is denoted <code>Sum</code>. The measurement is encoded as a
-length-<code>bits</code> vector of field elements, where the <code>l</code>th element of the vector
-represents the <code>l</code>th bit of the summand:<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-4">
+range. Each measurement is an integer in <code>range(max_measurement+1)</code>, where
+<code>max_measurement</code> is an associated parameter equal to the largest valid
+measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a bit vector,
+encoding the measurement plus an offset as a bit vector, then checking that the
+two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.4.2-4.1">
+              <p id="section-7.4.2-4.1.1"><code>bits = max_measurement.bit_length()</code>, the number of bits needed to encode
+the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-7.4.2-4.2">
+              <p id="section-7.4.2-4.2.1"><code>offset = 2**bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
+measurements between <code>0</code> and <code>2**bits - 1</code> can be encoded this way with
+<code>bits</code> bits. The second bit-encoded integer is the sum of the measurement and
+<code>offset</code>. Observe that this sum can only be encoded this way if it is between <code>0</code>
+and <code>2**bits - 1</code>, which implies that the measurement is between <code>-offset</code> and
+<code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-6">The circuit, denoted <code>Sum</code>, first checks that each entry of both bit vectors is
+a one or a zero. It then decodes both the measurement and the offset
+measurement, and subtracts <code>offset</code> from the latter. It then checks if these
+two values are equal. Since both the measurement and the measurement plus
+<code>offset</code> are in the same range of <code>0</code> to <code>2**bits - 1</code>, this means that the
+measurement itself is between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-7">The measurement is encoded in <code>2*bits</code> field elements as follows:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-7.4.2-8">
 <pre>
 def encode(self, measurement: int) -&gt; list[F]:
-    if 0 &gt; measurement or measurement &gt;= 2 ** self.MEAS_LEN:
-        raise ValueError('measurement out of range')
-
-    return self.field.encode_into_bit_vector(measurement,
-                                             self.MEAS_LEN)
+    encoded = []
+    encoded += self.field.encode_into_bit_vector(
+        measurement,
+        self.bits
+    )
+    encoded += self.field.encode_into_bit_vector(
+        measurement + self.offset.as_unsigned(),
+        self.bits
+    )
+    return encoded
 
 def truncate(self, meas: list[F]) -&gt; list[F]:
-    return [self.field.decode_from_bit_vector(meas)]
+    return [self.field.decode_from_bit_vector(meas[:self.bits])]
 
-def decode(
-        self,
-        output: list[F],
-        _num_measurements: int) -&gt; int:
+def decode(self, output: list[F], _num_measurements: int) -&gt; int:
     return output[0].as_unsigned()
-</pre><a href="#section-7.4.2-4" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.2-5">The validity circuit checks that the input consists of ones and zeros. Its
-gadget, denoted <code>Range2</code>, is the degree-2, arity-1 gadget defined as<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-6">
+<p id="section-7.4.2-9">The validity circuit checks that the input consists of ones and zeros. Its
+gadget, denoted <code>Range2</code>, is the degree-2, arity-1 gadget defined as<a href="#section-7.4.2-9" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-7.4.2-10">
 <pre>
 def eval(self, _field: type[F], inp: list[F]) -&gt; F:
     self.check_gadget_eval(inp)
     return inp[0] * inp[0] - inp[0]
-</pre><a href="#section-7.4.2-6" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.2-10" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.2-7">The <code>Sum</code> validity circuit is defined as<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-8">
+<p id="section-7.4.2-11">The <code>Sum</code> validity circuit is defined as<a href="#section-7.4.2-11" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-7.4.2-12">
 <pre>
 def eval(
         self,
         meas: list[F],
         joint_rand: list[F],
-        _num_shares: int) -&gt; list[F]:
+        num_shares: int) -&gt; list[F]:
     self.check_valid_eval(meas, joint_rand)
-    out = self.field(0)
-    r = joint_rand[0]
+    shares_inv = self.field(num_shares).inv()
+
+    out = []
     for b in meas:
-        out += r * self.GADGETS[0].eval(self.field, [b])
-        r *= joint_rand[0]
-    return [out]
-</pre><a href="#section-7.4.2-8" class="pilcrow">¶</a>
+        out.append(self.GADGETS[0].eval(self.field, [b]))
+
+    range_check = self.offset * shares_inv + \
+        self.field.decode_from_bit_vector(meas[:self.bits]) - \
+        self.field.decode_from_bit_vector(meas[self.bits:])
+    out.append(range_check)
+    return out
+</pre><a href="#section-7.4.2-12" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circu"></span><table class="center" id="table-12">
             <caption>
@@ -6246,7 +6276,7 @@ def eval(
                   <code>GADGET_CALLS</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>[bits]</code>
+                  <code>[2*bits]</code>
 </td>
               </tr>
               <tr>
@@ -6254,7 +6284,7 @@ def eval(
                   <code>MEAS_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>bits</code>
+                  <code>2*bits</code>
 </td>
               </tr>
               <tr>
@@ -6270,7 +6300,7 @@ def eval(
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
+                  <code>0</code>
 </td>
               </tr>
               <tr>
@@ -6278,7 +6308,7 @@ def eval(
                   <code>EVAL_OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
+                  <code>2*bits + 1</code>
 </td>
               </tr>
               <tr>
@@ -6286,7 +6316,7 @@ def eval(
                   <code>Measurement</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code> in <code>range(2**bits)</code>
+                  <code>int</code> in <code>range(max_measurement)</code>
 </td>
               </tr>
               <tr>
