@@ -2489,14 +2489,14 @@ subsections. These methods refer to constants enumerated in
 | Parameter         | Value                                           |
 |:------------------|:------------------------------------------------|
 | `VERIFY_KEY_SIZE` | `Xof.SEED_SIZE`                                 |
-| `RAND_SIZE`       | `Xof.SEED_SIZE * (1 + 2 * (SHARES - 1)) if flp.JOINT_RAND_LEN == 0 else Xof.SEED_SIZE * (1 + 2 * (SHARES - 1) + SHARES)` |
+| `RAND_SIZE`       | `Xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN == 0 else 2 * Xof.SEED_SIZE * SHARES` |
 | `NONCE_SIZE`      | `16`                                            |
 | `ROUNDS`          | `1`                                             |
 | `SHARES`          | in `[2, 256)`                                   |
 | `Measurement`     | `Flp.Measurement`                               |
 | `AggParam`        | `None`                                          |
 | `PublicShare`     | `Optional[list[bytes]]`                         |
-| `InputShare`      | `tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, bytes, Optional[bytes]]` |
+| `InputShare`      | `tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, Optional[bytes]]` |
 | `OutShare`        | `list[F]`                                       |
 | `AggShare`        | `list[F]`                                       |
 | `AggResult`       | `Flp.AggResult`                                 |
@@ -2588,15 +2588,7 @@ def shard_without_joint_rand(
         seeds: list[bytes]) -> tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
-    k_helper_meas_shares = [
-        k_helper_seeds[i]
-        for i in range(0, (self.SHARES - 1) * 2, 2)
-    ]
-    k_helper_proofs_shares = [
-        k_helper_seeds[i]
-        for i in range(1, (self.SHARES - 1) * 2, 2)
-    ]
+    k_helper_shares, seeds = front(self.SHARES - 1, seeds)
     (k_prove,), seeds = front(1, seeds)
 
     # Shard the encoded measurement into shares.
@@ -2604,7 +2596,7 @@ def shard_without_joint_rand(
     for j in range(self.SHARES - 1):
         leader_meas_share = vec_sub(
             leader_meas_share,
-            self.helper_meas_share(j + 1, k_helper_meas_shares[j]),
+            self.helper_meas_share(j + 1, k_helper_shares[j]),
         )
 
     # Generate and shard each proof into shares.
@@ -2619,7 +2611,7 @@ def shard_without_joint_rand(
             leader_proofs_share,
             self.helper_proofs_share(
                 j + 1,
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
             ),
         )
 
@@ -2633,8 +2625,7 @@ def shard_without_joint_rand(
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_meas_shares[j],
-            k_helper_proofs_shares[j],
+            k_helper_shares[j],
             None,
         ))
     return (None, input_shares)
@@ -2648,9 +2639,9 @@ The steps in this method are as follows:
 1. Encode each measurement and shares of each proof into an input share
 
 Notice that only one pair of measurement and proof(s) share (called the
-"leader" shares above) are vectors of field elements. The other shares
-(called the "helper" shares) are represented instead by XOF seeds, which
-are expanded into vectors of field elements.
+"leader" shares above) are vectors of field elements. The other shares (called
+the "helper" shares) are represented instead by an XOF seed, which is expanded
+into vectors of field elements.
 
 The methods on `Prio3` for deriving the prover randomness, measurement shares,
 and proof shares and the methods for encoding the input shares are defined in
@@ -2669,18 +2660,14 @@ def shard_with_joint_rand(
         seeds: list[bytes]) -> tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
-    k_helper_meas_shares = [
+    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
+    k_helper_shares = [
         k_helper_seeds[i]
-        for i in range(0, (self.SHARES - 1) * 3, 3)
-    ]
-    k_helper_proofs_shares = [
-        k_helper_seeds[i]
-        for i in range(1, (self.SHARES - 1) * 3, 3)
+        for i in range(0, (self.SHARES - 1) * 2, 2)
     ]
     k_helper_blinds = [
         k_helper_seeds[i]
-        for i in range(2, (self.SHARES - 1) * 3, 3)
+        for i in range(1, (self.SHARES - 1) * 2, 2)
     ]
     (k_leader_blind, k_prove), seeds = front(2, seeds)
 
@@ -2690,7 +2677,7 @@ def shard_with_joint_rand(
     k_joint_rand_parts = []
     for j in range(self.SHARES - 1):
         helper_meas_share = self.helper_meas_share(
-            j + 1, k_helper_meas_shares[j])
+            j + 1, k_helper_shares[j])
         leader_meas_share = vec_sub(leader_meas_share,
                                     helper_meas_share)
         k_joint_rand_parts.append(self.joint_rand_part(
@@ -2718,7 +2705,7 @@ def shard_with_joint_rand(
             leader_proofs_share,
             self.helper_proofs_share(
                 j + 1,
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
             ),
         )
 
@@ -2733,8 +2720,7 @@ def shard_with_joint_rand(
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_meas_shares[j],
-            k_helper_proofs_shares[j],
+            k_helper_shares[j],
             k_helper_blinds[j],
         ))
     return (k_joint_rand_parts, input_shares)
@@ -2742,11 +2728,11 @@ def shard_with_joint_rand(
 {: #prio3-shard-with-joint-rand title="Sharding an encoded measurement with joint randomness."}
 
 The difference between this procedure and previous one is that here we compute
-joint randomnesses `joint_rands`, split it into multiple `joint_rand`,
-and pass each `joint_rand` to the proof generationg algorithm.
-(In {{prio3-shard-without-joint-rand}} the joint randomness is the empty
-vector, `[]`.) This requires generating an additional value, called the
-"blind", that is incorporated into each input share.
+joint randomnesses `joint_rands`, split it into multiple `joint_rand`, and pass
+each `joint_rand` to the proof generationg algorithm. (In
+{{prio3-shard-without-joint-rand}} the joint randomness is the empty vector,
+`[]`.) This requires generating an additional value, called the "blind", that
+is incorporated into each input share.
 
 The joint randomness computation involves the following steps:
 
@@ -2982,15 +2968,14 @@ def expand_input_share(
             list[F],
             list[F],
             Optional[bytes]]:
-    (meas_share, proofs_share, k_blind) = input_share
     if agg_id > 0:
-        assert isinstance(meas_share, bytes)
-        assert isinstance(proofs_share, bytes)
-        meas_share = self.helper_meas_share(agg_id, meas_share)
-        proofs_share = self.helper_proofs_share(agg_id, proofs_share)
+        assert len(input_share) == 2
+        (k_share, k_blind) = input_share
+        meas_share = self.helper_meas_share(agg_id, k_share)
+        proofs_share = self.helper_proofs_share(agg_id, k_share)
     else:
-        assert isinstance(meas_share, list)
-        assert isinstance(proofs_share, list)
+        assert len(input_share) == 3
+        (meas_share, proofs_share, k_blind) = input_share
     return (meas_share, proofs_share, k_blind)
 
 def prove_rands(self, k_prove: bytes) -> list[F]:
@@ -3086,9 +3071,9 @@ Aggregator's blind for generating its joint randomness part.
 In addition, the encoding of the input shares depends on which aggregator is
 receiving the message. If the aggregator ID is `0`, then the input share
 includes the full measurement and share of proof(s). Otherwise, if the aggregator ID
-is greater than `0`, then the measurement and shares of proof(s) are represented
-by XOF seeds. We shall call the former the "Leader" and the latter the
-"Helpers".
+is greater than `0`, then the measurement and shares of proof(s) are
+represented by an XOF seed. We shall call the former the "Leader" and the
+latter the "Helpers".
 
 In total there are four variants of the input share. When joint randomness is
 not used, the Leader's share is structured as follows:
@@ -3105,8 +3090,7 @@ as follows:
 
 ~~~ tls-presentation
 struct {
-    Prio3Seed k_meas_share;
-    Prio3Seed k_proofs_share;
+    Prio3Seed k_share;
 } Prio3HelperShare;
 ~~~
 
