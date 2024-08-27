@@ -4374,7 +4374,7 @@ subsections. These methods refer to constants enumerated in
                 <code>RAND_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE * (1 + 2 * (SHARES - 1)) if flp.JOINT_RAND_LEN == 0 else Xof.SEED_SIZE * (1 + 2 * (SHARES - 1) + SHARES)</code>
+                <code>Xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN == 0 else 2 * Xof.SEED_SIZE * SHARES</code>
 </td>
             </tr>
             <tr>
@@ -4429,7 +4429,7 @@ subsections. These methods refer to constants enumerated in
                 <code>InputShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, bytes, Optional[bytes]]</code>
+                <code>tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, Optional[bytes]]</code>
 </td>
             </tr>
             <tr>
@@ -4632,7 +4632,7 @@ subsections below.<a href="#section-7.2.1-8" class="pilcrow">¶</a></p>
 i.e., when <code>flp.JOINT_RAND_LEN == 0</code>:<a href="#section-7.2.1.1-1" class="pilcrow">¶</a></p>
 <span id="name-sharding-an-encoded-measure"></span><div id="prio3-shard-without-joint-rand">
 <figure id="figure-16">
-              <div class="breakable lang-python sourcecode" id="section-7.2.1.1-2.1">
+              <div class="lang-python sourcecode" id="section-7.2.1.1-2.1">
 <pre>
 def shard_without_joint_rand(
         self,
@@ -4640,15 +4640,7 @@ def shard_without_joint_rand(
         seeds: list[bytes]) -&gt; tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
-    k_helper_meas_shares = [
-        k_helper_seeds[i]
-        for i in range(0, (self.SHARES - 1) * 2, 2)
-    ]
-    k_helper_proofs_shares = [
-        k_helper_seeds[i]
-        for i in range(1, (self.SHARES - 1) * 2, 2)
-    ]
+    k_helper_shares, seeds = front(self.SHARES - 1, seeds)
     (k_prove,), seeds = front(1, seeds)
 
     # Shard the encoded measurement into shares.
@@ -4656,7 +4648,7 @@ def shard_without_joint_rand(
     for j in range(self.SHARES - 1):
         leader_meas_share = vec_sub(
             leader_meas_share,
-            self.helper_meas_share(j + 1, k_helper_meas_shares[j]),
+            self.helper_meas_share(j + 1, k_helper_shares[j]),
         )
 
     # Generate and shard each proof into shares.
@@ -4671,7 +4663,7 @@ def shard_without_joint_rand(
             leader_proofs_share,
             self.helper_proofs_share(
                 j + 1,
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
             ),
         )
 
@@ -4685,8 +4677,7 @@ def shard_without_joint_rand(
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_meas_shares[j],
-            k_helper_proofs_shares[j],
+            k_helper_shares[j],
             None,
         ))
     return (None, input_shares)
@@ -4709,9 +4700,9 @@ def shard_without_joint_rand(
 </li>
             </ol>
 <p id="section-7.2.1.1-5">Notice that only one pair of measurement and proof(s) share (called the
-"leader" shares above) are vectors of field elements. The other shares
-(called the "helper" shares) are represented instead by XOF seeds, which
-are expanded into vectors of field elements.<a href="#section-7.2.1.1-5" class="pilcrow">¶</a></p>
+"leader" shares above) are vectors of field elements. The other shares (called
+the "helper" shares) are represented instead by an XOF, which is expanded into
+vectors of field elements.<a href="#section-7.2.1.1-5" class="pilcrow">¶</a></p>
 <p id="section-7.2.1.1-6">The methods on <code>Prio3</code> for deriving the prover randomness, measurement shares,
 and proof shares and the methods for encoding the input shares are defined in
 <a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>.<a href="#section-7.2.1.1-6" class="pilcrow">¶</a></p>
@@ -4735,18 +4726,14 @@ def shard_with_joint_rand(
         seeds: list[bytes]) -&gt; tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
-    k_helper_meas_shares = [
+    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
+    k_helper_shares = [
         k_helper_seeds[i]
-        for i in range(0, (self.SHARES - 1) * 3, 3)
-    ]
-    k_helper_proofs_shares = [
-        k_helper_seeds[i]
-        for i in range(1, (self.SHARES - 1) * 3, 3)
+        for i in range(0, (self.SHARES - 1) * 2, 2)
     ]
     k_helper_blinds = [
         k_helper_seeds[i]
-        for i in range(2, (self.SHARES - 1) * 3, 3)
+        for i in range(1, (self.SHARES - 1) * 2, 2)
     ]
     (k_leader_blind, k_prove), seeds = front(2, seeds)
 
@@ -4756,7 +4743,7 @@ def shard_with_joint_rand(
     k_joint_rand_parts = []
     for j in range(self.SHARES - 1):
         helper_meas_share = self.helper_meas_share(
-            j + 1, k_helper_meas_shares[j])
+            j + 1, k_helper_shares[j])
         leader_meas_share = vec_sub(leader_meas_share,
                                     helper_meas_share)
         k_joint_rand_parts.append(self.joint_rand_part(
@@ -4784,7 +4771,7 @@ def shard_with_joint_rand(
             leader_proofs_share,
             self.helper_proofs_share(
                 j + 1,
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
             ),
         )
 
@@ -4799,8 +4786,7 @@ def shard_with_joint_rand(
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_meas_shares[j],
-            k_helper_proofs_shares[j],
+            k_helper_shares[j],
             k_helper_blinds[j],
         ))
     return (k_joint_rand_parts, input_shares)
@@ -4811,11 +4797,11 @@ def shard_with_joint_rand(
               </figcaption></figure>
 </div>
 <p id="section-7.2.1.2-3">The difference between this procedure and previous one is that here we compute
-joint randomnesses <code>joint_rands</code>, split it into multiple <code>joint_rand</code>,
-and pass each <code>joint_rand</code> to the proof generationg algorithm.
-(In <a href="#prio3-shard-without-joint-rand" class="auto internal xref">Figure 16</a> the joint randomness is the empty
-vector, <code>[]</code>.) This requires generating an additional value, called the
-"blind", that is incorporated into each input share.<a href="#section-7.2.1.2-3" class="pilcrow">¶</a></p>
+joint randomnesses <code>joint_rands</code>, split it into multiple <code>joint_rand</code>, and pass
+each <code>joint_rand</code> to the proof generationg algorithm. (In
+<a href="#prio3-shard-without-joint-rand" class="auto internal xref">Figure 16</a> the joint randomness is the empty vector,
+<code>[]</code>.) This requires generating an additional value, called the "blind", that
+is incorporated into each input share.<a href="#section-7.2.1.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.2.1.2-4">The joint randomness computation involves the following steps:<a href="#section-7.2.1.2-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-7.2.1.2-5">
 <li id="section-7.2.1.2-5.1">
@@ -5096,15 +5082,16 @@ def expand_input_share(
             list[F],
             list[F],
             Optional[bytes]]:
-    (meas_share, proofs_share, k_blind) = input_share
     if agg_id &gt; 0:
-        assert isinstance(meas_share, bytes)
-        assert isinstance(proofs_share, bytes)
-        meas_share = self.helper_meas_share(agg_id, meas_share)
-        proofs_share = self.helper_proofs_share(agg_id, proofs_share)
+        (k_share, k_blind) = cast(
+            tuple[bytes, Optional[bytes]],
+            input_share)
+        meas_share = self.helper_meas_share(agg_id, k_share)
+        proofs_share = self.helper_proofs_share(agg_id, k_share)
     else:
-        assert isinstance(meas_share, list)
-        assert isinstance(proofs_share, list)
+        (meas_share, proofs_share, k_blind) = cast(
+            tuple[list[F], list[F], Optional[bytes]],
+            input_share)
     return (meas_share, proofs_share, k_blind)
 
 def prove_rands(self, k_prove: bytes) -&gt; list[F]:
@@ -5229,8 +5216,7 @@ as follows:<a href="#section-7.2.7.2-5" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.2-6">
 <pre>
 struct {
-    Prio3Seed k_meas_share;
-    Prio3Seed k_proofs_share;
+    Prio3Seed k_share;
 } Prio3HelperShare;
 </pre><a href="#section-7.2.7.2-6" class="pilcrow">¶</a>
 </div>
