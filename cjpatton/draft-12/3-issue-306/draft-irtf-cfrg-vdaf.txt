@@ -3840,24 +3840,29 @@ Table of Contents
    range(max_measurement+1), where max_measurement is an associated
    parameter equal to the largest valid measurement.
 
-   The range check is accomplished by encoding the measurement in a way
-   that ensures it is in range, then comparing the reported measurement
-   to the range checked measurement.  Let
+   The range check is accomplished by encoding the measurement as a bit
+   vector, encoding the measurement plus an offset as a bit vector, then
+   checking that the two encoded integers are consistent.  Let
 
    *  bits = max_measurement.bit_length(), the number of bits needed to
       encode the largest valid measurement
 
    *  offset = 2**bits - 1 - max_measurement
 
-   The range checked measurement is the bit-encoding of offset plus the
-   measurement.  Observe that only measurements between 0 and
-   max_measurement inclusive can be encoded this way with bits bits.
+   The first bit-encoded integer is the measurement itself.  Note that
+   only measurements between 0 and 2**bits - 1 can be encoded this way
+   with bits bits.  The second bit-encoded integer is the sum of the
+   measurement and offset.  Observe that only measurements between
+   -offset and max_measurement inclusive can be encoded this way with
+   bits bits.
 
-   The circuit, denoted Sum, first checks that each entry of this bit
-   vector is a one or a zero.  It then decodes it and subtracts it from
-   offset plus the reported value.  Since the range checked measurement
-   is in the correct range, equality implies that the reported
-   measurement is as well.
+   The circuit, denoted Sum, first checks that each entry of both bit
+   vectors is a one or a zero.  It then decodes both the measurement and
+   the offset measurement, and subtracts offset from the latter.  It
+   then checks if these two values are equal.  Since both the
+   measurement and the measurement plus offset are in the same range of
+   0 to 2**bits - 1, this means that the measurement itself is between 0
+   and max_measurement.
 
    The measurement is encoded in 2*bits field elements as follows:
 

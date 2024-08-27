@@ -6174,9 +6174,9 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
 range. Each measurement is an integer in <code>range(max_measurement+1)</code>, where
 <code>max_measurement</code> is an associated parameter equal to the largest valid
 measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-3">The range check is accomplished by encoding the measurement in a way that
-ensures it is in range, then comparing the reported measurement to the range
-checked measurement. Let<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a bit vector,
+encoding the measurement plus an offset as a bit vector, then checking that the
+two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.4.2-4.1">
               <p id="section-7.4.2-4.1.1"><code>bits = max_measurement.bit_length()</code>, the number of bits needed to encode
@@ -6186,13 +6186,17 @@ the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</
               <p id="section-7.4.2-4.2.1"><code>offset = 2**bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-7.4.2-5">The range checked measurement is the bit-encoding of <code>offset</code> plus the
-measurement. Observe that only measurements between <code>0</code> and <code>max_measurement</code>
-inclusive can be encoded this way with <code>bits</code> bits.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-6">The circuit, denoted <code>Sum</code>, first checks that each entry of this bit vector is a
-one or a zero. It then decodes it and subtracts it from <code>offset</code> plus the
-reported value. Since the range checked measurement is in the correct range,
-equality implies that the reported measurement is as well.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
+measurements between <code>0</code> and <code>2**bits - 1</code> can be encoded this way with
+<code>bits</code> bits. The second bit-encoded integer is the sum of the measurement
+and <code>offset</code>. Observe that only measurements between <code>-offset</code> and
+<code>max_measurement</code> inclusive can be encoded this way with <code>bits</code> bits.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-6">The circuit, denoted <code>Sum</code>, first checks that each entry of both bit vectors is a
+one or a zero. It then decodes both the measurement and the offset
+measurement, and subtracts <code>offset</code> from the latter. It then checks if these two
+values are equal. Since both the measurement and the measurement plus <code>offset</code>
+are in the same range of <code>0</code> to <code>2**bits - 1</code>, this means that the measurement
+itself is between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-7">The measurement is encoded in <code>2*bits</code> field elements as follows:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.2-8">
 <pre>
