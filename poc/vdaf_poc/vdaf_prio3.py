@@ -29,8 +29,7 @@ Prio3InputShare: TypeAlias = \
         Optional[bytes],  # joint randomness blind
     ] | \
     tuple[  # helper input share
-        bytes,  # measurement share seed
-        bytes,  # proof share seed
+        bytes,  # measurement and proof share seed
         Optional[bytes],  # joint randomness blind
     ]
 Prio3PrepState: TypeAlias = tuple[
@@ -82,7 +81,7 @@ class Prio3(
         self.PROOFS = num_proofs
         self.flp = flp
 
-        rand_size = (1 + 2 * (shares - 1)) * self.xof.SEED_SIZE
+        rand_size = shares * self.xof.SEED_SIZE
         if flp.JOINT_RAND_LEN > 0:
             rand_size += shares * self.xof.SEED_SIZE
         self.RAND_SIZE = rand_size
@@ -270,15 +269,7 @@ class Prio3(
             seeds: list[bytes]) -> tuple[
                 Optional[list[bytes]],
                 list[Prio3InputShare[F]]]:
-        k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
-        k_helper_meas_shares = [
-            k_helper_seeds[i]
-            for i in range(0, (self.SHARES - 1) * 2, 2)
-        ]
-        k_helper_proofs_shares = [
-            k_helper_seeds[i]
-            for i in range(1, (self.SHARES - 1) * 2, 2)
-        ]
+        k_helper_shares, seeds = front(self.SHARES - 1, seeds)
         (k_prove,), seeds = front(1, seeds)
 
         # Shard the encoded measurement into shares.
@@ -286,7 +277,7 @@ class Prio3(
         for j in range(self.SHARES - 1):
             leader_meas_share = vec_sub(
                 leader_meas_share,
-                self.helper_meas_share(j + 1, k_helper_meas_shares[j]),
+                self.helper_meas_share(j + 1, k_helper_shares[j]),
             )
 
         # Generate and shard each proof into shares.
@@ -301,7 +292,7 @@ class Prio3(
                 leader_proofs_share,
                 self.helper_proofs_share(
                     j + 1,
-                    k_helper_proofs_shares[j],
+                    k_helper_shares[j],
                 ),
             )
 
@@ -315,8 +306,7 @@ class Prio3(
         ))
         for j in range(self.SHARES - 1):
             input_shares.append((
-                k_helper_meas_shares[j],
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
                 None,
             ))
         return (None, input_shares)
@@ -333,18 +323,14 @@ class Prio3(
             seeds: list[bytes]) -> tuple[
                 Optional[list[bytes]],
                 list[Prio3InputShare[F]]]:
-        k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
-        k_helper_meas_shares = [
+        k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
+        k_helper_shares = [
             k_helper_seeds[i]
-            for i in range(0, (self.SHARES - 1) * 3, 3)
-        ]
-        k_helper_proofs_shares = [
-            k_helper_seeds[i]
-            for i in range(1, (self.SHARES - 1) * 3, 3)
+            for i in range(0, (self.SHARES - 1) * 2, 2)
         ]
         k_helper_blinds = [
             k_helper_seeds[i]
-            for i in range(2, (self.SHARES - 1) * 3, 3)
+            for i in range(1, (self.SHARES - 1) * 2, 2)
         ]
         (k_leader_blind, k_prove), seeds = front(2, seeds)
 
@@ -354,7 +340,7 @@ class Prio3(
         k_joint_rand_parts = []
         for j in range(self.SHARES - 1):
             helper_meas_share = self.helper_meas_share(
-                j + 1, k_helper_meas_shares[j])
+                j + 1, k_helper_shares[j])
             leader_meas_share = vec_sub(leader_meas_share,
                                         helper_meas_share)
             k_joint_rand_parts.append(self.joint_rand_part(
@@ -382,7 +368,7 @@ class Prio3(
                 leader_proofs_share,
                 self.helper_proofs_share(
                     j + 1,
-                    k_helper_proofs_shares[j],
+                    k_helper_shares[j],
                 ),
             )
 
@@ -397,8 +383,7 @@ class Prio3(
         ))
         for j in range(self.SHARES - 1):
             input_shares.append((
-                k_helper_meas_shares[j],
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
                 k_helper_blinds[j],
             ))
         return (k_joint_rand_parts, input_shares)
@@ -438,15 +423,14 @@ class Prio3(
                 list[F],
                 list[F],
                 Optional[bytes]]:
-        (meas_share, proofs_share, k_blind) = input_share
         if agg_id > 0:
-            assert isinstance(meas_share, bytes)
-            assert isinstance(proofs_share, bytes)
-            meas_share = self.helper_meas_share(agg_id, meas_share)
-            proofs_share = self.helper_proofs_share(agg_id, proofs_share)
+            assert len(input_share) == 2
+            (k_share, k_blind) = input_share
+            meas_share = self.helper_meas_share(agg_id, k_share)
+            proofs_share = self.helper_proofs_share(agg_id, k_share)
         else:
-            assert isinstance(meas_share, list)
-            assert isinstance(proofs_share, list)
+            assert len(input_share) == 3
+            (meas_share, proofs_share, k_blind) = input_share
         return (meas_share, proofs_share, k_blind)
 
     def prove_rands(self, k_prove: bytes) -> list[F]:
@@ -501,15 +485,15 @@ class Prio3(
         return self.flp.test_vec_set_type_param(test_vec)
 
     def test_vec_encode_input_share(self, input_share: Prio3InputShare[F]) -> bytes:
-        (meas_share, proofs_share, k_blind) = input_share
         encoded = bytes()
-        if isinstance(meas_share, list) and isinstance(proofs_share, list):  # Leader
+        if len(input_share) == 3:  # Leader
+            (meas_share, proofs_share, k_blind) = input_share
             assert len(proofs_share) == self.flp.PROOF_LEN * self.PROOFS
             encoded += self.flp.field.encode_vec(meas_share)
             encoded += self.flp.field.encode_vec(proofs_share)
-        elif isinstance(meas_share, bytes) and isinstance(proofs_share, bytes):  # Helper
-            encoded += meas_share
-            encoded += proofs_share
+        elif len(input_share) == 2:  # Helper
+            (k_share, k_blind) = input_share
+            encoded += k_share
         if k_blind is not None:  # joint randomness used
             encoded += k_blind
         return encoded
