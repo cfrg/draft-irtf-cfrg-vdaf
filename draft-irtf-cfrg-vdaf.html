@@ -18,11 +18,11 @@ are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
 measurement that would result in an invalid aggregate result. 
     " name="description">
-<meta content="xml2rfc 3.22.0" name="generator">
+<meta content="xml2rfc 3.23.0" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.22.0
+  xml2rfc 3.23.0
     Python 3.12.3
     ConfigArgParse 1.7
     google-i18n-address 3.1.0
@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 27 February 2025</td>
+<td class="center">Expires 28 February 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-08-26" class="published">26 August 2024</time>
+<time datetime="2024-08-27" class="published">27 August 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-02-27">27 February 2025</time></dd>
+<dd class="expires"><time datetime="2025-02-28">28 February 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 27 February 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 28 February 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -8294,8 +8294,8 @@ def gen(
         lose = 1 - keep
         bit = Field2(keep)
 
-        (s0, t0) = self.extend(seed[0], nonce)
-        (s1, t1) = self.extend(seed[1], nonce)
+        (s0, t0) = self.extend(level, seed[0], nonce)
+        (s1, t1) = self.extend(level, seed[1], nonce)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
             t0[0] + t1[0] + bit + Field2(1),
@@ -8360,8 +8360,7 @@ def eval(
         key: bytes,
         level: int,
         prefixes: Sequence[int],
-        nonce: bytes,
-    ) -&gt; list[list[Field64]] | list[list[Field255]]:
+        nonce: bytes) -&gt; list[list[Field64]] | list[list[Field255]]:
     if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
     if level not in range(self.BITS):
@@ -8434,7 +8433,7 @@ def eval_next(
     seed_cw = correction_word[0]
     ctrl_cw = correction_word[1]
     w_cw = cast(list[Field], correction_word[2])
-    (s, t) = self.extend(prev_seed, nonce)
+    (s, t) = self.extend(level, prev_seed, nonce)
     s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
     s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
     t[0] += ctrl_cw[0] * prev_ctrl
@@ -8471,12 +8470,13 @@ def eval_next(
 <pre>
 def extend(
         self,
+        level: int,
         seed: bytes,
         nonce: bytes) -&gt; tuple[list[bytes], list[Field2]]:
-    xof = XofFixedKeyAes128(seed, format_dst(1, 0, 0), nonce)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
     s = [
-        bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
-        bytearray(xof.next(XofFixedKeyAes128.SEED_SIZE)),
+        bytearray(xof.next(xof.SEED_SIZE)),
+        bytearray(xof.next(xof.SEED_SIZE)),
     ]
     # Use the least significant bits as the control bit correction,
     # and then zero it out. This gives effectively 127 bits of
@@ -8491,11 +8491,20 @@ def convert(
         level: int,
         seed: bytes,
         nonce: bytes) -&gt; tuple[bytes, FieldVec]:
-    xof = XofFixedKeyAes128(seed, format_dst(1, 0, 1), nonce)
-    next_seed = xof.next(XofFixedKeyAes128.SEED_SIZE)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
+    next_seed = xof.next(xof.SEED_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
     return (next_seed, cast(FieldVec, w))
+
+def current_xof(self,
+                level: int,
+                seed: bytes,
+                dst: bytes,
+                nonce: bytes) -&gt; Xof:
+    if level &lt; self.BITS-1:
+        return XofFixedKeyAes128(seed, dst, nonce)
+    return XofTurboShake128(seed, dst, nonce)
 </pre>
 </div>
 <figcaption><a href="#figure-33" class="selfRef">Figure 33</a>:
@@ -8740,8 +8749,9 @@ can practically only achieve the zero function, a point function, or a
 pseudorandom function.)<a href="#section-9.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-9.4.2-3">The IDPF specified in <a href="#idpf" class="auto internal xref">Section 8.1</a> only guarantees extractability at the last level
 of the tree. (This is by virtue of using a larger field for the leaves than for
-the inner nodes.) For intermediate levels, it is feasible for a client to
-produce IDPF shares with two controlled non-zero nodes.<a href="#section-9.4.2-3" class="pilcrow">¶</a></p>
+inner nodes and using an XOF to derive leaves that is safe to model as a random
+oracle (see <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a>).) For intermediate levels, it is feasible for a
+client to produce IDPF shares with two controlled non-zero nodes.<a href="#section-9.4.2-3" class="pilcrow">¶</a></p>
 <p id="section-9.4.2-4">This is not an issue for running heavy hitters, since (1) each node in the
 prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
 would detect double voting at every level of the prefix tree, and (3) the IDPF
