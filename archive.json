@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-25T00:54:07.576029+00:00",
+  "timestamp": "2024-08-27T00:50:58.505305+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -34933,7 +34933,7 @@
       "id": "PR_kwDOGKuqOc546LEm",
       "title": "Bump VERSION to 12 (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/404",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -34942,17 +34942,19 @@
       ],
       "body": "",
       "createdAt": "2024-08-20T21:54:22Z",
-      "updatedAt": "2024-08-23T22:05:25Z",
+      "updatedAt": "2024-08-26T22:32:48Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e37da53af7092a9c6c91b4dba6b9c0dc64466dcf",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/1-ver",
       "headRefOid": "4b89b0ac1d65998eee404815f2d7ef01cb0fcd0f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-08-26T22:32:48Z",
+      "mergedAt": "2024-08-26T22:32:48Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "cafac3123fe5b914236021af2d21acbcd8f521e1"
+      },
       "comments": [],
       "reviews": [
         {
@@ -34984,19 +34986,40 @@
       ],
       "body": "Based on #404.\r\nCloses #341.\r\n\r\nThis is a safer choice for ensuring the IDPF is extracatible.",
       "createdAt": "2024-08-20T21:55:16Z",
-      "updatedAt": "2024-08-22T16:25:50Z",
+      "updatedAt": "2024-08-26T22:36:28Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/draft-12/1-ver",
-      "baseRefOid": "4b89b0ac1d65998eee404815f2d7ef01cb0fcd0f",
+      "baseRefName": "main",
+      "baseRefOid": "cafac3123fe5b914236021af2d21acbcd8f521e1",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/2-idpf-leaf-xof",
-      "headRefOid": "a27581ddd023b0b1fb1d3b0ef700d1a7070bfd70",
+      "headRefOid": "eeef5d121fc9c08d104364c16ed9753ade84a889",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Gwv8n",
+          "commit": {
+            "abbreviatedOid": "a27581d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-26T15:04:29Z",
+          "updatedAt": "2024-08-26T15:04:29Z",
+          "comments": [
+            {
+              "originalPosition": 25,
+              "body": "Oops, this needs to be reverted (here and below).",
+              "createdAt": "2024-08-26T15:04:29Z",
+              "updatedAt": "2024-08-26T15:04:30Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 406,
@@ -35012,13 +35035,13 @@
       ],
       "body": "Based on #405.\r\nCloses #306.\r\n\r\nReplace `Sum` with `SumOfRangeCheckedInputs`. The new circuit has two improvements:\r\n\r\n1. No joint randomness is used, so it's safe to use a smaller field.\r\n\r\n2. The largest measurement can be any positive integer, not just a power of two.\r\n\r\nUpdate `Prio3Sum` accordingly by switching from `Field128` to `Field64`.",
       "createdAt": "2024-08-20T21:57:17Z",
-      "updatedAt": "2024-08-22T16:26:04Z",
+      "updatedAt": "2024-08-26T22:37:48Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "cjpatton/draft-12/2-idpf-leaf-xof",
-      "baseRefOid": "a27581ddd023b0b1fb1d3b0ef700d1a7070bfd70",
+      "baseRefOid": "eeef5d121fc9c08d104364c16ed9753ade84a889",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/3-issue-306",
-      "headRefOid": "bad646dd7a478c65f472fcb0a34bb69c160b7ab4",
+      "headRefOid": "858c6c863fef3e89c95c24adefb72b93facd02ed",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -35040,13 +35063,13 @@
       ],
       "body": "Based on #406.\r\nCloses #319.\r\n\r\nA robustness attacker can try to find two distinct reports that derive the joint randomness seed by an offline birthday attack. By increasing the seed size from 16 to 32 bytes, we ensure this probability is negligible (in the random oracle model) even when the attacker can do a lot of computation (make many random oracle queries).",
       "createdAt": "2024-08-20T22:00:49Z",
-      "updatedAt": "2024-08-21T17:46:35Z",
+      "updatedAt": "2024-08-26T22:38:46Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "cjpatton/draft-12/3-issue-306",
-      "baseRefOid": "bad646dd7a478c65f472fcb0a34bb69c160b7ab4",
+      "baseRefOid": "858c6c863fef3e89c95c24adefb72b93facd02ed",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/4-larger-joint-rand-seed",
-      "headRefOid": "0e241f9c14452d9cb63dc0e74522a79b280e62cf",
+      "headRefOid": "051401a569f7590aefed7a9f631658694e8097a8",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
