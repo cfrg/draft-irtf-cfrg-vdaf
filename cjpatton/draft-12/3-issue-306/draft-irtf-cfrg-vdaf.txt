@@ -3852,9 +3852,9 @@ Table of Contents
    The first bit-encoded integer is the measurement itself.  Note that
    only measurements between 0 and 2**bits - 1 can be encoded this way
    with bits bits.  The second bit-encoded integer is the sum of the
-   measurement and offset.  Observe that only measurements between
-   -offset and max_measurement inclusive can be encoded this way with
-   bits bits.
+   measurement and offset.  Observe that this sum can only be encoded
+   this way if it is between 0 and 2**bits - 1, which implies that the
+   measurement is between -offset and max_measurement.
 
    The circuit, denoted Sum, first checks that each entry of both bit
    vectors is a one or a zero.  It then decodes both the measurement and
