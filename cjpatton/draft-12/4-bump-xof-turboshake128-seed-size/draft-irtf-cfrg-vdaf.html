@@ -8537,7 +8537,7 @@ def current_xof(self,
                 nonce: bytes) -&gt; Xof:
     if level &lt; self.BITS-1:
         return XofFixedKeyAes128(seed, dst, nonce)
-    return XofTurboShake128(seed + zeros(16), dst, nonce)
+    return XofTurboShake128(seed, dst, nonce)
 </pre>
 </div>
 <figcaption><a href="#figure-33" class="selfRef">Figure 33</a>:

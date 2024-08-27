@@ -5541,7 +5541,7 @@ Table of Contents
                    nonce: bytes) -> Xof:
        if level < self.BITS-1:
            return XofFixedKeyAes128(seed, dst, nonce)
-       return XofTurboShake128(seed + zeros(16), dst, nonce)
+       return XofTurboShake128(seed, dst, nonce)
 
                  Figure 33: Helper functions for the IDPF.
 
