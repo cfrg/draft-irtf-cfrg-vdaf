@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-08-27T00:50:58.505305+00:00",
+  "timestamp": "2024-08-29T00:51:38.593512+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -97,6 +97,11 @@
       "name": "draft-12",
       "description": "",
       "color": "36D415"
+    },
+    {
+      "name": "draft-13",
+      "description": "",
+      "color": "27D6F4"
     }
   ],
   "issues": [
@@ -3100,7 +3105,9 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "wire change",
         "needs security analysis",
@@ -3108,7 +3115,7 @@
       ],
       "body": "We currently use separate seeds for the helper's measurement share, proof share, and blind. It is likely safe to use the same PRG seed for all three.\r\n\r\nThe upshot is that this reduce bandwdith and simplify the Prio3 spec. However, it is not immediately clear how this change would impact known security analysis. See comments on https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/129 for discussion.\r\n",
       "createdAt": "2023-03-02T01:19:20Z",
-      "updatedAt": "2024-08-14T15:45:44Z",
+      "updatedAt": "2024-08-27T20:53:55Z",
       "closedAt": null,
       "comments": [
         {
@@ -3131,6 +3138,13 @@
           "body": "I'm inclined to not make this change unless folks are strongly motivated by the bandwidth savings.",
           "createdAt": "2024-08-07T15:23:27Z",
           "updatedAt": "2024-08-07T15:23:27Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Alrighty, Hannah and I feel comfortable merging the measurement share and proof share seeds, but we will leave the blind alone.",
+          "createdAt": "2024-08-27T20:53:54Z",
+          "updatedAt": "2024-08-27T20:53:54Z"
         }
       ]
     },
@@ -3538,11 +3552,12 @@
         "cjpatton"
       ],
       "labels": [
-        "editorial"
+        "editorial",
+        "draft-13"
       ],
       "body": "#flp-generic-construction-prove (and the other sections for the generic FLP) uses prose to describe steps of the generic FLP like proof generation, querying, and so on. This is distinctly less precise than the rest of the document, which uses pseudocode to describe steps. For example, consider the step to actually compute gadget polynomials:\r\n\r\n >      Let `poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-1])`. That\r\n >    is, evaluate the circuit `G_i` on the wire polynomials for the `i`th\r\n >    gadget. (Arithmetic is in the ring of polynomials over `Field`.)\r\n\r\nI would not expect most people to be familiar with the concept of a ring, nor would most people know how to intuitively implement circuit evaluation. Perhaps it might be good to give examples of common gadgets -- like Mul -- and how to implement this evaluation?\r\n\r\nMoreover, consider the following:\r\n\r\n>   Let `poly_wire_i[j-1]` be the lowest degree polynomial for which\r\n>     `poly_wire_i[j-1](alpha_i^k) == padded_w[k]` for all `k` in `[P_i]`.\r\n\r\nHow does one actually implement this? In general, prose that is not followed by an algorithm seems like it could be replaced with more precise implementation guidance. The reference implementation could be used as the basis for this content, if desired.\r\n",
       "createdAt": "2023-04-24T21:30:33Z",
-      "updatedAt": "2023-10-25T18:54:05Z",
+      "updatedAt": "2024-08-27T21:36:08Z",
       "closedAt": null,
       "comments": []
     },
@@ -4792,7 +4807,7 @@
       "id": "I_kwDOGKuqOc509fzZ",
       "title": "Generalize range check in Prio3Sum",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/306",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -4805,8 +4820,8 @@
       ],
       "body": "In Prio3Sum and Prio3SumVec we do a simple $[0, 2^k)$ range check by encoding the integer as a $k$-bit string and checking each bit is $0$ or $1$. In #287 we devised a simple strategy for generalizing this check to $[0, C)$ for any $C > 0$, even if $C$ is not a power of $2$. What's more, this check is concretely efficient in that it doesn't change the input length or the number of gadget calls. (The affine part of the computation is a bit more complex.)\r\n\r\nCould we, and would it be worth it to, do the same for Prio3Sum and Prio3SumVec? It seems to me this would be a valuable improvement.\r\n\r\ncc/ @divergentdave, @junyechen1996 ",
       "createdAt": "2023-10-25T21:43:29Z",
-      "updatedAt": "2024-08-22T16:20:41Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-27T20:00:00Z",
+      "closedAt": "2024-08-27T20:00:00Z",
       "comments": [
         {
           "author": "divergentdave",
@@ -5112,7 +5127,7 @@
       ],
       "body": "When thinking about Prio3 robustness (ia.cr/2023/130, Theorem 1) we (err, I, really) have been ignoring the term that depends on the size of the seed: $(q_\\text{RG} + {q_{\\text{Prep}}}^2) / 2^{\\kappa -1}$\r\n\r\n* $q_\\text{RG}$ - the number of random oracle queries (XofTurboShake128 is modeled as an RO)\r\n* $q_\\text{Prep}$ - the number of (potentially malicious) reports consumed in a given DAP task\r\n* $\\kappa$ - the seed size (16 bytes for XofTurboShake128)\r\n\r\nAs @albertpl pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/318#discussion_r1416669600, the bound becomes vacuous after $q_\\text{Prep}=2^{63.5}$ reports (since $(2^{63.5})^2 = 2^{\\kappa -1}$).\r\n\r\nWhile it's doubtful that we'd ever consume so many reports in a single task, it's not a bad idea to have a more conservative safety margin. 32 bytes seems like a reasonable choice.",
       "createdAt": "2023-12-07T22:57:31Z",
-      "updatedAt": "2024-08-20T22:01:14Z",
+      "updatedAt": "2024-08-27T18:59:44Z",
       "closedAt": null,
       "comments": [
         {
@@ -5121,6 +5136,13 @@
           "body": "Update: the term we're looking at here deals with the probability of two reports deriving the same joint randomness. While our main concern here was the number of online attacks against robustness (and whether a birthday attack is too close for comfort, given the current seed size), @bwesterb pointed out the possibility of an offline attacker finding pair of distinct reports that derive the same joint randomness seed. This is clearly a possibility: an offline attacker can try to find joint randomness hints that produce the same joint randomness seed, or two reports that produce the same joint randomness hints.\r\n\r\nThis points to a bug in the current proof. The ${q_\\text{Prep}}^2/2^\\kappa$ is actually more like $(q_\\text{RG} + q_\\text{Prep})^2/2^\\kappa$. @hannahdaviscrypto and I are updating the paper and will put it on eprint soon.\r\n\r\nCertainly ${q_\\text{RO}}^2/2^\\kappa$ is too weak, so we'll need to fix this. Rather than double the seed size for `XofTurboShake128`, we propose a more targeted fix: to double the size of the joint randomness seed only, and adjust the joint randomness derivation accordingly. See PR #407.",
           "createdAt": "2024-08-20T22:01:13Z",
           "updatedAt": "2024-08-20T22:01:13Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "After pondering the previous PR, we decided it would be safer to also bump the joint randomness hints, at which point it's simpler to bump the seed size in all cases. See https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/407#issuecomment-2302597582.",
+          "createdAt": "2024-08-27T18:54:25Z",
+          "updatedAt": "2024-08-27T18:59:44Z"
         }
       ]
     },
@@ -5331,7 +5353,7 @@
       "id": "I_kwDOGKuqOc6H9dia",
       "title": "IDPF: Use XofTurboShake128 for deriving the leaf nodes",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/341",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5343,8 +5365,8 @@
       ],
       "body": "This is needed for IDPF to be extractable.\r\n\r\n_Originally posted by @schoppmp in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/336#discussion_r1588266127_\r\n            ",
       "createdAt": "2024-05-06T14:36:25Z",
-      "updatedAt": "2024-08-16T19:52:14Z",
-      "closedAt": null,
+      "updatedAt": "2024-08-27T15:37:33Z",
+      "closedAt": "2024-08-27T15:37:33Z",
       "comments": []
     },
     {
@@ -5705,11 +5727,12 @@
         "schoppmp"
       ],
       "labels": [
-        "editorial"
+        "editorial",
+        "draft-13"
       ],
       "body": "We need text that conveys the intuition of how IDPFs work, and whey they're private:\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4902-L4903\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4981",
       "createdAt": "2024-08-13T21:13:44Z",
-      "updatedAt": "2024-08-13T21:13:44Z",
+      "updatedAt": "2024-08-27T21:36:19Z",
       "closedAt": null,
       "comments": []
     },
@@ -34977,7 +35000,7 @@
       "id": "PR_kwDOGKuqOc546LRo",
       "title": "idpf: Use XofTurboShake128 for the leaf nodes (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/405",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -34986,17 +35009,19 @@
       ],
       "body": "Based on #404.\r\nCloses #341.\r\n\r\nThis is a safer choice for ensuring the IDPF is extracatible.",
       "createdAt": "2024-08-20T21:55:16Z",
-      "updatedAt": "2024-08-26T22:36:28Z",
+      "updatedAt": "2024-08-27T15:37:32Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cafac3123fe5b914236021af2d21acbcd8f521e1",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/2-idpf-leaf-xof",
-      "headRefOid": "eeef5d121fc9c08d104364c16ed9753ade84a889",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "baf7e2d4267c4869bbd162a815ab95dff94deeb0",
+      "closedAt": "2024-08-27T15:37:32Z",
+      "mergedAt": "2024-08-27T15:37:32Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "63335a2dba47711ac0cc2f3752ce4a64b5f973ed"
+      },
       "comments": [],
       "reviews": [
         {
@@ -35018,6 +35043,46 @@
               "updatedAt": "2024-08-26T15:04:30Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6G6ycH",
+          "commit": {
+            "abbreviatedOid": "eeef5d1"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-27T14:26:08Z",
+          "updatedAt": "2024-08-27T14:28:58Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "I think we should update the parenthetical about the last level of the tree in section 9.4.2 to mention that we're using a different XOF, as well as a larger field.",
+              "createdAt": "2024-08-27T14:26:08Z",
+              "updatedAt": "2024-08-27T14:28:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6G7jlX",
+          "commit": {
+            "abbreviatedOid": "eeef5d1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-27T15:24:38Z",
+          "updatedAt": "2024-08-27T15:24:38Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Done!",
+              "createdAt": "2024-08-27T15:24:38Z",
+              "updatedAt": "2024-08-27T15:24:38Z"
+            }
+          ]
         }
       ]
     },
@@ -35026,7 +35091,7 @@
       "id": "PR_kwDOGKuqOc546LvD",
       "title": "Improve circuit for `Prio3Sum` (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/406",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -35035,26 +35100,173 @@
       ],
       "body": "Based on #405.\r\nCloses #306.\r\n\r\nReplace `Sum` with `SumOfRangeCheckedInputs`. The new circuit has two improvements:\r\n\r\n1. No joint randomness is used, so it's safe to use a smaller field.\r\n\r\n2. The largest measurement can be any positive integer, not just a power of two.\r\n\r\nUpdate `Prio3Sum` accordingly by switching from `Field128` to `Field64`.",
       "createdAt": "2024-08-20T21:57:17Z",
-      "updatedAt": "2024-08-26T22:37:48Z",
+      "updatedAt": "2024-08-27T19:59:59Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/draft-12/2-idpf-leaf-xof",
-      "baseRefOid": "eeef5d121fc9c08d104364c16ed9753ade84a889",
+      "baseRefName": "main",
+      "baseRefOid": "63335a2dba47711ac0cc2f3752ce4a64b5f973ed",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/3-issue-306",
-      "headRefOid": "858c6c863fef3e89c95c24adefb72b93facd02ed",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "2134de7170fa06e07ccc1387ae0d853154e8ff5d",
+      "closedAt": "2024-08-27T19:59:59Z",
+      "mergedAt": "2024-08-27T19:59:59Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "584c799979cab021792a1b4213f0612ed767081e"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6G6_Q6",
+          "commit": {
+            "abbreviatedOid": "858c6c8"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-27T14:42:52Z",
+          "updatedAt": "2024-08-27T15:17:21Z",
+          "comments": [
+            {
+              "originalPosition": 97,
+              "body": "I find this explanation confusing, I took a stab at rewriting it for clarity.\r\n```suggestion\r\n        A circuit that checks that the measurement is in\r\n        `range(max_measurement+1)`. This is accomplished by encoding the\r\n        measurement as a bit vector, encoding the measurement plus an offset\r\n        as a bit vector, then checking that the two encoded integers are consistent.\r\n```",
+              "createdAt": "2024-08-27T14:42:52Z",
+              "updatedAt": "2024-08-27T15:17:21Z"
+            },
+            {
+              "originalPosition": 108,
+              "body": "Continued.\r\n```suggestion\r\n        The first bit-encoded integer is the measurement itself. Note that only\r\n        measurements between `0` and `2**bits - 1` can be encoded this way with\r\n        `bits` bits. The second bit-encoded integer is the sum of the\r\n        measurement and `offset`. Observe that only measurements between\r\n        `-offset` and `max_measurement` inclusive can be encoded this way with\r\n        `bits` bits.\r\n```",
+              "createdAt": "2024-08-27T14:49:58Z",
+              "updatedAt": "2024-08-27T15:17:21Z"
+            },
+            {
+              "originalPosition": 111,
+              "body": "Continued (this isn't an actual GitHub suggestion because it runs off the diff's context)\r\n\r\n```\r\n        To do the range check, the circuit first checks that each\r\n        entry of both bit vectors is a one or a zero. It then decodes\r\n        both the measurement and the offset measurement, and\r\n        subtracts `offset` from the latter. It then checks if these two\r\n        values are equal. Since both the measurement and the\r\n        measurement plus `offset` are in the same range of `0` to\r\n        `2**bits - 1`, this means that the measurement itself is between\r\n        `0` and `max_measurement`.\r\n```",
+              "createdAt": "2024-08-27T14:54:53Z",
+              "updatedAt": "2024-08-27T15:17:21Z"
+            },
+            {
+              "originalPosition": 36,
+              "body": "Same as below. My two main issues with the existing explanation are that it elides that the \"reported measurement\" is encoded as a bit vector as well, and the claim that the 'range checked measurement' ensures the measurement is \"between `0` and `max_measurement`\" is too strong, since that could represent a measurement of `-offset` as well.\r\n\r\n```suggestion\r\nThe range check is accomplished by encoding the measurement as a bit vector,\r\nencoding the measurement plus an offset as a bit vector, then checking that the\r\ntwo encoded integers are consistent. Let\r\n\r\n* `bits = max_measurement.bit_length()`, the number of bits needed to encode\r\n  the largest valid measurement\r\n\r\n* `offset = 2**bits - 1 - max_measurement`\r\n\r\nThe first bit-encoded integer is the measurement itself. Note that only\r\nmeasurements between `0` and `2**bits - 1` can be encoded this way with\r\n`bits` bits. The second bit-encoded integer is the sum of the measurement\r\nand `offset`. Observe that only measurements between `-offset` and\r\n`max_measurement` inclusive can be encoded this way with `bits` bits.\r\n```",
+              "createdAt": "2024-08-27T15:08:38Z",
+              "updatedAt": "2024-08-27T15:17:21Z"
+            },
+            {
+              "originalPosition": 44,
+              "body": "Continued\r\n```suggestion\r\nThe circuit, denoted `Sum`, first checks that each entry of both bit vectors is a\r\none or a zero. It then decodes both the measurement and the offset\r\nmeasurement, and subtracts `offset` from the latter. It then checks if these two\r\nvalues are equal. Since both the measurement and the measurement plus `offset`\r\nare in the same range of `0` to `2**bits - 1`, this means that the measurement\r\nitself is between `0` and `max_measurement`.\r\n```",
+              "createdAt": "2024-08-27T15:10:10Z",
+              "updatedAt": "2024-08-27T15:17:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6G8kLn",
+          "commit": {
+            "abbreviatedOid": "858c6c8"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-27T17:09:14Z",
+          "updatedAt": "2024-08-27T17:09:14Z",
+          "comments": [
+            {
+              "originalPosition": 111,
+              "body": "Done.",
+              "createdAt": "2024-08-27T17:09:14Z",
+              "updatedAt": "2024-08-27T17:09:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6G8olp",
+          "commit": {
+            "abbreviatedOid": "9ec7fb5"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I took all your suggestions and rebased. There's one thing I'm confused about: see my comment.",
+          "createdAt": "2024-08-27T17:18:24Z",
+          "updatedAt": "2024-08-27T17:20:56Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "@divergentdave if true, this is not the intent of the construction, and it contradicts the statement above: \r\n\r\n>  Each measurement is an integer in `range(max_measurement+1)`, where associated parameter. `max_measurement` is an associated parameter equal to the largest valid measurement.",
+              "createdAt": "2024-08-27T17:18:24Z",
+              "updatedAt": "2024-08-27T17:20:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6G8s2Z",
+          "commit": {
+            "abbreviatedOid": "9ec7fb5"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-27T17:27:27Z",
+          "updatedAt": "2024-08-27T17:27:27Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "This is referring specifically to the second encoded integer, but not the first encoded integer. We only get `range(max_measurement+1)` when combining the two, and checking they're consistent. Maybe this would be clearer?\r\n\r\n> Observe that this sum can only be encoded this way if it is between `0` and `2**bits - 1`, which implies that the measurement is between `-offset` and `max_measurement`.",
+              "createdAt": "2024-08-27T17:27:27Z",
+              "updatedAt": "2024-08-27T17:27:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6G9Cjc",
+          "commit": {
+            "abbreviatedOid": "4541609"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-08-27T18:17:11Z",
+          "updatedAt": "2024-08-27T18:17:11Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "Ah ok, that makes more sense! Yes that's clearer.\r\n",
+              "createdAt": "2024-08-27T18:17:11Z",
+              "updatedAt": "2024-08-27T18:17:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6G9ULC",
+          "commit": {
+            "abbreviatedOid": "ce53d7f"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-08-27T18:54:37Z",
+          "updatedAt": "2024-08-27T18:58:07Z",
+          "comments": [
+            {
+              "originalPosition": 38,
+              "body": "nit: consistency\r\n```suggestion\r\n`offset`. Observe that this sum can only be encoded this way if it is between `0`\r\nand `2**bits - 1`, which implies that the measurement is between `-offset` and\r\n```",
+              "createdAt": "2024-08-27T18:54:37Z",
+              "updatedAt": "2024-08-27T18:58:07Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 407,
       "id": "PR_kwDOGKuqOc546Mn7",
       "title": "Prio3: Double the length of the joint randomness seed (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/407",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -35063,14 +35275,14 @@
       ],
       "body": "Based on #406.\r\nCloses #319.\r\n\r\nA robustness attacker can try to find two distinct reports that derive the joint randomness seed by an offline birthday attack. By increasing the seed size from 16 to 32 bytes, we ensure this probability is negligible (in the random oracle model) even when the attacker can do a lot of computation (make many random oracle queries).",
       "createdAt": "2024-08-20T22:00:49Z",
-      "updatedAt": "2024-08-26T22:38:46Z",
+      "updatedAt": "2024-08-27T18:50:59Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "cjpatton/draft-12/3-issue-306",
-      "baseRefOid": "858c6c863fef3e89c95c24adefb72b93facd02ed",
+      "baseRefOid": "ce53d7fffbeb92cc6efc7aa55176daee1a43eba8",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/4-larger-joint-rand-seed",
       "headRefOid": "051401a569f7590aefed7a9f631658694e8097a8",
-      "closedAt": null,
+      "closedAt": "2024-08-27T18:50:58Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -35123,8 +35335,71 @@
           "body": "> > I think a similar offline birthday attack could be mounted against either seed derivation, whether it be the input share => joint randomness hint RO call, or the joint randomness hints => joint randomness seed RO call.\r\n> \r\n> Making the joint randomness seed 32 bytes covers the second case here, and a collision in the first case only matters if all hints collide, as Chris said. So the advantage of an attack that searches for collisions one-at-a-time is going to be on the order of q^4/2^256 for two aggregators, and drop more as the number of aggregators increases. That said, the attack wouldn't have to randomize the measurement share; it could fix the nonces and measurement shares and just search among blinds to find collisions (as long as we have three seeds, not one as in the other proposed change).\r\n\r\nWhy $q^4$? This being the case, we definitely need to bump the joint randomness hints. At which point I wonder if we should just bump all seeds to 32 bytes, for consistency if nothing else.",
           "createdAt": "2024-08-21T17:46:34Z",
           "updatedAt": "2024-08-21T17:46:34Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Answering my own question: $q^4$ because we need two collisions to happen.\r\n\r\nGiven this observation, I think we'd be better off just bumping the seed size across the board.",
+          "createdAt": "2024-08-27T18:50:58Z",
+          "updatedAt": "2024-08-27T18:50:58Z"
         }
       ],
+      "reviews": []
+    },
+    {
+      "number": 408,
+      "id": "PR_kwDOGKuqOc55n5j3",
+      "title": "Bump `XofTurboShake128.SEED_SIZE` from 16 to 32 (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/408",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Closes #319.\r\n\r\nAn offline robustness robustness attacker can try to find two distinct reports that derive the same joint randomness. To thwart this attack, increase the seed size for `XofTurboShake128` from 16 to 32 bytes so that this probability is negligible (in the random oracle model) for a computationally bounded attacker.\r\n\r\n`IdpfBBCGGI21` assumes both `XofTurboShake128` and `XofFixedKeyAes128` have the same seed size. Since this is no longer the case, we need to be able to use a 16 byte seed with `XofTurboShake128`. To ensure this is safe, modify the input stream by prepending the length of the seed. This is also useful for future proofing this XOF for other use cases.",
+      "createdAt": "2024-08-27T20:49:22Z",
+      "updatedAt": "2024-08-27T20:54:40Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "584c799979cab021792a1b4213f0612ed767081e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/4-bump-xof-turboshake128-seed-size",
+      "headRefOid": "2c91d8f0a6aaf233a9887cba062163e61b6100d6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 409,
+      "id": "PR_kwDOGKuqOc55oKYx",
+      "title": "Prio3: Merge the measurement and proof share seed (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/409",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Stacked on #408.\r\nCloses #185.\r\n\r\nReplace the measurement and proof share seeds in the helper's input share with a single seed from which both the measurement and proof share are derived. Usage of the same seed for both shares is safe as long as we have domain separation between them.",
+      "createdAt": "2024-08-27T21:33:18Z",
+      "updatedAt": "2024-08-27T21:42:50Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-12/4-bump-xof-turboshake128-seed-size",
+      "baseRefOid": "2c91d8f0a6aaf233a9887cba062163e61b6100d6",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/5-merge-seeds",
+      "headRefOid": "20e9e0af6182604f3315d74d1d626809d1c32b2d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]
