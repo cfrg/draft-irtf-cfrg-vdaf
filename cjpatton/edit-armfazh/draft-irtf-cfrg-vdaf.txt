@@ -3415,7 +3415,7 @@ Table of Contents
    The second extension implemented by our FLP allows the validity
    circuit to contain multiple gadget types.  (This generalization was
    suggested in [BBCGGI19], Remark 4.5.)  This provides additional
-   flexibility for designing circuits by allowing multiple, non-afine
+   flexibility for designing circuits by allowing multiple, non-affine
    sub-circuits.  For example, the following circuit is allowed:
 
    C(meas, r) = r * Range2(meas[0]) + ... + r^L * Range2(meas[L-1]) + \
