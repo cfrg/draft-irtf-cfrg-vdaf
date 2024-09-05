@@ -5079,12 +5079,9 @@ Table of Contents
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for poplar1.xof.SEED_SIZE, Fi as
-   an alias for poplar1.idpf.field_inner.ENCODED_SIZE and Fl as an alias
-   for poplar1.idpf.field_leaf.ENCODED_SIZE.  XOF seeds are represented
-   as follows:
-
-   opaque Poplar1Seed[S];
+   the remainder we use Fi as an alias for
+   poplar1.idpf.field_inner.ENCODED_SIZE and Fl as an alias for
+   poplar1.idpf.field_leaf.ENCODED_SIZE.
 
    Elements of the inner field are encoded in little-endian byte order
    (as defined in Section 6.1) and are represented as follows:
@@ -5115,12 +5112,12 @@ Table of Contents
    structured as follows:
 
    struct {
-       Poplar1Seed seed;
+       opaque seed[16];
        Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
    } Poplar1CWSeedAndPayloadInner;
 
    struct {
-       Poplar1Seed seed;
+       opaque seed[32];
        Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
    } Poplar1CWSeedAndPayloadLeaf;
 
@@ -5167,9 +5164,9 @@ Table of Contents
    Each input share is structured as follows:
 
    struct {
-       opaque idpf_key[poplar1.Idpf.KEY_SIZE];
-       Poplar1Seed corr_seed;
-       Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
+       opaque idpf_key[poplar1.idpf.KEY_SIZE];
+       opaque corr_seed[poplaar1.xof.SEED_SIZE];
+       Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.idpf.BITS - 1)];
        Poplar1FieldLeaf corr_leaf[Fl * 2];
    } Poplar1InputShare;
 
