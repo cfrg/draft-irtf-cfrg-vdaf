@@ -7947,28 +7947,21 @@ def unshard(
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
-for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code> and <code>Fl</code> as an alias for
-<code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>. XOF seeds are represented as
-follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-8.2.6-3">
-<pre>
-opaque Poplar1Seed[S];
-</pre><a href="#section-8.2.6-3" class="pilcrow">¶</a>
-</div>
-<p id="section-8.2.6-4">Elements of the inner field are encoded in little-endian byte order (as defined
-in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-4" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-8.2.6-5">
+remainder we use <code>Fi</code> as an alias for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code>
+and <code>Fl</code> as an alias for <code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>.<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
+<p id="section-8.2.6-3">Elements of the inner field are encoded in little-endian byte order (as defined
+in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-3" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-8.2.6-4">
 <pre>
 opaque Poplar1FieldInner[Fi];
-</pre><a href="#section-8.2.6-5" class="pilcrow">¶</a>
+</pre><a href="#section-8.2.6-4" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2.6-6">Likewise, elements of the leaf field are encoded in little-endian byte order
-(as defined in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-6" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-8.2.6-7">
+<p id="section-8.2.6-5">Likewise, elements of the leaf field are encoded in little-endian byte order
+(as defined in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-5" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-8.2.6-6">
 <pre>
 opaque Poplar1FieldLeaf[Fl];
-</pre><a href="#section-8.2.6-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.2.6-6" class="pilcrow">¶</a>
 </div>
 <div id="public-share-1">
 <section id="section-8.2.6.1">
@@ -7994,12 +7987,12 @@ tightly as possible. The encoded public share is structured as follows:<a href="
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.1-4">
 <pre>
 struct {
-    Poplar1Seed seed;
+    opaque seed[16];
     Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadInner;
 
 struct {
-    Poplar1Seed seed;
+    opaque seed[32];
     Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadLeaf;
 
@@ -8055,9 +8048,9 @@ if (length + 7) // 8 != len(packed_control_bits) or \
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.2-2">
 <pre>
 struct {
-    opaque idpf_key[poplar1.Idpf.KEY_SIZE];
-    Poplar1Seed corr_seed;
-    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
+    opaque idpf_key[poplar1.idpf.KEY_SIZE];
+    opaque corr_seed[poplaar1.xof.SEED_SIZE];
+    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.idpf.BITS - 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
 </pre><a href="#section-8.2.6.2-2" class="pilcrow">¶</a>
