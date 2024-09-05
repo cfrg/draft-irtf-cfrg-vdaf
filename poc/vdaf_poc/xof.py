@@ -144,7 +144,7 @@ class XofTurboShake128(Xof):
         # Function `TurboSHAKE128(M, D, L)` is as defined in
         # Section 2.2 of [TurboSHAKE].
         #
-        # Implementation note: Rather than re-generate the output
+        # Implementation note: rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
         # of TurboSHAKE128 will expose an "absorb-then-squeeze" API
         # that allows stateful handling of the stream.
@@ -186,7 +186,7 @@ class XofFixedKeyAes128(Xof):
         # need to be kept secret from any party. However, when used
         # with an IDPF, we require the binder to be a random nonce.
         #
-        # Implementation note: This step can be cached across XOF
+        # Implementation note: this step can be cached across XOF
         # evaluations with many different seeds.
         dst_length = to_le_bytes(len(dst), 1)
         self.fixed_key = TurboSHAKE128(
@@ -206,7 +206,7 @@ class XofFixedKeyAes128(Xof):
         # need to be kept secret from any party. However, when used
         # with an IDPF, we require the binder to be a random nonce.
         #
-        # Implementation note: This step can be cached across XOF
+        # Implementation note: this step can be cached across XOF
         # evaluations with many different seeds.
         h = TurboSHAKE128.new(domain=2)
         h.update(to_le_bytes(len(dst), 1))

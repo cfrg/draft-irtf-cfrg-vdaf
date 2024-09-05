@@ -181,7 +181,7 @@ class Field2(Field):
         Return `inp` unmodified if `self == 1`; otherwise return the all-zero
         string of the same length.
 
-        Implementation note: To protect the code from timing side channels, it
+        Implementation note: to protect the code from timing side channels, it
         is important to implement this algorithm in constant time.
         """
 
