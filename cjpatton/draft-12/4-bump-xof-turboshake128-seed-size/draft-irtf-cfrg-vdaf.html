@@ -7991,18 +7991,18 @@ tightly as possible. The encoded public share is structured as follows:<a href="
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.1-4">
 <pre>
 struct {
-    opaque seed[16];
-    Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
+    opaque seed[poplar1.idpf.KEY_SIZE];
+    Poplar1FieldInner payload[Fi * poplar1.idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadInner;
 
 struct {
-    opaque seed[32];
-    Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
+    opaque seed[poplar1.idpf.KEY_SIZE];
+    Poplar1FieldLeaf payload[Fl * poplar1.idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadLeaf;
 
 struct {
     opaque packed_control_bits[packed_len];
-    Poplar1CWSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
+    Poplar1CWSeedAndPayloadInner inner[Ci * (poplar1.idpf.BITS-1)];
     Poplar1CWSeedAndPayloadLeaf leaf;
 } Poplar1PublicShare;
 </pre><a href="#section-8.2.6.1-4" class="pilcrow">¶</a>
@@ -8053,7 +8053,7 @@ if (length + 7) // 8 != len(packed_control_bits) or \
 <pre>
 struct {
     opaque idpf_key[poplar1.idpf.KEY_SIZE];
-    opaque corr_seed[poplar1.xof.SEED_SIZE];
+    opaque corr_seed[poplaar1.xof.SEED_SIZE];
     Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.idpf.BITS - 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
