@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 28 February 2025                                           ISRG
+Expires: 9 March 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          27 August 2024
+                                                        5 September 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 28 February 2025.
+   This Internet-Draft will expire on 9 March 2025.
 
 Copyright Notice
 
@@ -2056,10 +2056,11 @@ Table of Contents
 
    *  Xof(seed: bytes, dst: bytes, binder: bytes) constructs an instance
       of Xof from the given seed, domain separation tag, and binder
-      string.  (See below for definitions of these.)  The seed MUST be
-      of length SEED_SIZE and MUST be generated securely (i.e., it is
-      either the output of a CSPRNG or a previous invocation of the
-      XOF).
+      string.  (See below for definitions of these.)  The length of the
+      seed will typically be SEED_SIZE, but some XOFs may support
+      multiple seed sizes.  The seed MUST be generated securely (i.e.,
+      it is either the output of a CSPRNG or a previous invocation of
+      the XOF).
 
    *  xof.next(length: int) returns the next length bytes of output of
       xof.
