@@ -5799,9 +5799,9 @@ Table of Contents
 
    We note that for robustness, the analysis of [BBCGGI21] still assumes
    a random oracle to make the IDPF extractable.  We therefore use
-   XofTurboShake128 instead for the last level of the tree.  Note that
-   it is important that XofTurboShake128 supports 16 byte seeds, as this
-   is the seed size for the higher levels.
+   XofTurboShake128 instead for the last level of the tree.  It is
+   important that XofTurboShake128 supports 16 byte seeds, as this is
+   the seed size for the inner levels.
 
    While XofFixedKeyAes128 has been shown to be differentiable from a
    random oracle [GKWWY20], there are no known attacks exploiting this

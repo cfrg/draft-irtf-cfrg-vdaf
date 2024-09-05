@@ -8821,9 +8821,8 @@ use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
 <p id="section-9.5-6">We note that for robustness, the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> still assumes a
 random oracle to make the IDPF extractable. We therefore use XofTurboShake128
-instead for the last level of the tree. Note that it is important that
-XofTurboShake128 supports 16 byte seeds, as this is the seed size for the
-higher levels.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+instead for the last level of the tree. It is important that XofTurboShake128
+supports 16 byte seeds, as this is the seed size for the inner levels.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
 <p id="section-9.5-7">While XofFixedKeyAes128 has been shown to be differentiable from a random
 oracle <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>, there are no known attacks exploiting this difference. We
 also stress that even if the IDPF is not extractable, Poplar1 guarantees that
@@ -8869,8 +8868,8 @@ including Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>), all
 which needs to be trusted in order for the computation to be private. To hedge
 against corruptions that happen during the course of the attack, deployments
 may consider involving more than two Aggregators as described for example in
-<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode of operation,
-such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
+<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode
+of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
