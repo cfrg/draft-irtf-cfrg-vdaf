@@ -5364,10 +5364,11 @@ gate (<code>x * (x - 1)</code>). Observe that <code>C(x) = 0</code> if and only 
 <p id="section-7.3.1-8">Our goal is to allow each Aggregator, who holds a secret share of <code>x</code>, to
 correctly compute a secret share of <code>C(x)</code>. This allows the Aggregators to
 determine validity by combining their shares of the output.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
-<p id="section-7.3.1-9">Suppose for a moment that the validity circuit <code>C</code> is linear, meaning its only
-operations are addition, subtraction, and multiplication-by-constant. (The
-circuit above is non-linear because it contains a multiplication gate with two
-non-constant inputs.) Then each Aggregator can compute its share locally, since<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-9">Suppose for a moment that the validity circuit <code>C</code> is an affine arithmetic
+circuit, meaning its only operations are addition, subtraction, and
+multiplication-by-constant. (The circuit above is non-affine because it
+contains a multiplication gate with two non-constant inputs.) Then each
+Aggregator can compute its share locally, since<a href="#section-7.3.1-9" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-10">
 <pre>
 C(x_shares[0] + ... + x_shares[SHARES-1]) =
@@ -5383,8 +5384,8 @@ that each Aggregator can perform locally.<a href="#section-7.3.1-11" class="pilc
 is equal to the output of the <code>j</code>-th multiplication gate. Polynomial evaluation
 is fully linear, which means the coefficients of the polynomial can be secret
 shared in a way that allows each Aggregator to compute a share of <code>p(j)</code> for
-any <code>j</code>. These intermediate results can then be combined with the linear
-operations of the validity circuit to produce the final output.<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
+any <code>j</code>. These intermediate results can then be combined with the affine
+arithmetic operations of the validity circuit to produce the final output.<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-13">Applying this idea to the example circuit <code>C</code> above:<a href="#section-7.3.1-13" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-7.3.1-14">
 <li id="section-7.3.1-14.1">
@@ -5400,7 +5401,7 @@ is equal to its share of <code>C(x)</code>.<a href="#section-7.3.1-14.2.1" class
 </li>
           </ol>
 <p id="section-7.3.1-15">In fact, our FLP is slightly more general than this. We can replace the
-multiplication gate with any non-linear sub-circuit and apply the same idea.
+multiplication gate with any non-affine sub-circuit and apply the same idea.
 For example, in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>, the validity circuit uses the following
 sub-circuit multiple times:<a href="#section-7.3.1-15" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-16">
@@ -5411,8 +5412,8 @@ Range2(x) = x * (x - 1) = x^2 - x
 <p id="section-7.3.1-17">(This is the same functionality computed by the example circuit <code>C</code> above.)
 Here again we can interpolate the lowest degree polynomial <code>p</code> for which <code>p(j)</code>
 is the value of the <code>j</code>-th call to <code>Range2</code> in the validity circuit. Each
-validity circuit defines a sub-circuit that encapsulates its non-linear
-functionality. We refer to this sub-circuit as the "gadget".<a href="#section-7.3.1-17" class="pilcrow">¶</a></p>
+validity circuit defines a sub-circuit that encapsulates its non-affine
+arithmetic operations. We refer to this sub-circuit as the "gadget".<a href="#section-7.3.1-17" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-18">This idea provides the needed functionality, but it has one more problem: it is
 possible for a malicious Client to produce a gadget polynomial <code>p</code> that would
 result in <code>C(x)</code> being computed incorrectly, potentially resulting in an
@@ -5452,7 +5453,7 @@ high probability.<a href="#section-7.3.1.1-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-5">The second extension implemented by our FLP allows the validity circuit to
 contain multiple gadget types. (This generalization was suggested in
 <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Remark 4.5.) This provides additional flexibility for designing
-circuits by allowing multiple, non-linear sub-circuits. For example, the
+circuits by allowing multiple, non-afine sub-circuits. For example, the
 following circuit is allowed:<a href="#section-7.3.1.1-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1.1-6">
 <pre>
