@@ -3202,10 +3202,11 @@ Our goal is to allow each Aggregator, who holds a secret share of `x`, to
 correctly compute a secret share of `C(x)`. This allows the Aggregators to
 determine validity by combining their shares of the output.
 
-Suppose for a moment that the validity circuit `C` is affine, meaning its only
-operations are addition, subtraction, and multiplication-by-constant. (The
-circuit above is non-affine because it contains a multiplication gate with
-two non-constant inputs.) Then each Aggregator can compute its share locally, since
+Suppose for a moment that the validity circuit `C` is an affine arithmetic
+circuit, meaning its only operations are addition, subtraction, and
+multiplication-by-constant. (The circuit above is non-affine because it
+contains a multiplication gate with two non-constant inputs.) Then each
+Aggregator can compute its share locally, since
 
 ~~~
 C(x_shares[0] + ... + x_shares[SHARES-1]) =
@@ -3223,7 +3224,7 @@ is equal to the output of the `j`-th multiplication gate. Polynomial evaluation
 is fully linear, which means the coefficients of the polynomial can be secret
 shared in a way that allows each Aggregator to compute a share of `p(j)` for
 any `j`. These intermediate results can then be combined with the affine
-operations of the validity circuit to produce the final output.
+arithmetic operations of the validity circuit to produce the final output.
 
 Applying this idea to the example circuit `C` above:
 
@@ -3249,7 +3250,7 @@ Range2(x) = x * (x - 1) = x^2 - x
 Here again we can interpolate the lowest degree polynomial `p` for which `p(j)`
 is the value of the `j`-th call to `Range2` in the validity circuit. Each
 validity circuit defines a sub-circuit that encapsulates its non-affine
-functionality. We refer to this sub-circuit as the "gadget".
+arithmetic operations. We refer to this sub-circuit as the "gadget".
 
 This idea provides the needed functionality, but it has one more problem: it is
 possible for a malicious Client to produce a gadget polynomial `p` that would
