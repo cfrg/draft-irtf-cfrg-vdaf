@@ -3750,9 +3750,10 @@ methods:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
           <li class="normal" id="section-6.2-3.2">
             <p id="section-6.2-3.2.1"><code>Xof(seed: bytes, dst: bytes, binder: bytes)</code> constructs an instance of <code>Xof</code>
 from the given seed, domain separation tag, and binder string. (See below for
-definitions of these.) The seed <span class="bcp14">MUST</span> be of length <code>SEED_SIZE</code> and <span class="bcp14">MUST</span> be
-generated securely (i.e., it is either the output of a CSPRNG or a previous
-invocation of the XOF).<a href="#section-6.2-3.2.1" class="pilcrow">¶</a></p>
+definitions of these.) The length of the seed will typically be <code>SEED_SIZE</code>,
+but some XOFs may support multiple seed sizes. The seed <span class="bcp14">MUST</span> be generated
+securely (i.e., it is either the output of a CSPRNG or a previous invocation
+of the XOF).<a href="#section-6.2-3.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-6.2-3.3">
             <p id="section-6.2-3.3.1"><code>xof.next(length: int)</code> returns the next <code>length</code> bytes of output of
@@ -3840,11 +3841,14 @@ class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
 
     # Associated parameters
-    SEED_SIZE = 16
+    SEED_SIZE = 32
 
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         self.l = 0
-        self.m = to_le_bytes(len(dst), 1) + dst + seed + binder
+        self.m = \
+            to_le_bytes(len(dst), 1) + dst \
+            to_le_bytes(len(seed), 1) + seed + \
+            binder
 
     def next(self, length: int) -&gt; bytes:
         self.l += length
@@ -4371,7 +4375,7 @@ subsections. These methods refer to constants enumerated in
                 <code>RAND_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE * (1 + 2 * (SHARES - 1)) if flp.JOINT_RAND_LEN == 0 else Xof.SEED_SIZE * (1 + 2 * (SHARES - 1) + SHARES)</code>
+                <code>Xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN == 0 else 2 * Xof.SEED_SIZE * SHARES</code>
 </td>
             </tr>
             <tr>
@@ -4426,7 +4430,7 @@ subsections. These methods refer to constants enumerated in
                 <code>InputShare</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, bytes, Optional[bytes]]</code>
+                <code>tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, Optional[bytes]]</code>
 </td>
             </tr>
             <tr>
@@ -4629,7 +4633,7 @@ subsections below.<a href="#section-7.2.1-8" class="pilcrow">¶</a></p>
 i.e., when <code>flp.JOINT_RAND_LEN == 0</code>:<a href="#section-7.2.1.1-1" class="pilcrow">¶</a></p>
 <span id="name-sharding-an-encoded-measure"></span><div id="prio3-shard-without-joint-rand">
 <figure id="figure-16">
-              <div class="breakable lang-python sourcecode" id="section-7.2.1.1-2.1">
+              <div class="lang-python sourcecode" id="section-7.2.1.1-2.1">
 <pre>
 def shard_without_joint_rand(
         self,
@@ -4637,15 +4641,7 @@ def shard_without_joint_rand(
         seeds: list[bytes]) -&gt; tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
-    k_helper_meas_shares = [
-        k_helper_seeds[i]
-        for i in range(0, (self.SHARES - 1) * 2, 2)
-    ]
-    k_helper_proofs_shares = [
-        k_helper_seeds[i]
-        for i in range(1, (self.SHARES - 1) * 2, 2)
-    ]
+    k_helper_shares, seeds = front(self.SHARES - 1, seeds)
     (k_prove,), seeds = front(1, seeds)
 
     # Shard the encoded measurement into shares.
@@ -4653,7 +4649,7 @@ def shard_without_joint_rand(
     for j in range(self.SHARES - 1):
         leader_meas_share = vec_sub(
             leader_meas_share,
-            self.helper_meas_share(j + 1, k_helper_meas_shares[j]),
+            self.helper_meas_share(j + 1, k_helper_shares[j]),
         )
 
     # Generate and shard each proof into shares.
@@ -4668,7 +4664,7 @@ def shard_without_joint_rand(
             leader_proofs_share,
             self.helper_proofs_share(
                 j + 1,
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
             ),
         )
 
@@ -4682,8 +4678,7 @@ def shard_without_joint_rand(
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_meas_shares[j],
-            k_helper_proofs_shares[j],
+            k_helper_shares[j],
             None,
         ))
     return (None, input_shares)
@@ -4706,9 +4701,9 @@ def shard_without_joint_rand(
 </li>
             </ol>
 <p id="section-7.2.1.1-5">Notice that only one pair of measurement and proof(s) share (called the
-"leader" shares above) are vectors of field elements. The other shares
-(called the "helper" shares) are represented instead by XOF seeds, which
-are expanded into vectors of field elements.<a href="#section-7.2.1.1-5" class="pilcrow">¶</a></p>
+"leader" shares above) are vectors of field elements. The other shares (called
+the "helper" shares) are represented instead by an XOF seed, which is expanded
+into vectors of field elements.<a href="#section-7.2.1.1-5" class="pilcrow">¶</a></p>
 <p id="section-7.2.1.1-6">The methods on <code>Prio3</code> for deriving the prover randomness, measurement shares,
 and proof shares and the methods for encoding the input shares are defined in
 <a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>.<a href="#section-7.2.1.1-6" class="pilcrow">¶</a></p>
@@ -4732,18 +4727,14 @@ def shard_with_joint_rand(
         seeds: list[bytes]) -&gt; tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_seeds, seeds = front((self.SHARES - 1) * 3, seeds)
-    k_helper_meas_shares = [
+    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
+    k_helper_shares = [
         k_helper_seeds[i]
-        for i in range(0, (self.SHARES - 1) * 3, 3)
-    ]
-    k_helper_proofs_shares = [
-        k_helper_seeds[i]
-        for i in range(1, (self.SHARES - 1) * 3, 3)
+        for i in range(0, (self.SHARES - 1) * 2, 2)
     ]
     k_helper_blinds = [
         k_helper_seeds[i]
-        for i in range(2, (self.SHARES - 1) * 3, 3)
+        for i in range(1, (self.SHARES - 1) * 2, 2)
     ]
     (k_leader_blind, k_prove), seeds = front(2, seeds)
 
@@ -4753,7 +4744,7 @@ def shard_with_joint_rand(
     k_joint_rand_parts = []
     for j in range(self.SHARES - 1):
         helper_meas_share = self.helper_meas_share(
-            j + 1, k_helper_meas_shares[j])
+            j + 1, k_helper_shares[j])
         leader_meas_share = vec_sub(leader_meas_share,
                                     helper_meas_share)
         k_joint_rand_parts.append(self.joint_rand_part(
@@ -4781,7 +4772,7 @@ def shard_with_joint_rand(
             leader_proofs_share,
             self.helper_proofs_share(
                 j + 1,
-                k_helper_proofs_shares[j],
+                k_helper_shares[j],
             ),
         )
 
@@ -4796,8 +4787,7 @@ def shard_with_joint_rand(
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_meas_shares[j],
-            k_helper_proofs_shares[j],
+            k_helper_shares[j],
             k_helper_blinds[j],
         ))
     return (k_joint_rand_parts, input_shares)
@@ -4808,11 +4798,11 @@ def shard_with_joint_rand(
               </figcaption></figure>
 </div>
 <p id="section-7.2.1.2-3">The difference between this procedure and previous one is that here we compute
-joint randomnesses <code>joint_rands</code>, split it into multiple <code>joint_rand</code>,
-and pass each <code>joint_rand</code> to the proof generationg algorithm.
-(In <a href="#prio3-shard-without-joint-rand" class="auto internal xref">Figure 16</a> the joint randomness is the empty
-vector, <code>[]</code>.) This requires generating an additional value, called the
-"blind", that is incorporated into each input share.<a href="#section-7.2.1.2-3" class="pilcrow">¶</a></p>
+joint randomnesses <code>joint_rands</code>, split it into multiple <code>joint_rand</code>, and pass
+each <code>joint_rand</code> to the proof generationg algorithm. (In
+<a href="#prio3-shard-without-joint-rand" class="auto internal xref">Figure 16</a> the joint randomness is the empty vector,
+<code>[]</code>.) This requires generating an additional value, called the "blind", that
+is incorporated into each input share.<a href="#section-7.2.1.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.2.1.2-4">The joint randomness computation involves the following steps:<a href="#section-7.2.1.2-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-7.2.1.2-5">
 <li id="section-7.2.1.2-5.1">
@@ -5093,15 +5083,14 @@ def expand_input_share(
             list[F],
             list[F],
             Optional[bytes]]:
-    (meas_share, proofs_share, k_blind) = input_share
     if agg_id &gt; 0:
-        assert isinstance(meas_share, bytes)
-        assert isinstance(proofs_share, bytes)
-        meas_share = self.helper_meas_share(agg_id, meas_share)
-        proofs_share = self.helper_proofs_share(agg_id, proofs_share)
+        assert len(input_share) == 2
+        (k_share, k_blind) = input_share
+        meas_share = self.helper_meas_share(agg_id, k_share)
+        proofs_share = self.helper_proofs_share(agg_id, k_share)
     else:
-        assert isinstance(meas_share, list)
-        assert isinstance(proofs_share, list)
+        assert len(input_share) == 3
+        (meas_share, proofs_share, k_blind) = input_share
     return (meas_share, proofs_share, k_blind)
 
 def prove_rands(self, k_prove: bytes) -&gt; list[F]:
@@ -5208,9 +5197,9 @@ Aggregator's blind for generating its joint randomness part.<a href="#section-7.
 <p id="section-7.2.7.2-2">In addition, the encoding of the input shares depends on which aggregator is
 receiving the message. If the aggregator ID is <code>0</code>, then the input share
 includes the full measurement and share of proof(s). Otherwise, if the aggregator ID
-is greater than <code>0</code>, then the measurement and shares of proof(s) are represented
-by XOF seeds. We shall call the former the "Leader" and the latter the
-"Helpers".<a href="#section-7.2.7.2-2" class="pilcrow">¶</a></p>
+is greater than <code>0</code>, then the measurement and shares of proof(s) are
+represented by an XOF seed. We shall call the former the "Leader" and the
+latter the "Helpers".<a href="#section-7.2.7.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.2.7.2-3">In total there are four variants of the input share. When joint randomness is
 not used, the Leader's share is structured as follows:<a href="#section-7.2.7.2-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.2-4">
@@ -5226,8 +5215,7 @@ as follows:<a href="#section-7.2.7.2-5" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.2-6">
 <pre>
 struct {
-    Prio3Seed k_meas_share;
-    Prio3Seed k_proofs_share;
+    Prio3Seed k_share;
 } Prio3HelperShare;
 </pre><a href="#section-7.2.7.2-6" class="pilcrow">¶</a>
 </div>
@@ -7948,28 +7936,21 @@ def unshard(
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>poplar1.xof.SEED_SIZE</code>, <code>Fi</code> as an alias
-for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code> and <code>Fl</code> as an alias for
-<code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>. XOF seeds are represented as
-follows:<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-8.2.6-3">
-<pre>
-opaque Poplar1Seed[S];
-</pre><a href="#section-8.2.6-3" class="pilcrow">¶</a>
-</div>
-<p id="section-8.2.6-4">Elements of the inner field are encoded in little-endian byte order (as defined
-in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-4" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-8.2.6-5">
+remainder we use <code>Fi</code> as an alias for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code>
+and <code>Fl</code> as an alias for <code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>.<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
+<p id="section-8.2.6-3">Elements of the inner field are encoded in little-endian byte order (as defined
+in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-3" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-8.2.6-4">
 <pre>
 opaque Poplar1FieldInner[Fi];
-</pre><a href="#section-8.2.6-5" class="pilcrow">¶</a>
+</pre><a href="#section-8.2.6-4" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2.6-6">Likewise, elements of the leaf field are encoded in little-endian byte order
-(as defined in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-6" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-8.2.6-7">
+<p id="section-8.2.6-5">Likewise, elements of the leaf field are encoded in little-endian byte order
+(as defined in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-5" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-8.2.6-6">
 <pre>
 opaque Poplar1FieldLeaf[Fl];
-</pre><a href="#section-8.2.6-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.2.6-6" class="pilcrow">¶</a>
 </div>
 <div id="public-share-1">
 <section id="section-8.2.6.1">
@@ -7995,18 +7976,18 @@ tightly as possible. The encoded public share is structured as follows:<a href="
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.1-4">
 <pre>
 struct {
-    Poplar1Seed seed;
-    Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
+    opaque seed[poplar1.idpf.KEY_SIZE];
+    Poplar1FieldInner payload[Fi * poplar1.idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadInner;
 
 struct {
-    Poplar1Seed seed;
-    Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
+    opaque seed[poplar1.idpf.KEY_SIZE];
+    Poplar1FieldLeaf payload[Fl * poplar1.idpf.VALUE_LEN];
 } Poplar1CWSeedAndPayloadLeaf;
 
 struct {
     opaque packed_control_bits[packed_len];
-    Poplar1CWSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
+    Poplar1CWSeedAndPayloadInner inner[Ci * (poplar1.idpf.BITS-1)];
     Poplar1CWSeedAndPayloadLeaf leaf;
 } Poplar1PublicShare;
 </pre><a href="#section-8.2.6.1-4" class="pilcrow">¶</a>
@@ -8056,9 +8037,9 @@ if (length + 7) // 8 != len(packed_control_bits) or \
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.2-2">
 <pre>
 struct {
-    opaque idpf_key[poplar1.Idpf.KEY_SIZE];
-    Poplar1Seed corr_seed;
-    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
+    opaque idpf_key[poplar1.idpf.KEY_SIZE];
+    opaque corr_seed[poplar1.xof.SEED_SIZE];
+    Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.idpf.BITS - 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
 </pre><a href="#section-8.2.6.2-2" class="pilcrow">¶</a>
@@ -8225,10 +8206,10 @@ Poplar1. The scheme gets its name from the name of the protocol of
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <p id="section-8.3-2">The constant and type definitions required by the <code>Idpf</code> interface are given in
 <a href="#idpf-bbcggi21-param" class="auto internal xref">Table 22</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
-<p id="section-8.3-3">Our IDPF requires an XOF for deriving the output shares, as well as a variety of
-other artifacts used internally. For performance reasons, we instantiate this
-object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>). See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for
-justification of this choice.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
+<p id="section-8.3-3">Our IDPF requires an XOF for deriving the output shares, as well as a variety
+of other artifacts used internally. For performance reasons, we instantiate
+this object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>) wherever
+possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for more information.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-bbcggi21-param">
 <table class="center" id="table-22">
           <caption>
@@ -8506,8 +8487,8 @@ def extend(
         nonce: bytes) -&gt; tuple[list[bytes], list[Field2]]:
     xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
     s = [
-        bytearray(xof.next(xof.SEED_SIZE)),
-        bytearray(xof.next(xof.SEED_SIZE)),
+        bytearray(xof.next(self.KEY_SIZE)),
+        bytearray(xof.next(self.KEY_SIZE)),
     ]
     # Use the least significant bits as the control bit correction,
     # and then zero it out. This gives effectively 127 bits of
@@ -8523,7 +8504,7 @@ def convert(
         seed: bytes,
         nonce: bytes) -&gt; tuple[bytes, FieldVec]:
     xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
-    next_seed = xof.next(xof.SEED_SIZE)
+    next_seed = xof.next(self.KEY_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
     return (next_seed, cast(FieldVec, w))
@@ -8800,11 +8781,10 @@ purpose beyond the heavy-hitters tree traversal.<a href="#section-9.4.2-5" class
         <h3 id="name-requirements-for-xofs">
 <a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-requirements-for-xofs" class="section-name selfRef">Requirements for XOFs</a>
         </h3>
-<p id="section-9.5-1">As described in <a href="#xof" class="auto internal xref">Section 6.2</a>, our constructions rely on eXtendable
-Output Functions (XOFs). In the security analyses of our protocols, these are
-usually modeled as random oracles. XofTurboShake128 is designed to be
-indifferentiable from a random oracle <span>[<a href="#MRH04" class="cite xref">MRH04</a>]</span>, making it a suitable choice
-for most situations.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-1">As described in <a href="#xof" class="auto internal xref">Section 6.2</a>, our constructions rely on eXtendable Output Functions
+(XOFs). In the security analyses of our protocols, these are usually modeled as
+random oracles. XofTurboShake128 is designed to be indifferentiable from a
+random oracle <span>[<a href="#MRH04" class="cite xref">MRH04</a>]</span>, making it a suitable choice for most situations.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
 <p id="section-9.5-2">The one exception is the IDPF of <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. Here, a random oracle is not
 needed to prove privacy, since the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Proposition 1, only
 requires a Pseudorandom Generator (PRG). As observed in <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>, a PRG can be
@@ -8824,13 +8804,15 @@ hash function using fixed-key AES. For security, it assumes that AES with a
 fixed key can be modeled as a random permutation <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
-<p id="section-9.5-6">We note that for robustness, the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> still assumes a random
-oracle to make the Idpf extractable. While XofFixedKeyAes128 has been shown
-to be differentiable from a random oracle <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>, there are no known
-attacks exploiting this difference.
-We also stress that even if the Idpf is not extractable, Poplar1 guarantees
-that every client can contribute to at most one prefix among the ones being
-evaluated by the helpers.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+<p id="section-9.5-6">We note that for robustness, the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> still assumes a
+random oracle to make the IDPF extractable. We therefore use XofTurboShake128
+instead for the last level of the tree. It is important that XofTurboShake128
+supports 16 byte seeds, as this is the seed size for the inner levels.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+<p id="section-9.5-7">While XofFixedKeyAes128 has been shown to be differentiable from a random
+oracle <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>, there are no known attacks exploiting this difference. We
+also stress that even if the IDPF is not extractable, Poplar1 guarantees that
+every client can contribute to at most one prefix among the ones being
+evaluated by the helpers.<a href="#section-9.5-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-multiproof">
@@ -8871,8 +8853,8 @@ including Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>), all
 which needs to be trusted in order for the computation to be private. To hedge
 against corruptions that happen during the course of the attack, deployments
 may consider involving more than two Aggregators as described for example in
-<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode of operation,
-such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
+<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode
+of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
