@@ -8221,10 +8221,10 @@ Poplar1. The scheme gets its name from the name of the protocol of
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <p id="section-8.3-2">The constant and type definitions required by the <code>Idpf</code> interface are given in
 <a href="#idpf-bbcggi21-param" class="auto internal xref">Table 22</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
-<p id="section-8.3-3">Our IDPF requires an XOF for deriving the output shares, as well as a variety of
-other artifacts used internally. For performance reasons, we instantiate this
-object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>). See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for
-justification of this choice.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
+<p id="section-8.3-3">Our IDPF requires an XOF for deriving the output shares, as well as a variety
+of other artifacts used internally. For performance reasons, we instantiate
+this object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>) wherever
+possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for more information.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-bbcggi21-param">
 <table class="center" id="table-22">
           <caption>
@@ -8796,11 +8796,10 @@ purpose beyond the heavy-hitters tree traversal.<a href="#section-9.4.2-5" class
         <h3 id="name-requirements-for-xofs">
 <a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-requirements-for-xofs" class="section-name selfRef">Requirements for XOFs</a>
         </h3>
-<p id="section-9.5-1">As described in <a href="#xof" class="auto internal xref">Section 6.2</a>, our constructions rely on eXtendable
-Output Functions (XOFs). In the security analyses of our protocols, these are
-usually modeled as random oracles. XofTurboShake128 is designed to be
-indifferentiable from a random oracle <span>[<a href="#MRH04" class="cite xref">MRH04</a>]</span>, making it a suitable choice
-for most situations.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-1">As described in <a href="#xof" class="auto internal xref">Section 6.2</a>, our constructions rely on eXtendable Output Functions
+(XOFs). In the security analyses of our protocols, these are usually modeled as
+random oracles. XofTurboShake128 is designed to be indifferentiable from a
+random oracle <span>[<a href="#MRH04" class="cite xref">MRH04</a>]</span>, making it a suitable choice for most situations.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
 <p id="section-9.5-2">The one exception is the IDPF of <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. Here, a random oracle is not
 needed to prove privacy, since the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Proposition 1, only
 requires a Pseudorandom Generator (PRG). As observed in <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>, a PRG can be
@@ -8820,13 +8819,15 @@ hash function using fixed-key AES. For security, it assumes that AES with a
 fixed key can be modeled as a random permutation <span>[<a href="#GKWY20" class="cite xref">GKWY20</a>]</span>. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
-<p id="section-9.5-6">We note that for robustness, the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> still assumes a random
-oracle to make the Idpf extractable. While XofFixedKeyAes128 has been shown
-to be differentiable from a random oracle <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>, there are no known
-attacks exploiting this difference.
-We also stress that even if the Idpf is not extractable, Poplar1 guarantees
-that every client can contribute to at most one prefix among the ones being
-evaluated by the helpers.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+<p id="section-9.5-6">We note that for robustness, the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> still assumes a
+random oracle to make the IDPF extractable. We therefore use XofTurboShake128
+instead for the last level of the tree. It is important that XofTurboShake128
+supports 16 byte seeds, as this is the seed size for the inner levels.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
+<p id="section-9.5-7">While XofFixedKeyAes128 has been shown to be differentiable from a random
+oracle <span>[<a href="#GKWWY20" class="cite xref">GKWWY20</a>]</span>, there are no known attacks exploiting this difference. We
+also stress that even if the IDPF is not extractable, Poplar1 guarantees that
+every client can contribute to at most one prefix among the ones being
+evaluated by the helpers.<a href="#section-9.5-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-multiproof">
@@ -8867,8 +8868,8 @@ including Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>), all
 which needs to be trusted in order for the computation to be private. To hedge
 against corruptions that happen during the course of the attack, deployments
 may consider involving more than two Aggregators as described for example in
-<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode of operation,
-such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
+<a href="#star-topo" class="auto internal xref">Section 5.9</a>. Note however that some schemes are not compatible with this mode
+of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>

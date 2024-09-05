@@ -5293,8 +5293,8 @@ Table of Contents
 
    Our IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
-   we instantiate this object using XofFixedKeyAes128 (Section 6.2.2).
-   See Section 9.5 for justification of this choice.
+   we instantiate this object using XofFixedKeyAes128 (Section 6.2.2)
+   wherever possible.  See Section 9.5 for more information.
 
                    +============+======================+
                    | Parameter  | Value                |
@@ -5798,10 +5798,14 @@ Table of Contents
    the ideal cipher model leads to better concrete security [GKWWY20].
 
    We note that for robustness, the analysis of [BBCGGI21] still assumes
-   a random oracle to make the Idpf extractable.  While
-   XofFixedKeyAes128 has been shown to be differentiable from a random
-   oracle [GKWWY20], there are no known attacks exploiting this
-   difference.  We also stress that even if the Idpf is not extractable,
+   a random oracle to make the IDPF extractable.  We therefore use
+   XofTurboShake128 instead for the last level of the tree.  It is
+   important that XofTurboShake128 supports 16 byte seeds, as this is
+   the seed size for the inner levels.
+
+   While XofFixedKeyAes128 has been shown to be differentiable from a
+   random oracle [GKWWY20], there are no known attacks exploiting this
+   difference.  We also stress that even if the IDPF is not extractable,
    Poplar1 guarantees that every client can contribute to at most one
    prefix among the ones being evaluated by the helpers.
 
