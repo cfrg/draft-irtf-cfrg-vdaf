@@ -2056,10 +2056,11 @@ Table of Contents
 
    *  Xof(seed: bytes, dst: bytes, binder: bytes) constructs an instance
       of Xof from the given seed, domain separation tag, and binder
-      string.  (See below for definitions of these.)  The seed MUST be
-      of length SEED_SIZE and MUST be generated securely (i.e., it is
-      either the output of a CSPRNG or a previous invocation of the
-      XOF).
+      string.  (See below for definitions of these.)  The length of the
+      seed will typically be SEED_SIZE, but some XOFs may support
+      multiple seed sizes.  The seed MUST be generated securely (i.e.,
+      it is either the output of a CSPRNG or a previous invocation of
+      the XOF).
 
    *  xof.next(length: int) returns the next length bytes of output of
       xof.
@@ -5061,12 +5062,9 @@ Table of Contents
    implementations provide serialization methods for them.
 
    Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for poplar1.xof.SEED_SIZE, Fi as
-   an alias for poplar1.idpf.field_inner.ENCODED_SIZE and Fl as an alias
-   for poplar1.idpf.field_leaf.ENCODED_SIZE.  XOF seeds are represented
-   as follows:
-
-   opaque Poplar1Seed[S];
+   the remainder we use Fi as an alias for
+   poplar1.idpf.field_inner.ENCODED_SIZE and Fl as an alias for
+   poplar1.idpf.field_leaf.ENCODED_SIZE.
 
    Elements of the inner field are encoded in little-endian byte order
    (as defined in Section 6.1) and are represented as follows:
@@ -5097,18 +5095,18 @@ Table of Contents
    structured as follows:
 
    struct {
-       Poplar1Seed seed;
-       Poplar1FieldInner payload[Fi * Poplar1.Idpf.VALUE_LEN];
+       opaque seed[poplar1.idpf.KEY_SIZE];
+       Poplar1FieldInner payload[Fi * poplar1.idpf.VALUE_LEN];
    } Poplar1CWSeedAndPayloadInner;
 
    struct {
-       Poplar1Seed seed;
-       Poplar1FieldLeaf payload[Fl * Poplar1.Idpf.VALUE_LEN];
+       opaque seed[poplar1.idpf.KEY_SIZE];
+       Poplar1FieldLeaf payload[Fl * poplar1.idpf.VALUE_LEN];
    } Poplar1CWSeedAndPayloadLeaf;
 
    struct {
        opaque packed_control_bits[packed_len];
-       Poplar1CWSeedAndPayloadInner inner[Ci * (Poplar1.Idpf.BITS-1)];
+       Poplar1CWSeedAndPayloadInner inner[Ci * (poplar1.idpf.BITS-1)];
        Poplar1CWSeedAndPayloadLeaf leaf;
    } Poplar1PublicShare;
 
@@ -5149,9 +5147,9 @@ Table of Contents
    Each input share is structured as follows:
 
    struct {
-       opaque idpf_key[poplar1.Idpf.KEY_SIZE];
-       Poplar1Seed corr_seed;
-       Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.Idpf.BITS - 1)];
+       opaque idpf_key[poplar1.idpf.KEY_SIZE];
+       opaque corr_seed[poplar1.xof.SEED_SIZE];
+       Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.idpf.BITS - 1)];
        Poplar1FieldLeaf corr_leaf[Fl * 2];
    } Poplar1InputShare;
 
@@ -5366,7 +5364,7 @@ Table of Contents
                )
 
            w_cw = vec_add(vec_sub(b, w0), w1)
-           # Implementation note: Here we negate the correction word if
+           # Implementation note: here we negate the correction word if
            # the control bit `ctrl[1]` is set. We avoid branching on the
            # value in order to reduce leakage via timing side channels.
            mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
