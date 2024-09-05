@@ -5035,10 +5035,10 @@ Poplar1. The scheme gets its name from the name of the protocol of
 The constant and type definitions required by the `Idpf` interface are given in
 {{idpf-bbcggi21-param}}.
 
-Our IDPF requires an XOF for deriving the output shares, as well as a variety of
-other artifacts used internally. For performance reasons, we instantiate this
-object using XofFixedKeyAes128 ({{xof-fixed-key-aes128}}). See {{xof-vs-ro}} for
-justification of this choice.
+Our IDPF requires an XOF for deriving the output shares, as well as a variety
+of other artifacts used internally. For performance reasons, we instantiate
+this object using XofFixedKeyAes128 ({{xof-fixed-key-aes128}}) wherever
+possible. See {{xof-vs-ro}} for more information.
 
 | Parameter  | Value                   |
 |:-----------|:------------------------|
@@ -5493,11 +5493,10 @@ purpose beyond the heavy-hitters tree traversal.
 
 ## Requirements for XOFs {#xof-vs-ro}
 
-As described in {{xof}}, our constructions rely on eXtendable
-Output Functions (XOFs). In the security analyses of our protocols, these are
-usually modeled as random oracles. XofTurboShake128 is designed to be
-indifferentiable from a random oracle {{MRH04}}, making it a suitable choice
-for most situations.
+As described in {{xof}}, our constructions rely on eXtendable Output Functions
+(XOFs). In the security analyses of our protocols, these are usually modeled as
+random oracles. XofTurboShake128 is designed to be indifferentiable from a
+random oracle {{MRH04}}, making it a suitable choice for most situations.
 
 The one exception is the IDPF of {{idpf-bbcggi21}}. Here, a random oracle is not
 needed to prove privacy, since the analysis of {{BBCGGI21}}, Proposition 1, only
@@ -5520,12 +5519,15 @@ fixed key can be modeled as a random permutation {{GKWY20}}. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security {{GKWWY20}}.
 
-We note that for robustness, the analysis of {{BBCGGI21}} still assumes a random
-oracle to make the Idpf extractable. While XofFixedKeyAes128 has been shown
-to be differentiable from a random oracle {{GKWWY20}}, there are no known
-attacks exploiting this difference.
-We also stress that even if the Idpf is not extractable, Poplar1 guarantees
-that every client can contribute to at most one prefix among the ones being
+We note that for robustness, the analysis of {{BBCGGI21}} still assumes a
+random oracle to make the IDPF extractable. We therefore use XofTurboShake128
+instead for the last level of the tree. It is important that XofTurboShake128
+supports 16 byte seeds, as this is the seed size for the inner levels.
+
+While XofFixedKeyAes128 has been shown to be differentiable from a random
+oracle {{GKWWY20}}, there are no known attacks exploiting this difference. We
+also stress that even if the IDPF is not extractable, Poplar1 guarantees that
+every client can contribute to at most one prefix among the ones being
 evaluated by the helpers.
 
 ## Choosing the Field Size {#security-multiproof}
@@ -5562,8 +5564,8 @@ including Prio3 ({{prio3}}), allow for any number of Aggregators, only one of
 which needs to be trusted in order for the computation to be private. To hedge
 against corruptions that happen during the course of the attack, deployments
 may consider involving more than two Aggregators as described for example in
-{{star-topo}}. Note however that some schemes are not compatible with this mode of operation,
-such as Poplar1.
+{{star-topo}}. Note however that some schemes are not compatible with this mode
+of operation, such as Poplar1.
 
 # IANA Considerations
 
