@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 28 February 2025                                           ISRG
+Expires: 9 March 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          27 August 2024
+                                                        5 September 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 28 February 2025.
+   This Internet-Draft will expire on 9 March 2025.
 
 Copyright Notice
 
@@ -2766,8 +2766,8 @@ Table of Contents
 
    Notice that only one pair of measurement and proof(s) share (called
    the "leader" shares above) are vectors of field elements.  The other
-   shares (called the "helper" shares) are represented instead by an
-   XOF, which is expanded into vectors of field elements.
+   shares (called the "helper" shares) are represented instead by an XOF
+   seed, which is expanded into vectors of field elements.
 
    The methods on Prio3 for deriving the prover randomness, measurement
    shares, and proof shares and the methods for encoding the input
@@ -3098,15 +3098,13 @@ Table of Contents
                list[F],
                Optional[bytes]]:
        if agg_id > 0:
-           (k_share, k_blind) = cast(
-               tuple[bytes, Optional[bytes]],
-               input_share)
+           assert len(input_share) == 2
+           (k_share, k_blind) = input_share
            meas_share = self.helper_meas_share(agg_id, k_share)
            proofs_share = self.helper_proofs_share(agg_id, k_share)
        else:
-           (meas_share, proofs_share, k_blind) = cast(
-               tuple[list[F], list[F], Optional[bytes]],
-               input_share)
+           assert len(input_share) == 3
+           (meas_share, proofs_share, k_blind) = input_share
        return (meas_share, proofs_share, k_blind)
 
    def prove_rands(self, k_prove: bytes) -> list[F]:
@@ -3198,8 +3196,8 @@ Table of Contents
    aggregator is receiving the message.  If the aggregator ID is 0, then
    the input share includes the full measurement and share of proof(s).
    Otherwise, if the aggregator ID is greater than 0, then the
-   measurement and shares of proof(s) are represented by XOF seeds.  We
-   shall call the former the "Leader" and the latter the "Helpers".
+   measurement and shares of proof(s) are represented by an XOF seed.
+   We shall call the former the "Leader" and the latter the "Helpers".
 
    In total there are four variants of the input share.  When joint
    randomness is not used, the Leader's share is structured as follows:
