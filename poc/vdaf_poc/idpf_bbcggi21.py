@@ -3,7 +3,7 @@
 import itertools
 from typing import Sequence, TypeAlias, cast
 
-from vdaf_poc.common import format_dst, vec_add, vec_neg, vec_sub, xor
+from vdaf_poc.common import format_dst, front, vec_add, vec_neg, vec_sub, xor
 from vdaf_poc.field import Field, Field2, Field64, Field255
 from vdaf_poc.idpf import Idpf
 from vdaf_poc.xof import Xof, XofFixedKeyAes128, XofTurboShake128
@@ -283,40 +283,42 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
     def encode_public_share(
             self,
             public_share: list[CorrectionWord]) -> bytes:
+        (seeds, ctrl, payloads) = zip(*public_share)
         encoded = bytes()
-        control_bits = list(itertools.chain.from_iterable(
-            cw[1] for cw in public_share
-        ))
-        encoded += pack_bits(control_bits)
-        for (level, (seed_cw, _, w_cw)) \
-                in enumerate(public_share):
-            field = cast(type[Field], self.current_field(level))
-            encoded += seed_cw
-            encoded += field.encode_vec(cast(list[Field], w_cw))
+        encoded += pack_bits(list(itertools.chain.from_iterable(ctrl)))
+        for seed in seeds:
+            encoded += seed
+        for payload in payloads[:-1]:
+            encoded += self.field_inner.encode_vec(payload)
+        encoded += self.field_leaf.encode_vec(payloads[-1])
         return encoded
 
     def decode_public_share(
             self,
             encoded: bytes) -> list[CorrectionWord]:
-        l = (2 * self.BITS + 7) // 8
-        encoded_ctrl, encoded = encoded[:l], encoded[l:]
-        control_bits = unpack_bits(encoded_ctrl, 2 * self.BITS)
-        public_share = []
+        ctrl = []
+        (encoded_ctrl, encoded) = front((2 * self.BITS + 7) // 8, encoded)
+        flattened_ctrl = unpack_bits(encoded_ctrl, 2 * self.BITS)
+        for level in range(self.BITS):
+            ctrl.append((
+                flattened_ctrl[2 * level],
+                flattened_ctrl[2 * level + 1],
+            ))
+        seeds = []
+        for _ in range(self.BITS):
+            (seed, encoded) = front(self.KEY_SIZE, encoded)
+            seeds.append(seed)
+        payloads = []
         for level in range(self.BITS):
             field = self.current_field(level)
-            ctrl_cw = (
-                control_bits[level * 2],
-                control_bits[level * 2 + 1],
-            )
-            l = XofFixedKeyAes128.SEED_SIZE
-            seed_cw, encoded = encoded[:l], encoded[l:]
-            l = field.ENCODED_SIZE * self.VALUE_LEN
-            encoded_w_cw, encoded = encoded[:l], encoded[l:]
-            w_cw = field.decode_vec(encoded_w_cw)
-            public_share.append((seed_cw, ctrl_cw, w_cw))
+            (encoded_payload, encoded) = front(
+                field.ENCODED_SIZE * self.VALUE_LEN,
+                encoded)
+            payload = field.decode_vec(encoded_payload)
+            payloads.append(payload)
         if len(encoded) != 0:
             raise ValueError('trailing bytes')
-        return public_share
+        return list(zip(seeds, ctrl, payloads))
 
     def test_vec_encode_public_share(self, public_share: list[CorrectionWord]) -> bytes:
         return self.encode_public_share(public_share)

@@ -4784,8 +4784,9 @@ network while executing `Poplar1`. It is RECOMMENDED that implementations
 provide serialization methods for them.
 
 Message structures are defined following {{Section 3 of !RFC8446}}). In the
-remainder we use `Fi` as an alias for `poplar1.idpf.field_inner.ENCODED_SIZE`
-and `Fl` as an alias for `poplar1.idpf.field_leaf.ENCODED_SIZE`.
+remainder we use `Fi` as an alias for `poplar1.idpf.field_inner.ENCODED_SIZE`,
+`Fl` as an alias for `poplar1.idpf.field_leaf.ENCODED_SIZE`, and `B` as an
+alias for `poplar1.idpf.BITS`.
 
 Elements of the inner field are encoded in little-endian byte order (as defined
 in {{field}}) and are represented as follows:
@@ -4811,31 +4812,20 @@ of "correction words". A correction word has three components:
 3. the payload of type `list[Field64]` for the first `BITS-1` words and
    `list[Field255]` for the last word.
 
-The encoding is straightforward, except that the control bits are packed as
-tightly as possible. The encoded public share is structured as follows:
+The encoding is a straightforward structure of arrays, except that the control
+bits are packed as tightly as possible. The encoded public share is structured
+as follows:
 
 ~~~ tls-presentation
 struct {
-    opaque seed[poplar1.idpf.KEY_SIZE];
-    Poplar1FieldInner payload[Fi * poplar1.idpf.VALUE_LEN];
-} Poplar1CWSeedAndPayloadInner;
-
-struct {
-    opaque seed[poplar1.idpf.KEY_SIZE];
-    Poplar1FieldLeaf payload[Fl * poplar1.idpf.VALUE_LEN];
-} Poplar1CWSeedAndPayloadLeaf;
-
-struct {
     opaque packed_control_bits[packed_len];
-    Poplar1CWSeedAndPayloadInner inner[Ci * (poplar1.idpf.BITS-1)];
-    Poplar1CWSeedAndPayloadLeaf leaf;
+    opaque seed[poplar1.idpf.KEY_SIZE*B];
+    Poplar1FieldInner payload_inner[Fi*poplar1.idpf.VALUE_LEN*(B-1)];
+    Poplar1FieldLeaf payload_leaf[Fl*poplar1.idpf.VALUE_LEN];
 } Poplar1PublicShare;
 ~~~
 
-Here `Ci` denotes the length of `Poplar1CWSeedAndPayloadInner` and
-`packed_len = (2*Poplar1.Idpf.BITS + 7) // 8` is the length of the packed
-control bits.
-
+Here `packed_len = (2*B + 7) // 8` is the length of the packed control bits.
 Field `packed_control_bits` is encoded with the following function:
 
 ~~~ python
