@@ -176,23 +176,6 @@ class Field2(Field):
     # Sage finite field object.
     gf = GF(MODULUS)
 
-    def conditional_select(self, inp: bytes) -> bytes:
-        """
-        Return `inp` unmodified if `self == 1`; otherwise return the all-zero
-        string of the same length.
-
-        Implementation note: to protect the code from timing side channels, it
-        is important to implement this algorithm in constant time.
-        """
-
-        # Convert the element into a bitmask such that `m == 255` if
-        # `self == 1` and `m == 0` otherwise.
-        m = 0
-        v = self.as_unsigned()
-        for i in range(8):
-            m |= v << i
-        return bytes(map(lambda x: m & x, inp))
-
 
 class Field64(NttField):
     """The finite field GF(2^32 * 4294967295 + 1)."""

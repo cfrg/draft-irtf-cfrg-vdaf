@@ -66,9 +66,6 @@ class TestFields(unittest.TestCase):
         self.assertEqual(Field2(1) + Field2(1), Field2(0))
         self.assertEqual(Field2(1) * Field2(1), Field2(1))
         self.assertEqual(-Field2(1), Field2(1))
-        self.assertEqual(Field2(1).conditional_select(b'hello'), b'hello')
-        self.assertEqual(Field2(0).conditional_select(
-            b'hello'), bytes([0, 0, 0, 0, 0]))
 
     def test_interp(self) -> None:
         # Test polynomial interpolation.
