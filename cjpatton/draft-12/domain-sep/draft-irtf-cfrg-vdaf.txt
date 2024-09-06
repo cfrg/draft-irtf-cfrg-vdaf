@@ -5864,7 +5864,7 @@ Table of Contents
    There are also some important limitations to be aware of.  For
    example, Prio3 provides domain separation between families of
    circuits, but does not provide domain separation between instances of
-   a circuit.  Concretely it is possible for Aggregators to accept a
+   a circuit.  Concretely, it is possible for Aggregators to accept a
    report for Prio3SumVec from a Client who disagrees with them on the
    value of bits and length.  This is because there is no binding of the
    circuit parameters to the computation.
