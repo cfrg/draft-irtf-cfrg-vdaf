@@ -5822,6 +5822,11 @@ Table of Contents
    robustness for PROOFS == 2 is feasible, if impractical; but PROOFS ==
    1 is completely broken for such a small field.
 
+   We stress that weak parameters (too small a field, too few proofs, or
+   both) can be exploited to attack any aggregation task for which they
+   are deployed.  To mitigate offline attacks, it is necessary to
+   disable all tasks that use the weak parameters.
+
 9.7.  Choosing the Number of Aggregators
 
    Two Aggregators are required for privacy in our threat model, but
@@ -5854,9 +5859,7 @@ Table of Contents
        small.  (See Section 9.6.)  The joint randomness derivation is
        bound to both the field (via the algorithm ID) and the number of
        proofs, thereby ensuring that joint randomness derived for weak
-       parameters is not reused for stronger parameters.  We stress,
-       however, that the weak parameters can be exploited as long as any
-       aggregation task for which they are deployed is in use.
+       parameters is not reused for stronger parameters.
 
    There are also some important limitations to be aware of.  For
    example, Prio3 provides domain separation between families of

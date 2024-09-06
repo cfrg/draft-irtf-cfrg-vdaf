@@ -8847,6 +8847,10 @@ joint randomness (<code>JOINT_RAND_LEN &gt; 0</code>) and <code>PROOFS == 1</cod
 instead, but <code>PROOFS</code> <span class="bcp14">MUST</span> be set to at least <code>3</code>. Breaking robustness for
 <code>PROOFS == 2</code> is feasible, if impractical; but <code>PROOFS == 1</code> is completely
 broken for such a small field.<a href="#section-9.6-4" class="pilcrow">¶</a></p>
+<p id="section-9.6-5">We stress that weak parameters (too small a field, too few proofs, or both) can
+be exploited to attack any aggregation task for which they are deployed. To
+mitigate offline attacks, it is necessary to disable all tasks that use the
+weak parameters.<a href="#section-9.6-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="num-aggregators">
@@ -8887,8 +8891,7 @@ size or number of proofs is sufficiently small. (See
 <a href="#security-multiproof" class="auto internal xref">Section 9.6</a>.) The joint randomness derivation is bound to both
 the field (via the algorithm ID) and the number of proofs, thereby ensuring
 that joint randomness derived for weak parameters is not reused for stronger
-parameters. We stress, however, that the weak parameters can be exploited as
-long as any aggregation task for which they are deployed is in use.<a href="#section-9.8-3.2.1" class="pilcrow">¶</a></p>
+parameters.<a href="#section-9.8-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-9.8-4">There are also some important limitations to be aware of. For example, Prio3
