@@ -5855,7 +5855,7 @@ Table of Contents
        bound to both the field (via the algorithm ID) and the number of
        proofs, thereby ensuring that joint randomness derived for weak
        parameters is not reused for stronger parameters.  We stress,
-       however, that the weak parameters can be exploited as any
+       however, that the weak parameters can be exploited as long as any
        aggregation task for which they are deployed is in use.
 
    There are also some important limitations to be aware of.  For
