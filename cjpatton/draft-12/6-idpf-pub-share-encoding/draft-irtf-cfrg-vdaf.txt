@@ -5090,9 +5090,9 @@ Table of Contents
    3.  the payload of type list[Field64] for the first BITS-1 words and
        list[Field255] for the last word.
 
-   The encoding is straightforward, except that the control bits are
-   packed as tightly as possible.  The encoded public share is
-   structured as follows:
+   The encoding is a straightforward structure of arrays, except that
+   the control bits are packed as tightly as possible.  The encoded
+   public share is structured as follows:
 
    struct {
        opaque packed_control_bits[packed_len];
