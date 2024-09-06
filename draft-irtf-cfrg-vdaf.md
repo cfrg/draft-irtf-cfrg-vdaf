@@ -2126,8 +2126,8 @@ cases where a more efficient instantiation based on fixed-key AES is possible.
 For now, this is limited to the XOF used inside the Idpf {{idpf}}
 implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT RECOMMENDED to use this
 XOF anywhere else. The length of the domain separation string `dst` passed to
-XofFixedKeyAes128 MUST NOT exceed 255 bytes. See Security Considerations
-{{security}} for a more detailed discussion.
+XofFixedKeyAes128 MUST NOT exceed 255 bytes. See {{security}} for a more
+detailed discussion.
 
 ~~~ python
 class XofFixedKeyAes128(Xof):
@@ -5530,11 +5530,14 @@ Care must be taken, however, since a smaller field also results in degraded (or
 even vacuous) robustness.
 
 Different variants of Prio3 ({{prio3}}) use different field sizes: Prio3Count
-uses Field64; but Prio3Sum, Prio3SumVec, and Prio3Histogram use Field128, a
-field that is twice as large as Field64. This is due to the use of joint
-randomness ({{flp}}) in the latter variants. Joint randomness allows for more
-flexible circuit design (see {{flp-bbcggi19-overview-extensions}}), but opens up
-Prio3 to precomputation attacks, which the larger field mitigates. (See
+and Prio3Sum use Field64; but Prio3SumVec, Prio3Histogram, and
+Prio3MultihotCountVec all use Field128, a field that is twice as large as
+Field64. This is due to the use of joint randomness ({{flp}}) in the latter
+variants. Joint randomness allows for more flexible circuit design (see
+{{flp-bbcggi19-overview-extensions}}), but opens up Prio3 to offline attacks in
+which the attacker searches for input shares for an invalid measurement that
+derive joint randomness that causes the circuit to accept. Choosing a large
+enough field ensures this computation is too expensive to be feasible. (See
 {{DPRS23}}, Theorem 1.) Note that privacy is not susceptible to such attacks.
 
 Another way to mitigate this issue (or improve robustness in general) is to
@@ -5548,6 +5551,11 @@ instead, but `PROOFS` MUST be set to at least `3`. Breaking robustness for
 `PROOFS == 2` is feasible, if impractical; but `PROOFS == 1` is completely
 broken for such a small field.
 
+We stress that weak parameters (too small a field, too few proofs, or both) can
+be exploited to attack any aggregation task using those parameters. To
+mitigate offline attacks, it is necessary to disable all tasks that use the
+weak parameters.
+
 ## Choosing the Number of Aggregators {#num-aggregators}
 
 Two Aggregators are required for privacy in our threat model, but some (V)DAFs,
@@ -5557,6 +5565,35 @@ against corruptions that happen during the course of the attack, deployments
 may consider involving more than two Aggregators as described for example in
 {{star-topo}}. Note however that some schemes are not compatible with this mode
 of operation, such as Poplar1.
+
+## Defense-in-Depth Measures
+
+Prio3 and Poplar1 are designed to resist some attacks that fall outside the
+main threat model for VDAFs.
+
+Broadly speaking, domain separation is used to prevent cross protocol attacks,
+in which data from evaluation of one VDAF translates to an attack against another.
+For example:
+
+1. Weak entropy sources: the VDAF algorithm ID is bound to each XOF invocation,
+   thereby ensuring the outputs are different between VDAF invocations, even if
+   the underlying randomness is the same. For example, two different instances
+   of Prio3 would compute different measurement shares.
+
+1. Weak parameters: Prio3 variants that require joint randomness are subject to
+   offline attacks against robustness. These attacks are feasible if the field
+   size or number of proofs is sufficiently small. (See
+   {{security-multiproof}}.) The joint randomness derivation is bound to both
+   the field (via the algorithm ID) and the number of proofs, thereby ensuring
+   that joint randomness derived for weak parameters is not reused for stronger
+   parameters.
+
+There are also some important limitations to be aware of. For example, Prio3
+provides domain separation between families of circuits, but does not provide
+domain separation between instances of a circuit. Concretely, it is possible
+for Aggregators to accept a report for Prio3SumVec from a Client who disagrees
+with them on the value of `bits` and `length`. This is because there is no
+binding of the circuit parameters to the computation.
 
 # IANA Considerations
 
