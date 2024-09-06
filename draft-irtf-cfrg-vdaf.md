@@ -2189,7 +2189,7 @@ class XofFixedKeyAes128(Xof):
         return xor(AES128(self.fixed_key, sigma_block), sigma_block)
 ~~~
 
-### The Domain Separation Tag and Binder String
+### The Domain Separation Tag and Binder String {#dst-binder}
 
 XOFs are used to map a seed to a finite domain, e.g., a fresh seed or a vector
 of field elements. To ensure domain separation, the derivation is needs to be
@@ -5544,22 +5544,53 @@ of operation, such as Poplar1.
 
 # IANA Considerations
 
-A codepoint for each (V)DAF in this document is defined in the table below. Note
-that `0xFFFF0000` through `0xFFFFFFFF` are reserved for private use.
+IANA is requested to make one new registry:
 
-| Value                        | Scheme                | Type | Reference                 |
-|:-----------------------------|:----------------------|:-----|:--------------------------|
-| `0x00000000`                 | Prio3Count            | VDAF | {{prio3count}}            |
-| `0x00000001`                 | Prio3Sum              | VDAF | {{prio3sum}}              |
-| `0x00000002`                 | Prio3SumVec           | VDAF | {{prio3sumvec}}           |
-| `0x00000003`                 | Prio3Histogram        | VDAF | {{prio3histogram}}        |
-| `0x00000004`                 | Prio3MultihotCountVec | VDAF | {{prio3multihotcountvec}} |
-| `0x00000005` to `0x00000FFF` | reserved for Prio3    | VDAF | n/a                       |
-| `0x00001000`                 | Poplar1               | VDAF | {{poplar1-inst}}          |
-| `0xFFFF0000` to `0xFFFFFFFF` | reserved              | n/a  | n/a                       |
-{: #codepoints title="Unique identifiers for (V)DAFs."}
+* DAF and VDAF Identifiers
 
-> TODO Add IANA considerations for the codepoints summarized in {{codepoints}}.
+This registry should be created under the heading "Verifiable Distributed
+Aggregation Functions (VDAF)", and administered under the Specification Required
+policy {{!RFC8126}}.
+
+The "VDAF Identifiers" registry lists identifiers for Distributed Aggregation
+Functions (DAFs) and Verifiable Distributed Aggregation Functions (VDAFs). These
+identifiers are four-byte values, so the minimum possible value is 0x00000000
+and the maximum possible value is 0xffffffff.
+
+Template:
+
+* Value: The four-byte identifier for the DAF or VDAF
+* Scheme: The name of the DAF or VDAF
+* Type: Either "DAF" for a Distributed Aggregation Function or "VDAF" for a
+  Verifiable Distributed Aggregation Function
+* Reference: Where the algorithm is defined
+
+The initial contents of the registry are as follows:
+
+| Value                        | Scheme                   | Type | Reference                             |
+|:-----------------------------|:-------------------------|:-----|:--------------------------------------|
+| `0x00000000`                 | Reserved                 | n/a  | RFC XXXX                              |
+| `0x00000001`                 | Prio3Count               | VDAF | {{prio3count}} of RFC XXXX            |
+| `0x00000002`                 | Prio3Sum                 | VDAF | {{prio3sum}} of RFC XXXX              |
+| `0x00000003`                 | Prio3SumVec              | VDAF | {{prio3sumvec}} of RFC XXXX           |
+| `0x00000004`                 | Prio3Histogram           | VDAF | {{prio3histogram}} of RFC XXXX        |
+| `0x00000005`                 | Prio3MultihotCountVec    | VDAF | {{prio3multihotcountvec}} of RFC XXXX |
+| `0x00000006`                 | Poplar1                  | VDAF | {{poplar1-inst}} of RFC XXXX          |
+| `0xFFFF0000` to `0xFFFFFFFF` | Reserved for Private Use | n/a  | n/a                                   |
+{: #codepoints title="Verifiable Distributed Aggregation Function Identifiers Registry"}
+
+(RFC EDITOR: Please replace "RFC XXXX" above with the RFC number assigned to
+this document.)
+
+VDAF identifiers are used for domain separation, as described in {{dst-binder}}.
+Domain separation guards against failures of entropy sources, by ensuring that
+invocations of different VDAFs use different derived values, even if they are
+invoked with the same underlying random data.
+
+The benefits of domain separation are undermined if different VDAFs are used
+with the same VDAF Identifier.  The "Reserved for Private Use" code points
+should thus be used judiciously, because they provide no defense against such
+collisions.  Applications SHOULD prefer the use of registered code points.
 
 --- back
 
