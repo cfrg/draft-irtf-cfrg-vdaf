@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-05T00:52:17.371984+00:00",
+  "timestamp": "2024-09-08T00:56:39.623799+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -2134,15 +2134,25 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "bifurcation"
+      ],
       "labels": [
-        "pre-RGLC"
+        "draft-12"
       ],
       "body": "As of VDAF-03, the draft has codepoints intended to be used by other drafts (e.g., DAP). These are currently summarized in a table `{{codepoints}}`. This is good enough for now, but eventually we'll need to flesh this out into a section that IANA can actually use. @bifurcation points to an example of how to do this properly:  https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/104#discussion_r948280200_",
       "createdAt": "2022-08-23T16:14:29Z",
-      "updatedAt": "2024-06-06T22:42:00Z",
+      "updatedAt": "2024-09-06T19:26:34Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@bifurcation we have a table of VDAF codepoints that are used internally by our constructions for domain separations. Can you please make sure this section is complete? https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#name-iana-considerations\r\n\r\nYou mentioned on the 2024/9/6 call that we'll have to ask IANA to define a policy for registering DAF/VDAF codepoints.",
+          "createdAt": "2024-09-06T16:32:45Z",
+          "updatedAt": "2024-09-06T16:32:45Z"
+        }
+      ]
     },
     {
       "number": 113,
@@ -3102,7 +3112,7 @@
       "id": "I_kwDOGKuqOc5fuOco",
       "title": "Prio3: Consider merging helper shares and blinds into a single seed",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/185",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -3115,8 +3125,8 @@
       ],
       "body": "We currently use separate seeds for the helper's measurement share, proof share, and blind. It is likely safe to use the same PRG seed for all three.\r\n\r\nThe upshot is that this reduce bandwdith and simplify the Prio3 spec. However, it is not immediately clear how this change would impact known security analysis. See comments on https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/129 for discussion.\r\n",
       "createdAt": "2023-03-02T01:19:20Z",
-      "updatedAt": "2024-08-27T20:53:55Z",
-      "closedAt": null,
+      "updatedAt": "2024-09-05T21:08:53Z",
+      "closedAt": "2024-09-05T21:08:53Z",
       "comments": [
         {
           "author": "martinthomson",
@@ -4947,15 +4957,25 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "pre-RGLC"
       ],
       "body": "We removed them a couple of drafts ago because updating them was becoming a pain. (Note that machine-readable test vectors can be found in https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)",
       "createdAt": "2023-11-16T15:03:15Z",
-      "updatedAt": "2024-06-06T22:42:22Z",
+      "updatedAt": "2024-09-06T16:26:48Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Let's format this the way recent CFRG RFCs do (e.g., RFC 9180)",
+          "createdAt": "2024-09-06T16:26:47Z",
+          "updatedAt": "2024-09-06T16:26:47Z"
+        }
+      ]
     },
     {
       "number": 314,
@@ -5115,7 +5135,7 @@
       "id": "I_kwDOGKuqOc55GJpO",
       "title": "XofTurboShake128: Consider bumping SEED_SIZE from 16 to 32 bytes",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/319",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5127,8 +5147,8 @@
       ],
       "body": "When thinking about Prio3 robustness (ia.cr/2023/130, Theorem 1) we (err, I, really) have been ignoring the term that depends on the size of the seed: $(q_\\text{RG} + {q_{\\text{Prep}}}^2) / 2^{\\kappa -1}$\r\n\r\n* $q_\\text{RG}$ - the number of random oracle queries (XofTurboShake128 is modeled as an RO)\r\n* $q_\\text{Prep}$ - the number of (potentially malicious) reports consumed in a given DAP task\r\n* $\\kappa$ - the seed size (16 bytes for XofTurboShake128)\r\n\r\nAs @albertpl pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/318#discussion_r1416669600, the bound becomes vacuous after $q_\\text{Prep}=2^{63.5}$ reports (since $(2^{63.5})^2 = 2^{\\kappa -1}$).\r\n\r\nWhile it's doubtful that we'd ever consume so many reports in a single task, it's not a bad idea to have a more conservative safety margin. 32 bytes seems like a reasonable choice.",
       "createdAt": "2023-12-07T22:57:31Z",
-      "updatedAt": "2024-08-27T18:59:44Z",
-      "closedAt": null,
+      "updatedAt": "2024-09-05T20:49:54Z",
+      "closedAt": "2024-09-05T20:49:54Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5272,7 +5292,7 @@
       "id": "I_kwDOGKuqOc6Ei6kZ",
       "title": "Version Poplar1 and Prio3 separately",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/334",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -5281,9 +5301,17 @@
       ],
       "body": "The draft specifies a constant `VERSION` that is used for domain separation in Prio3 and Poplar1. This is intended to force incompatibility across drafts such that an old version of Prio3 doesn't interop with a new version. (Likewise for Poplar1.)\r\n\r\nWe're considering two breaking changes for Poplar1 in the next draft:\r\n- #316\r\n- #333\r\n\r\nHowever we're not likely to see breaking changes for Prio3.  VDAF-08-Prio3 is already deployed:  I propose that, for VDAF-09, we keep the version tag for Prio3 the same and only bump the version tag for Poplar1. If breaking changes for Prio3 are required in the future, then we can bump the version tag then.",
       "createdAt": "2024-04-03T19:29:27Z",
-      "updatedAt": "2024-08-14T15:47:31Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2024-09-06T17:21:35Z",
+      "closedAt": "2024-09-06T17:21:34Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Draft 12 will have breaking changes for both, so this is not necessary at the moment. If later we have breaking changes for one VDAF but not the other, then we'll make them then.",
+          "createdAt": "2024-09-06T17:21:34Z",
+          "updatedAt": "2024-09-06T17:21:34Z"
+        }
+      ]
     },
     {
       "number": 335,
@@ -5732,9 +5760,17 @@
       ],
       "body": "We need text that conveys the intuition of how IDPFs work, and whey they're private:\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4902-L4903\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4981",
       "createdAt": "2024-08-13T21:13:44Z",
-      "updatedAt": "2024-08-27T21:36:19Z",
+      "updatedAt": "2024-09-06T17:06:46Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "As noted in the 2024/9/6 call: Let's remoe the TODOs and add this new text in an overview section before key generation and evaluations sections.",
+          "createdAt": "2024-09-06T17:06:45Z",
+          "updatedAt": "2024-09-06T17:06:45Z"
+        }
+      ]
     },
     {
       "number": 398,
@@ -5756,6 +5792,108 @@
       "updatedAt": "2024-08-20T01:47:29Z",
       "closedAt": "2024-08-20T01:47:29Z",
       "comments": []
+    },
+    {
+      "number": 411,
+      "id": "I_kwDOGKuqOc6VgvNI",
+      "title": "@armfazh: draft 11: Replace circuit and gadget descriptions with their classes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/411",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "We currently [describe a circuit](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-7.4.1) this way:\r\n\r\n```\r\nThe Count validity circuit is defined as\r\n\r\ndef eval(\r\n        self,\r\n        meas: list[F],\r\n        joint_rand: list[F],\r\n        _num_shares: int) -> list[F]:\r\n    self.check_valid_eval(meas, joint_rand)\r\n    squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])\r\n    return [squared - meas[0]]\r\n```\r\n\r\nHere \"Count\" refers to a sub-class of \"Valid\" and \"eval()\" refers to an abstract method on Valid. This is not at all clear from the text. In particular, \"eval\" here doesn't appear to have anything to do with \"Count\".\r\n\r\n@armfazh suggests we fix this by listing the \"Count\" class here instead. This also has the benefit of making this section of the draft more copy-pastable. \r\n\r\nWe should do the same for gadgets as well. IN fact, rather than define them \"on first use\" as we're doing now, we should pull them into their own section. I believe we just have three: `Mul`, `PolyEval`, and `ParallelSum`.",
+      "createdAt": "2024-09-05T17:44:50Z",
+      "updatedAt": "2024-09-05T17:44:56Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 412,
+      "id": "I_kwDOGKuqOc6Vg6NL",
+      "title": "@armfazh: draft 11: In prose, write `[start, stop)` instead of `range(start, stop)`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/412",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "",
+      "createdAt": "2024-09-05T18:09:29Z",
+      "updatedAt": "2024-09-06T00:07:20Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm not sure I like this idea. I would like to have different notation for math and code, but the only thing we have for either is back ticks, e.g., `x`. It would be nice if everything in backticks was code.",
+          "createdAt": "2024-09-06T00:07:19Z",
+          "updatedAt": "2024-09-06T00:07:19Z"
+        }
+      ]
+    },
+    {
+      "number": 416,
+      "id": "I_kwDOGKuqOc6VqPgd",
+      "title": "IDPF: Change APIs to take alpha as a bit string, not an integer",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/416",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "wire change",
+        "draft-12"
+      ],
+      "body": "As discussed in the 2024-09-06 call, we should change the IDPF gen() and eval() methods to take in bit strings (lists of booleans) instead of bigints. Iterating over the bits of the bit string would be clearer than shifting and masking an integer. We'll likewise need to change the recommendation for handling byte string, which currently suggests `from_be_bytes()`, and rewrite the prefix packing done in the aggregation parameter encoding/decoding.",
+      "createdAt": "2024-09-06T17:16:55Z",
+      "updatedAt": "2024-09-06T17:25:34Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I labeled this as wire breaking, as this may be a possibility. ",
+          "createdAt": "2024-09-06T17:25:33Z",
+          "updatedAt": "2024-09-06T17:25:33Z"
+        }
+      ]
+    },
+    {
+      "number": 418,
+      "id": "I_kwDOGKuqOc6Vq3Ij",
+      "title": "Bind application context to VDAF computations",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/418",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-12"
+      ],
+      "body": "Consider the risk that, for a specific variant of Prio3, an attacker does enough offline computation that it can efficiently find  invalid reports that get accepted by the aggregators. We know this attack is feasible for a sufficiently small finite field and/or number of proofs: when the circuit uses joint randomness, the attacker can search for input shares that derive joint randomness that forces the circuit to accept an invalid measurement. (See #311 for details.)\r\n\r\nWhile we believe we've mitigated this risk for standardized variants, like Prio3SumVec, there is still a possibility of non-standardized variants getting deployed that haven't. The draft should, at a minimum, acknowledge this risk. We could also modify the spec in order to reduce the blast radius of this attack as much as possible.\r\n\r\nOne idea that's been suggested (by @junyechen1996 and @kunal-talwar) is to add the [DAP task ID](https://ietf-wg-ppm.github.io/draft-ietf-ppm-dap/draft-ietf-ppm-dap.html#section-4.4) to the transcript hash for the joint randomness derivation. This way all of the offline computation carried out by the attacker is only useful for a specific DAP task. This is similar to [salting a password hash](https://en.wikipedia.org/wiki/Salt_(cryptography)) in order to ensure that whatever computation the attacker does in advance, like building [rainbow tables](https://en.wikipedia.org/wiki/Rainbow_table), is specific to that user the attacker wants to impersonate.\r\n\r\nMore generally, we could modify the VDAF syntax in order to allow binding the computation to its application context. There are a couple ways we can do this:\r\n\r\n1. Add a context parameter to (V)DAF sharding and preparation.\r\n2. Allow the nonce to encode the context. At the moment, the nonce size is determined by the (V)DAF, and the client is supposed to choose it at random; we would need modify the syntax to support any nonce size and relax the requirements for choosing it.\r\n\r\nBoth of these options will require about the same amount of work for the DAP and VDAF specs. The downside of (1.) is that it requires API breaking changes. The downside of (2.) is that it makes the requirements more technical: the nonce now needs to have high min-entropy rather than being completely random. We could probably address this by providing some examples of secure ways to choose the nonce.\r\n\r\nDo folks support this change?\r\n\r\nSome reasons to do this:\r\n1. Defense-in-depth is always good (and this change certainly can't hurt).\r\n2. This aligns with a design philosophy of more conventional ZKP applications, which is to add as much context as possible to the transcript whenever you do Fiat-Shamir.\r\n\r\nSome reasons not to do this:\r\n1. It's a fairly big change, and there's a chance we get it wrong. Though we at least have a pretty good idea of what to do for Prio3.\r\n3. It could create a false sense of security, leading to overly optimistic parameter choices getting deployed.",
+      "createdAt": "2024-09-06T19:04:46Z",
+      "updatedAt": "2024-09-06T23:49:49Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "junyechen1996",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Thanks @cjpatton.\r\n\r\nI think the current VDAF robustness is assuming a particular VDAF cannot be attacked during the lifetime of it. To attack the joint randomness, an attacker actually controls all the components that go into the hashing, which includes nonce, secret shares of the input share, VDAF ID. In theory, an attacker can use a fairly long time and make enough random oracle queries to find the joint randomness that passes the circuit verification. Additionally, if the attacker finds the joint randomness, it can keep using the same combination to attack a new task (nonce can be reused in different tasks in DAP), or even publish the attack vectors so others can all use these to attack the VDAF in new tasks.\r\n\r\nHowever, binding application context like taskID has the following advantages:\r\n- It reduces the timespan that the VDAF can be attacked, i.e., an attacker only has the task lifetime to find the attack vectors.\r\n- Even if the VDAF is successfully attacked once in a task, the attack cannot be reused in a new task, unless the attacker finds the new attack vectors.\r\n\r\nI agree this is defense-in-depth, but this concern does apply to all the VDAFs that use joint randomness, including the standard VDAFs, it's just a matter of how long and how many random oracle queries to make to find the attack vectors.",
+          "createdAt": "2024-09-06T19:44:44Z",
+          "updatedAt": "2024-09-06T19:44:44Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -35270,12 +35408,10 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [
-        "draft-12"
-      ],
+      "labels": [],
       "body": "Based on #406.\r\nCloses #319.\r\n\r\nA robustness attacker can try to find two distinct reports that derive the joint randomness seed by an offline birthday attack. By increasing the seed size from 16 to 32 bytes, we ensure this probability is negligible (in the random oracle model) even when the attacker can do a lot of computation (make many random oracle queries).",
       "createdAt": "2024-08-20T22:00:49Z",
-      "updatedAt": "2024-08-27T18:50:59Z",
+      "updatedAt": "2024-09-05T20:56:27Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "cjpatton/draft-12/3-issue-306",
       "baseRefOid": "ce53d7fffbeb92cc6efc7aa55176daee1a43eba8",
@@ -35351,7 +35487,7 @@
       "id": "PR_kwDOGKuqOc55n5j3",
       "title": "Bump `XofTurboShake128.SEED_SIZE` from 16 to 32 (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/408",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -35360,26 +35496,188 @@
       ],
       "body": "Closes #319.\r\n\r\nAn offline robustness robustness attacker can try to find two distinct reports that derive the same joint randomness. To thwart this attack, increase the seed size for `XofTurboShake128` from 16 to 32 bytes so that this probability is negligible (in the random oracle model) for a computationally bounded attacker.\r\n\r\n`IdpfBBCGGI21` assumes both `XofTurboShake128` and `XofFixedKeyAes128` have the same seed size. Since this is no longer the case, we need to be able to use a 16 byte seed with `XofTurboShake128`. To ensure this is safe, modify the input stream by prepending the length of the seed. This is also useful for future proofing this XOF for other use cases.",
       "createdAt": "2024-08-27T20:49:22Z",
-      "updatedAt": "2024-08-27T20:54:40Z",
+      "updatedAt": "2024-09-05T20:49:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "584c799979cab021792a1b4213f0612ed767081e",
+      "baseRefOid": "0f3407107943c6b318cc1b9226cb3797db56af26",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/4-bump-xof-turboshake128-seed-size",
-      "headRefOid": "2c91d8f0a6aaf233a9887cba062163e61b6100d6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "headRefOid": "45df7a57c5932953b4ac3c94b08f008472aee699",
+      "closedAt": "2024-09-05T20:49:53Z",
+      "mergedAt": "2024-09-05T20:49:53Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "cb3501229cb81fddadffff865f1a7a76fbbdb4a7"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and squashed (will hold off on merging for a while).",
+          "createdAt": "2024-09-05T19:13:50Z",
+          "updatedAt": "2024-09-05T19:13:50Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6IGe4N",
+          "commit": {
+            "abbreviatedOid": "2c91d8f"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T15:20:10Z",
+          "updatedAt": "2024-09-05T17:03:25Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Section 6.2 currently says that the seed passed to XOF constructors \"MUST be of length SEED_SIZE\". We should mention that `XofTurboShake128` is tolerant of different-sized seeds.",
+              "createdAt": "2024-09-05T15:20:11Z",
+              "updatedAt": "2024-09-05T17:03:25Z"
+            },
+            {
+              "originalPosition": 22,
+              "body": "nit: This is rolling back a change from #400",
+              "createdAt": "2024-09-05T15:23:39Z",
+              "updatedAt": "2024-09-05T17:03:25Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "The description of the Poplar1 public share encoding format needs to change, because the seed correction words will stay 16 bytes (KEY_SIZE), but they are described as `opaque Poplar1Seed[S]`, where S is `poplar1.xof.SEED_SIZE`, which is changing to 32. We need to use `Poplar1Seed` only for the Poplar1 correlated randomness seed, and something else for IDPF seed correction words.",
+              "createdAt": "2024-09-05T16:47:55Z",
+              "updatedAt": "2024-09-05T17:03:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IHd0r",
+          "commit": {
+            "abbreviatedOid": "2c91d8f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T17:14:14Z",
+          "updatedAt": "2024-09-05T17:14:14Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Done.",
+              "createdAt": "2024-09-05T17:14:14Z",
+              "updatedAt": "2024-09-05T17:14:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IHhQf",
+          "commit": {
+            "abbreviatedOid": "2c91d8f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T17:21:52Z",
+          "updatedAt": "2024-09-05T17:21:53Z",
+          "comments": [
+            {
+              "originalPosition": 22,
+              "body": "Ah yes, this is a result of copy-pasting from the reference code: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/410",
+              "createdAt": "2024-09-05T17:21:53Z",
+              "updatedAt": "2024-09-05T17:21:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IHk53",
+          "commit": {
+            "abbreviatedOid": "2c91d8f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T17:29:50Z",
+          "updatedAt": "2024-09-05T17:29:50Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Good catch. I removed  `S` and `Poplar1Seed` and hardcoded the seed lengths for the correction words.",
+              "createdAt": "2024-09-05T17:29:50Z",
+              "updatedAt": "2024-09-05T17:29:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IHzlt",
+          "commit": {
+            "abbreviatedOid": "de44efa"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T17:59:42Z",
+          "updatedAt": "2024-09-05T18:08:58Z",
+          "comments": [
+            {
+              "originalPosition": 71,
+              "body": "nit: typo\r\n```suggestion\r\n    opaque corr_seed[poplar1.xof.SEED_SIZE];\r\n```",
+              "createdAt": "2024-09-05T17:59:42Z",
+              "updatedAt": "2024-09-05T18:08:58Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "I don't think this is right, because `extend()` always returns a seed of `KEY_SIZE` bytes, and this is the XOR of two such seeds.",
+              "createdAt": "2024-09-05T18:02:27Z",
+              "updatedAt": "2024-09-05T18:08:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IH7F9",
+          "commit": {
+            "abbreviatedOid": "de44efa"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T18:15:29Z",
+          "updatedAt": "2024-09-05T18:15:29Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "Yup :/ fixed.",
+              "createdAt": "2024-09-05T18:15:29Z",
+              "updatedAt": "2024-09-05T18:15:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IIT_9",
+          "commit": {
+            "abbreviatedOid": "45df7a5"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-05T19:10:40Z",
+          "updatedAt": "2024-09-05T19:13:26Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 409,
       "id": "PR_kwDOGKuqOc55oKYx",
       "title": "Prio3: Merge the measurement and proof share seed (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/409",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -35388,13 +35686,569 @@
       ],
       "body": "Stacked on #408.\r\nCloses #185.\r\n\r\nReplace the measurement and proof share seeds in the helper's input share with a single seed from which both the measurement and proof share are derived. Usage of the same seed for both shares is safe as long as we have domain separation between them.",
       "createdAt": "2024-08-27T21:33:18Z",
-      "updatedAt": "2024-08-27T21:42:50Z",
+      "updatedAt": "2024-09-05T21:08:52Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/draft-12/4-bump-xof-turboshake128-seed-size",
-      "baseRefOid": "2c91d8f0a6aaf233a9887cba062163e61b6100d6",
+      "baseRefName": "main",
+      "baseRefOid": "cb3501229cb81fddadffff865f1a7a76fbbdb4a7",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/5-merge-seeds",
-      "headRefOid": "20e9e0af6182604f3315d74d1d626809d1c32b2d",
+      "headRefOid": "fad13163cdd92cfba9049681c003ef1e4aaab92e",
+      "closedAt": "2024-09-05T21:08:52Z",
+      "mergedAt": "2024-09-05T21:08:52Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "ea39dccccc83988029fd667555aa45f6589195b2"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Oof, I'm going to rebase so this is hopefully easier to review.",
+          "createdAt": "2024-09-05T19:30:24Z",
+          "updatedAt": "2024-09-05T19:30:24Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Squashed.",
+          "createdAt": "2024-09-05T20:30:19Z",
+          "updatedAt": "2024-09-05T20:30:26Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6IHjWk",
+          "commit": {
+            "abbreviatedOid": "20e9e0a"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T17:26:27Z",
+          "updatedAt": "2024-09-05T17:42:34Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "nit: missing a word\r\n```suggestion\r\nthe \"helper\" shares) are represented instead by an XOF seed, which is expanded into\r\n```",
+              "createdAt": "2024-09-05T17:26:28Z",
+              "updatedAt": "2024-09-05T17:42:34Z"
+            },
+            {
+              "originalPosition": 149,
+              "body": "FYI, these assertions served the secondary purpose of narrowing the inferred types, so we didn't need to cast from a union type to one of its arms. We could do the same here with the following, to simplify a bit.\r\n\r\n```python\r\nif agg_id > 0:\r\n    assert len(input_share) == 2\r\n    # destructure without cast()\r\n    ...\r\nelse:\r\n    assert len(input_share) == 3\r\n    # destructure without cast()\r\n    ...\r\n```",
+              "createdAt": "2024-09-05T17:36:58Z",
+              "updatedAt": "2024-09-05T17:42:34Z"
+            },
+            {
+              "originalPosition": 168,
+              "body": "The text above about helper shares should be updated to say \"an XOF seed\" instead of \"XOF seeds\".",
+              "createdAt": "2024-09-05T17:38:51Z",
+              "updatedAt": "2024-09-05T17:42:34Z"
+            },
+            {
+              "originalPosition": 130,
+              "body": "See above",
+              "createdAt": "2024-09-05T17:40:39Z",
+              "updatedAt": "2024-09-05T17:42:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IIXuM",
+          "commit": {
+            "abbreviatedOid": "20e9e0a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T19:14:55Z",
+          "updatedAt": "2024-09-05T19:14:55Z",
+          "comments": [
+            {
+              "originalPosition": 70,
+              "body": "Done.",
+              "createdAt": "2024-09-05T19:14:55Z",
+              "updatedAt": "2024-09-05T19:14:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IIaDn",
+          "commit": {
+            "abbreviatedOid": "20e9e0a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T19:20:02Z",
+          "updatedAt": "2024-09-05T19:20:02Z",
+          "comments": [
+            {
+              "originalPosition": 149,
+              "body": "Done.",
+              "createdAt": "2024-09-05T19:20:02Z",
+              "updatedAt": "2024-09-05T19:20:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IIbJ0",
+          "commit": {
+            "abbreviatedOid": "20e9e0a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-05T19:22:43Z",
+          "updatedAt": "2024-09-05T19:22:44Z",
+          "comments": [
+            {
+              "originalPosition": 168,
+              "body": "Done!",
+              "createdAt": "2024-09-05T19:22:44Z",
+              "updatedAt": "2024-09-05T19:22:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6II0C9",
+          "commit": {
+            "abbreviatedOid": "be5ad26"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-05T20:24:12Z",
+          "updatedAt": "2024-09-05T20:30:07Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 410,
+      "id": "PR_kwDOGKuqOc56jlRO",
+      "title": "poc: Don't capitalize after implementation notes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/410",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "",
+      "createdAt": "2024-09-05T17:21:21Z",
+      "updatedAt": "2024-09-05T18:03:12Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "584c799979cab021792a1b4213f0612ed767081e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/edit-capital-after-impl-note",
+      "headRefOid": "9e381ff880466c1395990cb30b8283d9fc5824cc",
+      "closedAt": "2024-09-05T18:03:12Z",
+      "mergedAt": "2024-09-05T18:03:12Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "0f3407107943c6b318cc1b9226cb3797db56af26"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6IHra3",
+          "commit": {
+            "abbreviatedOid": "9e381ff"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-05T17:44:01Z",
+          "updatedAt": "2024-09-05T17:44:01Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 413,
+      "id": "PR_kwDOGKuqOc56j4HX",
+      "title": "Some editorial suggestions from @armfazh",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/413",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "* Say \"linear\" instead of \"affine\"\r\n* Be consistent about range notation. Pick `range()`, but see #412.",
+      "createdAt": "2024-09-05T18:10:17Z",
+      "updatedAt": "2024-09-05T21:51:23Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "ea39dccccc83988029fd667555aa45f6589195b2",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/edit-armfazh",
+      "headRefOid": "5cb74eba76321ac7c562899152ebddff899aac72",
+      "closedAt": "2024-09-05T21:51:23Z",
+      "mergedAt": "2024-09-05T21:51:23Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "598455e704b9d5c593f6fe391fc4e56f762decf7"
+      },
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I lean towards keeping \"affine\" when talking about circuits and gates because it's the language our references use, and it seems to be fairly common in ZK writ large. For example, [here's a ZK library with an affine circuit abstraction](https://hackage.haskell.org/package/arithmetic-circuits-0.2.0/docs/Circuit-Affine.html). I have found one reference to a \"linear arithmetic circuit\", and it was clear that all gates were of the form \"ax + by\". Note that our classic Range2 gadget, \"x*(x - 1)\", is built with one multiplication gate and subcircuits that are affine, but not linear, by these definitions, since one includes a subtraction of a constant.\r\n\r\nMaybe we could say \"affine arithmetic circuit\" in places where we currently say \"affine circuit\", to get the gist across more easily, while retaining precision?",
+          "createdAt": "2024-09-05T19:05:15Z",
+          "updatedAt": "2024-09-05T19:18:37Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I lean towards keeping \"affine\" when talking about circuits and gates because it's the language our references use, and it seems to be fairly common in ZK writ large. For example, [here's a ZK library with an affine circuit abstraction](https://hackage.haskell.org/package/arithmetic-circuits-0.2.0/docs/Circuit-Affine.html). I have found one reference to a \"linear arithmetic circuit\", and it was clear that all gates were of the form \"ax + by\". Note that our classic Range2 gadget, \"x*(x - 1)\", is built with one multiplication gate and subcircuits that are affine, but not linear, by these definitions, since one includes a subtraction of a constant.\r\n> \r\n> Maybe we could say \"affine arithmetic circuit\" in places where we currently say \"affine circuit\", to get the gist across more easily, while retaining precision?\r\n\r\nWorks for me!",
+          "createdAt": "2024-09-05T19:29:41Z",
+          "updatedAt": "2024-09-05T19:29:41Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6IJRDC",
+          "commit": {
+            "abbreviatedOid": "d4660ad"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-05T21:43:44Z",
+          "updatedAt": "2024-09-05T21:44:29Z",
+          "comments": [
+            {
+              "originalPosition": 94,
+              "body": "nit: typo\r\n```suggestion\r\ncircuits by allowing multiple, non-affine sub-circuits. For example, the\r\n```",
+              "createdAt": "2024-09-05T21:43:44Z",
+              "updatedAt": "2024-09-05T21:44:29Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 414,
+      "id": "PR_kwDOGKuqOc56k1l7",
+      "title": "idpf: Clarify that the leaf XOF needs to support 16 byte seeds",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/414",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "While at it, re-align some paragraphs.",
+      "createdAt": "2024-09-05T21:05:12Z",
+      "updatedAt": "2024-09-05T21:08:08Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "cb3501229cb81fddadffff865f1a7a76fbbdb4a7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/edit-bound-on-idpf-leaf-xofk",
+      "headRefOid": "e1ac26bf82adbcaf3948172a8249745fc119777f",
+      "closedAt": "2024-09-05T21:08:08Z",
+      "mergedAt": "2024-09-05T21:08:07Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "369f99dadd07a2cd58a16fe59bcaef52b9f60d7a"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 415,
+      "id": "PR_kwDOGKuqOc56lD1D",
+      "title": "Update Change Log for draft 12",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/415",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "",
+      "createdAt": "2024-09-05T21:31:08Z",
+      "updatedAt": "2024-09-06T22:21:15Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "ea39dccccc83988029fd667555aa45f6589195b2",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/cl",
+      "headRefOid": "e6cd5dc6af665877376973ea0a7169e286d13e10",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Per call on 2024/9/6: We're going to make a few more changes before cutting -12.",
+          "createdAt": "2024-09-06T17:08:29Z",
+          "updatedAt": "2024-09-06T17:08:29Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "To note:\r\n- [ ] Updated code points https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417\r\n- [ ] Change to IDPF public share encoding https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420",
+          "createdAt": "2024-09-06T19:23:46Z",
+          "updatedAt": "2024-09-06T22:21:15Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 417,
+      "id": "PR_kwDOGKuqOc56srdG",
+      "title": "Flesh out IANA considerations",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417",
+      "state": "OPEN",
+      "author": "bifurcation",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-12"
+      ],
+      "body": "This PR replaces the IANA considerations with a more IETF/IRTF-standard formulation.  It provides precise instructions to IANA as to how to construct and manage the registry.\r\n\r\nThis PR also adds some discussion about how these identifiers are used, to guide applications toward VDAF IDs that are less likely to accidentally collide.\r\n\r\nFixes #110 ",
+      "createdAt": "2024-09-06T18:53:34Z",
+      "updatedAt": "2024-09-06T21:39:27Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "598455e704b9d5c593f6fe391fc4e56f762decf7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "iana",
+      "headRefOid": "f3fac461919b1a5e31b335dc962ccb720ead4847",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Note that I also incremented all of the code point values so that `0x00000000` is a reserved value.  This is just a slight paranoia about programming languages sometimes defaulting things to zero, and not wanting that to lead to an accidentally valid value.",
+          "createdAt": "2024-09-06T18:55:29Z",
+          "updatedAt": "2024-09-06T18:55:29Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@divergentdave please take a look as well: this re-assigns codepoints, which will likely be painful for our DAP implementations.",
+          "createdAt": "2024-09-06T19:25:59Z",
+          "updatedAt": "2024-09-06T19:25:59Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6IUQyB",
+          "commit": {
+            "abbreviatedOid": "106601f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Excellent, thanks @bifurcation! Just a couple of nits.",
+          "createdAt": "2024-09-06T19:20:00Z",
+          "updatedAt": "2024-09-06T19:22:47Z",
+          "comments": [
+            {
+              "originalPosition": 22,
+              "body": "```suggestion\r\n* DAF and VDAF Identifiers\r\n```",
+              "createdAt": "2024-09-06T19:20:00Z",
+              "updatedAt": "2024-09-06T19:22:47Z"
+            },
+            {
+              "originalPosition": 38,
+              "body": "```suggestion\r\n* Type: Either \"DAF\" for a Distributed Aggregation Function or \"VDAF\" for a\r\n  Verifiable Distributed Aggregation Function\r\n```",
+              "createdAt": "2024-09-06T19:21:07Z",
+              "updatedAt": "2024-09-06T19:22:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IU6bl",
+          "commit": {
+            "abbreviatedOid": "f3fac46"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-06T21:28:30Z",
+          "updatedAt": "2024-09-06T21:39:27Z",
+          "comments": [
+            {
+              "originalPosition": 56,
+              "body": "nit: These square brackets cause Markdown issues\r\n```suggestion\r\n( RFC EDITOR: Please replace \"RFC XXXX\" above with the RFC number assigned to\r\nthis document. )\r\n```",
+              "createdAt": "2024-09-06T21:28:30Z",
+              "updatedAt": "2024-09-06T21:39:27Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "It would probably be good to explicitly provide an anchor label on the referenced section heading, in case we tweak its wording.",
+              "createdAt": "2024-09-06T21:30:16Z",
+              "updatedAt": "2024-09-06T21:39:28Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 419,
+      "id": "PR_kwDOGKuqOc56tFcK",
+      "title": "IDPF: Simplify code, add constant-time notes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/419",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "This simplifies some code in `gen()` and `eval_next()` by using control flow instead of multiplications and conditional selects. I added and updated implementation notes about timing side channels.",
+      "createdAt": "2024-09-06T20:20:40Z",
+      "updatedAt": "2024-09-06T20:47:28Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "598455e704b9d5c593f6fe391fc4e56f762decf7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/idpf-simplify-select",
+      "headRefOid": "ca6eb5d00dee6a7770df4ee1a774988395cb5c37",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6IUu0C",
+          "commit": {
+            "abbreviatedOid": "ca6eb5d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-06T20:47:28Z",
+          "updatedAt": "2024-09-06T20:47:28Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 420,
+      "id": "PR_kwDOGKuqOc56tKtR",
+      "title": "IDPF: Simplify the public share encoding (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-12"
+      ],
+      "body": "Unzip the seeds, control bits, and payloads and encode them separately. This significantly reduces the complexity of the spec in TLS syntax.",
+      "createdAt": "2024-09-06T20:40:38Z",
+      "updatedAt": "2024-09-06T22:33:34Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "598455e704b9d5c593f6fe391fc4e56f762decf7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/6-idpf-pub-share-encoding",
+      "headRefOid": "aa6b4c2f31e5e36bed73e1fae9c6dcd013d702b3",
+      "closedAt": "2024-09-06T22:33:34Z",
+      "mergedAt": "2024-09-06T22:33:34Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "cc875878cc59394d5aed64e481b7e07e44c9d020"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6IUu7q",
+          "commit": {
+            "abbreviatedOid": "fabcc02"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-06T20:47:52Z",
+          "updatedAt": "2024-09-06T21:12:09Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I suggest we change this paragraph to the following, to reflect this change.\r\n\r\n```\r\nThe encoding is a straightforward structure of arrays, except that the control\r\nbits are packed as tightly as possible. The encoded public share is structured\r\nas follows:\r\n```",
+              "createdAt": "2024-09-06T20:47:53Z",
+              "updatedAt": "2024-09-06T21:12:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6IVEgB",
+          "commit": {
+            "abbreviatedOid": "fabcc02"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-06T22:18:44Z",
+          "updatedAt": "2024-09-06T22:18:44Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "Done!",
+              "createdAt": "2024-09-06T22:18:44Z",
+              "updatedAt": "2024-09-06T22:18:44Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 421,
+      "id": "PR_kwDOGKuqOc56tfny",
+      "title": "Add defenses-in-depth section",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/421",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "Partially addresses #418.\r\n\r\nNote defenses against cross protocol attacks resulting from weak entropy or weak parameters. Also, acknowledge the possibility of cross protocol attacks within a circuit family (no binding of the circuit parameters) and the blast radius of weak parameters (all deployed tasks).",
+      "createdAt": "2024-09-06T22:17:18Z",
+      "updatedAt": "2024-09-06T23:48:39Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "598455e704b9d5c593f6fe391fc4e56f762decf7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/domain-sep",
+      "headRefOid": "b78382b39208eb86302dd67c78036b34b2db0cdc",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
