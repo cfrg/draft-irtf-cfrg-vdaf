@@ -90,11 +90,14 @@ def gen_test_vec_for_xof(cls: type[Xof]) -> None:
 if __name__ == '__main__':
     from vdaf_poc import idpf_bbcggi21, vdaf_poplar1, vdaf_prio3, xof
 
+    ctx = b'some application'
+
     # Prio3 variants
     gen_test_vec_for_vdaf(
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3Count(2),
         None,
+        ctx,
         [1],
         0,
     )
@@ -102,6 +105,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3Count(3),
         None,
+        ctx,
         [1],
         1,
     )
@@ -109,6 +113,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3Sum(2, 255),
         None,
+        ctx,
         [100],
         0,
     )
@@ -116,6 +121,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3Sum(3, 255),
         None,
+        ctx,
         [100],
         1,
     )
@@ -123,6 +129,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3SumVec(2, 10, 8, 9),
         None,
+        ctx,
         [
             list(range(10)),
             [1] * 10,
@@ -134,6 +141,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3SumVec(3, 3, 16, 7),
         None,
+        ctx,
         [
             [10000, 32000, 9],
             [19342, 19615, 3061],
@@ -145,6 +153,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3Histogram(2, 4, 2),
         None,
+        ctx,
         [2],
         0,
     )
@@ -152,6 +161,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3Histogram(3, 11, 3),
         None,
+        ctx,
         [2],
         1,
     )
@@ -159,6 +169,7 @@ if __name__ == '__main__':
         TEST_VECTOR_PATH,
         vdaf_prio3.Prio3MultihotCountVec(2, 4, 2, 2),
         None,
+        ctx,
         [[0, 1, 1, 0]],
         0,
     )
@@ -195,6 +206,7 @@ if __name__ == '__main__':
             TEST_VECTOR_PATH,
             vdaf_poplar1.Poplar1(4),
             (test_level, prefixes),
+            ctx,
             measurements,
             test_level,
         )

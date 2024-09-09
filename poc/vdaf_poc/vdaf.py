@@ -67,6 +67,7 @@ class Vdaf(
 
     @abstractmethod
     def shard(self,
+              ctx: bytes,
               measurement: Measurement,
               nonce: bytes,
               rand: bytes,
@@ -94,6 +95,7 @@ class Vdaf(
     @abstractmethod
     def prep_init(self,
                   verify_key: bytes,
+                  ctx: bytes,
                   agg_id: int,
                   agg_param: AggParam,
                   nonce: bytes,
@@ -104,7 +106,8 @@ class Vdaf(
         initial prep share. This method is run by an Aggregator. Along with the
         public share and its input share, the inputs include the verification
         key shared by all of the Aggregators, the Aggregator's ID, and the
-        aggregation parameter and nonce agreed upon by all of the Aggregators.
+        aggregation parameter, application context, and nonce agreed upon by
+        all of the Aggregators.
 
         Pre-conditions:
 
@@ -116,6 +119,7 @@ class Vdaf(
 
     @abstractmethod
     def prep_next(self,
+                  ctx: bytes,
                   prep_state: PrepState,
                   prep_msg: PrepMessage,
                   ) -> tuple[PrepState, PrepShare] | OutShare:
@@ -128,6 +132,7 @@ class Vdaf(
 
     @abstractmethod
     def prep_shares_to_prep(self,
+                            ctx: bytes,
                             agg_param: AggParam,
                             prep_shares: list[PrepShare]) -> PrepMessage:
         """
@@ -167,15 +172,16 @@ class Vdaf(
     # width should be limited to 69 columns after de-indenting, or 73
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
-    def domain_separation_tag(self, usage: int) -> bytes:
+    def domain_separation_tag(self, usage: int, ctx: bytes) -> bytes:
         """
-        Format domain separation tag for this VDAF with the given usage.
+        Format domain separation tag for this VDAF with the given
+        application context and usage.
 
         Pre-conditions:
 
             - `usage` in `range(2**16)`
         """
-        return format_dst(0, self.ID, usage)
+        return format_dst(0, self.ID, usage) + ctx
 
     # Methods for generating test vectors
 
@@ -226,6 +232,7 @@ def run_vdaf(
         ],
         verify_key: bytes,
         agg_param: AggParam,
+        ctx: bytes,
         nonces: list[bytes],
         measurements: list[Measurement]) -> AggResult:
     """
@@ -254,13 +261,13 @@ def run_vdaf(
         # Each Client shards its measurement into input shares.
         rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            vdaf.shard(measurement, nonce, rand)
+            vdaf.shard(ctx, measurement, nonce, rand)
 
         # Each Aggregator initializes its preparation state.
         prep_states = []
         outbound_prep_shares = []
         for j in range(vdaf.SHARES):
-            (state, share) = vdaf.prep_init(verify_key, j,
+            (state, share) = vdaf.prep_init(verify_key, ctx, j,
                                             agg_param,
                                             nonce,
                                             public_share,
@@ -270,24 +277,26 @@ def run_vdaf(
 
         # Aggregators recover their output shares.
         for i in range(vdaf.ROUNDS - 1):
-            prep_msg = vdaf.prep_shares_to_prep(agg_param,
+            prep_msg = vdaf.prep_shares_to_prep(ctx,
+                                                agg_param,
                                                 outbound_prep_shares)
 
             outbound_prep_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.prep_next(prep_states[j], prep_msg)
+                out = vdaf.prep_next(ctx, prep_states[j], prep_msg)
                 assert isinstance(out, tuple)
                 (prep_states[j], prep_share) = out
                 outbound_prep_shares.append(prep_share)
 
         # The final outputs of the prepare phase are the output
         # shares.
-        prep_msg = vdaf.prep_shares_to_prep(agg_param,
+        prep_msg = vdaf.prep_shares_to_prep(ctx,
+                                            agg_param,
                                             outbound_prep_shares)
 
         outbound_out_shares = []
         for j in range(vdaf.SHARES):
-            out_share = vdaf.prep_next(prep_states[j], prep_msg)
+            out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
             outbound_out_shares.append(out_share)
 

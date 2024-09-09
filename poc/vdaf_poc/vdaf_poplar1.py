@@ -72,6 +72,7 @@ class Poplar1(
     # ===================================================================
     def shard(
         self,
+        ctx: bytes,
         measurement: tuple[bool, ...],
         nonce: bytes,
         rand: bytes,
@@ -94,7 +95,7 @@ class Poplar1(
 
         xof = self.xof(
             k_shard,
-            self.domain_separation_tag(USAGE_SHARD_RAND),
+            self.domain_separation_tag(USAGE_SHARD_RAND, ctx),
             nonce,
         )
 
@@ -128,14 +129,14 @@ class Poplar1(
             self.xof.expand_into_vec(
                 self.idpf.field_inner,
                 corr_seed[0],
-                self.domain_separation_tag(USAGE_CORR_INNER),
+                self.domain_separation_tag(USAGE_CORR_INNER, ctx),
                 byte(0) + nonce,
                 3 * (self.idpf.BITS - 1),
             ),
             self.xof.expand_into_vec(
                 self.idpf.field_inner,
                 corr_seed[1],
-                self.domain_separation_tag(USAGE_CORR_INNER),
+                self.domain_separation_tag(USAGE_CORR_INNER, ctx),
                 byte(1) + nonce,
                 3 * (self.idpf.BITS - 1),
             ),
@@ -144,14 +145,14 @@ class Poplar1(
             self.xof.expand_into_vec(
                 self.idpf.field_leaf,
                 corr_seed[0],
-                self.domain_separation_tag(USAGE_CORR_LEAF),
+                self.domain_separation_tag(USAGE_CORR_LEAF, ctx),
                 byte(0) + nonce,
                 3,
             ),
             self.xof.expand_into_vec(
                 self.idpf.field_leaf,
                 corr_seed[1],
-                self.domain_separation_tag(USAGE_CORR_LEAF),
+                self.domain_separation_tag(USAGE_CORR_LEAF, ctx),
                 byte(1) + nonce,
                 3,
             ),
@@ -226,6 +227,7 @@ class Poplar1(
     def prep_init(
             self,
             verify_key: bytes,
+            ctx: bytes,
             agg_id: int,
             agg_param: Poplar1AggParam,
             nonce: bytes,
@@ -252,7 +254,7 @@ class Poplar1(
         if level < self.idpf.BITS - 1:
             corr_xof = self.xof(
                 corr_seed,
-                self.domain_separation_tag(USAGE_CORR_INNER),
+                self.domain_separation_tag(USAGE_CORR_INNER, ctx),
                 byte(agg_id) + nonce,
             )
             # Fast-forward the XOF state to the current level.
@@ -260,7 +262,7 @@ class Poplar1(
         else:
             corr_xof = self.xof(
                 corr_seed,
-                self.domain_separation_tag(USAGE_CORR_LEAF),
+                self.domain_separation_tag(USAGE_CORR_LEAF, ctx),
                 byte(agg_id) + nonce,
             )
         (a_share, b_share, c_share) = corr_xof.next_vec(field, 3)
@@ -276,7 +278,7 @@ class Poplar1(
         # called the "masked input values" [BBCGGI21, Appendix C.4].
         verify_rand_xof = self.xof(
             verify_key,
-            self.domain_separation_tag(USAGE_VERIFY_RAND),
+            self.domain_separation_tag(USAGE_VERIFY_RAND, ctx),
             nonce + to_be_bytes(level, 2),
         )
         verify_rand = cast(
@@ -305,6 +307,7 @@ class Poplar1(
 
     def prep_next(
         self,
+        _ctx: bytes,
         prep_state: Poplar1PrepState,
         prep_msg: Optional[FieldVec]
     ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
@@ -349,6 +352,7 @@ class Poplar1(
 
     def prep_shares_to_prep(
             self,
+            _ctx: bytes,
             agg_param: Poplar1AggParam,
             prep_shares: list[FieldVec]) -> Optional[FieldVec]:
         if len(prep_shares) != 2:
