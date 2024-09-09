@@ -65,6 +65,7 @@ class TestVdaf(unittest.TestCase):
         agg_result = run_vdaf(vdaf,
                               verify_key,
                               agg_param,
+                              b"some application context",
                               nonces,
                               measurements)
         self.assertEqual(agg_result, expected_agg_result)
@@ -85,6 +86,7 @@ class VdafTestVectorDict(Generic[Measurement, AggParam, AggResult], TypedDict):
     shares: int
     verify_key: str
     agg_param: AggParam
+    ctx: str
     prep: list[VdafPrepTestVectorDict[Measurement]]
     agg_shares: list[str]
     agg_result: Optional[AggResult]
@@ -105,6 +107,7 @@ def gen_test_vec_for_vdaf(
             PrepMessage,
         ],
         agg_param: AggParam,
+        ctx: bytes,
         measurements: list[Measurement],
         test_vec_instance: int,
         print_test_vec: bool = True) -> AggResult:
@@ -120,6 +123,7 @@ def gen_test_vec_for_vdaf(
         'shares': vdaf.SHARES,
         'verify_key': verify_key.hex(),
         'agg_param': agg_param,
+        'ctx': ctx.hex(),
         'prep': [],
         'agg_shares': [],
         'agg_result': None,  # set below
@@ -135,7 +139,7 @@ def gen_test_vec_for_vdaf(
         # Each Client shards its measurement into input shares.
         rand = test_vec_gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
-            vdaf.shard(measurement, nonce, rand)
+            vdaf.shard(ctx, measurement, nonce, rand)
 
         prep_test_vec: VdafPrepTestVectorDict[Measurement] = {
             'measurement': measurement,
@@ -157,7 +161,7 @@ def gen_test_vec_for_vdaf(
         prep_states = []
         outbound_prep_shares = []
         for j in range(vdaf.SHARES):
-            (state, share) = vdaf.prep_init(verify_key, j,
+            (state, share) = vdaf.prep_init(verify_key, ctx, j,
                                             agg_param,
                                             nonce,
                                             public_share,
@@ -171,14 +175,15 @@ def gen_test_vec_for_vdaf(
 
         # Aggregators recover their output shares.
         for i in range(vdaf.ROUNDS - 1):
-            prep_msg = vdaf.prep_shares_to_prep(agg_param,
+            prep_msg = vdaf.prep_shares_to_prep(ctx,
+                                                agg_param,
                                                 outbound_prep_shares)
             prep_test_vec['prep_messages'].append(
                 vdaf.test_vec_encode_prep_msg(prep_msg).hex())
 
             outbound_prep_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.prep_next(prep_states[j], prep_msg)
+                out = vdaf.prep_next(ctx, prep_states[j], prep_msg)
                 assert isinstance(out, tuple)
                 (prep_states[j], prep_share) = out
                 outbound_prep_shares.append(prep_share)
@@ -190,14 +195,15 @@ def gen_test_vec_for_vdaf(
 
         # The final outputs of the prepare phase are the output
         # shares.
-        prep_msg = vdaf.prep_shares_to_prep(agg_param,
+        prep_msg = vdaf.prep_shares_to_prep(ctx,
+                                            agg_param,
                                             outbound_prep_shares)
         prep_test_vec['prep_messages'].append(
             vdaf.test_vec_encode_prep_msg(prep_msg).hex())
 
         outbound_out_shares = []
         for j in range(vdaf.SHARES):
-            out_share = vdaf.prep_next(prep_states[j], prep_msg)
+            out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
             outbound_out_shares.append(out_share)
 

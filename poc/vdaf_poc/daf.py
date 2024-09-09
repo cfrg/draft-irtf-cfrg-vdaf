@@ -55,6 +55,7 @@ class Daf(
     def shard(
             self,
             measurement: Measurement,
+            ctx: bytes,
             nonce: bytes,
             rand: bytes) -> tuple[PublicShare, list[InputShare]]:
         """
@@ -84,6 +85,7 @@ class Daf(
             self,
             agg_id: int,
             agg_param: AggParam,
+            ctx: bytes,
             nonce: bytes,
             public_share: PublicShare,
             input_share: InputShare) -> OutShare:
@@ -142,6 +144,7 @@ def run_daf(
             AggResult,
         ],
         agg_param: AggParam,
+        ctx: bytes,
         measurements: list[Measurement],
         nonces: list[bytes]) -> AggResult:
     """
@@ -169,12 +172,12 @@ def run_daf(
         # distributes them among the Aggregators.
         rand = gen_rand(daf.RAND_SIZE)
         (public_share, input_shares) = \
-            daf.shard(measurement, nonce, rand)
+            daf.shard(measurement, ctx, nonce, rand)
 
         # Each Aggregator prepares its input share for aggregation.
         for j in range(daf.SHARES):
             out_shares[j].append(
-                daf.prep(j, agg_param, nonce,
+                daf.prep(j, agg_param, ctx, nonce,
                          public_share, input_shares[j]))
 
     # Each Aggregator aggregates its output shares into an aggregate

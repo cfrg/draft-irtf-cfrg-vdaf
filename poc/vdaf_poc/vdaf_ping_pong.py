@@ -108,6 +108,7 @@ class PingPong(
     def ping_pong_leader_init(
             self,
             vdaf_verify_key: bytes,
+            ctx: bytes,
             agg_param: bytes,
             nonce: bytes,
             public_share: bytes,
@@ -116,6 +117,7 @@ class PingPong(
         try:
             (prep_state, prep_share) = self.prep_init(
                 vdaf_verify_key,
+                ctx,
                 0,
                 self.decode_agg_param(agg_param),
                 nonce,
@@ -133,6 +135,7 @@ class PingPong(
     def ping_pong_helper_init(
             self,
             vdaf_verify_key: bytes,
+            ctx: bytes,
             agg_param: bytes,
             nonce: bytes,
             public_share: bytes,
@@ -145,6 +148,7 @@ class PingPong(
         try:
             (prep_state, prep_share) = self.prep_init(
                 vdaf_verify_key,
+                ctx,
                 1,
                 self.decode_agg_param(agg_param),
                 nonce,
@@ -162,6 +166,7 @@ class PingPong(
                 prep_share,
             ]
             return self.ping_pong_transition(
+                ctx,
                 self.decode_agg_param(agg_param),
                 prep_shares,
                 prep_state,
@@ -172,14 +177,16 @@ class PingPong(
 
     def ping_pong_transition(
             self,
+            ctx: bytes,
             agg_param: AggParam,
             prep_shares: list[PrepShare],
             prep_state: PrepState,
             prep_round: int) -> tuple[State, bytes]:
-        prep_msg = self.prep_shares_to_prep(agg_param,
+        prep_msg = self.prep_shares_to_prep(ctx,
+                                            agg_param,
                                             prep_shares)
         encoded_prep_msg = self.encode_prep_msg(prep_msg)
-        out = self.prep_next(prep_state, prep_msg)
+        out = self.prep_next(ctx, prep_state, prep_msg)
         if prep_round+1 == self.ROUNDS:
             return (
                 Finished(out),
@@ -195,6 +202,7 @@ class PingPong(
 
     def ping_pong_leader_continued(
         self,
+        ctx: bytes,
         agg_param: bytes,
         state: State,
         inbound: bytes,
@@ -203,11 +211,12 @@ class PingPong(
         Called by the leader to start the next step of ping-ponging.
         """
         return self.ping_pong_continued(
-            True, agg_param, state, inbound)
+            True, ctx, agg_param, state, inbound)
 
     def ping_pong_continued(
         self,
         is_leader: bool,
+        ctx: bytes,
         agg_param: bytes,
         state: State,
         inbound: bytes,
@@ -226,7 +235,7 @@ class PingPong(
                 state.prep_state,
                 encoded_prep_msg,
             )
-            out = self.prep_next(state.prep_state, prep_msg)
+            out = self.prep_next(ctx, state.prep_state, prep_msg)
             if prep_round+1 < self.ROUNDS and \
                     inbound_type == 1:  # continue
                 (prep_state, prep_share) = cast(
@@ -242,6 +251,7 @@ class PingPong(
                 if is_leader:
                     prep_shares.reverse()
                 return self.ping_pong_transition(
+                    ctx,
                     self.decode_agg_param(agg_param),
                     prep_shares,
                     prep_state,
@@ -257,13 +267,14 @@ class PingPong(
 
     def ping_pong_helper_continued(
         self,
+        ctx: bytes,
         agg_param: bytes,
         state: State,
         inbound: bytes,
     ) -> tuple[State, Optional[bytes]]:
         """Called by the helper to continue ping-ponging."""
         return self.ping_pong_continued(
-            False, agg_param, state, inbound)
+            False, ctx, agg_param, state, inbound)
 
 
 def encode(msg_type: int, *items: bytes) -> bytes:

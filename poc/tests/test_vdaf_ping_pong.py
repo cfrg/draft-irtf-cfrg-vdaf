@@ -40,6 +40,7 @@ class PingPongTester(
     # `Vdaf`
 
     def shard(self,
+              _ctx: bytes,
               measurement: int,
               _nonce: bytes,
               _rand: bytes) -> tuple[str, list[int]]:
@@ -52,6 +53,7 @@ class PingPongTester(
 
     def prep_init(self,
                   _verify_key: bytes,
+                  _ctx: bytes,
                   _agg_id: int,
                   _agg_param: int,
                   _nonce: bytes,
@@ -66,6 +68,7 @@ class PingPongTester(
         )
 
     def prep_shares_to_prep(self,
+                            _ctx: bytes,
                             _agg_param: int,
                             prep_shares: list[str]) -> str:
         for prep_share in prep_shares[1:]:
@@ -74,6 +77,7 @@ class PingPongTester(
         return prep_shares[0]
 
     def prep_next(self,
+                  _ctx: bytes,
                   prep_state: tuple[int, int],
                   prep_msg: str) -> Union[tuple[tuple[int, int], str], int]:
         (current_round, out_share) = prep_state
@@ -159,9 +163,11 @@ class TestPingPong(unittest.TestCase):
         verify_key = b''
 
         measurement = 1337
+        ctx = b'some context'
         nonce = b''
         rand = b''
         (public_share, input_shares) = vdaf.shard(
+            ctx,
             measurement,
             nonce,
             rand,
@@ -170,6 +176,7 @@ class TestPingPong(unittest.TestCase):
         agg_param = 23
         (leader_state, msg) = vdaf.ping_pong_leader_init(
             verify_key,
+            ctx,
             vdaf.encode_agg_param(agg_param),
             nonce,
             vdaf.test_vec_encode_public_share(public_share),
@@ -179,6 +186,7 @@ class TestPingPong(unittest.TestCase):
 
         (helper_state, msg) = vdaf.ping_pong_helper_init(
             verify_key,
+            ctx,
             vdaf.encode_agg_param(agg_param),
             nonce,
             vdaf.test_vec_encode_public_share(public_share),
@@ -188,6 +196,7 @@ class TestPingPong(unittest.TestCase):
         self.assertEqual(helper_state, Finished(measurement))
 
         (leader_state, msg) = vdaf.ping_pong_leader_continued(
+            ctx,
             vdaf.encode_agg_param(agg_param),
             leader_state,
             cast(bytes, msg),
@@ -199,6 +208,7 @@ class TestPingPong(unittest.TestCase):
         """Test the ping pong flow with multiple rounds."""
         verify_key = b''
         measurement = 1337
+        ctx = b'some application'
         nonce = b''
         rand = b''
         agg_param = 23
@@ -209,6 +219,7 @@ class TestPingPong(unittest.TestCase):
             vdaf = PingPongTester(num_rounds)
 
             (public_share, input_shares) = vdaf.shard(
+                ctx,
                 measurement,
                 nonce,
                 rand,
@@ -216,6 +227,7 @@ class TestPingPong(unittest.TestCase):
 
             (leader_state, msg) = vdaf.ping_pong_leader_init(
                 verify_key,
+                ctx,
                 vdaf.encode_agg_param(agg_param),
                 nonce,
                 vdaf.test_vec_encode_public_share(public_share),
@@ -227,6 +239,7 @@ class TestPingPong(unittest.TestCase):
                 if step == 0:
                     (helper_state, msg) = vdaf.ping_pong_helper_init(
                         verify_key,
+                        ctx,
                         vdaf.encode_agg_param(agg_param),
                         nonce,
                         vdaf.test_vec_encode_public_share(public_share),
@@ -236,6 +249,7 @@ class TestPingPong(unittest.TestCase):
                 else:
                     (helper_state, msg) = vdaf.ping_pong_helper_continued(
                         vdaf.encode_agg_param(agg_param),
+                        ctx,
                         helper_state,
                         cast(bytes, msg),
                     )
@@ -243,6 +257,7 @@ class TestPingPong(unittest.TestCase):
                 if isinstance(leader_state, Continued):
                     (leader_state, msg) = vdaf.ping_pong_leader_continued(
                         vdaf.encode_agg_param(agg_param),
+                        ctx,
                         leader_state,
                         cast(bytes, msg),
                     )

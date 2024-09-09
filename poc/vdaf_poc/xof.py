@@ -125,13 +125,13 @@ class XofTurboShake128(Xof):
         '''
         self.l = 0
         self.m = \
-            to_le_bytes(len(dst), 1) + dst \
+            to_le_bytes(len(dst), 2) + dst \
             to_le_bytes(len(seed), 1) + seed + \
             binder
         '''
         self.length_consumed = 0
         self.h = TurboSHAKE128.new(domain=1)
-        self.h.update(to_le_bytes(len(dst), 1))
+        self.h.update(to_le_bytes(len(dst), 2))
         self.h.update(dst)
         self.h.update(to_le_bytes(len(seed), 1))
         self.h.update(seed)
@@ -188,7 +188,7 @@ class XofFixedKeyAes128(Xof):
         #
         # Implementation note: this step can be cached across XOF
         # evaluations with many different seeds.
-        dst_length = to_le_bytes(len(dst), 1)
+        dst_length = to_le_bytes(len(dst), 2)
         self.fixed_key = TurboSHAKE128(
             dst_length + dst + binder,
             2,
@@ -209,7 +209,7 @@ class XofFixedKeyAes128(Xof):
         # Implementation note: this step can be cached across XOF
         # evaluations with many different seeds.
         h = TurboSHAKE128.new(domain=2)
-        h.update(to_le_bytes(len(dst), 1))
+        h.update(to_le_bytes(len(dst), 2))
         h.update(dst)
         h.update(binder)
         fixed_key = h.read(16)
