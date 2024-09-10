@@ -5521,7 +5521,7 @@ also stress that even if the IDPF is not extractable, Poplar1 guarantees that
 every client can contribute to at most one prefix among the ones being
 evaluated by the helpers.
 
-## Choosing the Field Size {#security-multiproof}
+## Choosing FLP Parameters {#security-multiproof}
 
 Prio3 and other systems built from FLPs ({{flp-bbcggi19}} in particular) may
 benefit from choosing a field size that is as small as possible. Generally
@@ -5543,13 +5543,25 @@ enough field ensures this computation is too expensive to be feasible. (See
 Another way to mitigate this issue (or improve robustness in general) is to
 generate and verify multiple, independent proofs. (See {{multiproofs}}.) For
 Prio3, the `PROOFS` parameter controls the number of proofs (at least one) that
-are generated and verified.
+are generated and verified. In general the soundness error of the FLP is given
+by the following formula:
 
-In general, Field128 is RECOMMENDED for use in Prio3 when the circuit uses
-joint randomness (`JOINT_RAND_LEN > 0`) and `PROOFS == 1`. Field64 MAY be used
-instead, but `PROOFS` MUST be set to at least `3`. Breaking robustness for
-`PROOFS == 2` is feasible, if impractical; but `PROOFS == 1` is completely
-broken for such a small field.
+~~~
+(circuit_soundness + flp_soundness) ** PROOFS
+~~~
+
+where:
+
+* `circuit_soundness` is the soundness of the validity circuit
+  ({{flp-bbcggi19-valid}})
+* `flp_soundness` is the base soundness of the proof system ({{BBCGGI19}},
+  Theorem 4.3)
+
+For circuits involving joint randomness, we aim for the soundness error to be
+close to `2^-128` in order to mitigate offline attacks. Such circuits MUST use
+Field128 with at least one proof or Field64 with at least three proofs.
+Depending on the circuit, Field64 with two proofs might have significantly
+lower soundness than Field128 with one proof.
 
 We stress that weak parameters (too small a field, too few proofs, or both) can
 be exploited to attack any aggregation task using those parameters. To
