@@ -2083,11 +2083,11 @@ def expand_into_vec(cls,
 
 ### XofTurboShake128 {#xof-turboshake128}
 
-This section describes XofTurboShake128, an XOF based on the
-TurboSHAKE128 {{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. This
-XOF is RECOMMENDED for all use cases within VDAFs. The length of the
-domain separation string `dst` passed to XofTurboShake128 MUST NOT
-exceed 255 bytes.
+This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
+{{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. (RFC EDITOR: Update this
+reference to the RFC for draft-irtf-cfrg-kangarootwelve once published.) This
+XOF is RECOMMENDED for all use cases within VDAFs. The length of the domain
+separation string `dst` passed to XofTurboShake128 MUST NOT exceed 255 bytes.
 
 ~~~ python
 class XofTurboShake128(Xof):
