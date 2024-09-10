@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-08T00:56:39.623799+00:00",
+  "timestamp": "2024-09-10T00:52:59.461195+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -35987,7 +35987,7 @@
       ],
       "body": "",
       "createdAt": "2024-09-05T21:31:08Z",
-      "updatedAt": "2024-09-06T22:21:15Z",
+      "updatedAt": "2024-09-09T21:37:42Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "ea39dccccc83988029fd667555aa45f6589195b2",
@@ -36009,9 +36009,9 @@
         {
           "author": "cjpatton",
           "authorAssociation": "COLLABORATOR",
-          "body": "To note:\r\n- [ ] Updated code points https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417\r\n- [ ] Change to IDPF public share encoding https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420",
+          "body": "To note:\r\n- [ ] Updated code points https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417\r\n- [ ] Change to IDPF public share encoding https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420\r\n- [ ] Application context: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422",
           "createdAt": "2024-09-06T19:23:46Z",
-          "updatedAt": "2024-09-06T22:21:15Z"
+          "updatedAt": "2024-09-09T21:37:42Z"
         }
       ],
       "reviews": []
@@ -36249,6 +36249,34 @@
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/domain-sep",
       "headRefOid": "b78382b39208eb86302dd67c78036b34b2db0cdc",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 422,
+      "id": "PR_kwDOGKuqOc5658_J",
+      "title": "Add application context string (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Based on #421 (merge that first).\r\nCloses #418.\r\n\r\n**WIP: We still need to propagate the changes through the draft and update security considerations, in particular the line about weak parameters being exploitable across tasks.**\r\n\r\nAdd an application context string, denoted `ctx`, to sharding and preparation APIs for DAFs and VDAFs. The intent is to use this for defense-in-depth: by binding execution of a VDAF to its application (concretely, in DAP we would set `ctx` to the task ID), we hope that an attack on that application does not translate directly to an attack on another application using the same parameters.\r\n\r\nThis change is motivated by the possibility of an offline attack against the robustness of some Prio3 variants. The attack is as follows: fix an invalid measurement, then search for measurement shares that derive joint randomness that causes the circuit to accept. Once these shares are found, they can be used to corrupt any batch that uses the same Prio3 parameters.\r\n\r\nTo reduce the blast radius of this attack, we can bind `ctx` to the joint randomness derivation, thereby ensuring the offline work done by the attacker is only useful to break a single application.\r\n\r\nThis change is slightly more general: wherever we compute a domain separation tag in either Prio3 or Poplar1, we append `ctx`. This is a more invasive than necessary, but it's also more conservative.\r\n\r\nFinally, we modify XofTurboShake128 and XofFixedKeyAes128 by changing the length prefix for the domain separation tag from a single byte to two bytes, thereby accommodating larger application context strings.",
+      "createdAt": "2024-09-09T21:34:26Z",
+      "updatedAt": "2024-09-09T21:36:47Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-12/domain-sep",
+      "baseRefOid": "b78382b39208eb86302dd67c78036b34b2db0cdc",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/context-string",
+      "headRefOid": "cb5bc19709735cd7a90ecc4de50aa4385f5628a6",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
