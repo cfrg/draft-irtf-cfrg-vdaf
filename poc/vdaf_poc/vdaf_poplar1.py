@@ -50,7 +50,7 @@ class Poplar1(
     idpf: IdpfBBCGGI21
     xof: type[Xof]
 
-    ID = 0x00001000
+    ID = 0x00000006
     NONCE_SIZE = 16
     SHARES = 2
     ROUNDS = 2
