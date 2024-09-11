@@ -91,8 +91,6 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         ctrl = [Field2(0), Field2(1)]
         public_share = []
         for level in range(self.BITS):
-            field: type[Field]
-            field = cast(type[Field], self.current_field(level))
             keep = (alpha >> (self.BITS - level - 1)) & 1
             lose = 1 - keep
             bit = Field2(keep)
@@ -105,12 +103,24 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
                 t0[1] + t1[1] + bit,
             )
 
-            x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
-            x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
+            # Implementation note: these conditional XORs and
+            # input-dependent array indices should be replaced with
+            # constant-time selects in practice in order to reduce
+            # leakage via timing side channels.
+            if ctrl[0].as_unsigned():
+                x0 = xor(s0[keep], seed_cw)
+                ctrl[0] = t0[keep] + ctrl_cw[keep]
+            else:
+                x0 = s0[keep]
+                ctrl[0] = t0[keep]
+            if ctrl[1].as_unsigned():
+                x1 = xor(s1[keep], seed_cw)
+                ctrl[1] = t1[keep] + ctrl_cw[keep]
+            else:
+                x1 = s1[keep]
+                ctrl[1] = t1[keep]
             (seed[0], w0) = self.convert(level, x0, nonce)
             (seed[1], w1) = self.convert(level, x1, nonce)
-            ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
-            ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
             if level < self.BITS - 1:
                 b = cast(list[Field], beta_inner[level])
@@ -122,12 +132,13 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
                 )
 
             w_cw = vec_add(vec_sub(b, w0), w1)
-            # Implementation note: here we negate the correction word if
-            # the control bit `ctrl[1]` is set. We avoid branching on the
-            # value in order to reduce leakage via timing side channels.
-            mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
-            for i in range(len(w_cw)):
-                w_cw[i] *= mask
+            # Implementation note: this conditional negation should be
+            # replaced with a constant time select or a constant time
+            # multiplication in practice in order to reduce leakage via
+            # timing side channels.
+            if ctrl[1].as_unsigned():
+                for i in range(len(w_cw)):
+                    w_cw[i] = -w_cw[i]
 
             public_share.append((seed_cw, ctrl_cw, w_cw))
         return (public_share, key)
@@ -214,26 +225,31 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         bit of the prefix corresponding to the next level of the tree.
         """
 
-        field = self.current_field(level)
         seed_cw = correction_word[0]
         ctrl_cw = correction_word[1]
         w_cw = cast(list[Field], correction_word[2])
         (s, t) = self.extend(level, prev_seed, nonce)
-        s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
-        s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
-        t[0] += ctrl_cw[0] * prev_ctrl
-        t[1] += ctrl_cw[1] * prev_ctrl
+
+        # Implementation note: these conditional operations and
+        # input-dependent array indices should be replaced with
+        # constant-time selects in practice in order to reduce leakage
+        # via timing side channels.
+        if prev_ctrl.as_unsigned():
+            s[0] = xor(s[0], seed_cw)
+            s[1] = xor(s[1], seed_cw)
+            t[0] += ctrl_cw[0]
+            t[1] += ctrl_cw[1]
 
         next_ctrl = t[bit]
         convert_output = self.convert(level, s[bit], nonce)
         next_seed = convert_output[0]
         y = cast(list[Field], convert_output[1])
-        # Implementation note: here we add the correction word to the
-        # output if `next_ctrl` is set. We avoid branching on the value
-        # of the control bit in order to reduce side channel leakage.
-        mask = cast(Field, field(next_ctrl.as_unsigned()))
-        for i in range(len(y)):
-            y[i] += w_cw[i] * mask
+        # Implementation note: this conditional addition should be
+        # replaced with a constant-time select in practice in order to
+        # reduce leakage via timing side channels.
+        if next_ctrl.as_unsigned():
+            for i in range(len(y)):
+                y[i] += w_cw[i]
 
         return (next_seed, next_ctrl, cast(FieldVec, y))
 
