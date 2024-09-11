@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 10 March 2025</td>
+<td class="center">Expires 15 March 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-09-06" class="published">6 September 2024</time>
+<time datetime="2024-09-11" class="published">11 September 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-03-10">10 March 2025</time></dd>
+<dd class="expires"><time datetime="2025-03-15">15 March 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 10 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 15 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3829,11 +3829,11 @@ def expand_into_vec(cls,
           <h4 id="name-xofturboshake128">
 <a href="#section-6.2.1" class="section-number selfRef">6.2.1. </a><a href="#name-xofturboshake128" class="section-name selfRef">XofTurboShake128</a>
           </h4>
-<p id="section-6.2.1-1">This section describes XofTurboShake128, an XOF based on the
-TurboSHAKE128 <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. This
-XOF is <span class="bcp14">RECOMMENDED</span> for all use cases within VDAFs. The length of the
-domain separation string <code>dst</code> passed to XofTurboShake128 <span class="bcp14">MUST NOT</span>
-exceed 255 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.2.1-1">This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
+<span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. (RFC EDITOR: Update this
+reference to the RFC for draft-irtf-cfrg-kangarootwelve once published.) This
+XOF is <span class="bcp14">RECOMMENDED</span> for all use cases within VDAFs. The length of the domain
+separation string <code>dst</code> passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 255 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
 <span id="name-definition-of-xof-xofturbos"></span><figure id="figure-13">
             <div class="lang-python sourcecode" id="section-6.2.1-2.1">
 <pre>
@@ -3945,7 +3945,7 @@ class XofFixedKeyAes128(Xof):
 </div>
 </section>
 </div>
-<div id="the-domain-separation-tag-and-binder-string">
+<div id="dst-binder">
 <section id="section-6.2.3">
           <h4 id="name-the-domain-separation-tag-a">
 <a href="#section-6.2.3" class="section-number selfRef">6.2.3. </a><a href="#name-the-domain-separation-tag-a" class="section-name selfRef">The Domain Separation Tag and Binder String</a>
@@ -7936,8 +7936,9 @@ def unshard(
 network while executing <code>Poplar1</code>. It is <span class="bcp14">RECOMMENDED</span> that implementations
 provide serialization methods for them.<a href="#section-8.2.6-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>Fi</code> as an alias for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code>
-and <code>Fl</code> as an alias for <code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>.<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
+remainder we use <code>Fi</code> as an alias for <code>poplar1.idpf.field_inner.ENCODED_SIZE</code>,
+<code>Fl</code> as an alias for <code>poplar1.idpf.field_leaf.ENCODED_SIZE</code>, and <code>B</code> as an
+alias for <code>poplar1.idpf.BITS</code>.<a href="#section-8.2.6-2" class="pilcrow">¶</a></p>
 <p id="section-8.2.6-3">Elements of the inner field are encoded in little-endian byte order (as defined
 in <a href="#field" class="auto internal xref">Section 6.1</a>) and are represented as follows:<a href="#section-8.2.6-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6-4">
@@ -7971,47 +7972,37 @@ of "correction words". A correction word has three components:<a href="#section-
 <code>list[Field255]</code> for the last word.<a href="#section-8.2.6.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
-<p id="section-8.2.6.1-3">The encoding is straightforward, except that the control bits are packed as
-tightly as possible. The encoded public share is structured as follows:<a href="#section-8.2.6.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.2.6.1-3">The encoding is a straightforward structure of arrays, except that the control
+bits are packed as tightly as possible. The encoded public share is structured
+as follows:<a href="#section-8.2.6.1-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-8.2.6.1-4">
 <pre>
 struct {
-    opaque seed[poplar1.idpf.KEY_SIZE];
-    Poplar1FieldInner payload[Fi * poplar1.idpf.VALUE_LEN];
-} Poplar1CWSeedAndPayloadInner;
-
-struct {
-    opaque seed[poplar1.idpf.KEY_SIZE];
-    Poplar1FieldLeaf payload[Fl * poplar1.idpf.VALUE_LEN];
-} Poplar1CWSeedAndPayloadLeaf;
-
-struct {
     opaque packed_control_bits[packed_len];
-    Poplar1CWSeedAndPayloadInner inner[Ci * (poplar1.idpf.BITS-1)];
-    Poplar1CWSeedAndPayloadLeaf leaf;
+    opaque seed[poplar1.idpf.KEY_SIZE*B];
+    Poplar1FieldInner payload_inner[Fi*poplar1.idpf.VALUE_LEN*(B-1)];
+    Poplar1FieldLeaf payload_leaf[Fl*poplar1.idpf.VALUE_LEN];
 } Poplar1PublicShare;
 </pre><a href="#section-8.2.6.1-4" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2.6.1-5">Here <code>Ci</code> denotes the length of <code>Poplar1CWSeedAndPayloadInner</code> and
-<code>packed_len = (2*Poplar1.Idpf.BITS + 7) // 8</code> is the length of the packed
-control bits.<a href="#section-8.2.6.1-5" class="pilcrow">¶</a></p>
-<p id="section-8.2.6.1-6">Field <code>packed_control_bits</code> is encoded with the following function:<a href="#section-8.2.6.1-6" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-8.2.6.1-7">
+<p id="section-8.2.6.1-5">Here <code>packed_len = (2*B + 7) // 8</code> is the length of the packed control bits.
+Field <code>packed_control_bits</code> is encoded with the following function:<a href="#section-8.2.6.1-5" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-8.2.6.1-6">
 <pre>
 packed_control_buf = [int(0)] * packed_len
 for i, bit in enumerate(control_bits):
     packed_control_buf[i // 8] |= bit.as_unsigned() &lt;&lt; (i % 8)
 packed_control_bits = bytes(packed_control_buf)
-</pre><a href="#section-8.2.6.1-7" class="pilcrow">¶</a>
+</pre><a href="#section-8.2.6.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2.6.1-8">It encodes each group of eight bits into a byte, in LSB to MSB order, padding the most
+<p id="section-8.2.6.1-7">It encodes each group of eight bits into a byte, in LSB to MSB order, padding the most
 significant bits of the last byte with zeros as necessary, and returns the byte
 array. Decoding performs the reverse operation: it takes in a byte array
 and a number of bits, and returns a list of bits, extracting eight bits from
 each byte in turn, in LSB to MSB order, and stopping after the requested number
 of bits. If the byte array has an incorrect length, or if unused bits in the
-last bytes are not zero, it throws an error:<a href="#section-8.2.6.1-8" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-8.2.6.1-9">
+last bytes are not zero, it throws an error:<a href="#section-8.2.6.1-7" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-8.2.6.1-8">
 <pre>
 control_bits = []
 for i in range(length):
@@ -8024,7 +8015,7 @@ leftover_bits = packed_control_bits[-1] &gt;&gt; (
 if (length + 7) // 8 != len(packed_control_bits) or \
         leftover_bits != 0:
     raise ValueError('trailing bits')
-</pre><a href="#section-8.2.6.1-9" class="pilcrow">¶</a>
+</pre><a href="#section-8.2.6.1-8" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -8982,13 +8973,12 @@ Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pi
         </tbody>
       </table>
 </div>
-<p id="section-10-9">[[ RFC EDITOR: Please replace "RFC XXXX" above with the RFC number assigned to
-this document. ]]<a href="#section-10-9" class="pilcrow">¶</a></p>
-<p id="section-10-10">VDAF identifiers are used for domain separation, as described in
-<a href="#the-domain-separation-tag-and-binder-string" class="auto internal xref">Section 6.2.3</a>.  Domain separation guards
-against failures of entropy sources, by ensuring that invocations of different
-VDAFs use different derived values, even if they are invoked with the same
-underlying random data.<a href="#section-10-10" class="pilcrow">¶</a></p>
+<p id="section-10-9">(RFC EDITOR: Please replace "RFC XXXX" above with the RFC number assigned to
+this document.)<a href="#section-10-9" class="pilcrow">¶</a></p>
+<p id="section-10-10">VDAF identifiers are used for domain separation, as described in <a href="#dst-binder" class="auto internal xref">Section 6.2.3</a>.
+Domain separation guards against failures of entropy sources, by ensuring that
+invocations of different VDAFs use different derived values, even if they are
+invoked with the same underlying random data.<a href="#section-10-10" class="pilcrow">¶</a></p>
 <p id="section-10-11">The benefits of domain separation are undermined if different VDAFs are used
 with the same VDAF Identifier.  The "Reserved for Private Use" code points
 should thus be used judiciously, because they provide no defense against such
