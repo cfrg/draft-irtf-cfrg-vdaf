@@ -54,7 +54,7 @@ class TestPrio3FlpTest(TestVdaf):
 class TestPrio3Count(TestVdaf):
     def test(self) -> None:
         prio3 = Prio3Count(2)
-        self.assertEqual(prio3.ID, 0x00000000)
+        self.assertEqual(prio3.ID, 0x00000001)
         self.run_vdaf_test(prio3, None, [0, 1, 1, 0, 1], 3)
         self.run_vdaf_test(prio3, None, [1], 1)
 
@@ -66,7 +66,7 @@ class TestPrio3Count(TestVdaf):
 class TestPrio3Sum(TestVdaf):
     def test(self) -> None:
         prio3 = Prio3Sum(2, 147)
-        self.assertEqual(prio3.ID, 0x00000001)
+        self.assertEqual(prio3.ID, 0x00000002)
         self.run_vdaf_test(prio3, None, [0, 147, 1, 0, 11, 0], 159)
         self.run_vdaf_test(prio3, None, [100], 100)
 
@@ -78,7 +78,7 @@ class TestPrio3Sum(TestVdaf):
 class TestPrio3SumVec(TestVdaf):
     def test(self) -> None:
         prio3 = Prio3SumVec(2, 10, 8, 9)
-        self.assertEqual(prio3.ID, 0x00000002)
+        self.assertEqual(prio3.ID, 0x00000003)
         self.run_vdaf_test(
             prio3,
             None,
@@ -113,7 +113,7 @@ class TestPrio3SumVec(TestVdaf):
 class TestHistogram(TestVdaf):
     def test(self) -> None:
         prio3 = Prio3Histogram(2, 4, 2)
-        self.assertEqual(prio3.ID, 0x00000003)
+        self.assertEqual(prio3.ID, 0x00000004)
         self.run_vdaf_test(prio3, None, [0], [1, 0, 0, 0])
         self.run_vdaf_test(prio3, None, [1], [0, 1, 0, 0])
         self.run_vdaf_test(prio3, None, [2], [0, 0, 1, 0])
@@ -134,7 +134,7 @@ class TestPrio3MultihotCountVec(TestVdaf):
         # Prio3MultihotCountVec with length = 4, max_weight = 2,
         # chunk_length = 2.
         prio3 = Prio3MultihotCountVec(2, 4, 2, 2)
-        self.assertEqual(prio3.ID, 0x00000004)
+        self.assertEqual(prio3.ID, 0x00000005)
         self.run_vdaf_test(prio3, None, [[0, 0, 0, 0]], [0, 0, 0, 0])
         self.run_vdaf_test(prio3, None, [[0, 1, 0, 0]], [0, 1, 0, 0])
         self.run_vdaf_test(prio3, None, [[0, 1, 1, 0]], [0, 1, 1, 0])

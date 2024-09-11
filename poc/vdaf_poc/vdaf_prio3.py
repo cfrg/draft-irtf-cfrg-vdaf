@@ -530,7 +530,7 @@ class Prio3(
 #
 
 class Prio3Count(Prio3[int, int, Field64]):
-    ID = 0x00000000
+    ID = 0x00000001
     xof = XofTurboShake128
     VERIFY_KEY_SIZE = xof.SEED_SIZE
 
@@ -545,7 +545,7 @@ class Prio3Count(Prio3[int, int, Field64]):
 
 
 class Prio3Sum(Prio3[int, int, Field64]):
-    ID = 0x00000001
+    ID = 0x00000002
     xof = XofTurboShake128
     VERIFY_KEY_SIZE = xof.SEED_SIZE
 
@@ -560,7 +560,7 @@ class Prio3Sum(Prio3[int, int, Field64]):
 
 
 class Prio3SumVec(Prio3[list[int], list[int], Field128]):
-    ID = 0x00000002
+    ID = 0x00000003
     xof = XofTurboShake128
     VERIFY_KEY_SIZE = xof.SEED_SIZE
 
@@ -575,7 +575,7 @@ class Prio3SumVec(Prio3[list[int], list[int], Field128]):
 
 
 class Prio3Histogram(Prio3[int, list[int], Field128]):
-    ID = 0x00000003
+    ID = 0x00000004
     xof = XofTurboShake128
     VERIFY_KEY_SIZE = xof.SEED_SIZE
 
@@ -623,7 +623,7 @@ class Prio3SumVecWithMultiproof(Prio3[list[int], list[int], F], Generic[F]):
 
 
 class Prio3MultihotCountVec(Prio3[list[int], list[int], Field128]):
-    ID = 0x00000004
+    ID = 0x00000005
     xof = XofTurboShake128
     VERIFY_KEY_SIZE = xof.SEED_SIZE
 

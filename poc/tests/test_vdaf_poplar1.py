@@ -123,7 +123,7 @@ class TestPoplar1(TestVdaf):
     def test_generate_test_vectors(self) -> None:
         # Generate test vectors.
         cls = Poplar1(4)
-        self.assertEqual(cls.ID, 0x00001000)
+        self.assertEqual(cls.ID, 0x00000006)
         measurements = [0b1101]
         tests = [
             # (level, prefixes, expected result)
