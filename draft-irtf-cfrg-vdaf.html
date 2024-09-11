@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 14 March 2025</td>
+<td class="center">Expires 15 March 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-09-10" class="published">10 September 2024</time>
+<time datetime="2024-09-11" class="published">11 September 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-03-14">14 March 2025</time></dd>
+<dd class="expires"><time datetime="2025-03-15">15 March 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 15 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3945,7 +3945,7 @@ class XofFixedKeyAes128(Xof):
 </div>
 </section>
 </div>
-<div id="the-domain-separation-tag-and-binder-string">
+<div id="dst-binder">
 <section id="section-6.2.3">
           <h4 id="name-the-domain-separation-tag-a">
 <a href="#section-6.2.3" class="section-number selfRef">6.2.3. </a><a href="#name-the-domain-separation-tag-a" class="section-name selfRef">The Domain Separation Tag and Binder String</a>
@@ -8855,13 +8855,41 @@ of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p
       <h2 id="name-iana-considerations">
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-10-1">A codepoint for each (V)DAF in this document is defined in the table below. Note
-that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for private use.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<span id="name-unique-identifiers-for-vdaf"></span><div id="codepoints">
+<p id="section-10-1">IANA is requested to make one new registry:<a href="#section-10-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10-2.1">
+          <p id="section-10-2.1.1">DAF and VDAF Identifiers<a href="#section-10-2.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-10-3">This registry should be created under the heading "Verifiable Distributed
+Aggregation Functions (VDAF)", and administered under the Specification Required
+policy <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-10-3" class="pilcrow">¶</a></p>
+<p id="section-10-4">The "VDAF Identifiers" registry lists identifiers for Distributed Aggregation
+Functions (DAFs) and Verifiable Distributed Aggregation Functions (VDAFs). These
+identifiers are four-byte values, so the minimum possible value is 0x00000000
+and the maximum possible value is 0xffffffff.<a href="#section-10-4" class="pilcrow">¶</a></p>
+<p id="section-10-5">Template:<a href="#section-10-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10-6.1">
+          <p id="section-10-6.1.1">Value: The four-byte identifier for the DAF or VDAF<a href="#section-10-6.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-10-6.2">
+          <p id="section-10-6.2.1">Scheme: The name of the DAF or VDAF<a href="#section-10-6.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-10-6.3">
+          <p id="section-10-6.3.1">Type: Either "DAF" for a Distributed Aggregation Function or "VDAF" for a
+Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-10-6.4">
+          <p id="section-10-6.4.1">Reference: Where the algorithm is defined<a href="#section-10-6.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-10-7">The initial contents of the registry are as follows:<a href="#section-10-7" class="pilcrow">¶</a></p>
+<span id="name-verifiable-distributed-aggr"></span><div id="codepoints">
 <table class="center" id="table-23">
         <caption>
 <a href="#table-23" class="selfRef">Table 23</a>:
-<a href="#name-unique-identifiers-for-vdaf" class="selfRef">Unique identifiers for (V)DAFs.</a>
+<a href="#name-verifiable-distributed-aggr" class="selfRef">Verifiable Distributed Aggregation Function Identifiers Registry</a>
         </caption>
 <thead>
           <tr>
@@ -8876,86 +8904,85 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000000</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3Count</td>
-            <td class="text-left" rowspan="1" colspan="1">VDAF</td>
-            <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3count" class="auto internal xref">Section 7.4.1</a>
-</td>
+            <td class="text-left" rowspan="1" colspan="1">Reserved</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000001</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3Sum</td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Count</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>
-</td>
+              <a href="#prio3count" class="auto internal xref">Section 7.4.1</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000002</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3SumVec</td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Sum</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a>
-</td>
+              <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000003</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3Histogram</td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3SumVec</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>
-</td>
+              <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000004</code>
 </td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Histogram</td>
+            <td class="text-left" rowspan="1" colspan="1">VDAF</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a> of RFC XXXX</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>0x00000005</code>
+</td>
             <td class="text-left" rowspan="1" colspan="1">Prio3MultihotCountVec</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3multihotcountvec" class="auto internal xref">Section 7.4.5</a>
-</td>
+              <a href="#prio3multihotcountvec" class="auto internal xref">Section 7.4.5</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>0x00000005</code> to <code>0x00000FFF</code>
-</td>
-            <td class="text-left" rowspan="1" colspan="1">reserved for Prio3</td>
-            <td class="text-left" rowspan="1" colspan="1">VDAF</td>
-            <td class="text-left" rowspan="1" colspan="1">n/a</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">
-              <code>0x00001000</code>
+              <code>0x00000006</code>
 </td>
             <td class="text-left" rowspan="1" colspan="1">Poplar1</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>
-</td>
+              <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0xFFFF0000</code> to <code>0xFFFFFFFF</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">reserved</td>
+            <td class="text-left" rowspan="1" colspan="1">Reserved for Private Use</td>
             <td class="text-left" rowspan="1" colspan="1">n/a</td>
             <td class="text-left" rowspan="1" colspan="1">n/a</td>
           </tr>
         </tbody>
       </table>
 </div>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-10-3.1">
-          <p id="section-10-3.1.1">TODO Add IANA considerations for the codepoints summarized in <a href="#codepoints" class="auto internal xref">Table 23</a>.<a href="#section-10-3.1.1" class="pilcrow">¶</a></p>
-</li>
-      </ul>
+<p id="section-10-9">(RFC EDITOR: Please replace "RFC XXXX" above with the RFC number assigned to
+this document.)<a href="#section-10-9" class="pilcrow">¶</a></p>
+<p id="section-10-10">VDAF identifiers are used for domain separation, as described in <a href="#dst-binder" class="auto internal xref">Section 6.2.3</a>.
+Domain separation guards against failures of entropy sources, by ensuring that
+invocations of different VDAFs use different derived values, even if they are
+invoked with the same underlying random data.<a href="#section-10-10" class="pilcrow">¶</a></p>
+<p id="section-10-11">The benefits of domain separation are undermined if different VDAFs are used
+with the same VDAF Identifier.  The "Reserved for Private Use" code points
+should thus be used judiciously, because they provide no defense against such
+collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of registered code points.<a href="#section-10-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -8972,6 +8999,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8126">[RFC8126]</dt>
+        <dd>
+<span class="refAuthor">Cotton, M.</span>, <span class="refAuthor">Leiba, B.</span>, and <span class="refAuthor">T. Narten</span>, <span class="refTitle">"Guidelines for Writing an IANA Considerations Section in RFCs"</span>, <span class="seriesInfo">BCP 26</span>, <span class="seriesInfo">RFC 8126</span>, <span class="seriesInfo">DOI 10.17487/RFC8126</span>, <time datetime="2017-06" class="refDate">June 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8126">https://www.rfc-editor.org/rfc/rfc8126</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
         <dd>

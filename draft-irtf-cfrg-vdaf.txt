@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 March 2025                                              ISRG
+Expires: 15 March 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                       10 September 2024
+                                                       11 September 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 March 2025.
+   This Internet-Draft will expire on 15 March 2025.
 
 Copyright Notice
 
@@ -5825,36 +5825,77 @@ Table of Contents
 
 10.  IANA Considerations
 
-   A codepoint for each (V)DAF in this document is defined in the table
-   below.  Note that 0xFFFF0000 through 0xFFFFFFFF are reserved for
-   private use.
+   IANA is requested to make one new registry:
+
+   *  DAF and VDAF Identifiers
+
+   This registry should be created under the heading "Verifiable
+   Distributed Aggregation Functions (VDAF)", and administered under the
+   Specification Required policy [RFC8126].
+
+   The "VDAF Identifiers" registry lists identifiers for Distributed
+   Aggregation Functions (DAFs) and Verifiable Distributed Aggregation
+   Functions (VDAFs).  These identifiers are four-byte values, so the
+   minimum possible value is 0x00000000 and the maximum possible value
+   is 0xffffffff.
+
+   Template:
+
+   *  Value: The four-byte identifier for the DAF or VDAF
+
+   *  Scheme: The name of the DAF or VDAF
+
+   *  Type: Either "DAF" for a Distributed Aggregation Function or
+      "VDAF" for a Verifiable Distributed Aggregation Function
+
+   *  Reference: Where the algorithm is defined
+
+   The initial contents of the registry are as follows:
 
      +===============+=======================+======+===============+
      | Value         | Scheme                | Type | Reference     |
      +===============+=======================+======+===============+
-     | 0x00000000    | Prio3Count            | VDAF | Section 7.4.1 |
+     | 0x00000000    | Reserved              | n/a  | RFC XXXX      |
      +---------------+-----------------------+------+---------------+
-     | 0x00000001    | Prio3Sum              | VDAF | Section 7.4.2 |
+     | 0x00000001    | Prio3Count            | VDAF | Section 7.4.1 |
+     |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
-     | 0x00000002    | Prio3SumVec           | VDAF | Section 7.4.3 |
+     | 0x00000002    | Prio3Sum              | VDAF | Section 7.4.2 |
+     |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
-     | 0x00000003    | Prio3Histogram        | VDAF | Section 7.4.4 |
+     | 0x00000003    | Prio3SumVec           | VDAF | Section 7.4.3 |
+     |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
-     | 0x00000004    | Prio3MultihotCountVec | VDAF | Section 7.4.5 |
+     | 0x00000004    | Prio3Histogram        | VDAF | Section 7.4.4 |
+     |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
-     | 0x00000005 to | reserved for Prio3    | VDAF | n/a           |
-     | 0x00000FFF    |                       |      |               |
+     | 0x00000005    | Prio3MultihotCountVec | VDAF | Section 7.4.5 |
+     |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
-     | 0x00001000    | Poplar1               | VDAF | Section 8.4   |
+     | 0x00000006    | Poplar1               | VDAF | Section 8.4   |
+     |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
-     | 0xFFFF0000 to | reserved              | n/a  | n/a           |
-     | 0xFFFFFFFF    |                       |      |               |
+     | 0xFFFF0000 to | Reserved for Private  | n/a  | n/a           |
+     | 0xFFFFFFFF    | Use                   |      |               |
      +---------------+-----------------------+------+---------------+
 
-                Table 23: Unique identifiers for (V)DAFs.
+          Table 23: Verifiable Distributed Aggregation Function
+                           Identifiers Registry
 
-      TODO Add IANA considerations for the codepoints summarized in
-      Table 23.
+   (RFC EDITOR: Please replace "RFC XXXX" above with the RFC number
+   assigned to this document.)
+
+   VDAF identifiers are used for domain separation, as described in
+   Section 6.2.3.  Domain separation guards against failures of entropy
+   sources, by ensuring that invocations of different VDAFs use
+   different derived values, even if they are invoked with the same
+   underlying random data.
+
+   The benefits of domain separation are undermined if different VDAFs
+   are used with the same VDAF Identifier.  The "Reserved for Private
+   Use" code points should thus be used judiciously, because they
+   provide no defense against such collisions.  Applications SHOULD
+   prefer the use of registered code points.
 
 11.  References
 
@@ -5864,6 +5905,11 @@ Table of Contents
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8126]  Cotton, M., Leiba, B., and T. Narten, "Guidelines for
+              Writing an IANA Considerations Section in RFCs", BCP 26,
+              RFC 8126, DOI 10.17487/RFC8126, June 2017,
+              <https://www.rfc-editor.org/rfc/rfc8126>.
 
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
