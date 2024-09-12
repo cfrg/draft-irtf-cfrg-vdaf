@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-10T00:52:59.461195+00:00",
+  "timestamp": "2024-09-12T00:52:45.417834+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -2131,7 +2131,7 @@
       "id": "I_kwDOGKuqOc5QW-a7",
       "title": "Complete IANA considerations",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/110",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -2142,8 +2142,8 @@
       ],
       "body": "As of VDAF-03, the draft has codepoints intended to be used by other drafts (e.g., DAP). These are currently summarized in a table `{{codepoints}}`. This is good enough for now, but eventually we'll need to flesh this out into a section that IANA can actually use. @bifurcation points to an example of how to do this properly:  https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/104#discussion_r948280200_",
       "createdAt": "2022-08-23T16:14:29Z",
-      "updatedAt": "2024-09-06T19:26:34Z",
-      "closedAt": null,
+      "updatedAt": "2024-09-11T14:57:54Z",
+      "closedAt": "2024-09-11T14:57:54Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5876,14 +5876,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "wire change",
         "draft-12"
       ],
       "body": "Consider the risk that, for a specific variant of Prio3, an attacker does enough offline computation that it can efficiently find  invalid reports that get accepted by the aggregators. We know this attack is feasible for a sufficiently small finite field and/or number of proofs: when the circuit uses joint randomness, the attacker can search for input shares that derive joint randomness that forces the circuit to accept an invalid measurement. (See #311 for details.)\r\n\r\nWhile we believe we've mitigated this risk for standardized variants, like Prio3SumVec, there is still a possibility of non-standardized variants getting deployed that haven't. The draft should, at a minimum, acknowledge this risk. We could also modify the spec in order to reduce the blast radius of this attack as much as possible.\r\n\r\nOne idea that's been suggested (by @junyechen1996 and @kunal-talwar) is to add the [DAP task ID](https://ietf-wg-ppm.github.io/draft-ietf-ppm-dap/draft-ietf-ppm-dap.html#section-4.4) to the transcript hash for the joint randomness derivation. This way all of the offline computation carried out by the attacker is only useful for a specific DAP task. This is similar to [salting a password hash](https://en.wikipedia.org/wiki/Salt_(cryptography)) in order to ensure that whatever computation the attacker does in advance, like building [rainbow tables](https://en.wikipedia.org/wiki/Rainbow_table), is specific to that user the attacker wants to impersonate.\r\n\r\nMore generally, we could modify the VDAF syntax in order to allow binding the computation to its application context. There are a couple ways we can do this:\r\n\r\n1. Add a context parameter to (V)DAF sharding and preparation.\r\n2. Allow the nonce to encode the context. At the moment, the nonce size is determined by the (V)DAF, and the client is supposed to choose it at random; we would need modify the syntax to support any nonce size and relax the requirements for choosing it.\r\n\r\nBoth of these options will require about the same amount of work for the DAP and VDAF specs. The downside of (1.) is that it requires API breaking changes. The downside of (2.) is that it makes the requirements more technical: the nonce now needs to have high min-entropy rather than being completely random. We could probably address this by providing some examples of secure ways to choose the nonce.\r\n\r\nDo folks support this change?\r\n\r\nSome reasons to do this:\r\n1. Defense-in-depth is always good (and this change certainly can't hurt).\r\n2. This aligns with a design philosophy of more conventional ZKP applications, which is to add as much context as possible to the transcript whenever you do Fiat-Shamir.\r\n\r\nSome reasons not to do this:\r\n1. It's a fairly big change, and there's a chance we get it wrong. Though we at least have a pretty good idea of what to do for Prio3.\r\n3. It could create a false sense of security, leading to overly optimistic parameter choices getting deployed.",
       "createdAt": "2024-09-06T19:04:46Z",
-      "updatedAt": "2024-09-06T23:49:49Z",
+      "updatedAt": "2024-09-11T16:07:40Z",
       "closedAt": null,
       "comments": [
         {
@@ -36021,7 +36023,7 @@
       "id": "PR_kwDOGKuqOc56srdG",
       "title": "Flesh out IANA considerations",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "bifurcation",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36031,17 +36033,19 @@
       ],
       "body": "This PR replaces the IANA considerations with a more IETF/IRTF-standard formulation.  It provides precise instructions to IANA as to how to construct and manage the registry.\r\n\r\nThis PR also adds some discussion about how these identifiers are used, to guide applications toward VDAF IDs that are less likely to accidentally collide.\r\n\r\nFixes #110 ",
       "createdAt": "2024-09-06T18:53:34Z",
-      "updatedAt": "2024-09-06T21:39:27Z",
+      "updatedAt": "2024-09-11T14:57:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "598455e704b9d5c593f6fe391fc4e56f762decf7",
+      "baseRefOid": "a0e056ea5b73a8c91f0a27b123f6e22adc611d1e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "iana",
-      "headRefOid": "f3fac461919b1a5e31b335dc962ccb720ead4847",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "7b67beb43bbfe303d98922c39979ad0c90086480",
+      "closedAt": "2024-09-11T14:57:53Z",
+      "mergedAt": "2024-09-11T14:57:53Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "3a951d58a5171d8abb3fff5001d9eddc18b3b575"
+      },
       "comments": [
         {
           "author": "bifurcation",
@@ -36056,6 +36060,13 @@
           "body": "@divergentdave please take a look as well: this re-assigns codepoints, which will likely be painful for our DAP implementations.",
           "createdAt": "2024-09-06T19:25:59Z",
           "updatedAt": "2024-09-06T19:25:59Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The update action is failing because update-artifact v2 is deprecated. This was already fixed: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/424\r\n\r\nI'm going to rebase this and force-push to @bifurcation's branch.",
+          "createdAt": "2024-09-11T14:50:18Z",
+          "updatedAt": "2024-09-11T14:50:18Z"
         }
       ],
       "reviews": [
@@ -36118,7 +36129,7 @@
       "id": "PR_kwDOGKuqOc56tFcK",
       "title": "IDPF: Simplify code, add constant-time notes",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/419",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36127,17 +36138,19 @@
       ],
       "body": "This simplifies some code in `gen()` and `eval_next()` by using control flow instead of multiplications and conditional selects. I added and updated implementation notes about timing side channels.",
       "createdAt": "2024-09-06T20:20:40Z",
-      "updatedAt": "2024-09-06T20:47:28Z",
+      "updatedAt": "2024-09-11T15:21:17Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "598455e704b9d5c593f6fe391fc4e56f762decf7",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/idpf-simplify-select",
       "headRefOid": "ca6eb5d00dee6a7770df4ee1a774988395cb5c37",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-09-11T15:21:13Z",
+      "mergedAt": "2024-09-11T15:21:13Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24"
+      },
       "comments": [],
       "reviews": [
         {
@@ -36283,6 +36296,175 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 423,
+      "id": "PR_kwDOGKuqOc56_car",
+      "title": "Add an RFC EDITOR note for TurboSHAKE",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/423",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "We currently point to the draft; we'll want to replace this pointer with a reference to the RFC once it's published.",
+      "createdAt": "2024-09-10T14:13:15Z",
+      "updatedAt": "2024-09-10T15:47:01Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "d038274376c880392b2c73a3aebf8f5178cd8991",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/rfc-editor-notes",
+      "headRefOid": "06d2d4d216b2e29f1b69dfd57f3df8704462e000",
+      "closedAt": "2024-09-10T15:47:01Z",
+      "mergedAt": "2024-09-10T15:47:01Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "a0e056ea5b73a8c91f0a27b123f6e22adc611d1e"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "CI should be fixed after merging #424.",
+          "createdAt": "2024-09-10T14:26:06Z",
+          "updatedAt": "2024-09-10T14:26:06Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Iqxig",
+          "commit": {
+            "abbreviatedOid": "06d2d4d"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-10T15:42:49Z",
+          "updatedAt": "2024-09-10T15:43:29Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 424,
+      "id": "PR_kwDOGKuqOc56_gKN",
+      "title": "Bump update-artifact to v4",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/424",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "v2 has been deprecated for some time:\r\nhttps://github.blog/changelog/2024-02-13-deprecation-notice-v1-and-v2-of-the-artifact-actions/",
+      "createdAt": "2024-09-10T14:20:12Z",
+      "updatedAt": "2024-09-10T15:42:06Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "cc875878cc59394d5aed64e481b7e07e44c9d020",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/update-editors-copy",
+      "headRefOid": "7174d47013129ff8100597bbd9153fae48be74ae",
+      "closedAt": "2024-09-10T15:42:06Z",
+      "mergedAt": "2024-09-10T15:42:06Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "d038274376c880392b2c73a3aebf8f5178cd8991"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Iqtzb",
+          "commit": {
+            "abbreviatedOid": "7174d47"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-10T15:36:11Z",
+          "updatedAt": "2024-09-10T15:36:11Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 425,
+      "id": "PR_kwDOGKuqOc56_sZT",
+      "title": "Strengthen recommendation about field size",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/425",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "The security consideration section has the following recommendation for choosing parameters for circuits with joint randomness: \"Field128 is RECOMMENDED, but Field64 MAY be used with at least three proofs\".\r\n\r\nClarify where this requirement comes from (the base proof system needs around 128 bits of security) and strengthen this language somewhat: \"Either Field128 or Field64 with three proofs MUST be used\".\r\n\r\nThis change was suggested in an offline conversation with @henrycg.",
+      "createdAt": "2024-09-10T14:42:19Z",
+      "updatedAt": "2024-09-10T15:43:55Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "d038274376c880392b2c73a3aebf8f5178cd8991",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/bits-of-security-for-flp",
+      "headRefOid": "7424d4a07eca8d209862a2213f71d8a56a133202",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 426,
+      "id": "PR_kwDOGKuqOc57LSFE",
+      "title": "poc: Update codepoints for all VDAFs (*)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/426",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-12"
+      ],
+      "body": "Previously we re-assigned codepoints for Prio3 and Poplar1. Update the reference code to match.\r\n\r\nFollow up for #110.",
+      "createdAt": "2024-09-11T15:00:42Z",
+      "updatedAt": "2024-09-11T15:17:12Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "3a951d58a5171d8abb3fff5001d9eddc18b3b575",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-12/update-codepoints",
+      "headRefOid": "0631edecbe72618c1da250c4418e7c83295bd6b7",
+      "closedAt": "2024-09-11T15:17:12Z",
+      "mergedAt": "2024-09-11T15:17:11Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "6e7b1c1a0740ab0c2fa66e065538cc8def7b675a"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6I8OQo",
+          "commit": {
+            "abbreviatedOid": "0631ede"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-11T15:05:14Z",
+          "updatedAt": "2024-09-11T15:05:14Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
