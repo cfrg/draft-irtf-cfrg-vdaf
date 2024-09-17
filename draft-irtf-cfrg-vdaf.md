@@ -1582,17 +1582,18 @@ struct {
   MessageType type;
   select (Message.type) {
     case initialize:
-      opaque prep_share<0..2^32-1>;
+      opaque prep_share<1..2^32-1>;
     case continue:
       opaque prep_msg<0..2^32-1>;
-      opaque prep_share<0..2^32-1>;
+      opaque prep_share<1..2^32-1>;
     case finish:
       opaque prep_msg<0..2^32-1>;
   };
 } Message;
 ~~~
 
-These messages are used to transition between the states described in
+Note that the shortest encodable ping-pong message is `5` bytes long. These
+messages are used to transition between the states described in
 {{vdaf-prep-comm}}. The Leader's initial transition is computed with the
 following method, implemented on `Vdaf`:
 
