@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-15T00:58:32.546194+00:00",
+  "timestamp": "2024-09-17T00:42:43.105908+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5856,7 +5856,7 @@
       ],
       "body": "As discussed in the 2024-09-06 call, we should change the IDPF gen() and eval() methods to take in bit strings (lists of booleans) instead of bigints. Iterating over the bits of the bit string would be clearer than shifting and masking an integer. We'll likewise need to change the recommendation for handling byte string, which currently suggests `from_be_bytes()`, and rewrite the prefix packing done in the aggregation parameter encoding/decoding.",
       "createdAt": "2024-09-06T17:16:55Z",
-      "updatedAt": "2024-09-06T17:25:34Z",
+      "updatedAt": "2024-09-16T22:58:18Z",
       "closedAt": null,
       "comments": [
         {
@@ -5865,6 +5865,20 @@
           "body": "I labeled this as wire breaking, as this may be a possibility. ",
           "createdAt": "2024-09-06T17:25:33Z",
           "updatedAt": "2024-09-06T17:25:33Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The encoding of the set of prefixes in a `Poplar1AggregationParam` is currently defined by shifting the integer representations of each prefix and concatenating them through bitwise ORs, then encoding the resulting integer in big-endian order. In practice, production implementations won't actually do all this handling with arbitrary-precision integers, but emulate it with bit manipulation, starting with their native representation of the list of prefixes, and skipping the intermediate integer with all the prefixes packed together, writing out the appropriate bytes.\r\n\r\nIn the `libprio-rs` implementation, we currently store IDPF indices using the `bitvec` crate. Aggregation parameter encoding is done by reversing each prefix bit string, concatenating them all into one bit string, reinterpreting the bit string as a byte string, and then reversing the order of the bytes and outputting them. The bit reversing and byte reversing are necessary because our encoding format has a strange property that unused bits, if any, appear in the first byte of the packed prefixes field. This is not expressible in terms of the `bitvec` crate's storage options, so we need some extra transformations to achieve it. Furthermore, the bits for the last prefix appear first in the byte encoding, while the bits for the first prefix appear last in the byte encoding. Both of these ergonomic/aesthetic issues arise from our use of big-endian encoding of arbitrary-precision integers in this procedure. Thus, we can consider changing the encoding format to something more natural, and easier to implement, as we remove the integer representation of IDPF indices, rather than re-implement the same format in terms of bit strings.\r\n\r\nI looked at various options for IDPF index interpretation, encoding order, and alignment. I focused on the options that satisfy the property that the encoding of a single IDPF index and the encoding of a prefix of that index share the same initial bytes. (this will solve the first ergonomics issue) Once this is decided, the next question is whether the partial byte (now at the end of the encoding) should be \"filled in\" from the MSB side or the LSB side. Both are easy to implement in libprio-rs, as we would use `BitVec<u8, Msb0>` or `BitVec<u8, Lsb0>` from the `bitvec` crate as-is. Currently, we regard the MSB of a byte as the \"first\" bit, so I figure we may as well stick with that convention. Next, I think we should flip the order of multiple prefixes in an aggregation parameter, so that the first prefix gets encoded in the first bytes, etc.\r\n\r\nLastly, we have a choice to either tightly pack all prefixes together, or to pad out each prefix with zeros to the next byte boundary. We currently do the former, and this is the bandwidth-optimal choice. We could switch to padding, which would make implementations a bit easier, since this requires less shifting, and would make hex dumps of aggregation parameters more easily legible. I haven't decided whether I want to pursue this change or not, so I'm going to punt and not include it in my first PR.",
+          "createdAt": "2024-09-16T15:32:21Z",
+          "updatedAt": "2024-09-16T15:32:21Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "\r\n> I looked at various options for IDPF index interpretation, encoding order, and alignment. I focused on the options that satisfy the property that the encoding of a single IDPF index and the encoding of a prefix of that index share the same initial bytes. (this will solve the first ergonomics issue)\r\n\r\n+1 Let's make sure we have this property.\r\n\r\n> Once this is decided, the next question is whether the partial byte (now at the end of the encoding) should be \"filled in\" from the MSB side or the LSB side. Both are easy to implement in libprio-rs, as we would use `BitVec<u8, Msb0>` or `BitVec<u8, Lsb0>` from the `bitvec` crate as-is. Currently, we regard the MSB of a byte as the \"first\" bit, so I figure we may as well stick with that convention.\r\n\r\nWhat do you mean by \"first\" bit? I think of `byte & 1` as the least signficant bit and `byte >> 7` as the most significant bit.\r\n \r\n> Lastly, we have a choice to either tightly pack all prefixes together, or to pad out each prefix with zeros to the next byte boundary. We currently do the former, and this is the bandwidth-optimal choice. We could switch to padding, which would make implementations a bit easier, since this requires less shifting, and would make hex dumps of aggregation parameters more easily legible. I haven't decided whether I want to pursue this change or not, so I'm going to punt and not include it in my first PR.\r\n\r\nI'd go for ease of implementation here. In my opinion, the complexity of the current implementation is outweighs the bandwidth savings (one byte pre prefix).",
+          "createdAt": "2024-09-16T22:58:17Z",
+          "updatedAt": "2024-09-16T22:58:17Z"
         }
       ]
     },
