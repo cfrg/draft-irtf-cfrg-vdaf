@@ -1623,7 +1623,7 @@ Table of Contents
          opaque prep_msg<0..2^32-1>;
          opaque prep_share<1..2^32-1>;
        case finish:
-         opaque prep_msg<1..2^32-1>;
+         opaque prep_msg<0..2^32-1>;
      };
    } Message;
 
