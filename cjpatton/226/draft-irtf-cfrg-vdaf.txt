@@ -3584,11 +3584,12 @@ Table of Contents
     |
     V proof
 
-       Figure 22: The proof generation algorithm invokes the validity
-       circuit on the encoded measurement and joint randomness.  The
-       validity circuit in turn invokes the gadget(s) defined by the
-       circuit.  The prove randomness is used to construct the gadget
-                               polynomial(s).
+          Figure 22: Components of the proof generation algorithm.
+
+   The proof generation algorithm invokes the validity circuit on the
+   encoded measurement and joint randomness.  The validity circuit in
+   turn invokes the gadget(s) defined by the circuit.  The prove
+   randomness is used to construct the gadget polynomial(s).
 
    The proof consists of the gadget polynomials that the verifier will
    use to compute the output of each gadget.  To generate these, the
@@ -3615,11 +3616,12 @@ Table of Contents
 
            # Compute the wire polynomials for this gadget. For each `j`,
            # find the lowest degree polynomial `wire_poly` for which
-           # `wire_poly(alpha^k) = wires[j][k]` for all `k`.
+           # `wire_poly(alpha^k) = wires[j][k]` for all `k`. Note that
+           # each `wires[j][0]` is set to the wire seed.
            #
            # Implementation note: `alpha` is a root of unity, which
-           # means `poly_interp()` can be evaluated using the NTT. This
-           # is also why we require `p` to be a power of 2.
+           # means `poly_interp()` can be evaluated using the NTT. Note
+           # that `g.wires[j]` is padded with 0s to a power of 2.
            alpha = self.field.gen() ** (self.field.GEN_ORDER // p)
            wire_inp = [alpha ** k for k in range(p)]
            wire_polys = []
@@ -3640,67 +3642,94 @@ Table of Contents
 
 7.3.3.2.  Query Generation
 
-    | proof (share)
-    +--------+
-    V        |
+         proof (share)
    +---------|--------+
    | Query   |        |
    | +-------|-----+  |
    | | Valid |     |<---- meas (share)
-   | | +-----|--+  |<---- joint rand
-   | | |     V  |  |  |<- query rand
+   | | +-----V--+  |<---- joint rand
+   | | | Gadget |  |  |<- query rand
    | | +--------+  |  |
    | +-------------+  |
    +------------------+
     |
     V verifier (share)
 
-       Figure 23: The query generation algorithm invokes the validity
-        circuit on the encoded measurement and joint randomness.  It
-      evaluates the gadget polynomials(s) encoded by the proof (share)
-     to produce (a share of) each gadget output.  The verifier (share)
-       consists of (a share of) the validity circuit's output and (a
-          share of) each gadget test.  The tests consume the query
-                                randomness.
+          Figure 23: Components of the query generation algorithm.
 
-   On input of meas, proof, query_rand, and joint_rand, the verifier
-   message is generated as follows:
+   The query generation algorithm invokes the validity circuit on the
+   encoded measurement and joint randomness.  It evaluates the gadget
+   polynomials(s) encoded by the proof (share) to produce (a share of)
+   each gadget output.  The verifier (share) consists of (a share of)
+   the validity circuit's output and (a share of) each gadget test.  The
+   gadget tests consume the query randomness.
 
-   1.  For every i in [H] create an empty table wire_i.
+   Each gadget test consists of the following procedure.  First, we
+   construct the wire polynomials just as the prover did, by recording
+   g.wires[j][k] as the input (share) of the j-th wire of the k-th
+   invocation of the gadget.  Again, this is accomplished by wrapper
+   gadget, QueryGadget.  This gadget also evaluates the gadget proof for
+   each gadget invocation.  We list this class in Appendix "FLP Gadget
+   Wrappers" for completeness.
 
-   2.  Partition proof into the sub-vectors seed_1, coeff_1, ...,
-       seed_H, coeff_H defined in Section 7.3.3.1.
+   To test for consistency, we choose a random point t (parsed from the
+   query randomness), evaluate each wire polynomial at t, and evaluate
+   the gadget polynomial at t.  The results are recorded in the verifier
+   message passed to the decision algorithm.
 
-   3.  Evaluate Valid on input of meas and joint_rand, recording the
-       inputs of each gadget in the corresponding table.  This step is
-       similar to the prover's step (3.) except the verifier does not
-       evaluate the gadgets.  Instead, it computes the output of the kth
-       call to G_i by evaluating poly_gadget_i(alpha_i^k).  Let out
-       denote the output of the circuit evaluation.
+   def query(self,
+             meas: list[F],
+             proof: list[F],
+             query_rand: list[F],
+             joint_rand: list[F],
+             num_shares: int) -> list[F]:
+       # Evaluate the validity circuit, recording the value of each
+       # input wire for each evaluation of each gadget. Use the gadget
+       # polynomials encoded by `proof` to compute the gadget outputs.
+       valid = QueryGadget.wrap(self.valid, proof)
+       out = valid.eval(meas, joint_rand, num_shares)
 
-   4.  Next, reduce out as follows.  If EVAL_OUTPUT_LEN > 1, then
-       consume the first element of query_rand by letting [r],
-       query_rand = front(1, query_rand).  Then let v = r*out[0] +
-       r**2*out[1] + r**3*out[2] + .... That is, interpret the outputs
-       as coefficients of a polynomial f(x) and evaluate polynomial
-       f(x)*x at a random point r.
+       # Reduce the output.
+       if self.valid.EVAL_OUTPUT_LEN > 1:
+           ([r], query_rand) = front(1, query_rand)
+           r_power = r
+           v = self.field(0)
+           for out_elem in out:
+               v += r_power * out_elem
+               r_power *= r
+       else:
+           [v] = out
 
-   5.  Compute the wire polynomials just as in the prover's step (4.).
+       # Construct the verifier message, which consists of the reduced
+       # circuit output and each gadget test.
+       verifier = [v]
+       for (g, t) in zip(cast(list[QueryGadget[F]], valid.GADGETS),
+                         query_rand):
+           p = len(g.wires[0])
 
-   6.  Compute the tests for well-formedness of the gadget polynomials.
-       That is, for every i in [H]:
+           # Abort if `t` is one of the inputs used to compute the wire
+           # polynomials so that the verifier message doesn't leak the
+           # gadget output. It suffices to check if `t` is a root of
+           # unity, which implies it is a power of `alpha`.
+           if t ** p == self.field(1):
+               raise ValueError('test point is a root of unity')
 
-       *  Let t = query_rand[i].  Check if t^(P_i) == 1: if so, then
-          raise ERR_ABORT and halt.  (This prevents the verifier from
-          inadvertently leaking a gadget output in the verifier
-          message.)
+           # To test the gadget, we re-compute the wire polynomials and
+           # check for consistency with the gadget polynomial provided
+           # by the prover. To start, evaluate the gadget polynomial and
+           # each of the wire polynomials at the random point `t`.
+           wire_checks = []
+           wire_inp = [g.alpha ** k for k in range(p)]
+           for j in range(g.ARITY):
+               wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
+               wire_checks.append(poly_eval(self.field, wire_poly, t))
 
-       *  Let y_i = poly_gadget_i(t).
+           gadget_check = poly_eval(self.field, g.poly, t)
 
-       *  For each j in [0,L_i) let x_i[j-1] = poly_wire_i[j-1](t).
+           verifier += wire_checks
+           verifier.append(gadget_check)
 
-   The verifier message is the vector verifier = [v] + x_1 + [y_1] + ...
-   + x_H + [y_H].
+       return verifier
 
 7.3.3.3.  Decision
 
@@ -6086,7 +6115,6 @@ FLP Gadget Wrappers
                     wire_seeds: list[F],
                     g: Gadget[F],
                     g_calls: int):
-           assert len(wire_seeds) == g.ARITY  # REMOVE ME
            p = next_power_of_2(1 + g_calls)
            self.inner = g
            self.ARITY = g.ARITY
@@ -6119,13 +6147,64 @@ FLP Gadget Wrappers
            the wire inputs. `prove_rand` is used to produce the wire
            seeds for each gadget.
            """
-           assert len(prove_rand) == valid.prove_rand_len()  # REMOVE ME
            wrapped_gadgets: list[Gadget[F]] = []
            for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
                (wire_seeds, prove_rand) = front(g.ARITY, prove_rand)
                wrapped = cls(valid.field, wire_seeds, g, g_calls)
                wrapped_gadgets.append(wrapped)
-           assert len(prove_rand) == 0  # REMOVE ME
+           wrapped_valid = deepcopy(valid)
+           wrapped_valid.GADGETS = wrapped_gadgets
+           return wrapped_valid
+
+
+   class QueryGadget(Gadget[F]):
+       """
+       Gadget wrapper that records the input wires for each evaluation.
+       Rather than evaluate the circuit, use the provided gadget
+       polynomial to produce the output.
+       """
+
+       def __init__(
+               self,
+               field: type[F],
+               wire_seeds: list[F],
+               gadget_poly: list[F],
+               g: Gadget[F],
+               g_calls: int):
+           p = next_power_of_2(1 + g_calls)
+           self.alpha = field.gen() ** (field.GEN_ORDER // p)
+           self.poly = gadget_poly
+           self.ARITY = g.ARITY
+           self.DEGREE = g.DEGREE
+           self.wires = []
+           self.k = 0
+           for s in wire_seeds:
+               wire = field.zeros(p)
+               wire[0] = s  # set the wire seed
+               self.wires.append(wire)
+
+       def eval(self, field: type[F], inp: list[F]) -> F:
+           self.k += 1
+           for j in range(len(inp)):
+               self.wires[j][self.k] = inp[j]
+           return poly_eval(field, self.poly, self.alpha ** self.k)
+
+       @classmethod
+       def wrap(cls,
+                valid: Valid[Measurement, AggResult, F],
+                proof: list[F]) -> Valid[Measurement, AggResult, F]:
+           wrapped_gadgets: list[Gadget[F]] = []
+           for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
+               p = next_power_of_2(1 + g_calls)
+               gadget_poly_len = g.DEGREE * (p - 1) + 1
+               (wire_seeds, proof) = front(g.ARITY, proof)
+               (gadget_poly, proof) = front(gadget_poly_len, proof)
+               wrapped = cls(valid.field,
+                             wire_seeds,
+                             gadget_poly,
+                             g, g_calls)
+               wrapped_gadgets.append(wrapped)
+           assert len(proof) == 0
            wrapped_valid = deepcopy(valid)
            wrapped_valid.GADGETS = wrapped_gadgets
            return wrapped_valid
