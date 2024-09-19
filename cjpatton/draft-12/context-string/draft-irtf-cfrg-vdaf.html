@@ -8855,7 +8855,7 @@ instead, but <code>PROOFS</code> <span class="bcp14">MUST</span> be set to at le
 <code>PROOFS == 2</code> is feasible, if impractical; but <code>PROOFS == 1</code> is completely
 broken for such a small field.<a href="#section-9.6-4" class="pilcrow">¶</a></p>
 <p id="section-9.6-5">We stress that weak parameters (too small a field, too few proofs, or both) can
-be exploited to attack any aggregation task for which they are deployed. To
+be exploited to attack any aggregation task using those parameters. To
 mitigate offline attacks, it is necessary to disable all tasks that use the
 weak parameters.<a href="#section-9.6-5" class="pilcrow">¶</a></p>
 </section>
@@ -8882,7 +8882,7 @@ of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p
 <p id="section-9.8-1">Prio3 and Poplar1 are designed to resist some attacks that fall outside the
 main threat model for VDAFs.<a href="#section-9.8-1" class="pilcrow">¶</a></p>
 <p id="section-9.8-2">Broadly speaking, domain separation is used to prevent cross protocol attacks,
-in which an attack against one VDAF translates to an attack against another.
+in which data from evaluation of one VDAF translates to an attack against another.
 For example:<a href="#section-9.8-2" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9.8-3">
 <li id="section-9.8-3.1">

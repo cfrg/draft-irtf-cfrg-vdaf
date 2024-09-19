@@ -5831,9 +5831,9 @@ Table of Contents
    1 is completely broken for such a small field.
 
    We stress that weak parameters (too small a field, too few proofs, or
-   both) can be exploited to attack any aggregation task for which they
-   are deployed.  To mitigate offline attacks, it is necessary to
-   disable all tasks that use the weak parameters.
+   both) can be exploited to attack any aggregation task using those
+   parameters.  To mitigate offline attacks, it is necessary to disable
+   all tasks that use the weak parameters.
 
 9.7.  Choosing the Number of Aggregators
 
@@ -5852,8 +5852,8 @@ Table of Contents
    outside the main threat model for VDAFs.
 
    Broadly speaking, domain separation is used to prevent cross protocol
-   attacks, in which an attack against one VDAF translates to an attack
-   against another.  For example:
+   attacks, in which data from evaluation of one VDAF translates to an
+   attack against another.  For example:
 
    1.  Weak entropy sources: the VDAF algorithm ID is bound to each XOF
        invocation, thereby ensuring the outputs are different between
