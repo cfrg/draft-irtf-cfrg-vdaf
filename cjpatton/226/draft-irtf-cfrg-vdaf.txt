@@ -3465,20 +3465,21 @@ Table of Contents
    circuit that implements the interface specified in this section.  The
    parameters are listed in the table above.
 
-   Each circuit has a list of gadgets, denoted GADGETS.  Each gadget has
-   the following interface:
+   Each circuit has a list of gadgets, denoted GADGETS.  The circuit
+   evaluated by the gadget MAY be non-affine, but MUST be arithmetic,
+   i.e., composed only of multiplication, addition, and subtraction
+   gates.  Each gadget has the following interface:
 
    *  ARITY: int is the number of input wires.  For example, the
       multiplication gadget Mul(x,y) = x*y has arity of 2.
 
    *  DEGREE: int is the arithmetic degree of the gadget circuit.  This
       is defined to be the degree of the polynomial that computes it.
-      For example, the multiplication gadget has degree 2.
+      This exists because since the circuit is arithmetic.  For example,
+      Mul has degree 2.
 
    *  gadget.eval(field: type[F], inp: list[F]) -> F evaluates the
-      gadget circuit over the given inputs and field.  The circuit MAY
-      be non-affine, but MUST be arithmetic, i.e., composed only of
-      multiplication, addition, and subtraction gates.
+      gadget circuit over the given inputs and field.
 
    *  gadget.eval_poly(field: type[F], inp_poly: list[list[F]]) ->
       list[F] is the same as eval() except it evaluates the circuit over
@@ -3492,7 +3493,8 @@ Table of Contents
    output (EVAL_OUTPUT_LEN).
 
    A validity circuit also specifies parameters and methods needed for
-   Prio3 aggregation.  These are:
+   Prio3 aggregation.  These are used to implement the interface in
+   Section 7.1.1:
 
    *  valid.encode(measurement: Measurement) -> list[F] returns a vector
       of length MEAS_LEN representing a measurement of type Measurement.
@@ -3505,8 +3507,8 @@ Table of Contents
       returns an aggregate result of type AggResult.  This computation
       may depend on the number of outputs aggregated.
 
-   Finally, the following are helper are used to instantiate parameters
-   of the Flp interface for the implementation in the next section:
+   Finally, the following are helper methods used to instantiate
+   parameters of the Flp interface (Section 7.1):
 
    def prove_rand_len(self) -> int:
        """Length of the prover randomness."""
@@ -3560,15 +3562,15 @@ Table of Contents
                 | field          | valid.field            |
                 +----------------+------------------------+
 
-                    Table 8: FLP parameters for a given
-                              validity circuit
+                   Table 8: FLP parameters for a validity
+                                  circuit.
 
    This section specifies an implementation of the Flp interface
-   (Section 7.1).  It has as a generic parameter a validity circuit
-   valid implementing the interface defined in Section 7.3.2.  Its
-   parameters are listed in the table above.  The proof generation
-   algorithm, query generation algorithm, and decision algorithm ares
-   specified in the remaining subsections.
+   (Section 7.1).  It has as a generic parameter a validity circuit,
+   denoted valid, that implements the interface defined in the previous
+   section.  Its FLP parameters are listed in the table above.  The
+   proof generation algorithm, query generation algorithm, and decision
+   algorithm ares specified in the remaining subsections.
 
 7.3.3.1.  Proof Generation
 
@@ -3588,16 +3590,20 @@ Table of Contents
 
    The proof generation algorithm invokes the validity circuit on the
    encoded measurement and joint randomness.  The validity circuit in
-   turn invokes the gadget(s) defined by the circuit.  The prove
-   randomness is used to construct the gadget polynomial(s).
+   turn invokes the gadgets defined by the circuit.  The prove
+   randomness is used to construct the gadget polynomials that the
+   verifier will use to compute the outputs of each gadget.
 
-   The proof consists of the gadget polynomials that the verifier will
-   use to compute the output of each gadget.  To generate these, the
-   prover evaluates the validity circuit, setting g.wires[j][k] to the
-   value of the j-th wire for the k-th invocation of gadget g.  This is
-   accomplished by "wrapping" each gadget in a class ProveGadget that
-   records the wire inputs.  For completeness, we list this class in
-   Appendix "FLP Gadget Wrappers".
+   To generate the gadget polynomials, the prover evaluates the validity
+   circuit, setting g.wires[j][k] to the value of the j-th wire for the
+   k-th invocation of gadget g.  This is accomplished by "wrapping" each
+   gadget in a class ProveGadget that records the wire inputs.  We list
+   this class in Appendix "FLP Gadget Wrappers".
+
+   Next, we compute each of the "wire polynomials" for each gadget.  The
+   j-th wire polynomial is the lowest degree polynomial that evaluates
+   to g.wire[j][k] for invocation k.  When obtain the gadget polynomial
+   by evaluating the gadget on input of the wire polynomials.
 
    def prove(self,
              meas: list[F],
@@ -3616,8 +3622,9 @@ Table of Contents
 
            # Compute the wire polynomials for this gadget. For each `j`,
            # find the lowest degree polynomial `wire_poly` for which
-           # `wire_poly(alpha^k) = wires[j][k]` for all `k`. Note that
-           # each `wires[j][0]` is set to the wire seed.
+           # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
+           # each `g.wires[j][0]` is set to seed of wire `j`, which is
+           # included in the prove randomness.
            #
            # Implementation note: `alpha` is a root of unity, which
            # means `poly_interp()` can be evaluated using the NTT. Note
@@ -3659,23 +3666,34 @@ Table of Contents
 
    The query generation algorithm invokes the validity circuit on the
    encoded measurement and joint randomness.  It evaluates the gadget
-   polynomials(s) encoded by the proof (share) to produce (a share of)
-   each gadget output.  The verifier (share) consists of (a share of)
-   the validity circuit's output and (a share of) each gadget test.  The
+   polynomials encoded by the proof (share) to produce (a share of) each
+   gadget output.  The verifier (share) consists of (a share of) the
+   validity circuit's output and (a share of) each gadget test.  The
    gadget tests consume the query randomness.
 
-   Each gadget test consists of the following procedure.  First, we
-   construct the wire polynomials just as the prover did, by recording
-   g.wires[j][k] as the input (share) of the j-th wire of the k-th
-   invocation of the gadget.  Again, this is accomplished by wrapper
-   gadget, QueryGadget.  This gadget also evaluates the gadget proof for
-   each gadget invocation.  We list this class in Appendix "FLP Gadget
-   Wrappers" for completeness.
+   The goal of each gadget test is to ensure the inputs used by the
+   prover to generate the gadget polynomial matches the inputs we used
+   to evaluate it.  We do this by partially reconstructing the gadget
+   polynomial and evaluate it a random point: when we evaluate the
+   gadget polynomial at the same point, we expect to get the same
+   result.
 
-   To test for consistency, we choose a random point t (parsed from the
-   query randomness), evaluate each wire polynomial at t, and evaluate
-   the gadget polynomial at t.  The results are recorded in the verifier
-   message passed to the decision algorithm.
+   To start a gadget test, we first construct the (shares of the) wire
+   polynomials just as the prover did.  First, we record g.wires[j][k]
+   as the input (share) of the j-th wire of the k-th invocation of the
+   gadget.  Again, this is accomplished by a wrapper gadget,
+   QueryGadget, listed in Appendix "FLP Gadget Wrappers".  This gadget
+   also evaluates the gadget proof for each gadget invocation.  Then we
+   compute the wire polynomials from the recorded values.
+
+   Next, we choose a random point t (parsed from the query randomness),
+   evaluate each wire polynomial at t, and evaluate the gadget
+   polynomial at t.  The results are recorded in the verifier message
+   passed to the decision algorithm, where we finish the test.
+
+   The random point t MUST NOT be one of the inputs used to compute the
+   wire polynomials.  Otherwise, the verifier message may partially leak
+   the encoded measurement.
 
    def query(self,
              meas: list[F],
@@ -3744,11 +3762,11 @@ Table of Contents
               Figure 24: Components of the decision algorithm.
 
    The decision algorithm consumes the verifier message.  (Each of the
-   Aggregators computes an additive share of the verifier message in the
-   previous step.)  The verifier message consists of the reduced circuit
-   output and the gadget tests.
+   Aggregators computes an additive share of the verifier message after
+   the previous step.)  The verifier message consists of the reduced
+   circuit output and the gadget tests.
 
-   To complete each gadget test, we evaluate the gadget on the wire
+   To finish each gadget test, we evaluate the gadget on the wire
    checks: if the encoded measurement and joint randomness used to
    generate the proof are the same as the measurement (share) and joint
    randomness used to verify the proof, then the output of the gadget
