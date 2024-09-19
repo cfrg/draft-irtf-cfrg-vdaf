@@ -1,7 +1,7 @@
 """The FLP of {{BBCGGI19}}, Theorem 4.3."""
 
-import copy
 from abc import ABCMeta, abstractmethod
+from copy import deepcopy
 from typing import Any, Generic, Optional, TypeVar, cast
 
 from vdaf_poc.common import front, next_power_of_2
@@ -88,11 +88,10 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
     # as `GADGETS`.
     GADGET_CALLS: list[int]
 
-    # NOTE: The prove_rand_len(), query_rand_len(), proof_len(),
-    # verifier_len(), and check_valid_eval() methods are excerpted in the
-    # document, de-indented. Their width should be limited to 69 columns
-    # after de-indenting, or 73 columns before de-indenting, to avoid
-    # warnings from xml2rfc.
+    # NOTE: The prove_rand_len(), query_rand_len(), proof_len(), and
+    # verifier_len() methods are excerpted in the document, de-indented. Their
+    # width should be limited to 69 columns after de-indenting, or 73 columns
+    # before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
     def prove_rand_len(self) -> int:
         """Length of the prover randomness."""
@@ -147,17 +146,17 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
 
     @abstractmethod
     def decode(self,
-               output: list[F],
+               agg: list[F],
                num_measurements: int) -> AggResult:
         """
         Decode an aggregate result.
 
         Pre-conditions:
 
-            - `len(output) == self.OUTPUT_LEN`
+            - `len(agg) == self.OUTPUT_LEN`
             - `num_measurements >= 1`
         """
-        raise NotImplementedError()
+        pass
 
     @abstractmethod
     def eval(self,
@@ -177,7 +176,7 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
 
             - return value has length `self.EVAL_OUTPUT_LEN`
         """
-        raise NotImplementedError()
+        pass
 
     def test_vec_set_type_param(self, _test_vec: dict[str, Any]) -> list[str]:
         """
@@ -187,46 +186,74 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
         return []
 
 
+# NOTE: The class below is excerpted in the document. Its width
+# should be limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
 class ProveGadget(Gadget[F]):
-    def __init__(self, field: type[F], wire_seeds: list[F], g: Gadget[F], g_calls: int):
+    """
+    Gadget wrapper that records the input wires for each evaluation.
+    """
+
+    def __init__(self,
+                 field: type[F],
+                 wire_seeds: list[F],
+                 g: Gadget[F],
+                 g_calls: int):
+        assert len(wire_seeds) == g.ARITY  # REMOVE ME
+        p = next_power_of_2(1 + g_calls)
         self.inner = g
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
-        self.wire = []
-        P = next_power_of_2(1 + g_calls)
-        for j in range(g.ARITY):
-            self.wire.append(field.zeros(P))
-            self.wire[j][0] = wire_seeds[j]
-        self.k = 0
+        self.wires = []
+        self.k = 0  # evaluation counter
+        for s in wire_seeds:
+            wire = field.zeros(p)
+            wire[0] = s  # set the wire seed
+            self.wires.append(wire)
 
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.k += 1
         for j in range(len(inp)):
-            self.wire[j][self.k] = inp[j]
+            self.wires[j][self.k] = inp[j]
         return self.inner.eval(field, inp)
 
-    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -> list[F]:
         return self.inner.eval_poly(field, inp_poly)
 
+    @classmethod
+    def wrap(cls,
+             valid: Valid[Measurement, AggResult, F],
+             prove_rand: list[F],
+             ) -> Valid[Measurement, AggResult, F]:
+        """
+        Make a copy of `valid` with each gadget wrapped for recording
+        the wire inputs. `prove_rand` is used to produce the wire
+        seeds for each gadget.
+        """
+        assert len(prove_rand) == valid.prove_rand_len()  # REMOVE ME
+        wrapped_gadgets: list[Gadget[F]] = []
+        for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
+            (wire_seeds, prove_rand) = front(g.ARITY, prove_rand)
+            wrapped = cls(valid.field, wire_seeds, g, g_calls)
+            wrapped_gadgets.append(wrapped)
+        assert len(prove_rand) == 0  # REMOVE ME
+        wrapped_valid = deepcopy(valid)
+        wrapped_valid.GADGETS = wrapped_gadgets
+        return wrapped_valid
 
-def prove_wrapped(
-        valid: Valid[Measurement, AggResult, F],
-        prove_rand: list[F]) -> Valid[Measurement, AggResult, F]:
-    if len(prove_rand) != valid.prove_rand_len():
-        raise ValueError('incorrect proof length')
 
-    wrapped_gadgets: list[Gadget[F]] = []
-    for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
-        wire_seeds, prove_rand = prove_rand[:g.ARITY], prove_rand[g.ARITY:]
-        wrapped = ProveGadget[F](valid.field, wire_seeds, g, g_calls)
-        wrapped_gadgets.append(wrapped)
-    assert len(prove_rand) == 0
-    wrapped_valid = copy.deepcopy(valid)
-    wrapped_valid.GADGETS = wrapped_gadgets
-    return wrapped_valid
-
-
+# NOTE: The class below is excerpted in the document. Its width
+# should be limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
 class QueryGadget(Gadget[F]):
+    """
+    Gadget wrapper that records the input wires for each evaluation.
+    Rather than evaluate the circuit, use the provided gadget
+    polynomial to produce the output.
+    """
+
     def __init__(
             self,
             field: type[F],
@@ -234,61 +261,58 @@ class QueryGadget(Gadget[F]):
             gadget_poly: list[F],
             g: Gadget[F],
             g_calls: int):
-        self.inner = g
+        assert len(wire_seeds) == g.ARITY  # REMOVE ME
+        p = next_power_of_2(1 + g_calls)
+        assert field.GEN_ORDER % p == 0  # REMOVE ME
+        self.alpha = field.gen() ** (field.GEN_ORDER // p)
+        self.poly = gadget_poly
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
-        self.wire = []
-        self.gadget_poly = gadget_poly
-        P = next_power_of_2(1 + g_calls)
-        for j in range(g.ARITY):
-            self.wire.append(field.zeros(P))
-            self.wire[j][0] = wire_seeds[j]
-        assert field.GEN_ORDER % P == 0
-        self.alpha = field.gen() ** (field.GEN_ORDER // P)
+        self.wires = []
         self.k = 0
+        for s in wire_seeds:
+            wire = field.zeros(p)
+            wire[0] = s  # set the wire seed
+            self.wires.append(wire)
 
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.k += 1
         for j in range(len(inp)):
-            self.wire[j][self.k] = inp[j]
-        return poly_eval(field, self.gadget_poly, self.alpha ** self.k)
+            self.wires[j][self.k] = inp[j]
+        return poly_eval(field, self.poly, self.alpha ** self.k)
 
-    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
-        raise NotImplementedError(
-            "QueryGadget does not need to implement eval_poly()"
-        )
+    # REMOVE ME
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -> list[F]:
+        raise NotImplementedError("not used by verifier")
 
-
-def query_wrapped(
-        valid: Valid[Measurement, AggResult, F],
-        proof: list[F]) -> Valid[Measurement, AggResult, F]:
-    if len(proof) != valid.proof_len():
-        raise ValueError('incorrect proof length')
-
-    wrapped_gadgets: list[Gadget[F]] = []
-    for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
-        P = next_power_of_2(1 + g_calls)
-        gadget_poly_len = g.DEGREE * (P - 1) + 1
-        wire_seeds, proof = proof[:g.ARITY], proof[g.ARITY:]
-        gadget_poly, proof = proof[:gadget_poly_len], proof[gadget_poly_len:]
-        wrapped = QueryGadget(
-            valid.field,
-            wire_seeds,
-            gadget_poly,
-            g,
-            g_calls,
-        )
-        wrapped_gadgets.append(wrapped)
-    assert len(proof) == 0
-    wrapped_valid = copy.deepcopy(valid)
-    wrapped_valid.GADGETS = wrapped_gadgets
-    return wrapped_valid
+    @classmethod
+    def wrap(cls,
+             valid: Valid[Measurement, AggResult, F],
+             proof: list[F]) -> Valid[Measurement, AggResult, F]:
+        assert len(proof) == valid.proof_len()  # REMOVE ME
+        wrapped_gadgets: list[Gadget[F]] = []
+        for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
+            p = next_power_of_2(1 + g_calls)
+            gadget_poly_len = g.DEGREE * (p - 1) + 1
+            (wire_seeds, proof) = front(g.ARITY, proof)
+            (gadget_poly, proof) = front(gadget_poly_len, proof)
+            wrapped = cls(valid.field,
+                          wire_seeds,
+                          gadget_poly,
+                          g,
+                          g_calls)
+            wrapped_gadgets.append(wrapped)
+        assert len(proof) == 0  # REMOVE ME
+        wrapped_valid = deepcopy(valid)
+        wrapped_valid.GADGETS = wrapped_gadgets
+        return wrapped_valid
 
 
 class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
     """The FLP of {{BBCGGI19}}, Theorem 4.3 with some extensions."""
 
-    # Validity circuit and AFE.
     valid: Valid[Measurement, AggResult, F]
 
     def __init__(self, valid: Valid[Measurement, AggResult, F]):
@@ -303,59 +327,75 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
         self.PROOF_LEN = valid.proof_len()
         self.VERIFIER_LEN = valid.verifier_len()
 
-    def prove(self, meas: list[F], prove_rand: list[F], joint_rand: list[F]) -> list[F]:
-        # Evaluate the validity circuit, recording the values of the input wires
-        # for each call to each gadget.
-        valid = prove_wrapped(self.valid, prove_rand)
+    # NOTE: Methods `prove()`, `query()`, and `decide()` are all
+    # excerpted in the document, de-indented. Their width should be
+    # limited to 73 columns to avoid warnings from xml2rfc.
+    # ===================================================================
+    def prove(self,
+              meas: list[F],
+              prove_rand: list[F],
+              joint_rand: list[F]) -> list[F]:
+        assert len(meas) == self.MEAS_LEN  # REMOVE ME
+        assert len(prove_rand) == self.PROVE_RAND_LEN  # REMOVE ME
+        assert len(joint_rand) == self.JOINT_RAND_LEN  # REMOVE ME
+
+        # Evaluate the validity circuit, recording the value of each
+        # input wire for each evaluation of each gadget.
+        valid = ProveGadget.wrap(self.valid, prove_rand)
         valid.eval(meas, joint_rand, 1)
 
-        # Construct the proof.
+        # Construct the proof, which consists of the wire seeds and
+        # gadget polynomial for each gadget.
         proof = []
-        # Downcast the gadgets from list[Gadget[F]] to list[ProveGadget[F]],
-        # so we can access the wire values. The call to prove_wrapped() above
-        # ensures that all gadgets will be of this type.
         for g in cast(list[ProveGadget[F]], valid.GADGETS):
-            P = len(g.wire[0])
+            p = len(g.wires[0])
 
-            # Compute the wire polynomials for this gadget.
+            # Compute the wire polynomials for this gadget. For each `j`,
+            # find the lowest degree polynomial `wire_poly` for which
+            # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
+            # each `g.wires[j][0]` is set to seed of wire `j`, which is
+            # included in the prove randomness.
             #
-            # NOTE We pad the wire inputs to the nearest power of 2 so that we
-            # can use NTT for interpolating the wire polynomials.
-            assert self.field.GEN_ORDER % P == 0
-            alpha = self.field.gen() ** (self.field.GEN_ORDER // P)
-            wire_inp = [alpha ** k for k in range(P)]
+            # Implementation note: `alpha` is a root of unity, which
+            # means `poly_interp()` can be evaluated using the NTT. Note
+            # that `g.wires[j]` is padded with 0s to a power of 2.
+            assert self.field.GEN_ORDER % p == 0  # REMOVE ME
+            alpha = self.field.gen() ** (self.field.GEN_ORDER // p)
+            wire_inp = [alpha ** k for k in range(p)]
             wire_polys = []
             for j in range(g.ARITY):
-                wire_poly = poly_interp(self.field, wire_inp, g.wire[j])
+                wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
                 wire_polys.append(wire_poly)
 
-            # Compute the gadget polynomial.
+            # Compute the gadget polynomial by evaluating the gadget on
+            # the wire polynomials. By construction we have that
+            # `gadget_poly(alpha^k)` is the `k`-th output.
             gadget_poly = g.eval_poly(self.field, wire_polys)
 
             for j in range(g.ARITY):
-                proof.append(g.wire[j][0])
+                proof.append(g.wires[j][0])
             proof += gadget_poly
 
+        assert len(proof) == self.PROOF_LEN  # REMOVE ME
         return proof
 
-    def query(
-            self,
-            meas: list[F],
-            proof: list[F],
-            query_rand: list[F],
-            joint_rand: list[F],
-            num_shares: int) -> list[F]:
-        # Evaluate the validity circuit, recording the values of the input wires
-        # for each call to each gadget. The gadget output is computed by
-        # evaluating the gadget polynomial.
-        valid = query_wrapped(self.valid, proof)
+    def query(self,
+              meas: list[F],
+              proof: list[F],
+              query_rand: list[F],
+              joint_rand: list[F],
+              num_shares: int) -> list[F]:
+        assert len(meas) == self.MEAS_LEN  # REMOVE ME
+        assert len(proof) == self.PROOF_LEN  # REMOVE ME
+        assert len(query_rand) == self.QUERY_RAND_LEN  # REMOVE ME
+        assert len(joint_rand) == self.JOINT_RAND_LEN  # REMOVE ME
+
+        # Evaluate the validity circuit, recording the value of each
+        # input wire for each evaluation of each gadget. Use the gadget
+        # polynomials encoded by `proof` to compute the gadget outputs.
+        valid = QueryGadget.wrap(self.valid, proof)
         out = valid.eval(meas, joint_rand, num_shares)
-
-        if len(out) != self.valid.EVAL_OUTPUT_LEN:
-            raise ValueError('circuit has unexpected output length')
-
-        if len(query_rand) != self.valid.query_rand_len():
-            raise ValueError('incorrect query randomness length')
+        assert len(out) == self.valid.EVAL_OUTPUT_LEN  # REMOVE ME
 
         # Reduce the output.
         if self.valid.EVAL_OUTPUT_LEN > 1:
@@ -366,51 +406,53 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
         else:
             [v] = out
 
-        # Construct the verifier message.
+        # Construct the verifier message, which consists of the reduced
+        # circuit output and each gadget test.
         verifier = [v]
-        for (g, t) in zip(cast(list[QueryGadget[F]], valid.GADGETS), query_rand):
-            P = len(g.wire[0])
+        for (g, t) in zip(cast(list[QueryGadget[F]], valid.GADGETS),
+                          query_rand):
+            p = len(g.wires[0])
 
-            # Check if `t` is a degenerate point and abort if so.
-            #
-            # A degenerate point is one that was used as an input for
-            # constructing the gadget polynomial. Using such a point would leak
-            # an output of the gadget to the verifier.
-            if t ** P == self.field(1):
-                raise ValueError('query randomness contains a root of unity')
+            # Abort if `t` is one of the inputs used to compute the wire
+            # polynomials so that the verifier message doesn't leak the
+            # gadget output. It suffices to check if `t` is a root of
+            # unity, which implies it is a power of `alpha`.
+            if t ** p == self.field(1):
+                raise ValueError('test point is a root of unity')
 
-            # Compute the well-formedness test for the gadget polynomial.
-            x = []
-            wire_inp = [g.alpha ** k for k in range(P)]
+            # To test the gadget, we re-compute the wire polynomials and
+            # check for consistency with the gadget polynomial provided
+            # by the prover. To start, evaluate the gadget polynomial and
+            # each of the wire polynomials at the random point `t`.
+            wire_checks = []
+            wire_inp = [g.alpha ** k for k in range(p)]
             for j in range(g.ARITY):
-                wire_poly = poly_interp(self.field, wire_inp, g.wire[j])
-                x.append(poly_eval(self.field, wire_poly, t))
+                wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
+                wire_checks.append(poly_eval(self.field, wire_poly, t))
 
-            y = poly_eval(self.field, g.gadget_poly, t)
+            gadget_check = poly_eval(self.field, g.poly, t)
 
-            verifier += x
-            verifier.append(y)
+            verifier += wire_checks
+            verifier.append(gadget_check)
 
         return verifier
 
     def decide(self, verifier: list[F]) -> bool:
-        if len(verifier) != self.valid.verifier_len():
-            raise ValueError('incorrect verifier length')
+        assert len(verifier) == self.VERIFIER_LEN  # REMOVE ME
 
         # Check the output of the validity circuit.
         v, verifier = verifier[0], verifier[1:]
         if v != self.field(0):
             return False
 
-        # Check for well-formedness of each gadget polynomial.
+        # Complete each gadget test.
         for g in self.valid.GADGETS:
-            x, verifier = verifier[:g.ARITY], verifier[g.ARITY:]
-            y, verifier = verifier[0], verifier[1:]
-            z = g.eval(self.field, x)
-            if z != y:
+            (wire_checks, verifier) = front(g.ARITY, verifier)
+            ([gadget_check], verifier) = front(1, verifier)
+            if g.eval(self.field, wire_checks) != gadget_check:
                 return False
 
-        assert len(verifier) == 0
+        assert len(verifier) == 0  # REMOVE ME
         return True
 
     def encode(self, measurement: Measurement) -> list[F]:
@@ -443,7 +485,7 @@ class Mul(Gadget[F]):
         return inp[0] * inp[1]
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
-        self.check_gadget_eval_poly(inp_poly)
+        self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
         return poly_mul(field, inp_poly[0], inp_poly[1])
 
 
@@ -464,7 +506,7 @@ class Range2(Gadget[F]):
         return inp[0] * inp[0] - inp[0]
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
-        self.check_gadget_eval_poly(inp_poly)
+        self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
         output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
         out = [field(0) for _ in range(output_poly_length)]
         x = inp_poly[0]
@@ -500,12 +542,12 @@ class PolyEval(Gadget[F]):
         self.DEGREE = len(p) - 1
 
     def eval(self, field: type[F], inp: list[F]) -> F:
-        self.check_gadget_eval(inp)
+        self.check_gadget_eval(inp)  # REMOVE ME
         p = [field(coeff) for coeff in self.p]
         return poly_eval(field, p, inp[0])
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
-        self.check_gadget_eval_poly(inp_poly)
+        self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
         p = [field(coeff) for coeff in self.p]
         out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
         out[0] = p[0]
@@ -550,7 +592,7 @@ class ParallelSum(Gadget[F]):
     # columns before de-indenting, to avoid warnings from xml2rfc.
     # ===================================================================
     def eval(self, field: type[F], inp: list[F]) -> F:
-        self.check_gadget_eval(inp)
+        self.check_gadget_eval(inp)  # REMOVE ME
         out = field(0)
         for i in range(self.count):
             start_index = i * self.subcircuit.ARITY
@@ -562,7 +604,7 @@ class ParallelSum(Gadget[F]):
         return out
 
     def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
-        self.check_gadget_eval_poly(inp_poly)
+        self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
         output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
         out_sum = [field(0) for _ in range(output_poly_length)]
         for i in range(self.count):
@@ -609,7 +651,7 @@ class Count(
             meas: list[F],
             joint_rand: list[F],
             _num_shares: int) -> list[F]:
-        self.check_valid_eval(meas, joint_rand)
+        self.check_valid_eval(meas, joint_rand)  # REMOVE ME
         squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
         return [squared - meas[0]]
 
@@ -671,7 +713,7 @@ class Histogram(
             meas: list[F],
             joint_rand: list[F],
             num_shares: int) -> list[F]:
-        self.check_valid_eval(meas, joint_rand)
+        self.check_valid_eval(meas, joint_rand)  # REMOVE ME
 
         # Check that each bucket is one or zero.
         range_check = self.field(0)
@@ -822,7 +864,7 @@ class MultihotCountVec(
             meas: list[F],
             joint_rand: list[F],
             num_shares: int) -> list[F]:
-        self.check_valid_eval(meas, joint_rand)
+        self.check_valid_eval(meas, joint_rand)  # REMOVE ME
 
         # Check that each entry in the input vector is one or zero.
         range_check = self.field(0)
@@ -947,7 +989,7 @@ class SumVec(
             meas: list[F],
             joint_rand: list[F],
             num_shares: int) -> list[F]:
-        self.check_valid_eval(meas, joint_rand)
+        self.check_valid_eval(meas, joint_rand)  # REMOVE ME
 
         out = self.field(0)
         shares_inv = self.field(num_shares).inv()
@@ -1070,7 +1112,7 @@ class Sum(
             meas: list[F],
             joint_rand: list[F],
             num_shares: int) -> list[F]:
-        self.check_valid_eval(meas, joint_rand)
+        self.check_valid_eval(meas, joint_rand)  # REMOVE ME
         shares_inv = self.field(num_shares).inv()
 
         out = []
