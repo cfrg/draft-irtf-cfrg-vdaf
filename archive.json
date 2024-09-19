@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-17T00:42:43.105908+00:00",
+  "timestamp": "2024-09-19T00:53:41.311444+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5856,7 +5856,7 @@
       ],
       "body": "As discussed in the 2024-09-06 call, we should change the IDPF gen() and eval() methods to take in bit strings (lists of booleans) instead of bigints. Iterating over the bits of the bit string would be clearer than shifting and masking an integer. We'll likewise need to change the recommendation for handling byte string, which currently suggests `from_be_bytes()`, and rewrite the prefix packing done in the aggregation parameter encoding/decoding.",
       "createdAt": "2024-09-06T17:16:55Z",
-      "updatedAt": "2024-09-16T22:58:18Z",
+      "updatedAt": "2024-09-17T13:29:05Z",
       "closedAt": null,
       "comments": [
         {
@@ -5879,6 +5879,20 @@
           "body": "\r\n> I looked at various options for IDPF index interpretation, encoding order, and alignment. I focused on the options that satisfy the property that the encoding of a single IDPF index and the encoding of a prefix of that index share the same initial bytes. (this will solve the first ergonomics issue)\r\n\r\n+1 Let's make sure we have this property.\r\n\r\n> Once this is decided, the next question is whether the partial byte (now at the end of the encoding) should be \"filled in\" from the MSB side or the LSB side. Both are easy to implement in libprio-rs, as we would use `BitVec<u8, Msb0>` or `BitVec<u8, Lsb0>` from the `bitvec` crate as-is. Currently, we regard the MSB of a byte as the \"first\" bit, so I figure we may as well stick with that convention.\r\n\r\nWhat do you mean by \"first\" bit? I think of `byte & 1` as the least signficant bit and `byte >> 7` as the most significant bit.\r\n \r\n> Lastly, we have a choice to either tightly pack all prefixes together, or to pad out each prefix with zeros to the next byte boundary. We currently do the former, and this is the bandwidth-optimal choice. We could switch to padding, which would make implementations a bit easier, since this requires less shifting, and would make hex dumps of aggregation parameters more easily legible. I haven't decided whether I want to pursue this change or not, so I'm going to punt and not include it in my first PR.\r\n\r\nI'd go for ease of implementation here. In my opinion, the complexity of the current implementation is outweighs the bandwidth savings (one byte pre prefix).",
           "createdAt": "2024-09-16T22:58:17Z",
           "updatedAt": "2024-09-16T22:58:17Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> What do you mean by \"first\" bit? I think of `byte & 1` as the least signficant bit and `byte >> 7` as the most significant bit.\r\n\r\nRight, I agree on the definition of MSB and LSB. The question at hand is, when we start with an IDPF index representing a string of bytes, in what order we assign the bits from each byte to IDPF tree levels? We can start with the MSB or LSB, and produce a consistent system either way, but for each possible order, there's a different natural choice for encoding prefixes to byte strings. I've been working through the toy example of \"Cat\"/\"\\x43\\x61\\x74\" as an input, and taking the 10-bit prefix. If we start from the MSB first, then the prefix is \"\\x43\\x40\", with the lower 6 bits of the second byte unused, otherwise if we start from the LSB first, then the prefix is \"\\x43\\x01\", with the upper 6 bits of the second byte unused.",
+          "createdAt": "2024-09-17T02:22:28Z",
+          "updatedAt": "2024-09-17T02:22:28Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "No preference for me :)",
+          "createdAt": "2024-09-17T13:29:03Z",
+          "updatedAt": "2024-09-17T13:29:03Z"
         }
       ]
     },
@@ -5908,6 +5922,33 @@
           "body": "Thanks @cjpatton.\r\n\r\nI think the current VDAF robustness is assuming a particular VDAF cannot be attacked during the lifetime of it. To attack the joint randomness, an attacker actually controls all the components that go into the hashing, which includes nonce, secret shares of the input share, VDAF ID. In theory, an attacker can use a fairly long time and make enough random oracle queries to find the joint randomness that passes the circuit verification. Additionally, if the attacker finds the joint randomness, it can keep using the same combination to attack a new task (nonce can be reused in different tasks in DAP), or even publish the attack vectors so others can all use these to attack the VDAF in new tasks.\r\n\r\nHowever, binding application context like taskID has the following advantages:\r\n- It reduces the timespan that the VDAF can be attacked, i.e., an attacker only has the task lifetime to find the attack vectors.\r\n- Even if the VDAF is successfully attacked once in a task, the attack cannot be reused in a new task, unless the attacker finds the new attack vectors.\r\n\r\nI agree this is defense-in-depth, but this concern does apply to all the VDAFs that use joint randomness, including the standard VDAFs, it's just a matter of how long and how many random oracle queries to make to find the attack vectors.",
           "createdAt": "2024-09-06T19:44:44Z",
           "updatedAt": "2024-09-06T19:44:44Z"
+        }
+      ]
+    },
+    {
+      "number": 427,
+      "id": "I_kwDOGKuqOc6W7dM4",
+      "title": "Prio3: Soundness improvement for reductions",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/427",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-12"
+      ],
+      "body": "Prio3Sum, Prio3SumVec, Prio3Histogram, and Prio3MultihotCountVec all involve checking that each of $n$ \"sub-checks\" outputs $0$. This works by interpreting the outputs as coefficients of a polynomial $p$, then evaluating $p$ at a random point $r\\in F$. If $p(r)=0$, then we deem the input valid. Some of us have been calling this the circuit's \"reduction\".\r\n\r\nOur current analysis of the circuit's soundness goes as follows. When the input is invalid, i.e., at least one sub-check output is non-zero, the probability that $p(r) = 0$ is equal to the probability that $r$ is a root of $p$, of which there are at most $\\deg{p} / |F|$. The degree of $p$ is at most $n$, which gives us a soundness error of $n / |F|$.\r\n\r\nThis is also given by the [Schwartz-Zippel lemma](https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma). More generally, let $p$ is a polynomial of $n$ variables with at least one non-zero coefficient. When we evaluate $p$ at a random point $(r_1, \\ldots, r_n) \\in F^n$, the probability that $p(r_1, \\ldots, r_n) = 0$ is at most $\\deg p / |F|$, where $\\deg p$ denotes in particular the [total degree](https://en.wikipedia.org/wiki/Degree_of_a_polynomial#Extension_to_polynomials_with_two_or_more_variables) of $p$.\r\n\r\nThis lemma suggests an alternative reduction with better soundness. Let $c_1, \\ldots, c_n$ denote the sub-check outputs. $p(x_1, \\ldots, x_n) = c_1 \\cdot x_1 + \\cdots + c_n \\cdot x_n$ be the polynomial with $n$ variables that has $c_1 \\ldots, c_n$ as its coefficients. Choose a random vector $\\vec{r} = (r_1, \\ldots, r_N) \\in F^n$ and evaluate $p$ at $\\vec{r}$. If $p(\\vec{r}) = 0$, then deem the input valid.\r\n\r\nSoundness: since $\\deg p = 1$, by the Schwartz-Zippel lemma it follows that the soundness error for this circuit is $1 / |F|$.\r\n\r\nThis is a pretty significant improvement, especially for larger inputs with lots of sub-checks. The base soundness of the current circuit is $\\frac{n}{|F|} + \\frac{2m}{|F|-m}$, where the second term is from {{BBCGGI19}}, Theorem 4.3; the soundness of the new circuit is $\\frac{1}{|F|} + \\frac{2m}{|F|-m}$. Concretely, for Prio3SumVec with `bits == 1`, `length = 100_000` and `chunk_length = 316` , this drops from $~ 2^{-111}$ to $2^{-118}$:\r\n\r\n```sage\r\ndef sound(n, m, f): return -int((log(n/f + (2*m)/(f-m))/log(2)).n())\r\n```\r\n\r\nThere is a catch: we end up with a much longer joint randomness, which means more times spent on XOF evaluation. On the other hand, we spend less time on finite field arithmetic, since we don't need to compute powers of $r$. Let's benchmark this, and if we don't see a performance degradation, then I think we should adopt this new reduction in each of the circuits, as well as for the [built-in reduction for circuits with multiple outputs](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-1.1-6.2.1).\r\n\r\nCredit to @rozbb for pointing out this use of Shwartz-Zippel and thanks to @bwesterb and @bhalleycf for confirming the math.",
+      "createdAt": "2024-09-17T21:11:59Z",
+      "updatedAt": "2024-09-18T13:41:29Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This does indeed cost us in terms of runtime: up to 10% for sharding and up to 5% for preparation:\r\n\r\n```\r\n[exp/sum_vec_alternative_reduction][~/github.com/cjpatton/libprio-rs]$ cargo bench -- sumvec\r\n   Compiling prio v0.16.7 (/Users/christopherpatton/github.com/cjpatton/libprio-rs)\r\n    Finished `bench` profile [optimized] target(s) in 2.64s\r\n     Running benches/cycle_counts.rs (target/release/deps/cycle_counts-79a8c47b35862616)\r\nUnexpected error while launching valgrind. Error: No such file or directory (os error 2)\r\n     Running benches/speed_tests.rs (target/release/deps/speed_tests-54fc5ed5311a9071)\r\nGnuplot not found, using plotters backend\r\nprio3sumvec_shard/serial/10\r\n                        time:   [13.449 \u00b5s 13.458 \u00b5s 13.467 \u00b5s]\r\n                        change: [+0.1918% +0.9733% +1.5465%] (p = 0.00 < 0.05)\r\n                        Change within noise threshold.\r\nFound 7 outliers among 100 measurements (7.00%)\r\n  4 (4.00%) high mild\r\n  3 (3.00%) high severe\r\nprio3sumvec_shard/serial/100\r\n                        time:   [45.367 \u00b5s 45.411 \u00b5s 45.457 \u00b5s]\r\n                        change: [+8.7190% +8.9538% +9.1834%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 9 outliers among 100 measurements (9.00%)\r\n  4 (4.00%) high mild\r\n  5 (5.00%) high severe\r\nprio3sumvec_shard/serial/1000\r\n                        time:   [656.54 \u00b5s 657.42 \u00b5s 658.73 \u00b5s]\r\n                        change: [+9.8910% +10.270% +10.584%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 9 outliers among 100 measurements (9.00%)\r\n  4 (4.00%) high mild\r\n  5 (5.00%) high severe\r\nprio3sumvec_shard/serial/100000\r\n                        time:   [49.211 ms 49.280 ms 49.366 ms]\r\n                        change: [+9.6781% +9.9782% +10.291%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 8 outliers among 100 measurements (8.00%)\r\n  6 (6.00%) high mild\r\n  2 (2.00%) high severe\r\n\r\nprio3sumvec_prepare_init/serial/10\r\n                        time:   [9.8698 \u00b5s 9.8849 \u00b5s 9.9031 \u00b5s]\r\n                        change: [+0.4939% +0.7480% +0.9854%] (p = 0.00 < 0.05)\r\n                        Change within noise threshold.\r\nFound 18 outliers among 100 measurements (18.00%)\r\n  4 (4.00%) high mild\r\n  14 (14.00%) high severe\r\nprio3sumvec_prepare_init/serial/100\r\n                        time:   [23.629 \u00b5s 23.643 \u00b5s 23.662 \u00b5s]\r\n                        change: [+5.1860% +5.5778% +5.8787%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 12 outliers among 100 measurements (12.00%)\r\n  5 (5.00%) high mild\r\n  7 (7.00%) high severe\r\nprio3sumvec_prepare_init/serial/1000\r\n                        time:   [221.06 \u00b5s 221.24 \u00b5s 221.48 \u00b5s]\r\n                        change: [+4.3432% +4.7894% +5.0854%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 8 outliers among 100 measurements (8.00%)\r\n  4 (4.00%) high mild\r\n  4 (4.00%) high severe\r\n```\r\n\r\nBranch with the modified `SumVec` circuit: https://github.com/cjpatton/libprio-rs/commit/789d5fea6b4e61f5124021725934c5a8c11d97ad",
+          "createdAt": "2024-09-17T21:57:55Z",
+          "updatedAt": "2024-09-17T21:59:20Z"
         }
       ]
     }
@@ -36477,6 +36518,116 @@
           "createdAt": "2024-09-11T15:05:14Z",
           "updatedAt": "2024-09-11T15:05:14Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 428,
+      "id": "PR_kwDOGKuqOc570vKV",
+      "title": "tls-presentation: Fix limits for length-prefixed values",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/428",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-12"
+      ],
+      "body": "Assume the length of the encoded prep share is at least 1 byte for every VDAF; otherwise there would be no mechanism to convey validity. The prep message, however, may be empty, as it is for some Prio3 variants.",
+      "createdAt": "2024-09-17T22:33:26Z",
+      "updatedAt": "2024-09-18T14:56:40Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/tls-syntax-limits",
+      "headRefOid": "be6a6e016bb5470f4b0ef12eec6d9db4b0f84706",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Jwl-g",
+          "commit": {
+            "abbreviatedOid": "6dc04e0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-17T22:45:43Z",
+          "updatedAt": "2024-09-17T22:45:43Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "The smallest message is 10 bytes:\r\n* 1 byte for the type discriminator\r\n* 9 bytes for the longest variant, which is continue:\r\n  * 0 bytes for the prep message + 4 bytes for the length prefix\r\n  * 1 byte for the prep share + 4 bytes for the length prefix",
+              "createdAt": "2024-09-17T22:45:43Z",
+              "updatedAt": "2024-09-17T22:45:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6J23tZ",
+          "commit": {
+            "abbreviatedOid": "6dc04e0"
+          },
+          "author": "branlwyd",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-18T14:21:13Z",
+          "updatedAt": "2024-09-18T14:21:13Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Following this logic, I think the smallest message is 5 bytes:\r\n\r\n* 1 byte for the type discriminator\r\n* 4 bytes for the shortest variant, which is finish:\r\n  * 0 bytes for the prep message + 4 bytes for the length prefix",
+              "createdAt": "2024-09-18T14:21:13Z",
+              "updatedAt": "2024-09-18T14:21:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6J3H--",
+          "commit": {
+            "abbreviatedOid": "6dc04e0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-18T14:44:50Z",
+          "updatedAt": "2024-09-18T14:44:50Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Oofta, you're right. Some times my brain just swaps min/max, $\\leq$ / $\\geq$, $x$ / $-x$, etc. Will fix here and in the DAP PR.",
+              "createdAt": "2024-09-18T14:44:50Z",
+              "updatedAt": "2024-09-18T14:46:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6J3KDO",
+          "commit": {
+            "abbreviatedOid": "6dc04e0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-18T14:47:55Z",
+          "updatedAt": "2024-09-18T14:47:56Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Noted here that the shortest pingpong message is 5 bytes.",
+              "createdAt": "2024-09-18T14:47:55Z",
+              "updatedAt": "2024-09-18T14:47:56Z"
+            }
+          ]
         }
       ]
     }
