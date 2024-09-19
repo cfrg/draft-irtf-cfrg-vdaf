@@ -2343,40 +2343,40 @@ Table of Contents
 
    The parameters provided by a concrete FLP are listed in Table 4.
 
-       +================+==========================================+
-       | Parameter      | Description                              |
-       +================+==========================================+
-       | PROVE_RAND_LEN | Length of the prover randomness, the     |
-       |                | number of random field elements consumed |
-       |                | by the prover when generating a proof    |
-       +----------------+------------------------------------------+
-       | QUERY_RAND_LEN | Length of the query randomness, the      |
-       |                | number of random field elements consumed |
-       |                | by the verifier                          |
-       +----------------+------------------------------------------+
-       | JOINT_RAND_LEN | Length of the joint randomness, the      |
-       |                | number of random field elements consumed |
-       |                | by both the prover and verifier          |
-       +----------------+------------------------------------------+
-       | MEAS_LEN       | Length of the encoded measurement        |
-       |                | (Section 7.1.1)                          |
-       +----------------+------------------------------------------+
-       | OUTPUT_LEN     | Length of the aggregatable output        |
-       |                | (Section 7.1.1)                          |
-       +----------------+------------------------------------------+
-       | PROOF_LEN      | Length of the proof                      |
-       +----------------+------------------------------------------+
-       | VERIFIER_LEN   | Length of the verifier message generated |
-       |                | by querying the measurement and proof    |
-       +----------------+------------------------------------------+
-       | Measurement    | Type of the measurement                  |
-       +----------------+------------------------------------------+
-       | AggResult      | Type of the aggregate result             |
-       +----------------+------------------------------------------+
-       | field          | Class object for the field (Section 6.1) |
-       +----------------+------------------------------------------+
+      +=================+==========================================+
+      | Parameter       | Description                              |
+      +=================+==========================================+
+      | PROVE_RAND_LEN: | Length of the prover randomness, the     |
+      | int             | number of random field elements consumed |
+      |                 | by the prover when generating a proof    |
+      +-----------------+------------------------------------------+
+      | QUERY_RAND_LEN: | Length of the query randomness, the      |
+      | int             | number of random field elements consumed |
+      |                 | by the verifier                          |
+      +-----------------+------------------------------------------+
+      | JOINT_RAND_LEN: | Length of the joint randomness, the      |
+      | int             | number of random field elements consumed |
+      |                 | by both the prover and verifier          |
+      +-----------------+------------------------------------------+
+      | MEAS_LEN: int   | Length of the encoded measurement        |
+      |                 | (Section 7.1.1)                          |
+      +-----------------+------------------------------------------+
+      | OUTPUT_LEN: int | Length of the aggregatable output        |
+      |                 | (Section 7.1.1)                          |
+      +-----------------+------------------------------------------+
+      | PROOF_LEN: int  | Length of the proof                      |
+      +-----------------+------------------------------------------+
+      | VERIFIER_LEN:   | Length of the verifier message generated |
+      | int             | by querying the measurement and proof    |
+      +-----------------+------------------------------------------+
+      | Measurement     | Type of the measurement                  |
+      +-----------------+------------------------------------------+
+      | AggResult       | Type of the aggregate result             |
+      +-----------------+------------------------------------------+
+      | field: type[F]  | Class object for the field (Section 6.1) |
+      +-----------------+------------------------------------------+
 
-          Table 4: Constants and types defined by a concrete FLP.
+                         Table 4: FLP parameters.
 
    An FLP specifies the following algorithms for generating and
    verifying proofs of validity (encoding is described below in
@@ -3530,13 +3530,39 @@ Table of Contents
 
 7.3.3.  Specification
 
+                +================+========================+
+                | Parameter      | Value                  |
+                +================+========================+
+                | PROVE_RAND_LEN | valid.prove_rand_len() |
+                +----------------+------------------------+
+                | QUERY_RAND_LEN | valid.query_rand_len() |
+                +----------------+------------------------+
+                | JOINT_RAND_LEN | valid.JOINT_RAND_LEN   |
+                +----------------+------------------------+
+                | MEAS_LEN       | valid.MEAS_LEN         |
+                +----------------+------------------------+
+                | OUTPUT_LEN     | valid.OUTPUT_LEN       |
+                +----------------+------------------------+
+                | PROOF_LEN      | valid.proof_len()      |
+                +----------------+------------------------+
+                | VERIFIER_LEN   | valid.verifier_len()   |
+                +----------------+------------------------+
+                | Measurement    | valid.Measurement      |
+                +----------------+------------------------+
+                | AggResult      | valid.AggResult        |
+                +----------------+------------------------+
+                | field          | valid.field            |
+                +----------------+------------------------+
+
+                    Table 8: FLP parameters for a given
+                              validity circuit
+
    This section specifies an implementation of the Flp interface
    (Section 7.1).  It has as a generic parameter a validity circuit
-   Valid implementing the interface defined in Section 7.3.2.
-
-   The parameters are defined in Table 8.  The required methods for
-   generating the proof, generating the verifier, and deciding validity
-   are specified in the remaining subsections.
+   valid implementing the interface defined in Section 7.3.2.  Its
+   parameters are listed in the table above.  The proof generation
+   algorithm, query generation algorithm, and decision algorithm ares
+   specified in the remaining subsections.
 
    In the remainder, we let [n] denote the set {1, ..., n} for positive
    integer n.  We also define the following constants:
@@ -3554,28 +3580,6 @@ Table of Contents
       -  Let P_i = next_power_of_2(M_i+1)
 
       -  Let alpha_i = field.gen()^(field.GEN_ORDER / P_i)
-
-      +================+============================================+
-      | Parameter      | Value                                      |
-      +================+============================================+
-      | PROVE_RAND_LEN | valid.prove_rand_len() (see Section 7.3.2) |
-      +----------------+--------------------------------------------+
-      | QUERY_RAND_LEN | valid.query_rand_len() (see Section 7.3.2) |
-      +----------------+--------------------------------------------+
-      | JOINT_RAND_LEN | valid.JOINT_RAND_LEN                       |
-      +----------------+--------------------------------------------+
-      | MEAS_LEN       | valid.MEAS_LEN                             |
-      +----------------+--------------------------------------------+
-      | OUTPUT_LEN     | valid.OUTPUT_LEN                           |
-      +----------------+--------------------------------------------+
-      | PROOF_LEN      | valid.proof_len() (see Section 7.3.2)      |
-      +----------------+--------------------------------------------+
-      | VERIFIER_LEN   | valid.verifier_len() (see Section 7.3.2)   |
-      +----------------+--------------------------------------------+
-      | Measurement    | valid.Measurement                          |
-      +----------------+--------------------------------------------+
-
-                  Table 8: Parameters of FLP of BBCGGI19.
 
 7.3.3.1.  Proof Generation
 
