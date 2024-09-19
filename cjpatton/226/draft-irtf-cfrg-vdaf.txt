@@ -3741,31 +3741,34 @@ Table of Contents
     |
     V is_valid
 
-          Figure 24: The decision algorithm consumes the verifier,
-     consisting of the reduced output of the validity circuit and each
-      gadget test.  The verifier is produced by adding up the verifier
-                     shares output by each Aggregator.
+              Figure 24: Components of the decision algorithm.
 
-   On input of vector verifier, the verifier decides if the measurement
-   is valid as follows:
+   The decision algorithm consumes the verifier message.  (Each of the
+   Aggregators computes an additive share of the verifier message in the
+   previous step.)  The verifier message consists of the reduced circuit
+   output and the gadget tests.
 
-   1.  Parse verifier into v, x_1, y_1, ..., x_H, y_H as defined in
-       Section 7.3.3.2.
+   To complete each gadget test, we evaluate the gadget on the wire
+   checks: if the encoded measurement and joint randomness used to
+   generate the proof are the same as the measurement (share) and joint
+   randomness used to verify the proof, then the output of the gadget
+   will be equal to the gadget check; otherwise, the output will not
+   equal the gadget check with high probability.
 
-   2.  Check for well-formedness of the gadget polynomials.  For every i
-       in [H]:
+   def decide(self, verifier: list[F]) -> bool:
+       # Check the output of the validity circuit.
+       v, verifier = verifier[0], verifier[1:]
+       if v != self.field(0):
+           return False
 
-       *  Let z = G_i(x_i).  That is, evaluate the circuit G_i on x_i
-          and set z to the output.
+       # Complete each gadget test.
+       for g in self.valid.GADGETS:
+           (wire_checks, verifier) = front(g.ARITY, verifier)
+           ([gadget_check], verifier) = front(1, verifier)
+           if g.eval(self.field, wire_checks) != gadget_check:
+               return False
 
-       *  If z != y_i, then return False and halt.
-
-   3.  Return True if v == 0 and False otherwise.
-
-7.3.3.4.  Encoding
-
-   The FLP encoding and truncation methods invoke valid.encode,
-   valid.truncate, and valid.decode in the natural way.
+       return True
 
 7.4.  Instantiations
 

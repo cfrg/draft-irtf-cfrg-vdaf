@@ -5922,8 +5922,7 @@ def query(self,
             <h5 id="name-decision">
 <a href="#section-7.3.3.3" class="section-number selfRef">7.3.3.3. </a><a href="#name-decision" class="section-name selfRef">Decision</a>
             </h5>
-<span id="name-the-decision-algorithm-cons"></span><div id="flp-bbcggi19-decide-illustration">
-<figure id="figure-24">
+<span id="name-components-of-the-decision-"></span><figure id="figure-24">
               <div class="alignLeft art-text artwork" id="section-7.3.3.3-1.1">
 <pre>
  | verifier
@@ -5936,41 +5935,34 @@ def query(self,
 </pre>
 </div>
 <figcaption><a href="#figure-24" class="selfRef">Figure 24</a>:
-<a href="#name-the-decision-algorithm-cons" class="selfRef">The decision algorithm consumes the verifier, consisting of the reduced output of the validity circuit and each gadget test. The verifier is produced by adding up the verifier shares output by each Aggregator.</a>
+<a href="#name-components-of-the-decision-" class="selfRef">Components of the decision algorithm.</a>
               </figcaption></figure>
+<p id="section-7.3.3.3-2">The decision algorithm consumes the verifier message. (Each of the Aggregators
+computes an additive share of the verifier message in the previous step.) The
+verifier message consists of the reduced circuit output and the gadget tests.<a href="#section-7.3.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.3.3.3-3">To complete each gadget test, we evaluate the gadget on the wire checks: if the
+encoded measurement and joint randomness used to generate the proof are the
+same as the measurement (share) and joint randomness used to verify the proof,
+then the output of the gadget will be equal to the gadget check; otherwise, the
+output will not equal the gadget check with high probability.<a href="#section-7.3.3.3-3" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-7.3.3.3-4">
+<pre>
+def decide(self, verifier: list[F]) -&gt; bool:
+    # Check the output of the validity circuit.
+    v, verifier = verifier[0], verifier[1:]
+    if v != self.field(0):
+        return False
+
+    # Complete each gadget test.
+    for g in self.valid.GADGETS:
+        (wire_checks, verifier) = front(g.ARITY, verifier)
+        ([gadget_check], verifier) = front(1, verifier)
+        if g.eval(self.field, wire_checks) != gadget_check:
+            return False
+
+    return True
+</pre><a href="#section-7.3.3.3-4" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.3.3-2">On input of vector <code>verifier</code>, the verifier decides if the measurement is valid
-as follows:<a href="#section-7.3.3.3-2" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.3.3.3-3">
-<li id="section-7.3.3.3-3.1">
-                <p id="section-7.3.3.3-3.1.1">Parse <code>verifier</code> into <code>v</code>, <code>x_1</code>, <code>y_1</code>, ..., <code>x_H</code>, <code>y_H</code> as defined in
-<a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.3.2</a>.<a href="#section-7.3.3.3-3.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li id="section-7.3.3.3-3.2">
-                <p id="section-7.3.3.3-3.2.1">Check for well-formedness of the gadget polynomials. For every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.3-3.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.3.3-3.2.2.1">
-                    <p id="section-7.3.3.3-3.2.2.1.1">Let <code>z = G_i(x_i)</code>. That is, evaluate the circuit <code>G_i</code> on <code>x_i</code> and set
-<code>z</code> to the output.<a href="#section-7.3.3.3-3.2.2.1.1" class="pilcrow">¶</a></p>
-</li>
-                  <li class="normal" id="section-7.3.3.3-3.2.2.2">
-                    <p id="section-7.3.3.3-3.2.2.2.1">If <code>z != y_i</code>, then return <code>False</code> and halt.<a href="#section-7.3.3.3-3.2.2.2.1" class="pilcrow">¶</a></p>
-</li>
-                </ul>
-</li>
-              <li id="section-7.3.3.3-3.3">
-                <p id="section-7.3.3.3-3.3.1">Return <code>True</code> if <code>v == 0</code> and <code>False</code> otherwise.<a href="#section-7.3.3.3-3.3.1" class="pilcrow">¶</a></p>
-</li>
-            </ol>
-</section>
-</div>
-<div id="encoding">
-<section id="section-7.3.3.4">
-            <h5 id="name-encoding">
-<a href="#section-7.3.3.4" class="section-number selfRef">7.3.3.4. </a><a href="#name-encoding" class="section-name selfRef">Encoding</a>
-            </h5>
-<p id="section-7.3.3.4-1">The FLP encoding and truncation methods invoke <code>valid.encode</code>,
-<code>valid.truncate</code>, and <code>valid.decode</code> in the natural way.<a href="#section-7.3.3.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
