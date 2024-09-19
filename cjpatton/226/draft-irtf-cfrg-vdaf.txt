@@ -150,6 +150,7 @@ Table of Contents
      11.1.  Normative References
      11.2.  Informative References
    Acknowledgments
+   FLP Gadget Wrappers
    Test Vectors
      Prio3Count
      Prio3Sum
@@ -680,8 +681,8 @@ Table of Contents
    *  next_power_of_2(n: int) -> int returns the smallest integer
       greater than or equal to n that is also a power of two.
 
-   *  additive_secret_share(vec: list[Field], num_shares: int, field:
-      type) -> list[list[Field]] takes a vector of field elements and
+   *  additive_secret_share(vec: list[F], num_shares: int, field:
+      type[F]) -> list[list[F]] takes a vector of field elements and
       returns multiple vectors of the same length, such that they all
       add up to the input vector, and each proper subset of the vectors
       are indistinguishable from random.
@@ -696,6 +697,11 @@ Table of Contents
       the integers from zero (inclusive) to stop, exclusive.  The two-
       and three-argument forms allow overriding the start of the range
       and overriding the step between successive output values.
+
+   *  poly_interp(field: type[F], inputs: list[F], outputs: list[F]) ->
+      list[F] returns the coefficients of the lowest degree polynomial p
+      for which p(input[k]) == output[k] for all k.  Normally this will
+      be computed using the Number Theoretic Transform (NTT) [SML24].
 
 3.  Overview
 
@@ -3584,41 +3590,53 @@ Table of Contents
        circuit.  The prove randomness is used to construct the gadget
                                polynomial(s).
 
-   On input of meas, prove_rand, and joint_rand, the proof is computed
-   as follows:
+   The proof consists of the gadget polynomials that the verifier will
+   use to compute the output of each gadget.  To generate these, the
+   prover evaluates the validity circuit, setting g.wires[j][k] to the
+   value of the j-th wire for the k-th invocation of gadget g.  This is
+   accomplished by "wrapping" each gadget in a class ProveGadget that
+   records the wire inputs.  For completeness, we list this class in
+   Appendix "FLP Gadget Wrappers".
 
-   1.  For each i in [H] create an empty table wire_i.
+   def prove(self,
+             meas: list[F],
+             prove_rand: list[F],
+             joint_rand: list[F]) -> list[F]:
+       # Evaluate the validity circuit, recording the value of each
+       # input wire for each evaluation of each gadget.
+       valid = ProveGadget.wrap(self.valid, prove_rand)
+       valid.eval(meas, joint_rand, 1)
 
-   2.  Partition the prover randomness prove_rand into sub-vectors
-       seed_1, ..., seed_H where len(seed_i) == L_i for all i in [H].
-       Let us call these the "wire seeds" of each gadget.
+       # Construct the proof, which consists of the wire seeds and
+       # gadget polynomial for each gadget.
+       proof = []
+       for g in cast(list[ProveGadget[F]], valid.GADGETS):
+           p = len(g.wires[0])
 
-   3.  Evaluate Valid on input of meas and joint_rand, recording the
-       inputs of each gadget in the corresponding table.  Specifically,
-       for every i in [H], set wire_i[j-1,k-1] to the value on the jth
-       wire into the kth call to gadget G_i.
+           # Compute the wire polynomials for this gadget. For each `j`,
+           # find the lowest degree polynomial `wire_poly` for which
+           # `wire_poly(alpha^k) = wires[j][k]` for all `k`.
+           #
+           # Implementation note: `alpha` is a root of unity, which
+           # means `poly_interp()` can be evaluated using the NTT. This
+           # is also why we require `p` to be a power of 2.
+           alpha = self.field.gen() ** (self.field.GEN_ORDER // p)
+           wire_inp = [alpha ** k for k in range(p)]
+           wire_polys = []
+           for j in range(g.ARITY):
+               wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
+               wire_polys.append(wire_poly)
 
-   4.  Compute the "wire polynomials".  That is, for every i in [H] and
-       j in [L_i], construct poly_wire_i[j-1], the jth wire polynomial
-       for the ith gadget, as follows:
+           # Compute the gadget polynomial by evaluating the gadget on
+           # the wire polynomials. By construction we have that
+           # `gadget_poly(alpha^k)` is the `k`-th output.
+           gadget_poly = g.eval_poly(self.field, wire_polys)
 
-       *  Let w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]].
+           for j in range(g.ARITY):
+               proof.append(g.wires[j][0])
+           proof += gadget_poly
 
-       *  Let padded_w = w + field.zeros(P_i - len(w)).
-
-       *  Let poly_wire_i[j-1] be the lowest degree polynomial for which
-          poly_wire_i[j-1](alpha_i^k) == padded_w[k] for all k in [P_i].
-
-   5.  Compute the "gadget polynomials".  That is, for every i in [H]:
-
-       *  Let poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-
-          1]).  That is, evaluate the circuit G_i on the wire
-          polynomials for the ith gadget.  (Arithmetic is in the ring of
-          polynomials over field.)
-
-   The proof is the vector proof = seed_1 + coeff_1 + ... + seed_H +
-   coeff_H, where coeff_i is the vector of coefficients of poly_gadget_i
-   for each i in [H].
+       return proof
 
 7.3.3.2.  Query Generation
 
@@ -6055,6 +6073,62 @@ Acknowledgments
    Raykova, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
    Christopher Wood for useful feedback on and contributions to the
    spec.
+
+FLP Gadget Wrappers
+
+   class ProveGadget(Gadget[F]):
+       """
+       Gadget wrapper that records the input wires for each evaluation.
+       """
+
+       def __init__(self,
+                    field: type[F],
+                    wire_seeds: list[F],
+                    g: Gadget[F],
+                    g_calls: int):
+           assert len(wire_seeds) == g.ARITY  # REMOVE ME
+           p = next_power_of_2(1 + g_calls)
+           self.inner = g
+           self.ARITY = g.ARITY
+           self.DEGREE = g.DEGREE
+           self.wires = []
+           self.k = 0  # evaluation counter
+           for s in wire_seeds:
+               wire = field.zeros(p)
+               wire[0] = s  # set the wire seed
+               self.wires.append(wire)
+
+       def eval(self, field: type[F], inp: list[F]) -> F:
+           self.k += 1
+           for j in range(len(inp)):
+               self.wires[j][self.k] = inp[j]
+           return self.inner.eval(field, inp)
+
+       def eval_poly(self,
+                     field: type[F],
+                     inp_poly: list[list[F]]) -> list[F]:
+           return self.inner.eval_poly(field, inp_poly)
+
+       @classmethod
+       def wrap(cls,
+                valid: Valid[Measurement, AggResult, F],
+                prove_rand: list[F],
+                ) -> Valid[Measurement, AggResult, F]:
+           """
+           Make a copy of `valid` with each gadget wrapped for recording
+           the wire inputs. `prove_rand` is used to produce the wire
+           seeds for each gadget.
+           """
+           assert len(prove_rand) == valid.prove_rand_len()  # REMOVE ME
+           wrapped_gadgets: list[Gadget[F]] = []
+           for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
+               (wire_seeds, prove_rand) = front(g.ARITY, prove_rand)
+               wrapped = cls(valid.field, wire_seeds, g, g_calls)
+               wrapped_gadgets.append(wrapped)
+           assert len(prove_rand) == 0  # REMOVE ME
+           wrapped_valid = deepcopy(valid)
+           wrapped_valid.GADGETS = wrapped_gadgets
+           return wrapped_valid
 
 Test Vectors
 

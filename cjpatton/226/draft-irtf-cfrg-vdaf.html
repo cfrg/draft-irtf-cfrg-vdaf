@@ -1427,27 +1427,30 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
             <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-flp-gadget-wrappers" class="internal xref">FLP Gadget Wrappers</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
-                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-B.1" class="auto internal xref"></a><a href="#name-prio3count-2" class="internal xref">Prio3Count</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
+                <p id="section-toc.1-1.14.2.1.1"><a href="#appendix-C.1" class="auto internal xref"></a><a href="#name-prio3count-2" class="internal xref">Prio3Count</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
-                <p id="section-toc.1-1.13.2.2.1"><a href="#appendix-B.2" class="auto internal xref"></a><a href="#name-prio3sum-2" class="internal xref">Prio3Sum</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
+                <p id="section-toc.1-1.14.2.2.1"><a href="#appendix-C.2" class="auto internal xref"></a><a href="#name-prio3sum-2" class="internal xref">Prio3Sum</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.3">
-                <p id="section-toc.1-1.13.2.3.1"><a href="#appendix-B.3" class="auto internal xref"></a><a href="#name-prio3sumvec-2" class="internal xref">Prio3SumVec</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3">
+                <p id="section-toc.1-1.14.2.3.1"><a href="#appendix-C.3" class="auto internal xref"></a><a href="#name-prio3sumvec-2" class="internal xref">Prio3SumVec</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4">
-                <p id="section-toc.1-1.13.2.4.1"><a href="#appendix-B.4" class="auto internal xref"></a><a href="#name-prio3histogram-2" class="internal xref">Prio3Histogram</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.4">
+                <p id="section-toc.1-1.14.2.4.1"><a href="#appendix-C.4" class="auto internal xref"></a><a href="#name-prio3histogram-2" class="internal xref">Prio3Histogram</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.5">
-                <p id="section-toc.1-1.13.2.5.1"><a href="#appendix-B.5" class="auto internal xref"></a><a href="#name-poplar1-2" class="internal xref">Poplar1</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.5">
+                <p id="section-toc.1-1.14.2.5.1"><a href="#appendix-C.5" class="auto internal xref"></a><a href="#name-poplar1-2" class="internal xref">Poplar1</a></p>
 </li>
             </ul>
 </li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -2033,8 +2036,8 @@ bytes; its value <span class="bcp14">MUST</span> be at least <code>0</code> but 
 greater than or equal to <code>n</code> that is also a power of two.<a href="#section-2-8.9.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-8.10">
-          <p id="section-2-8.10.1"><code>additive_secret_share(vec: list[Field], num_shares: int, field: type)
--&gt; list[list[Field]]</code> takes a vector of field elements and returns multiple
+          <p id="section-2-8.10.1"><code>additive_secret_share(vec: list[F], num_shares: int, field: type[F])
+-&gt; list[list[F]]</code> takes a vector of field elements and returns multiple
 vectors of the same length, such that they all add up to the input vector,
 and each proper subset of the vectors are indistinguishable from random.<a href="#section-2-8.10.1" class="pilcrow">¶</a></p>
 </li>
@@ -2050,6 +2053,12 @@ Python standard library. The one-argument form returns the integers from zero
 (inclusive) to <code>stop</code>, exclusive. The two- and three-argument forms allow
 overriding the start of the range and overriding the step between successive
 output values.<a href="#section-2-8.12.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.13">
+          <p id="section-2-8.13.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
+returns the coefficients of the lowest degree polynomial <code>p</code> for which
+<code>p(input[k]) == output[k]</code> for all <code>k</code>. Normally this will be computed using
+the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-8.13.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
@@ -5755,54 +5764,55 @@ decision algorithm ares specified in the remaining subsections.<a href="#section
 <a href="#name-the-proof-generation-algori" class="selfRef">The proof generation algorithm invokes the validity circuit on the encoded measurement and joint randomness. The validity circuit in turn invokes the gadget(s) defined by the circuit. The prove randomness is used to construct the gadget polynomial(s).</a>
               </figcaption></figure>
 </div>
-<p id="section-7.3.3.1-2">On input of <code>meas</code>, <code>prove_rand</code>, and <code>joint_rand</code>, the proof is computed as
-follows:<a href="#section-7.3.3.1-2" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-7.3.3.1-3">
-<li id="section-7.3.3.1-3.1">
-                <p id="section-7.3.3.1-3.1.1">For each <code>i</code> in <code>[H]</code> create an empty table <code>wire_i</code>.<a href="#section-7.3.3.1-3.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li id="section-7.3.3.1-3.2">
-                <p id="section-7.3.3.1-3.2.1">Partition the prover randomness <code>prove_rand</code> into sub-vectors <code>seed_1, ...,
-seed_H</code> where <code>len(seed_i) == L_i</code> for all <code>i</code> in <code>[H]</code>. Let us call these
-the "wire seeds" of each gadget.<a href="#section-7.3.3.1-3.2.1" class="pilcrow">¶</a></p>
-</li>
-              <li id="section-7.3.3.1-3.3">
-                <p id="section-7.3.3.1-3.3.1">Evaluate <code>Valid</code> on input of <code>meas</code> and <code>joint_rand</code>, recording the inputs
-of each gadget in the corresponding table. Specifically, for every <code>i</code> in
-<code>[H]</code>, set <code>wire_i[j-1,k-1]</code> to the value on the <code>j</code>th wire into the <code>k</code>th
-call to gadget <code>G_i</code>.<a href="#section-7.3.3.1-3.3.1" class="pilcrow">¶</a></p>
-</li>
-              <li id="section-7.3.3.1-3.4">
-                <p id="section-7.3.3.1-3.4.1">Compute the "wire polynomials". That is, for every <code>i</code> in <code>[H]</code> and <code>j</code> in
-<code>[L_i]</code>, construct <code>poly_wire_i[j-1]</code>, the <code>j</code>th wire polynomial for the
-<code>i</code>th gadget, as follows:<a href="#section-7.3.3.1-3.4.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.3.1-3.4.2.1">
-                    <p id="section-7.3.3.1-3.4.2.1.1">Let <code>w = [seed_i[j-1], wire_i[j-1,0], ..., wire_i[j-1,M_i-1]]</code>.<a href="#section-7.3.3.1-3.4.2.1.1" class="pilcrow">¶</a></p>
-</li>
-                  <li class="normal" id="section-7.3.3.1-3.4.2.2">
-                    <p id="section-7.3.3.1-3.4.2.2.1">Let <code>padded_w = w + field.zeros(P_i - len(w))</code>.<a href="#section-7.3.3.1-3.4.2.2.1" class="pilcrow">¶</a></p>
-</li>
-                  <li class="normal" id="section-7.3.3.1-3.4.2.3">
-                    <p id="section-7.3.3.1-3.4.2.3.1">Let <code>poly_wire_i[j-1]</code> be the lowest degree polynomial for which
-<code>poly_wire_i[j-1](alpha_i^k) == padded_w[k]</code> for all <code>k</code> in <code>[P_i]</code>.<a href="#section-7.3.3.1-3.4.2.3.1" class="pilcrow">¶</a></p>
-</li>
-                </ul>
-</li>
-              <li id="section-7.3.3.1-3.5">
-                <p id="section-7.3.3.1-3.5.1">Compute the "gadget polynomials". That is, for every <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3.1-3.5.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.3.1-3.5.2.1">
-                    <p id="section-7.3.3.1-3.5.2.1.1">Let <code>poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-1])</code>. That
-is, evaluate the circuit <code>G_i</code> on the wire polynomials for the <code>i</code>th
-gadget. (Arithmetic is in the ring of polynomials over <code>field</code>.)<a href="#section-7.3.3.1-3.5.2.1.1" class="pilcrow">¶</a></p>
-</li>
-                </ul>
-</li>
-            </ol>
-<p id="section-7.3.3.1-4">The proof is the vector <code>proof = seed_1 + coeff_1 + ... + seed_H + coeff_H</code>,
-where <code>coeff_i</code> is the vector of coefficients of <code>poly_gadget_i</code> for each <code>i</code> in
-<code>[H]</code>.<a href="#section-7.3.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.3.3.1-2">The proof consists of the gadget polynomials that the verifier will use to
+compute the output of each gadget. To generate these, the prover evaluates the
+validity circuit, setting <code>g.wires[j][k]</code> to the value of the <code>j</code>-th wire for
+the <code>k</code>-th invocation of gadget <code>g</code>. This is accomplished by "wrapping" each
+gadget in a class <code>ProveGadget</code> that records the wire inputs. For completeness,
+we list this class in <a href="#gadget-wrappers" class="auto internal xref">Appendix "FLP Gadget Wrappers"</a>.<a href="#section-7.3.3.1-2" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-7.3.3.1-3">
+<pre>
+def prove(self,
+          meas: list[F],
+          prove_rand: list[F],
+          joint_rand: list[F]) -&gt; list[F]:
+    # Evaluate the validity circuit, recording the value of each
+    # input wire for each evaluation of each gadget.
+    valid = ProveGadget.wrap(self.valid, prove_rand)
+    valid.eval(meas, joint_rand, 1)
+
+    # Construct the proof, which consists of the wire seeds and
+    # gadget polynomial for each gadget.
+    proof = []
+    for g in cast(list[ProveGadget[F]], valid.GADGETS):
+        p = len(g.wires[0])
+
+        # Compute the wire polynomials for this gadget. For each `j`,
+        # find the lowest degree polynomial `wire_poly` for which
+        # `wire_poly(alpha^k) = wires[j][k]` for all `k`.
+        #
+        # Implementation note: `alpha` is a root of unity, which
+        # means `poly_interp()` can be evaluated using the NTT. This
+        # is also why we require `p` to be a power of 2.
+        alpha = self.field.gen() ** (self.field.GEN_ORDER // p)
+        wire_inp = [alpha ** k for k in range(p)]
+        wire_polys = []
+        for j in range(g.ARITY):
+            wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
+            wire_polys.append(wire_poly)
+
+        # Compute the gadget polynomial by evaluating the gadget on
+        # the wire polynomials. By construction we have that
+        # `gadget_poly(alpha^k)` is the `k`-th output.
+        gadget_poly = g.eval_poly(self.field, wire_polys)
+
+        for j in range(g.ARITY):
+            proof.append(g.wires[j][0])
+        proof += gadget_poly
+
+    return proof
+</pre><a href="#section-7.3.3.1-3" class="pilcrow">¶</a>
+</div>
 </section>
 </div>
 <div id="flp-bbcggi19-construction-query">
@@ -9145,92 +9155,156 @@ Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and Christopher Wood for
 useful feedback on and contributions to the spec.<a href="#appendix-A-4" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="test-vectors">
+<div id="gadget-wrappers">
 <section id="appendix-B">
+      <h2 id="name-flp-gadget-wrappers">
+<a href="#name-flp-gadget-wrappers" class="section-name selfRef">FLP Gadget Wrappers</a>
+      </h2>
+<div class="breakable lang-python sourcecode" id="appendix-B-1">
+<pre>
+class ProveGadget(Gadget[F]):
+    """
+    Gadget wrapper that records the input wires for each evaluation.
+    """
+
+    def __init__(self,
+                 field: type[F],
+                 wire_seeds: list[F],
+                 g: Gadget[F],
+                 g_calls: int):
+        assert len(wire_seeds) == g.ARITY  # REMOVE ME
+        p = next_power_of_2(1 + g_calls)
+        self.inner = g
+        self.ARITY = g.ARITY
+        self.DEGREE = g.DEGREE
+        self.wires = []
+        self.k = 0  # evaluation counter
+        for s in wire_seeds:
+            wire = field.zeros(p)
+            wire[0] = s  # set the wire seed
+            self.wires.append(wire)
+
+    def eval(self, field: type[F], inp: list[F]) -&gt; F:
+        self.k += 1
+        for j in range(len(inp)):
+            self.wires[j][self.k] = inp[j]
+        return self.inner.eval(field, inp)
+
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -&gt; list[F]:
+        return self.inner.eval_poly(field, inp_poly)
+
+    @classmethod
+    def wrap(cls,
+             valid: Valid[Measurement, AggResult, F],
+             prove_rand: list[F],
+             ) -&gt; Valid[Measurement, AggResult, F]:
+        """
+        Make a copy of `valid` with each gadget wrapped for recording
+        the wire inputs. `prove_rand` is used to produce the wire
+        seeds for each gadget.
+        """
+        assert len(prove_rand) == valid.prove_rand_len()  # REMOVE ME
+        wrapped_gadgets: list[Gadget[F]] = []
+        for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
+            (wire_seeds, prove_rand) = front(g.ARITY, prove_rand)
+            wrapped = cls(valid.field, wire_seeds, g, g_calls)
+            wrapped_gadgets.append(wrapped)
+        assert len(prove_rand) == 0  # REMOVE ME
+        wrapped_valid = deepcopy(valid)
+        wrapped_valid.GADGETS = wrapped_gadgets
+        return wrapped_valid
+</pre><a href="#appendix-B-1" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="test-vectors">
+<section id="appendix-C">
       <h2 id="name-test-vectors">
 <a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
       </h2>
-<p id="appendix-B-1">(TO BE REMOVED BY RFC EDITOR: machine-readable test vectors can be found at
-https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)<a href="#appendix-B-1" class="pilcrow">¶</a></p>
-<p id="appendix-B-2">Test vectors cover the generation of input shares and the conversion of input
+<p id="appendix-C-1">(TO BE REMOVED BY RFC EDITOR: machine-readable test vectors can be found at
+https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<p id="appendix-C-2">Test vectors cover the generation of input shares and the conversion of input
 shares into output shares. Vectors specify the verification key, measurements,
 aggregation parameter, and any parameters needed to construct the VDAF. (For
 example, for <code>Prio3Sum</code>, the user specifies the number of bits for representing
-each summand.)<a href="#appendix-B-2" class="pilcrow">¶</a></p>
-<p id="appendix-B-3">Byte strings are encoded in hexadecimal. To make the tests deterministic, the
+each summand.)<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<p id="appendix-C-3">Byte strings are encoded in hexadecimal. To make the tests deterministic, the
 random inputs of randomized algorithms were fixed to the byte sequence starting
-with <code>0</code>, incrementing by <code>1</code>, and wrapping at <code>256</code>:<a href="#appendix-B-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="appendix-B-4">
+with <code>0</code>, incrementing by <code>1</code>, and wrapping at <code>256</code>:<a href="#appendix-C-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="appendix-C-4">
 <pre>
 0, 1, 2, ..., 255, 0, 1, 2, ...
-</pre><a href="#appendix-B-4" class="pilcrow">¶</a>
+</pre><a href="#appendix-C-4" class="pilcrow">¶</a>
 </div>
 <div id="testvec-prio3count">
-<section id="appendix-B.1">
+<section id="appendix-C.1">
         <h3 id="name-prio3count-2">
 <a href="#name-prio3count-2" class="section-name selfRef">Prio3Count</a>
         </h3>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.1-1.1">
-            <p id="appendix-B.1-1.1.1">TODO Copy the machine readable vectors from the source repository
+<li class="normal ulEmpty" id="appendix-C.1-1.1">
+            <p id="appendix-C.1-1.1.1">TODO Copy the machine readable vectors from the source repository
 (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.1-1.1.1" class="pilcrow">¶</a></p>
+format them for humans.<a href="#appendix-C.1-1.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 <div id="testvec-prio3sum">
-<section id="appendix-B.2">
+<section id="appendix-C.2">
         <h3 id="name-prio3sum-2">
 <a href="#name-prio3sum-2" class="section-name selfRef">Prio3Sum</a>
         </h3>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.2-1.1">
-            <p id="appendix-B.2-1.1.1">TODO Copy the machine readable vectors from the source repository
+<li class="normal ulEmpty" id="appendix-C.2-1.1">
+            <p id="appendix-C.2-1.1.1">TODO Copy the machine readable vectors from the source repository
 (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.2-1.1.1" class="pilcrow">¶</a></p>
+format them for humans.<a href="#appendix-C.2-1.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 <div id="testvec-prio3sumvec">
-<section id="appendix-B.3">
+<section id="appendix-C.3">
         <h3 id="name-prio3sumvec-2">
 <a href="#name-prio3sumvec-2" class="section-name selfRef">Prio3SumVec</a>
         </h3>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.3-1.1">
-            <p id="appendix-B.3-1.1.1">TODO Copy the machine readable vectors from the source repository
+<li class="normal ulEmpty" id="appendix-C.3-1.1">
+            <p id="appendix-C.3-1.1.1">TODO Copy the machine readable vectors from the source repository
 (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.3-1.1.1" class="pilcrow">¶</a></p>
+format them for humans.<a href="#appendix-C.3-1.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 <div id="testvec-prio3histogram">
-<section id="appendix-B.4">
+<section id="appendix-C.4">
         <h3 id="name-prio3histogram-2">
 <a href="#name-prio3histogram-2" class="section-name selfRef">Prio3Histogram</a>
         </h3>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.4-1.1">
-            <p id="appendix-B.4-1.1.1">TODO Copy the machine readable vectors from the source repository
+<li class="normal ulEmpty" id="appendix-C.4-1.1">
+            <p id="appendix-C.4-1.1.1">TODO Copy the machine readable vectors from the source repository
 (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.4-1.1.1" class="pilcrow">¶</a></p>
+format them for humans.<a href="#appendix-C.4-1.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
 </div>
 <div id="testvec-poplar1">
-<section id="appendix-B.5">
+<section id="appendix-C.5">
         <h3 id="name-poplar1-2">
 <a href="#name-poplar1-2" class="section-name selfRef">Poplar1</a>
         </h3>
 <ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.5-1.1">
-            <p id="appendix-B.5-1.1.1">TODO Copy the machine readable vectors from the source repository
+<li class="normal ulEmpty" id="appendix-C.5-1.1">
+            <p id="appendix-C.5-1.1.1">TODO Copy the machine readable vectors from the source repository
 (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.5-1.1.1" class="pilcrow">¶</a></p>
+format them for humans.<a href="#appendix-C.5-1.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -9238,7 +9312,7 @@ format them for humans.<a href="#appendix-B.5-1.1.1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
-<section id="appendix-C">
+<section id="appendix-D">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
