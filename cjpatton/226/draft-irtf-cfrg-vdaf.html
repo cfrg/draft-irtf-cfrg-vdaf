@@ -5729,33 +5729,6 @@ has as a generic parameter a validity circuit <code>valid</code> implementing th
 interface defined in <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>. Its parameters are listed in the
 table above. The proof generation algorithm, query generation algorithm, and
 decision algorithm ares specified in the remaining subsections.<a href="#section-7.3.3-2" class="pilcrow">¶</a></p>
-<p id="section-7.3.3-3">In the remainder, we let <code>[n]</code> denote the set <code>{1, ..., n}</code> for positive integer
-<code>n</code>. We also define the following constants:<a href="#section-7.3.3-3" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.3-4.1">
-              <p id="section-7.3.3-4.1.1">Let <code>H = len(valid.GADGETS)</code><a href="#section-7.3.3-4.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-7.3.3-4.2">
-              <p id="section-7.3.3-4.2.1">For each <code>i</code> in <code>[H]</code>:<a href="#section-7.3.3-4.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.3-4.2.2.1">
-                  <p id="section-7.3.3-4.2.2.1.1">Let <code>G_i = valid.GADGETS[i]</code><a href="#section-7.3.3-4.2.2.1.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-7.3.3-4.2.2.2">
-                  <p id="section-7.3.3-4.2.2.2.1">Let <code>L_i = valid.GADGETS[i].ARITY</code><a href="#section-7.3.3-4.2.2.2.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-7.3.3-4.2.2.3">
-                  <p id="section-7.3.3-4.2.2.3.1">Let <code>M_i = valid.GADGET_CALLS[i]</code><a href="#section-7.3.3-4.2.2.3.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-7.3.3-4.2.2.4">
-                  <p id="section-7.3.3-4.2.2.4.1">Let <code>P_i = next_power_of_2(M_i+1)</code><a href="#section-7.3.3-4.2.2.4.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-7.3.3-4.2.2.5">
-                  <p id="section-7.3.3-4.2.2.5.1">Let <code>alpha_i = field.gen()^(field.GEN_ORDER / P_i)</code><a href="#section-7.3.3-4.2.2.5.1" class="pilcrow">¶</a></p>
-</li>
-              </ul>
-</li>
-          </ul>
 <div id="flp-bbcggi19-construction-prove">
 <section id="section-7.3.3.1">
             <h5 id="name-proof-generation">

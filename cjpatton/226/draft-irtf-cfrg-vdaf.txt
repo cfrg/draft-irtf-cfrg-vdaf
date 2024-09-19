@@ -3564,23 +3564,6 @@ Table of Contents
    algorithm, query generation algorithm, and decision algorithm ares
    specified in the remaining subsections.
 
-   In the remainder, we let [n] denote the set {1, ..., n} for positive
-   integer n.  We also define the following constants:
-
-   *  Let H = len(valid.GADGETS)
-
-   *  For each i in [H]:
-
-      -  Let G_i = valid.GADGETS[i]
-
-      -  Let L_i = valid.GADGETS[i].ARITY
-
-      -  Let M_i = valid.GADGET_CALLS[i]
-
-      -  Let P_i = next_power_of_2(M_i+1)
-
-      -  Let alpha_i = field.gen()^(field.GEN_ORDER / P_i)
-
 7.3.3.1.  Proof Generation
 
    +------------------+
