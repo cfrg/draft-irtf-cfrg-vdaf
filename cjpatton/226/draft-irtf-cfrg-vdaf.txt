@@ -3370,7 +3370,7 @@ Table of Contents
    encapsulates its non-affine arithmetic operations.  We refer to this
    sub-circuit as the "gadget".
 
-   Finally, the proof sysetm has one more important component.  It is
+   Finally, the proof system has one more important component.  It is
    possible for a malicious Client to produce a gadget polynomial p that
    would result in C(x) being computed incorrectly, potentially
    resulting in an invalid measurement being accepted.  To prevent this,
