@@ -5360,7 +5360,7 @@ C(x) = x * (x-1)
 (<code>x * (x-1)</code>). Observe that <code>C(x) = 0</code> if and only if <code>x</code> is in <code>range(2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-8">The goal of the proof system is to allow each Aggregator to privately and
 correctly compute a secret share of <code>C(x)</code> from its secret share of <code>x</code>. This
-way all they need to do determine validity is combine their shares of <code>C(x)</code>.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
+way all they need to determine validity is to add up their shares of <code>C(x)</code>.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-9">Suppose for a moment that <code>C</code> is an affine arithmetic circuit, meaning its only
 operations are addition, subtraction, and multiplication-by-constant. (The
 circuit above is non-affine because it contains a multiplication gate with two
@@ -5552,12 +5552,12 @@ probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
             </tbody>
           </table>
 <p id="section-7.3.2-2">An instance of the proof system is defined in terms of a validity circuit that
-implements the interface specified in this section. The parameters are listed
-in the table above.<a href="#section-7.3.2-2" class="pilcrow">¶</a></p>
+implements the <code>Valid</code> interface specified in this section. The parameters are
+listed in the table above.<a href="#section-7.3.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.3.2-3">Each circuit has a list of gadgets, denoted <code>GADGETS</code>. The circuit evaluated by
 the gadget <span class="bcp14">MAY</span> be non-affine, but <span class="bcp14">MUST</span> be arithmetic, i.e., composed only of
-multiplication, addition, and subtraction gates. Each gadget has the following
-interface:<a href="#section-7.3.2-3" class="pilcrow">¶</a></p>
+multiplication, addition, and subtraction gates. An instance of class <code>Gadget</code>
+has the following interface:<a href="#section-7.3.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.2-4.1">
               <p id="section-7.3.2-4.1.1"><code>ARITY: int</code> is the number of input wires. For example, the multiplication

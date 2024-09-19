@@ -3317,7 +3317,7 @@ Table of Contents
 
    The goal of the proof system is to allow each Aggregator to privately
    and correctly compute a secret share of C(x) from its secret share of
-   x.  This way all they need to do determine validity is combine their
+   x.  This way all they need to determine validity is to add up their
    shares of C(x).
 
    Suppose for a moment that C is an affine arithmetic circuit, meaning
@@ -3462,13 +3462,13 @@ Table of Contents
                    Table 7: Validity circuit parameters.
 
    An instance of the proof system is defined in terms of a validity
-   circuit that implements the interface specified in this section.  The
-   parameters are listed in the table above.
+   circuit that implements the Valid interface specified in this
+   section.  The parameters are listed in the table above.
 
    Each circuit has a list of gadgets, denoted GADGETS.  The circuit
    evaluated by the gadget MAY be non-affine, but MUST be arithmetic,
    i.e., composed only of multiplication, addition, and subtraction
-   gates.  Each gadget has the following interface:
+   gates.  An instance of class Gadget has the following interface:
 
    *  ARITY: int is the number of input wires.  For example, the
       multiplication gadget Mul(x,y) = x*y has arity of 2.
