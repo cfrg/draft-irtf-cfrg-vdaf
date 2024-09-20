@@ -152,11 +152,6 @@ Table of Contents
      11.2.  Informative References
    Acknowledgments
    Test Vectors
-     Prio3Count
-     Prio3Sum
-     Prio3SumVec
-     Prio3Histogram
-     Poplar1
    Authors' Addresses
 
 1.  Introduction
@@ -6126,10 +6121,14 @@ Test Vectors
    (RFC EDITOR: Update the commit hash in the command above to the
    commit that contains the final version of the test vectors.)
 
-   The directory contains a set of JSON files.  Each file contains a
-   single test vector for an instance of Vdaf (Section 5).  A test
-   vector covers sharding, preparation, aggregation, and unsharding of
-   each of several measurements.  The test vector schema is as follows:
+   The directory contains a set of JSON files.  Each file beginning with
+   "Prio3" or "Poplar1"contains a test vector for an instance of Vdaf
+   (Section 5).  A test vector covers sharding, preparation,
+   aggregation, and unsharding of each of several measurements.  The
+   test vector schema is as follows:
+
+   *  whatever parameters are required to instantiate Vdaf, e.g., shares
+      and max_measurement for Prio3Sum or bits for Poplar1
 
    *  verify_key: the verification key encoded in hexadecimal
 
@@ -6162,46 +6161,6 @@ Test Vectors
    *  "agg_shares": the expected aggregate shares encoded in hexadecimal
 
    *  "agg_result": the expected aggregate result of type Vdaf.AggResult
-
-   Each test vector specifies
-
-   the generation of input shares and the conversion of input shares
-   into output shares.  Vectors specify:
-
-   the verification key, measurements, nonces, the randomness used for
-   each aggregation parameter, and any parameters needed to construct
-   the VDAF.  (For example, for Prio3Sum, the user specifies the
-   max_measurement, the largest permitted summand.)
-
-Prio3Count
-
-      TODO Copy the machine readable vectors from the source repository
-      (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
-      test_vec) and format them for humans.
-
-Prio3Sum
-
-      TODO Copy the machine readable vectors from the source repository
-      (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
-      test_vec) and format them for humans.
-
-Prio3SumVec
-
-      TODO Copy the machine readable vectors from the source repository
-      (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
-      test_vec) and format them for humans.
-
-Prio3Histogram
-
-      TODO Copy the machine readable vectors from the source repository
-      (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
-      test_vec) and format them for humans.
-
-Poplar1
-
-      TODO Copy the machine readable vectors from the source repository
-      (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
-      test_vec) and format them for humans.
 
 Authors' Addresses
 

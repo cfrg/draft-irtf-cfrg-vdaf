@@ -1431,23 +1431,6 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
             <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
-<ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
-                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-B.1" class="auto internal xref"></a><a href="#name-prio3count-2" class="internal xref">Prio3Count</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
-                <p id="section-toc.1-1.13.2.2.1"><a href="#appendix-B.2" class="auto internal xref"></a><a href="#name-prio3sum-2" class="internal xref">Prio3Sum</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.3">
-                <p id="section-toc.1-1.13.2.3.1"><a href="#appendix-B.3" class="auto internal xref"></a><a href="#name-prio3sumvec-2" class="internal xref">Prio3SumVec</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4">
-                <p id="section-toc.1-1.13.2.4.1"><a href="#appendix-B.4" class="auto internal xref"></a><a href="#name-prio3histogram-2" class="internal xref">Prio3Histogram</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.5">
-                <p id="section-toc.1-1.13.2.5.1"><a href="#appendix-B.5" class="auto internal xref"></a><a href="#name-poplar1-2" class="internal xref">Poplar1</a></p>
-</li>
-            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
             <p id="section-toc.1-1.14.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
@@ -9215,134 +9198,61 @@ tar -zxf - "*/test_vec/*.json"
 </div>
 <p id="appendix-B-3">(RFC EDITOR: Update the commit hash in the command above to the commit that
 contains the final version of the test vectors.)<a href="#appendix-B-3" class="pilcrow">¶</a></p>
-<p id="appendix-B-4">The directory contains a set of JSON files. Each file contains a single test
-vector for an instance of <code>Vdaf</code> (<a href="#vdaf" class="auto internal xref">Section 5</a>). A test vector covers sharding,
-preparation, aggregation, and unsharding of each of several measurements. The
-test vector schema is as follows:<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+<p id="appendix-B-4">The directory contains a set of JSON files. Each file beginning with <code>"Prio3"</code>
+or <code>"Poplar1"</code>contains a test vector for an instance of <code>Vdaf</code> (<a href="#vdaf" class="auto internal xref">Section 5</a>). A
+test vector covers sharding, preparation, aggregation, and unsharding of each
+of several measurements. The test vector schema is as follows:<a href="#appendix-B-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-B-5.1">
-          <p id="appendix-B-5.1.1"><code>verify_key</code>: the verification key encoded in hexadecimal<a href="#appendix-B-5.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-B-5.1.1">whatever parameters are required to instantiate <code>Vdaf</code>, e.g., <code>shares</code> and
+<code>max_measurement</code> for Prio3Sum or <code>bits</code> for Poplar1<a href="#appendix-B-5.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-B-5.2">
-          <p id="appendix-B-5.2.1"><code>"agg_param"</code>: the aggregation parameter of type <code>Vdaf.AggParam</code><a href="#appendix-B-5.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-B-5.2.1"><code>verify_key</code>: the verification key encoded in hexadecimal<a href="#appendix-B-5.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-B-5.3">
-          <p id="appendix-B-5.3.1">"prep": a list of objects with the following schema:<a href="#appendix-B-5.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-B-5.3.1"><code>"agg_param"</code>: the aggregation parameter of type <code>Vdaf.AggParam</code><a href="#appendix-B-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-5.4">
+          <p id="appendix-B-5.4.1">"prep": a list of objects with the following schema:<a href="#appendix-B-5.4.1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="appendix-B-5.3.2.1">
-              <p id="appendix-B-5.3.2.1.1"><code>"measurement"</code>: the measurement of type <code>Vdaf.Measurement</code><a href="#appendix-B-5.3.2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="appendix-B-5.4.2.1">
+              <p id="appendix-B-5.4.2.1.1"><code>"measurement"</code>: the measurement of type <code>Vdaf.Measurement</code><a href="#appendix-B-5.4.2.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-B-5.3.2.2">
-              <p id="appendix-B-5.3.2.2.1"><code>"nonce"</code>: the nonce encoded in hexadecimal<a href="#appendix-B-5.3.2.2.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-B-5.4.2.2">
+              <p id="appendix-B-5.4.2.2.1"><code>"nonce"</code>: the nonce encoded in hexadecimal<a href="#appendix-B-5.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-B-5.3.2.3">
-              <p id="appendix-B-5.3.2.3.1"><code>"rand"</code>: the sharding randomness encoded in hexadecimal<a href="#appendix-B-5.3.2.3.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-B-5.4.2.3">
+              <p id="appendix-B-5.4.2.3.1"><code>"rand"</code>: the sharding randomness encoded in hexadecimal<a href="#appendix-B-5.4.2.3.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-B-5.3.2.4">
-              <p id="appendix-B-5.3.2.4.1"><code>"public_share"</code>: the expected public share encoded in hexadecimal<a href="#appendix-B-5.3.2.4.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-B-5.4.2.4">
+              <p id="appendix-B-5.4.2.4.1"><code>"public_share"</code>: the expected public share encoded in hexadecimal<a href="#appendix-B-5.4.2.4.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-B-5.3.2.5">
-              <p id="appendix-B-5.3.2.5.1"><code>"input_shares"</code>: the expected list of input shares, each incoded in
-hexadecimal<a href="#appendix-B-5.3.2.5.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-B-5.4.2.5">
+              <p id="appendix-B-5.4.2.5.1"><code>"input_shares"</code>: the expected list of input shares, each incoded in
+hexadecimal<a href="#appendix-B-5.4.2.5.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-B-5.3.2.6">
-              <p id="appendix-B-5.3.2.6.1"><code>"prep_shares"</code>: the expected list of prep shares generated by each
-Aggregator at each round of preparation, encoded in hexadecimal<a href="#appendix-B-5.3.2.6.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-B-5.4.2.6">
+              <p id="appendix-B-5.4.2.6.1"><code>"prep_shares"</code>: the expected list of prep shares generated by each
+Aggregator at each round of preparation, encoded in hexadecimal<a href="#appendix-B-5.4.2.6.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-B-5.3.2.7">
-              <p id="appendix-B-5.3.2.7.1"><code>"prep_messages"</code>: the expected list of prep messages for each round of
-preparation, encoded in hexadecimal<a href="#appendix-B-5.3.2.7.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-B-5.4.2.7">
+              <p id="appendix-B-5.4.2.7.1"><code>"prep_messages"</code>: the expected list of prep messages for each round of
+preparation, encoded in hexadecimal<a href="#appendix-B-5.4.2.7.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="appendix-B-5.3.2.8">
-              <p id="appendix-B-5.3.2.8.1"><code>"out_shares"</code>: the expected list of output shares, encoded in
-hexadecimal<a href="#appendix-B-5.3.2.8.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="appendix-B-5.4.2.8">
+              <p id="appendix-B-5.4.2.8.1"><code>"out_shares"</code>: the expected list of output shares, encoded in
+hexadecimal<a href="#appendix-B-5.4.2.8.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </li>
-        <li class="normal" id="appendix-B-5.4">
-          <p id="appendix-B-5.4.1"><code>"agg_shares"</code>: the expected aggregate shares encoded in hexadecimal<a href="#appendix-B-5.4.1" class="pilcrow">¶</a></p>
-</li>
         <li class="normal" id="appendix-B-5.5">
-          <p id="appendix-B-5.5.1"><code>"agg_result"</code>: the expected aggregate result of type <code>Vdaf.AggResult</code><a href="#appendix-B-5.5.1" class="pilcrow">¶</a></p>
+          <p id="appendix-B-5.5.1"><code>"agg_shares"</code>: the expected aggregate shares encoded in hexadecimal<a href="#appendix-B-5.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-B-5.6">
+          <p id="appendix-B-5.6.1"><code>"agg_result"</code>: the expected aggregate result of type <code>Vdaf.AggResult</code><a href="#appendix-B-5.6.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="appendix-B-6">Each test vector specifies<a href="#appendix-B-6" class="pilcrow">¶</a></p>
-<p id="appendix-B-7">the generation of input shares and the conversion of input
-shares into output shares. Vectors specify:<a href="#appendix-B-7" class="pilcrow">¶</a></p>
-<p id="appendix-B-8">the verification key, measurements, nonces, the randomness used for each
-aggregation parameter, and any parameters needed to construct the VDAF. (For
-example, for <code>Prio3Sum</code>, the user specifies the <code>max_measurement</code>, the largest
-permitted summand.)<a href="#appendix-B-8" class="pilcrow">¶</a></p>
-<div id="testvec-prio3count">
-<section id="appendix-B.1">
-        <h3 id="name-prio3count-2">
-<a href="#name-prio3count-2" class="section-name selfRef">Prio3Count</a>
-        </h3>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.1-1.1">
-            <p id="appendix-B.1-1.1.1">TODO Copy the machine readable vectors from the source repository
-(https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.1-1.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-</section>
-</div>
-<div id="testvec-prio3sum">
-<section id="appendix-B.2">
-        <h3 id="name-prio3sum-2">
-<a href="#name-prio3sum-2" class="section-name selfRef">Prio3Sum</a>
-        </h3>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.2-1.1">
-            <p id="appendix-B.2-1.1.1">TODO Copy the machine readable vectors from the source repository
-(https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.2-1.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-</section>
-</div>
-<div id="testvec-prio3sumvec">
-<section id="appendix-B.3">
-        <h3 id="name-prio3sumvec-2">
-<a href="#name-prio3sumvec-2" class="section-name selfRef">Prio3SumVec</a>
-        </h3>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.3-1.1">
-            <p id="appendix-B.3-1.1.1">TODO Copy the machine readable vectors from the source repository
-(https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.3-1.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-</section>
-</div>
-<div id="testvec-prio3histogram">
-<section id="appendix-B.4">
-        <h3 id="name-prio3histogram-2">
-<a href="#name-prio3histogram-2" class="section-name selfRef">Prio3Histogram</a>
-        </h3>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.4-1.1">
-            <p id="appendix-B.4-1.1.1">TODO Copy the machine readable vectors from the source repository
-(https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.4-1.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-</section>
-</div>
-<div id="testvec-poplar1">
-<section id="appendix-B.5">
-        <h3 id="name-poplar1-2">
-<a href="#name-poplar1-2" class="section-name selfRef">Poplar1</a>
-        </h3>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="appendix-B.5-1.1">
-            <p id="appendix-B.5-1.1.1">TODO Copy the machine readable vectors from the source repository
-(https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec) and
-format them for humans.<a href="#appendix-B.5-1.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-</section>
-</div>
 </section>
 </div>
 <div id="authors-addresses">
