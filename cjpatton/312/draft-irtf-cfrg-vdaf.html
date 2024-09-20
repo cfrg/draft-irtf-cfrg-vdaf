@@ -9204,8 +9204,8 @@ test vector covers sharding, preparation, aggregation, and unsharding of each
 of several measurements. The test vector schema is as follows:<a href="#appendix-B-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-B-5.1">
-          <p id="appendix-B-5.1.1">whatever parameters are required to instantiate <code>Vdaf</code>, e.g., <code>shares</code> and
-<code>max_measurement</code> for Prio3Sum or <code>bits</code> for Poplar1<a href="#appendix-B-5.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-B-5.1.1">whatever parameters are required to instantiate the scheme (see
+<a href="#vdaf-test-vec-params" class="auto internal xref">Table 24</a>)<a href="#appendix-B-5.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-B-5.2">
           <p id="appendix-B-5.2.1"><code>verify_key</code>: the verification key encoded in hexadecimal<a href="#appendix-B-5.2.1" class="pilcrow">¶</a></p>
@@ -9253,6 +9253,58 @@ hexadecimal<a href="#appendix-B-5.4.2.8.1" class="pilcrow">¶</a></p>
           <p id="appendix-B-5.6.1"><code>"agg_result"</code>: the expected aggregate result of type <code>Vdaf.AggResult</code><a href="#appendix-B-5.6.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
+<span id="name-parameters-for-instantiatin"></span><div id="vdaf-test-vec-params">
+<table class="center" id="table-24">
+        <caption>
+<a href="#table-24" class="selfRef">Table 24</a>:
+<a href="#name-parameters-for-instantiatin" class="selfRef">Parameters for instantiating each VDAF.</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">Scheme</th>
+            <th class="text-left" rowspan="1" colspan="1">Parameters</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Count</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>shares: int</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Sum</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>shares: int, max_measurement: int</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Prio3SumVec</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>shares: int, length: int, bits: int, chunk_length: int</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Histogram</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>shares: int, length: int, chunk_length: int</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Prio3MultihotCountVec</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>shares: int, length: int, max_weight: int, chunk_length: int</code>
+</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">Poplar1</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>bits: int</code>
+</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
 </section>
 </div>
 <div id="authors-addresses">

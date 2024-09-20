@@ -6127,8 +6127,8 @@ Test Vectors
    aggregation, and unsharding of each of several measurements.  The
    test vector schema is as follows:
 
-   *  whatever parameters are required to instantiate Vdaf, e.g., shares
-      and max_measurement for Prio3Sum or bits for Poplar1
+   *  whatever parameters are required to instantiate the scheme (see
+      Table 24)
 
    *  verify_key: the verification key encoded in hexadecimal
 
@@ -6161,6 +6161,27 @@ Test Vectors
    *  "agg_shares": the expected aggregate shares encoded in hexadecimal
 
    *  "agg_result": the expected aggregate result of type Vdaf.AggResult
+
+      +=======================+====================================+
+      | Scheme                | Parameters                         |
+      +=======================+====================================+
+      | Prio3Count            | shares: int                        |
+      +-----------------------+------------------------------------+
+      | Prio3Sum              | shares: int, max_measurement: int  |
+      +-----------------------+------------------------------------+
+      | Prio3SumVec           | shares: int, length: int, bits:    |
+      |                       | int, chunk_length: int             |
+      +-----------------------+------------------------------------+
+      | Prio3Histogram        | shares: int, length: int,          |
+      |                       | chunk_length: int                  |
+      +-----------------------+------------------------------------+
+      | Prio3MultihotCountVec | shares: int, length: int,          |
+      |                       | max_weight: int, chunk_length: int |
+      +-----------------------+------------------------------------+
+      | Poplar1               | bits: int                          |
+      +-----------------------+------------------------------------+
+
+            Table 24: Parameters for instantiating each VDAF.
 
 Authors' Addresses
 
