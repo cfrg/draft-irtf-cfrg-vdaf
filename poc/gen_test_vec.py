@@ -1,18 +1,17 @@
 import json
 import os
 
-from vdaf_poc.common import VERSION, print_wrapped_line
+from vdaf_poc.common import print_wrapped_line
 from vdaf_poc.field import Field128
 from vdaf_poc.idpf import Idpf
 from vdaf_poc.test_utils import gen_test_vec_for_vdaf, test_vec_gen_rand
 from vdaf_poc.xof import Xof
 
 # The path where test vectors are generated.
-TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
-                                  '../test_vec/{:02}'.format(VERSION))
-
+TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH', '../test_vec/')
 
 # IDPF
+
 
 def gen_test_vec_for_idpf(idpf: Idpf,
                           alpha: tuple[bool, ...],
@@ -91,10 +90,11 @@ if __name__ == '__main__':
     from vdaf_poc import idpf_bbcggi21, vdaf_poplar1, vdaf_prio3, xof
 
     ctx = b'some application'
+    vdaf_test_vec_path = TEST_VECTOR_PATH + "/vdaf/"
 
     # Prio3 variants
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3Count(2),
         None,
         ctx,
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         0,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3Count(3),
         None,
         ctx,
@@ -110,7 +110,7 @@ if __name__ == '__main__':
         1,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3Sum(2, 255),
         None,
         ctx,
@@ -118,7 +118,7 @@ if __name__ == '__main__':
         0,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3Sum(3, 255),
         None,
         ctx,
@@ -126,7 +126,7 @@ if __name__ == '__main__':
         1,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3SumVec(2, 10, 8, 9),
         None,
         ctx,
@@ -138,7 +138,7 @@ if __name__ == '__main__':
         0,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3SumVec(3, 3, 16, 7),
         None,
         ctx,
@@ -150,7 +150,7 @@ if __name__ == '__main__':
         1,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3Histogram(2, 4, 2),
         None,
         ctx,
@@ -158,7 +158,7 @@ if __name__ == '__main__':
         0,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3Histogram(3, 11, 3),
         None,
         ctx,
@@ -166,7 +166,7 @@ if __name__ == '__main__':
         1,
     )
     gen_test_vec_for_vdaf(
-        TEST_VECTOR_PATH,
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3MultihotCountVec(2, 4, 2, 2),
         None,
         ctx,
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     measurements: list[tuple[bool, ...]] = [(True, True, False, True)]
     for (test_level, prefixes) in tests:
         gen_test_vec_for_vdaf(
-            TEST_VECTOR_PATH,
+            vdaf_test_vec_path,
             vdaf_poplar1.Poplar1(4),
             (test_level, prefixes),
             ctx,

@@ -141,17 +141,16 @@ def gen_test_vec_for_vdaf(
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
 
+        pub_share_hex = vdaf.test_vec_encode_public_share(public_share).hex()
         prep_test_vec: VdafPrepTestVectorDict[Measurement] = {
             'measurement': measurement,
             'nonce': nonce.hex(),
+            'rand': rand.hex(),
+            'public_share': pub_share_hex,
             'input_shares': [],
             'prep_shares': [[] for _ in range(vdaf.ROUNDS)],
             'prep_messages': [],
             'out_shares': [],
-            'rand': rand.hex(),
-            'public_share': vdaf.test_vec_encode_public_share(
-                public_share
-            ).hex()
         }
         for input_share in input_shares:
             prep_test_vec['input_shares'].append(
