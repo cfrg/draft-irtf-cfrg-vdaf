@@ -6115,7 +6115,7 @@ Test Vectors
    command:
 
    curl -L https://github.com/cfrg/draft-irtf-cfrg-vdaf/archive/\
-   <FIXME>.tar.gz |\
+   3e837b6c17e48050948b9838c7eb11b061113346.tar.gz |\
    tar -zxf - "*/test_vec/12/vdaf/*.json"
 
    (RFC EDITOR: Update the commit hash in the command above to the
