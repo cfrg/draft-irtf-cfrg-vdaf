@@ -6115,17 +6115,16 @@ Test Vectors
    command:
 
    curl -L https://github.com/cfrg/draft-irtf-cfrg-vdaf/archive/\
-   bb01e528dab1da66c3264347a7c020f2c3403494.tar.gz |\
-   tar -zxf - "*/test_vec/*.json"
+   <FIXME>.tar.gz |\
+   tar -zxf - "*/test_vec/12/vdaf/*.json"
 
    (RFC EDITOR: Update the commit hash in the command above to the
    commit that contains the final version of the test vectors.)
 
-   The directory contains a set of JSON files.  Each file beginning with
-   "Prio3" or "Poplar1"contains a test vector for an instance of Vdaf
-   (Section 5).  A test vector covers sharding, preparation,
-   aggregation, and unsharding of each of several measurements.  The
-   test vector schema is as follows:
+   The directory contains a set of JSON files.  Each file contains a
+   test vector for an instance of Vdaf (Section 5).  A test vector
+   covers sharding, preparation, aggregation, and unsharding of each of
+   several measurements.  The test vector schema is as follows:
 
    *  whatever parameters are required to instantiate the scheme (see
       Table 24)

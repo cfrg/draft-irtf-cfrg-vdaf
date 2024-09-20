@@ -9192,16 +9192,16 @@ useful feedback on and contributions to the spec.<a href="#appendix-A-4" class="
 <div class="alignLeft art-text artwork" id="appendix-B-2">
 <pre>
 curl -L https://github.com/cfrg/draft-irtf-cfrg-vdaf/archive/\
-bb01e528dab1da66c3264347a7c020f2c3403494.tar.gz |\
-tar -zxf - "*/test_vec/*.json"
+&lt;FIXME&gt;.tar.gz |\
+tar -zxf - "*/test_vec/12/vdaf/*.json"
 </pre><a href="#appendix-B-2" class="pilcrow">¶</a>
 </div>
 <p id="appendix-B-3">(RFC EDITOR: Update the commit hash in the command above to the commit that
 contains the final version of the test vectors.)<a href="#appendix-B-3" class="pilcrow">¶</a></p>
-<p id="appendix-B-4">The directory contains a set of JSON files. Each file beginning with <code>"Prio3"</code>
-or <code>"Poplar1"</code>contains a test vector for an instance of <code>Vdaf</code> (<a href="#vdaf" class="auto internal xref">Section 5</a>). A
-test vector covers sharding, preparation, aggregation, and unsharding of each
-of several measurements. The test vector schema is as follows:<a href="#appendix-B-4" class="pilcrow">¶</a></p>
+<p id="appendix-B-4">The directory contains a set of JSON files. Each file contains a test vector
+for an instance of <code>Vdaf</code> (<a href="#vdaf" class="auto internal xref">Section 5</a>). A test vector covers sharding,
+preparation, aggregation, and unsharding of each of several measurements.
+The test vector schema is as follows:<a href="#appendix-B-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="appendix-B-5.1">
           <p id="appendix-B-5.1.1">whatever parameters are required to instantiate the scheme (see
