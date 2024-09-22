@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-19T00:53:41.311444+00:00",
+  "timestamp": "2024-09-22T00:58:48.851831+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4965,7 +4965,7 @@
       ],
       "body": "We removed them a couple of drafts ago because updating them was becoming a pain. (Note that machine-readable test vectors can be found in https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)",
       "createdAt": "2023-11-16T15:03:15Z",
-      "updatedAt": "2024-09-06T16:26:48Z",
+      "updatedAt": "2024-09-20T22:35:25Z",
       "closedAt": null,
       "comments": [
         {
@@ -4974,6 +4974,13 @@
           "body": "Let's format this the way recent CFRG RFCs do (e.g., RFC 9180)",
           "createdAt": "2024-09-06T16:26:47Z",
           "updatedAt": "2024-09-06T16:26:47Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yesterday I started a thread to discuss whether we could point to test vectors in GitHub rather than reproduce them in the draft. The RFC editor confirmed this should be OK: https://mailarchive.ietf.org/arch/msg/cfrg/sWa_WkzOW5IPvQ71Hmz21HsBNVY/\r\n\r\n\r\n",
+          "createdAt": "2024-09-20T22:35:24Z",
+          "updatedAt": "2024-09-20T22:35:24Z"
         }
       ]
     },
@@ -5940,7 +5947,7 @@
       ],
       "body": "Prio3Sum, Prio3SumVec, Prio3Histogram, and Prio3MultihotCountVec all involve checking that each of $n$ \"sub-checks\" outputs $0$. This works by interpreting the outputs as coefficients of a polynomial $p$, then evaluating $p$ at a random point $r\\in F$. If $p(r)=0$, then we deem the input valid. Some of us have been calling this the circuit's \"reduction\".\r\n\r\nOur current analysis of the circuit's soundness goes as follows. When the input is invalid, i.e., at least one sub-check output is non-zero, the probability that $p(r) = 0$ is equal to the probability that $r$ is a root of $p$, of which there are at most $\\deg{p} / |F|$. The degree of $p$ is at most $n$, which gives us a soundness error of $n / |F|$.\r\n\r\nThis is also given by the [Schwartz-Zippel lemma](https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma). More generally, let $p$ is a polynomial of $n$ variables with at least one non-zero coefficient. When we evaluate $p$ at a random point $(r_1, \\ldots, r_n) \\in F^n$, the probability that $p(r_1, \\ldots, r_n) = 0$ is at most $\\deg p / |F|$, where $\\deg p$ denotes in particular the [total degree](https://en.wikipedia.org/wiki/Degree_of_a_polynomial#Extension_to_polynomials_with_two_or_more_variables) of $p$.\r\n\r\nThis lemma suggests an alternative reduction with better soundness. Let $c_1, \\ldots, c_n$ denote the sub-check outputs. $p(x_1, \\ldots, x_n) = c_1 \\cdot x_1 + \\cdots + c_n \\cdot x_n$ be the polynomial with $n$ variables that has $c_1 \\ldots, c_n$ as its coefficients. Choose a random vector $\\vec{r} = (r_1, \\ldots, r_N) \\in F^n$ and evaluate $p$ at $\\vec{r}$. If $p(\\vec{r}) = 0$, then deem the input valid.\r\n\r\nSoundness: since $\\deg p = 1$, by the Schwartz-Zippel lemma it follows that the soundness error for this circuit is $1 / |F|$.\r\n\r\nThis is a pretty significant improvement, especially for larger inputs with lots of sub-checks. The base soundness of the current circuit is $\\frac{n}{|F|} + \\frac{2m}{|F|-m}$, where the second term is from {{BBCGGI19}}, Theorem 4.3; the soundness of the new circuit is $\\frac{1}{|F|} + \\frac{2m}{|F|-m}$. Concretely, for Prio3SumVec with `bits == 1`, `length = 100_000` and `chunk_length = 316` , this drops from $~ 2^{-111}$ to $2^{-118}$:\r\n\r\n```sage\r\ndef sound(n, m, f): return -int((log(n/f + (2*m)/(f-m))/log(2)).n())\r\n```\r\n\r\nThere is a catch: we end up with a much longer joint randomness, which means more times spent on XOF evaluation. On the other hand, we spend less time on finite field arithmetic, since we don't need to compute powers of $r$. Let's benchmark this, and if we don't see a performance degradation, then I think we should adopt this new reduction in each of the circuits, as well as for the [built-in reduction for circuits with multiple outputs](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-1.1-6.2.1).\r\n\r\nCredit to @rozbb for pointing out this use of Shwartz-Zippel and thanks to @bwesterb and @bhalleycf for confirming the math.",
       "createdAt": "2024-09-17T21:11:59Z",
-      "updatedAt": "2024-09-18T13:41:29Z",
+      "updatedAt": "2024-09-19T14:44:02Z",
       "closedAt": null,
       "comments": [
         {
@@ -5949,6 +5956,20 @@
           "body": "This does indeed cost us in terms of runtime: up to 10% for sharding and up to 5% for preparation:\r\n\r\n```\r\n[exp/sum_vec_alternative_reduction][~/github.com/cjpatton/libprio-rs]$ cargo bench -- sumvec\r\n   Compiling prio v0.16.7 (/Users/christopherpatton/github.com/cjpatton/libprio-rs)\r\n    Finished `bench` profile [optimized] target(s) in 2.64s\r\n     Running benches/cycle_counts.rs (target/release/deps/cycle_counts-79a8c47b35862616)\r\nUnexpected error while launching valgrind. Error: No such file or directory (os error 2)\r\n     Running benches/speed_tests.rs (target/release/deps/speed_tests-54fc5ed5311a9071)\r\nGnuplot not found, using plotters backend\r\nprio3sumvec_shard/serial/10\r\n                        time:   [13.449 \u00b5s 13.458 \u00b5s 13.467 \u00b5s]\r\n                        change: [+0.1918% +0.9733% +1.5465%] (p = 0.00 < 0.05)\r\n                        Change within noise threshold.\r\nFound 7 outliers among 100 measurements (7.00%)\r\n  4 (4.00%) high mild\r\n  3 (3.00%) high severe\r\nprio3sumvec_shard/serial/100\r\n                        time:   [45.367 \u00b5s 45.411 \u00b5s 45.457 \u00b5s]\r\n                        change: [+8.7190% +8.9538% +9.1834%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 9 outliers among 100 measurements (9.00%)\r\n  4 (4.00%) high mild\r\n  5 (5.00%) high severe\r\nprio3sumvec_shard/serial/1000\r\n                        time:   [656.54 \u00b5s 657.42 \u00b5s 658.73 \u00b5s]\r\n                        change: [+9.8910% +10.270% +10.584%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 9 outliers among 100 measurements (9.00%)\r\n  4 (4.00%) high mild\r\n  5 (5.00%) high severe\r\nprio3sumvec_shard/serial/100000\r\n                        time:   [49.211 ms 49.280 ms 49.366 ms]\r\n                        change: [+9.6781% +9.9782% +10.291%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 8 outliers among 100 measurements (8.00%)\r\n  6 (6.00%) high mild\r\n  2 (2.00%) high severe\r\n\r\nprio3sumvec_prepare_init/serial/10\r\n                        time:   [9.8698 \u00b5s 9.8849 \u00b5s 9.9031 \u00b5s]\r\n                        change: [+0.4939% +0.7480% +0.9854%] (p = 0.00 < 0.05)\r\n                        Change within noise threshold.\r\nFound 18 outliers among 100 measurements (18.00%)\r\n  4 (4.00%) high mild\r\n  14 (14.00%) high severe\r\nprio3sumvec_prepare_init/serial/100\r\n                        time:   [23.629 \u00b5s 23.643 \u00b5s 23.662 \u00b5s]\r\n                        change: [+5.1860% +5.5778% +5.8787%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 12 outliers among 100 measurements (12.00%)\r\n  5 (5.00%) high mild\r\n  7 (7.00%) high severe\r\nprio3sumvec_prepare_init/serial/1000\r\n                        time:   [221.06 \u00b5s 221.24 \u00b5s 221.48 \u00b5s]\r\n                        change: [+4.3432% +4.7894% +5.0854%] (p = 0.00 < 0.05)\r\n                        Performance has regressed.\r\nFound 8 outliers among 100 measurements (8.00%)\r\n  4 (4.00%) high mild\r\n  4 (4.00%) high severe\r\n```\r\n\r\nBranch with the modified `SumVec` circuit: https://github.com/cjpatton/libprio-rs/commit/789d5fea6b4e61f5124021725934c5a8c11d97ad",
           "createdAt": "2024-09-17T21:57:55Z",
           "updatedAt": "2024-09-17T21:59:20Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think the improvement to soundness is worth the mild hit to performance.",
+          "createdAt": "2024-09-19T01:50:37Z",
+          "updatedAt": "2024-09-19T01:50:37Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Actually, there's another way to tune this.\r\n\r\nThe idea is that each call the `ParallelSum` gadget gets its own fresh $r$, and within the gadget, we compute powers of $r$. That way we end up with joint randomness length equal to the number of gadget calls, and the totoal degree of the polynomial is at most the chunk length. When we choose the chunk length to be $\\sqrt{n}$, we end up with a soundness bound of\r\n\r\n$\\frac{\\sqrt{n}}{|F|} + \\frac{2\\sqrt{n}}{|F|-\\sqrt{n}}$\r\n\r\n(Assuming $n$ is a perfect square; otherwise the bound is numerically close.) The second term is still dominant, so this doesn't actually lose much in terms of bits of security. For `bits == 1`, `length = 100_000`, and `chunk_length = 316`, we still get $2^{-118}$.\r\n\r\nThis doesn't result in a noticeable performance difference for our benchmarks: https://github.com/cjpatton/libprio-rs/commit/0540c24e522bb7cb00c5dff8c28b20a45f2375",
+          "createdAt": "2024-09-19T14:44:01Z",
+          "updatedAt": "2024-09-19T14:44:01Z"
         }
       ]
     }
@@ -36300,7 +36321,7 @@
       "id": "PR_kwDOGKuqOc56tfny",
       "title": "Add defenses-in-depth section",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/421",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36310,24 +36331,68 @@
       ],
       "body": "Partially addresses #418.\r\n\r\nNote defenses against cross protocol attacks resulting from weak entropy or weak parameters. Also, acknowledge the possibility of cross protocol attacks within a circuit family (no binding of the circuit parameters) and the blast radius of weak parameters (all deployed tasks).",
       "createdAt": "2024-09-06T22:17:18Z",
-      "updatedAt": "2024-09-06T23:48:39Z",
+      "updatedAt": "2024-09-19T23:54:29Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "598455e704b9d5c593f6fe391fc4e56f762decf7",
+      "baseRefOid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/domain-sep",
-      "headRefOid": "b78382b39208eb86302dd67c78036b34b2db0cdc",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "headRefOid": "fe18ace8e36929ab0b237f626d41d5358bce939c",
+      "closedAt": "2024-09-19T23:54:29Z",
+      "mergedAt": "2024-09-19T23:54:29Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "bb01e528dab1da66c3264347a7c020f2c3403494"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-09-19T01:42:21Z",
+          "updatedAt": "2024-09-19T01:42:21Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Took your suggestions and squashed.",
+          "createdAt": "2024-09-19T23:54:03Z",
+          "updatedAt": "2024-09-19T23:54:03Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6KFamo",
+          "commit": {
+            "abbreviatedOid": "4abca34"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-19T20:27:11Z",
+          "updatedAt": "2024-09-19T20:46:02Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "nit: suggested rephrasing for clarity\r\n```suggestion\r\nbe exploited to attack any aggregation task using those parameters. To\r\n```",
+              "createdAt": "2024-09-19T20:27:11Z",
+              "updatedAt": "2024-09-19T20:46:02Z"
+            },
+            {
+              "originalPosition": 54,
+              "body": "I think the phrase \"cross-protocol attack\" is usually a bit stronger, in that it also covers cases where honest execution of one protocol acts as an oracle enabling an attack against another protocol. In other words, the first protocol doesn't need to have a complete attack against it in order for it to be used in a cross-protocol attack against another protocol.\r\n```suggestion\r\nBroadly speaking, domain separation is used to prevent cross protocol attacks,\r\nin which data from evaluation of one VDAF translates to an attack against another.\r\nFor example:\r\n```",
+              "createdAt": "2024-09-19T20:36:08Z",
+              "updatedAt": "2024-09-19T20:46:02Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 422,
       "id": "PR_kwDOGKuqOc5658_J",
-      "title": "Add application context string (*)",
+      "title": "poc: Add application context string (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422",
       "state": "OPEN",
       "author": "cjpatton",
@@ -36336,20 +36401,35 @@
       "labels": [
         "draft-12"
       ],
-      "body": "Based on #421 (merge that first).\r\nCloses #418.\r\n\r\n**WIP: We still need to propagate the changes through the draft and update security considerations, in particular the line about weak parameters being exploitable across tasks.**\r\n\r\nAdd an application context string, denoted `ctx`, to sharding and preparation APIs for DAFs and VDAFs. The intent is to use this for defense-in-depth: by binding execution of a VDAF to its application (concretely, in DAP we would set `ctx` to the task ID), we hope that an attack on that application does not translate directly to an attack on another application using the same parameters.\r\n\r\nThis change is motivated by the possibility of an offline attack against the robustness of some Prio3 variants. The attack is as follows: fix an invalid measurement, then search for measurement shares that derive joint randomness that causes the circuit to accept. Once these shares are found, they can be used to corrupt any batch that uses the same Prio3 parameters.\r\n\r\nTo reduce the blast radius of this attack, we can bind `ctx` to the joint randomness derivation, thereby ensuring the offline work done by the attacker is only useful to break a single application.\r\n\r\nThis change is slightly more general: wherever we compute a domain separation tag in either Prio3 or Poplar1, we append `ctx`. This is a more invasive than necessary, but it's also more conservative.\r\n\r\nFinally, we modify XofTurboShake128 and XofFixedKeyAes128 by changing the length prefix for the domain separation tag from a single byte to two bytes, thereby accommodating larger application context strings.",
+      "body": "Based on #421 (merge that first).\r\nPartially addresses #418 (still need to propagate to draft).\r\n\r\nAdd an application context string, denoted `ctx`, to sharding and preparation APIs for DAFs and VDAFs. The intent is to use this for defense-in-depth: by binding execution of a VDAF to its application (concretely, in DAP we would set `ctx` to the task ID), we hope that an attack on that application does not translate directly to an attack on another application using the same parameters.\r\n\r\nThis change is motivated by the possibility of an offline attack against the robustness of some Prio3 variants. The attack is as follows: fix an invalid measurement, then search for measurement shares that derive joint randomness that causes the circuit to accept. Once these shares are found, they can be used to corrupt any batch that uses the same Prio3 parameters.\r\n\r\nTo reduce the blast radius of this attack, we can bind `ctx` to the joint randomness derivation, thereby ensuring the offline work done by the attacker is only useful to break a single application.\r\n\r\nThis change is slightly more general: wherever we compute a domain separation tag in either Prio3 or Poplar1, we append `ctx`. This is a more invasive than necessary, but it's also more conservative.\r\n\r\nFinally, we modify XofTurboShake128 and XofFixedKeyAes128 by changing the length prefix for the domain separation tag from a single byte to two bytes, thereby accommodating larger application context strings.",
       "createdAt": "2024-09-09T21:34:26Z",
-      "updatedAt": "2024-09-14T18:41:52Z",
+      "updatedAt": "2024-09-19T23:55:23Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/draft-12/domain-sep",
-      "baseRefOid": "b78382b39208eb86302dd67c78036b34b2db0cdc",
+      "baseRefName": "main",
+      "baseRefOid": "bb01e528dab1da66c3264347a7c020f2c3403494",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/context-string",
-      "headRefOid": "cb5bc19709735cd7a90ecc4de50aa4385f5628a6",
+      "headRefOid": "faa25205030e5b011c0364c9f869a5dd9aab5a71",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Scoped the PR to just changing the poc and converted to \"ready for review\". (We'll propagate the changes to the draft in the next PR.) Also rebased.",
+          "createdAt": "2024-09-19T01:44:48Z",
+          "updatedAt": "2024-09-19T01:44:48Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-09-19T23:55:23Z",
+          "updatedAt": "2024-09-19T23:55:23Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -36630,6 +36710,62 @@
           ]
         }
       ]
+    },
+    {
+      "number": 429,
+      "id": "PR_kwDOGKuqOc58GdU4",
+      "title": "Improve FLP specification",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/429",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #226.\r\n\r\nClean up the reference code a bit so that it can be excerpted in the draft: add comments; use more meaningful variable names; and make variables consistent across the prover and verifier. We've also replaced `prove_wrapped()` and `query_wrapped()` with class methods on `ProveGadget` and `QueryGadget` respectively. This way the listing of these classes is a little tidier.\r\n\r\nReplace the current description of the algorithms with the reference code for and a brief overview of each. This entails defining `poly_eval()`, which we've done in the conventions section. `ProveGadget` and `QueryGadget` are listed in the appendix, as their descriptions are a bit tedious and their functionality is relatively straightforward. Note however that these are load-bearing parts of the specification.\r\n\r\nOther things:\r\n\r\n* Remove the \"Encoding\" subsection, which is pretty useless. Instead, we just say how these are instantiated in the \"Validity Circuit\" section.\r\n\r\n* Remove calls to `check_valid_eval()` from the draft, as this more useful for testing than it is as part of the spec.\r\n\r\n* Clean up the parameter tables, including indicating types.\r\n\r\n* Do another pass of the overview and tighten things up a bit.",
+      "createdAt": "2024-09-19T23:49:09Z",
+      "updatedAt": "2024-09-19T23:51:35Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/226",
+      "headRefOid": "3112814004c98288f7b5ba628c49243ebb34c281",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 430,
+      "id": "PR_kwDOGKuqOc58MaCj",
+      "title": "Point to test vectors rather than reproduce them",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/430",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Partially addresses #312 (we'll need to update the commit hash after publishing draft-12).\r\n\r\nThe current plan is to reproduce the test vectors in the draft once we're ready for RFC. However the value of these test vectors for implementers is not clear. It would be better to publish machine-readable test vectors somewhere somewhere, point to it from the draft, and publish a hash of the test vectors in the draft so that implementers can use to verify their veracity.\r\n\r\nThis commit implements the following idea: point to a commit hash for the draft and describe how to consume the test vectors.\r\n\r\nThis commit also moves the VDAF test vectors to their own sub-directory so that it is convenient to point to them.",
+      "createdAt": "2024-09-20T17:22:12Z",
+      "updatedAt": "2024-09-20T22:45:11Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "bb01e528dab1da66c3264347a7c020f2c3403494",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/312",
+      "headRefOid": "a7d9e68faf4b741be606768da2f7c56117b64e5d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
