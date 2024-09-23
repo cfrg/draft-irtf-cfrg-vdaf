@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 23 March 2025</td>
+<td class="center">Expires 27 March 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-09-19" class="published">19 September 2024</time>
+<time datetime="2024-09-23" class="published">23 September 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-03-23">23 March 2025</time></dd>
+<dd class="expires"><time datetime="2025-03-27">27 March 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 23 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 27 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1402,7 +1402,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                 <p id="section-toc.1-1.9.2.5.1"><a href="#section-9.5" class="auto internal xref">9.5</a>.  <a href="#name-requirements-for-xofs" class="internal xref">Requirements for XOFs</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.6">
-                <p id="section-toc.1-1.9.2.6.1"><a href="#section-9.6" class="auto internal xref">9.6</a>.  <a href="#name-choosing-the-field-size" class="internal xref">Choosing the Field Size</a></p>
+                <p id="section-toc.1-1.9.2.6.1"><a href="#section-9.6" class="auto internal xref">9.6</a>.  <a href="#name-choosing-flp-parameters" class="internal xref">Choosing FLP Parameters</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.7">
                 <p id="section-toc.1-1.9.2.7.1"><a href="#section-9.7" class="auto internal xref">9.7</a>.  <a href="#name-choosing-the-number-of-aggr" class="internal xref">Choosing the Number of Aggregators</a></p>
@@ -8827,8 +8827,8 @@ evaluated by the helpers.<a href="#section-9.5-7" class="pilcrow">¶</a></p>
 </div>
 <div id="security-multiproof">
 <section id="section-9.6">
-        <h3 id="name-choosing-the-field-size">
-<a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-choosing-the-field-size" class="section-name selfRef">Choosing the Field Size</a>
+        <h3 id="name-choosing-flp-parameters">
+<a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-choosing-flp-parameters" class="section-name selfRef">Choosing FLP Parameters</a>
         </h3>
 <p id="section-9.6-1">Prio3 and other systems built from FLPs (<a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> in particular) may
 benefit from choosing a field size that is as small as possible. Generally
@@ -8848,16 +8848,33 @@ enough field ensures this computation is too expensive to be feasible. (See
 <p id="section-9.6-3">Another way to mitigate this issue (or improve robustness in general) is to
 generate and verify multiple, independent proofs. (See <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>.) For
 Prio3, the <code>PROOFS</code> parameter controls the number of proofs (at least one) that
-are generated and verified.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
-<p id="section-9.6-4">In general, Field128 is <span class="bcp14">RECOMMENDED</span> for use in Prio3 when the circuit uses
-joint randomness (<code>JOINT_RAND_LEN &gt; 0</code>) and <code>PROOFS == 1</code>. Field64 <span class="bcp14">MAY</span> be used
-instead, but <code>PROOFS</code> <span class="bcp14">MUST</span> be set to at least <code>3</code>. Breaking robustness for
-<code>PROOFS == 2</code> is feasible, if impractical; but <code>PROOFS == 1</code> is completely
-broken for such a small field.<a href="#section-9.6-4" class="pilcrow">¶</a></p>
-<p id="section-9.6-5">We stress that weak parameters (too small a field, too few proofs, or both) can
+are generated and verified. In general the soundness error of the FLP is given
+by the following formula:<a href="#section-9.6-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.6-4">
+<pre>
+(circuit_soundness + flp_soundness) ** PROOFS
+</pre><a href="#section-9.6-4" class="pilcrow">¶</a>
+</div>
+<p id="section-9.6-5">where:<a href="#section-9.6-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.6-6.1">
+            <p id="section-9.6-6.1.1"><code>circuit_soundness</code> is the soundness of the validity circuit
+(<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)<a href="#section-9.6-6.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.6-6.2">
+            <p id="section-9.6-6.2.1"><code>flp_soundness</code> is the base soundness of the proof system (<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
+Theorem 4.3)<a href="#section-9.6-6.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-9.6-7">For circuits involving joint randomness, we aim for the soundness error to be
+close to <code>2^-128</code> in order to mitigate offline attacks. Such circuits <span class="bcp14">MUST</span> use
+Field128 with at least one proof or Field64 with at least three proofs.
+Depending on the circuit, Field64 with two proofs might have significantly
+lower soundness than Field128 with one proof.<a href="#section-9.6-7" class="pilcrow">¶</a></p>
+<p id="section-9.6-8">We stress that weak parameters (too small a field, too few proofs, or both) can
 be exploited to attack any aggregation task using those parameters. To
 mitigate offline attacks, it is necessary to disable all tasks that use the
-weak parameters.<a href="#section-9.6-5" class="pilcrow">¶</a></p>
+weak parameters.<a href="#section-9.6-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="num-aggregators">

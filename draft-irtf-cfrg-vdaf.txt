@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 23 March 2025                                              ISRG
+Expires: 27 March 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                       19 September 2024
+                                                       23 September 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 March 2025.
+   This Internet-Draft will expire on 27 March 2025.
 
 Copyright Notice
 
@@ -143,7 +143,7 @@ Table of Contents
        9.4.1.  Additional Privacy Considerations
        9.4.2.  Safe Usage of IDPF Outputs
      9.5.  Requirements for XOFs
-     9.6.  Choosing the Field Size
+     9.6.  Choosing FLP Parameters
      9.7.  Choosing the Number of Aggregators
      9.8.  Defense-in-Depth Measures
    10. IANA Considerations
@@ -5799,7 +5799,7 @@ Table of Contents
    Poplar1 guarantees that every client can contribute to at most one
    prefix among the ones being evaluated by the helpers.
 
-9.6.  Choosing the Field Size
+9.6.  Choosing FLP Parameters
 
    Prio3 and other systems built from FLPs (Section 7.3 in particular)
    may benefit from choosing a field size that is as small as possible.
@@ -5822,13 +5822,25 @@ Table of Contents
    Another way to mitigate this issue (or improve robustness in general)
    is to generate and verify multiple, independent proofs.  (See
    Section 7.1.2.)  For Prio3, the PROOFS parameter controls the number
-   of proofs (at least one) that are generated and verified.
+   of proofs (at least one) that are generated and verified.  In general
+   the soundness error of the FLP is given by the following formula:
 
-   In general, Field128 is RECOMMENDED for use in Prio3 when the circuit
-   uses joint randomness (JOINT_RAND_LEN > 0) and PROOFS == 1.  Field64
-   MAY be used instead, but PROOFS MUST be set to at least 3.  Breaking
-   robustness for PROOFS == 2 is feasible, if impractical; but PROOFS ==
-   1 is completely broken for such a small field.
+   (circuit_soundness + flp_soundness) ** PROOFS
+
+   where:
+
+   *  circuit_soundness is the soundness of the validity circuit
+      (Section 7.3.2)
+
+   *  flp_soundness is the base soundness of the proof system
+      ([BBCGGI19], Theorem 4.3)
+
+   For circuits involving joint randomness, we aim for the soundness
+   error to be close to 2^-128 in order to mitigate offline attacks.
+   Such circuits MUST use Field128 with at least one proof or Field64
+   with at least three proofs.  Depending on the circuit, Field64 with
+   two proofs might have significantly lower soundness than Field128
+   with one proof.
 
    We stress that weak parameters (too small a field, too few proofs, or
    both) can be exploited to attack any aggregation task using those
