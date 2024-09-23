@@ -1407,6 +1407,9 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.7">
                 <p id="section-toc.1-1.9.2.7.1"><a href="#section-9.7" class="auto internal xref">9.7</a>.  <a href="#name-choosing-the-number-of-aggr" class="internal xref">Choosing the Number of Aggregators</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.8">
+                <p id="section-toc.1-1.9.2.8.1"><a href="#section-9.8" class="auto internal xref">9.8</a>.  <a href="#name-defense-in-depth-measures" class="internal xref">Defense-in-Depth Measures</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
@@ -3829,11 +3832,11 @@ def expand_into_vec(cls,
           <h4 id="name-xofturboshake128">
 <a href="#section-6.2.1" class="section-number selfRef">6.2.1. </a><a href="#name-xofturboshake128" class="section-name selfRef">XofTurboShake128</a>
           </h4>
-<p id="section-6.2.1-1">This section describes XofTurboShake128, an XOF based on the
-TurboSHAKE128 <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. This
-XOF is <span class="bcp14">RECOMMENDED</span> for all use cases within VDAFs. The length of the
-domain separation string <code>dst</code> passed to XofTurboShake128 <span class="bcp14">MUST NOT</span>
-exceed 255 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.2.1-1">This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
+<span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. (RFC EDITOR: Update this
+reference to the RFC for draft-irtf-cfrg-kangarootwelve once published.) This
+XOF is <span class="bcp14">RECOMMENDED</span> for all use cases within VDAFs. The length of the domain
+separation string <code>dst</code> passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 255 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
 <span id="name-definition-of-xof-xofturbos"></span><figure id="figure-13">
             <div class="lang-python sourcecode" id="section-6.2.1-2.1">
 <pre>
@@ -3880,8 +3883,8 @@ cases where a more efficient instantiation based on fixed-key AES is possible.
 For now, this is limited to the XOF used inside the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a>
 implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this
 XOF anywhere else. The length of the domain separation string <code>dst</code> passed to
-XofFixedKeyAes128 <span class="bcp14">MUST NOT</span> exceed 255 bytes. See Security Considerations
-<a href="#security" class="auto internal xref">Section 9</a> for a more detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
+XofFixedKeyAes128 <span class="bcp14">MUST NOT</span> exceed 255 bytes. See <a href="#security" class="auto internal xref">Section 9</a> for a more
+detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-6.2.2-2">
 <pre>
 class XofFixedKeyAes128(Xof):
@@ -3945,7 +3948,7 @@ class XofFixedKeyAes128(Xof):
 </div>
 </section>
 </div>
-<div id="the-domain-separation-tag-and-binder-string">
+<div id="dst-binder">
 <section id="section-6.2.3">
           <h4 id="name-the-domain-separation-tag-a">
 <a href="#section-6.2.3" class="section-number selfRef">6.2.3. </a><a href="#name-the-domain-separation-tag-a" class="section-name selfRef">The Domain Separation Tag and Binder String</a>
@@ -8291,8 +8294,6 @@ def gen(
     ctrl = [Field2(0), Field2(1)]
     public_share = []
     for level in range(self.BITS):
-        field: type[Field]
-        field = cast(type[Field], self.current_field(level))
         keep = (alpha &gt;&gt; (self.BITS - level - 1)) &amp; 1
         lose = 1 - keep
         bit = Field2(keep)
@@ -8305,12 +8306,24 @@ def gen(
             t0[1] + t1[1] + bit,
         )
 
-        x0 = xor(s0[keep], ctrl[0].conditional_select(seed_cw))
-        x1 = xor(s1[keep], ctrl[1].conditional_select(seed_cw))
+        # Implementation note: these conditional XORs and
+        # input-dependent array indices should be replaced with
+        # constant-time selects in practice in order to reduce
+        # leakage via timing side channels.
+        if ctrl[0].as_unsigned():
+            x0 = xor(s0[keep], seed_cw)
+            ctrl[0] = t0[keep] + ctrl_cw[keep]
+        else:
+            x0 = s0[keep]
+            ctrl[0] = t0[keep]
+        if ctrl[1].as_unsigned():
+            x1 = xor(s1[keep], seed_cw)
+            ctrl[1] = t1[keep] + ctrl_cw[keep]
+        else:
+            x1 = s1[keep]
+            ctrl[1] = t1[keep]
         (seed[0], w0) = self.convert(level, x0, nonce)
         (seed[1], w1) = self.convert(level, x1, nonce)
-        ctrl[0] = t0[keep] + ctrl[0] * ctrl_cw[keep]
-        ctrl[1] = t1[keep] + ctrl[1] * ctrl_cw[keep]
 
         if level &lt; self.BITS - 1:
             b = cast(list[Field], beta_inner[level])
@@ -8322,12 +8335,13 @@ def gen(
             )
 
         w_cw = vec_add(vec_sub(b, w0), w1)
-        # Implementation note: here we negate the correction word if
-        # the control bit `ctrl[1]` is set. We avoid branching on the
-        # value in order to reduce leakage via timing side channels.
-        mask = field(1) - field(2) * field(ctrl[1].as_unsigned())
-        for i in range(len(w_cw)):
-            w_cw[i] *= mask
+        # Implementation note: this conditional negation should be
+        # replaced with a constant time select or a constant time
+        # multiplication in practice in order to reduce leakage via
+        # timing side channels.
+        if ctrl[1].as_unsigned():
+            for i in range(len(w_cw)):
+                w_cw[i] = -w_cw[i]
 
         public_share.append((seed_cw, ctrl_cw, w_cw))
     return (public_share, key)
@@ -8432,26 +8446,31 @@ def eval_next(
     bit of the prefix corresponding to the next level of the tree.
     """
 
-    field = self.current_field(level)
     seed_cw = correction_word[0]
     ctrl_cw = correction_word[1]
     w_cw = cast(list[Field], correction_word[2])
     (s, t) = self.extend(level, prev_seed, nonce)
-    s[0] = xor(s[0], prev_ctrl.conditional_select(seed_cw))
-    s[1] = xor(s[1], prev_ctrl.conditional_select(seed_cw))
-    t[0] += ctrl_cw[0] * prev_ctrl
-    t[1] += ctrl_cw[1] * prev_ctrl
+
+    # Implementation note: these conditional operations and
+    # input-dependent array indices should be replaced with
+    # constant-time selects in practice in order to reduce leakage
+    # via timing side channels.
+    if prev_ctrl.as_unsigned():
+        s[0] = xor(s[0], seed_cw)
+        s[1] = xor(s[1], seed_cw)
+        t[0] += ctrl_cw[0]
+        t[1] += ctrl_cw[1]
 
     next_ctrl = t[bit]
     convert_output = self.convert(level, s[bit], nonce)
     next_seed = convert_output[0]
     y = cast(list[Field], convert_output[1])
-    # Implementation note: here we add the correction word to the
-    # output if `next_ctrl` is set. We avoid branching on the value
-    # of the control bit in order to reduce side channel leakage.
-    mask = cast(Field, field(next_ctrl.as_unsigned()))
-    for i in range(len(y)):
-        y[i] += w_cw[i] * mask
+    # Implementation note: this conditional addition should be
+    # replaced with a constant-time select in practice in order to
+    # reduce leakage via timing side channels.
+    if next_ctrl.as_unsigned():
+        for i in range(len(y)):
+            y[i] += w_cw[i]
 
     return (next_seed, next_ctrl, cast(FieldVec, y))
 </pre>
@@ -8817,16 +8836,20 @@ speaking, a smaller field results in lower communication and storage costs.
 Care must be taken, however, since a smaller field also results in degraded (or
 even vacuous) robustness.<a href="#section-9.6-1" class="pilcrow">¶</a></p>
 <p id="section-9.6-2">Different variants of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) use different field sizes: Prio3Count
-uses Field64; but Prio3Sum, Prio3SumVec, and Prio3Histogram use Field128, a
-field that is twice as large as Field64. This is due to the use of joint
-randomness (<a href="#flp" class="auto internal xref">Section 7.1</a>) in the latter variants. Joint randomness allows for more
-flexible circuit design (see <a href="#flp-bbcggi19-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>), but opens up
-Prio3 to precomputation attacks, which the larger field mitigates. (See
+and Prio3Sum use Field64; but Prio3SumVec, Prio3Histogram, and
+Prio3MultihotCountVec all use Field128, a field that is twice as large as
+Field64. This is due to the use of joint randomness (<a href="#flp" class="auto internal xref">Section 7.1</a>) in the latter
+variants. Joint randomness allows for more flexible circuit design (see
+<a href="#flp-bbcggi19-overview-extensions" class="auto internal xref">Section 7.3.1.1</a>), but opens up Prio3 to offline attacks in
+which the attacker searches for input shares for an invalid measurement that
+derive joint randomness that causes the circuit to accept. Choosing a large
+enough field ensures this computation is too expensive to be feasible. (See
 <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>, Theorem 1.) Note that privacy is not susceptible to such attacks.<a href="#section-9.6-2" class="pilcrow">¶</a></p>
 <p id="section-9.6-3">Another way to mitigate this issue (or improve robustness in general) is to
 generate and verify multiple, independent proofs. (See <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>.) For
 Prio3, the <code>PROOFS</code> parameter controls the number of proofs (at least one) that
-are generated and verified. In general the soundness of the FLP is given By<a href="#section-9.6-3" class="pilcrow">¶</a></p>
+are generated and verified. In general the soundness of the FLP is given by the
+following formula:<a href="#section-9.6-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.6-4">
 <pre>
 (circuit_soundness + flp_soundness) ** PROOFS
@@ -8848,6 +8871,10 @@ FLP close to <code>2^-128</code> in order to mitigate offline attacks. Such circ
 use Field128 with at least one proof or Field64 with at least three proofs.
 Depending on the circuit, Field64 with two proofs might have significantly
 lower soundness than Field128 with one proof.<a href="#section-9.6-7" class="pilcrow">¶</a></p>
+<p id="section-9.6-8">We stress that weak parameters (too small a field, too few proofs, or both) can
+be exploited to attack any aggregation task using those parameters. To
+mitigate offline attacks, it is necessary to disable all tasks that use the
+weak parameters.<a href="#section-9.6-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="num-aggregators">
@@ -8864,6 +8891,41 @@ may consider involving more than two Aggregators as described for example in
 of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="defense-in-depth-measures">
+<section id="section-9.8">
+        <h3 id="name-defense-in-depth-measures">
+<a href="#section-9.8" class="section-number selfRef">9.8. </a><a href="#name-defense-in-depth-measures" class="section-name selfRef">Defense-in-Depth Measures</a>
+        </h3>
+<p id="section-9.8-1">Prio3 and Poplar1 are designed to resist some attacks that fall outside the
+main threat model for VDAFs.<a href="#section-9.8-1" class="pilcrow">¶</a></p>
+<p id="section-9.8-2">Broadly speaking, domain separation is used to prevent cross protocol attacks,
+in which data from evaluation of one VDAF translates to an attack against another.
+For example:<a href="#section-9.8-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-9.8-3">
+<li id="section-9.8-3.1">
+            <p id="section-9.8-3.1.1">Weak entropy sources: the VDAF algorithm ID is bound to each XOF invocation,
+thereby ensuring the outputs are different between VDAF invocations, even if
+the underlying randomness is the same. For example, two different instances
+of Prio3 would compute different measurement shares.<a href="#section-9.8-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-9.8-3.2">
+            <p id="section-9.8-3.2.1">Weak parameters: Prio3 variants that require joint randomness are subject to
+offline attacks against robustness. These attacks are feasible if the field
+size or number of proofs is sufficiently small. (See
+<a href="#security-multiproof" class="auto internal xref">Section 9.6</a>.) The joint randomness derivation is bound to both
+the field (via the algorithm ID) and the number of proofs, thereby ensuring
+that joint randomness derived for weak parameters is not reused for stronger
+parameters.<a href="#section-9.8-3.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-9.8-4">There are also some important limitations to be aware of. For example, Prio3
+provides domain separation between families of circuits, but does not provide
+domain separation between instances of a circuit. Concretely, it is possible
+for Aggregators to accept a report for Prio3SumVec from a Client who disagrees
+with them on the value of <code>bits</code> and <code>length</code>. This is because there is no
+binding of the circuit parameters to the computation.<a href="#section-9.8-4" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="iana-considerations">
@@ -8871,13 +8933,41 @@ of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p
       <h2 id="name-iana-considerations">
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-10-1">A codepoint for each (V)DAF in this document is defined in the table below. Note
-that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for private use.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<span id="name-unique-identifiers-for-vdaf"></span><div id="codepoints">
+<p id="section-10-1">IANA is requested to make one new registry:<a href="#section-10-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10-2.1">
+          <p id="section-10-2.1.1">DAF and VDAF Identifiers<a href="#section-10-2.1.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-10-3">This registry should be created under the heading "Verifiable Distributed
+Aggregation Functions (VDAF)", and administered under the Specification Required
+policy <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-10-3" class="pilcrow">¶</a></p>
+<p id="section-10-4">The "VDAF Identifiers" registry lists identifiers for Distributed Aggregation
+Functions (DAFs) and Verifiable Distributed Aggregation Functions (VDAFs). These
+identifiers are four-byte values, so the minimum possible value is 0x00000000
+and the maximum possible value is 0xffffffff.<a href="#section-10-4" class="pilcrow">¶</a></p>
+<p id="section-10-5">Template:<a href="#section-10-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10-6.1">
+          <p id="section-10-6.1.1">Value: The four-byte identifier for the DAF or VDAF<a href="#section-10-6.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-10-6.2">
+          <p id="section-10-6.2.1">Scheme: The name of the DAF or VDAF<a href="#section-10-6.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-10-6.3">
+          <p id="section-10-6.3.1">Type: Either "DAF" for a Distributed Aggregation Function or "VDAF" for a
+Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-10-6.4">
+          <p id="section-10-6.4.1">Reference: Where the algorithm is defined<a href="#section-10-6.4.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-10-7">The initial contents of the registry are as follows:<a href="#section-10-7" class="pilcrow">¶</a></p>
+<span id="name-verifiable-distributed-aggr"></span><div id="codepoints">
 <table class="center" id="table-23">
         <caption>
 <a href="#table-23" class="selfRef">Table 23</a>:
-<a href="#name-unique-identifiers-for-vdaf" class="selfRef">Unique identifiers for (V)DAFs.</a>
+<a href="#name-verifiable-distributed-aggr" class="selfRef">Verifiable Distributed Aggregation Function Identifiers Registry</a>
         </caption>
 <thead>
           <tr>
@@ -8892,86 +8982,85 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000000</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3Count</td>
-            <td class="text-left" rowspan="1" colspan="1">VDAF</td>
-            <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3count" class="auto internal xref">Section 7.4.1</a>
-</td>
+            <td class="text-left" rowspan="1" colspan="1">Reserved</td>
+            <td class="text-left" rowspan="1" colspan="1">n/a</td>
+            <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000001</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3Sum</td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Count</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>
-</td>
+              <a href="#prio3count" class="auto internal xref">Section 7.4.1</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000002</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3SumVec</td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Sum</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a>
-</td>
+              <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000003</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Prio3Histogram</td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3SumVec</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>
-</td>
+              <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0x00000004</code>
 </td>
+            <td class="text-left" rowspan="1" colspan="1">Prio3Histogram</td>
+            <td class="text-left" rowspan="1" colspan="1">VDAF</td>
+            <td class="text-left" rowspan="1" colspan="1">
+              <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a> of RFC XXXX</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">
+              <code>0x00000005</code>
+</td>
             <td class="text-left" rowspan="1" colspan="1">Prio3MultihotCountVec</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#prio3multihotcountvec" class="auto internal xref">Section 7.4.5</a>
-</td>
+              <a href="#prio3multihotcountvec" class="auto internal xref">Section 7.4.5</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>0x00000005</code> to <code>0x00000FFF</code>
-</td>
-            <td class="text-left" rowspan="1" colspan="1">reserved for Prio3</td>
-            <td class="text-left" rowspan="1" colspan="1">VDAF</td>
-            <td class="text-left" rowspan="1" colspan="1">n/a</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">
-              <code>0x00001000</code>
+              <code>0x00000006</code>
 </td>
             <td class="text-left" rowspan="1" colspan="1">Poplar1</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>
-</td>
+              <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
               <code>0xFFFF0000</code> to <code>0xFFFFFFFF</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">reserved</td>
+            <td class="text-left" rowspan="1" colspan="1">Reserved for Private Use</td>
             <td class="text-left" rowspan="1" colspan="1">n/a</td>
             <td class="text-left" rowspan="1" colspan="1">n/a</td>
           </tr>
         </tbody>
       </table>
 </div>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-10-3.1">
-          <p id="section-10-3.1.1">TODO Add IANA considerations for the codepoints summarized in <a href="#codepoints" class="auto internal xref">Table 23</a>.<a href="#section-10-3.1.1" class="pilcrow">¶</a></p>
-</li>
-      </ul>
+<p id="section-10-9">(RFC EDITOR: Please replace "RFC XXXX" above with the RFC number assigned to
+this document.)<a href="#section-10-9" class="pilcrow">¶</a></p>
+<p id="section-10-10">VDAF identifiers are used for domain separation, as described in <a href="#dst-binder" class="auto internal xref">Section 6.2.3</a>.
+Domain separation guards against failures of entropy sources, by ensuring that
+invocations of different VDAFs use different derived values, even if they are
+invoked with the same underlying random data.<a href="#section-10-10" class="pilcrow">¶</a></p>
+<p id="section-10-11">The benefits of domain separation are undermined if different VDAFs are used
+with the same VDAF Identifier.  The "Reserved for Private Use" code points
+should thus be used judiciously, because they provide no defense against such
+collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of registered code points.<a href="#section-10-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -8988,6 +9077,10 @@ that <code>0xFFFF0000</code> through <code>0xFFFFFFFF</code> are reserved for pr
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8126">[RFC8126]</dt>
+        <dd>
+<span class="refAuthor">Cotton, M.</span>, <span class="refAuthor">Leiba, B.</span>, and <span class="refAuthor">T. Narten</span>, <span class="refTitle">"Guidelines for Writing an IANA Considerations Section in RFCs"</span>, <span class="seriesInfo">BCP 26</span>, <span class="seriesInfo">RFC 8126</span>, <span class="seriesInfo">DOI 10.17487/RFC8126</span>, <time datetime="2017-06" class="refDate">June 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8126">https://www.rfc-editor.org/rfc/rfc8126</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8174">[RFC8174]</dt>
         <dd>
