@@ -152,12 +152,13 @@ Table of Contents
      11.2.  Informative References
    Acknowledgments
    Test Vectors
-     Prio3Count
-     Prio3Sum
-     Prio3SumVec
-     Prio3Histogram
-     Prio3Histogram
-     Poplar1
+     Schema
+       Prio3Count
+       Prio3Sum
+       Prio3SumVec
+       Prio3Histogram
+       Prio3MultihotCountVec
+       Poplar1
    Authors' Addresses
 
 1.  Introduction
@@ -6088,9 +6089,9 @@ Table of Contents
               2024, <https://eprint.iacr.org/2024/585>.
 
    [TestVectors]
-              "Test vectors for Prio3 and Poplar1", n.d.,
-              <https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/
-              test_vec>.
+              "Test vectors for Prio3 and Poplar1", commit hash <TODO> ,
+              September 2024, <https://github.com/cfrg/draft-irtf-cfrg-
+              vdaf/tree/main/test_vec/vdaf>.
 
 Acknowledgments
 
@@ -6129,7 +6130,9 @@ Test Vectors
    contains a set of JSON files.  Each file contains a test vector for
    an instance of Vdaf (Section 5).  A test vector covers sharding,
    preparation, aggregation, and unsharding of each of several
-   measurements.  The test vector schema is as follows:
+   measurements.  The test vector schema is defined below.
+
+Schema
 
    "verify_key":  The verification key encoded in hexadecimal.
 
@@ -6195,7 +6198,7 @@ Prio3Histogram
 
    "chunk_length":  the length of each vector chunk, an integer.
 
-Prio3Histogram
+Prio3MultihotCountVec
 
    "shares":  The number of shares, an integer.
 

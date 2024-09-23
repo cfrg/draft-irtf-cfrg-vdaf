@@ -1433,22 +1433,27 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
             <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
-                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-B.1" class="auto internal xref"></a><a href="#name-prio3count-2" class="internal xref">Prio3Count</a></p>
+                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-B.1" class="auto internal xref"></a><a href="#name-schema" class="internal xref">Schema</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.1">
+                    <p id="section-toc.1-1.13.2.1.2.1.1"><a href="#appendix-B.1.1" class="auto internal xref"></a><a href="#name-prio3count-2" class="internal xref">Prio3Count</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
-                <p id="section-toc.1-1.13.2.2.1"><a href="#appendix-B.2" class="auto internal xref"></a><a href="#name-prio3sum-2" class="internal xref">Prio3Sum</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.2">
+                    <p id="section-toc.1-1.13.2.1.2.2.1"><a href="#appendix-B.1.2" class="auto internal xref"></a><a href="#name-prio3sum-2" class="internal xref">Prio3Sum</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.3">
-                <p id="section-toc.1-1.13.2.3.1"><a href="#appendix-B.3" class="auto internal xref"></a><a href="#name-prio3sumvec-2" class="internal xref">Prio3SumVec</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.3">
+                    <p id="section-toc.1-1.13.2.1.2.3.1"><a href="#appendix-B.1.3" class="auto internal xref"></a><a href="#name-prio3sumvec-2" class="internal xref">Prio3SumVec</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4">
-                <p id="section-toc.1-1.13.2.4.1"><a href="#appendix-B.4" class="auto internal xref"></a><a href="#name-prio3histogram-2" class="internal xref">Prio3Histogram</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.4">
+                    <p id="section-toc.1-1.13.2.1.2.4.1"><a href="#appendix-B.1.4" class="auto internal xref"></a><a href="#name-prio3histogram-2" class="internal xref">Prio3Histogram</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.5">
-                <p id="section-toc.1-1.13.2.5.1"><a href="#appendix-B.5" class="auto internal xref"></a><a href="#name-prio3histogram-3" class="internal xref">Prio3Histogram</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.5">
+                    <p id="section-toc.1-1.13.2.1.2.5.1"><a href="#appendix-B.1.5" class="auto internal xref"></a><a href="#name-prio3multihotcountvec-2" class="internal xref">Prio3MultihotCountVec</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.6">
-                <p id="section-toc.1-1.13.2.6.1"><a href="#appendix-B.6" class="auto internal xref"></a><a href="#name-poplar1-2" class="internal xref">Poplar1</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1.2.6">
+                    <p id="section-toc.1-1.13.2.1.2.6.1"><a href="#appendix-B.1.6" class="auto internal xref"></a><a href="#name-poplar1-2" class="internal xref">Poplar1</a></p>
+</li>
+                </ul>
 </li>
             </ul>
 </li>
@@ -9175,7 +9180,7 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
 <dd class="break"></dd>
 <dt id="TestVectors">[TestVectors]</dt>
       <dd>
-<span class="refTitle">"Test vectors for Prio3 and Poplar1"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/test_vec">https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/test_vec</a>&gt;</span>. </dd>
+<span class="refTitle">"Test vectors for Prio3 and Poplar1"</span>, <span class="seriesInfo">commit hash &lt;TODO&gt; </span>, <time datetime="2024-09" class="refDate">September 2024</time>, <span>&lt;<a href="https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/test_vec/vdaf">https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/test_vec/vdaf</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -9217,211 +9222,218 @@ contains the final version of the test vectors.)<a href="#appendix-B-1" class="p
 <p id="appendix-B-2">The test vectors are available at <span>[<a href="#TestVectors" class="cite xref">TestVectors</a>]</span>. The directory contains a set
 of JSON files. Each file contains a test vector for an instance of <code>Vdaf</code>
 (<a href="#vdaf" class="auto internal xref">Section 5</a>). A test vector covers sharding, preparation, aggregation, and
-unsharding of each of several measurements. The test vector schema is as
-follows:<a href="#appendix-B-2" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="appendix-B-3">
-        <dt id="appendix-B-3.1">"verify_key":</dt>
-        <dd style="margin-left: 1.5em" id="appendix-B-3.2">
-          <p id="appendix-B-3.2.1">The verification key encoded in hexadecimal.<a href="#appendix-B-3.2.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="appendix-B-3.3">"agg_param":</dt>
-        <dd style="margin-left: 1.5em" id="appendix-B-3.4">
-          <p id="appendix-B-3.4.1">The aggregation parameter of type <code>Vdaf.AggParam</code>.<a href="#appendix-B-3.4.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="appendix-B-3.5">"prep":</dt>
-        <dd style="margin-left: 1.5em" id="appendix-B-3.6">
-          <p id="appendix-B-3.6.1">A list of objects with the following schema:<a href="#appendix-B-3.6.1" class="pilcrow">¶</a></p>
-<span class="break"></span><dl class="dlParallel" id="appendix-B-3.6.2">
-            <dt id="appendix-B-3.6.2.1">"measurement":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.2">
-              <p id="appendix-B-3.6.2.2.1">The measurement of type <code>Vdaf.Measurement</code>.<a href="#appendix-B-3.6.2.2.1" class="pilcrow">¶</a></p>
-</dd>
-            <dd class="break"></dd>
-<dt id="appendix-B-3.6.2.3">"nonce":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.4">
-              <p id="appendix-B-3.6.2.4.1">The nonce encoded in hexadecimal.<a href="#appendix-B-3.6.2.4.1" class="pilcrow">¶</a></p>
-</dd>
-            <dd class="break"></dd>
-<dt id="appendix-B-3.6.2.5">"rand":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.6">
-              <p id="appendix-B-3.6.2.6.1">The sharding randomness encoded in hexadecimal.<a href="#appendix-B-3.6.2.6.1" class="pilcrow">¶</a></p>
-</dd>
-            <dd class="break"></dd>
-<dt id="appendix-B-3.6.2.7">"public_share":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.8">
-              <p id="appendix-B-3.6.2.8.1">The expected public share encoded in hexadecimal.<a href="#appendix-B-3.6.2.8.1" class="pilcrow">¶</a></p>
-</dd>
-            <dd class="break"></dd>
-<dt id="appendix-B-3.6.2.9">"input_shares":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.10">
-              <p id="appendix-B-3.6.2.10.1">The expected list of input shares, each incoded in hexadecimal.<a href="#appendix-B-3.6.2.10.1" class="pilcrow">¶</a></p>
-</dd>
-            <dd class="break"></dd>
-<dt id="appendix-B-3.6.2.11">"prep_shares":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.12">
-              <p id="appendix-B-3.6.2.12.1">The expected list of prep shares generated by each Aggregator at each
-round of preparation, encoded in hexadecimal.<a href="#appendix-B-3.6.2.12.1" class="pilcrow">¶</a></p>
-</dd>
-            <dd class="break"></dd>
-<dt id="appendix-B-3.6.2.13">"prep_messages":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.14">
-              <p id="appendix-B-3.6.2.14.1">The expected list of prep messages for each round of preparation, encoded
-in hexadecimal.<a href="#appendix-B-3.6.2.14.1" class="pilcrow">¶</a></p>
-</dd>
-            <dd class="break"></dd>
-<dt id="appendix-B-3.6.2.15">"out_shares":</dt>
-            <dd style="margin-left: 1.5em" id="appendix-B-3.6.2.16">
-              <p id="appendix-B-3.6.2.16.1">The expected list of output shares, encoded in hexadecimal.<a href="#appendix-B-3.6.2.16.1" class="pilcrow">¶</a></p>
-</dd>
-          <dd class="break"></dd>
-</dl>
-</dd>
-        <dd class="break"></dd>
-<dt id="appendix-B-3.7">"agg_shares":</dt>
-        <dd style="margin-left: 1.5em" id="appendix-B-3.8">
-          <p id="appendix-B-3.8.1">The expected aggregate shares encoded in hexadecimal.<a href="#appendix-B-3.8.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
-<dt id="appendix-B-3.9">"agg_result"`</dt>
-        <dd style="margin-left: 1.5em" id="appendix-B-3.10">
-          <p id="appendix-B-3.10.1">The expected aggregate result of type <code>Vdaf.AggResult</code>.<a href="#appendix-B-3.10.1" class="pilcrow">¶</a></p>
-</dd>
-      <dd class="break"></dd>
-</dl>
-<p id="appendix-B-4">The scehma also includes whatever parameters are required to instantiate the
-VDAF. These are listed in the subsections below.<a href="#appendix-B-4" class="pilcrow">¶</a></p>
-<div id="prio3count-1">
+unsharding of each of several measurements. The test vector schema is defined
+below.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<div id="schema">
 <section id="appendix-B.1">
-        <h3 id="name-prio3count-2">
-<a href="#name-prio3count-2" class="section-name selfRef">Prio3Count</a>
+        <h3 id="name-schema">
+<a href="#name-schema" class="section-name selfRef">Schema</a>
         </h3>
 <span class="break"></span><dl class="dlParallel" id="appendix-B.1-1">
-          <dt id="appendix-B.1-1.1">"shares":</dt>
+          <dt id="appendix-B.1-1.1">"verify_key":</dt>
           <dd style="margin-left: 1.5em" id="appendix-B.1-1.2">
-            <p id="appendix-B.1-1.2.1">The number of shares, an integer.<a href="#appendix-B.1-1.2.1" class="pilcrow">¶</a></p>
+            <p id="appendix-B.1-1.2.1">The verification key encoded in hexadecimal.<a href="#appendix-B.1-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-B.1-1.3">"agg_param":</dt>
+          <dd style="margin-left: 1.5em" id="appendix-B.1-1.4">
+            <p id="appendix-B.1-1.4.1">The aggregation parameter of type <code>Vdaf.AggParam</code>.<a href="#appendix-B.1-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-B.1-1.5">"prep":</dt>
+          <dd style="margin-left: 1.5em" id="appendix-B.1-1.6">
+            <p id="appendix-B.1-1.6.1">A list of objects with the following schema:<a href="#appendix-B.1-1.6.1" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="appendix-B.1-1.6.2">
+              <dt id="appendix-B.1-1.6.2.1">"measurement":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.2">
+                <p id="appendix-B.1-1.6.2.2.1">The measurement of type <code>Vdaf.Measurement</code>.<a href="#appendix-B.1-1.6.2.2.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt id="appendix-B.1-1.6.2.3">"nonce":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.4">
+                <p id="appendix-B.1-1.6.2.4.1">The nonce encoded in hexadecimal.<a href="#appendix-B.1-1.6.2.4.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt id="appendix-B.1-1.6.2.5">"rand":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.6">
+                <p id="appendix-B.1-1.6.2.6.1">The sharding randomness encoded in hexadecimal.<a href="#appendix-B.1-1.6.2.6.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt id="appendix-B.1-1.6.2.7">"public_share":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.8">
+                <p id="appendix-B.1-1.6.2.8.1">The expected public share encoded in hexadecimal.<a href="#appendix-B.1-1.6.2.8.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt id="appendix-B.1-1.6.2.9">"input_shares":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.10">
+                <p id="appendix-B.1-1.6.2.10.1">The expected list of input shares, each incoded in hexadecimal.<a href="#appendix-B.1-1.6.2.10.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt id="appendix-B.1-1.6.2.11">"prep_shares":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.12">
+                <p id="appendix-B.1-1.6.2.12.1">The expected list of prep shares generated by each Aggregator at each
+round of preparation, encoded in hexadecimal.<a href="#appendix-B.1-1.6.2.12.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt id="appendix-B.1-1.6.2.13">"prep_messages":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.14">
+                <p id="appendix-B.1-1.6.2.14.1">The expected list of prep messages for each round of preparation, encoded
+in hexadecimal.<a href="#appendix-B.1-1.6.2.14.1" class="pilcrow">¶</a></p>
+</dd>
+              <dd class="break"></dd>
+<dt id="appendix-B.1-1.6.2.15">"out_shares":</dt>
+              <dd style="margin-left: 1.5em" id="appendix-B.1-1.6.2.16">
+                <p id="appendix-B.1-1.6.2.16.1">The expected list of output shares, encoded in hexadecimal.<a href="#appendix-B.1-1.6.2.16.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+</dl>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-B.1-1.7">"agg_shares":</dt>
+          <dd style="margin-left: 1.5em" id="appendix-B.1-1.8">
+            <p id="appendix-B.1-1.8.1">The expected aggregate shares encoded in hexadecimal.<a href="#appendix-B.1-1.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-B.1-1.9">"agg_result"`</dt>
+          <dd style="margin-left: 1.5em" id="appendix-B.1-1.10">
+            <p id="appendix-B.1-1.10.1">The expected aggregate result of type <code>Vdaf.AggResult</code>.<a href="#appendix-B.1-1.10.1" class="pilcrow">¶</a></p>
 </dd>
         <dd class="break"></dd>
+</dl>
+<p id="appendix-B.1-2">The scehma also includes whatever parameters are required to instantiate the
+VDAF. These are listed in the subsections below.<a href="#appendix-B.1-2" class="pilcrow">¶</a></p>
+<div id="prio3count-1">
+<section id="appendix-B.1.1">
+          <h4 id="name-prio3count-2">
+<a href="#name-prio3count-2" class="section-name selfRef">Prio3Count</a>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-B.1.1-1">
+            <dt id="appendix-B.1.1-1.1">"shares":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.1-1.2">
+              <p id="appendix-B.1.1-1.2.1">The number of shares, an integer.<a href="#appendix-B.1.1-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="prio3sum-1">
-<section id="appendix-B.2">
-        <h3 id="name-prio3sum-2">
+<section id="appendix-B.1.2">
+          <h4 id="name-prio3sum-2">
 <a href="#name-prio3sum-2" class="section-name selfRef">Prio3Sum</a>
-        </h3>
-<span class="break"></span><dl class="dlParallel" id="appendix-B.2-1">
-          <dt id="appendix-B.2-1.1">"shares":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.2-1.2">
-            <p id="appendix-B.2-1.2.1">The number of shares, an integer.<a href="#appendix-B.2-1.2.1" class="pilcrow">¶</a></p>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-B.1.2-1">
+            <dt id="appendix-B.1.2-1.1">"shares":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.2-1.2">
+              <p id="appendix-B.1.2-1.2.1">The number of shares, an integer.<a href="#appendix-B.1.2-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.2-1.3">"max_measurement":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.2-1.4">
+              <p id="appendix-B.1.2-1.4.1">The largest measurement, an integer. Each element is in range
+<code>range(max_measurement+1)</code>.<a href="#appendix-B.1.2-1.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="appendix-B.2-1.3">"max_measurement":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.2-1.4">
-            <p id="appendix-B.2-1.4.1">The largest measurement, an integer. Each element is in range
-<code>range(max_measurement+1)</code>.<a href="#appendix-B.2-1.4.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="prio3sumvec-1">
-<section id="appendix-B.3">
-        <h3 id="name-prio3sumvec-2">
+<section id="appendix-B.1.3">
+          <h4 id="name-prio3sumvec-2">
 <a href="#name-prio3sumvec-2" class="section-name selfRef">Prio3SumVec</a>
-        </h3>
-<span class="break"></span><dl class="dlParallel" id="appendix-B.3-1">
-          <dt id="appendix-B.3-1.1">"shares":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.3-1.2">
-            <p id="appendix-B.3-1.2.1">The number of shares, an integer.<a href="#appendix-B.3-1.2.1" class="pilcrow">¶</a></p>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-B.1.3-1">
+            <dt id="appendix-B.1.3-1.1">"shares":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.3-1.2">
+              <p id="appendix-B.1.3-1.2.1">The number of shares, an integer.<a href="#appendix-B.1.3-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.3-1.3">"length":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.3-1.4">
+              <p id="appendix-B.1.3-1.4.1">The lengh of the vector, an integer.<a href="#appendix-B.1.3-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.3-1.5">"chunk_length":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.3-1.6">
+              <p id="appendix-B.1.3-1.6.1">the length of each vector chunk, an integer.<a href="#appendix-B.1.3-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.3-1.7">"bits":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.3-1.8">
+              <p id="appendix-B.1.3-1.8.1">the bit length of each element of the vector, an integer. each element is in
+<code>range(2 ** bits)</code>.<a href="#appendix-B.1.3-1.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="appendix-B.3-1.3">"length":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.3-1.4">
-            <p id="appendix-B.3-1.4.1">The lengh of the vector, an integer.<a href="#appendix-B.3-1.4.1" class="pilcrow">¶</a></p>
-</dd>
-          <dd class="break"></dd>
-<dt id="appendix-B.3-1.5">"chunk_length":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.3-1.6">
-            <p id="appendix-B.3-1.6.1">the length of each vector chunk, an integer.<a href="#appendix-B.3-1.6.1" class="pilcrow">¶</a></p>
-</dd>
-          <dd class="break"></dd>
-<dt id="appendix-B.3-1.7">"bits":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.3-1.8">
-            <p id="appendix-B.3-1.8.1">the bit length of each element of the vector, an integer. each element is in
-<code>range(2 ** bits)</code>.<a href="#appendix-B.3-1.8.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="prio3histogram-1">
-<section id="appendix-B.4">
-        <h3 id="name-prio3histogram-2">
+<section id="appendix-B.1.4">
+          <h4 id="name-prio3histogram-2">
 <a href="#name-prio3histogram-2" class="section-name selfRef">Prio3Histogram</a>
-        </h3>
-<span class="break"></span><dl class="dlParallel" id="appendix-B.4-1">
-          <dt id="appendix-B.4-1.1">"shares":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.4-1.2">
-            <p id="appendix-B.4-1.2.1">The number of shares, an integer.<a href="#appendix-B.4-1.2.1" class="pilcrow">¶</a></p>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-B.1.4-1">
+            <dt id="appendix-B.1.4-1.1">"shares":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.4-1.2">
+              <p id="appendix-B.1.4-1.2.1">The number of shares, an integer.<a href="#appendix-B.1.4-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.4-1.3">"length":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.4-1.4">
+              <p id="appendix-B.1.4-1.4.1">The lengh of the vector, an integer.<a href="#appendix-B.1.4-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.4-1.5">"chunk_length":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.4-1.6">
+              <p id="appendix-B.1.4-1.6.1">the length of each vector chunk, an integer.<a href="#appendix-B.1.4-1.6.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="appendix-B.4-1.3">"length":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.4-1.4">
-            <p id="appendix-B.4-1.4.1">The lengh of the vector, an integer.<a href="#appendix-B.4-1.4.1" class="pilcrow">¶</a></p>
-</dd>
-          <dd class="break"></dd>
-<dt id="appendix-B.4-1.5">"chunk_length":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.4-1.6">
-            <p id="appendix-B.4-1.6.1">the length of each vector chunk, an integer.<a href="#appendix-B.4-1.6.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
 </dl>
 </section>
 </div>
-<div id="prio3histogram-2">
-<section id="appendix-B.5">
-        <h3 id="name-prio3histogram-3">
-<a href="#name-prio3histogram-3" class="section-name selfRef">Prio3Histogram</a>
-        </h3>
-<span class="break"></span><dl class="dlParallel" id="appendix-B.5-1">
-          <dt id="appendix-B.5-1.1">"shares":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.5-1.2">
-            <p id="appendix-B.5-1.2.1">The number of shares, an integer.<a href="#appendix-B.5-1.2.1" class="pilcrow">¶</a></p>
+<div id="prio3multihotcountvec-1">
+<section id="appendix-B.1.5">
+          <h4 id="name-prio3multihotcountvec-2">
+<a href="#name-prio3multihotcountvec-2" class="section-name selfRef">Prio3MultihotCountVec</a>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-B.1.5-1">
+            <dt id="appendix-B.1.5-1.1">"shares":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.5-1.2">
+              <p id="appendix-B.1.5-1.2.1">The number of shares, an integer.<a href="#appendix-B.1.5-1.2.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.5-1.3">"length":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.5-1.4">
+              <p id="appendix-B.1.5-1.4.1">The lengh of the vector, an integer.<a href="#appendix-B.1.5-1.4.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.5-1.5">"chunk_length":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.5-1.6">
+              <p id="appendix-B.1.5-1.6.1">the length of each vector chunk, an integer.<a href="#appendix-B.1.5-1.6.1" class="pilcrow">¶</a></p>
+</dd>
+            <dd class="break"></dd>
+<dt id="appendix-B.1.5-1.7">"max_weight":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.5-1.8">
+              <p id="appendix-B.1.5-1.8.1">The largest vector weight, an integer. The sum of the elements must be in
+<code>range(max_weight+1)</code>.<a href="#appendix-B.1.5-1.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
-<dt id="appendix-B.5-1.3">"length":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.5-1.4">
-            <p id="appendix-B.5-1.4.1">The lengh of the vector, an integer.<a href="#appendix-B.5-1.4.1" class="pilcrow">¶</a></p>
-</dd>
-          <dd class="break"></dd>
-<dt id="appendix-B.5-1.5">"chunk_length":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.5-1.6">
-            <p id="appendix-B.5-1.6.1">the length of each vector chunk, an integer.<a href="#appendix-B.5-1.6.1" class="pilcrow">¶</a></p>
-</dd>
-          <dd class="break"></dd>
-<dt id="appendix-B.5-1.7">"max_weight":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.5-1.8">
-            <p id="appendix-B.5-1.8.1">The largest vector weight, an integer. The sum of the elements must be in
-<code>range(max_weight+1)</code>.<a href="#appendix-B.5-1.8.1" class="pilcrow">¶</a></p>
-</dd>
-        <dd class="break"></dd>
 </dl>
 </section>
 </div>
 <div id="poplar1-test-vec-param">
-<section id="appendix-B.6">
-        <h3 id="name-poplar1-2">
+<section id="appendix-B.1.6">
+          <h4 id="name-poplar1-2">
 <a href="#name-poplar1-2" class="section-name selfRef">Poplar1</a>
-        </h3>
-<span class="break"></span><dl class="dlParallel" id="appendix-B.6-1">
-          <dt id="appendix-B.6-1.1">"bits":</dt>
-          <dd style="margin-left: 1.5em" id="appendix-B.6-1.2">
-            <p id="appendix-B.6-1.2.1">The length of each input, an integer.<a href="#appendix-B.6-1.2.1" class="pilcrow">¶</a></p>
+          </h4>
+<span class="break"></span><dl class="dlParallel" id="appendix-B.1.6-1">
+            <dt id="appendix-B.1.6-1.1">"bits":</dt>
+            <dd style="margin-left: 1.5em" id="appendix-B.1.6-1.2">
+              <p id="appendix-B.1.6-1.2.1">The length of each input, an integer.<a href="#appendix-B.1.6-1.2.1" class="pilcrow">¶</a></p>
 </dd>
-        <dd class="break"></dd>
+          <dd class="break"></dd>
 </dl>
+</section>
+</div>
 </section>
 </div>
 </section>
