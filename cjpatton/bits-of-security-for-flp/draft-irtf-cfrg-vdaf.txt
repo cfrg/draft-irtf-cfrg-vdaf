@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 March 2025                                              ISRG
+Expires: 27 March 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                       10 September 2024
+                                                       23 September 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 March 2025.
+   This Internet-Draft will expire on 27 March 2025.
 
 Copyright Notice
 
@@ -5661,8 +5661,8 @@ Table of Contents
 9.3.  Requirements for the Public Share
 
    The Aggregators MUST ensure they have both received the same public
-   share from the Client.  It is sufficient, for example, to exchange a
-   hash of the public share over a secure channel.
+   share from the Client.  It is sufficient, for exam`aple, to exchange
+   a hash of the public share over a secure channel.
 
 9.4.  Requirements for Aggregation Parameters
 
@@ -5802,19 +5802,25 @@ Table of Contents
    Another way to mitigate this issue (or improve robustness in general)
    is to generate and verify multiple, independent proofs.  (See
    Section 7.1.2.)  For Prio3, the PROOFS parameter controls the number
-   of proofs (at least one) that are generated and verified.
+   of proofs (at least one) that are generated and verified.  In general
+   the soundness of the FLP is given By
 
-   For circuits involving joint randomness, we aim for a soundness error
-   of the FLP close to 2^-128 in order to mitigate offline attacks.
-   (The soundness error is the probability of a random joint randomness
-   accepting an invalid measurement plus the base soundness error of the
-   proof system, which is given by Theorem 4.3 of [BBCGGI19].)  Such
-   circuits MUST use Field128 with at least one proof or Field64 with at
-   least three proofs.
+   (circuit_soundness + flp_soundness) ** PROOFS
 
-   In the case of Field64, breaking robustness for two proofs is
-   feasible, if impractical; but one proof is completely broken for such
-   a small field.
+   where:
+
+   *  circuit_soundness is the soundness of the validity circuit
+      (Section 7.3.2)
+
+   *  flp_soundness is the base soundness of the proof system
+      ([BBCGGI19], Theorem 4.3)
+
+   For circuits involving joint randomness, we aim for the soundness
+   error of the FLP close to 2^-128 in order to mitigate offline
+   attacks.  Such circuits MUST use Field128 with at least one proof or
+   Field64 with at least three proofs.  Depending on the circuit,
+   Field64 with two proofs might have significantly lower soundness than
+   Field128 with one proof.
 
 9.7.  Choosing the Number of Aggregators
 

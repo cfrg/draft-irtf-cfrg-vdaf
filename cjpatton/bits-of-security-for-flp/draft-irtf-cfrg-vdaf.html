@@ -18,18 +18,18 @@ are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
 measurement that would result in an invalid aggregate result. 
     " name="description">
-<meta content="xml2rfc 3.23.0" name="generator">
+<meta content="xml2rfc 3.23.1" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.23.0
-    Python 3.12.3
+  xml2rfc 3.23.1
+    Python 3.12.6
     ConfigArgParse 1.7
-    google-i18n-address 3.1.0
+    google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.4
     lxml 4.9.4
-    platformdirs 4.2.2
+    platformdirs 4.3.6
     pycountry 22.3.5
     PyYAML 6.0.1
     requests 2.32.3
@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 14 March 2025</td>
+<td class="center">Expires 27 March 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-09-10" class="published">10 September 2024</time>
+<time datetime="2024-09-23" class="published">23 September 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-03-14">14 March 2025</time></dd>
+<dd class="expires"><time datetime="2025-03-27">27 March 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 27 March 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -8685,7 +8685,7 @@ used by the Aggregators for replay protection.<a href="#section-9.2-2" class="pi
 <a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-requirements-for-the-public" class="section-name selfRef">Requirements for the Public Share</a>
         </h3>
 <p id="section-9.3-1">The Aggregators <span class="bcp14">MUST</span> ensure they have both received the same public share from
-the Client. It is sufficient, for example, to exchange a hash of the public
+the Client. It is sufficient, for exam`aple, to exchange a hash of the public
 share over a secure channel.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -8826,15 +8826,28 @@ Prio3 to precomputation attacks, which the larger field mitigates. (See
 <p id="section-9.6-3">Another way to mitigate this issue (or improve robustness in general) is to
 generate and verify multiple, independent proofs. (See <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>.) For
 Prio3, the <code>PROOFS</code> parameter controls the number of proofs (at least one) that
-are generated and verified.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
-<p id="section-9.6-4">For circuits involving joint randomness, we aim for a soundness error of the
-FLP close to <code>2^-128</code> in order to mitigate offline attacks. (The soundness
-error is the probability of a random joint randomness accepting an invalid
-measurement plus the base soundness error of the proof system, which is given
-by Theorem 4.3 of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>.) Such circuits <span class="bcp14">MUST</span> use Field128 with at least
-one proof or Field64 with at least three proofs.<a href="#section-9.6-4" class="pilcrow">¶</a></p>
-<p id="section-9.6-5">In the case of Field64, breaking robustness for two proofs is feasible, if
-impractical; but one proof is completely broken for such a small field.<a href="#section-9.6-5" class="pilcrow">¶</a></p>
+are generated and verified. In general the soundness of the FLP is given By<a href="#section-9.6-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.6-4">
+<pre>
+(circuit_soundness + flp_soundness) ** PROOFS
+</pre><a href="#section-9.6-4" class="pilcrow">¶</a>
+</div>
+<p id="section-9.6-5">where:<a href="#section-9.6-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-9.6-6.1">
+            <p id="section-9.6-6.1.1"><code>circuit_soundness</code> is the soundness of the validity circuit
+(<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)<a href="#section-9.6-6.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-9.6-6.2">
+            <p id="section-9.6-6.2.1"><code>flp_soundness</code> is the base soundness of the proof system (<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
+Theorem 4.3)<a href="#section-9.6-6.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-9.6-7">For circuits involving joint randomness, we aim for the soundness error of the
+FLP close to <code>2^-128</code> in order to mitigate offline attacks. Such circuits <span class="bcp14">MUST</span>
+use Field128 with at least one proof or Field64 with at least three proofs.
+Depending on the circuit, Field64 with two proofs might have significantly
+lower soundness than Field128 with one proof.<a href="#section-9.6-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="num-aggregators">
