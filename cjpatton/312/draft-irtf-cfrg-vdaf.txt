@@ -6123,8 +6123,9 @@ Acknowledgments
 
 Test Vectors
 
-   (RFC EDITOR: Update the commit hash in [TestVectors] to the commit
-   that contains the final version of the test vectors.)
+   (RFC EDITOR: Update the reference in [TestVectors] by replacing
+   <TODO> with the commit hash with the final version of the test
+   vectors.)
 
    The test vectors are available at [TestVectors].  The directory
    contains a set of JSON files.  Each file contains a test vector for
