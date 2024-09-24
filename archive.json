@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-22T00:58:48.851831+00:00",
+  "timestamp": "2024-09-24T00:55:36.944655+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4961,11 +4961,12 @@
         "cjpatton"
       ],
       "labels": [
-        "pre-RGLC"
+        "pre-RGLC",
+        "draft-12"
       ],
       "body": "We removed them a couple of drafts ago because updating them was becoming a pain. (Note that machine-readable test vectors can be found in https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)",
       "createdAt": "2023-11-16T15:03:15Z",
-      "updatedAt": "2024-09-20T22:35:25Z",
+      "updatedAt": "2024-09-23T19:24:57Z",
       "closedAt": null,
       "comments": [
         {
@@ -5972,6 +5973,44 @@
           "updatedAt": "2024-09-19T14:44:01Z"
         }
       ]
+    },
+    {
+      "number": 431,
+      "id": "I_kwDOGKuqOc6Xkpnp",
+      "title": "Consider removing sage as a dependency",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/431",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "idea",
+        "poc"
+      ],
+      "body": "[It was suggested on the CFRG mailing list](https://mailarchive.ietf.org/arch/msg/cfrg/ht4YzBMYWoQvKxlCxx-CAPJFtC0/) that VDAF implementers could integrate the reference code directly into their tests, similar to the [SUPERCOP](https://bench.cr.yp.to/supercop.html) project. However such tests would need sage as a dependency, which is not ideal. If we removed the sage dependency, then the only dependency would by python3, which is just about everywhere these days. Of course, they would also need to install pycryptodomex.\r\n\r\nI believe we only use sage for the finite field arithmetic and polynomial interpolation, neither of which would be terribly complicated to implement ourselves.\r\n\r\nNote that this conflicts with #282.",
+      "createdAt": "2024-09-23T15:11:57Z",
+      "updatedAt": "2024-09-23T15:13:15Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 432,
+      "id": "I_kwDOGKuqOc6XoGop",
+      "title": "Replace `aggregate()` with a streaming API",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/432",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "The current aggregation API takes a sequence of output shares and returns an aggregate share. This envisions VDAFs for which the aggregate result depends on the order in which output shares are aggregated, but so far this isn't true of anything we've come up with. In fact, DAP (implicitly?) requires a VDAF for which output shares can be aggregated in any order. (The Leader and Helper may not aggregate output shares in the same order.)\r\n\r\nOne problem with the current API is that it doesn't align well with practice. Normally what we expect Aggregators to do is aggregate in a \"streaming\" fashion, meaning output shares are not stored individually, but accumulated into an existing aggregate share as soon as they're ready to be aggregated.\r\n\r\nIn fact, we'd like to make this \"streaming aggregation\" normative in DAP: https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/581.\r\n\r\nHowever in order to do this, we'll need to modify the VDAF syntax. There's a few things we could do, but probably the simplest is to split `vdaf.aggregate()` into the following functions:\r\n\r\n* `vdaf.agg_init() -> AggShare`: returns an empty aggregate share.\r\n* `vdaf.agg_update(agg_share: AggShare, out_share) -> AggShare`: updates an aggregate share with the incoming output share.",
+      "createdAt": "2024-09-23T22:53:16Z",
+      "updatedAt": "2024-09-23T22:53:25Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -36532,7 +36571,7 @@
       "id": "PR_kwDOGKuqOc56_sZT",
       "title": "Strengthen recommendation about field size",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/425",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36542,19 +36581,62 @@
       ],
       "body": "The security consideration section has the following recommendation for choosing parameters for circuits with joint randomness: \"Field128 is RECOMMENDED, but Field64 MAY be used with at least three proofs\".\r\n\r\nClarify where this requirement comes from (the base proof system needs around 128 bits of security) and strengthen this language somewhat: \"Either Field128 or Field64 with three proofs MUST be used\".\r\n\r\nThis change was suggested in an offline conversation with @henrycg.",
       "createdAt": "2024-09-10T14:42:19Z",
-      "updatedAt": "2024-09-10T15:43:55Z",
+      "updatedAt": "2024-09-23T21:41:13Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "d038274376c880392b2c73a3aebf8f5178cd8991",
+      "baseRefOid": "bb01e528dab1da66c3264347a7c020f2c3403494",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/bits-of-security-for-flp",
-      "headRefOid": "7424d4a07eca8d209862a2213f71d8a56a133202",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "3b87180abc34bd9f2accc316b24f68065825e055",
+      "closedAt": "2024-09-23T21:41:13Z",
+      "mergedAt": "2024-09-23T21:41:13Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "fd9fda6fabceecf25b163a8e19d5f7b007c6aafe"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6KeLmo",
+          "commit": {
+            "abbreviatedOid": "7424d4a"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-23T19:45:53Z",
+          "updatedAt": "2024-09-23T19:46:02Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "This paragraph is just hand-waving as written.  If you want to make an argument for the MUST above, you should provide some explanation for why 3 is the right break point.  Presumably there's something that scales as `2^{k * PROOFS}`, so that `k * PROOFS` is big enough with `PROOFS == 3` but not below?",
+              "createdAt": "2024-09-23T19:45:53Z",
+              "updatedAt": "2024-09-23T19:46:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Ke_t1",
+          "commit": {
+            "abbreviatedOid": "7424d4a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-23T21:28:28Z",
+          "updatedAt": "2024-09-23T21:28:28Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "That's close to the truth. I've added the formula that is relevant here. What matters is that, depending on the circuit, Field64/2 might have significantly lower soundness than Field128/1. ",
+              "createdAt": "2024-09-23T21:28:28Z",
+              "updatedAt": "2024-09-23T21:28:28Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 426,
@@ -36616,7 +36698,7 @@
       ],
       "body": "Assume the length of the encoded prep share is at least 1 byte for every VDAF; otherwise there would be no mechanism to convey validity. The prep message, however, may be empty, as it is for some Prio3 variants.",
       "createdAt": "2024-09-17T22:33:26Z",
-      "updatedAt": "2024-09-18T14:56:40Z",
+      "updatedAt": "2024-09-23T19:40:09Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24",
@@ -36627,7 +36709,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Let's hold off on merging this until we settle https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/110.",
+          "createdAt": "2024-09-23T18:49:55Z",
+          "updatedAt": "2024-09-23T18:49:55Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc6Jwl-g",
@@ -36708,6 +36798,39 @@
               "updatedAt": "2024-09-18T14:47:56Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Kdmpd",
+          "commit": {
+            "abbreviatedOid": "be6a6e0"
+          },
+          "author": "branlwyd",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-23T18:24:50Z",
+          "updatedAt": "2024-09-23T18:24:50Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6KeI4m",
+          "commit": {
+            "abbreviatedOid": "be6a6e0"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I generally think that encoding these sorts of things in the TLS syntax is not that useful.  It gives you marginally faster failure, but makes it more complicated to set up the TLS parsing.",
+          "createdAt": "2024-09-23T19:39:53Z",
+          "updatedAt": "2024-09-23T19:40:09Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "```suggestion\r\nNote that the shortest valid ping-pong message is `5` bytes long. These\r\n```\r\n\r\nWhy does the reader need to know how long the shortest valid message is?  If it matters, you could get it down to 2 bytes using the [variable-length headers](https://www.rfc-editor.org/rfc/rfc9420.html#name-variable-size-vector-length) introduced in MLS.",
+              "createdAt": "2024-09-23T19:39:53Z",
+              "updatedAt": "2024-09-23T19:40:09Z"
+            }
+          ]
         }
       ]
     },
@@ -36751,20 +36874,28 @@
       "labels": [
         "draft-12"
       ],
-      "body": "Partially addresses #312 (we'll need to update the commit hash after publishing draft-12).\r\n\r\nThe current plan is to reproduce the test vectors in the draft once we're ready for RFC. However the value of these test vectors for implementers is not clear. It would be better to publish machine-readable test vectors somewhere somewhere, point to it from the draft, and publish a hash of the test vectors in the draft so that implementers can use to verify their veracity.\r\n\r\nThis commit implements the following idea: point to a commit hash for the draft and describe how to consume the test vectors.\r\n\r\nThis commit also moves the VDAF test vectors to their own sub-directory so that it is convenient to point to them.",
+      "body": "Closes #312.\r\n\r\nThe current plan is to reproduce the test vectors in the draft once\r\nwe're ready for RFC. However the value of these test vectors for\r\nimplementers is not clear. It would be better to publish\r\nmachine-readable test vectors somewhere, point to it from the\r\ndraft, and publish a hash of the test vectors in the draft so that\r\nimplementers can use to verify their veracity.\r\n\r\nThis commit implements the following idea: point to a commit hash for\r\nthe draft and describe how to consume the test vectors.\r\n\r\nThis commit also moves the VDAF test vectors to a directory that is easy\r\nto reference. Namely, we remove the sub-directory based on the version\r\nand add a `vdaf` sub-directory.",
       "createdAt": "2024-09-20T17:22:12Z",
-      "updatedAt": "2024-09-20T22:45:11Z",
+      "updatedAt": "2024-09-23T19:24:48Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "bb01e528dab1da66c3264347a7c020f2c3403494",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/312",
-      "headRefOid": "a7d9e68faf4b741be606768da2f7c56117b64e5d",
+      "headRefOid": "05712824075ca880a242bfaa50de44ed8a61fc3f",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Converted to draft while I incorporate some feedback from the list.",
+          "createdAt": "2024-09-23T16:53:02Z",
+          "updatedAt": "2024-09-23T16:53:02Z"
+        }
+      ],
       "reviews": []
     }
   ]
