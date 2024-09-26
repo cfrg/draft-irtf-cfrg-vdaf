@@ -8165,10 +8165,10 @@ prefixes_len = ((level + 1) + 7) // 8 * len(prefixes)
 encoded_prefixes = bytearray()
 for prefix in prefixes:
     for chunk in itertools.batched(prefix, 8):
-        byte = 0
+        byte_out = 0
         for bit_position, bit in enumerate(chunk):
-            byte |= bit &lt;&lt; (7 - bit_position)
-        encoded_prefixes.append(byte)
+            byte_out |= bit &lt;&lt; (7 - bit_position)
+        encoded_prefixes.append(byte_out)
 </pre><a href="#section-8.2.6.6-4" class="pilcrow">¶</a>
 </div>
 <p id="section-8.2.6.6-5">Decoding involves the following procedure:<a href="#section-8.2.6.6-5" class="pilcrow">¶</a></p>

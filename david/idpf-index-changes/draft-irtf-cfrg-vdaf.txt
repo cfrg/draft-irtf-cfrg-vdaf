@@ -5238,10 +5238,10 @@ Table of Contents
    encoded_prefixes = bytearray()
    for prefix in prefixes:
        for chunk in itertools.batched(prefix, 8):
-           byte = 0
+           byte_out = 0
            for bit_position, bit in enumerate(chunk):
-               byte |= bit << (7 - bit_position)
-           encoded_prefixes.append(byte)
+               byte_out |= bit << (7 - bit_position)
+           encoded_prefixes.append(byte_out)
 
    Decoding involves the following procedure:
 
