@@ -4503,8 +4503,8 @@ Table of Contents
          random by the Client (see Section 9.2).
 
    *  idpf.eval(agg_id: int, public_share: PublicShare, key: bytes,
-      level: int, prefixes: tuple[tuple[bool, ...], ...], nonce: bytes)
-      -> Output is the deterministic, stateless IDPF-key evaluation
+      level: int, prefixes: Sequence[tuple[bool, ...]], nonce: bytes) ->
+      Output is the deterministic, stateless IDPF-key evaluation
       algorithm run by each Aggregator.  Its inputs are the Aggregator's
       unique identifier, the public share distributed to all of the
       Aggregators, the Aggregator's IDPF key, the "level" at which to
@@ -5239,7 +5239,7 @@ Table of Contents
    for prefix in prefixes:
        for chunk in itertools.batched(prefix, 8):
            byte_out = 0
-           for bit_position, bit in enumerate(chunk):
+           for (bit_position, bit) in enumerate(chunk):
                byte_out |= bit << (7 - bit_position)
            encoded_prefixes.append(byte_out)
 
