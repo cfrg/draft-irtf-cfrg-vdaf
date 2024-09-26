@@ -68,13 +68,13 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
     # ===================================================================
     def gen(
             self,
-            alpha: int,
+            alpha: tuple[bool, ...],
             beta_inner: list[list[Field64]],
             beta_leaf: list[Field255],
             nonce: bytes,
             rand: bytes) -> tuple[list[CorrectionWord], list[bytes]]:
-        if alpha not in range(2 ** self.BITS):
-            raise ValueError("alpha out of range")
+        if len(alpha) != self.BITS:
+            raise ValueError("incorrect alpha length")
         if len(beta_inner) != self.BITS - 1:
             raise ValueError("incorrect beta_inner length")
         if len(rand) != self.RAND_SIZE:
@@ -91,7 +91,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         ctrl = [Field2(0), Field2(1)]
         public_share = []
         for level in range(self.BITS):
-            keep = (alpha >> (self.BITS - level - 1)) & 1
+            keep = int(alpha[level])
             lose = 1 - keep
             bit = Field2(keep)
 
@@ -155,7 +155,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             public_share: list[CorrectionWord],
             key: bytes,
             level: int,
-            prefixes: Sequence[int],
+            prefixes: Sequence[tuple[bool, ...]],
             nonce: bytes) -> list[list[Field64]] | list[list[Field255]]:
         if agg_id not in range(self.SHARES):
             raise ValueError('aggregator id out of range')
@@ -166,8 +166,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
 
         out_share = []
         for prefix in prefixes:
-            if prefix not in range(2 ** (level + 1)):
-                raise ValueError('prefix out of range')
+            if len(prefix) != level + 1:
+                raise ValueError('incorrect prefix length')
 
             # The Aggregator's output share is the value of a node of
             # the IDPF tree at the given `level`. The node's value is
@@ -178,7 +178,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             ctrl = Field2(agg_id)
             y: FieldVec
             for current_level in range(level + 1):
-                bit = (prefix >> (level - current_level)) & 1
+                bit = int(prefix[current_level])
 
                 # Implementation note: typically the current round of
                 # candidate prefixes would have been derived from

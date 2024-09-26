@@ -1,5 +1,16 @@
 {
-    "alpha": "0",
+    "alpha": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+    ],
     "beta_inner": [
         [
             "0",

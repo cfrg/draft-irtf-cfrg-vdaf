@@ -4220,21 +4220,13 @@ test vectors can be found in {{test-vectors}}.
 ## Incremental Distributed Point Functions (IDPFs) {#idpf}
 
 An IDPF is defined over a domain of size `2^BITS`, where `BITS` is a constant.
-Indices into the IDPF tree are encoded as integers in `range(2**BITS)`. (In
-Poplar1, each Client's bit string is encoded as an index; see
-{{poplar1-idpf-index-encoding}} for details.) The Client specifies an index
-`alpha` and a vector of values `beta`, one for each "level" `L` in
-`range(BITS)`. The key generation algorithm generates one IDPF "key" for each
-Aggregator. When evaluated at level `L` and index `0 <= prefix < 2^L`, each
-IDPF key returns an additive share of `beta[L]` if `prefix` is the `L`-bit
-prefix of `alpha` and shares of zero otherwise.
-
-An index `x` is defined to be a prefix of another index `y` as follows. Let
-`LSB(x, L)` denote the least significant `L` bits of positive integer `x`. A
-positive integer `0 <= x < 2^L` is defined to be the length-`L` prefix of
-positive integer `0 <= y < 2^BITS` if `LSB(x, L)` is equal to the most
-significant `L` bits of `LSB(y, BITS)`, For example, 6 (110 in binary) is the
-length-3 prefix of 25 (11001), but 7 (111) is not.
+Indices into the IDPF tree are bit strings. (In Poplar1, each Client's bit
+string is an index; see {{poplar1-idpf-index-encoding}} for details.) The Client
+specifies an index `alpha` and a vector of values `beta`, one for each "level"
+`L` in `range(BITS)`. The key generation algorithm generates one IDPF "key" for
+each Aggregator. When evaluated at level `L` and index `prefix`, each IDPF key
+returns an additive share of `beta[L]` if `prefix` is the `L`-bit prefix of
+`alpha` and shares of zero otherwise.
 
 Each of the programmed points `beta` is a vector of elements of some finite
 field. We distinguish two types of fields: one for inner nodes (denoted
@@ -4249,10 +4241,10 @@ In the remainder we write `Output` as shorthand for the type
 denotes either a vector of inner node field elements or leaf node field
 elements.) The scheme is comprised of the following algorithms:
 
-* `idpf.gen(alpha: int, beta_inner: list[list[FieldInner]], beta_leaf:
+* `idpf.gen(alpha: tuple[bool, ...], beta_inner: list[list[FieldInner]], beta_leaf:
   list[FieldLeaf], nonce: bytes, rand: bytes) -> tuple[PublicShare,
   list[bytes]]` is the randomized IDPF-key generation algorithm. Its inputs are
-  the index `alpha` the values `beta`, and a nonce string.
+  the index `alpha`, the values `beta`, and a nonce string.
 
   The output is a public part (of type `PublicShare`) that is sent to all
   Aggregators and a vector of private IDPF keys, one for each aggregator. The
@@ -4261,7 +4253,7 @@ elements.) The scheme is comprised of the following algorithms:
 
   Pre-conditions:
 
-    * `alpha` MUST be in `range(2**BITS)`.
+    * `alpha` MUST have length `BITS`.
     * `beta_inner` MUST have length `BITS - 1`.
     * `beta_inner[level]` MUST have length `VALUE_LEN` for each `level` in
        `range(BITS - 1)`.
@@ -4271,12 +4263,13 @@ elements.) The scheme is comprised of the following algorithms:
       random by the Client (see {{nonce-requirements}}).
 
 * `idpf.eval(agg_id: int, public_share: PublicShare, key: bytes, level: int,
-  prefixes: tuple[int, ...], nonce: bytes) -> Output` is the deterministic,
-  stateless IDPF-key evaluation algorithm run by each Aggregator. Its inputs
-  are the Aggregator's unique identifier, the public share distributed to all
-  of the Aggregators, the Aggregator's IDPF key, the "level" at which to
-  evaluate the IDPF, the sequence of candidate prefixes, and a nonce string. It
-  returns the share of the value corresponding to each candidate prefix.
+  prefixes: Sequence[tuple[bool, ...]], nonce: bytes) -> Output` is the
+  deterministic, stateless IDPF-key evaluation algorithm run by each Aggregator.
+  Its inputs are the Aggregator's unique identifier, the public share
+  distributed to all of the Aggregators, the Aggregator's IDPF key, the "level"
+  at which to evaluate the IDPF, the sequence of candidate prefixes, and a nonce
+  string. It returns the share of the value corresponding to each candidate
+  prefix.
 
   The output type (i.e., `Output`) depends on the value of `level`: if `level <
   BITS-1`, the output is the value for an inner node, which has type
@@ -4288,7 +4281,7 @@ elements.) The scheme is comprised of the following algorithms:
   * `agg_id` MUST be in `range(SHARES)` and match the index of `key` in
     the sequence of IDPF keys output by the Client.
   * `level` MUST be in `range(0, BITS)`.
-  * Each `prefix` in `prefixes` MUST be distinct and in `range(2**level)`.
+  * Each `prefix` in `prefixes` MUST be distinct and have length `level + 1`.
 
 In addition, the following method is derived for each concrete `Idpf`:
 
@@ -4304,9 +4297,9 @@ def current_field(
 Finally, an implementation note. The interface for IDPFs specified here is
 stateless, in the sense that there is no state carried between IDPF evaluations.
 This is to align the IDPF syntax with the VDAF abstraction boundary, which does
-not include shared state across across VDAF evaluations. In practice, of course,
-it will often be beneficial to expose a stateful API for IDPFs and carry the
-state across evaluations. See {{idpf-bbcggi21}} for details.
+not include shared state across VDAF evaluations. In practice, of course, it
+will often be beneficial to expose a stateful API for IDPFs and carry the state
+across evaluations. See {{idpf-bbcggi21}} for details.
 
 | Parameter   | Description               |
 |:------------|:--------------------------|
@@ -4326,19 +4319,27 @@ state across evaluations. See {{idpf-bbcggi21}} for details.
 ### Encoding inputs as indices {#poplar1-idpf-index-encoding}
 
 How data are represented as IDPF indices is up to the application. When the
-inputs are fixed-length byte strings, the most natural choice of encoder is
-`from_be_bytes()`. This ensures that, when a string is a prefix of another, so
-too is its index. (Index prefixes are defined in {{idpf}}). For example,
+inputs are fixed-length byte strings, the most natural choice of representation
+is as a bit string formed from all the bits of the byte string, first ordered by
+byte position, then ordered from most significant bit to least significant bit
+within each byte. This ensures that, when a byte string is a prefix of another,
+so too is its corresponding index. (Index prefixes are defined in {{idpf}}.) For
+example,
 
-~~~ python
-from_be_bytes(b"\x01\x02") == 0x0102
+~~~
+Byte string: 01 02
+Bit string: 00000001 00000010
 ~~~
 
 is a prefix of
 
-~~~ python
-from_be_bytes(b"\x01\x02\x03") == 0x010203
 ~~~
+Byte string: 01 02 03
+Bit string: 00000001 00000010 00000011
+~~~
+
+Additionally, lexicographic ordering is preserved by this mapping from a byte
+string to a bit string.
 
 When the inputs are variable length, it is necessary to pad each input to some
 fixed length. Further, the padding scheme must be non-ambiguous. For example,
@@ -4362,9 +4363,9 @@ subsections. These methods make use of constants defined in {{poplar1-const}}.
 | `NONCE_SIZE`      | `16`                                 |
 | `ROUNDS`          | `2`                                  |
 | `SHARES`          | `2`                                  |
-| `Measurement`     | `int`                                |
-| `AggParam`        | `tuple[int, Sequence[int]]`          |
-| `PublicShare`     | same as the IDPF                    |
+| `Measurement`     | `tuple[bool, ...]`                   |
+| `AggParam`        | `tuple[int, Sequence[tuple[bool, ...]]]` |
+| `PublicShare`     | same as the IDPF                     |
 | `InputShare`      | `tuple[bytes, bytes, list[FieldInner], list[FieldLeaf]]` |
 | `OutShare`        | `FieldVec`                           |
 | `AggShare`        | `FieldVec`                           |
@@ -4406,7 +4407,7 @@ follows.
 ~~~ python
 def shard(
         self,
-        measurement: int,
+        measurement: tuple[bool, ...],
         nonce: bytes,
         rand: bytes,
     ) -> tuple[Poplar1PublicShare, list[Poplar1InputShare]]:
@@ -4699,14 +4700,13 @@ suffixes of the previous level's prefixes.
 
 ~~~ python
 def get_ancestor(
-        index: int,
-        this_level: int,
-        last_level: int) -> int:
+        index: tuple[bool, ...],
+        level: int) -> tuple[bool, ...]:
     """
     Helper function to determine the prefix of `index` at
-    `last_level`.
+    `level`.
     """
-    return index >> (this_level - last_level)
+    return index[:level + 1]
 
 def is_valid(
         self,
@@ -4730,7 +4730,7 @@ def is_valid(
 
     # Check that prefixes are suffixes of the last level's prefixes.
     for prefix in prefixes:
-        last_prefix = get_ancestor(prefix, level, last_level)
+        last_prefix = get_ancestor(prefix, last_level)
         if last_prefix not in last_prefixes_set:
             # Current prefix not a suffix of last level's prefixes.
             return False
@@ -4967,31 +4967,39 @@ The aggregation parameter is encoded as follows:
 struct {
     uint16_t level;
     uint32_t num_prefixes;
-    opaque packed_prefixes[packed_len];
+    opaque encoded_prefixes[prefixes_len];
 } Poplar1AggParam;
 ~~~
 
 The fields in this struct are: `level`, the level of the IDPF tree of each
 prefixes; `num_prefixes`, the number of prefixes to evaluate; and
-`packed_prefixes`, the sequence of prefixes packed into a byte string of
-length `packed_len`. The prefixes are encoded with the following procedure:
+`encoded_prefixes`, the sequence of prefixes encoded into a byte string of
+length `prefixes_len`. The prefixes are encoded with the following procedure:
 
 ~~~ python
-packed = 0
-for (i, prefix) in enumerate(prefixes):
-    packed |= prefix << ((level + 1) * i)
-packed_len = ((level + 1) * len(prefixes) + 7) // 8
-packed_prefixes = to_be_bytes(packed, packed_len)
+prefixes_len = ((level + 1) + 7) // 8 * len(prefixes)
+encoded_prefixes = bytearray()
+for prefix in prefixes:
+    for chunk in itertools.batched(prefix, 8):
+        byte_out = 0
+        for (bit_position, bit) in enumerate(chunk):
+            byte_out |= bit << (7 - bit_position)
+        encoded_prefixes.append(byte_out)
 ~~~
 
 Decoding involves the following procedure:
 
 ~~~ python
-packed = from_be_bytes(packed_prefixes)
 prefixes = []
-m = 2 ** (level + 1) - 1
-for i in range(num_prefixes):
-    prefixes.append(packed >> ((level + 1) * i) & m)
+bytes_per_prefix = ((level + 1) + 7) // 8
+for chunk in itertools.batched(encoded_prefixes, bytes_per_prefix):
+    prefix = []
+    for i in range(level + 1):
+        byte_index = i // 8
+        bit_offset = 7 - (i % 8)
+        bit = (chunk[byte_index] >> bit_offset) & 1 != 0
+        prefix.append(bit)
+    prefixes.append(tuple(prefix))
 ~~~
 
 Implementation note: the aggregation parameter includes the level of the IDPF
@@ -5038,13 +5046,13 @@ the field `GF(2)`.
 ~~~ python
 def gen(
         self,
-        alpha: int,
+        alpha: tuple[bool, ...],
         beta_inner: list[list[Field64]],
         beta_leaf: list[Field255],
         nonce: bytes,
         rand: bytes) -> tuple[list[CorrectionWord], list[bytes]]:
-    if alpha not in range(2 ** self.BITS):
-        raise ValueError("alpha out of range")
+    if len(alpha) != self.BITS:
+        raise ValueError("incorrect alpha length")
     if len(beta_inner) != self.BITS - 1:
         raise ValueError("incorrect beta_inner length")
     if len(rand) != self.RAND_SIZE:
@@ -5061,7 +5069,7 @@ def gen(
     ctrl = [Field2(0), Field2(1)]
     public_share = []
     for level in range(self.BITS):
-        keep = (alpha >> (self.BITS - level - 1)) & 1
+        keep = int(alpha[level])
         lose = 1 - keep
         bit = Field2(keep)
 
@@ -5130,7 +5138,7 @@ def eval(
         public_share: list[CorrectionWord],
         key: bytes,
         level: int,
-        prefixes: Sequence[int],
+        prefixes: Sequence[tuple[bool, ...]],
         nonce: bytes) -> list[list[Field64]] | list[list[Field255]]:
     if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
@@ -5141,8 +5149,8 @@ def eval(
 
     out_share = []
     for prefix in prefixes:
-        if prefix not in range(2 ** (level + 1)):
-            raise ValueError('prefix out of range')
+        if len(prefix) != level + 1:
+            raise ValueError('incorrect prefix length')
 
         # The Aggregator's output share is the value of a node of
         # the IDPF tree at the given `level`. The node's value is
@@ -5153,7 +5161,7 @@ def eval(
         ctrl = Field2(agg_id)
         y: FieldVec
         for current_level in range(level + 1):
-            bit = (prefix >> (level - current_level)) & 1
+            bit = int(prefix[current_level])
 
             # Implementation note: typically the current round of
             # candidate prefixes would have been derived from
