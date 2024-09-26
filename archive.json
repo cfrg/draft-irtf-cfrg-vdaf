@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-24T00:55:36.944655+00:00",
+  "timestamp": "2024-09-26T00:55:05.111589+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5155,7 +5155,7 @@
       ],
       "body": "When thinking about Prio3 robustness (ia.cr/2023/130, Theorem 1) we (err, I, really) have been ignoring the term that depends on the size of the seed: $(q_\\text{RG} + {q_{\\text{Prep}}}^2) / 2^{\\kappa -1}$\r\n\r\n* $q_\\text{RG}$ - the number of random oracle queries (XofTurboShake128 is modeled as an RO)\r\n* $q_\\text{Prep}$ - the number of (potentially malicious) reports consumed in a given DAP task\r\n* $\\kappa$ - the seed size (16 bytes for XofTurboShake128)\r\n\r\nAs @albertpl pointed out in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/318#discussion_r1416669600, the bound becomes vacuous after $q_\\text{Prep}=2^{63.5}$ reports (since $(2^{63.5})^2 = 2^{\\kappa -1}$).\r\n\r\nWhile it's doubtful that we'd ever consume so many reports in a single task, it's not a bad idea to have a more conservative safety margin. 32 bytes seems like a reasonable choice.",
       "createdAt": "2023-12-07T22:57:31Z",
-      "updatedAt": "2024-09-05T20:49:54Z",
+      "updatedAt": "2024-09-25T18:50:42Z",
       "closedAt": "2024-09-05T20:49:54Z",
       "comments": [
         {
@@ -5171,6 +5171,13 @@
           "body": "After pondering the previous PR, we decided it would be safer to also bump the joint randomness hints, at which point it's simpler to bump the seed size in all cases. See https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/407#issuecomment-2302597582.",
           "createdAt": "2024-08-27T18:54:25Z",
           "updatedAt": "2024-08-27T18:59:44Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The paper has been updated: https://eprint.iacr.org/archive/2023/130/20240925:184929",
+          "createdAt": "2024-09-25T18:50:41Z",
+          "updatedAt": "2024-09-25T18:50:41Z"
         }
       ]
     },
@@ -5864,7 +5871,7 @@
       ],
       "body": "As discussed in the 2024-09-06 call, we should change the IDPF gen() and eval() methods to take in bit strings (lists of booleans) instead of bigints. Iterating over the bits of the bit string would be clearer than shifting and masking an integer. We'll likewise need to change the recommendation for handling byte string, which currently suggests `from_be_bytes()`, and rewrite the prefix packing done in the aggregation parameter encoding/decoding.",
       "createdAt": "2024-09-06T17:16:55Z",
-      "updatedAt": "2024-09-17T13:29:05Z",
+      "updatedAt": "2024-09-25T20:39:03Z",
       "closedAt": null,
       "comments": [
         {
@@ -5901,6 +5908,13 @@
           "body": "No preference for me :)",
           "createdAt": "2024-09-17T13:29:03Z",
           "updatedAt": "2024-09-17T13:29:03Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Another reason to treat the MSB of a byte as the first bit: this results in lexicographic ordering of bit strings matching lexicographic ordering of the original byte strings. Since we have a requirement in Poplar1 that candidate prefixes be provided in order, this can make sorting and checking that order simpler and cheaper.",
+          "createdAt": "2024-09-25T20:39:02Z",
+          "updatedAt": "2024-09-25T20:39:02Z"
         }
       ]
     },
@@ -6003,14 +6017,35 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "editorial",
         "draft-13"
       ],
       "body": "The current aggregation API takes a sequence of output shares and returns an aggregate share. This envisions VDAFs for which the aggregate result depends on the order in which output shares are aggregated, but so far this isn't true of anything we've come up with. In fact, DAP (implicitly?) requires a VDAF for which output shares can be aggregated in any order. (The Leader and Helper may not aggregate output shares in the same order.)\r\n\r\nOne problem with the current API is that it doesn't align well with practice. Normally what we expect Aggregators to do is aggregate in a \"streaming\" fashion, meaning output shares are not stored individually, but accumulated into an existing aggregate share as soon as they're ready to be aggregated.\r\n\r\nIn fact, we'd like to make this \"streaming aggregation\" normative in DAP: https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/581.\r\n\r\nHowever in order to do this, we'll need to modify the VDAF syntax. There's a few things we could do, but probably the simplest is to split `vdaf.aggregate()` into the following functions:\r\n\r\n* `vdaf.agg_init() -> AggShare`: returns an empty aggregate share.\r\n* `vdaf.agg_update(agg_share: AggShare, out_share) -> AggShare`: updates an aggregate share with the incoming output share.",
       "createdAt": "2024-09-23T22:53:16Z",
-      "updatedAt": "2024-09-23T22:53:25Z",
+      "updatedAt": "2024-09-24T22:33:31Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I support this change and the corresponding changes in DAP (https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/581). However I am concerned about the potential for type confusion here. In Prio3, it so happens that output shares, aggregate shares and aggregate results have the same \"shape\" and thus can be summed together naively to yield semantically meaningful and useful results. But we shouldn't bake that assumption into the abstract VDAF interface, because I don't think it will hold for all VDAFs. Indeed, for Poplar1, aggregate shares and aggregate results already have a different type (`FieldVec` and `list[int]`, respectively [1](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-8.2)).\r\n\r\nSo I propose adding a little bit more to the VDAF interface to accommodate VDAFs that don't work like Prio3 and to steer implementations away from type confusion.\r\n\r\n- `vdaf.aggregate_init(agg_param: AggParam) -> IntermediateAggShare` returns an empty intermediate aggregate share. `IntermediateAggShare` is an associated type on the VDAF distinct from `OutShare` or `AggShare`.\r\n- `vdaf.accumulate(agg_param: AggParam, intermediate: IntermediateAggShare, out_share: OutShare) -> IntermediateAggShare` accumulates an output share into an intermediate aggregate share.\r\n- `vdaf.merge(agg_param: AggParam, intermediates: list[IntermediateAggShare]) -> AggShare` merges one or more intermediate aggregate shares into an aggregate share. Aggregate shares may then be unsharded into an aggregate result using the existing `vdaf.unshard` function.\r\n\r\nSome discussion:\r\n- I believe all these associated functions need to take the aggregation parameter, as `vdaf.aggregate` and `vdaf.unshard` already do.\r\n- An intermediate aggregate share is what DAP implementations would construct for each \"batch bucket\", as discussed in https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/581.\r\n- I use the verb \"accumulate\" instead of \"update\". I think it's more specific and descriptive, and matches the [existing API in `libprio`](https://docs.rs/prio/latest/prio/vdaf/trait.Aggregatable.html#tymethod.accumulate).\r\n- The verb \"merge\" also matches the [existing `libprio` API](https://docs.rs/prio/latest/prio/vdaf/trait.Aggregatable.html#tymethod.merge).\r\n- We could do away with [`vdaf.aggregate`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-5.4) if we do the rest of this stuff, but we could also keep it for use cases besides streaming DAP.\r\n\r\nFinally, I don't think the \"editorial\" label is appropriate here: we're discussing some changes to VDAF that would result in changes to implementations.",
+          "createdAt": "2024-09-24T17:49:39Z",
+          "updatedAt": "2024-09-24T17:51:03Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm partly with you, but I think your proposal is more complicated than we need. \r\n\r\n> In Prio3, it so happens that output shares, aggregate shares and aggregate results have the same \"shape\" and thus can be summed together naively to yield semantically meaningful and useful results. But we shouldn't bake that assumption into the abstract VDAF interface, because I don't think it will hold for all VDAFs. Indeed, for Poplar1, aggregate shares and aggregate results already have a different type (`FieldVec` and `list[int]`, respectively [1](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-8.2)).\r\n\r\nFor Prio3 and Poplar1, the type of the output share is the same as the type of the aggregate share. It's true that the aggregate result is different for both, but I don't see how this is relevant to this case.\r\n\r\n\r\n\r\n> So I propose adding a little bit more to the VDAF interface to accommodate VDAFs that don't work like Prio3 and to steer implementations away from type confusion.\r\n> \r\n>     * `vdaf.aggregate_init(agg_param: AggParam) -> IntermediateAggShare` returns an empty intermediate aggregate share. `IntermediateAggShare` is an associated type on the VDAF distinct from `OutShare` or `AggShare`.\r\n> \r\n>     * `vdaf.accumulate(agg_param: AggParam, intermediate: IntermediateAggShare, out_share: OutShare) -> IntermediateAggShare` accumulates an output share into an intermediate aggregate share.\r\n> \r\n>     * `vdaf.merge(agg_param: AggParam, intermediates: list[IntermediateAggShare]) -> AggShare` merges one or more intermediate aggregate shares into an aggregate share. Aggregate shares may then be unsharded into an aggregate result using the existing `vdaf.unshard` function.\r\n\r\nWhy do we need to distinguish between `IntermedaiteAggShare` and `AggShare`? Why not just do `merge(agg_share: AggShare, agg_shares: list[AggShare]) -> AggShare`? I'm wary of adding yet another intermediate type to abstract around what amounts to adding vectors in any VDAF we've thought of so far.\r\n\r\n\r\n\r\n>     * I use the verb \"accumulate\" instead of \"update\". I think it's more specific and descriptive, and matches the [existing API in `libprio`](https://docs.rs/prio/latest/prio/vdaf/trait.Aggregatable.html#tymethod.accumulate).\r\n> \r\n>     * The verb \"merge\" also matches the [existing `libprio` API](https://docs.rs/prio/latest/prio/vdaf/trait.Aggregatable.html#tymethod.merge).\r\n\r\nWorks for me.\r\n\r\n> Finally, I don't think the \"editorial\" label is appropriate here: we're discussing some changes to VDAF that would result in changes to implementations.\r\n\r\nI removed the label, however note that the change is not wire breaking and I don't believe it's mandatory for an implementation to match the API.\r\n",
+          "createdAt": "2024-09-24T18:04:49Z",
+          "updatedAt": "2024-09-24T18:04:49Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I can live with:\r\n\r\n- `vdaf.aggregate_init(agg_param: AggParam) -> AggShare`\r\n- `vdaf.accumulate(agg_param: AggParam, share: AggShare, out_share: OutShare) -> AggShare`\r\n- `vdaf.merge(agg_param: AggParam, shares: list[AggShare]) -> AggShare`\r\n\r\nBut the risk is that there may be some future VDAF that won't fit this shape. I'm comfortable accepting that risk.",
+          "createdAt": "2024-09-24T22:33:30Z",
+          "updatedAt": "2024-09-24T22:33:30Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -36688,7 +36723,7 @@
       "id": "PR_kwDOGKuqOc570vKV",
       "title": "tls-presentation: Fix limits for length-prefixed values",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/428",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36698,14 +36733,14 @@
       ],
       "body": "Assume the length of the encoded prep share is at least 1 byte for every VDAF; otherwise there would be no mechanism to convey validity. The prep message, however, may be empty, as it is for some Prio3 variants.",
       "createdAt": "2024-09-17T22:33:26Z",
-      "updatedAt": "2024-09-23T19:40:09Z",
+      "updatedAt": "2024-09-25T14:50:33Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/tls-syntax-limits",
       "headRefOid": "be6a6e016bb5470f4b0ef12eec6d9db4b0f84706",
-      "closedAt": null,
+      "closedAt": "2024-09-25T14:50:33Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -36716,6 +36751,13 @@
           "body": "Let's hold off on merging this until we settle https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/110.",
           "createdAt": "2024-09-23T18:49:55Z",
           "updatedAt": "2024-09-23T18:49:55Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "It looks like the most likely outcome for DAP is that we'll just set all lower limits to 0: https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/pull/587. I'm therefore closing this.",
+          "createdAt": "2024-09-25T14:50:33Z",
+          "updatedAt": "2024-09-25T14:50:33Z"
         }
       ],
       "reviews": [
