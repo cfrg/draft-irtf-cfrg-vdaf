@@ -27,8 +27,8 @@ class TestDaf(
 
     def shard(
             self,
-            measurement: int,
             _ctx: bytes,
+            measurement: int,
             nonce: bytes,
             rand: bytes) -> tuple[None, list[Field128]]:
         if len(nonce) != self.NONCE_SIZE:
@@ -57,9 +57,9 @@ class TestDaf(
 
     def prep(
             self,
+            _ctx: bytes,
             _agg_id: int,
             _agg_param: None,
-            _ctx: bytes,
             nonce: bytes,
             _public_share: None,
             input_share: Field128) -> Field128:
@@ -114,8 +114,8 @@ class TestDafCase(unittest.TestCase):
         # Run the DAF on the set of measurements.
         nonces = [gen_rand(daf.NONCE_SIZE) for _ in range(len(measurements))]
         agg_result = run_daf(daf,
-                             agg_param,
                              b'some application',
+                             agg_param,
                              measurements,
                              nonces)
         self.assertEqual(agg_result, expected_agg_result)
