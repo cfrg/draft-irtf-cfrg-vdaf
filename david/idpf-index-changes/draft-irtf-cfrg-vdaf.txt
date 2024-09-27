@@ -4586,7 +4586,7 @@ Table of Contents
    most significant bit to least significant bit within each byte.  This
    ensures that, when a byte string is a prefix of another, so too is
    its corresponding index.  (Index prefixes are defined in
-   Section 8.1).  For example,
+   Section 8.1.)  For example,
 
    Byte string: 01 02
    Bit string: 00000001 00000010
