@@ -351,14 +351,15 @@ class Prio3(
             leader_meas_share = vec_sub(leader_meas_share,
                                         helper_meas_share)
             k_joint_rand_parts.append(self.joint_rand_part(
-                ctx, j + 1, k_helper_blinds[j], helper_meas_share, nonce))
+                ctx, j + 1, k_helper_blinds[j],
+                helper_meas_share, nonce))
         k_joint_rand_parts.insert(0, self.joint_rand_part(
             ctx, 0, k_leader_blind, leader_meas_share, nonce))
 
         # Generate the proof and shard it into proof shares.
         prove_rands = self.prove_rands(ctx, k_prove)
-        joint_rands = self.joint_rands(ctx,
-                                       self.joint_rand_seed(ctx, k_joint_rand_parts))
+        joint_rands = self.joint_rands(
+            ctx, self.joint_rand_seed(ctx, k_joint_rand_parts))
         leader_proofs_share = []
         for _ in range(self.PROOFS):
             prove_rand, prove_rands = front(
