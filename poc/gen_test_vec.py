@@ -15,7 +15,7 @@ TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH',
 # IDPF
 
 def gen_test_vec_for_idpf(idpf: Idpf,
-                          alpha: int,
+                          alpha: tuple[bool, ...],
                           test_vec_instance: int) -> None:
     beta_inner = []
     for level in range(idpf.BITS - 1):
@@ -32,7 +32,7 @@ def gen_test_vec_for_idpf(idpf: Idpf,
     printable_keys = [key.hex() for key in keys]
     test_vec = {
         'bits': int(idpf.BITS),
-        'alpha': str(alpha),
+        'alpha': alpha,
         'beta_inner': printable_beta_inner,
         'beta_leaf': printable_beta_leaf,
         'nonce': nonce.hex(),
@@ -164,23 +164,47 @@ if __name__ == '__main__':
     )
 
     # Poplar1
-    tests = [
-        (0, (0, 1)),
-        (1, (0, 1, 2, 3)),
-        (2, (0, 2, 4, 6)),
-        (3, (1, 3, 5, 7, 9, 13, 15)),
+    tests: list[tuple[int, tuple[tuple[bool, ...], ...]]] = [
+        (0, ((False,), (True,))),
+        (1, ((False, False), (False, True), (True, False), (True, True))),
+        (
+            2,
+            (
+                (False, False, False),
+                (False, True, False),
+                (True, False, False),
+                (True, True, False),
+            ),
+        ),
+        (
+            3,
+            (
+                (False, False, False, True),
+                (False, False, True, True),
+                (False, True, False, True),
+                (False, True, True, True),
+                (True, False, False, True),
+                (True, True, False, True),
+                (True, True, True, True),
+            ),
+        ),
     ]
+    measurements: list[tuple[bool, ...]] = [(True, True, False, True)]
     for (test_level, prefixes) in tests:
         gen_test_vec_for_vdaf(
             TEST_VECTOR_PATH,
             vdaf_poplar1.Poplar1(4),
             (test_level, prefixes),
-            [0b1101],
+            measurements,
             test_level,
         )
 
     # IdpfBBCGGI21
-    gen_test_vec_for_idpf(idpf_bbcggi21.IdpfBBCGGI21(2, 10), 0, 0)
+    gen_test_vec_for_idpf(
+        idpf_bbcggi21.IdpfBBCGGI21(2, 10),
+        (False, False, False, False, False, False, False, False, False, False),
+        0,
+    )
 
     # XOFs
     gen_test_vec_for_xof(xof.XofTurboShake128)

@@ -1,5 +1,6 @@
 """The Poplar1 VDAF."""
 
+import itertools
 from typing import Any, Optional, Sequence, TypeAlias, cast
 
 from vdaf_poc.common import (byte, from_be_bytes, front, to_be_bytes, vec_add,
@@ -17,7 +18,7 @@ USAGE_VERIFY_RAND = 4
 FieldVec: TypeAlias = list[Field64] | list[Field255]
 Poplar1AggParam: TypeAlias = tuple[
     int,  # level
-    Sequence[int],  # prefixes
+    Sequence[tuple[bool, ...]],  # prefixes
 ]
 Poplar1PublicShare: TypeAlias = list[CorrectionWord]
 Poplar1InputShare: TypeAlias = tuple[
@@ -35,7 +36,7 @@ Poplar1PrepState: TypeAlias = tuple[
 
 class Poplar1(
         Vdaf[
-            int,  # Measurement, `range(0, 2 ** BITS)`
+            tuple[bool, ...],  # Measurement, of length `BITS`
             Poplar1AggParam,  # AggParam
             Poplar1PublicShare,  # PublicShare
             Poplar1InputShare,  # InputShare
@@ -71,7 +72,7 @@ class Poplar1(
     # ===================================================================
     def shard(
         self,
-        measurement: int,
+        measurement: tuple[bool, ...],
         nonce: bytes,
         rand: bytes,
     ) -> tuple[Poplar1PublicShare, list[Poplar1InputShare]]:
@@ -210,7 +211,7 @@ class Poplar1(
 
         # Check that prefixes are suffixes of the last level's prefixes.
         for prefix in prefixes:
-            last_prefix = get_ancestor(prefix, level, last_level)
+            last_prefix = get_ancestor(prefix, last_level)
             if last_prefix not in last_prefixes_set:
                 # Current prefix not a suffix of last level's prefixes.
                 return False
@@ -416,13 +417,17 @@ class Poplar1(
         # should be limited to 69 columns after de-indenting, or 77 columns
         # before de-indenting, to avoid warnings from xml2rfc.
         # ===================================================================
-        packed = 0
-        for (i, prefix) in enumerate(prefixes):
-            packed |= prefix << ((level + 1) * i)
-        packed_len = ((level + 1) * len(prefixes) + 7) // 8
-        packed_prefixes = to_be_bytes(packed, packed_len)
+        prefixes_len = ((level + 1) + 7) // 8 * len(prefixes)
+        encoded_prefixes = bytearray()
+        for prefix in prefixes:
+            for chunk in itertools.batched(prefix, 8):
+                byte_out = 0
+                for (bit_position, bit) in enumerate(chunk):
+                    byte_out |= bit << (7 - bit_position)
+                encoded_prefixes.append(byte_out)
         # NOTE: End of excerpt.
-        encoded += packed_prefixes
+        assert len(encoded_prefixes) == prefixes_len
+        encoded += encoded_prefixes
         return encoded
 
     def decode_agg_param(self, encoded: bytes) -> Poplar1AggParam:
@@ -430,17 +435,22 @@ class Poplar1(
         level = from_be_bytes(encoded_level)
         encoded_num_prefixes, encoded = front(4, encoded)
         num_prefixes = from_be_bytes(encoded_num_prefixes)
-        packed_len = ((level + 1) * num_prefixes + 7) // 8
-        packed_prefixes, encoded = front(packed_len, encoded)
+        prefixes_len = ((level + 1) + 7) // 8 * num_prefixes
+        encoded_prefixes, encoded = front(prefixes_len, encoded)
         # NOTE: The following lines are exerpted in the document. Their width
         # should be limited to 69 columns after de-indenting, or 77 columns
         # before de-indenting, to avoid warnings from xml2rfc.
         # ===================================================================
-        packed = from_be_bytes(packed_prefixes)
         prefixes = []
-        m = 2 ** (level + 1) - 1
-        for i in range(num_prefixes):
-            prefixes.append(packed >> ((level + 1) * i) & m)
+        bytes_per_prefix = ((level + 1) + 7) // 8
+        for chunk in itertools.batched(encoded_prefixes, bytes_per_prefix):
+            prefix = []
+            for i in range(level + 1):
+                byte_index = i // 8
+                bit_offset = 7 - (i % 8)
+                bit = (chunk[byte_index] >> bit_offset) & 1 != 0
+                prefix.append(bit)
+            prefixes.append(tuple(prefix))
         # NOTE: End of excerpt.
         if len(encoded) != 0:
             raise ValueError('trailing bytes')
@@ -487,11 +497,10 @@ def encode_idpf_field_vec(vec: FieldVec) -> bytes:
 # 69 columns, to avoid warnings from xml2rfc.
 # ===================================================================
 def get_ancestor(
-        index: int,
-        this_level: int,
-        last_level: int) -> int:
+        index: tuple[bool, ...],
+        level: int) -> tuple[bool, ...]:
     """
     Helper function to determine the prefix of `index` at
-    `last_level`.
+    `level`.
     """
-    return index >> (this_level - last_level)
+    return index[:level + 1]

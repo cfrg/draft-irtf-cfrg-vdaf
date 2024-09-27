@@ -2,8 +2,12 @@
     "agg_param": [
         0,
         [
-            0,
-            1
+            [
+                false
+            ],
+            [
+                true
+            ]
         ]
     ],
     "agg_result": [
@@ -21,7 +25,12 @@
                 "000102030405060708090a0b0c0d0e0f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3fa7d39cbdaa0b9575d5ccf8a191e96adda32231324cca74ffbf77267f2b6a331bef52b3994bd943c15bf8288a26ef27e634e3ae333d518bddc60ba9d75050af1d01e58c9ab35b049eaf34cf790662ed1358b3cee6f01e3c263aaae44f4f58640c7a7b0cb242d815f40bbf9b0d82cbdb06",
                 "101112131415161718191a1b1c1d1e1f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f345c033af004f120dedfb7564a5b370cdfe2af5efe6ec314a9a403136de0fa7e9b9a08628fefe66c9db7fea91bc06a03052c9e904241e65650c9433270cba11cfd93f9e12e0b3105b7bff0bb3c452647d6b661c0c2cd11bf2115f3e3245c53f678520668d0d91df3e11847412d0ccf35"
             ],
-            "measurement": 13,
+            "measurement": [
+                true,
+                true,
+                false,
+                true
+            ],
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
                 [
