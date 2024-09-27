@@ -890,6 +890,15 @@ Table of Contents
 
       -  The number of input shares MUST equal SHARES.
 
+   Sharding is bound to a specific "application context".  The
+   application context is a string intended to uniquely identify the
+   higher level protocol that uses the DAF.  This is intended to ensure
+   that aggregation succeeds only if the Clients and Aggregators agree
+   on the application context.  (Preparation binds the application
+   context, too; see Section 4.2.)  Note that, unlike VDAFs (Section 5),
+   there is no explicit signal of disagreement; it may only manifest as
+   a garbled aggregate result.
+
        Client
        ======
 
@@ -1235,6 +1244,15 @@ Table of Contents
       Post-conditions:
 
       -  The number of input shares MUST equal SHARES.
+
+   Like DAFs, sharding is bound to the application context via the ctx
+   string.  Again, this is intended to ensure that aggregation succeeds
+   only if the Clients and Aggregators agree on the application context.
+   Unlike DAFs, however, disagreement on the context should manifest as
+   a failure to validate the report, causing the report to be rejected
+   without garbling the aggregate result.  The application context also
+   provides some defense-in-depth against cross protocol attacks; see
+   Section 9.8.
 
 5.2.  Preparation
 
@@ -5936,7 +5954,10 @@ Table of Contents
        small.  (See Section 9.6.)  The joint randomness derivation is
        bound to both the field (via the algorithm ID) and the number of
        proofs, thereby ensuring that joint randomness derived for weak
-       parameters is not reused for stronger parameters.
+       parameters is not reused for stronger parameters.  In addition,
+       the joint randomness is bound to the application context, meaning
+       any work the attacker does to attack some application is not
+       useful for other applications that use the same parameters.
 
    There are also some important limitations to be aware of.  For
    example, Prio3 provides domain separation between families of

@@ -2320,9 +2320,16 @@ Post-conditions:<a href="#section-4.1-2.1.4" class="pilcrow">¶</a></p>
             </ul>
 </li>
         </ul>
+<p id="section-4.1-3">Sharding is bound to a specific "application context". The application context
+is a string intended to uniquely identify the higher level protocol that uses
+the DAF. This is intended to ensure that aggregation succeeds only if the
+Clients and Aggregators agree on the application context. (Preparation binds
+the application context, too; see <a href="#sec-daf-prepare" class="auto internal xref">Section 4.2</a>.) Note that, unlike VDAFs
+(<a href="#vdaf" class="auto internal xref">Section 5</a>), there is no explicit signal of disagreement; it may only manifest
+as a garbled aggregate result.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <span id="name-the-client-divides-its-meas"></span><div id="shard-flow">
 <figure id="figure-2">
-          <div class="alignLeft art-text artwork" id="section-4.1-3.1">
+          <div class="alignLeft art-text artwork" id="section-4.1-4.1">
 <pre>
     Client
     ======
@@ -2800,6 +2807,13 @@ Post-conditions:<a href="#section-5.1-2.1.4" class="pilcrow">¶</a></p>
             </ul>
 </li>
         </ul>
+<p id="section-5.1-3">Like DAFs, sharding is bound to the application context via the <code>ctx</code> string.
+Again, this is intended to ensure that aggregation succeeds only if the Clients
+and Aggregators agree on the application context. Unlike DAFs, however,
+disagreement on the context should manifest as a failure to validate the
+report, causing the report to be rejected without garbling the aggregate
+result. The application context also provides some defense-in-depth against
+cross protocol attacks; see <a href="#deep" class="auto internal xref">Section 9.8</a>.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-vdaf-prepare">
@@ -8948,7 +8962,7 @@ may consider involving more than two Aggregators as described for example in
 of operation, such as Poplar1.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="defense-in-depth-measures">
+<div id="deep">
 <section id="section-9.8">
         <h3 id="name-defense-in-depth-measures">
 <a href="#section-9.8" class="section-number selfRef">9.8. </a><a href="#name-defense-in-depth-measures" class="section-name selfRef">Defense-in-Depth Measures</a>
@@ -8972,7 +8986,9 @@ size or number of proofs is sufficiently small. (See
 <a href="#security-multiproof" class="auto internal xref">Section 9.6</a>.) The joint randomness derivation is bound to both
 the field (via the algorithm ID) and the number of proofs, thereby ensuring
 that joint randomness derived for weak parameters is not reused for stronger
-parameters.<a href="#section-9.8-3.2.1" class="pilcrow">¶</a></p>
+parameters. In addition, the joint randomness is bound to the application
+context, meaning any work the attacker does to attack some application is
+not useful for other applications that use the same parameters.<a href="#section-9.8-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-9.8-4">There are also some important limitations to be aware of. For example, Prio3
