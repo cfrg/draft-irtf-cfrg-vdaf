@@ -3870,7 +3870,7 @@ class XofTurboShake128(Xof):
     def __init__(self, seed: bytes, dst: bytes, binder: bytes):
         self.l = 0
         self.m = \
-            to_le_bytes(len(dst), 1) + dst \
+            to_le_bytes(len(dst), 2) + dst \
             to_le_bytes(len(seed), 1) + seed + \
             binder
 
@@ -3930,7 +3930,7 @@ class XofFixedKeyAes128(Xof):
         #
         # Implementation note: this step can be cached across XOF
         # evaluations with many different seeds.
-        dst_length = to_le_bytes(len(dst), 1)
+        dst_length = to_le_bytes(len(dst), 2)
         self.fixed_key = TurboSHAKE128(
             dst_length + dst + binder,
             2,
