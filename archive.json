@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-09-26T00:55:05.111589+00:00",
+  "timestamp": "2024-09-29T00:59:36.984229+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5859,7 +5859,7 @@
       "id": "I_kwDOGKuqOc6VqPgd",
       "title": "IDPF: Change APIs to take alpha as a bit string, not an integer",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/416",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5871,8 +5871,8 @@
       ],
       "body": "As discussed in the 2024-09-06 call, we should change the IDPF gen() and eval() methods to take in bit strings (lists of booleans) instead of bigints. Iterating over the bits of the bit string would be clearer than shifting and masking an integer. We'll likewise need to change the recommendation for handling byte string, which currently suggests `from_be_bytes()`, and rewrite the prefix packing done in the aggregation parameter encoding/decoding.",
       "createdAt": "2024-09-06T17:16:55Z",
-      "updatedAt": "2024-09-25T20:39:03Z",
-      "closedAt": null,
+      "updatedAt": "2024-09-27T22:24:00Z",
+      "closedAt": "2024-09-27T22:24:00Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -5962,7 +5962,7 @@
       ],
       "body": "Prio3Sum, Prio3SumVec, Prio3Histogram, and Prio3MultihotCountVec all involve checking that each of $n$ \"sub-checks\" outputs $0$. This works by interpreting the outputs as coefficients of a polynomial $p$, then evaluating $p$ at a random point $r\\in F$. If $p(r)=0$, then we deem the input valid. Some of us have been calling this the circuit's \"reduction\".\r\n\r\nOur current analysis of the circuit's soundness goes as follows. When the input is invalid, i.e., at least one sub-check output is non-zero, the probability that $p(r) = 0$ is equal to the probability that $r$ is a root of $p$, of which there are at most $\\deg{p} / |F|$. The degree of $p$ is at most $n$, which gives us a soundness error of $n / |F|$.\r\n\r\nThis is also given by the [Schwartz-Zippel lemma](https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma). More generally, let $p$ is a polynomial of $n$ variables with at least one non-zero coefficient. When we evaluate $p$ at a random point $(r_1, \\ldots, r_n) \\in F^n$, the probability that $p(r_1, \\ldots, r_n) = 0$ is at most $\\deg p / |F|$, where $\\deg p$ denotes in particular the [total degree](https://en.wikipedia.org/wiki/Degree_of_a_polynomial#Extension_to_polynomials_with_two_or_more_variables) of $p$.\r\n\r\nThis lemma suggests an alternative reduction with better soundness. Let $c_1, \\ldots, c_n$ denote the sub-check outputs. $p(x_1, \\ldots, x_n) = c_1 \\cdot x_1 + \\cdots + c_n \\cdot x_n$ be the polynomial with $n$ variables that has $c_1 \\ldots, c_n$ as its coefficients. Choose a random vector $\\vec{r} = (r_1, \\ldots, r_N) \\in F^n$ and evaluate $p$ at $\\vec{r}$. If $p(\\vec{r}) = 0$, then deem the input valid.\r\n\r\nSoundness: since $\\deg p = 1$, by the Schwartz-Zippel lemma it follows that the soundness error for this circuit is $1 / |F|$.\r\n\r\nThis is a pretty significant improvement, especially for larger inputs with lots of sub-checks. The base soundness of the current circuit is $\\frac{n}{|F|} + \\frac{2m}{|F|-m}$, where the second term is from {{BBCGGI19}}, Theorem 4.3; the soundness of the new circuit is $\\frac{1}{|F|} + \\frac{2m}{|F|-m}$. Concretely, for Prio3SumVec with `bits == 1`, `length = 100_000` and `chunk_length = 316` , this drops from $~ 2^{-111}$ to $2^{-118}$:\r\n\r\n```sage\r\ndef sound(n, m, f): return -int((log(n/f + (2*m)/(f-m))/log(2)).n())\r\n```\r\n\r\nThere is a catch: we end up with a much longer joint randomness, which means more times spent on XOF evaluation. On the other hand, we spend less time on finite field arithmetic, since we don't need to compute powers of $r$. Let's benchmark this, and if we don't see a performance degradation, then I think we should adopt this new reduction in each of the circuits, as well as for the [built-in reduction for circuits with multiple outputs](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-1.1-6.2.1).\r\n\r\nCredit to @rozbb for pointing out this use of Shwartz-Zippel and thanks to @bwesterb and @bhalleycf for confirming the math.",
       "createdAt": "2024-09-17T21:11:59Z",
-      "updatedAt": "2024-09-19T14:44:02Z",
+      "updatedAt": "2024-09-28T18:08:34Z",
       "closedAt": null,
       "comments": [
         {
@@ -5985,6 +5985,13 @@
           "body": "Actually, there's another way to tune this.\r\n\r\nThe idea is that each call the `ParallelSum` gadget gets its own fresh $r$, and within the gadget, we compute powers of $r$. That way we end up with joint randomness length equal to the number of gadget calls, and the totoal degree of the polynomial is at most the chunk length. When we choose the chunk length to be $\\sqrt{n}$, we end up with a soundness bound of\r\n\r\n$\\frac{\\sqrt{n}}{|F|} + \\frac{2\\sqrt{n}}{|F|-\\sqrt{n}}$\r\n\r\n(Assuming $n$ is a perfect square; otherwise the bound is numerically close.) The second term is still dominant, so this doesn't actually lose much in terms of bits of security. For `bits == 1`, `length = 100_000`, and `chunk_length = 316`, we still get $2^{-118}$.\r\n\r\nThis doesn't result in a noticeable performance difference for our benchmarks: https://github.com/cjpatton/libprio-rs/commit/0540c24e522bb7cb00c5dff8c28b20a45f2375",
           "createdAt": "2024-09-19T14:44:01Z",
           "updatedAt": "2024-09-19T14:44:01Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This square-root \"compromise\" sounds good to me. Since $m$ will be approximately the square root of the input size when using the parallel sum gadget, this looks to be the sweet spot of the computation-soundness tradeoff. I re-read the first message and realized you covered that the Schwartz-Zippel lemma already considers multivariate polynomials, so the security argument makes sense to me. We'll now interpret the parallel sum gadget output as a polynomial with \"number of chunks\" variables and total degree \"chunk length\", so we're all good.",
+          "createdAt": "2024-09-28T18:08:33Z",
+          "updatedAt": "2024-09-28T18:08:33Z"
         }
       ]
     },
@@ -6046,6 +6053,25 @@
           "updatedAt": "2024-09-24T22:33:30Z"
         }
       ]
+    },
+    {
+      "number": 435,
+      "id": "I_kwDOGKuqOc6YOSzJ",
+      "title": "Remove leading \"`k_`\" in variable names",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/435",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This was meant to denote that something is an XOF seed, but not that we're making good use of type hints, this doesn't seem necessary anymore.",
+      "createdAt": "2024-09-27T23:37:47Z",
+      "updatedAt": "2024-09-27T23:37:48Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -36139,7 +36165,7 @@
       ],
       "body": "",
       "createdAt": "2024-09-05T21:31:08Z",
-      "updatedAt": "2024-09-09T21:37:42Z",
+      "updatedAt": "2024-09-27T22:36:08Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "ea39dccccc83988029fd667555aa45f6589195b2",
@@ -36161,9 +36187,9 @@
         {
           "author": "cjpatton",
           "authorAssociation": "COLLABORATOR",
-          "body": "To note:\r\n- [ ] Updated code points https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417\r\n- [ ] Change to IDPF public share encoding https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420\r\n- [ ] Application context: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422",
+          "body": "To note:\r\n- [ ] Updated code points https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417\r\n- [ ] Change to agg param encoding https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420\r\n- [ ] Application context: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422",
           "createdAt": "2024-09-06T19:23:46Z",
-          "updatedAt": "2024-09-09T21:37:42Z"
+          "updatedAt": "2024-09-27T22:36:08Z"
         }
       ],
       "reviews": []
@@ -36468,7 +36494,7 @@
       "id": "PR_kwDOGKuqOc5658_J",
       "title": "poc: Add application context string (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36477,17 +36503,19 @@
       ],
       "body": "Based on #421 (merge that first).\r\nPartially addresses #418 (still need to propagate to draft).\r\n\r\nAdd an application context string, denoted `ctx`, to sharding and preparation APIs for DAFs and VDAFs. The intent is to use this for defense-in-depth: by binding execution of a VDAF to its application (concretely, in DAP we would set `ctx` to the task ID), we hope that an attack on that application does not translate directly to an attack on another application using the same parameters.\r\n\r\nThis change is motivated by the possibility of an offline attack against the robustness of some Prio3 variants. The attack is as follows: fix an invalid measurement, then search for measurement shares that derive joint randomness that causes the circuit to accept. Once these shares are found, they can be used to corrupt any batch that uses the same Prio3 parameters.\r\n\r\nTo reduce the blast radius of this attack, we can bind `ctx` to the joint randomness derivation, thereby ensuring the offline work done by the attacker is only useful to break a single application.\r\n\r\nThis change is slightly more general: wherever we compute a domain separation tag in either Prio3 or Poplar1, we append `ctx`. This is a more invasive than necessary, but it's also more conservative.\r\n\r\nFinally, we modify XofTurboShake128 and XofFixedKeyAes128 by changing the length prefix for the domain separation tag from a single byte to two bytes, thereby accommodating larger application context strings.",
       "createdAt": "2024-09-09T21:34:26Z",
-      "updatedAt": "2024-09-19T23:55:23Z",
+      "updatedAt": "2024-09-27T22:34:04Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "bb01e528dab1da66c3264347a7c020f2c3403494",
+      "baseRefOid": "c24cd4231d25bb6d1779b58dfa85c260b35e806e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/context-string",
-      "headRefOid": "faa25205030e5b011c0364c9f869a5dd9aab5a71",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "fd87fac3204c3ced64ee86255eaded42289bb33a",
+      "closedAt": "2024-09-27T22:34:04Z",
+      "mergedAt": "2024-09-27T22:34:04Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "17e90c9a0023e6a700d82cde4a0812d440002c1e"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -36504,7 +36532,21 @@
           "updatedAt": "2024-09-19T23:55:23Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6LKE5z",
+          "commit": {
+            "abbreviatedOid": "faa2520"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-09-27T21:37:06Z",
+          "updatedAt": "2024-09-27T21:37:06Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 423,
@@ -36939,6 +36981,326 @@
         }
       ],
       "reviews": []
+    },
+    {
+      "number": 433,
+      "id": "PR_kwDOGKuqOc581sHF",
+      "title": "Change handling of IDPF indices",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/433",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Closes #416. This changes the IDPF and Poplar1 APIs to explicitly take in a bit string, rather than an arbitrary precision integer. The encoding of Poplar1 aggregation parameters is changed so that the first prefix is encoded first, each prefix is padded out to the next byte boundary with zero bits, instead of packing them, and the last byte of each prefix may be partially used, instead of the first one.",
+      "createdAt": "2024-09-26T19:21:31Z",
+      "updatedAt": "2024-09-27T22:24:02Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "fd9fda6fabceecf25b163a8e19d5f7b007c6aafe",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/idpf-index-changes",
+      "headRefOid": "db1ea16ad92c69f739e5958cf5cb7f7db2830665",
+      "closedAt": "2024-09-27T22:23:59Z",
+      "mergedAt": "2024-09-27T22:23:59Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "c24cd4231d25bb6d1779b58dfa85c260b35e806e"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6LAwZh",
+          "commit": {
+            "abbreviatedOid": "6c42f6f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-26T19:54:27Z",
+          "updatedAt": "2024-09-26T20:07:11Z",
+          "comments": [
+            {
+              "originalPosition": 34,
+              "body": "Why a `tuple` instead of a `list`?",
+              "createdAt": "2024-09-26T19:54:27Z",
+              "updatedAt": "2024-09-26T20:07:11Z"
+            },
+            {
+              "originalPosition": 76,
+              "body": "Why `+1`?",
+              "createdAt": "2024-09-26T19:55:33Z",
+              "updatedAt": "2024-09-26T20:07:11Z"
+            },
+            {
+              "originalPosition": 136,
+              "body": "`idpf.eval()` takes in a `tuple[tuple[bool, ...], ...]`. Should this match?\r\n```suggestion\r\n| `AggParam`        | `tuple[int, tuple[tuple[bool, ...], ...]]` |\r\n```",
+              "createdAt": "2024-09-26T19:57:31Z",
+              "updatedAt": "2024-09-26T20:07:11Z"
+            },
+            {
+              "originalPosition": 205,
+              "body": "nit: When unpacking a tuple, elsewhere in the code we prefer to the keep the parentheses.\r\n```suggestion\r\n        for (bit_position, bit) in enumerate(chunk):\r\n```",
+              "createdAt": "2024-09-26T20:00:38Z",
+              "updatedAt": "2024-09-26T20:07:11Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "Suggestion: `0b1111000011110000` is a nicer visual representation than the tuple of bools. For testing purposes, it might be nice to add a method for decoding a `tuple[bool, ...]` from an `int`\r\n\r\n```suggestion\r\n            prefix_from_int(0b1111000011110000),\r\n```",
+              "createdAt": "2024-09-26T20:04:48Z",
+              "updatedAt": "2024-09-26T20:07:11Z"
+            },
+            {
+              "originalPosition": 336,
+              "body": "Wouldn't this be the same procedure used by the agg param decoder?",
+              "createdAt": "2024-09-26T20:07:09Z",
+              "updatedAt": "2024-09-26T20:07:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LA-0_",
+          "commit": {
+            "abbreviatedOid": "6c42f6f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-26T20:29:48Z",
+          "updatedAt": "2024-09-26T20:29:48Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "Bonus: it would make it easier to make sure these tests haven't changed.",
+              "createdAt": "2024-09-26T20:29:48Z",
+              "updatedAt": "2024-09-26T20:29:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LA5ew",
+          "commit": {
+            "abbreviatedOid": "6c42f6f"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-26T20:16:56Z",
+          "updatedAt": "2024-09-26T22:01:20Z",
+          "comments": [
+            {
+              "originalPosition": 34,
+              "body": "Mainly because it is immutable, and therefore hashable. This matters because we use `set()` to check uniqueness of prefixes in a couple places.",
+              "createdAt": "2024-09-26T20:16:56Z",
+              "updatedAt": "2024-09-26T22:01:20Z"
+            },
+            {
+              "originalPosition": 76,
+              "body": "The existing bounds were inconsistent, some were `2**level` and some were `2**(level + 1)`. Referring to the line above, `level` may be 0, in which case the prefix should have one bit, and `level` may be `BITS - 1`, in which case the prefix should have `BITS` bits.",
+              "createdAt": "2024-09-26T20:18:43Z",
+              "updatedAt": "2024-09-26T22:01:20Z"
+            },
+            {
+              "originalPosition": 136,
+              "body": "I'll update the signature of `idpf.eval()` in the text instead, `Sequence[...]` is used in more places.",
+              "createdAt": "2024-09-26T20:22:23Z",
+              "updatedAt": "2024-09-26T22:01:20Z"
+            },
+            {
+              "originalPosition": 336,
+              "body": "This is similar, but simpler since it only produces one bit string, and is restricted to only handling multiples of eight bits.",
+              "createdAt": "2024-09-26T22:01:03Z",
+              "updatedAt": "2024-09-26T22:01:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LBgb4",
+          "commit": {
+            "abbreviatedOid": "94b17a7"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-26T22:14:43Z",
+          "updatedAt": "2024-09-26T23:29:56Z",
+          "comments": [
+            {
+              "originalPosition": 34,
+              "body": "Ack. Can you make sure this consideration is documented somewhere?",
+              "createdAt": "2024-09-26T22:14:43Z",
+              "updatedAt": "2024-09-26T23:29:56Z"
+            },
+            {
+              "originalPosition": 76,
+              "body": "NIce, good catch.",
+              "createdAt": "2024-09-26T22:15:18Z",
+              "updatedAt": "2024-09-26T23:29:56Z"
+            },
+            {
+              "originalPosition": 136,
+              "body": "SG",
+              "createdAt": "2024-09-26T22:25:50Z",
+              "updatedAt": "2024-09-26T23:29:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LG7_h",
+          "commit": {
+            "abbreviatedOid": "6c42f6f"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-27T14:07:23Z",
+          "updatedAt": "2024-09-27T14:07:23Z",
+          "comments": [
+            {
+              "originalPosition": 34,
+              "body": "Sure, I'll add a comment in the Python code, as I don't think this is relevant at the spec level.",
+              "createdAt": "2024-09-27T14:07:23Z",
+              "updatedAt": "2024-09-27T14:07:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LKIny",
+          "commit": {
+            "abbreviatedOid": "238260b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "\ud83e\udd86 \r\n",
+          "createdAt": "2024-09-27T21:44:36Z",
+          "updatedAt": "2024-09-27T21:46:59Z",
+          "comments": [
+            {
+              "originalPosition": 104,
+              "body": "This parenthesis is never closed\r\n```suggestion\r\nso too is its corresponding index. Index prefixes are defined in {{idpf}}). For\r\n```",
+              "createdAt": "2024-09-27T21:44:36Z",
+              "updatedAt": "2024-09-27T21:46:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LKMEQ",
+          "commit": {
+            "abbreviatedOid": "238260b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-27T21:51:50Z",
+          "updatedAt": "2024-09-27T21:51:50Z",
+          "comments": [
+            {
+              "originalPosition": 104,
+              "body": "It is closed, though it's clustered with curly braces here. This is carried over from existing text.",
+              "createdAt": "2024-09-27T21:51:50Z",
+              "updatedAt": "2024-09-27T21:51:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LKRCY",
+          "commit": {
+            "abbreviatedOid": "238260b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-27T22:02:49Z",
+          "updatedAt": "2024-09-27T22:02:49Z",
+          "comments": [
+            {
+              "originalPosition": 104,
+              "body": "Oh, I think I missed it because the period comes after.\r\n\r\nNormally if I have a paranthetical that is an entire sentence, I put the period with in the paranthetical.",
+              "createdAt": "2024-09-27T22:02:49Z",
+              "updatedAt": "2024-09-27T22:02:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LKRkR",
+          "commit": {
+            "abbreviatedOid": "238260b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-27T22:03:58Z",
+          "updatedAt": "2024-09-27T22:03:58Z",
+          "comments": [
+            {
+              "originalPosition": 104,
+              "body": "```suggestion\r\nso too is its corresponding index. (Index prefixes are defined in {{idpf}}.) For\r\n```",
+              "createdAt": "2024-09-27T22:03:58Z",
+              "updatedAt": "2024-09-27T22:03:58Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 434,
+      "id": "PR_kwDOGKuqOc58-R1x",
+      "title": "Add application context string",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/434",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-12"
+      ],
+      "body": "Closes #418.\r\n\r\nPropagate changes to the reference code from a recent change that add an application context string to sharding and preparation. Explain the intended role of context: disagreement should imply failure to aggregate a report. However, the affect is different for DAFs and VDAFs, since for DAFs there is no explicit signal of rejection; disagreement would manifest as a garbled aggregate result. Point this out.\r\n\r\nAlso, note in security considerations that this provides a cushion for weak parameters.\r\n\r\nFinally, update the order of the context string in the `Daf` input parameters to align with the `Vdaf`. The context string comes ahead of every input except for the VDAF verification key.",
+      "createdAt": "2024-09-27T23:34:32Z",
+      "updatedAt": "2024-09-27T23:39:05Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "17e90c9a0023e6a700d82cde4a0812d440002c1e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/418",
+      "headRefOid": "bc8cce4947d2bb09fb3c91fc22351f8fa9c2f983",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6LKmIX",
+          "commit": {
+            "abbreviatedOid": "bc8cce4"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-09-27T23:35:54Z",
+          "updatedAt": "2024-09-27T23:35:54Z",
+          "comments": [
+            {
+              "originalPosition": 79,
+              "body": "Forgot to note this in the commit: worth clarifying that this is for Prio3 and Poplar1. Other VDAFs don't need to version the same way, and perhaps they shouldn't. They'll need to version their own drafts anyway.",
+              "createdAt": "2024-09-27T23:35:54Z",
+              "updatedAt": "2024-09-27T23:35:54Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
