@@ -4019,8 +4019,7 @@ def decode(
 The `Histogram` validity circuit checks for one-hotness in two steps, by
 checking that the encoded measurement consists of ones and zeros, and by
 checking that the sum of all elements in the encoded measurement is equal to
-one. All the individual checks are combined together in a random linear
-combination.
+one. The individual checks constitute the output of the circuit.
 
 As in the `SumVec` validity circuit ({{prio3sumvec}}), the first part of the
 validity circuit uses the `ParallelSum` gadget to perform range checks while
@@ -4069,9 +4068,7 @@ def eval(
     for b in meas:
         sum_check += b
 
-    out = joint_rand[-1] * range_check + \
-        joint_rand[-1] ** 2 * sum_check
-    return [out]
+    return [range_check, sum_check]
 ~~~
 
 Note that this circuit depends on the number of shares into which the
@@ -4083,8 +4080,8 @@ measurement is sharded. This is provided to the FLP by Prio3.
 | `GADGET_CALLS`    | `[(length + chunk_length - 1) // chunk_length]` |
 | `MEAS_LEN`        | `length`                                        |
 | `OUTPUT_LEN`      | `length`                                        |
-| `JOINT_RAND_LEN`  | `1 + GADGET_CALLS[0]`                           |
-| `EVAL_OUTPUT_LEN` | `1`                                             |
+| `JOINT_RAND_LEN`  | `GADGET_CALLS[0]`                               |
+| `EVAL_OUTPUT_LEN` | `2`                                             |
 | `Measurement`     | `int`                                           |
 | `AggResult`       | `list[int]`                                     |
 {: title="Parameters of validity circuit Histogram."}
@@ -4201,20 +4198,19 @@ def eval(
     weight_check = self.offset*shares_inv + weight - \
         weight_reported
 
-    out = joint_rand[-1] * range_check + \
-        joint_rand[-1] ** 2 * weight_check
-    return [out]
+    return [range_check, weight_check]
 ~~~
 
-| Parameter        | Value                                           |
-|:-----------------|:------------------------------------------------|
-| `GADGETS`        | `[ParallelSum(Mul(), chunk_length)]`            |
-| `GADGET_CALLS`   | `[(length + bits_for_weight + chunk_length - 1) // chunk_length]` |
-| `MEAS_LEN`       | `length + bits_for_weight`                      |
-| `OUTPUT_LEN`     | `length`                                        |
-| `JOINT_RAND_LEN` | `1 + GADGET_CALLS[0]`                           |
-| `Measurement`    | `list[int]`                                     |
-| `AggResult`      | `list[int]`                                     |
+| Parameter         | Value                                           |
+|:------------------|:------------------------------------------------|
+| `GADGETS`         | `[ParallelSum(Mul(), chunk_length)]`            |
+| `GADGET_CALLS`    | `[(length + bits_for_weight + chunk_length - 1) // chunk_length]` |
+| `MEAS_LEN`        | `length + bits_for_weight`                      |
+| `OUTPUT_LEN`      | `length`                                        |
+| `JOINT_RAND_LEN`  | `GADGET_CALLS[0]`                               |
+| `EVAL_OUTPUT_LEN` | `2`                                             |
+| `Measurement`     | `list[int]`                                     |
+| `AggResult`       | `list[int]`                                     |
 {: title="Parameters of validity circuit MultihotCountVec."}
 
 

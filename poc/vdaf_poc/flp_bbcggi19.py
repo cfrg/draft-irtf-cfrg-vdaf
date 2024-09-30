@@ -638,7 +638,7 @@ class Histogram(
     length: int
     chunk_length: int
 
-    EVAL_OUTPUT_LEN = 1
+    EVAL_OUTPUT_LEN = 2
 
     def __init__(self, field: type[F], length: int, chunk_length: int):
         """
@@ -660,7 +660,7 @@ class Histogram(
         self.GADGET_CALLS = [(length + chunk_length - 1) // chunk_length]
         self.MEAS_LEN = self.length
         self.OUTPUT_LEN = self.length
-        self.JOINT_RAND_LEN = 1 + self.GADGET_CALLS[0]
+        self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
     # NOTE: This method is excerpted in the document, de-indented. Its
     # width should be limited to 69 columns after de-indenting, or 73
@@ -703,9 +703,7 @@ class Histogram(
         for b in meas:
             sum_check += b
 
-        out = joint_rand[-1] * range_check + \
-            joint_rand[-1] ** 2 * sum_check
-        return [out]
+        return [range_check, sum_check]
 
     # NOTE: The encode(), truncate(), and decode() methods are excerpted
     # in the document, de-indented. Their width should be limited to 69
@@ -765,7 +763,7 @@ class MultihotCountVec(
     # Class object for the field.
     field: type[F]
 
-    EVAL_OUTPUT_LEN = 1
+    EVAL_OUTPUT_LEN = 2
 
     def __init__(self,
                  field: type[F],
@@ -813,7 +811,7 @@ class MultihotCountVec(
         ]
         self.MEAS_LEN = self.length + self.bits_for_weight
         self.OUTPUT_LEN = self.length
-        self.JOINT_RAND_LEN = 1 + self.GADGET_CALLS[0]
+        self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
     # NOTE: This method is excerpted in the document, de-indented. Its
     # width should be limited to 69 columns after de-indenting, or 73
@@ -860,9 +858,7 @@ class MultihotCountVec(
         weight_check = self.offset*shares_inv + weight - \
             weight_reported
 
-        out = joint_rand[-1] * range_check + \
-            joint_rand[-1] ** 2 * weight_check
-        return [out]
+        return [range_check, weight_check]
 
     # NOTE: The encode(), truncate(), and decode() methods are excerpted
     # in the document, de-indented. Their width should be limited to 69
