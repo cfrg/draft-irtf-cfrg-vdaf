@@ -6127,9 +6127,9 @@ Acknowledgments
 
    Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
    Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
-   Raykova, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
-   Christopher Wood for useful feedback on and contributions to the
-   spec.
+   Raykova, Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang,
+   Bas Westerbaan, and Christopher Wood for useful feedback on and
+   contributions to the spec.
 
 Test Vectors
 
