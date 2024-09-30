@@ -102,7 +102,7 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
         """Length of the query randomness."""
         query_rand_len = len(self.GADGETS)
         if self.EVAL_OUTPUT_LEN > 1:
-            query_rand_len += 1
+            query_rand_len += self.EVAL_OUTPUT_LEN
         return query_rand_len
 
     def proof_len(self) -> int:
@@ -359,12 +359,10 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
         # Reduce the output.
         if self.valid.EVAL_OUTPUT_LEN > 1:
-            ([r], query_rand) = front(1, query_rand)
-            r_power = r
+            (rand, query_rand) = front(self.valid.EVAL_OUTPUT_LEN, query_rand)
             v = self.field(0)
-            for out_elem in out:
-                v += r_power * out_elem
-                r_power *= r
+            for (r, out_elem) in zip(rand, out):
+                v += r * out_elem
         else:
             [v] = out
 
@@ -640,7 +638,6 @@ class Histogram(
     length: int
     chunk_length: int
 
-    JOINT_RAND_LEN = 2
     EVAL_OUTPUT_LEN = 1
 
     def __init__(self, field: type[F], length: int, chunk_length: int):
@@ -663,6 +660,7 @@ class Histogram(
         self.GADGET_CALLS = [(length + chunk_length - 1) // chunk_length]
         self.MEAS_LEN = self.length
         self.OUTPUT_LEN = self.length
+        self.JOINT_RAND_LEN = 1 + self.GADGET_CALLS[0]
 
     # NOTE: This method is excerpted in the document, de-indented. Its
     # width should be limited to 69 columns after de-indenting, or 73
@@ -677,10 +675,10 @@ class Histogram(
 
         # Check that each bucket is one or zero.
         range_check = self.field(0)
-        r = joint_rand[0]
-        r_power = r
         shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
+            r = joint_rand[i]
+            r_power = r
             inputs: list[Optional[F]]
             inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
@@ -705,8 +703,8 @@ class Histogram(
         for b in meas:
             sum_check += b
 
-        out = joint_rand[1] * range_check + \
-            joint_rand[1] ** 2 * sum_check
+        out = joint_rand[-1] * range_check + \
+            joint_rand[-1] ** 2 * sum_check
         return [out]
 
     # NOTE: The encode(), truncate(), and decode() methods are excerpted
@@ -767,7 +765,6 @@ class MultihotCountVec(
     # Class object for the field.
     field: type[F]
 
-    JOINT_RAND_LEN = 2
     EVAL_OUTPUT_LEN = 1
 
     def __init__(self,
@@ -816,6 +813,7 @@ class MultihotCountVec(
         ]
         self.MEAS_LEN = self.length + self.bits_for_weight
         self.OUTPUT_LEN = self.length
+        self.JOINT_RAND_LEN = 1 + self.GADGET_CALLS[0]
 
     # NOTE: This method is excerpted in the document, de-indented. Its
     # width should be limited to 69 columns after de-indenting, or 73
@@ -830,10 +828,10 @@ class MultihotCountVec(
 
         # Check that each entry in the input vector is one or zero.
         range_check = self.field(0)
-        r = joint_rand[0]
-        r_power = r
         shares_inv = self.field(num_shares).inv()
         for i in range(self.GADGET_CALLS[0]):
+            r = joint_rand[i]
+            r_power = r
             inputs: list[Optional[F]]
             inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):
@@ -862,8 +860,8 @@ class MultihotCountVec(
         weight_check = self.offset*shares_inv + weight - \
             weight_reported
 
-        out = joint_rand[1] * range_check + \
-            joint_rand[1] ** 2 * weight_check
+        out = joint_rand[-1] * range_check + \
+            joint_rand[-1] ** 2 * weight_check
         return [out]
 
     # NOTE: The encode(), truncate(), and decode() methods are excerpted
@@ -915,7 +913,6 @@ class SumVec(
     chunk_length: int
 
     field: type[F]
-    JOINT_RAND_LEN = 1
     EVAL_OUTPUT_LEN = 1
 
     def __init__(self, field: type[F], length: int, bits: int, chunk_length: int):
@@ -943,6 +940,7 @@ class SumVec(
         ]
         self.MEAS_LEN = length * bits
         self.OUTPUT_LEN = length
+        self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
     # NOTE: This method is excerpted in the document, de-indented. Its
     # width should be limited to 69 columns after de-indenting, or 73
@@ -956,11 +954,10 @@ class SumVec(
         self.check_valid_eval(meas, joint_rand)
 
         out = self.field(0)
-        r = joint_rand[0]
-        r_power = r
         shares_inv = self.field(num_shares).inv()
-
         for i in range(self.GADGET_CALLS[0]):
+            r = joint_rand[i]
+            r_power = r
             inputs: list[Optional[F]]
             inputs = [None] * (2 * self.chunk_length)
             for j in range(self.chunk_length):

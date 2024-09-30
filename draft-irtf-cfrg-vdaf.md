@@ -3442,7 +3442,7 @@ def query_rand_len(self) -> int:
     """Length of the query randomness."""
     query_rand_len = len(self.GADGETS)
     if self.EVAL_OUTPUT_LEN > 1:
-        query_rand_len += 1
+        query_rand_len += self.EVAL_OUTPUT_LEN
     return query_rand_len
 
 def proof_len(self) -> int:
@@ -3600,10 +3600,9 @@ is generated as follows:
    evaluation.
 
 1. Next, reduce `out` as follows. If `EVAL_OUTPUT_LEN > 1`, then consume the
-   first element of `query_rand` by letting `[r], query_rand = front(1,
-   query_rand)`. Then let `v = r*out[0] + r**2*out[1] + r**3*out[2] + ...`.
-   That is, interpret the outputs as coefficients of a polynomial `f(x)` and
-   evaluate polynomial `f(x)*x` at a random point `r`.
+   first `EVAL_OUTPUT_LEN` elements of `query_rand` by letting `r, query_rand =
+   front(1, query_rand)`. Then let
+   `v = r[0]*out[0] + r[1]*out[1] + r[2]*out[2] + ...`.
 
 1. Compute the wire polynomials just as in the prover's step (4.).
 
@@ -3908,10 +3907,10 @@ ones and zeros. Rather than use the `Range2` gadget on each element, as in the
 multiplication and addition gates to simultaneously evaluate the same range
 check polynomial on each element, and multiply by a constant. One of the two
 `Mul` subcircuit inputs is equal to a measurement element multiplied by a power
-of the joint randomness value, and the other is equal to the same measurement
-element minus one. These `Mul` subcircuits are evaluated by a `ParallelSum`
-gadget, and the results are added up both within the `ParallelSum` gadget and
-after it.
+of one of the elements of the joint randomness vector, and the other is equal
+to the same measurement element minus one. These `Mul` subcircuits are
+evaluated by a `ParallelSum` gadget, and the results are added up both within
+the `ParallelSum` gadget and after it.
 
 ~~~ python
 def eval(
@@ -3922,11 +3921,10 @@ def eval(
     self.check_valid_eval(meas, joint_rand)
 
     out = self.field(0)
-    r = joint_rand[0]
-    r_power = r
     shares_inv = self.field(num_shares).inv()
-
     for i in range(self.GADGET_CALLS[0]):
+        r = joint_rand[i]
+        r_power = r
         inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
@@ -3955,7 +3953,7 @@ def eval(
 | `GADGET_CALLS`    | `[(length * bits + chunk_length - 1) // chunk_length]` |
 | `MEAS_LEN`        | `length * bits`                                        |
 | `OUTPUT_LEN`      | `length`                                               |
-| `JOINT_RAND_LEN`  | `1`                                                    |
+| `JOINT_RAND_LEN`  | `GADGET_CALLS[0]`                                      |
 | `EVAL_OUTPUT_LEN` | `1`                                                    |
 | `Measurement`     | `list[int]`, each element in `range(2**bits)`          |
 | `AggResult`       | `list[int]`                                            |
@@ -4029,9 +4027,9 @@ validity circuit uses the `ParallelSum` gadget to perform range checks while
 achieving a smaller proof size. The `ParallelSum` gadget uses `Mul` subcircuits
 to evaluate a range check polynomial on each element, and includes an additional
 constant multiplication. One of the two `Mul` subcircuit inputs is equal to a
-measurement element multiplied by a power of the first joint randomness value,
-and the other is equal to the same measurement element minus one. The results
-are added up both within the `ParallelSum` gadget and after it.
+measurement element multiplied by a power of an element of the joint randomness
+vector, and the other is equal to the same measurement element minus one. The
+results are added up both within the `ParallelSum` gadget and after it.
 
 ~~~ python
 def eval(
@@ -4043,10 +4041,10 @@ def eval(
 
     # Check that each bucket is one or zero.
     range_check = self.field(0)
-    r = joint_rand[0]
-    r_power = r
     shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
+        r = joint_rand[i]
+        r_power = r
         inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
@@ -4071,8 +4069,8 @@ def eval(
     for b in meas:
         sum_check += b
 
-    out = joint_rand[1] * range_check + \
-        joint_rand[1] ** 2 * sum_check
+    out = joint_rand[-1] * range_check + \
+        joint_rand[-1] ** 2 * sum_check
     return [out]
 ~~~
 
@@ -4085,7 +4083,7 @@ measurement is sharded. This is provided to the FLP by Prio3.
 | `GADGET_CALLS`    | `[(length + chunk_length - 1) // chunk_length]` |
 | `MEAS_LEN`        | `length`                                        |
 | `OUTPUT_LEN`      | `length`                                        |
-| `JOINT_RAND_LEN`  | `2`                                             |
+| `JOINT_RAND_LEN`  | `1 + GADGET_CALLS[0]`                           |
 | `EVAL_OUTPUT_LEN` | `1`                                             |
 | `Measurement`     | `int`                                           |
 | `AggResult`       | `list[int]`                                     |
@@ -4171,10 +4169,10 @@ def eval(
 
     # Check that each entry in the input vector is one or zero.
     range_check = self.field(0)
-    r = joint_rand[0]
-    r_power = r
     shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
+        r = joint_rand[i]
+        r_power = r
         inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
@@ -4203,8 +4201,8 @@ def eval(
     weight_check = self.offset*shares_inv + weight - \
         weight_reported
 
-    out = joint_rand[1] * range_check + \
-        joint_rand[1] ** 2 * weight_check
+    out = joint_rand[-1] * range_check + \
+        joint_rand[-1] ** 2 * weight_check
     return [out]
 ~~~
 
@@ -4214,7 +4212,7 @@ def eval(
 | `GADGET_CALLS`   | `[(length + bits_for_weight + chunk_length - 1) // chunk_length]` |
 | `MEAS_LEN`       | `length + bits_for_weight`                      |
 | `OUTPUT_LEN`     | `length`                                        |
-| `JOINT_RAND_LEN` | `2`                                             |
+| `JOINT_RAND_LEN` | `1 + GADGET_CALLS[0]`                           |
 | `Measurement`    | `list[int]`                                     |
 | `AggResult`      | `list[int]`                                     |
 {: title="Parameters of validity circuit MultihotCountVec."}
@@ -5761,9 +5759,9 @@ analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
 time to developing definitions and security proofs.
 
 Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
-Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova, Jacob
-Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and Christopher Wood for
-useful feedback on and contributions to the spec.
+Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
+Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
+Christopher Wood for useful feedback on and contributions to the spec.
 
 # Test Vectors {#test-vectors}
 {:numbered="false"}
