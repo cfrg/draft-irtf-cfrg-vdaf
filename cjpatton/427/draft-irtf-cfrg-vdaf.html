@@ -5587,7 +5587,7 @@ def query_rand_len(self) -&gt; int:
     """Length of the query randomness."""
     query_rand_len = len(self.GADGETS)
     if self.EVAL_OUTPUT_LEN &gt; 1:
-        query_rand_len += 1
+        query_rand_len += self.EVAL_OUTPUT_LEN
     return query_rand_len
 
 def proof_len(self) -&gt; int:
@@ -5859,10 +5859,9 @@ evaluation.<a href="#section-7.3.3.2-3.3.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.3.3.2-3.4">
                 <p id="section-7.3.3.2-3.4.1">Next, reduce <code>out</code> as follows. If <code>EVAL_OUTPUT_LEN &gt; 1</code>, then consume the
-first element of <code>query_rand</code> by letting <code>[r], query_rand = front(1,
-query_rand)</code>. Then let <code>v = r*out[0] + r**2*out[1] + r**3*out[2] + ...</code>.
-That is, interpret the outputs as coefficients of a polynomial <code>f(x)</code> and
-evaluate polynomial <code>f(x)*x</code> at a random point <code>r</code>.<a href="#section-7.3.3.2-3.4.1" class="pilcrow">¶</a></p>
+first <code>EVAL_OUTPUT_LEN</code> elements of <code>query_rand</code> by letting <code>r, query_rand =
+front(1, query_rand)</code>. Then let
+<code>v = r[0]*out[0] + r[1]*out[1] + r[2]*out[2] + ...</code>.<a href="#section-7.3.3.2-3.4.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.3.3.2-3.5">
                 <p id="section-7.3.3.2-3.5.1">Compute the wire polynomials just as in the prover's step (4.).<a href="#section-7.3.3.2-3.5.1" class="pilcrow">¶</a></p>
@@ -6461,11 +6460,10 @@ def eval(
     self.check_valid_eval(meas, joint_rand)
 
     out = self.field(0)
-    r = joint_rand[0]
-    r_power = r
     shares_inv = self.field(num_shares).inv()
-
     for i in range(self.GADGET_CALLS[0]):
+        r = joint_rand[i]
+        r_power = r
         inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
@@ -6537,7 +6535,7 @@ def eval(
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
+                  <code>GADGET_CALLS[0]</code>
 </td>
               </tr>
               <tr>
@@ -6689,10 +6687,10 @@ def eval(
 
     # Check that each bucket is one or zero.
     range_check = self.field(0)
-    r = joint_rand[0]
-    r_power = r
     shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
+        r = joint_rand[i]
+        r_power = r
         inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
@@ -6717,8 +6715,8 @@ def eval(
     for b in meas:
         sum_check += b
 
-    out = joint_rand[1] * range_check + \
-        joint_rand[1] ** 2 * sum_check
+    out = joint_rand[-1] * range_check + \
+        joint_rand[-1] ** 2 * sum_check
     return [out]
 </pre><a href="#section-7.4.4-8" class="pilcrow">¶</a>
 </div>
@@ -6773,7 +6771,7 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>2</code>
+                  <code>1 + GADGET_CALLS[0]</code>
 </td>
               </tr>
               <tr>
@@ -6922,10 +6920,10 @@ def eval(
 
     # Check that each entry in the input vector is one or zero.
     range_check = self.field(0)
-    r = joint_rand[0]
-    r_power = r
     shares_inv = self.field(num_shares).inv()
     for i in range(self.GADGET_CALLS[0]):
+        r = joint_rand[i]
+        r_power = r
         inputs: list[Optional[F]]
         inputs = [None] * (2 * self.chunk_length)
         for j in range(self.chunk_length):
@@ -6954,8 +6952,8 @@ def eval(
     weight_check = self.offset*shares_inv + weight - \
         weight_reported
 
-    out = joint_rand[1] * range_check + \
-        joint_rand[1] ** 2 * weight_check
+    out = joint_rand[-1] * range_check + \
+        joint_rand[-1] ** 2 * weight_check
     return [out]
 </pre><a href="#section-7.4.5-11" class="pilcrow">¶</a>
 </div>
@@ -7008,7 +7006,7 @@ def eval(
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>2</code>
+                  <code>1 + GADGET_CALLS[0]</code>
 </td>
               </tr>
               <tr>
