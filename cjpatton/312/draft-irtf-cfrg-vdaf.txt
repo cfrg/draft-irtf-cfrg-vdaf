@@ -6154,7 +6154,9 @@ Test Vectors
 
 Schema
 
-   verify_ke":  The verification key encoded in hexadecimal.
+   ctx:  The application context string encoded in hexadecimal.
+
+   verify_key:  The verification key encoded in hexadecimal.
 
    agg_param:  The aggregation parameter of type Vdaf.AggParam.
 
@@ -6183,9 +6185,9 @@ Schema
 
    agg_shares:  The expected aggregate shares encoded in hexadecimal.
 
-   agg_result`  The expected aggregate result of type Vdaf.AggResult.
+   agg_result:  The expected aggregate result of type Vdaf.AggResult.
 
-   The scehma also includes whatever parameters are required to
+   The schema also includes whatever parameters are required to
    instantiate the VDAF.  These are listed in the subsections below.
 
 Prio3Count
