@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 4 April 2025                                               ISRG
+Expires: 6 April 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          1 October 2024
+                                                          3 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 April 2025.
+   This Internet-Draft will expire on 6 April 2025.
 
 Copyright Notice
 
@@ -4016,11 +4016,11 @@ Table of Contents
    subcircuits and "free" constant multiplication and addition gates to
    simultaneously evaluate the same range check polynomial on each
    element, and multiply by a constant.  One of the two Mul subcircuit
-   inputs is equal to a measurement element multiplied by a power of the
-   joint randomness value, and the other is equal to the same
-   measurement element minus one.  These Mul subcircuits are evaluated
-   by a ParallelSum gadget, and the results are added up both within the
-   ParallelSum gadget and after it.
+   inputs is equal to a measurement element multiplied by a power of one
+   of the elements of the joint randomness vector, and the other is
+   equal to the same measurement element minus one.  These Mul
+   subcircuits are evaluated by a ParallelSum gadget, and the results
+   are added up both within the ParallelSum gadget and after it.
 
    def eval(
            self,
@@ -4158,9 +4158,10 @@ Table of Contents
    uses Mul subcircuits to evaluate a range check polynomial on each
    element, and includes an additional constant multiplication.  One of
    the two Mul subcircuit inputs is equal to a measurement element
-   multiplied by a power of the first joint randomness value, and the
-   other is equal to the same measurement element minus one.  The
-   results are added up both within the ParallelSum gadget and after it.
+   multiplied by a power of an element of the joint randomness vector,
+   and the other is equal to the same measurement element minus one.
+   The results are added up both within the ParallelSum gadget and after
+   it.
 
    def eval(
            self,
