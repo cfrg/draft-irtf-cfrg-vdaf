@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 23 March 2025                                              ISRG
+Expires: 6 April 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                       19 September 2024
+                                                          3 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 March 2025.
+   This Internet-Draft will expire on 6 April 2025.
 
 Copyright Notice
 
@@ -3425,8 +3425,8 @@ Table of Contents
    powers of alpha, where alpha is a root of unity for the field.  This
    allows us to construct each gadget polynomial via the number
    theoretic transform [SML24], which is far more efficient than generic
-   formulas.  Note that the roots of unity are given by the generator of
-   NTT-friendly fields (see Section 6.1.2).
+   formulas.  Note that the roots of unity are powers of the generator
+   of NTT-friendly fields (see Section 6.1.2).
 
    Finally, the validity circuit in our FLP may have any number of
    outputs (at least one).  The input is said to be valid if each of the
@@ -3475,8 +3475,8 @@ Table of Contents
 
    *  DEGREE: int is the arithmetic degree of the gadget circuit.  This
       is defined to be the degree of the polynomial that computes it.
-      This exists because since the circuit is arithmetic.  For example,
-      Mul has degree 2.
+      This exists because the circuit is arithmetic.  For example, Mul
+      has degree 2.
 
    *  gadget.eval(field: type[F], inp: list[F]) -> F evaluates the
       gadget circuit over the given inputs and field.
@@ -3602,8 +3602,8 @@ Table of Contents
 
    Next, we compute each of the "wire polynomials" for each gadget.  The
    j-th wire polynomial is the lowest degree polynomial that evaluates
-   to g.wire[j][k] for invocation k.  When obtain the gadget polynomial
-   by evaluating the gadget on input of the wire polynomials.
+   to g.wire[j][k] at a sequence of fixed points.  We obtain the gadget
+   polynomial by evaluating the gadget on the wire polynomials.
 
    def prove(self,
              meas: list[F],
@@ -3674,7 +3674,7 @@ Table of Contents
    The goal of each gadget test is to ensure the inputs used by the
    prover to generate the gadget polynomial matches the inputs we used
    to evaluate it.  We do this by partially reconstructing the gadget
-   polynomial and evaluate it a random point: when we evaluate the
+   polynomial and evaluating it a random point: when we evaluate the
    gadget polynomial at the same point, we expect to get the same
    result.
 
@@ -3691,9 +3691,9 @@ Table of Contents
    polynomial at t.  The results are recorded in the verifier message
    passed to the decision algorithm, where we finish the test.
 
-   The random point t MUST NOT be one of the inputs used to compute the
-   wire polynomials.  Otherwise, the verifier message may partially leak
-   the encoded measurement.
+   The random point t MUST NOT be one of the fixed evaluation points
+   used to interpolate the wire polynomials.  Otherwise, the verifier
+   message may partially leak the encoded measurement.
 
    def query(self,
              meas: list[F],
