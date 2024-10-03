@@ -2396,14 +2396,14 @@ Table of Contents
       randomness is shared by both the prover and verifier.
 
    *  flp.query(meas: list[F], proof: list[F], query_rand: list[F],
-      joint_rand: list[F], num_shares: int) -> list[F] is the query-
-      generation algorithm run by the verifier.  This is used to "query"
-      the measurement and proof.  The result of the query (i.e., the
-      output of this function) is called the "verifier message".  In
-      addition to the measurement and proof, this algorithm takes as
-      input the query randomness query_rand and the joint randomness
-      joint_rand.  The former is used only by the verifier. num_shares
-      specifies how many shares were generated.
+      joint_rand: list[F], num_shares: int) -> list[F] is the query
+      algorithm run by the verifier.  This is used to "query" the
+      measurement and proof.  The result of the query (i.e., the output
+      of this function) is called the "verifier message".  In addition
+      to the measurement and proof, this algorithm takes as input the
+      query randomness query_rand and the joint randomness joint_rand.
+      The former is used only by the verifier. num_shares specifies how
+      many shares were generated.
 
    *  flp.decide(verifier: list[F]) -> bool is the deterministic
       decision algorithm run by the verifier.  It takes as input the
@@ -2413,22 +2413,22 @@ Table of Contents
    Our application requires that the FLP is "fully linear" in the sense
    defined in [BBCGGI19].  As a practical matter, what this property
    implies is that, when run on a share of the measurement and proof,
-   the query-generation algorithm outputs a share of the verifier
-   message.  Furthermore, the privacy property of the FLP system ensures
-   that the verifier message reveals nothing about the measurement other
-   than whether it is valid.  Therefore, to decide if a measurement is
-   valid, the Aggregators will run the query-generation algorithm
-   locally, exchange verifier shares, combine them to recover the
-   verifier message, and run the decision algorithm.
+   the query algorithm outputs a share of the verifier message.
+   Furthermore, the privacy property of the FLP system ensures that the
+   verifier message reveals nothing about the measurement other than
+   whether it is valid.  Therefore, to decide if a measurement is valid,
+   the Aggregators will run the query algorithm locally, exchange
+   verifier shares, combine them to recover the verifier message, and
+   run the decision algorithm.
 
-   The query-generation algorithm includes a parameter num_shares that
-   specifies the number of shares that were generated.  If these data
-   are not secret shared, then num_shares == 1.  This parameter is
-   useful for certain FLP constructions.  For example, the FLP in
-   Section 7.3 is defined in terms of an arithmetic circuit; when the
-   circuit contains constants, it is sometimes necessary to normalize
-   those constants to ensure that the circuit's output, when run on a
-   valid measurement, is the same regardless of the number of shares.
+   The query algorithm includes a parameter num_shares that specifies
+   the number of shares that were generated.  If these data are not
+   secret shared, then num_shares == 1.  This parameter is useful for
+   certain FLP constructions.  For example, the FLP in Section 7.3 is
+   defined in terms of an arithmetic circuit; when the circuit contains
+   constants, it is sometimes necessary to normalize those constants to
+   ensure that the circuit's output, when run on a valid measurement, is
+   the same regardless of the number of shares.
 
    An FLP is executed by the prover and verifier as follows:
 
@@ -2897,9 +2897,9 @@ Table of Contents
 
    In addition, for FLPs that require joint randomness, the Aggregators
    must ensure that they have all used the same joint randomness for the
-   query-generation algorithm.  To do so, they collectively re-derive
-   the joint randomness from their measurement shares just as the Client
-   did during sharding.
+   query algorithm.  To do so, they collectively re-derive the joint
+   randomness from their measurement shares just as the Client did
+   during sharding.
 
    In order to avoid extra round of communication, the Client sends each
    Aggregator a "hint" consisting of the joint randomness parts.  This
@@ -3569,8 +3569,8 @@ Table of Contents
    (Section 7.1).  It has as a generic parameter a validity circuit,
    denoted valid, that implements the interface defined in the previous
    section.  Its FLP parameters are listed in the table above.  The
-   proof generation algorithm, query generation algorithm, and decision
-   algorithm ares specified in the remaining subsections.
+   proof generation algorithm, query algorithm, and decision algorithm
+   ares specified in the remaining subsections.
 
 7.3.3.1.  Proof Generation
 
@@ -3662,10 +3662,10 @@ Table of Contents
     |
     V verifier (share)
 
-          Figure 23: Components of the query generation algorithm.
+               Figure 23: Components of the query algorithm.
 
-   The query generation algorithm invokes the validity circuit on the
-   encoded measurement and joint randomness.  It evaluates the gadget
+   The query algorithm invokes the validity circuit on the encoded
+   measurement and joint randomness.  It evaluates the gadget
    polynomials encoded by the proof (share) to produce (a share of) each
    gadget output.  The verifier (share) consists of (a share of) the
    validity circuit's output and (a share of) each gadget test.  The

@@ -4164,11 +4164,11 @@ verifier.<a href="#section-7.1-6.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-7.1-6.2">
             <p id="section-7.1-6.2.1"><code>flp.query(meas: list[F], proof: list[F], query_rand: list[F], joint_rand:
-list[F], num_shares: int) -&gt; list[F]</code> is the query-generation algorithm run
-by the verifier. This is used to "query" the measurement and proof. The
-result of the query (i.e., the output of this function) is called the
-"verifier message". In addition to the measurement and proof, this algorithm
-takes as input the query randomness <code>query_rand</code> and the joint randomness
+list[F], num_shares: int) -&gt; list[F]</code> is the query algorithm run by the
+verifier. This is used to "query" the measurement and proof. The result of
+the query (i.e., the output of this function) is called the "verifier
+message". In addition to the measurement and proof, this algorithm takes as
+input the query randomness <code>query_rand</code> and the joint randomness
 <code>joint_rand</code>. The former is used only by the verifier. <code>num_shares</code> specifies
 how many shares were generated.<a href="#section-7.1-6.2.1" class="pilcrow">¶</a></p>
 </li>
@@ -4181,17 +4181,16 @@ is valid.<a href="#section-7.1-6.3.1" class="pilcrow">¶</a></p>
         </ul>
 <p id="section-7.1-7">Our application requires that the FLP is "fully linear" in the sense defined in
 <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>. As a practical matter, what this property implies is that, when
-run on a share of the measurement and proof, the query-generation algorithm
-outputs a share of the verifier message. Furthermore, the privacy property of
-the FLP system ensures that the verifier message reveals nothing about the measurement
-other than whether it is valid. Therefore, to decide if a measurement is valid, the
-Aggregators will run the query-generation algorithm locally, exchange verifier
-shares, combine them to recover the verifier message, and run the decision
-algorithm.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
-<p id="section-7.1-8">The query-generation algorithm includes a parameter <code>num_shares</code> that specifies
-the number of shares that were generated. If these data are not secret shared,
-then <code>num_shares == 1</code>. This parameter is useful for certain FLP constructions.
-For example, the FLP in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> is defined in terms of an arithmetic
+run on a share of the measurement and proof, the query algorithm outputs a
+share of the verifier message. Furthermore, the privacy property of the FLP
+system ensures that the verifier message reveals nothing about the measurement
+other than whether it is valid. Therefore, to decide if a measurement is valid,
+the Aggregators will run the query algorithm locally, exchange verifier shares,
+combine them to recover the verifier message, and run the decision algorithm.<a href="#section-7.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.1-8">The query algorithm includes a parameter <code>num_shares</code> that specifies the number
+of shares that were generated. If these data are not secret shared, then
+<code>num_shares == 1</code>. This parameter is useful for certain FLP constructions. For
+example, the FLP in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> is defined in terms of an arithmetic
 circuit; when the circuit contains constants, it is sometimes necessary to
 normalize those constants to ensure that the circuit's output, when run on a
 valid measurement, is the same regardless of the number of shares.<a href="#section-7.1-8" class="pilcrow">¶</a></p>
@@ -4845,10 +4844,9 @@ measurement and share of proof(s) locally, then exchanges its share of
 verifier(s) with the other Aggregators. The shares of verifier(s) are then
 combined into the verifier message(s) used to decide whether to accept.<a href="#section-7.2.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.2.2-2">In addition, for FLPs that require joint randomness, the Aggregators must
-ensure that they have all used the same joint randomness for the
-query-generation algorithm. To do so, they collectively re-derive the joint
-randomness from their measurement shares just as the Client did during
-sharding.<a href="#section-7.2.2-2" class="pilcrow">¶</a></p>
+ensure that they have all used the same joint randomness for the query
+algorithm. To do so, they collectively re-derive the joint randomness from
+their measurement shares just as the Client did during sharding.<a href="#section-7.2.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.2.2-3">In order to avoid extra round of communication, the Client sends each
 Aggregator a "hint" consisting of the joint randomness parts. This leaves open
 the possibility that the Client cheated by, say, forcing the Aggregators to use
@@ -5736,8 +5734,8 @@ def verifier_len(self) -&gt; int:
 <p id="section-7.3.3-2">This section specifies an implementation of the <code>Flp</code> interface (<a href="#flp" class="auto internal xref">Section 7.1</a>). It
 has as a generic parameter a validity circuit, denoted <code>valid</code>, that implements the
 interface defined in the previous section. Its FLP parameters are listed in the
-table above. The proof generation algorithm, query generation algorithm, and
-decision algorithm ares specified in the remaining subsections.<a href="#section-7.3.3-2" class="pilcrow">¶</a></p>
+table above. The proof generation algorithm, query algorithm, and decision
+algorithm ares specified in the remaining subsections.<a href="#section-7.3.3-2" class="pilcrow">¶</a></p>
 <div id="flp-bbcggi19-construction-prove">
 <section id="section-7.3.3.1">
             <h5 id="name-proof-generation">
@@ -5828,7 +5826,7 @@ def prove(self,
             <h5 id="name-query-generation">
 <a href="#section-7.3.3.2" class="section-number selfRef">7.3.3.2. </a><a href="#name-query-generation" class="section-name selfRef">Query Generation</a>
             </h5>
-<span id="name-components-of-the-query-gen"></span><figure id="figure-23">
+<span id="name-components-of-the-query-alg"></span><figure id="figure-23">
               <div class="alignLeft art-text artwork" id="section-7.3.3.2-1.1">
 <pre>
       proof (share)
@@ -5846,13 +5844,13 @@ def prove(self,
 </pre>
 </div>
 <figcaption><a href="#figure-23" class="selfRef">Figure 23</a>:
-<a href="#name-components-of-the-query-gen" class="selfRef">Components of the query generation algorithm.</a>
+<a href="#name-components-of-the-query-alg" class="selfRef">Components of the query algorithm.</a>
               </figcaption></figure>
-<p id="section-7.3.3.2-2">The query generation algorithm invokes the validity circuit on the encoded
-measurement and joint randomness. It evaluates the gadget polynomials
-encoded by the proof (share) to produce (a share of) each gadget output. The
-verifier (share) consists of (a share of) the validity circuit's output and (a
-share of) each gadget test. The gadget tests consume the query randomness.<a href="#section-7.3.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.3.3.2-2">The query algorithm invokes the validity circuit on the encoded measurement and
+joint randomness. It evaluates the gadget polynomials encoded by the proof
+(share) to produce (a share of) each gadget output. The verifier (share)
+consists of (a share of) the validity circuit's output and (a share of) each
+gadget test. The gadget tests consume the query randomness.<a href="#section-7.3.3.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-3">The goal of each gadget test is to ensure the inputs used by the prover to
 generate the gadget polynomial matches the inputs we used to evaluate it. We do
 this by partially reconstructing the gadget polynomial and evaluating it a random
