@@ -6733,8 +6733,7 @@ def decode(
 <p id="section-7.4.4-6">The <code>Histogram</code> validity circuit checks for one-hotness in two steps, by
 checking that the encoded measurement consists of ones and zeros, and by
 checking that the sum of all elements in the encoded measurement is equal to
-one. All the individual checks are combined together in a random linear
-combination.<a href="#section-7.4.4-6" class="pilcrow">¶</a></p>
+one. The individual checks constitute the output of the circuit.<a href="#section-7.4.4-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.4-7">As in the <code>SumVec</code> validity circuit (<a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a>), the first part of the
 validity circuit uses the <code>ParallelSum</code> gadget to perform range checks while
 achieving a smaller proof size. The <code>ParallelSum</code> gadget uses <code>Mul</code> subcircuits
@@ -6782,9 +6781,7 @@ def eval(
     for b in meas:
         sum_check += b
 
-    out = joint_rand[-1] * range_check + \
-        joint_rand[-1] ** 2 * sum_check
-    return [out]
+    return [range_check, sum_check]
 </pre><a href="#section-7.4.4-8" class="pilcrow">¶</a>
 </div>
 <p id="section-7.4.4-9">Note that this circuit depends on the number of shares into which the
@@ -6838,7 +6835,7 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>1 + GADGET_CALLS[0]</code>
+                  <code>GADGET_CALLS[0]</code>
 </td>
               </tr>
               <tr>
@@ -6846,7 +6843,7 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
                   <code>EVAL_OUTPUT_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
+                  <code>2</code>
 </td>
               </tr>
               <tr>
@@ -7019,9 +7016,7 @@ def eval(
     weight_check = self.offset*shares_inv + weight - \
         weight_reported
 
-    out = joint_rand[-1] * range_check + \
-        joint_rand[-1] ** 2 * weight_check
-    return [out]
+    return [range_check, weight_check]
 </pre><a href="#section-7.4.5-11" class="pilcrow">¶</a>
 </div>
 <span id="name-parameters-of-validity-circuit-"></span><table class="center" id="table-18">
@@ -7073,7 +7068,15 @@ def eval(
                   <code>JOINT_RAND_LEN</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>1 + GADGET_CALLS[0]</code>
+                  <code>GADGET_CALLS[0]</code>
+</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>EVAL_OUTPUT_LEN</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>2</code>
 </td>
               </tr>
               <tr>
