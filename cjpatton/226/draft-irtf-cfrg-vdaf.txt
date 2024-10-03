@@ -3739,7 +3739,7 @@ Table of Contents
    The goal of each gadget test is to ensure the inputs used by the
    prover to generate the gadget polynomial matches the inputs we used
    to evaluate it.  We do this by partially reconstructing the gadget
-   polynomial and evaluating it a random point: when we evaluate the
+   polynomial and evaluating it at a random point: when we evaluate the
    gadget polynomial at the same point, we expect to get the same
    result.
 
