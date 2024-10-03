@@ -6224,7 +6224,6 @@ Appendix B.  FLP Gadget Wrappers
                              gadget_poly,
                              g, g_calls)
                wrapped_gadgets.append(wrapped)
-           assert len(proof) == 0
            wrapped_valid = deepcopy(valid)
            wrapped_valid.GADGETS = wrapped_gadgets
            return wrapped_valid
