@@ -4212,8 +4212,8 @@ Table of Contents
    The Histogram validity circuit checks for one-hotness in two steps,
    by checking that the encoded measurement consists of ones and zeros,
    and by checking that the sum of all elements in the encoded
-   measurement is equal to one.  All the individual checks are combined
-   together in a random linear combination.
+   measurement is equal to one.  The individual checks constitute the
+   output of the circuit.
 
    As in the SumVec validity circuit (Section 7.4.3), the first part of
    the validity circuit uses the ParallelSum gadget to perform range

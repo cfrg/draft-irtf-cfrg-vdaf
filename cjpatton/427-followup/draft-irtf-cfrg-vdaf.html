@@ -6733,8 +6733,7 @@ def decode(
 <p id="section-7.4.4-6">The <code>Histogram</code> validity circuit checks for one-hotness in two steps, by
 checking that the encoded measurement consists of ones and zeros, and by
 checking that the sum of all elements in the encoded measurement is equal to
-one. All the individual checks are combined together in a random linear
-combination.<a href="#section-7.4.4-6" class="pilcrow">¶</a></p>
+one. The individual checks constitute the output of the circuit.<a href="#section-7.4.4-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.4-7">As in the <code>SumVec</code> validity circuit (<a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a>), the first part of the
 validity circuit uses the <code>ParallelSum</code> gadget to perform range checks while
 achieving a smaller proof size. The <code>ParallelSum</code> gadget uses <code>Mul</code> subcircuits
