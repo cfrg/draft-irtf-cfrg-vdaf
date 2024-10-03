@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-01T01:00:28.446310+00:00",
+  "timestamp": "2024-10-03T00:55:08.804785+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4952,7 +4952,7 @@
     {
       "number": 312,
       "id": "I_kwDOGKuqOc53CORA",
-      "title": "Add test vectors to draft",
+      "title": "Choose repo revision for test vector reference",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/312",
       "state": "OPEN",
       "author": "cjpatton",
@@ -4961,12 +4961,11 @@
         "cjpatton"
       ],
       "labels": [
-        "pre-RGLC",
-        "draft-12"
+        "pre-RGLC"
       ],
       "body": "We removed them a couple of drafts ago because updating them was becoming a pain. (Note that machine-readable test vectors can be found in https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)",
       "createdAt": "2023-11-16T15:03:15Z",
-      "updatedAt": "2024-09-23T19:24:57Z",
+      "updatedAt": "2024-10-01T21:44:28Z",
       "closedAt": null,
       "comments": [
         {
@@ -4982,6 +4981,13 @@
           "body": "Yesterday I started a thread to discuss whether we could point to test vectors in GitHub rather than reproduce them in the draft. The RFC editor confirmed this should be OK: https://mailarchive.ietf.org/arch/msg/cfrg/sWa_WkzOW5IPvQ71Hmz21HsBNVY/\r\n\r\n\r\n",
           "createdAt": "2024-09-20T22:35:24Z",
           "updatedAt": "2024-09-20T22:35:24Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Removed the draft-12 label: We're leaving a TODO that we'll resolve just before RGLC.",
+          "createdAt": "2024-10-01T02:14:48Z",
+          "updatedAt": "2024-10-01T02:14:48Z"
         }
       ]
     },
@@ -5923,7 +5929,7 @@
       "id": "I_kwDOGKuqOc6Vq3Ij",
       "title": "Bind application context to VDAF computations",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/418",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5935,8 +5941,8 @@
       ],
       "body": "Consider the risk that, for a specific variant of Prio3, an attacker does enough offline computation that it can efficiently find  invalid reports that get accepted by the aggregators. We know this attack is feasible for a sufficiently small finite field and/or number of proofs: when the circuit uses joint randomness, the attacker can search for input shares that derive joint randomness that forces the circuit to accept an invalid measurement. (See #311 for details.)\r\n\r\nWhile we believe we've mitigated this risk for standardized variants, like Prio3SumVec, there is still a possibility of non-standardized variants getting deployed that haven't. The draft should, at a minimum, acknowledge this risk. We could also modify the spec in order to reduce the blast radius of this attack as much as possible.\r\n\r\nOne idea that's been suggested (by @junyechen1996 and @kunal-talwar) is to add the [DAP task ID](https://ietf-wg-ppm.github.io/draft-ietf-ppm-dap/draft-ietf-ppm-dap.html#section-4.4) to the transcript hash for the joint randomness derivation. This way all of the offline computation carried out by the attacker is only useful for a specific DAP task. This is similar to [salting a password hash](https://en.wikipedia.org/wiki/Salt_(cryptography)) in order to ensure that whatever computation the attacker does in advance, like building [rainbow tables](https://en.wikipedia.org/wiki/Rainbow_table), is specific to that user the attacker wants to impersonate.\r\n\r\nMore generally, we could modify the VDAF syntax in order to allow binding the computation to its application context. There are a couple ways we can do this:\r\n\r\n1. Add a context parameter to (V)DAF sharding and preparation.\r\n2. Allow the nonce to encode the context. At the moment, the nonce size is determined by the (V)DAF, and the client is supposed to choose it at random; we would need modify the syntax to support any nonce size and relax the requirements for choosing it.\r\n\r\nBoth of these options will require about the same amount of work for the DAP and VDAF specs. The downside of (1.) is that it requires API breaking changes. The downside of (2.) is that it makes the requirements more technical: the nonce now needs to have high min-entropy rather than being completely random. We could probably address this by providing some examples of secure ways to choose the nonce.\r\n\r\nDo folks support this change?\r\n\r\nSome reasons to do this:\r\n1. Defense-in-depth is always good (and this change certainly can't hurt).\r\n2. This aligns with a design philosophy of more conventional ZKP applications, which is to add as much context as possible to the transcript whenever you do Fiat-Shamir.\r\n\r\nSome reasons not to do this:\r\n1. It's a fairly big change, and there's a chance we get it wrong. Though we at least have a pretty good idea of what to do for Prio3.\r\n3. It could create a false sense of security, leading to overly optimistic parameter choices getting deployed.",
       "createdAt": "2024-09-06T19:04:46Z",
-      "updatedAt": "2024-09-11T16:07:40Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-02T23:39:27Z",
+      "closedAt": "2024-10-02T23:39:27Z",
       "comments": [
         {
           "author": "junyechen1996",
@@ -6072,6 +6078,43 @@
       "body": "This was meant to denote that something is an XOF seed, but not that we're making good use of type hints, this doesn't seem necessary anymore.",
       "createdAt": "2024-09-27T23:37:47Z",
       "updatedAt": "2024-09-27T23:37:48Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 438,
+      "id": "I_kwDOGKuqOc6YkRPz",
+      "title": "Make sure all variables imported from `typing` are defined in the draft",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/438",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "",
+      "createdAt": "2024-10-01T15:55:01Z",
+      "updatedAt": "2024-10-01T15:55:09Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 439,
+      "id": "I_kwDOGKuqOc6YkR6J",
+      "title": "Make sure all \"RFC EDITOR\" notes are actually tasks for the RFC editor",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/439",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "pre-RGLC"
+      ],
+      "body": "@bifurcation points out here that we've been a bit fast and lose with this: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/430#discussion_r1775648553",
+      "createdAt": "2024-10-01T15:56:22Z",
+      "updatedAt": "2024-10-01T15:56:22Z",
       "closedAt": null,
       "comments": []
     }
@@ -36934,7 +36977,7 @@
       ],
       "body": "Closes #226.\r\n\r\nClean up the reference code a bit so that it can be excerpted in the draft: add comments; use more meaningful variable names; and make variables consistent across the prover and verifier. We've also replaced `prove_wrapped()` and `query_wrapped()` with class methods on `ProveGadget` and `QueryGadget` respectively. This way the listing of these classes is a little tidier.\r\n\r\nReplace the current description of the algorithms with the reference code for and a brief overview of each. This entails defining `poly_eval()`, which we've done in the conventions section. `ProveGadget` and `QueryGadget` are listed in the appendix, as their descriptions are a bit tedious and their functionality is relatively straightforward. Note however that these are load-bearing parts of the specification.\r\n\r\nOther things:\r\n\r\n* Remove the \"Encoding\" subsection, which is pretty useless. Instead, we just say how these are instantiated in the \"Validity Circuit\" section.\r\n\r\n* Remove calls to `check_valid_eval()` from the draft, as this more useful for testing than it is as part of the spec.\r\n\r\n* Clean up the parameter tables, including indicating types.\r\n\r\n* Do another pass of the overview and tighten things up a bit.",
       "createdAt": "2024-09-19T23:49:09Z",
-      "updatedAt": "2024-09-19T23:51:35Z",
+      "updatedAt": "2024-10-02T20:12:32Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24",
@@ -36946,33 +36989,110 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6LkjF0",
+          "commit": {
+            "abbreviatedOid": "3112814"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T23:18:18Z",
+          "updatedAt": "2024-10-02T20:12:32Z",
+          "comments": [
+            {
+              "originalPosition": 161,
+              "body": "nit: Technically the generator is just the first root of unity\r\n```suggestion\r\nunity are powers of the generator of NTT-friendly fields (see\r\n```",
+              "createdAt": "2024-10-01T23:18:18Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 218,
+              "body": "nit: redundant\r\n```suggestion\r\n  the circuit is arithmetic. For example, `Mul` has degree 2.\r\n```",
+              "createdAt": "2024-10-02T00:30:56Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 382,
+              "body": "\"for invocation k\" is confusing here. The next sentence needs some editing too.\r\n```suggestion\r\n`g.wire[j][k]` at a sequence of fixed points. We obtain the gadget polynomial by\r\nevaluating the gadget on the wire polynomials.\r\n```",
+              "createdAt": "2024-10-02T15:26:23Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 498,
+              "body": "I wonder if calling this a query generation algorithm might be misleading. This is effectively generating the fully linear query and evaluating it on secret shares of the input, but the two are commingled, since we don't do the evaluation as one enormous dot product. Maybe calling it the \"query algorithm\" would avoid this?",
+              "createdAt": "2024-10-02T15:59:33Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 506,
+              "body": "nit: parallelism\r\n```suggestion\r\nthis by partially reconstructing the gadget polynomial and evaluating it a random\r\n```",
+              "createdAt": "2024-10-02T16:03:39Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 514,
+              "body": "Should this sentence instead say that the QueryGadget also evaluates the gadget output for each gadget invocation?",
+              "createdAt": "2024-10-02T16:23:51Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 522,
+              "body": "Here's a suggested clarification, since there are a lot of inputs flying around\r\n```suggestion\r\nThe random point `t` MUST NOT be one of the fixed evaluation points used to interpolate the wire\r\n```",
+              "createdAt": "2024-10-02T16:28:19Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 688,
+              "body": "The reference to this section looks funny without a section number, it currently says `Appendix \"FLP Generic Wrappers\"`. We may need to reorder sections or add more appendix section numbers, though, because my first attempt resulted in \"Error: Did not expect a numbered section after an unnumbered section\".\r\n```suggestion\r\n```",
+              "createdAt": "2024-10-02T16:40:55Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 245,
+              "body": "Should this have a `REMOVE ME` comment, like the one in ProveGadget.wrap?",
+              "createdAt": "2024-10-02T16:56:44Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            },
+            {
+              "originalPosition": 243,
+              "body": "nit: one argument per line\r\n```suggestion\r\n                          g,\r\n                          g_calls)\r\n```",
+              "createdAt": "2024-10-02T17:01:24Z",
+              "updatedAt": "2024-10-02T20:12:32Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 430,
       "id": "PR_kwDOGKuqOc58MaCj",
       "title": "Point to test vectors rather than reproduce them",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/430",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
         "draft-12"
       ],
-      "body": "Closes #312.\r\n\r\nThe current plan is to reproduce the test vectors in the draft once\r\nwe're ready for RFC. However the value of these test vectors for\r\nimplementers is not clear. It would be better to publish\r\nmachine-readable test vectors somewhere, point to it from the\r\ndraft, and publish a hash of the test vectors in the draft so that\r\nimplementers can use to verify their veracity.\r\n\r\nThis commit implements the following idea: point to a commit hash for\r\nthe draft and describe how to consume the test vectors.\r\n\r\nThis commit also moves the VDAF test vectors to a directory that is easy\r\nto reference. Namely, we remove the sub-directory based on the version\r\nand add a `vdaf` sub-directory.",
+      "body": "Partially addresses #312.\r\n\r\nThe current plan is to reproduce the test vectors in the draft once\r\nwe're ready for RFC. However the value of these test vectors for\r\nimplementers is not clear. It would be better to publish\r\nmachine-readable test vectors somewhere, point to it from the\r\ndraft, and publish a hash of the test vectors in the draft so that\r\nimplementers can use to verify their veracity.\r\n\r\nThis commit implements the following idea: point to a commit hash for\r\nthe draft and describe how to consume the test vectors.\r\n\r\nThis commit also moves the VDAF test vectors to a directory that is easy\r\nto reference. Namely, we remove the sub-directory based on the version\r\nand add a `vdaf` sub-directory.",
       "createdAt": "2024-09-20T17:22:12Z",
-      "updatedAt": "2024-09-23T19:24:48Z",
+      "updatedAt": "2024-10-01T21:22:52Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "bb01e528dab1da66c3264347a7c020f2c3403494",
+      "baseRefOid": "17e90c9a0023e6a700d82cde4a0812d440002c1e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/312",
-      "headRefOid": "05712824075ca880a242bfaa50de44ed8a61fc3f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "58b15e8d6b34b8f4032095a516cc3c51a4bf45c4",
+      "closedAt": "2024-10-01T21:22:52Z",
+      "mergedAt": "2024-10-01T21:22:52Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b1a6e60940cfebd74deb8b71f87d22cdd56fb49a"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -36980,9 +37100,253 @@
           "body": "Converted to draft while I incorporate some feedback from the list.",
           "createdAt": "2024-09-23T16:53:02Z",
           "updatedAt": "2024-09-23T16:53:02Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-10-01T01:13:39Z",
+          "updatedAt": "2024-10-01T01:13:39Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Squashed.",
+          "createdAt": "2024-10-01T21:18:06Z",
+          "updatedAt": "2024-10-01T21:18:06Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6K0Uj7",
+          "commit": {
+            "abbreviatedOid": "2328af0"
+          },
+          "author": "bifurcation",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Couple of minor things, overall LGTM",
+          "createdAt": "2024-09-25T17:17:46Z",
+          "updatedAt": "2024-10-01T01:32:06Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "This is not an RFC Editor task.  We should do this ourselves in the last revision of the doc before it is sent to the RFC Editor.  I would just change this to a TODO note.",
+              "createdAt": "2024-09-25T17:17:46Z",
+              "updatedAt": "2024-10-01T01:32:06Z"
+            },
+            {
+              "originalPosition": 10,
+              "body": "```suggestion\r\n```",
+              "createdAt": "2024-10-01T01:17:56Z",
+              "updatedAt": "2024-10-01T01:32:06Z"
+            },
+            {
+              "originalPosition": 43,
+              "body": "```suggestion\r\n`verify_key`:\r\n```\r\n\r\nAssuming the MD processor allows it, it would be cleaner for all of these to be verbatim blocks.",
+              "createdAt": "2024-10-01T01:18:47Z",
+              "updatedAt": "2024-10-01T01:32:06Z"
+            },
+            {
+              "originalPosition": 15,
+              "body": "We're dropping the version suffix because we're getting ready for RFC publication?",
+              "createdAt": "2024-10-01T01:20:04Z",
+              "updatedAt": "2024-10-01T01:32:06Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "Just noting for posterity that this is because the repo contains test vectors for subroutines, e.g., IDPFs.",
+              "createdAt": "2024-10-01T01:31:36Z",
+              "updatedAt": "2024-10-01T01:32:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Lag6-",
+          "commit": {
+            "abbreviatedOid": "0571282"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T02:03:46Z",
+          "updatedAt": "2024-10-01T02:03:47Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Sounds good. In this case, we'll keep the issue open until we're done with breaking changes.",
+              "createdAt": "2024-10-01T02:03:46Z",
+              "updatedAt": "2024-10-01T02:03:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LahEr",
+          "commit": {
+            "abbreviatedOid": "2328af0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T02:04:38Z",
+          "updatedAt": "2024-10-01T02:04:38Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Done.",
+              "createdAt": "2024-10-01T02:04:38Z",
+              "updatedAt": "2024-10-01T02:04:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Laha_",
+          "commit": {
+            "abbreviatedOid": "2328af0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T02:06:47Z",
+          "updatedAt": "2024-10-01T02:06:47Z",
+          "comments": [
+            {
+              "originalPosition": 43,
+              "body": "The processor doesn't seem to mind. Done.",
+              "createdAt": "2024-10-01T02:06:47Z",
+              "updatedAt": "2024-10-01T02:06:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Lailm",
+          "commit": {
+            "abbreviatedOid": "2328af0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T02:13:27Z",
+          "updatedAt": "2024-10-01T02:13:27Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "Well, actually it's a little nit-pickier than that: the path is included in the reference to the test vectors, and I didn't want to have to remember to bump the version suffix in the path whenever we bump the version.\r\n\r\nOf course, this should hopefully be the last draft with breaking changes\ud83e\udd1e.",
+              "createdAt": "2024-10-01T02:13:27Z",
+              "updatedAt": "2024-10-01T02:13:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Lhbhi",
+          "commit": {
+            "abbreviatedOid": "0571282"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T15:56:28Z",
+          "updatedAt": "2024-10-01T15:56:28Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/439",
+              "createdAt": "2024-10-01T15:56:28Z",
+              "updatedAt": "2024-10-01T15:56:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Lj8-3",
+          "commit": {
+            "abbreviatedOid": "2b36a55"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T21:02:28Z",
+          "updatedAt": "2024-10-01T21:09:32Z",
+          "comments": [
+            {
+              "originalPosition": 42,
+              "body": "nit: typo\r\n```suggestion\r\n`verify_key`:\r\n```",
+              "createdAt": "2024-10-01T21:02:29Z",
+              "updatedAt": "2024-10-01T21:09:32Z"
+            },
+            {
+              "originalPosition": 80,
+              "body": "nit: typo\r\n```suggestion\r\n`agg_result`:\r\n```",
+              "createdAt": "2024-10-01T21:02:53Z",
+              "updatedAt": "2024-10-01T21:09:32Z"
+            },
+            {
+              "originalPosition": 36,
+              "body": "This is missing `ctx`.",
+              "createdAt": "2024-10-01T21:08:29Z",
+              "updatedAt": "2024-10-01T21:09:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LkA4z",
+          "commit": {
+            "abbreviatedOid": "2b36a55"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T21:13:29Z",
+          "updatedAt": "2024-10-01T21:13:30Z",
+          "comments": [
+            {
+              "originalPosition": 80,
+              "body": "Done, and fixed a misspelled word below.",
+              "createdAt": "2024-10-01T21:13:29Z",
+              "updatedAt": "2024-10-01T21:13:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LkBdW",
+          "commit": {
+            "abbreviatedOid": "2b36a55"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-01T21:15:11Z",
+          "updatedAt": "2024-10-01T21:15:12Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "Nice catch. ",
+              "createdAt": "2024-10-01T21:15:12Z",
+              "updatedAt": "2024-10-01T21:15:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LkB7Z",
+          "commit": {
+            "abbreviatedOid": "58b15e8"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-01T21:16:43Z",
+          "updatedAt": "2024-10-01T21:18:01Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 433,
@@ -37260,7 +37624,7 @@
       "id": "PR_kwDOGKuqOc58-R1x",
       "title": "Add application context string",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/434",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -37269,17 +37633,19 @@
       ],
       "body": "Closes #418.\r\n\r\nPropagate changes to the reference code from a recent change that add an application context string to sharding and preparation. Explain the intended role of context: disagreement should imply failure to aggregate a report. However, the affect is different for DAFs and VDAFs, since for DAFs there is no explicit signal of rejection; disagreement would manifest as a garbled aggregate result. Point this out.\r\n\r\nAlso, note in security considerations that this provides a cushion for weak parameters.\r\n\r\nFinally, update the order of the context string in the `Daf` input parameters to align with the `Vdaf`. The context string comes ahead of every input except for the VDAF verification key.",
       "createdAt": "2024-09-27T23:34:32Z",
-      "updatedAt": "2024-09-27T23:39:05Z",
+      "updatedAt": "2024-10-02T23:39:26Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "17e90c9a0023e6a700d82cde4a0812d440002c1e",
+      "baseRefOid": "b1a6e60940cfebd74deb8b71f87d22cdd56fb49a",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/418",
-      "headRefOid": "bc8cce4947d2bb09fb3c91fc22351f8fa9c2f983",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "0f590b23bafcf08d23a78c3978c67c38eb9868e4",
+      "closedAt": "2024-10-02T23:39:26Z",
+      "mergedAt": "2024-10-02T23:39:26Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "79fd0d8438b4ab0b22ed897a694c1e32ab318fe6"
+      },
       "comments": [],
       "reviews": [
         {
@@ -37301,6 +37667,46 @@
               "updatedAt": "2024-09-27T23:35:54Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LrOy9",
+          "commit": {
+            "abbreviatedOid": "bc8cce4"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-02T15:43:04Z",
+          "updatedAt": "2024-10-02T15:43:04Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "@divergentdave : identify an \"instance\" of the higher level protocl, not the higher level protocol itself",
+              "createdAt": "2024-10-02T15:43:04Z",
+              "updatedAt": "2024-10-02T15:43:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6LuFgh",
+          "commit": {
+            "abbreviatedOid": "bc8cce4"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-02T21:11:16Z",
+          "updatedAt": "2024-10-02T21:11:43Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "Here's a suggestion for the above comment.\r\n```suggestion\r\nSharding is bound to a specific \"application context\". The application context\r\nis a string intended to uniquely identify an instance of the higher level\r\nprotocol that uses the DAF. This is intended to ensure that aggregation succeeds\r\nonly if the Clients and Aggregators agree on the application context.\r\n(Preparation binds the application context, too; see {{sec-daf-prepare}}.) Note\r\nthat, unlike VDAFs ({{vdaf}}), there is no explicit signal of disagreement; it\r\nmay only manifest as a garbled aggregate result.\r\n```",
+              "createdAt": "2024-10-02T21:11:16Z",
+              "updatedAt": "2024-10-02T21:11:43Z"
+            }
+          ]
         }
       ]
     },
@@ -37318,18 +37724,26 @@
       ],
       "body": "Closes #427.\r\n\r\nIn a validity circuit we may have several values we expect to be 0. To check that they're all zero, we interpret them as coefficients of a polynomial and evaluate the polynomial at random point. We do this in several places:\r\n\r\n* Whenever `EVAL_OUTPUT_LEN > 0`\r\n* In the `SumVec` circuit\r\n* In the `MultihotCountVec` circuit\r\n* In the `Histogram` circuit\r\n\r\nThis induces a soundness error of `n / |F|`, where `n` is the number of values and $F$ is the finite field. This is significant especially for larger inputs.\r\n\r\nWe can reduce this soundness error by reducing the degree of the polynomial. By the Schwartz-Zippel lemma, when we evaluate a non-zero, multivariate polynomial with degree `d` at a random point (each variable gets a random value), the probability that the output is zero is at most `d / |F|`. For instance, if each value is a different variable, then the maximum degree is `1`, resulting in a `1 / |F|` soundness error.\r\n\r\nHowever, the more variables the polynomial, the more randomness we need to produce. This can become a CPU bottleneck for longer inputs.\r\n\r\nThis commit makes the following changes to Prio3 and its variants:\r\n\r\n1. When `EVAL_OUTPUT_LEN > 0`, we include in the query randomness `EVAL_OUTPUT_LEN` field elements and compute the reduced output as the dot product of this random vector and the outputs. This improves the soundness error from `EVAL_OUTPUT_LEN / |F|` to `1 / |F|`.\r\n\r\n2. We modify the `SumVec`, `MultihotCountVec` and `Histogram` circuits by including in the joint randomness a vector of length `GADGET_CALLS[0]`. For the `i`-th gadget call, we generate powers of `joint_rand[i]`. This results in a soundness error of `sqrt(length) / |F|` when the chunk length is chosen optimally.",
       "createdAt": "2024-09-30T17:34:05Z",
-      "updatedAt": "2024-09-30T17:38:01Z",
+      "updatedAt": "2024-10-01T21:24:38Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "17e90c9a0023e6a700d82cde4a0812d440002c1e",
+      "baseRefOid": "b1a6e60940cfebd74deb8b71f87d22cdd56fb49a",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/427",
-      "headRefOid": "252ccd8453fb18c0f10c5e31cffd012ca5716c74",
+      "headRefOid": "8f23e16a0edeb66c71a3fbecca87ca55ed247d9e",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-10-01T21:24:37Z",
+          "updatedAt": "2024-10-01T21:24:37Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -37347,18 +37761,26 @@
       ],
       "body": "Based on #436 (merge that first)\r\n\r\nSimplify the `Histogram` and `MultihotCountVec` circuits by moving the final reduction out of the circuit.",
       "createdAt": "2024-09-30T17:46:39Z",
-      "updatedAt": "2024-09-30T17:50:23Z",
+      "updatedAt": "2024-10-01T21:25:25Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "cjpatton/427",
-      "baseRefOid": "252ccd8453fb18c0f10c5e31cffd012ca5716c74",
+      "baseRefOid": "8f23e16a0edeb66c71a3fbecca87ca55ed247d9e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/427-followup",
-      "headRefOid": "0bf9c6427abcaca43260b2c2c08d249b5eea6ab8",
+      "headRefOid": "371440779364ca4924aee5614321cc1ec571f66e",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-10-01T21:25:24Z",
+          "updatedAt": "2024-10-01T21:25:24Z"
+        }
+      ],
       "reviews": []
     }
   ]
