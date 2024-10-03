@@ -149,14 +149,14 @@ Table of Contents
    11. References
      11.1.  Normative References
      11.2.  Informative References
-   Acknowledgments
-   FLP Gadget Wrappers
-   Test Vectors
-     Prio3Count
-     Prio3Sum
-     Prio3SumVec
-     Prio3Histogram
-     Poplar1
+   Appendix A.  Acknowledgments
+   Appendix B.  FLP Gadget Wrappers
+   Appendix C.  Test Vectors
+     C.1.  Prio3Count
+     C.2.  Prio3Sum
+     C.3.  Prio3SumVec
+     C.4.  Prio3Histogram
+     C.5.  Poplar1
    Authors' Addresses
 
 1.  Introduction
@@ -2328,7 +2328,7 @@ Table of Contents
    suitable for any validity circuit is specified in Section 7.3.
    Finally, instantiations of Prio3 for various types of measurements
    are specified in Section 7.4.  Test vectors can be found in
-   Appendix "Test Vectors".
+   Appendix C.
 
 7.1.  Fully Linear Proof (FLP) Systems
 
@@ -3598,7 +3598,7 @@ Table of Contents
    circuit, setting g.wires[j][k] to the value of the j-th wire for the
    k-th invocation of gadget g.  This is accomplished by "wrapping" each
    gadget in a class ProveGadget that records the wire inputs.  We list
-   this class in Appendix "FLP Gadget Wrappers".
+   this class in Appendix B.
 
    Next, we compute each of the "wire polynomials" for each gadget.  The
    j-th wire polynomial is the lowest degree polynomial that evaluates
@@ -3682,9 +3682,9 @@ Table of Contents
    polynomials just as the prover did.  First, we record g.wires[j][k]
    as the input (share) of the j-th wire of the k-th invocation of the
    gadget.  Again, this is accomplished by a wrapper gadget,
-   QueryGadget, listed in Appendix "FLP Gadget Wrappers".  This gadget
-   also evaluates the gadget proof for each gadget invocation.  Then we
-   compute the wire polynomials from the recorded values.
+   QueryGadget, listed in Appendix B.  This gadget also evaluates the
+   gadget proof for each gadget invocation.  Then we compute the wire
+   polynomials from the recorded values.
 
    Next, we choose a random point t (parsed from the query randomness),
    evaluate each wire polynomial at t, and evaluate the gadget
@@ -3794,7 +3794,7 @@ Table of Contents
    measurement types.  Each is determined by a field (Section 6.1), a
    validity circuit (Section 7.3.2), an XOF (Section 6.2). and the
    number of proofs to generate and verify.  Test vectors for each can
-   be found in Appendix "Test Vectors".
+   be found in Appendix C.
 
 7.4.1.  Prio3Count
 
@@ -4494,8 +4494,7 @@ Table of Contents
    defined in Section 8.1; a concrete instantiation is given
    Section 8.3.  The Poplar1 VDAF is defined in Section 8.2 in terms of
    a generic IDPF.  Finally, a concrete instantiation of Poplar1 is
-   specified in Section 8.4; test vectors can be found in Appendix "Test
-   Vectors".
+   specified in Section 8.4; test vectors can be found in Appendix C.
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
@@ -5586,7 +5585,7 @@ Table of Contents
    By default, Poplar1 is instantiated with the IDPF in Section 8.3
    (VALUE_LEN == 2) and XofTurboShake128 (Section 6.2.1).  This VDAF is
    suitable for any positive value of BITS.  Test vectors can be found
-   in Appendix "Test Vectors".
+   in Appendix C.
 
 9.  Security Considerations
 
@@ -6096,7 +6095,7 @@ Table of Contents
               Beginner Guide to the Number Theoretic Transform (NTT)",
               2024, <https://eprint.iacr.org/2024/585>.
 
-Acknowledgments
+Appendix A.  Acknowledgments
 
    The impetus of this work is the success of recent deployments of
    predecessors of Prio3.  The Mozilla Origin Telemetry project
@@ -6124,7 +6123,7 @@ Acknowledgments
    Christopher Wood for useful feedback on and contributions to the
    spec.
 
-FLP Gadget Wrappers
+Appendix B.  FLP Gadget Wrappers
 
    class ProveGadget(Gadget[F]):
        """
@@ -6230,7 +6229,7 @@ FLP Gadget Wrappers
            wrapped_valid.GADGETS = wrapped_gadgets
            return wrapped_valid
 
-Test Vectors
+Appendix C.  Test Vectors
 
    (TO BE REMOVED BY RFC EDITOR: machine-readable test vectors can be
    found at https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
@@ -6249,31 +6248,31 @@ Test Vectors
 
    0, 1, 2, ..., 255, 0, 1, 2, ...
 
-Prio3Count
+C.1.  Prio3Count
 
       TODO Copy the machine readable vectors from the source repository
       (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
       test_vec) and format them for humans.
 
-Prio3Sum
+C.2.  Prio3Sum
 
       TODO Copy the machine readable vectors from the source repository
       (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
       test_vec) and format them for humans.
 
-Prio3SumVec
+C.3.  Prio3SumVec
 
       TODO Copy the machine readable vectors from the source repository
       (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
       test_vec) and format them for humans.
 
-Prio3Histogram
+C.4.  Prio3Histogram
 
       TODO Copy the machine readable vectors from the source repository
       (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/
       test_vec) and format them for humans.
 
-Poplar1
+C.5.  Poplar1
 
       TODO Copy the machine readable vectors from the source repository
       (https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/

@@ -1424,28 +1424,28 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-flp-gadget-wrappers" class="internal xref">FLP Gadget Wrappers</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-flp-gadget-wrappers" class="internal xref">FLP Gadget Wrappers</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
+            <p id="section-toc.1-1.14.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
-                <p id="section-toc.1-1.14.2.1.1"><a href="#appendix-C.1" class="auto internal xref"></a><a href="#name-prio3count-2" class="internal xref">Prio3Count</a></p>
+                <p id="section-toc.1-1.14.2.1.1"><a href="#appendix-C.1" class="auto internal xref">C.1</a>.  <a href="#name-prio3count-2" class="internal xref">Prio3Count</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
-                <p id="section-toc.1-1.14.2.2.1"><a href="#appendix-C.2" class="auto internal xref"></a><a href="#name-prio3sum-2" class="internal xref">Prio3Sum</a></p>
+                <p id="section-toc.1-1.14.2.2.1"><a href="#appendix-C.2" class="auto internal xref">C.2</a>.  <a href="#name-prio3sum-2" class="internal xref">Prio3Sum</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3">
-                <p id="section-toc.1-1.14.2.3.1"><a href="#appendix-C.3" class="auto internal xref"></a><a href="#name-prio3sumvec-2" class="internal xref">Prio3SumVec</a></p>
+                <p id="section-toc.1-1.14.2.3.1"><a href="#appendix-C.3" class="auto internal xref">C.3</a>.  <a href="#name-prio3sumvec-2" class="internal xref">Prio3SumVec</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.4">
-                <p id="section-toc.1-1.14.2.4.1"><a href="#appendix-C.4" class="auto internal xref"></a><a href="#name-prio3histogram-2" class="internal xref">Prio3Histogram</a></p>
+                <p id="section-toc.1-1.14.2.4.1"><a href="#appendix-C.4" class="auto internal xref">C.4</a>.  <a href="#name-prio3histogram-2" class="internal xref">Prio3Histogram</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.5">
-                <p id="section-toc.1-1.14.2.5.1"><a href="#appendix-C.5" class="auto internal xref"></a><a href="#name-poplar1-2" class="internal xref">Poplar1</a></p>
+                <p id="section-toc.1-1.14.2.5.1"><a href="#appendix-C.5" class="auto internal xref">C.5</a>.  <a href="#name-poplar1-2" class="internal xref">Poplar1</a></p>
 </li>
             </ul>
 </li>
@@ -4056,7 +4056,7 @@ described in <a href="#flp" class="auto internal xref">Section 7.1</a>. The gene
 specified in <a href="#prio3-construction" class="auto internal xref">Section 7.2</a>. Next, a concrete FLP suitable for any
 validity circuit is specified in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>. Finally, instantiations of
 Prio3 for various types of measurements are specified in
-<a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-7-6" class="pilcrow">¶</a></p>
+<a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix C</a>.<a href="#section-7-6" class="pilcrow">¶</a></p>
 <div id="flp">
 <section id="section-7.1">
         <h3 id="name-fully-linear-proof-flp-syst">
@@ -5769,7 +5769,7 @@ gadget.<a href="#section-7.3.3.1-2" class="pilcrow">¶</a></p>
 setting <code>g.wires[j][k]</code> to the value of the <code>j</code>-th wire for the <code>k</code>-th
 invocation of gadget <code>g</code>. This is accomplished by "wrapping" each gadget in a
 class <code>ProveGadget</code> that records the wire inputs. We list this class in
-<a href="#gadget-wrappers" class="auto internal xref">Appendix "FLP Gadget Wrappers"</a>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
+<a href="#gadget-wrappers" class="auto internal xref">Appendix B</a>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.1-4">Next, we compute each of the "wire polynomials" for each gadget. The <code>j</code>-th
 wire polynomial is the lowest degree polynomial that evaluates to
 <code>g.wire[j][k]</code> at a sequence of fixed points. We obtain the gadget polynomial by
@@ -5859,7 +5859,7 @@ get the same result.<a href="#section-7.3.3.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-4">To start a gadget test, we first construct the (shares of the) wire polynomials
 just as the prover did. First, we record <code>g.wires[j][k]</code> as the input (share)
 of the <code>j</code>-th wire of the <code>k</code>-th invocation of the gadget. Again, this is
-accomplished by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix "FLP Gadget Wrappers"</a>.
+accomplished by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix B</a>.
 This gadget also evaluates the gadget proof for each gadget invocation. Then we
 compute the wire polynomials from the recorded values.<a href="#section-7.3.3.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-5">Next, we choose a random point <code>t</code> (parsed from the query randomness), evaluate
@@ -5988,7 +5988,7 @@ def decide(self, verifier: list[F]) -&gt; bool:
 <p id="section-7.4-1">This section specifies instantiations of Prio3 for various measurement types.
 Each is determined by a field (<a href="#field" class="auto internal xref">Section 6.1</a>), a validity circuit
 (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>), an XOF (<a href="#xof" class="auto internal xref">Section 6.2</a>). and the number of proofs to
-generate and verify. Test vectors for each can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+generate and verify. Test vectors for each can be found in <a href="#test-vectors" class="auto internal xref">Appendix C</a>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
 <div id="prio3count">
 <section id="section-7.4.1">
           <h4 id="name-prio3count">
@@ -7128,7 +7128,7 @@ is zero everywhere except for at most one element, which is equal to one.<a href
 <a href="#idpf" class="auto internal xref">Section 8.1</a>; a concrete instantiation is given <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. The Poplar1 VDAF is
 defined in <a href="#poplar1-construction" class="auto internal xref">Section 8.2</a> in terms of a generic IDPF. Finally, a
 concrete instantiation of Poplar1 is specified in <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>;
-test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
+test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix C</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
 <div id="idpf">
 <section id="section-8.1">
         <h3 id="name-incremental-distributed-poi">
@@ -8567,7 +8567,7 @@ def current_xof(self,
         </h3>
 <p id="section-8.4-1">By default, Poplar1 is instantiated with the IDPF in <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> (<code>VALUE_LEN
 == 2</code>) and XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>). This VDAF is suitable for
-any positive value of <code>BITS</code>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix "Test Vectors"</a>.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+any positive value of <code>BITS</code>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix C</a>.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -9159,7 +9159,7 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
 <div id="acknowledgments">
 <section id="appendix-A">
       <h2 id="name-acknowledgments">
-<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
 <p id="appendix-A-1">The impetus of this work is the success of recent deployments of predecessors
 of Prio3. The Mozilla Origin Telemetry project <span>[<a href="#OriginTelemetry" class="cite xref">OriginTelemetry</a>]</span> and the
@@ -9184,7 +9184,7 @@ useful feedback on and contributions to the spec.<a href="#appendix-A-4" class="
 <div id="gadget-wrappers">
 <section id="appendix-B">
       <h2 id="name-flp-gadget-wrappers">
-<a href="#name-flp-gadget-wrappers" class="section-name selfRef">FLP Gadget Wrappers</a>
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-flp-gadget-wrappers" class="section-name selfRef">FLP Gadget Wrappers</a>
       </h2>
 <div class="breakable lang-python sourcecode" id="appendix-B-1">
 <pre>
@@ -9298,7 +9298,7 @@ class QueryGadget(Gadget[F]):
 <div id="test-vectors">
 <section id="appendix-C">
       <h2 id="name-test-vectors">
-<a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
       </h2>
 <p id="appendix-C-1">(TO BE REMOVED BY RFC EDITOR: machine-readable test vectors can be found at
 https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)<a href="#appendix-C-1" class="pilcrow">¶</a></p>
@@ -9318,7 +9318,7 @@ with <code>0</code>, incrementing by <code>1</code>, and wrapping at <code>256</
 <div id="testvec-prio3count">
 <section id="appendix-C.1">
         <h3 id="name-prio3count-2">
-<a href="#name-prio3count-2" class="section-name selfRef">Prio3Count</a>
+<a href="#appendix-C.1" class="section-number selfRef">C.1. </a><a href="#name-prio3count-2" class="section-name selfRef">Prio3Count</a>
         </h3>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-C.1-1.1">
@@ -9332,7 +9332,7 @@ format them for humans.<a href="#appendix-C.1-1.1.1" class="pilcrow">¶</a></p>
 <div id="testvec-prio3sum">
 <section id="appendix-C.2">
         <h3 id="name-prio3sum-2">
-<a href="#name-prio3sum-2" class="section-name selfRef">Prio3Sum</a>
+<a href="#appendix-C.2" class="section-number selfRef">C.2. </a><a href="#name-prio3sum-2" class="section-name selfRef">Prio3Sum</a>
         </h3>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-C.2-1.1">
@@ -9346,7 +9346,7 @@ format them for humans.<a href="#appendix-C.2-1.1.1" class="pilcrow">¶</a></p>
 <div id="testvec-prio3sumvec">
 <section id="appendix-C.3">
         <h3 id="name-prio3sumvec-2">
-<a href="#name-prio3sumvec-2" class="section-name selfRef">Prio3SumVec</a>
+<a href="#appendix-C.3" class="section-number selfRef">C.3. </a><a href="#name-prio3sumvec-2" class="section-name selfRef">Prio3SumVec</a>
         </h3>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-C.3-1.1">
@@ -9360,7 +9360,7 @@ format them for humans.<a href="#appendix-C.3-1.1.1" class="pilcrow">¶</a></p>
 <div id="testvec-prio3histogram">
 <section id="appendix-C.4">
         <h3 id="name-prio3histogram-2">
-<a href="#name-prio3histogram-2" class="section-name selfRef">Prio3Histogram</a>
+<a href="#appendix-C.4" class="section-number selfRef">C.4. </a><a href="#name-prio3histogram-2" class="section-name selfRef">Prio3Histogram</a>
         </h3>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-C.4-1.1">
@@ -9374,7 +9374,7 @@ format them for humans.<a href="#appendix-C.4-1.1.1" class="pilcrow">¶</a></p>
 <div id="testvec-poplar1">
 <section id="appendix-C.5">
         <h3 id="name-poplar1-2">
-<a href="#name-poplar1-2" class="section-name selfRef">Poplar1</a>
+<a href="#appendix-C.5" class="section-number selfRef">C.5. </a><a href="#name-poplar1-2" class="section-name selfRef">Poplar1</a>
         </h3>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="appendix-C.5-1.1">
