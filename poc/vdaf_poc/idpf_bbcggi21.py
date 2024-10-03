@@ -71,6 +71,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             alpha: tuple[bool, ...],
             beta_inner: list[list[Field64]],
             beta_leaf: list[Field255],
+            ctx: bytes,
             nonce: bytes,
             rand: bytes) -> tuple[list[CorrectionWord], list[bytes]]:
         if len(alpha) != self.BITS:
@@ -95,8 +96,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             lose = 1 - keep
             bit = Field2(keep)
 
-            (s0, t0) = self.extend(level, seed[0], nonce)
-            (s1, t1) = self.extend(level, seed[1], nonce)
+            (s0, t0) = self.extend(level, seed[0], ctx, nonce)
+            (s1, t1) = self.extend(level, seed[1], ctx, nonce)
             seed_cw = xor(s0[lose], s1[lose])
             ctrl_cw = (
                 t0[0] + t1[0] + bit + Field2(1),
@@ -119,8 +120,8 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             else:
                 x1 = s1[keep]
                 ctrl[1] = t1[keep]
-            (seed[0], w0) = self.convert(level, x0, nonce)
-            (seed[1], w1) = self.convert(level, x1, nonce)
+            (seed[0], w0) = self.convert(level, x0, ctx, nonce)
+            (seed[1], w1) = self.convert(level, x1, ctx, nonce)
 
             if level < self.BITS - 1:
                 b = cast(list[Field], beta_inner[level])
@@ -156,6 +157,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             key: bytes,
             level: int,
             prefixes: Sequence[tuple[bool, ...]],
+            ctx: bytes,
             nonce: bytes) -> list[list[Field64]] | list[list[Field255]]:
         if agg_id not in range(self.SHARES):
             raise ValueError('aggregator id out of range')
@@ -200,6 +202,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
                     public_share[current_level],
                     current_level,
                     bit,
+                    ctx,
                     nonce,
                 )
             if agg_id == 0:
@@ -218,6 +221,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             correction_word: CorrectionWord,
             level: int,
             bit: int,
+            ctx: bytes,
             nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
         """
         Compute the next node in the IDPF tree along the path determined
@@ -228,7 +232,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         seed_cw = correction_word[0]
         ctrl_cw = correction_word[1]
         w_cw = cast(list[Field], correction_word[2])
-        (s, t) = self.extend(level, prev_seed, nonce)
+        (s, t) = self.extend(level, prev_seed, ctx, nonce)
 
         # Implementation note: these conditional operations and
         # input-dependent array indices should be replaced with
@@ -241,7 +245,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             t[1] += ctrl_cw[1]
 
         next_ctrl = t[bit]
-        convert_output = self.convert(level, s[bit], nonce)
+        convert_output = self.convert(level, s[bit], ctx, nonce)
         next_seed = convert_output[0]
         y = cast(list[Field], convert_output[1])
         # Implementation note: this conditional addition should be
@@ -262,8 +266,9 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             self,
             level: int,
             seed: bytes,
+            ctx: bytes,
             nonce: bytes) -> tuple[list[bytes], list[Field2]]:
-        xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
+        xof = self.current_xof(level, seed, format_dst(1, 0, 0) + ctx, nonce)
         s = [
             bytearray(xof.next(self.KEY_SIZE)),
             bytearray(xof.next(self.KEY_SIZE)),
@@ -280,8 +285,9 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             self,
             level: int,
             seed: bytes,
+            ctx: bytes,
             nonce: bytes) -> tuple[bytes, FieldVec]:
-        xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
+        xof = self.current_xof(level, seed, format_dst(1, 0, 1) + ctx, nonce)
         next_seed = xof.next(self.KEY_SIZE)
         field = self.current_field(level)
         w = xof.next_vec(field, self.VALUE_LEN)

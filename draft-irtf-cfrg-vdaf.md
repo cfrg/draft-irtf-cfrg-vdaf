@@ -2130,7 +2130,7 @@ This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
 {{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. (RFC EDITOR: Update this
 reference to the RFC for draft-irtf-cfrg-kangarootwelve once published.) This
 XOF is RECOMMENDED for all use cases within VDAFs. The length of the domain
-separation string `dst` passed to XofTurboShake128 MUST NOT exceed 255 bytes.
+separation string `dst` passed to XofTurboShake128 MUST NOT exceed 65535 bytes.
 
 ~~~ python
 class XofTurboShake128(Xof):
@@ -2169,7 +2169,7 @@ cases where a more efficient instantiation based on fixed-key AES is possible.
 For now, this is limited to the XOF used inside the Idpf {{idpf}}
 implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT RECOMMENDED to use this
 XOF anywhere else. The length of the domain separation string `dst` passed to
-XofFixedKeyAes128 MUST NOT exceed 255 bytes. See {{security}} for a more
+XofFixedKeyAes128 MUST NOT exceed 65535 bytes. See {{security}} for a more
 detailed discussion.
 
 ~~~ python
@@ -4303,9 +4303,10 @@ denotes either a vector of inner node field elements or leaf node field
 elements.) The scheme is comprised of the following algorithms:
 
 * `idpf.gen(alpha: tuple[bool, ...], beta_inner: list[list[FieldInner]], beta_leaf:
-  list[FieldLeaf], nonce: bytes, rand: bytes) -> tuple[PublicShare,
+  list[FieldLeaf], ctx: bytes, nonce: bytes, rand: bytes) -> tuple[PublicShare,
   list[bytes]]` is the randomized IDPF-key generation algorithm. Its inputs are
-  the index `alpha`, the values `beta`, and a nonce string.
+  the index `alpha`, the values `beta`, an application context string, and a
+  nonce string.
 
   The output is a public part (of type `PublicShare`) that is sent to all
   Aggregators and a vector of private IDPF keys, one for each aggregator. The
@@ -4324,13 +4325,13 @@ elements.) The scheme is comprised of the following algorithms:
       random by the Client (see {{nonce-requirements}}).
 
 * `idpf.eval(agg_id: int, public_share: PublicShare, key: bytes, level: int,
-  prefixes: Sequence[tuple[bool, ...]], nonce: bytes) -> Output` is the
-  deterministic, stateless IDPF-key evaluation algorithm run by each Aggregator.
-  Its inputs are the Aggregator's unique identifier, the public share
-  distributed to all of the Aggregators, the Aggregator's IDPF key, the "level"
-  at which to evaluate the IDPF, the sequence of candidate prefixes, and a nonce
-  string. It returns the share of the value corresponding to each candidate
-  prefix.
+  prefixes: Sequence[tuple[bool, ...]], ctx: bytes, nonce: bytes) -> Output` is
+  the deterministic, stateless IDPF-key evaluation algorithm run by each
+  Aggregator. Its inputs are the Aggregator's unique identifier, the public
+  share distributed to all of the Aggregators, the Aggregator's IDPF key, the
+  "level" at which to evaluate the IDPF, the sequence of candidate prefixes, an
+  application context string, and a nonce string. It returns the share of the
+  value corresponding to each candidate prefix.
 
   The output type (i.e., `Output`) depends on the value of `level`: if `level <
   BITS-1`, the output is the value for an inner node, which has type
@@ -4513,6 +4514,7 @@ def shard(
         measurement,
         beta_inner,
         beta_leaf,
+        ctx,
         nonce,
         idpf_rand,
     )
@@ -4624,7 +4626,7 @@ def prep_init(
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = self.idpf.eval(
-        agg_id, public_share, key, level, prefixes, nonce)
+        agg_id, public_share, key, level, prefixes, ctx, nonce)
 
     # Get shares of the correlated randomness for evaluating the
     # Aggregator's share of the sketch.
@@ -5114,6 +5116,7 @@ def gen(
         alpha: tuple[bool, ...],
         beta_inner: list[list[Field64]],
         beta_leaf: list[Field255],
+        ctx: bytes,
         nonce: bytes,
         rand: bytes) -> tuple[list[CorrectionWord], list[bytes]]:
     if len(alpha) != self.BITS:
@@ -5138,8 +5141,8 @@ def gen(
         lose = 1 - keep
         bit = Field2(keep)
 
-        (s0, t0) = self.extend(level, seed[0], nonce)
-        (s1, t1) = self.extend(level, seed[1], nonce)
+        (s0, t0) = self.extend(level, seed[0], ctx, nonce)
+        (s1, t1) = self.extend(level, seed[1], ctx, nonce)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
             t0[0] + t1[0] + bit + Field2(1),
@@ -5162,8 +5165,8 @@ def gen(
         else:
             x1 = s1[keep]
             ctrl[1] = t1[keep]
-        (seed[0], w0) = self.convert(level, x0, nonce)
-        (seed[1], w1) = self.convert(level, x1, nonce)
+        (seed[0], w0) = self.convert(level, x0, ctx, nonce)
+        (seed[1], w1) = self.convert(level, x1, ctx, nonce)
 
         if level < self.BITS - 1:
             b = cast(list[Field], beta_inner[level])
@@ -5204,6 +5207,7 @@ def eval(
         key: bytes,
         level: int,
         prefixes: Sequence[tuple[bool, ...]],
+        ctx: bytes,
         nonce: bytes) -> list[list[Field64]] | list[list[Field255]]:
     if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
@@ -5248,6 +5252,7 @@ def eval(
                 public_share[current_level],
                 current_level,
                 bit,
+                ctx,
                 nonce,
             )
         if agg_id == 0:
@@ -5266,6 +5271,7 @@ def eval_next(
         correction_word: CorrectionWord,
         level: int,
         bit: int,
+        ctx: bytes,
         nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
     """
     Compute the next node in the IDPF tree along the path determined
@@ -5276,7 +5282,7 @@ def eval_next(
     seed_cw = correction_word[0]
     ctrl_cw = correction_word[1]
     w_cw = cast(list[Field], correction_word[2])
-    (s, t) = self.extend(level, prev_seed, nonce)
+    (s, t) = self.extend(level, prev_seed, ctx, nonce)
 
     # Implementation note: these conditional operations and
     # input-dependent array indices should be replaced with
@@ -5289,7 +5295,7 @@ def eval_next(
         t[1] += ctrl_cw[1]
 
     next_ctrl = t[bit]
-    convert_output = self.convert(level, s[bit], nonce)
+    convert_output = self.convert(level, s[bit], ctx, nonce)
     next_seed = convert_output[0]
     y = cast(list[Field], convert_output[1])
     # Implementation note: this conditional addition should be
@@ -5310,8 +5316,9 @@ def extend(
         self,
         level: int,
         seed: bytes,
+        ctx: bytes,
         nonce: bytes) -> tuple[list[bytes], list[Field2]]:
-    xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 0) + ctx, nonce)
     s = [
         bytearray(xof.next(self.KEY_SIZE)),
         bytearray(xof.next(self.KEY_SIZE)),
@@ -5328,8 +5335,9 @@ def convert(
         self,
         level: int,
         seed: bytes,
+        ctx: bytes,
         nonce: bytes) -> tuple[bytes, FieldVec]:
-    xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 1) + ctx, nonce)
     next_seed = xof.next(self.KEY_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
