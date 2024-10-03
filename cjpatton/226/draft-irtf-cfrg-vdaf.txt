@@ -3748,8 +3748,9 @@ Table of Contents
    as the input (share) of the j-th wire of the k-th invocation of the
    gadget.  Again, this is accomplished by a wrapper gadget,
    QueryGadget, listed in Appendix B.  This gadget also evaluates the
-   gadget proof for each gadget invocation.  Then we compute the wire
-   polynomials from the recorded values.
+   gadget polynomial for each gadget invocation in order to produce the
+   gadget's output.  Then we compute the wire polynomials from the
+   recorded values.
 
    Next, we choose a random point t (parsed from the query randomness),
    evaluate each wire polynomial at t, and evaluate the gadget

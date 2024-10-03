@@ -5930,7 +5930,7 @@ get the same result.<a href="#section-7.3.3.2-3" class="pilcrow">¶</a></p>
 just as the prover did. First, we record <code>g.wires[j][k]</code> as the input (share)
 of the <code>j</code>-th wire of the <code>k</code>-th invocation of the gadget. Again, this is
 accomplished by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix B</a>.
-This gadget also evaluates the gadget proof for each gadget invocation. Then we
+This gadget also evaluates the gadget polynomial for each gadget invocation in order to produce the gadget's output. Then we
 compute the wire polynomials from the recorded values.<a href="#section-7.3.3.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-5">Next, we choose a random point <code>t</code> (parsed from the query randomness), evaluate
 each wire polynomial at <code>t</code>, and evaluate the gadget polynomial at <code>t</code>. The
