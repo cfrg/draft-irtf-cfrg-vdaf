@@ -5112,7 +5112,7 @@ The IDPF construction now boils down to secret-sharing the node labels of that t
 that explicitly representing the tree requires `O(2^BITS)` space, so the generator cannot just
 compute additive shares of it and send them to the two evaluators. Instead, the evaluators will
 re-generate shares of the tree using a pseudorandom generator (PRG). The basic observation is that if
-both evaluators have the same seed `s` of length `KEY_SIZE`, then Expanding `s` to length `2*KEY_SIZE`
+both evaluators have the same seed `s` of length `KEY_SIZE`, then expanding `s` to length `2*KEY_SIZE`
 using a PRG, then the expansion can be split again into two seeds `s_l`, `s_r`, that can again serve
 as PRG seeds. If we view seeds as XOR-shares of integers, then a seed that is the same at both
 evaluators will be expanded to a secret-shared tree of zeros.
