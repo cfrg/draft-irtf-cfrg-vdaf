@@ -15,7 +15,7 @@ on:
 jobs:
   test:
     name: "Run unit tests for reference code"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - name: Checkout
       uses: actions/checkout@v3
