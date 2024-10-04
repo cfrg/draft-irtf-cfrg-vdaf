@@ -1,9 +1,7 @@
 """Definitions of finite fields used in this spec."""
 
+import random
 from typing import Self, TypeVar, cast
-
-from sage.all import GF, PolynomialRing
-from sage.rings.finite_rings.finite_field_constructor import FiniteFieldFactory
 
 from vdaf_poc.common import from_le_bytes, to_le_bytes
 
@@ -17,15 +15,14 @@ class Field:
     # Number of bytes used to encode each field element.
     ENCODED_SIZE: int
 
-    gf: FiniteFieldFactory
-
     def __init__(self, val: int):
+        assert int(val) >= 0
         assert int(val) < self.MODULUS
-        self.val = self.gf(val)
+        self.val = val
 
     @classmethod
     def zeros(cls, length: int) -> list[Self]:
-        vec = [cls(cls.gf.zero()) for _ in range(length)]
+        vec = [cls(0) for _ in range(length)]
         return vec
 
     @classmethod
@@ -33,7 +30,7 @@ class Field:
         """
         Return a random vector of field elements of length `length`.
         """
-        vec = [cls(cls.gf.random_element()) for _ in range(length)]
+        vec = [cls(random.randrange(0, cls.MODULUS)) for _ in range(length)]
         return vec
 
     # NOTE: The encode_vec() and decode_vec() methods are excerpted in
@@ -117,16 +114,16 @@ class Field:
         return decoded
 
     def __add__(self, other: Self) -> Self:
-        return self.__class__(self.val + other.val)
+        return self.__class__((self.val + other.val) % self.MODULUS)
 
     def __neg__(self) -> Self:
-        return self.__class__(-self.val)
+        return self.__class__((-self.val) % self.MODULUS)
 
     def __mul__(self, other: Self) -> Self:
-        return self.__class__(self.val * other.val)
+        return self.__class__((self.val * other.val) % self.MODULUS)
 
     def inv(self) -> Self:
-        return self.__class__(self.val**-1)
+        return self ** (self.MODULUS - 2)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Field):
@@ -134,13 +131,13 @@ class Field:
         return cast(bool, self.val == other.val)
 
     def __sub__(self, other: Self) -> Self:
-        return self + (-other)
+        return self.__class__((self.val - other.val) % self.MODULUS)
 
     def __div__(self, other: Self) -> Self:
         return self * other.inv()
 
     def __pow__(self, n: int) -> Self:
-        return self.__class__(self.val ** n)
+        return self.__class__(pow(self.val, n, self.MODULUS))
 
     def __str__(self) -> str:
         return str(self.val)
@@ -149,7 +146,7 @@ class Field:
         return str(self.val)
 
     def as_unsigned(self) -> int:
-        return int(self.gf(self.val))
+        return self.val
 
 
 class NttField(Field):
@@ -173,9 +170,6 @@ class Field2(Field):
     MODULUS = 2
     ENCODED_SIZE = 1
 
-    # Sage finite field object.
-    gf = GF(MODULUS)
-
 
 class Field64(NttField):
     """The finite field GF(2^32 * 4294967295 + 1)."""
@@ -183,9 +177,6 @@ class Field64(NttField):
     MODULUS = 2**32 * 4294967295 + 1
     GEN_ORDER = 2**32
     ENCODED_SIZE = 8
-
-    # Sage finite field object.
-    gf = GF(MODULUS)
 
     @classmethod
     def gen(cls) -> Self:
@@ -199,9 +190,6 @@ class Field96(NttField):
     GEN_ORDER = 2**64
     ENCODED_SIZE = 12
 
-    # Sage finite field object.
-    gf = GF(MODULUS)
-
     @classmethod
     def gen(cls) -> Self:
         return cls(3)**4294966555
@@ -214,9 +202,6 @@ class Field128(NttField):
     GEN_ORDER = 2**66
     ENCODED_SIZE = 16
 
-    # Sage finite field object.
-    gf = GF(MODULUS)
-
     @classmethod
     def gen(cls) -> Self:
         return cls(7)**4611686018427387897
@@ -227,9 +212,6 @@ class Field255(Field):
 
     MODULUS = 2**255 - 19
     ENCODED_SIZE = 32
-
-    # Sage finite field object.
-    gf = GF(MODULUS)
 
 
 ##
@@ -256,6 +238,16 @@ def poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]:
     return poly_strip(field, r)
 
 
+def poly_add(field: type[F], p: list[F], q: list[F]) -> list[F]:
+    """Add two polynomials."""
+    r = field.zeros(max(len(p), len(q)))
+    for i, pi in enumerate(p):
+        r[i] = pi
+    for i, qi in enumerate(q):
+        r[i] += qi
+    return poly_strip(field, r)
+
+
 def poly_eval(field: type[F], p: list[F], eval_at: F) -> F:
     """Evaluate a polynomial at a point."""
     if len(p) == 0:
@@ -272,6 +264,39 @@ def poly_eval(field: type[F], p: list[F], eval_at: F) -> F:
 
 def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
     """Compute the Lagrange interpolation polynomial for the given points."""
-    R = PolynomialRing(field.gf, 'x')
-    p = R.lagrange_polynomial([(x.val, y.val) for (x, y) in zip(xs, ys)])
-    return poly_strip(field, list(map(field, p.coefficients())))
+
+    # This is an inefficient but simple implementation of polynomial
+    # interpolation. We compute the Lagrange basis, and then take a linear
+    # combination of the basis polynomials.
+
+    assert len(xs) == len(ys)
+    n = len(xs)
+    output: list[F] = []  # zero
+
+    for i, (xi, yi) in enumerate(zip(xs, ys)):
+        # The i-th basis polynomial is the product of (x - xj)/(xi - xj) for
+        # all j != i.
+        basis: list[F] = [field(1)]
+        for j in range(n):
+            if i == j:
+                continue
+            else:
+                xj = xs[j]
+                denominator = xi - xj
+                inverse = denominator.inv()
+                linear_coefficient = inverse
+                constant_coefficient = inverse * -xj
+                basis = poly_mul(
+                    field,
+                    basis,
+                    [constant_coefficient, linear_coefficient],
+                )
+
+        # Multiply the basis polynomial by the y-value, and add it to the output.
+        output = poly_add(
+            field,
+            output,
+            poly_mul(field, [yi], basis),
+        )
+
+    return output
