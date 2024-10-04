@@ -27,7 +27,7 @@ jobs:
         cache: pip
 
     - name: Install dependencies
-      run: python -m pip install pycryptodomex mypy
+      run: python -m pip install pycryptodomex mypy matplotlib
 
     - name: Run tests
       working-directory: poc
