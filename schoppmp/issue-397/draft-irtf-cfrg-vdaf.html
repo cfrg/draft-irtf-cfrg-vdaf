@@ -8338,7 +8338,7 @@ possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> fo
           <h4 id="name-overview-3">
 <a href="#section-8.3.1" class="section-number selfRef">8.3.1. </a><a href="#name-overview-3" class="section-name selfRef">Overview</a>
           </h4>
-<p id="section-8.3.1-1">On a high level, the IDPF maps a key generator's input <code>(alpha, beta_1, ..., beta_BITS)</code> onto
+<p id="section-8.3.1-1">At a high level, the IDPF maps a key generator's input <code>(alpha, beta_1, ..., beta_BITS)</code> onto
 a binary tree with <code>BITS+1</code> levels, where each edge going from a parent node to a left child is
 labeled <code>0</code>, and each right edge is labeled <code>1</code>. Then each leaf node corresponds to a value
 <code>x</code> in <code>0, ..., 2^BITS</code>, and the labels on the path from the root to <code>x</code> contain the binary
