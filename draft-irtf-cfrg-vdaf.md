@@ -5098,10 +5098,40 @@ possible. See {{xof-vs-ro}} for more information.
 | FieldLeaf  | `Field255` ({{fields}}) |
 {: #idpf-bbcggi21-param title="Constants and type definitions for the IDPF of BBCGGI21."}
 
-### Key Generation
+### Overview
 
-> TODO Describe the construction in prose, beginning with a gentle introduction
-> to the high level idea.
+On a high level, the IDPF maps a key generator's input `(alpha, beta_1, ..., beta_BITS)` onto
+a binary tree with `BITS+1` levels, where each edge going from a parent node to a left child is
+labeled `0`, and each right edge is labeled `1`. Then each leaf node corresponds to a value
+`x` in `0, ..., 2^BITS`, and the labels on the path from the root to `x` contain the binary
+decomposition of `x`, starting with the most significant bit. Finally, all inner nodes have
+the label `0`, while the nodes on the path from the root to `alpha` have labels
+`beta_1, ..., beta_BITS`.
+
+The IDPF construction now boils down to secret-sharing the node labels of that tree in an efficient way. Note
+that explicitly representing the tree requires `O(2^BITS)` space, so the generator cannot just
+compute additive shares of it and send them to the two evaluators. Instead, the evaluators will
+re-generate shares of the tree using a pseudorandom generator (PRG). The basic observation is that if
+both evaluators have the same seed `s` of length `KEY_SIZE`, then Expanding `s` to length `2*KEY_SIZE`
+using a PRG, then the expansion can be split again into two seeds `s_l`, `s_r`, that can again serve
+as PRG seeds. If we view seeds as XOR-shares of integers, then a seed that is the same at both
+evaluators will be expanded to a secret-shared tree of zeros.
+
+The open task now is to ensure that evaluators have *different* seeds at nodes that lie on the path
+to `alpha`, while having the same seeds on all other nodes. This is done using so-called
+*correction words* that are conditionally added to the PRG output by both evaluators.
+The condition here is a secret-shared bit, called *control bit*, which indicates whether the
+current node is on the path to `alpha` or not. On the path, the control bits add up to `1`, meaning
+only one evaluator will add the correction word to its PRG output. Off the path, either none or
+both evaluators add the correction word, and so the seeds at the next level.
+What remains is to turn the -- now pseudorandom -- values on the path to `alpha` into the desired
+`beta` values. This is done by sending *value correction words* to the evaluators, which are
+chosen such that when added with the pseudorandom shares at the `i`th node on the path to `alpha`,
+they add up to shares of `beta_i`.
+
+In the following two sections we describe the algorithms for key generation in full detail.
+
+### Key Generation
 
 The description of the IDPF-key generation algorithm makes use of auxiliary
 functions `extend()` and `convert()` defined in
@@ -5189,8 +5219,6 @@ def gen(
 {: #idpf-bbcggi21-gen title="IDPF-key generation algorithm of BBCGGI21."}
 
 ### Key Evaluation
-
-> TODO Describe in prose how IDPF-key evaluation algorithm works.
 
 The description of the IDPF-evaluation algorithm makes use of auxiliary
 functions `extend()` and `convert()` defined in
