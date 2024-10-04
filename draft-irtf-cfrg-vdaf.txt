@@ -338,6 +338,53 @@ Table of Contents
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
 
+   12:
+
+   *  (V)DAF: Add an application context string parameter to sharding
+      and preparation.  The motivation for this change is to harden
+      Prio3 against offline attacks.  More generally, however, it allows
+      designing schemes for which correct execution requires agreement
+      on the application context.  Accordingly, both Prio3 and Poplar1
+      have been modified to include the context in the domain separation
+      tag of each XOF invocation. (*)
+
+   *  Prio3: Improve soundness of the base proof system and the circuits
+      of some variants.  Generally speaking, wherever we evaluate a
+      univariate polynomial at a random point, we can instead evaluate a
+      multivariate polynomial of lower degree. (*)
+
+   *  Prio3: Replace the helper's measurement and proof share seeds with
+      a single seed. (*)
+
+   *  Prio3Sum: Update the circuit to support a more general range check
+      and avoid using joint randomness. (*)
+
+   *  Prio3Histogram, Prio3MultihotCountVec: Move the final reduction of
+      the intermediate outputs out of the circuit. (*)
+
+   *  IDPF: Add the application context string to key generation end
+      evaluation and bind it to the fixed AES key. (*)
+
+   *  IDPF: Use XofTurboShake128 for deriving the leaf nodes in order to
+      ensure the construction is extractable. (*)
+
+   *  IDPF: Simplify the public share encoding. (*)
+
+   *  XofTurboShake128: Change SEED_SIZE from 16 bytes to 32 to mitigate
+      offline attacks on Prio3 robustness.  In addition, allow seeds of
+      different lengths so that we can continue to use XofTurboShake128
+      with IDPF. (*)
+
+   *  XofTurboShake128, XofFixedKeyAes128: Increase the length prefix
+      for the domain separation tag from one by to two bytes.  This is
+      to accommodate the application context. (*)
+
+   *  Reassign codepoints for all Prio3 variants and Poplar1. (*)
+
+   *  Security considerations: Add a section on defense-in-depth
+      measures taken by Prio3 and Poplar1 and more discussion about
+      choosing FLP parameters.
+
    11:
 
    *  Define message formats for the Poplar1 aggregation parameter and
