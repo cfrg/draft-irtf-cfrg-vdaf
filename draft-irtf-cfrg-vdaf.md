@@ -5413,7 +5413,12 @@ def extend(
         seed: bytes,
         ctx: bytes,
         nonce: bytes) -> tuple[list[bytes], list[Field2]]:
-    xof = self.current_xof(level, seed, format_dst(1, 0, 0) + ctx, nonce)
+    xof = self.current_xof(
+        level,
+        seed,
+        format_dst(1, 0, 0) + ctx,
+        nonce,
+    )
     s = [
         bytearray(xof.next(self.KEY_SIZE)),
         bytearray(xof.next(self.KEY_SIZE)),
@@ -5432,7 +5437,12 @@ def convert(
         seed: bytes,
         ctx: bytes,
         nonce: bytes) -> tuple[bytes, FieldVec]:
-    xof = self.current_xof(level, seed, format_dst(1, 0, 1) + ctx, nonce)
+    xof = self.current_xof(
+        level,
+        seed,
+        format_dst(1, 0, 1) + ctx,
+        nonce,
+    )
     next_seed = xof.next(self.KEY_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
