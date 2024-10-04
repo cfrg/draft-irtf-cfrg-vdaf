@@ -5100,7 +5100,7 @@ possible. See {{xof-vs-ro}} for more information.
 
 ### Overview
 
-On a high level, the IDPF maps a key generator's input `(alpha, beta_1, ..., beta_BITS)` onto
+At a high level, the IDPF maps a key generator's input `(alpha, beta_1, ..., beta_BITS)` onto
 a binary tree with `BITS+1` levels, where each edge going from a parent node to a left child is
 labeled `0`, and each right edge is labeled `1`. Then each leaf node corresponds to a value
 `x` in `0, ..., 2^BITS`, and the labels on the path from the root to `x` contain the binary
