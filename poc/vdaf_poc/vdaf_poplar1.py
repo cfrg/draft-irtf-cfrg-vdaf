@@ -117,6 +117,7 @@ class Poplar1(
             measurement,
             beta_inner,
             beta_leaf,
+            ctx,
             nonce,
             idpf_rand,
         )
@@ -247,7 +248,7 @@ class Poplar1(
 
         # Evaluate the IDPF key at the given set of prefixes.
         value = self.idpf.eval(
-            agg_id, public_share, key, level, prefixes, nonce)
+            agg_id, public_share, key, level, prefixes, ctx, nonce)
 
         # Get shares of the correlated randomness for evaluating the
         # Aggregator's share of the sketch.

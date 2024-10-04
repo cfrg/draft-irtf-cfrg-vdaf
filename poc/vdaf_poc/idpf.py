@@ -69,13 +69,15 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
             alpha: tuple[bool, ...],
             beta_inner: list[list[FieldInner]],
             beta_leaf: list[FieldLeaf],
+            ctx: bytes,
             nonce: bytes,
             rand: bytes) -> tuple[PublicShare, list[bytes]]:
         """
         Generates an IDPF public share and sequence of IDPF-keys of length
         `SHARES`. Input `alpha` is the index to encode. Inputs `beta_inner` and
         `beta_leaf` are assigned to the values of the nodes on the non-zero
-        path of the IDPF tree. String `nonce` is a nonce string.
+        path of the IDPF tree. It takes two inputs from the higher-level
+        application, a context string `ctx`, and a nonce string `nonce`.
 
         `alpha` is a tuple of booleans, and not a list, because IDPF indices
         need to be immutable and hashable in order to check the uniqueness of
@@ -99,13 +101,15 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
              key: bytes,
              level: int,
              prefixes: Sequence[tuple[bool, ...]],
+             ctx: bytes,
              nonce: bytes) -> Output:
         """
         Evaluate an IDPF key share public share at a given level of the tree
         and with the given sequence of prefixes. The output is a vector where
         each element is a vector of length `VALUE_LEN`. The output field is
-        `FieldLeaf` if `level == BITS` and `FieldInner` otherwise. `nonce`
-        must match the nonce string passed by the Client to `gen`.
+        `FieldLeaf` if `level == BITS` and `FieldInner` otherwise. `ctx` and
+        `nonce` must match the context and nonce strings passed by the Client
+        to `gen`.
 
         Each element of `prefixes` is a bit string of length `level + 1`. For
         each element of `prefixes` that is the length-`level + 1` prefix of

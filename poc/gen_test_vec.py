@@ -22,7 +22,14 @@ def gen_test_vec_for_idpf(idpf: Idpf,
     beta_leaf = [idpf.field_leaf(idpf.BITS - 1)] * idpf.VALUE_LEN
     rand = test_vec_gen_rand(idpf.RAND_SIZE)
     nonce = test_vec_gen_rand(idpf.NONCE_SIZE)
-    (public_share, keys) = idpf.gen(alpha, beta_inner, beta_leaf, nonce, rand)
+    (public_share, keys) = idpf.gen(
+        alpha,
+        beta_inner,
+        beta_leaf,
+        ctx,
+        nonce,
+        rand,
+    )
 
     printable_beta_inner = [
         [str(elem.as_unsigned()) for elem in value] for value in beta_inner
@@ -34,6 +41,7 @@ def gen_test_vec_for_idpf(idpf: Idpf,
         'alpha': alpha,
         'beta_inner': printable_beta_inner,
         'beta_leaf': printable_beta_leaf,
+        'ctx': ctx.hex(),
         'nonce': nonce.hex(),
         'public_share': idpf.test_vec_encode_public_share(public_share).hex(),
         'keys': printable_keys,

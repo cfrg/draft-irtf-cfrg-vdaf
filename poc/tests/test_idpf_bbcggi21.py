@@ -14,6 +14,7 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         """
         Generate a set of IDPF keys and evaluate them on the given set of prefix.
         """
+        ctx = b'some context'
         beta_inner = [[idpf.field_inner(1)] * idpf.VALUE_LEN] * (idpf.BITS - 1)
         beta_leaf = [idpf.field_leaf(1)] * idpf.VALUE_LEN
 
@@ -21,12 +22,12 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         rand = gen_rand(idpf.RAND_SIZE)
         nonce = gen_rand(idpf.NONCE_SIZE)
         (public_share, keys) = idpf.gen(
-            alpha, beta_inner, beta_leaf, nonce, rand)
+            alpha, beta_inner, beta_leaf, ctx, nonce, rand)
 
         out = [idpf.current_field(level).zeros(idpf.VALUE_LEN)] * len(prefixes)
         for agg_id in range(idpf.SHARES):
             out_share = idpf.eval(
-                agg_id, public_share, keys[agg_id], level, prefixes, nonce)
+                agg_id, public_share, keys[agg_id], level, prefixes, ctx, nonce)
             for i in range(len(prefixes)):
                 out[i] = vec_add(out[i], out_share[i])
 
@@ -52,9 +53,10 @@ class TestIdpfBBCGGI21(unittest.TestCase):
 
         # Generate the IDPF keys.
         rand = gen_rand(idpf.RAND_SIZE)
+        ctx = b'some context'
         nonce = gen_rand(idpf.NONCE_SIZE)
         (public_share, keys) = idpf.gen(
-            alpha, beta_inner, beta_leaf, nonce, rand)
+            alpha, beta_inner, beta_leaf, ctx, nonce, rand)
 
         # Evaluate the IDPF at every node of the tree.
         for level in range(idpf.BITS):
@@ -66,7 +68,7 @@ class TestIdpfBBCGGI21(unittest.TestCase):
             for agg_id in range(idpf.SHARES):
                 out_shares.append(
                     idpf.eval(agg_id, public_share,
-                              keys[agg_id], level, prefixes, nonce))
+                              keys[agg_id], level, prefixes, ctx, nonce))
 
             # Check that each set of output shares for each prefix sums up to the
             # correct value.
@@ -181,6 +183,7 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         Ensure that the IDPF index is encoded in big-endian byte order.
         """
         idpf = IdpfBBCGGI21(1, 32)
+        ctx = b'some context'
         nonce = gen_rand(idpf.NONCE_SIZE)
 
         def shard(s: bytes) -> tuple[list[CorrectionWord], list[bytes]]:
@@ -188,7 +191,7 @@ class TestIdpfBBCGGI21(unittest.TestCase):
             beta_inner = [[idpf.field_inner(1)]] * (idpf.BITS - 1)
             beta_leaf = [idpf.field_leaf(1)]
             rand = gen_rand(idpf.RAND_SIZE)
-            return idpf.gen(alpha, beta_inner, beta_leaf, nonce, rand)
+            return idpf.gen(alpha, beta_inner, beta_leaf, ctx, nonce, rand)
 
         for (alpha_str, prefix, level) in [
             (
@@ -204,9 +207,9 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         ]:
             (public_share, keys) = shard(alpha_str)
             out_share_0 = cast(list[list[Field]], idpf.eval(
-                0, public_share, keys[0], level, (prefix,), nonce))
+                0, public_share, keys[0], level, (prefix,), ctx, nonce))
             out_share_1 = cast(list[list[Field]], idpf.eval(
-                1, public_share, keys[1], level, (prefix,), nonce))
+                1, public_share, keys[1], level, (prefix,), ctx, nonce))
             out = vec_add(out_share_0[0], out_share_1[0])[0]
             self.assertEqual(out.as_unsigned(), 1)
 
@@ -248,10 +251,11 @@ class TestIdpfBBCGGI21(unittest.TestCase):
         alpha = bytes_to_bit_string(b"cool")
         beta_inner = [[idpf.field_inner(23)]] * (idpf.BITS - 1)
         beta_leaf = [idpf.field_leaf(97)]
+        ctx = b'some context'
         nonce = gen_rand(idpf.NONCE_SIZE)
         rand = gen_rand(idpf.RAND_SIZE)
         (public_share, _keys) = idpf.gen(
-            alpha, beta_inner, beta_leaf, nonce, rand)
+            alpha, beta_inner, beta_leaf, ctx, nonce, rand)
         self.assertEqual(
             idpf.decode_public_share(idpf.encode_public_share(public_share)),
             public_share,
