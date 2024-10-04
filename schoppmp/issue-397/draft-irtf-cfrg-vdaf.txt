@@ -5383,7 +5383,7 @@ Table of Contents
    evaluators.  Instead, the evaluators will re-generate shares of the
    tree using a pseudorandom generator (PRG).  The basic observation is
    that if both evaluators have the same seed s of length KEY_SIZE, then
-   Expanding s to length 2*KEY_SIZE using a PRG, then the expansion can
+   expanding s to length 2*KEY_SIZE using a PRG, then the expansion can
    be split again into two seeds s_l, s_r, that can again serve as PRG
    seeds.  If we view seeds as XOR-shares of integers, then a seed that
    is the same at both evaluators will be expanded to a secret-shared
