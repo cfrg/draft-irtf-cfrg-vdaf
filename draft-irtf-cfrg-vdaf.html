@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 6 April 2025</td>
+<td class="center">Expires 7 April 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-03" class="published">3 October 2024</time>
+<time datetime="2024-10-04" class="published">4 October 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-06">6 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-04-07">7 April 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 6 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3879,7 +3879,7 @@ def expand_into_vec(cls,
 <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. (RFC EDITOR: Update this
 reference to the RFC for draft-irtf-cfrg-kangarootwelve once published.) This
 XOF is <span class="bcp14">RECOMMENDED</span> for all use cases within VDAFs. The length of the domain
-separation string <code>dst</code> passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 255 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+separation string <code>dst</code> passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 65535 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
 <span id="name-definition-of-xof-xofturbos"></span><figure id="figure-13">
             <div class="lang-python sourcecode" id="section-6.2.1-2.1">
 <pre>
@@ -3926,7 +3926,7 @@ cases where a more efficient instantiation based on fixed-key AES is possible.
 For now, this is limited to the XOF used inside the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a>
 implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this
 XOF anywhere else. The length of the domain separation string <code>dst</code> passed to
-XofFixedKeyAes128 <span class="bcp14">MUST NOT</span> exceed 255 bytes. See <a href="#security" class="auto internal xref">Section 9</a> for a more
+XofFixedKeyAes128 <span class="bcp14">MUST NOT</span> exceed 65535 bytes. See <a href="#security" class="auto internal xref">Section 9</a> for a more
 detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-6.2.2-2">
 <pre>
@@ -7201,9 +7201,10 @@ elements.) The scheme is comprised of the following algorithms:<a href="#section
 <ul class="normal">
 <li class="normal" id="section-8.1-4.1">
             <p id="section-8.1-4.1.1"><code>idpf.gen(alpha: tuple[bool, ...], beta_inner: list[list[FieldInner]], beta_leaf:
-list[FieldLeaf], nonce: bytes, rand: bytes) -&gt; tuple[PublicShare,
+list[FieldLeaf], ctx: bytes, nonce: bytes, rand: bytes) -&gt; tuple[PublicShare,
 list[bytes]]</code> is the randomized IDPF-key generation algorithm. Its inputs are
-the index <code>alpha</code>, the values <code>beta</code>, and a nonce string.<a href="#section-8.1-4.1.1" class="pilcrow">¶</a></p>
+the index <code>alpha</code>, the values <code>beta</code>, an application context string, and a
+nonce string.<a href="#section-8.1-4.1.1" class="pilcrow">¶</a></p>
 <p id="section-8.1-4.1.2">
 The output is a public part (of type <code>PublicShare</code>) that is sent to all
 Aggregators and a vector of private IDPF keys, one for each aggregator. The
@@ -7236,13 +7237,13 @@ random by the Client (see <a href="#nonce-requirements" class="auto internal xre
 </li>
           <li class="normal" id="section-8.1-4.2">
             <p id="section-8.1-4.2.1"><code>idpf.eval(agg_id: int, public_share: PublicShare, key: bytes, level: int,
-prefixes: Sequence[tuple[bool, ...]], nonce: bytes) -&gt; Output</code> is the
-deterministic, stateless IDPF-key evaluation algorithm run by each Aggregator.
-Its inputs are the Aggregator's unique identifier, the public share
-distributed to all of the Aggregators, the Aggregator's IDPF key, the "level"
-at which to evaluate the IDPF, the sequence of candidate prefixes, and a nonce
-string. It returns the share of the value corresponding to each candidate
-prefix.<a href="#section-8.1-4.2.1" class="pilcrow">¶</a></p>
+prefixes: Sequence[tuple[bool, ...]], ctx: bytes, nonce: bytes) -&gt; Output</code> is
+the deterministic, stateless IDPF-key evaluation algorithm run by each
+Aggregator. Its inputs are the Aggregator's unique identifier, the public
+share distributed to all of the Aggregators, the Aggregator's IDPF key, the
+"level" at which to evaluate the IDPF, the sequence of candidate prefixes, an
+application context string, and a nonce string. It returns the share of the
+value corresponding to each candidate prefix.<a href="#section-8.1-4.2.1" class="pilcrow">¶</a></p>
 <p id="section-8.1-4.2.2">
 The output type (i.e., <code>Output</code>) depends on the value of <code>level</code>: if <code>level &lt;
 BITS-1</code>, the output is the value for an inner node, which has type
@@ -7630,6 +7631,7 @@ def shard(
         measurement,
         beta_inner,
         beta_leaf,
+        ctx,
         nonce,
         idpf_rand,
     )
@@ -7750,7 +7752,7 @@ def prep_init(
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = self.idpf.eval(
-        agg_id, public_share, key, level, prefixes, nonce)
+        agg_id, public_share, key, level, prefixes, ctx, nonce)
 
     # Get shares of the correlated randomness for evaluating the
     # Aggregator's share of the sketch.
@@ -8354,6 +8356,7 @@ def gen(
         alpha: tuple[bool, ...],
         beta_inner: list[list[Field64]],
         beta_leaf: list[Field255],
+        ctx: bytes,
         nonce: bytes,
         rand: bytes) -&gt; tuple[list[CorrectionWord], list[bytes]]:
     if len(alpha) != self.BITS:
@@ -8378,8 +8381,8 @@ def gen(
         lose = 1 - keep
         bit = Field2(keep)
 
-        (s0, t0) = self.extend(level, seed[0], nonce)
-        (s1, t1) = self.extend(level, seed[1], nonce)
+        (s0, t0) = self.extend(level, seed[0], ctx, nonce)
+        (s1, t1) = self.extend(level, seed[1], ctx, nonce)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
             t0[0] + t1[0] + bit + Field2(1),
@@ -8402,8 +8405,8 @@ def gen(
         else:
             x1 = s1[keep]
             ctrl[1] = t1[keep]
-        (seed[0], w0) = self.convert(level, x0, nonce)
-        (seed[1], w1) = self.convert(level, x1, nonce)
+        (seed[0], w0) = self.convert(level, x0, ctx, nonce)
+        (seed[1], w1) = self.convert(level, x1, ctx, nonce)
 
         if level &lt; self.BITS - 1:
             b = cast(list[Field], beta_inner[level])
@@ -8457,6 +8460,7 @@ def eval(
         key: bytes,
         level: int,
         prefixes: Sequence[tuple[bool, ...]],
+        ctx: bytes,
         nonce: bytes) -&gt; list[list[Field64]] | list[list[Field255]]:
     if agg_id not in range(self.SHARES):
         raise ValueError('aggregator id out of range')
@@ -8501,6 +8505,7 @@ def eval(
                 public_share[current_level],
                 current_level,
                 bit,
+                ctx,
                 nonce,
             )
         if agg_id == 0:
@@ -8519,6 +8524,7 @@ def eval_next(
         correction_word: CorrectionWord,
         level: int,
         bit: int,
+        ctx: bytes,
         nonce: bytes) -&gt; tuple[bytes, Field2, FieldVec]:
     """
     Compute the next node in the IDPF tree along the path determined
@@ -8529,7 +8535,7 @@ def eval_next(
     seed_cw = correction_word[0]
     ctrl_cw = correction_word[1]
     w_cw = cast(list[Field], correction_word[2])
-    (s, t) = self.extend(level, prev_seed, nonce)
+    (s, t) = self.extend(level, prev_seed, ctx, nonce)
 
     # Implementation note: these conditional operations and
     # input-dependent array indices should be replaced with
@@ -8542,7 +8548,7 @@ def eval_next(
         t[1] += ctrl_cw[1]
 
     next_ctrl = t[bit]
-    convert_output = self.convert(level, s[bit], nonce)
+    convert_output = self.convert(level, s[bit], ctx, nonce)
     next_seed = convert_output[0]
     y = cast(list[Field], convert_output[1])
     # Implementation note: this conditional addition should be
@@ -8574,8 +8580,9 @@ def extend(
         self,
         level: int,
         seed: bytes,
+        ctx: bytes,
         nonce: bytes) -&gt; tuple[list[bytes], list[Field2]]:
-    xof = self.current_xof(level, seed, format_dst(1, 0, 0), nonce)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 0) + ctx, nonce)
     s = [
         bytearray(xof.next(self.KEY_SIZE)),
         bytearray(xof.next(self.KEY_SIZE)),
@@ -8592,8 +8599,9 @@ def convert(
         self,
         level: int,
         seed: bytes,
+        ctx: bytes,
         nonce: bytes) -&gt; tuple[bytes, FieldVec]:
-    xof = self.current_xof(level, seed, format_dst(1, 0, 1), nonce)
+    xof = self.current_xof(level, seed, format_dst(1, 0, 1) + ctx, nonce)
     next_seed = xof.next(self.KEY_SIZE)
     field = self.current_field(level)
     w = xof.next_vec(field, self.VALUE_LEN)
