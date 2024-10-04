@@ -8,7 +8,7 @@ generate test vectors.
 
 ## Installation
 
-This code requires Python 3 to run. To install:
+This code requires Python 3.11 or later to run. To install:
 
 ```
 pip install git+https://github.com/cfrg/draft-irtf-cfrg-vdaf@draft-irtf-cfrg-vdaf-11#subdirectory=poc
