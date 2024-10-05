@@ -16,8 +16,8 @@ class Field:
     ENCODED_SIZE: int
 
     def __init__(self, val: int):
-        assert int(val) >= 0
-        assert int(val) < self.MODULUS
+        assert val >= 0
+        assert val < self.MODULUS
         self.val = val
 
     @classmethod
