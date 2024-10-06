@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-03T00:55:08.804785+00:00",
+  "timestamp": "2024-10-06T00:59:25.649855+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -3555,7 +3555,7 @@
       "id": "I_kwDOGKuqOc5kQmqN",
       "title": "Review: 05: Chris Wood: Prose description of the FLP lacks precision",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/226",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -3567,8 +3567,8 @@
       ],
       "body": "#flp-generic-construction-prove (and the other sections for the generic FLP) uses prose to describe steps of the generic FLP like proof generation, querying, and so on. This is distinctly less precise than the rest of the document, which uses pseudocode to describe steps. For example, consider the step to actually compute gadget polynomials:\r\n\r\n >      Let `poly_gadget_i = G_i(poly_wire_i[0], ..., poly_wire_i[L_i-1])`. That\r\n >    is, evaluate the circuit `G_i` on the wire polynomials for the `i`th\r\n >    gadget. (Arithmetic is in the ring of polynomials over `Field`.)\r\n\r\nI would not expect most people to be familiar with the concept of a ring, nor would most people know how to intuitively implement circuit evaluation. Perhaps it might be good to give examples of common gadgets -- like Mul -- and how to implement this evaluation?\r\n\r\nMoreover, consider the following:\r\n\r\n>   Let `poly_wire_i[j-1]` be the lowest degree polynomial for which\r\n>     `poly_wire_i[j-1](alpha_i^k) == padded_w[k]` for all `k` in `[P_i]`.\r\n\r\nHow does one actually implement this? In general, prose that is not followed by an algorithm seems like it could be replaced with more precise implementation guidance. The reference implementation could be used as the basis for this content, if desired.\r\n",
       "createdAt": "2023-04-24T21:30:33Z",
-      "updatedAt": "2024-08-27T21:36:08Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-04T19:11:12Z",
+      "closedAt": "2024-10-04T19:11:12Z",
       "comments": []
     },
     {
@@ -4459,7 +4459,7 @@
       "id": "I_kwDOGKuqOc5txp3W",
       "title": "Sage: Use finite field and polynomial ring classes directly",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/282",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -4470,9 +4470,17 @@
       ],
       "body": "If we moved field element encoding/decoding routines elsewhere, we could simplify the proof of concept implementation by eliminating our `Field` class and using Sage's finite field classes directly. We could also represent polynomials in Sage natively rather than as lists of field elements. This would simplify implementing gadgets, as we'd no longer need a separate `eval_poly()`. (Currently, we only use `PolynomialRing` when interpolating, but then drop out to the list representation immediately)",
       "createdAt": "2023-08-08T17:37:42Z",
-      "updatedAt": "2024-04-30T23:11:58Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2024-10-04T15:21:38Z",
+      "closedAt": "2024-10-04T15:21:38Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Close in favor of #431. ",
+          "createdAt": "2024-10-04T15:21:38Z",
+          "updatedAt": "2024-10-04T15:21:38Z"
+        }
+      ]
     },
     {
       "number": 283,
@@ -4957,15 +4965,13 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [
-        "cjpatton"
-      ],
+      "assignees": [],
       "labels": [
         "pre-RGLC"
       ],
       "body": "We removed them a couple of drafts ago because updating them was becoming a pain. (Note that machine-readable test vectors can be found in https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)",
       "createdAt": "2023-11-16T15:03:15Z",
-      "updatedAt": "2024-10-01T21:44:28Z",
+      "updatedAt": "2024-10-03T18:35:24Z",
       "closedAt": null,
       "comments": [
         {
@@ -5822,14 +5828,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-13"
       ],
       "body": "We currently [describe a circuit](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-7.4.1) this way:\r\n\r\n```\r\nThe Count validity circuit is defined as\r\n\r\ndef eval(\r\n        self,\r\n        meas: list[F],\r\n        joint_rand: list[F],\r\n        _num_shares: int) -> list[F]:\r\n    self.check_valid_eval(meas, joint_rand)\r\n    squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])\r\n    return [squared - meas[0]]\r\n```\r\n\r\nHere \"Count\" refers to a sub-class of \"Valid\" and \"eval()\" refers to an abstract method on Valid. This is not at all clear from the text. In particular, \"eval\" here doesn't appear to have anything to do with \"Count\".\r\n\r\n@armfazh suggests we fix this by listing the \"Count\" class here instead. This also has the benefit of making this section of the draft more copy-pastable. \r\n\r\nWe should do the same for gadgets as well. IN fact, rather than define them \"on first use\" as we're doing now, we should pull them into their own section. I believe we just have three: `Mul`, `PolyEval`, and `ParallelSum`.",
       "createdAt": "2024-09-05T17:44:50Z",
-      "updatedAt": "2024-09-05T17:44:56Z",
+      "updatedAt": "2024-10-04T15:24:22Z",
       "closedAt": null,
       "comments": []
     },
@@ -5841,14 +5849,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-13"
       ],
       "body": "",
       "createdAt": "2024-09-05T18:09:29Z",
-      "updatedAt": "2024-09-06T00:07:20Z",
+      "updatedAt": "2024-10-04T15:32:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -5958,7 +5968,7 @@
       "id": "I_kwDOGKuqOc6W7dM4",
       "title": "Prio3: Soundness improvement for reductions",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/427",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5970,8 +5980,8 @@
       ],
       "body": "Prio3Sum, Prio3SumVec, Prio3Histogram, and Prio3MultihotCountVec all involve checking that each of $n$ \"sub-checks\" outputs $0$. This works by interpreting the outputs as coefficients of a polynomial $p$, then evaluating $p$ at a random point $r\\in F$. If $p(r)=0$, then we deem the input valid. Some of us have been calling this the circuit's \"reduction\".\r\n\r\nOur current analysis of the circuit's soundness goes as follows. When the input is invalid, i.e., at least one sub-check output is non-zero, the probability that $p(r) = 0$ is equal to the probability that $r$ is a root of $p$, of which there are at most $\\deg{p} / |F|$. The degree of $p$ is at most $n$, which gives us a soundness error of $n / |F|$.\r\n\r\nThis is also given by the [Schwartz-Zippel lemma](https://en.wikipedia.org/wiki/Schwartz%E2%80%93Zippel_lemma). More generally, let $p$ is a polynomial of $n$ variables with at least one non-zero coefficient. When we evaluate $p$ at a random point $(r_1, \\ldots, r_n) \\in F^n$, the probability that $p(r_1, \\ldots, r_n) = 0$ is at most $\\deg p / |F|$, where $\\deg p$ denotes in particular the [total degree](https://en.wikipedia.org/wiki/Degree_of_a_polynomial#Extension_to_polynomials_with_two_or_more_variables) of $p$.\r\n\r\nThis lemma suggests an alternative reduction with better soundness. Let $c_1, \\ldots, c_n$ denote the sub-check outputs. $p(x_1, \\ldots, x_n) = c_1 \\cdot x_1 + \\cdots + c_n \\cdot x_n$ be the polynomial with $n$ variables that has $c_1 \\ldots, c_n$ as its coefficients. Choose a random vector $\\vec{r} = (r_1, \\ldots, r_N) \\in F^n$ and evaluate $p$ at $\\vec{r}$. If $p(\\vec{r}) = 0$, then deem the input valid.\r\n\r\nSoundness: since $\\deg p = 1$, by the Schwartz-Zippel lemma it follows that the soundness error for this circuit is $1 / |F|$.\r\n\r\nThis is a pretty significant improvement, especially for larger inputs with lots of sub-checks. The base soundness of the current circuit is $\\frac{n}{|F|} + \\frac{2m}{|F|-m}$, where the second term is from {{BBCGGI19}}, Theorem 4.3; the soundness of the new circuit is $\\frac{1}{|F|} + \\frac{2m}{|F|-m}$. Concretely, for Prio3SumVec with `bits == 1`, `length = 100_000` and `chunk_length = 316` , this drops from $~ 2^{-111}$ to $2^{-118}$:\r\n\r\n```sage\r\ndef sound(n, m, f): return -int((log(n/f + (2*m)/(f-m))/log(2)).n())\r\n```\r\n\r\nThere is a catch: we end up with a much longer joint randomness, which means more times spent on XOF evaluation. On the other hand, we spend less time on finite field arithmetic, since we don't need to compute powers of $r$. Let's benchmark this, and if we don't see a performance degradation, then I think we should adopt this new reduction in each of the circuits, as well as for the [built-in reduction for circuits with multiple outputs](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-1.1-6.2.1).\r\n\r\nCredit to @rozbb for pointing out this use of Shwartz-Zippel and thanks to @bwesterb and @bhalleycf for confirming the math.",
       "createdAt": "2024-09-17T21:11:59Z",
-      "updatedAt": "2024-09-30T16:49:53Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-03T16:52:17Z",
+      "closedAt": "2024-10-03T16:52:17Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -6030,13 +6040,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "draft-13"
       ],
       "body": "The current aggregation API takes a sequence of output shares and returns an aggregate share. This envisions VDAFs for which the aggregate result depends on the order in which output shares are aggregated, but so far this isn't true of anything we've come up with. In fact, DAP (implicitly?) requires a VDAF for which output shares can be aggregated in any order. (The Leader and Helper may not aggregate output shares in the same order.)\r\n\r\nOne problem with the current API is that it doesn't align well with practice. Normally what we expect Aggregators to do is aggregate in a \"streaming\" fashion, meaning output shares are not stored individually, but accumulated into an existing aggregate share as soon as they're ready to be aggregated.\r\n\r\nIn fact, we'd like to make this \"streaming aggregation\" normative in DAP: https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/581.\r\n\r\nHowever in order to do this, we'll need to modify the VDAF syntax. There's a few things we could do, but probably the simplest is to split `vdaf.aggregate()` into the following functions:\r\n\r\n* `vdaf.agg_init() -> AggShare`: returns an empty aggregate share.\r\n* `vdaf.agg_update(agg_share: AggShare, out_share) -> AggShare`: updates an aggregate share with the incoming output share.",
       "createdAt": "2024-09-23T22:53:16Z",
-      "updatedAt": "2024-09-24T22:33:31Z",
+      "updatedAt": "2024-10-04T15:27:26Z",
       "closedAt": null,
       "comments": [
         {
@@ -6070,14 +6082,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-13"
       ],
       "body": "This was meant to denote that something is an XOF seed, but not that we're making good use of type hints, this doesn't seem necessary anymore.",
       "createdAt": "2024-09-27T23:37:47Z",
-      "updatedAt": "2024-09-27T23:37:48Z",
+      "updatedAt": "2024-10-04T15:27:37Z",
       "closedAt": null,
       "comments": []
     },
@@ -6089,16 +6103,26 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "divergentdave"
+      ],
       "labels": [
         "editorial",
         "draft-13"
       ],
       "body": "",
       "createdAt": "2024-10-01T15:55:01Z",
-      "updatedAt": "2024-10-01T15:55:09Z",
+      "updatedAt": "2024-10-04T18:12:00Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "- [ ] Any\r\n- [ ] Generic\r\n- [ ] Optional\r\n- [ ] Self\r\n- [ ] Sequence\r\n- [x] cast",
+          "createdAt": "2024-10-04T18:11:59Z",
+          "updatedAt": "2024-10-04T18:11:59Z"
+        }
+      ]
     },
     {
       "number": 439,
@@ -6108,13 +6132,36 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "pre-RGLC"
       ],
       "body": "@bifurcation points out here that we've been a bit fast and lose with this: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/430#discussion_r1775648553",
       "createdAt": "2024-10-01T15:56:22Z",
-      "updatedAt": "2024-10-01T15:56:22Z",
+      "updatedAt": "2024-10-04T15:28:20Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 441,
+      "id": "I_kwDOGKuqOc6Y45WM",
+      "title": "Move \"Acknowledgements\" to unnumbered section just before \"Authors' Addresses\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/441",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "",
+      "createdAt": "2024-10-03T21:44:15Z",
+      "updatedAt": "2024-10-04T15:31:47Z",
       "closedAt": null,
       "comments": []
     }
@@ -36200,7 +36247,7 @@
       "id": "PR_kwDOGKuqOc56lD1D",
       "title": "Update Change Log for draft 12",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/415",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36210,17 +36257,19 @@
       ],
       "body": "",
       "createdAt": "2024-09-05T21:31:08Z",
-      "updatedAt": "2024-09-27T22:36:08Z",
+      "updatedAt": "2024-10-04T19:05:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "ea39dccccc83988029fd667555aa45f6589195b2",
+      "baseRefOid": "033e2cd1eedd35a3f0e043c5f97b7d5f1f454bf5",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-12/cl",
-      "headRefOid": "e6cd5dc6af665877376973ea0a7169e286d13e10",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "b92153bbe5a3a4d05704dea37d5ee441010507a6",
+      "closedAt": "2024-10-04T19:05:54Z",
+      "mergedAt": "2024-10-04T19:05:54Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "f7f3efdc087a2feed06acc9703cbc62445f24053"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -36232,12 +36281,26 @@
         {
           "author": "cjpatton",
           "authorAssociation": "COLLABORATOR",
-          "body": "To note:\r\n- [ ] Updated code points https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417\r\n- [ ] Change to agg param encoding https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420\r\n- [ ] Application context: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422",
+          "body": "To note:\r\n- [x] Updated code points https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/417\r\n- [x] Change public share encoding https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/420\r\n- [x] Application context: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/422\r\n- [x] Improve soundness of some Prio3 variants\r\n- [x] Plumb context string through IDPF",
           "createdAt": "2024-09-06T19:23:46Z",
-          "updatedAt": "2024-09-27T22:36:08Z"
+          "updatedAt": "2024-10-04T17:47:50Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6L_9uT",
+          "commit": {
+            "abbreviatedOid": "b92153b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-04T18:02:50Z",
+          "updatedAt": "2024-10-04T18:02:50Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 417,
@@ -36968,7 +37031,7 @@
       "id": "PR_kwDOGKuqOc58GdU4",
       "title": "Improve FLP specification",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/429",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -36977,18 +37040,28 @@
       ],
       "body": "Closes #226.\r\n\r\nClean up the reference code a bit so that it can be excerpted in the draft: add comments; use more meaningful variable names; and make variables consistent across the prover and verifier. We've also replaced `prove_wrapped()` and `query_wrapped()` with class methods on `ProveGadget` and `QueryGadget` respectively. This way the listing of these classes is a little tidier.\r\n\r\nReplace the current description of the algorithms with the reference code for and a brief overview of each. This entails defining `poly_eval()`, which we've done in the conventions section. `ProveGadget` and `QueryGadget` are listed in the appendix, as their descriptions are a bit tedious and their functionality is relatively straightforward. Note however that these are load-bearing parts of the specification.\r\n\r\nOther things:\r\n\r\n* Remove the \"Encoding\" subsection, which is pretty useless. Instead, we just say how these are instantiated in the \"Validity Circuit\" section.\r\n\r\n* Remove calls to `check_valid_eval()` from the draft, as this more useful for testing than it is as part of the spec.\r\n\r\n* Clean up the parameter tables, including indicating types.\r\n\r\n* Do another pass of the overview and tighten things up a bit.",
       "createdAt": "2024-09-19T23:49:09Z",
-      "updatedAt": "2024-10-02T20:12:32Z",
+      "updatedAt": "2024-10-04T19:11:12Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "6c1e320ef8f7bbe918cde47a28590ba6dc4b2e24",
+      "baseRefOid": "033e2cd1eedd35a3f0e043c5f97b7d5f1f454bf5",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/226",
-      "headRefOid": "3112814004c98288f7b5ba628c49243ebb34c281",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "5dc46a992b9ea37f4812635be8b94051b62b0920",
+      "closedAt": "2024-10-04T19:11:12Z",
+      "mergedAt": "2024-10-04T19:11:12Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "096be4aa5ef560e0ff2dec88622b62c2fabd5fd7"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-10-03T17:33:22Z",
+          "updatedAt": "2024-10-03T17:33:22Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc6LkjF0",
@@ -37061,6 +37134,90 @@
               "body": "nit: one argument per line\r\n```suggestion\r\n                          g,\r\n                          g_calls)\r\n```",
               "createdAt": "2024-10-02T17:01:24Z",
               "updatedAt": "2024-10-02T20:12:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L16xt",
+          "commit": {
+            "abbreviatedOid": "36493e3"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-03T17:06:30Z",
+          "updatedAt": "2024-10-03T17:21:31Z",
+          "comments": [
+            {
+              "originalPosition": 498,
+              "body": "The term comes from from {{BBCGGI19}}: the query generation algorithm generates a \"query\", a matrix that we multiply the input + proof by to get the verifier. You're right that we're overloading this term quite a bit.\r\n\r\nI'm down with disambiguating. \"query algorithm\" sounds perfectly fine to me.\r\n\r\n",
+              "createdAt": "2024-10-03T17:06:30Z",
+              "updatedAt": "2024-10-03T17:21:31Z"
+            },
+            {
+              "originalPosition": 498,
+              "body": "Done.",
+              "createdAt": "2024-10-03T17:11:04Z",
+              "updatedAt": "2024-10-03T17:21:32Z"
+            },
+            {
+              "originalPosition": 514,
+              "body": "Actually instead of \"gadget proof\", I think this should say \"gadget polynomial\". Does this make more sense?\r\n```suggestion\r\nThis gadget also evaluates the gadget polynomial for each gadget invocation. Then we\r\n```",
+              "createdAt": "2024-10-03T17:14:03Z",
+              "updatedAt": "2024-10-03T17:21:32Z"
+            },
+            {
+              "originalPosition": 688,
+              "body": "This triggers the following error:\r\n```\r\nError: Did not expect a numbered section after an unnumbered section (seen on line 6725)\r\n```\r\n\r\nTBH I don't see a good reason to remove the numbers from the sections, so I just moved this line from each appendix section. The new table of contents is:\r\n\r\n```\r\n   Appendix A.  Acknowledgments\r\n   Appendix B.  FLP Gadget Wrappers\r\n   Appendix C.  Test Vectors\r\n     C.1.  Prio3Count\r\n     C.2.  Prio3Sum\r\n     C.3.  Prio3SumVec\r\n     C.4.  Prio3Histogram\r\n     C.5.  Poplar1\r\n   Authors' Addresses\r\n```\r\n\r\nI suppose it's a bit odd to have a numbered appeendix for the acknowledgements .. perhaps we can move this to an unnumbered section just before \"Authors' Addresses\". Will file an issue to track.",
+              "createdAt": "2024-10-03T17:18:16Z",
+              "updatedAt": "2024-10-03T17:21:32Z"
+            },
+            {
+              "originalPosition": 245,
+              "body": "Done.",
+              "createdAt": "2024-10-03T17:20:58Z",
+              "updatedAt": "2024-10-03T17:21:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L2oZ-",
+          "commit": {
+            "abbreviatedOid": "3112814"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-03T17:59:16Z",
+          "updatedAt": "2024-10-03T17:59:16Z",
+          "comments": [
+            {
+              "originalPosition": 514,
+              "body": "SGTM, elaborated a bit more here\r\n```suggestion\r\nThis gadget also evaluates the gadget polynomial for each gadget invocation in order to produce the gadget's output. Then we\r\n```",
+              "createdAt": "2024-10-03T17:59:16Z",
+              "updatedAt": "2024-10-03T17:59:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L3CKb",
+          "commit": {
+            "abbreviatedOid": "c6d2905"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-03T18:47:16Z",
+          "updatedAt": "2024-10-03T19:13:51Z",
+          "comments": [
+            {
+              "originalPosition": 566,
+              "body": "nit: grammar\r\n```suggestion\r\nthis by partially reconstructing the gadget polynomial and evaluating it at a random\r\n```",
+              "createdAt": "2024-10-03T18:47:16Z",
+              "updatedAt": "2024-10-03T19:13:51Z"
             }
           ]
         }
@@ -37715,7 +37872,7 @@
       "id": "PR_kwDOGKuqOc59JsoN",
       "title": "Prio3: Improve soundness of reductions (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/436",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -37724,17 +37881,19 @@
       ],
       "body": "Closes #427.\r\n\r\nIn a validity circuit we may have several values we expect to be 0. To check that they're all zero, we interpret them as coefficients of a polynomial and evaluate the polynomial at random point. We do this in several places:\r\n\r\n* Whenever `EVAL_OUTPUT_LEN > 0`\r\n* In the `SumVec` circuit\r\n* In the `MultihotCountVec` circuit\r\n* In the `Histogram` circuit\r\n\r\nThis induces a soundness error of `n / |F|`, where `n` is the number of values and $F$ is the finite field. This is significant especially for larger inputs.\r\n\r\nWe can reduce this soundness error by reducing the degree of the polynomial. By the Schwartz-Zippel lemma, when we evaluate a non-zero, multivariate polynomial with degree `d` at a random point (each variable gets a random value), the probability that the output is zero is at most `d / |F|`. For instance, if each value is a different variable, then the maximum degree is `1`, resulting in a `1 / |F|` soundness error.\r\n\r\nHowever, the more variables the polynomial, the more randomness we need to produce. This can become a CPU bottleneck for longer inputs.\r\n\r\nThis commit makes the following changes to Prio3 and its variants:\r\n\r\n1. When `EVAL_OUTPUT_LEN > 0`, we include in the query randomness `EVAL_OUTPUT_LEN` field elements and compute the reduced output as the dot product of this random vector and the outputs. This improves the soundness error from `EVAL_OUTPUT_LEN / |F|` to `1 / |F|`.\r\n\r\n2. We modify the `SumVec`, `MultihotCountVec` and `Histogram` circuits by including in the joint randomness a vector of length `GADGET_CALLS[0]`. For the `i`-th gadget call, we generate powers of `joint_rand[i]`. This results in a soundness error of `sqrt(length) / |F|` when the chunk length is chosen optimally.",
       "createdAt": "2024-09-30T17:34:05Z",
-      "updatedAt": "2024-10-01T21:24:38Z",
+      "updatedAt": "2024-10-03T16:52:17Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "b1a6e60940cfebd74deb8b71f87d22cdd56fb49a",
+      "baseRefOid": "79fd0d8438b4ab0b22ed897a694c1e32ab318fe6",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/427",
-      "headRefOid": "8f23e16a0edeb66c71a3fbecca87ca55ed247d9e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "eea120c7bf5a7587d21e957b7bc40f9576ee33fe",
+      "closedAt": "2024-10-03T16:52:16Z",
+      "mergedAt": "2024-10-03T16:52:16Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "0940b91a4c494017b340e4ebcd0f8efdc7a1f072"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -37742,16 +37901,44 @@
           "body": "Rebased.",
           "createdAt": "2024-10-01T21:24:37Z",
           "updatedAt": "2024-10-01T21:24:37Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> One other change: section 7.4.3 introduces the ParallelSum gadget and SumVec circuit, and there we should change \"multiplied by a power of the joint randomness value\" with \"multiplied by a power of a joint randomness value\". The same applies to the description of the Prio3Histogram circuit.\r\n\r\nDone!",
+          "createdAt": "2024-10-03T16:47:28Z",
+          "updatedAt": "2024-10-03T16:47:28Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6L1SJq",
+          "commit": {
+            "abbreviatedOid": "8f23e16"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "One other change: section 7.4.3 introduces the ParallelSum gadget and SumVec circuit, and there we should change \"multiplied by a power of the joint randomness value\" with \"multiplied by a power of a joint randomness value\". The same applies to the description of the Prio3Histogram circuit.",
+          "createdAt": "2024-10-03T15:45:59Z",
+          "updatedAt": "2024-10-03T16:30:55Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "Note that these changes will have to be copied into the draft once this is rebased over #429.",
+              "createdAt": "2024-10-03T15:45:59Z",
+              "updatedAt": "2024-10-03T16:30:55Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 437,
       "id": "PR_kwDOGKuqOc59JyRb",
-      "title": "Prio3Histogram,MultihotCountVec: Move final reduction (*)",
+      "title": "Histogram, MultihotCountVec: Move final reduction (*)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/437",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -37761,13 +37948,539 @@
       ],
       "body": "Based on #436 (merge that first)\r\n\r\nSimplify the `Histogram` and `MultihotCountVec` circuits by moving the final reduction out of the circuit.",
       "createdAt": "2024-09-30T17:46:39Z",
-      "updatedAt": "2024-10-01T21:25:25Z",
+      "updatedAt": "2024-10-03T17:01:30Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/427",
-      "baseRefOid": "8f23e16a0edeb66c71a3fbecca87ca55ed247d9e",
+      "baseRefName": "main",
+      "baseRefOid": "0940b91a4c494017b340e4ebcd0f8efdc7a1f072",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/427-followup",
-      "headRefOid": "371440779364ca4924aee5614321cc1ec571f66e",
+      "headRefOid": "31f39dc9e1ddc553679bfb3c204286600df5ee56",
+      "closedAt": "2024-10-03T17:01:30Z",
+      "mergedAt": "2024-10-03T17:01:30Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "033e2cd1eedd35a3f0e043c5f97b7d5f1f454bf5"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-10-01T21:25:24Z",
+          "updatedAt": "2024-10-01T21:25:24Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The sentence \"All the individual checks are combined together in a random linear combination\" in the Prio3Histogram section is technically still correct, but the random linear combination now happens both inside and outside the circuit, which could be a bit confusing.",
+          "createdAt": "2024-10-03T16:49:48Z",
+          "updatedAt": "2024-10-03T16:49:48Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-10-03T16:53:57Z",
+          "updatedAt": "2024-10-03T16:53:57Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> The sentence \"All the individual checks are combined together in a random linear combination\" in the Prio3Histogram section is technically still correct, but the random linear combination now happens both inside and outside the circuit, which could be a bit confusing.\r\n\r\nChanged to \"The individual checks constitute the output of the circuit.\"\r\n",
+          "createdAt": "2024-10-03T16:58:08Z",
+          "updatedAt": "2024-10-03T16:58:08Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6L1uhL",
+          "commit": {
+            "abbreviatedOid": "3714407"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-03T16:40:32Z",
+          "updatedAt": "2024-10-03T16:40:32Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 440,
+      "id": "PR_kwDOGKuqOc59jW2h",
+      "title": "Pass application context to IDPF",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/440",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-12"
+      ],
+      "body": "This is a follow-up to #422 and #434 to plumb the application context through the IDPF interface, to its XOF/PRG calls.\r\n\r\n",
+      "createdAt": "2024-10-03T21:15:56Z",
+      "updatedAt": "2024-10-04T17:58:33Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "033e2cd1eedd35a3f0e043c5f97b7d5f1f454bf5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/idpf-ctx",
+      "headRefOid": "17da5e7c77363ef7c5339e8d7dc9928ccc690e2d",
+      "closedAt": "2024-10-04T17:58:29Z",
+      "mergedAt": "2024-10-04T17:58:29Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "2d4f500182d2acab9d7fa9f201e7a6385854ab75"
+      },
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I haven't updated the defense-in-depth section yet. Here's what I'm thinking so far.\r\n\r\nPart of the original rationale for passing a nonce to the IDPF was to add a tweak to the fixed-key AES function, so each client uses a different AES key. This improves concrete security, see https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/32#issuecomment-1465432536. I'm not clear on the details though, is the concrete security improvement against a robustness attacker?\r\n\r\nIncluding application context in addition to a nonce is straightforwardly a defense-in-depth measure against attacks on robustness via offline attacks on extractability. However, we don't allow for the same sort of potentially-insecure parameterization as with Prio3 and small fields, so this isn't as big of a deal, assuming AES and the MiTCCR construction are as strong as we think. Precomputation attacks would have to pick one application context value, and thus one fixed-key AES key or TurboSHAKE domain separation input, which would prevent replaying one bad DAP report against multiple DAP tasks, for example.",
+          "createdAt": "2024-10-03T21:44:46Z",
+          "updatedAt": "2024-10-03T21:44:46Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Notes from today's sync: We probably don't need to say much about the defense in depth properties of this change, but we could mention that this prevents replaying a set of input shares with different application context strings. (DAP protects against this at its layer with the InputShareAAD, but it would be nice to also protect against this at the VDAF layer)",
+          "createdAt": "2024-10-04T15:18:13Z",
+          "updatedAt": "2024-10-04T15:18:13Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think the existing text about \"agreeing on the application context\" is good enough to cover preventing replays.",
+          "createdAt": "2024-10-04T17:36:23Z",
+          "updatedAt": "2024-10-04T17:36:23Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6L_yII",
+          "commit": {
+            "abbreviatedOid": "17da5e7"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-04T17:45:22Z",
+          "updatedAt": "2024-10-04T17:45:22Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 442,
+      "id": "PR_kwDOGKuqOc59n4P4",
+      "title": "Add high-level overview of the IDPF construction",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/442",
+      "state": "OPEN",
+      "author": "schoppmp",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #397",
+      "createdAt": "2024-10-04T13:33:45Z",
+      "updatedAt": "2024-10-04T17:56:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "033e2cd1eedd35a3f0e043c5f97b7d5f1f454bf5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "schoppmp/issue-397",
+      "headRefOid": "331f32c79bc72020223459dd0e2277b09cab089b",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6L-CXo",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-04T15:01:05Z",
+          "updatedAt": "2024-10-04T15:07:39Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "Following #433, we may want to talk about these as bit strings, rather than integers, for consistency.",
+              "createdAt": "2024-10-04T15:01:06Z",
+              "updatedAt": "2024-10-04T15:07:39Z"
+            },
+            {
+              "originalPosition": 12,
+              "body": "We are overloading the concept of \"labels\" here. The first half of the paragraph says that the labels are from successive bits of the IDPF index, while the second half says that the labels are zero or beta. Should we refer to the latter as \"values\", and not \"labels\"? Moreover, I don't think the distinction \"inner nodes\" needs to be made, since both inner nodes and leaf nodes will be labeled similarly.",
+              "createdAt": "2024-10-04T15:03:42Z",
+              "updatedAt": "2024-10-04T15:07:39Z"
+            },
+            {
+              "originalPosition": 19,
+              "body": "nit: copyedit\r\n```suggestion\r\nboth evaluators have the same seed `s` of length `KEY_SIZE`, then expanding `s` to length `2*KEY_SIZE`\r\n```",
+              "createdAt": "2024-10-04T15:04:04Z",
+              "updatedAt": "2024-10-04T15:07:39Z"
+            },
+            {
+              "originalPosition": 20,
+              "body": "I think this sentence needs to be rephrased",
+              "createdAt": "2024-10-04T15:04:54Z",
+              "updatedAt": "2024-10-04T15:07:39Z"
+            },
+            {
+              "originalPosition": 32,
+              "body": "We may need to mention that the pseudorandom seed values are also expanded by the PRG into pseudorandom output values, which are then corrected.",
+              "createdAt": "2024-10-04T15:07:11Z",
+              "updatedAt": "2024-10-04T15:07:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L-DNx",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "High level\r\n\r\n- wrap lines at 80 characters",
+          "createdAt": "2024-10-04T15:02:41Z",
+          "updatedAt": "2024-10-04T15:18:31Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "```suggestion\r\nAt a high level, the IDPF maps a key generator's input `(alpha, beta_1, ..., beta_BITS)` onto\r\n```",
+              "createdAt": "2024-10-04T15:02:41Z",
+              "updatedAt": "2024-10-04T15:18:31Z"
+            },
+            {
+              "originalPosition": 10,
+              "body": "We recently moved away from encoding the index as an `int` to encoding it as a `list[bool]` (basically the path itself).",
+              "createdAt": "2024-10-04T15:04:19Z",
+              "updatedAt": "2024-10-04T15:18:31Z"
+            },
+            {
+              "originalPosition": 18,
+              "body": "```suggestion\r\nre-generate shares of the tree using an XOF. The basic observation is that if\r\n```",
+              "createdAt": "2024-10-04T15:05:04Z",
+              "updatedAt": "2024-10-04T15:18:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L-gO-",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-04T16:02:14Z",
+          "updatedAt": "2024-10-04T16:02:14Z",
+          "comments": [
+            {
+              "originalPosition": 18,
+              "body": "Fixed.",
+              "createdAt": "2024-10-04T16:02:14Z",
+              "updatedAt": "2024-10-04T16:02:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L-gQS",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-04T16:02:17Z",
+          "updatedAt": "2024-10-04T16:02:17Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Called it a \"bit string\" instead.",
+              "createdAt": "2024-10-04T16:02:17Z",
+              "updatedAt": "2024-10-04T16:02:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L-gSb",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-04T16:02:22Z",
+          "updatedAt": "2024-10-04T16:02:22Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "Added a sentence above on `convert`.",
+              "createdAt": "2024-10-04T16:02:22Z",
+              "updatedAt": "2024-10-04T16:02:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L-gUF",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-04T16:02:25Z",
+          "updatedAt": "2024-10-04T16:02:25Z",
+          "comments": [
+            {
+              "originalPosition": 20,
+              "body": "Done.",
+              "createdAt": "2024-10-04T16:02:25Z",
+              "updatedAt": "2024-10-04T16:02:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L-gVz",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-04T16:02:28Z",
+          "updatedAt": "2024-10-04T16:02:29Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "Done.",
+              "createdAt": "2024-10-04T16:02:28Z",
+              "updatedAt": "2024-10-04T16:02:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L-gXe",
+          "commit": {
+            "abbreviatedOid": "1b62d12"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-04T16:02:32Z",
+          "updatedAt": "2024-10-04T16:02:32Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "Fixed.",
+              "createdAt": "2024-10-04T16:02:32Z",
+              "updatedAt": "2024-10-04T16:02:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L_yzD",
+          "commit": {
+            "abbreviatedOid": "331f32c"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "I've got one more nit, plus the lines should be wrapped before we merge",
+          "createdAt": "2024-10-04T17:47:04Z",
+          "updatedAt": "2024-10-04T17:52:51Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "To align with the above terminology:\r\n```suggestion\r\nThe IDPF construction now boils down to secret-sharing the values at each node of that tree in an efficient way. Note\r\n```",
+              "createdAt": "2024-10-04T17:47:04Z",
+              "updatedAt": "2024-10-04T17:52:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6L_1Iw",
+          "commit": {
+            "abbreviatedOid": "331f32c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Just some editorial stuff. Don't forget to break lines at 80 characters.",
+          "createdAt": "2024-10-04T17:52:59Z",
+          "updatedAt": "2024-10-04T17:56:03Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "```suggestion\r\nre-generate shares of the tree using a XOF ({{xof}}). The basic observation is that if\r\n```",
+              "createdAt": "2024-10-04T17:53:00Z",
+              "updatedAt": "2024-10-04T17:56:03Z"
+            },
+            {
+              "originalPosition": 22,
+              "body": "Add a forward reference to the section where `convert()` is defined.",
+              "createdAt": "2024-10-04T17:53:20Z",
+              "updatedAt": "2024-10-04T17:56:03Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "`convert()` also generates the seed for the next level, no?",
+              "createdAt": "2024-10-04T17:53:38Z",
+              "updatedAt": "2024-10-04T17:56:03Z"
+            },
+            {
+              "originalPosition": 25,
+              "body": "This won't render the way you want it to.\r\n```suggestion\r\nThe open task now is to ensure that evaluators have different seeds at nodes that lie on the path\r\n```",
+              "createdAt": "2024-10-04T17:54:04Z",
+              "updatedAt": "2024-10-04T17:56:03Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "We don't get to use bold. To denote a new term we're introducing, we've been using quotes.\r\n```suggestion\r\n\"correction words\" that are conditionally added to the XOF output by both evaluators.\r\n```",
+              "createdAt": "2024-10-04T17:54:52Z",
+              "updatedAt": "2024-10-04T17:56:03Z"
+            },
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\nThe condition here is a secret-shared bit, called a \"control bit\", which indicates whether the\r\n```",
+              "createdAt": "2024-10-04T17:55:13Z",
+              "updatedAt": "2024-10-04T17:56:03Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 443,
+      "id": "PR_kwDOGKuqOc59p9el",
+      "title": "Add definitions of type hint identifiers",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/443",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #438.",
+      "createdAt": "2024-10-04T18:36:06Z",
+      "updatedAt": "2024-10-04T19:16:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "096be4aa5ef560e0ff2dec88622b62c2fabd5fd7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/type-hint-definitions",
+      "headRefOid": "12c846a74c1ab787a54afe860602a9e6ab1211de",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MAduo",
+          "commit": {
+            "abbreviatedOid": "47a49d5"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-04T19:13:16Z",
+          "updatedAt": "2024-10-04T19:13:27Z",
+          "comments": [
+            {
+              "originalPosition": 39,
+              "body": "New paragraph.\r\n```suggestion\r\n`b'some constant string'`).\r\n\r\nA global constant `VERSION` of type `int` is\r\n```",
+              "createdAt": "2024-10-04T19:13:17Z",
+              "updatedAt": "2024-10-04T19:13:27Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 444,
+      "id": "PR_kwDOGKuqOc59qa7c",
+      "title": "Fix long lines",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/444",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "This fixes a couple long lines introduced in #440.",
+      "createdAt": "2024-10-04T20:03:38Z",
+      "updatedAt": "2024-10-04T20:08:58Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "096be4aa5ef560e0ff2dec88622b62c2fabd5fd7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/fix-long-lines",
+      "headRefOid": "9ede0692a583f0c9950b02f4a57eb48b4f50b79b",
+      "closedAt": "2024-10-04T20:08:55Z",
+      "mergedAt": "2024-10-04T20:08:55Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "9421d9cca4fa4ffc8dba93a6f905d2395c5665d5"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MA7_a",
+          "commit": {
+            "abbreviatedOid": "9ede069"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-04T20:08:22Z",
+          "updatedAt": "2024-10-04T20:08:22Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 445,
+      "id": "PR_kwDOGKuqOc59q49w",
+      "title": "Remove use of Sage, reimplement field and polynomial operations",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/445",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is a first attempt at #431. It works, and it's slower, which is to be expected, but currently it's a lot slower. Unit tests take 22 seconds instead of 2 seconds. I think I may take a second pass at polynomial interpolation, using the method of divided differences, and see if that improves the speed somewhat.",
+      "createdAt": "2024-10-04T21:21:34Z",
+      "updatedAt": "2024-10-04T21:35:25Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9421d9cca4fa4ffc8dba93a6f905d2395c5665d5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/eject-sage",
+      "headRefOid": "874c116b60e9bb0c78c3034af23f53a1cd73a4d1",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -37776,9 +38489,9 @@
         {
           "author": "cjpatton",
           "authorAssociation": "COLLABORATOR",
-          "body": "Rebased.",
-          "createdAt": "2024-10-01T21:25:24Z",
-          "updatedAt": "2024-10-01T21:25:24Z"
+          "body": "> This is a first attempt at #431. It works, and it's slower, which is to be expected, but currently it's a lot slower. Unit tests take 22 seconds instead of 2 seconds. I think I may take a second pass at polynomial interpolation, using the method of divided differences, and see if that improves the speed somewhat.\r\n\r\n22 is definitely too slow :) Another option is to just implement NTT? We only use it in FLP anyway.",
+          "createdAt": "2024-10-04T21:31:02Z",
+          "updatedAt": "2024-10-04T21:31:02Z"
         }
       ],
       "reviews": []
