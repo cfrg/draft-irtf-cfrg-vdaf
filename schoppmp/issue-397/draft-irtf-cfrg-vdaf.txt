@@ -5403,12 +5403,12 @@ Table of Contents
    not.  On the path, the control bits add up to 1, meaning only one
    evaluator will add the correction word to its XOF output.  Off the
    path, either none or both evaluators add the correction word, and so
-   the seeds at the next level.  What remains is to turn the -- now
-   pseudorandom -- values on the path to alpha into the desired beta
-   values.  This is done by sending _value correction words_ to the
-   evaluators, which are chosen such that when added with the
-   pseudorandom shares at the ith node on the path to alpha, they add up
-   to shares of beta_i.
+   the seeds at the next level stay the same.  What remains is to turn
+   the -- now pseudorandom -- values on the path to alpha into the
+   desired beta values.  This is done by sending _value correction
+   words_ to the evaluators, which are chosen such that when added with
+   the pseudorandom shares at the ith node on the path to alpha, they
+   add up to shares of beta_i.
 
    In the following two sections we describe the algorithms for key
    generation in full detail.

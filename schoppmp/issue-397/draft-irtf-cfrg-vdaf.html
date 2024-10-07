@@ -8369,11 +8369,11 @@ called a "control bit", which indicates whether the current node is on the path
 to <code>alpha</code> or not. On the path, the control bits add up to <code>1</code>, meaning only one
 evaluator will add the correction word to its XOF output. Off the path, either
 none or both evaluators add the correction word, and so the seeds at the next
-level.  What remains is to turn the -- now pseudorandom -- values on the path to
-<code>alpha</code> into the desired <code>beta</code> values. This is done by sending <em>value
-correction words</em> to the evaluators, which are chosen such that when added with
-the pseudorandom shares at the <code>i</code>th node on the path to <code>alpha</code>, they add up to
-shares of <code>beta_i</code>.<a href="#section-8.3.1-3" class="pilcrow">¶</a></p>
+level stay the same.  What remains is to turn the -- now pseudorandom -- values
+on the path to <code>alpha</code> into the desired <code>beta</code> values. This is done by sending
+<em>value correction words</em> to the evaluators, which are chosen such that when
+added with the pseudorandom shares at the <code>i</code>th node on the path to <code>alpha</code>,
+they add up to shares of <code>beta_i</code>.<a href="#section-8.3.1-3" class="pilcrow">¶</a></p>
 <p id="section-8.3.1-4">In the following two sections we describe the algorithms for key generation in
 full detail.<a href="#section-8.3.1-4" class="pilcrow">¶</a></p>
 </section>
