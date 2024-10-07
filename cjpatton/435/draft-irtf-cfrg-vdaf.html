@@ -4755,7 +4755,7 @@ def shard_without_joint_rand(
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
     helper_shares, seeds = front(self.SHARES - 1, seeds)
-    (prove,), seeds = front(1, seeds)
+    (prove_seed,), seeds = front(1, seeds)
 
     # Shard the encoded measurement into shares.
     leader_meas_share = meas
@@ -4766,7 +4766,7 @@ def shard_without_joint_rand(
         )
 
     # Generate and shard each proof into shares.
-    prove_rands = self.prove_rands(ctx, prove)
+    prove_rands = self.prove_rands(ctx, prove_seed)
     leader_proofs_share = []
     for _ in range(self.PROOFS):
         prove_rand, prove_rands = front(
