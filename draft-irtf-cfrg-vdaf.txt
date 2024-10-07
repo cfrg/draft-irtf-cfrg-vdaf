@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 7 April 2025                                               ISRG
+Expires: 10 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          4 October 2024
+                                                          7 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 April 2025.
+   This Internet-Draft will expire on 10 April 2025.
 
 Copyright Notice
 
@@ -150,16 +150,16 @@ Table of Contents
    11. References
      11.1.  Normative References
      11.2.  Informative References
-   Appendix A.  Acknowledgments
-   Appendix B.  FLP Gadget Wrappers
-   Appendix C.  Test Vectors
-     C.1.  Schema
-       C.1.1.  Prio3Count
-       C.1.2.  Prio3Sum
-       C.1.3.  Prio3SumVec
-       C.1.4.  Prio3Histogram
-       C.1.5.  Prio3MultihotCountVec
-       C.1.6.  Poplar1
+   Appendix A.  FLP Gadget Wrappers
+   Appendix B.  Test Vectors
+     B.1.  Schema
+       B.1.1.  Prio3Count
+       B.1.2.  Prio3Sum
+       B.1.3.  Prio3SumVec
+       B.1.4.  Prio3Histogram
+       B.1.5.  Prio3MultihotCountVec
+       B.1.6.  Poplar1
+   Acknowledgments
    Authors' Addresses
 
 1.  Introduction
@@ -2416,7 +2416,7 @@ Table of Contents
    suitable for any validity circuit is specified in Section 7.3.
    Finally, instantiations of Prio3 for various types of measurements
    are specified in Section 7.4.  Test vectors can be found in
-   Appendix C.
+   Appendix B.
 
 7.1.  Fully Linear Proof (FLP) Systems
 
@@ -3710,7 +3710,7 @@ Table of Contents
    circuit, setting g.wires[j][k] to the value of the j-th wire for the
    k-th invocation of gadget g.  This is accomplished by "wrapping" each
    gadget in a class ProveGadget that records the wire inputs.  We list
-   this class in Appendix B.
+   this class in Appendix A.
 
    Next, we compute each of the "wire polynomials" for each gadget.  The
    j-th wire polynomial is the lowest degree polynomial that evaluates
@@ -3794,7 +3794,7 @@ Table of Contents
    polynomials just as the prover did.  First, we record g.wires[j][k]
    as the input (share) of the j-th wire of the k-th invocation of the
    gadget.  Again, this is accomplished by a wrapper gadget,
-   QueryGadget, listed in Appendix B.  This gadget also evaluates the
+   QueryGadget, listed in Appendix A.  This gadget also evaluates the
    gadget polynomial for each gadget invocation in order to produce the
    gadget's output.  Then we compute the wire polynomials from the
    recorded values.
@@ -3905,7 +3905,7 @@ Table of Contents
    measurement types.  Each is determined by a field (Section 6.1), a
    validity circuit (Section 7.3.2), an XOF (Section 6.2). and the
    number of proofs to generate and verify.  Test vectors for each can
-   be found in Appendix C.
+   be found in Appendix B.
 
 7.4.1.  Prio3Count
 
@@ -4603,7 +4603,7 @@ Table of Contents
    defined in Section 8.1; a concrete instantiation is given
    Section 8.3.  The Poplar1 VDAF is defined in Section 8.2 in terms of
    a generic IDPF.  Finally, a concrete instantiation of Poplar1 is
-   specified in Section 8.4; test vectors can be found in Appendix C.
+   specified in Section 8.4; test vectors can be found in Appendix B.
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
@@ -5724,7 +5724,7 @@ Table of Contents
    By default, Poplar1 is instantiated with the IDPF in Section 8.3
    (VALUE_LEN == 2) and XofTurboShake128 (Section 6.2.1).  This VDAF is
    suitable for any positive value of BITS.  Test vectors can be found
-   in Appendix C.
+   in Appendix B.
 
 9.  Security Considerations
 
@@ -6292,35 +6292,7 @@ Table of Contents
               September 2024, <https://github.com/cfrg/draft-irtf-cfrg-
               vdaf/tree/main/test_vec/vdaf>.
 
-Appendix A.  Acknowledgments
-
-   The impetus of this work is the success of recent deployments of
-   predecessors of Prio3.  The Mozilla Origin Telemetry project
-   [OriginTelemetry] and the Exposure Notification Private Analytics
-   collaboration among the Internet Security Research Group (ISRG),
-   Google, Apple, and others [ENPA] have together aggregated data from
-   hundreds of millions of users.
-
-   As the name implies, Prio3 is a descendant of the original Prio
-   construction [CGB17].  A second iteration was deployed in the [ENPA]
-   system, and like the VDAF described here, the ENPA system was built
-   from techniques introduced in [BBCGGI19] that significantly improve
-   communication cost.  That system was specialized for a particular
-   aggregation function; the goal of Prio3 is to provide the same level
-   of generality as the original construction.
-
-   The security considerations in Section 9 are based largely on the
-   security analysis of [DPRS23].  Thanks to Hannah Davis and Mike
-   Rosulek, who lent their time to developing definitions and security
-   proofs.
-
-   Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
-   Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
-   Raykova, Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang,
-   Bas Westerbaan, and Christopher Wood for useful feedback on and
-   contributions to the spec.
-
-Appendix B.  FLP Gadget Wrappers
+Appendix A.  FLP Gadget Wrappers
 
    class ProveGadget(Gadget[F]):
        """
@@ -6425,7 +6397,7 @@ Appendix B.  FLP Gadget Wrappers
            wrapped_valid.GADGETS = wrapped_gadgets
            return wrapped_valid
 
-Appendix C.  Test Vectors
+Appendix B.  Test Vectors
 
       TODO Update the reference in [TestVectors] by replacing <TODO>
       with the commit hash with the final version of the test vectors.)
@@ -6436,7 +6408,7 @@ Appendix C.  Test Vectors
    preparation, aggregation, and unsharding of each of several
    measurements.  The test vector schema is defined below.
 
-C.1.  Schema
+B.1.  Schema
 
    ctx:  The application context string encoded in hexadecimal.
 
@@ -6474,18 +6446,18 @@ C.1.  Schema
    The schema also includes whatever parameters are required to
    instantiate the VDAF.  These are listed in the subsections below.
 
-C.1.1.  Prio3Count
+B.1.1.  Prio3Count
 
    shares:  The number of shares, an integer.
 
-C.1.2.  Prio3Sum
+B.1.2.  Prio3Sum
 
    shares:  The number of shares, an integer.
 
    max_measurement:  The largest measurement, an integer.  Each element
       is in range range(max_measurement+1).
 
-C.1.3.  Prio3SumVec
+B.1.3.  Prio3SumVec
 
    shares:  The number of shares, an integer.
 
@@ -6496,7 +6468,7 @@ C.1.3.  Prio3SumVec
    bits:  the bit length of each element of the vector, an integer. each
       element is in range(2 ** bits).
 
-C.1.4.  Prio3Histogram
+B.1.4.  Prio3Histogram
 
    shares:  The number of shares, an integer.
 
@@ -6504,7 +6476,7 @@ C.1.4.  Prio3Histogram
 
    chunk_length:  the length of each vector chunk, an integer.
 
-C.1.5.  Prio3MultihotCountVec
+B.1.5.  Prio3MultihotCountVec
 
    shares:  The number of shares, an integer.
 
@@ -6515,9 +6487,37 @@ C.1.5.  Prio3MultihotCountVec
    max_weight:  The largest vector weight, an integer.  The sum of the
       elements must be in range(max_weight+1).
 
-C.1.6.  Poplar1
+B.1.6.  Poplar1
 
    bits:  The length of each input, an integer.
+
+Acknowledgments
+
+   The impetus of this work is the success of recent deployments of
+   predecessors of Prio3.  The Mozilla Origin Telemetry project
+   [OriginTelemetry] and the Exposure Notification Private Analytics
+   collaboration among the Internet Security Research Group (ISRG),
+   Google, Apple, and others [ENPA] have together aggregated data from
+   hundreds of millions of users.
+
+   As the name implies, Prio3 is a descendant of the original Prio
+   construction [CGB17].  A second iteration was deployed in the [ENPA]
+   system, and like the VDAF described here, the ENPA system was built
+   from techniques introduced in [BBCGGI19] that significantly improve
+   communication cost.  That system was specialized for a particular
+   aggregation function; the goal of Prio3 is to provide the same level
+   of generality as the original construction.
+
+   The security considerations in Section 9 are based largely on the
+   security analysis of [DPRS23].  Thanks to Hannah Davis and Mike
+   Rosulek, who lent their time to developing definitions and security
+   proofs.
+
+   Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
+   Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
+   Raykova, Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang,
+   Bas Westerbaan, and Christopher Wood for useful feedback on and
+   contributions to the spec.
 
 Authors' Addresses
 
