@@ -5115,8 +5115,8 @@ both evaluators have the same seed `s` of length `KEY_SIZE`, then expanding `s` 
 result in the same expansion. If we set the length of the XOF expansion to `2*KEY_SIZE`, it can then be
 split again into two seeds `s_l`, `s_r`, that can again serve as XOF seeds. Now if we view seeds as XOR-shares
 of integers, and if evaluators have the same seed at the root of the tree, then their expanded trees will form
-a secret-shared tree of zeros. The actual construction will use a `convert` function that maps seeds
-into the appropriate output domain.
+a secret-shared tree of zeros. The actual construction will additionally use a `convert` function before each expansion, which maps seeds
+into the appropriate output domain (see {{idpf-bbcggi21-helper-functions}}), generating a new seed for the next level in the process.
 
 The open task now is to ensure that evaluators have different seeds at nodes that lie on the path
 to `alpha`, while having the same seeds on all other nodes. This is done using so-called
