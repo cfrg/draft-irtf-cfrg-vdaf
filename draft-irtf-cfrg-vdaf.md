@@ -5107,7 +5107,7 @@ of length `BITS`, where the labels on the path from the root to `x` contain the 
 Finally, all nodes on the tree have have an assigned value, with the nodes on the path from the
 root to `alpha` having values `beta_1, ..., beta_BITS`, and all other nodes having value `0`.
 
-The IDPF construction now boils down to secret-sharing the node labels of that tree in an efficient way. Note
+The IDPF construction now boils down to secret-sharing the values at each node of that tree in an efficient way. Note
 that explicitly representing the tree requires `O(2^BITS)` space, so the generator cannot just
 compute additive shares of it and send them to the two evaluators. Instead, the evaluators will
 re-generate shares of the tree using an extendable output function (XOF). The basic observation is that if
