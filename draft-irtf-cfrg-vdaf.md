@@ -5120,7 +5120,7 @@ into the appropriate output domain.
 
 The open task now is to ensure that evaluators have different seeds at nodes that lie on the path
 to `alpha`, while having the same seeds on all other nodes. This is done using so-called
-*correction words* that are conditionally added to the XOF output by both evaluators.
+"correction words" that are conditionally added to the XOF output by both evaluators.
 The condition here is a secret-shared bit, called *control bit*, which indicates whether the
 current node is on the path to `alpha` or not. On the path, the control bits add up to `1`, meaning
 only one evaluator will add the correction word to its XOF output. Off the path, either none or
