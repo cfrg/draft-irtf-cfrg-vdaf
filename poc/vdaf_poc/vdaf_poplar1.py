@@ -91,10 +91,10 @@ class Poplar1(
         idpf_rand, rand = front(self.idpf.RAND_SIZE, rand)
         seeds = [rand[i:i + l] for i in range(0, 3 * l, l)]
         corr_seed, seeds = front(2, seeds)
-        (k_shard,), seeds = front(1, seeds)
+        (shard_seed,), seeds = front(1, seeds)
 
         xof = self.xof(
-            k_shard,
+            shard_seed,
             self.domain_separation_tag(USAGE_SHARD_RAND, ctx),
             nonce,
         )
