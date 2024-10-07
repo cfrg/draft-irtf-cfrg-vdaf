@@ -1075,8 +1075,8 @@ Table of Contents
 
    In many situations it is desirable to split an aggregate share across
    multiple storage elements, then merge the aggregate shares together
-   just before the batch is collected.  DAFs facilitate this with the
-   following method:
+   just before releasing the completed aggregate share to the Collector.
+   DAFs facilitate this with the following method:
 
    *  daf.merge(agg_param: AggParam, agg_shares: list[AggShare]) ->
       AggShare merges a sequence of aggregate shares into a single

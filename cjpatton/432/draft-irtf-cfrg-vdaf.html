@@ -2565,8 +2565,9 @@ and return the updated aggregate share.<a href="#section-4.4-2.2.1" class="pilcr
           </figcaption></figure>
 </div>
 <p id="section-4.4-4">In many situations it is desirable to split an aggregate share across multiple
-storage elements, then merge the aggregate shares together just before the
-batch is collected. DAFs facilitate this with the following method:<a href="#section-4.4-4" class="pilcrow">¶</a></p>
+storage elements, then merge the aggregate shares together just before
+releasing the completed aggregate share to the Collector. DAFs facilitate this
+with the following method:<a href="#section-4.4-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-5.1">
             <p id="section-4.4-5.1.1"><code>daf.merge(agg_param: AggParam, agg_shares: list[AggShare]) -&gt; AggShare</code>
