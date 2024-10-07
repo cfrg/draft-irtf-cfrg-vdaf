@@ -221,7 +221,9 @@ def gen_test_vec_for_vdaf(
     agg_shares = []
     for j in range(vdaf.SHARES):
         out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
+        agg_share_j = vdaf.agg_init(agg_param)
+        for out_share in out_shares_j:
+            agg_share_j = vdaf.agg_update(agg_param, agg_share_j, out_share)
         agg_shares.append(agg_share_j)
         # REMOVE ME
         test_vec['agg_shares'].append(

@@ -376,21 +376,34 @@ class Poplar1(
         else:
             raise ValueError('incorrect sketch length')
 
-    # NOTE: This method is excerpted in the document, de-indented, as
-    # figure {{poplar1-out2agg}}. Its width should be limited to 69
-    # columns after de-indenting, or 73 columns before de-indenting, to
-    # avoid warnings from xml2rfc.
+    # NOTE: Methods `agg_init()`, `agg_update()`, and `merge()` are
+    # excerpted in the document, de-indented, as figure
+    # {{poplar1-out2agg}}. The width should be limited to 69 columns
+    # after de-indenting, or 73 columns before de-indenting, to avoid
+    # warnings from xml2rfc.
     # ===================================================================
-    def aggregate(
-            self,
-            agg_param: Poplar1AggParam,
-            out_shares: list[FieldVec]) -> FieldVec:
+    def agg_init(self, agg_param: Poplar1AggParam) -> FieldVec:
         (level, prefixes) = agg_param
         field = self.idpf.current_field(level)
-        agg_share = cast(list[Field], field.zeros(len(prefixes)))
-        for out_share in out_shares:
-            agg_share = vec_add(agg_share, cast(list[Field], out_share))
-        return cast(FieldVec, agg_share)
+        return field.zeros(len(prefixes))
+
+    def agg_update(self,
+                   agg_param: Poplar1AggParam,
+                   agg_share: FieldVec,
+                   out_share: FieldVec) -> FieldVec:
+        a = cast(list[Field], agg_share)
+        o = cast(list[Field], out_share)
+        return cast(FieldVec, vec_add(a, o))
+
+    def merge(self,
+              agg_param: Poplar1AggParam,
+              agg_shares: list[FieldVec]) -> FieldVec:
+        (level, prefixes) = agg_param
+        field = self.idpf.current_field(level)
+        agg = cast(list[Field], field.zeros(len(prefixes)))
+        for agg_share in agg_shares:
+            agg = vec_add(agg, cast(list[Field], agg_share))
+        return cast(FieldVec, agg)
 
     # NOTE: This method is excerpted in the document, de-indented, as
     # figure {{poplar1-agg-output}}. Its width should be limited to 69
@@ -402,11 +415,7 @@ class Poplar1(
             agg_param: Poplar1AggParam,
             agg_shares: list[FieldVec],
             _num_measurements: int) -> list[int]:
-        (level, prefixes) = agg_param
-        field = self.idpf.current_field(level)
-        agg = cast(list[Field], field.zeros(len(prefixes)))
-        for agg_share in agg_shares:
-            agg = vec_add(agg, cast(list[Field], agg_share))
+        agg = self.merge(agg_param, agg_shares)
         return [x.as_unsigned() for x in agg]
 
     def encode_agg_param(self, agg_param: Poplar1AggParam) -> bytes:

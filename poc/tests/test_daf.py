@@ -70,11 +70,19 @@ class TestDaf(
         # share.
         return input_share
 
-    def aggregate(
-            self,
-            _agg_param: None,
-            out_shares: list[Field128]) -> Field128:
-        return reduce(lambda x, y: x + y, out_shares)
+    def agg_init(self, _agg_param: None) -> Field128:
+        return Field128(0)
+
+    def agg_update(self,
+                   _agg_param: None,
+                   agg_share: Field128,
+                   out_share: Field128) -> Field128:
+        return agg_share + out_share
+
+    def merge(self,
+              _agg_param: None,
+              agg_shares: list[Field128]) -> Field128:
+        return reduce(lambda x, y: x + y, agg_shares)
 
     def unshard(
             self,

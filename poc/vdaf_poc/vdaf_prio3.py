@@ -232,19 +232,28 @@ class Prio3(
             joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
         return joint_rand_seed
 
-    # NOTE: This method is excerpted in the document, de-indented, as
-    # figure {{prio3-out2agg}}. Its width should be limited to 69 columns
-    # after de-indenting, or 73 columns before de-indenting, to avoid
-    # warnings from xml2rfc.
+    # NOTE: Methods `agg_init()`, `agg_update()`, and `merge()` are
+    # excerpted in the document, de-indented, as figure
+    # {{prio3-out2agg}}. The width should be limited to 69 columns after
+    # de-indenting, or 73 columns before de-indenting, to avoid warnings
+    # from xml2rfc.
     # ===================================================================
-    def aggregate(
-            self,
-            _agg_param: None,
-            out_shares: list[list[F]]) -> list[F]:
-        agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
-        for out_share in out_shares:
-            agg_share = vec_add(agg_share, out_share)
-        return agg_share
+    def agg_init(self, _agg_param: None) -> list[F]:
+        return self.flp.field.zeros(self.flp.OUTPUT_LEN)
+
+    def agg_update(self,
+                   _agg_param: None,
+                   agg_share: list[F],
+                   out_share: list[F]) -> list[F]:
+        return vec_add(agg_share, out_share)
+
+    def merge(self,
+              _agg_param: None,
+              agg_shares: list[list[F]]) -> list[F]:
+        agg = self.agg_init(None)
+        for agg_share in agg_shares:
+            agg = vec_add(agg, agg_share)
+        return agg
 
     # NOTE: This method is excerpted in the document, de-indented, as
     # figure {{prio3-agg-output}}. Its width should be limited to 69
@@ -256,9 +265,7 @@ class Prio3(
             _agg_param: None,
             agg_shares: list[list[F]],
             num_measurements: int) -> AggResult:
-        agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
-        for agg_share in agg_shares:
-            agg = vec_add(agg, agg_share)
+        agg = self.merge(None, agg_shares)
         return self.flp.decode(agg, num_measurements)
 
     # Auxiliary functions

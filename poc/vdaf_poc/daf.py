@@ -105,14 +105,30 @@ class Daf(
         pass
 
     @abstractmethod
-    def aggregate(
-            self,
-            agg_param: AggParam,
-            out_shares: list[OutShare]) -> AggShare:
+    def agg_init(self,
+                 agg_param: AggParam) -> AggShare:
         """
-        Merge a list of output shares into an aggregate share, encoded as a
-        byte string. This is called by an Aggregator after recovering a batch
-        of output shares.
+        Return an empty aggregate share.
+        """
+        pass
+
+    @abstractmethod
+    def agg_update(self,
+                   agg_param: AggParam,
+                   agg_share: AggShare,
+                   out_share: OutShare) -> AggShare:
+        """
+        Accumulate an output share into an aggregate share and return the
+        updated aggregate share.
+        """
+        pass
+
+    @abstractmethod
+    def merge(self,
+              agg_param: AggParam,
+              agg_shares: list[AggShare]) -> AggShare:
+        """
+        Merge a sequence of aggregate shares into a single aggregate share.
         """
         pass
 
@@ -165,8 +181,9 @@ def run_daf(
             "measurements and nonces lists have different lengths"
         )
 
-    out_shares: list[list[OutShare]]
-    out_shares = [[] for j in range(daf.SHARES)]
+    agg_shares: list[AggShare]
+    agg_shares = [daf.agg_init(agg_param)
+                  for _ in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.
@@ -174,19 +191,14 @@ def run_daf(
         (public_share, input_shares) = \
             daf.shard(ctx, measurement, nonce, rand)
 
-        # Each Aggregator prepares its input share for aggregation.
+        # Each Aggregator computes its output share from its input
+        # share and aggregates it.
         for j in range(daf.SHARES):
-            out_shares[j].append(
-                daf.prep(ctx, j, agg_param, nonce,
-                         public_share, input_shares[j]))
-
-    # Each Aggregator aggregates its output shares into an aggregate
-    # share and sends it to the Collector.
-    agg_shares = []
-    for j in range(daf.SHARES):
-        agg_share_j = daf.aggregate(agg_param,
-                                    out_shares[j])
-        agg_shares.append(agg_share_j)
+            out_share = daf.prep(ctx, j, agg_param, nonce,
+                                 public_share, input_shares[j])
+            agg_shares[j] = daf.agg_update(agg_param,
+                                           agg_shares[j],
+                                           out_share)
 
     # Collector unshards the aggregate result.
     num_measurements = len(measurements)
