@@ -399,7 +399,10 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
         # Reduce the output.
         if self.valid.EVAL_OUTPUT_LEN > 1:
-            (rand, query_rand) = front(self.valid.EVAL_OUTPUT_LEN, query_rand)
+            (rand, query_rand) = front(
+                self.valid.EVAL_OUTPUT_LEN,
+                query_rand,
+            )
             v = self.field(0)
             for (r, out_elem) in zip(rand, out):
                 v += r * out_elem
