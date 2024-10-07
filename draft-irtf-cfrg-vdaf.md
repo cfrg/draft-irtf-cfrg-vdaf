@@ -727,26 +727,42 @@ security considerations for DAFs and VDAFs.
 
 {::boilerplate bcp14-tagged}
 
-Algorithms in this document are written in Python 3. Type hints are used to
-define input and output types. The type variable `F` is used in signatures to
-signify any type that is a subclass of `Field`. A fatal error in a program
+Algorithms in this document are written in Python 3. A fatal error in a program
 (e.g., failure to parse one of the function parameters) is usually handled by
 raising an exception.
 
-A variable with type `bytes` is a byte string. This document defines several
-byte-string constants. When comprised of printable ASCII characters, they are
-written as Python 3 byte-string literals (e.g., `b'some constant string'`).
+Type hints are used to define input and output types.
 
-A global constant `VERSION` of type `int` is defined, which algorithms are
-free to use as desired. Its value SHALL be `12`.
+* The type variable `F` is used in signatures to signify any type that is a
+  subclass of `Field`.
+
+* `bytes` is a byte string.
+
+* `int` is an integer.
+
+* `Generic` is used in class definitions to explicitly declare type variables
+  of generic classes.
+
+* `Any` is the universal supertype, which admits values of any type.
+
+* `Optional[T]` is shorthand for `T | None`.
+
+* `Self` represents the containing class of the method definition in which it
+  appears.
+
+* `Sequence[T]` is either a list or tuple.
+
+This document defines several byte-string constants. When comprised of printable
+ASCII characters, they are written as Python 3 byte-string literals (e.g.,
+`b'some constant string'`).
+
+A global constant `VERSION` of type `int` is defined, which algorithms are free
+to use as desired. Its value SHALL be `12`.
 
 This document describes algorithms for multi-party computations in which the
 parties typically communicate over a network. Wherever a quantity is defined
 that must be be transmitted from one party to another, this document prescribes
 a particular encoding of that quantity as a byte string.
-
-> OPEN ISSUE It might be better to not be prescriptive about how quantities are
-> encoded on the wire. See issue #58.
 
 Some common functionalities:
 
