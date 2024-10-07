@@ -475,69 +475,40 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 # GADGETS
 #
 
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
 class Mul(Gadget[F]):
     ARITY = 2
     DEGREE = 2
 
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
     def eval(self, _field: type[F], inp: list[F]) -> F:
-        self.check_gadget_eval(inp)
+        self.check_gadget_eval(inp)  # REMOVE ME
         return inp[0] * inp[1]
 
-    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
         return poly_mul(field, inp_poly[0], inp_poly[1])
 
 
-class Range2(Gadget[F]):
-    """
-    Takes one input and computes x^2 - x.
-    """
-
-    ARITY = 1
-    DEGREE = 2
-
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
-    def eval(self, _field: type[F], inp: list[F]) -> F:
-        self.check_gadget_eval(inp)
-        return inp[0] * inp[0] - inp[0]
-
-    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
-        self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
-        output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
-        out = [field(0) for _ in range(output_poly_length)]
-        x = inp_poly[0]
-        x_squared = poly_mul(field, x, x)
-        for (i, x_i) in enumerate(x):
-            out[i] -= x_i
-        for (i, x_squared_i) in enumerate(x_squared):
-            out[i] += x_squared_i
-        return poly_strip(field, out)
-
-
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
 class PolyEval(Gadget[F]):
-    # Polynomial coefficients.
-    p: list[int]
-
     ARITY = 1
+    p: list[int]  # polynomial coefficients
 
     def __init__(self, p: list[int]):
         """
         Instantiate this gadget with the given polynomial.
         """
-
         # Strip leading zeros.
         for i in reversed(range(len(p))):
             if p[i] != 0:
                 p = p[:i+1]
                 break
-
         if len(p) < 1:
             raise ValueError('invalid polynomial: zero length')
 
@@ -549,7 +520,9 @@ class PolyEval(Gadget[F]):
         p = [field(coeff) for coeff in self.p]
         return poly_eval(field, p, inp[0])
 
-    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
         p = [field(coeff) for coeff in self.p]
         out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
@@ -562,25 +535,29 @@ class PolyEval(Gadget[F]):
         return poly_strip(field, out)
 
 
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
 class ParallelSum(Gadget[F]):
+    # REMOVE ME
     """
-    Evaluates a subcircuit (represented by a Gadget) on multiple inputs, adds
-    the results, and returns the sum.
+    Evaluates a subcircuit (represented by a Gadget) on multiple
+    inputs, adds the results, and returns the sum.
 
-    The `count` parameter determines how many times the `subcircuit` gadget will
-    be called. The arity of this gadget is equal to the arity of the subcircuit
-    multiplied by the `count` parameter, and the degree of this gadget is equal
-    to the degree of the subcircuit. Input wires will be sequentially mapped to
-    input wires of the subcircuit instances.
+    The `count` parameter determines how many times the `subcircuit`
+    gadget will be called. The arity of this gadget is equal to the
+    arity of the subcircuit multiplied by the `count` parameter, and
+    the degree of this gadget is equal to the degree of the
+    subcircuit. Input wires will be sequentially mapped to input
+    wires of the subcircuit instances.
 
-    Section 4.4 of the BBCGGI19 paper outlines an optimization for circuits
-    fitting the parallel sum form, wherein a sum of n identical subcircuits can
-    be replaced with sqrt(n) parallel sum gadgets, each adding up sqrt(n)
-    subcircuit results. This results in smaller proofs, since the proof size
-    linearly depends on both the arity of gadgets and the number of times
-    gadgets are called.
+    Section 4.4 of the BBCGGI19 paper outlines an optimization for
+    circuits fitting the parallel sum form, wherein a sum of n
+    identical subcircuits can be replaced with sqrt(n) parallel sum
+    gadgets, each adding up sqrt(n) subcircuit results. This results
+    in smaller proofs, since the proof size linearly depends on both
+    the arity of gadgets and the number of times gadgets are called.
     """
-
     subcircuit: Gadget[F]
     count: int
 
@@ -590,10 +567,6 @@ class ParallelSum(Gadget[F]):
         self.ARITY = subcircuit.ARITY * count
         self.DEGREE = subcircuit.DEGREE
 
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.check_gadget_eval(inp)  # REMOVE ME
         out = field(0)
@@ -606,7 +579,9 @@ class ParallelSum(Gadget[F]):
             )
         return out
 
-    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
         output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
         out_sum = [field(0) for _ in range(output_poly_length)]
@@ -626,12 +601,10 @@ class ParallelSum(Gadget[F]):
 # TYPES
 #
 
-class Count(
-        Valid[
-            int,  # Measurement, 0 or 1
-            int,  # AggResult
-            F,
-        ]):
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
+class Count(Valid[int, int, F]):
     GADGETS: list[Gadget[F]] = [Mul()]
     GADGET_CALLS = [1]
     MEAS_LEN = 1
@@ -645,52 +618,48 @@ class Count(
     def __init__(self, field: type[F]):
         self.field = field
 
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
     def eval(
             self,
             meas: list[F],
             joint_rand: list[F],
             _num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)  # REMOVE ME
-        squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
+        squared = self.GADGETS[0].eval(self.field,
+                                       [meas[0], meas[0]])
         return [squared - meas[0]]
 
     def encode(self, measurement: int) -> list[F]:
-        if measurement not in [0, 1]:
-            raise ValueError('measurement out of range')
+        if measurement not in range(2):  # REMOVE ME
+            raise ValueError('measurement out of range')  # REMOVE ME
         return [self.field(measurement)]
 
     def truncate(self, meas: list[F]) -> list[F]:
-        if len(meas) != 1:
-            raise ValueError('incorrect encoded measurement length')
+        if len(meas) != 1:  # REMOVE ME
+            raise ValueError('incorrect measurement length')  # REMOVE ME
         return meas
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
         return output[0].as_unsigned()
 
 
-class Histogram(
-        Valid[
-            int,        # Measurement, `range(length)`
-            list[int],  # AggResult
-            F,
-        ]):
-    # Class object for the field.
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
+class Histogram(Valid[int, list[int], F]):
+    EVAL_OUTPUT_LEN = 2
     field: type[F]
     length: int
     chunk_length: int
 
-    EVAL_OUTPUT_LEN = 2
-
-    def __init__(self, field: type[F], length: int, chunk_length: int):
+    def __init__(self,
+                 field: type[F],
+                 length: int,
+                 chunk_length: int):
         """
-        Instantiate an instance of the `Histogram` circuit with the given
-        length and chunk_length.
+        Instantiate an instance of the `Histogram` circuit with the
+        given `length` and `chunk_length`.
         """
-
+        # REMOVE ME
         if length <= 0:
             raise ValueError('invalid length')
         if chunk_length <= 0:
@@ -699,18 +668,13 @@ class Histogram(
         self.field = field
         self.length = length
         self.chunk_length = chunk_length
-        self.GADGETS: list[Gadget[F]] = [
-            ParallelSum(Mul(), chunk_length),
-        ]
-        self.GADGET_CALLS = [(length + chunk_length - 1) // chunk_length]
+        self.GADGETS = [ParallelSum(Mul(), chunk_length)]
+        self.GADGET_CALLS = [
+            (length + chunk_length - 1) // chunk_length]
         self.MEAS_LEN = self.length
         self.OUTPUT_LEN = self.length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
     def eval(
             self,
             meas: list[F],
@@ -750,11 +714,6 @@ class Histogram(
 
         return [range_check, sum_check]
 
-    # NOTE: The encode(), truncate(), and decode() methods are excerpted
-    # in the document, de-indented. Their width should be limited to 69
-    # columns after de-indenting, or 73 columns before de-indenting, to
-    # avoid warnings from xml2rfc.
-    # ===================================================================
     def encode(self, measurement: int) -> list[F]:
         encoded = [self.field(0)] * self.length
         encoded[measurement] = self.field(1)
@@ -767,7 +726,8 @@ class Histogram(
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [bucket_count.as_unsigned() for bucket_count in output]
+        return [bucket_count.as_unsigned()
+                for bucket_count in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         test_vec['length'] = int(self.length)
@@ -775,12 +735,11 @@ class Histogram(
         return ['length', 'chunk_length']
 
 
-class MultihotCountVec(
-        Valid[
-            list[int],  # Measurement, a vector of bits
-            list[int],  # AggResult, a vector of counts
-            F,
-        ]):
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
+class MultihotCountVec(Valid[list[int], list[int], F]):
+    # REMOVE ME
     """
     A validity circuit that checks each Client's measurement is a bit
     vector with at most `max_weight` number of 1s. We call the number
@@ -805,10 +764,8 @@ class MultihotCountVec(
     `count_vec` is the count vector. The result is zero if and only if
     the reported weight is equal to the true weight.
     """
-    # Class object for the field.
-    field: type[F]
-
     EVAL_OUTPUT_LEN = 2
+    field: type[F]
 
     def __init__(self,
                  field: type[F],
@@ -825,6 +782,7 @@ class MultihotCountVec(
             - `0 < max_weight` and `max_weight <= length`
             - `chunk_length > 0`
         """
+        # REMOVE ME
         if length <= 0:
             raise ValueError('invalid length')
         if max_weight <= 0 or max_weight > length:
@@ -836,7 +794,8 @@ class MultihotCountVec(
 
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
-        self.offset = self.field((2 ** self.bits_for_weight) - 1 - max_weight)
+        self.offset = self.field(
+            2**self.bits_for_weight - 1 - max_weight)
 
         # Make sure `offset + length` doesn't overflow the field
         # modulus. Otherwise we may not correctly compute the sum
@@ -852,16 +811,13 @@ class MultihotCountVec(
             ParallelSum(Mul(), chunk_length),
         ]
         self.GADGET_CALLS = [
-            (length + self.bits_for_weight + chunk_length - 1) // chunk_length
+            (length + self.bits_for_weight + chunk_length - 1)
+            // chunk_length
         ]
         self.MEAS_LEN = self.length + self.bits_for_weight
         self.OUTPUT_LEN = self.length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
     def eval(
             self,
             meas: list[F],
@@ -905,11 +861,6 @@ class MultihotCountVec(
 
         return [range_check, weight_check]
 
-    # NOTE: The encode(), truncate(), and decode() methods are excerpted
-    # in the document, de-indented. Their width should be limited to 69
-    # columns after de-indenting, or 73 columns before de-indenting, to
-    # avoid warnings from xml2rfc.
-    # ===================================================================
     def encode(self, measurement: list[int]) -> list[F]:
         if len(measurement) != self.length:
             raise ValueError('invalid Client measurement length')
@@ -934,7 +885,8 @@ class MultihotCountVec(
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [bucket_count.as_unsigned() for bucket_count in output]
+        return [bucket_count.as_unsigned() for
+                bucket_count in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         test_vec['length'] = int(self.length)
@@ -943,25 +895,26 @@ class MultihotCountVec(
         return ['length', 'max_weight', 'chunk_length']
 
 
-class SumVec(
-        Valid[
-            list[int],  # Measurement
-            list[int],  # AggResult
-            F,
-        ]):
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
+class SumVec(Valid[list[int], list[int], F]):
+    EVAL_OUTPUT_LEN = 1
     length: int
     bits: int
     chunk_length: int
-
     field: type[F]
-    EVAL_OUTPUT_LEN = 1
 
-    def __init__(self, field: type[F], length: int, bits: int, chunk_length: int):
+    def __init__(self,
+                 field: type[F],
+                 length: int,
+                 bits: int,
+                 chunk_length: int):
         """
-        Instantiate the `SumVec` circuit for measurements with `length`
-        elements, each in the range `[0, 2^bits)`.
+        Instantiate the `SumVec` circuit for measurements with
+        `length` elements, each in the range `[0, 2^bits)`.
         """
-
+        # REMOVE ME
         if 2 ** bits >= field.MODULUS:
             raise ValueError('bit size exceeds field modulus')
         if bits <= 0:
@@ -975,7 +928,7 @@ class SumVec(
         self.length = length
         self.bits = bits
         self.chunk_length = chunk_length
-        self.GADGETS: list[Gadget[F]] = [ParallelSum(Mul(), chunk_length)]
+        self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
             (length * bits + chunk_length - 1) // chunk_length
         ]
@@ -983,10 +936,6 @@ class SumVec(
         self.OUTPUT_LEN = length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-    # NOTE: This method is excerpted in the document, de-indented. Its
-    # width should be limited to 69 columns after de-indenting, or 73
-    # columns before de-indenting, to avoid warnings from xml2rfc.
-    # ===================================================================
     def eval(
             self,
             meas: list[F],
@@ -1020,23 +969,21 @@ class SumVec(
 
         return [out]
 
-    # NOTE: The encode(), truncate(), and decode() methods are excerpted
-    # in the document, de-indented. Their width should be limited to 69
-    # columns after de-indenting, or 73 columns before de-indenting, to
-    # avoid warnings from xml2rfc.
-    # ===================================================================
     def encode(self, measurement: list[int]) -> list[F]:
+        # REMOVE ME
         if len(measurement) != self.length:
             raise ValueError('incorrect measurement length')
 
         encoded = []
         for val in measurement:
+            # REMOVE ME
             if val not in range(2**self.bits):
                 raise ValueError(
                     'entry of measurement vector is out of range'
                 )
 
-            encoded += self.field.encode_into_bit_vector(val, self.bits)
+            encoded += self.field.encode_into_bit_vector(
+                val, self.bits)
         return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
@@ -1060,18 +1007,18 @@ class SumVec(
         return ['length', 'bits', 'chunk_length']
 
 
-class Sum(
-        Valid[
-            int,  # Measurement, `range(self.max_measurement + 1)`
-            int,  # AggResult
-            F,
-        ]):
-    field: type[F]
-    GADGETS: list[Gadget[F]] = [Range2()]
+# NOTE: This class is excerpted in the document, de-indented. Its
+# width should be limited to 69 columns to avoid warnings from
+# xml2rfc.
+# ===================================================================
+class Sum(Valid[int, int, F]):
+    GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
+    field: type[F]
 
     def __init__(self, field: type[F], max_measurement: int):
+        # REMOVE ME
         """
         A circuit that checks that the measurement is in range `[0,
         max_measurement]`. This is accomplished by encoding the
@@ -1101,10 +1048,10 @@ class Sum(
         """
         self.field = field
         self.bits = max_measurement.bit_length()
-        self.offset = self.field(2 ** self.bits - 1 - max_measurement)
+        self.offset = self.field(2**self.bits - 1 - max_measurement)
         self.max_measurement = max_measurement
-        if 2 ** self.bits >= self.field.MODULUS:
-            raise ValueError('bound exceeds field modulus')
+        if 2 ** self.bits >= self.field.MODULUS:  # REMOVE ME
+            raise ValueError('bound exceeds field modulus')  # REMOVE ME
 
         self.GADGET_CALLS = [2 * self.bits]
         self.MEAS_LEN = 2 * self.bits

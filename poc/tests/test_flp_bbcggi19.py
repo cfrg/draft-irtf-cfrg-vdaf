@@ -2,8 +2,8 @@ from typing import TypeVar
 
 from vdaf_poc.field import Field64, Field96, Field128, NttField
 from vdaf_poc.flp_bbcggi19 import (Count, FlpBBCGGI19, Histogram, Mul,
-                                   MultihotCountVec, PolyEval, Range2, Sum,
-                                   SumVec, Valid)
+                                   MultihotCountVec, PolyEval, Sum, SumVec,
+                                   Valid)
 from vdaf_poc.test_utils import TestFlpBBCGGI19
 
 Measurement = TypeVar("Measurement")
@@ -161,12 +161,12 @@ class TestMultiGadget(TestFlpBBCGGI19):
 
 
 class TestGadgets(TestFlpBBCGGI19):
-    def test_range2(self) -> None:
-        self.run_gadget_test(Range2(), Field128, 10)
+    def test_poly_eval_range2(self) -> None:
+        self.run_gadget_test(PolyEval([0, -1, 1]), Field128, 10)
 
-    def test_polyeval(self) -> None:
+    def test_poly_eval(self) -> None:
         self.run_gadget_test(
-            PolyEval([0, Field128.MODULUS - 23, 1, 3]),
+            PolyEval([0, -23, 1, 3]),
             Field128,
             10,
         )

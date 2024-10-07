@@ -16,9 +16,10 @@ class Field:
     ENCODED_SIZE: int
 
     def __init__(self, val: int):
-        assert val >= 0
         assert val < self.MODULUS
-        self.val = val
+        assert val > -self.MODULUS
+        # Interpret negative integers as additive inverses of field elements.
+        self.val = val % self.MODULUS
 
     @classmethod
     def zeros(cls, length: int) -> list[Self]:
