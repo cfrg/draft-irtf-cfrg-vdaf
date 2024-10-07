@@ -5195,10 +5195,51 @@ possible. See {{xof-vs-ro}} for more information.
 | FieldLeaf  | `Field255` ({{fields}}) |
 {: #idpf-bbcggi21-param title="Constants and type definitions for the IDPF of BBCGGI21."}
 
-### Key Generation
+### Overview
 
-> TODO Describe the construction in prose, beginning with a gentle introduction
-> to the high level idea.
+At a high level, the IDPF maps a key generator's input `(alpha, beta_1, ...,
+beta_BITS)` onto a binary tree with `BITS+1` levels, where each edge going from
+a parent node to a left child is labeled `0`, and each right edge is labeled
+`1`. Then each leaf node corresponds to a bit string of length `BITS`, where the
+labels on the path from the root to `x` contain the individual bits.  Finally,
+all nodes on the tree have have an assigned value, with the nodes on the path
+from the root to `alpha` having values `beta_1, ..., beta_BITS`, and all other
+nodes having value `0`.
+
+The IDPF construction now boils down to secret-sharing the values at each node
+of that tree in an efficient way. Note that explicitly representing the tree
+requires `O(2^BITS)` space, so the generator cannot just compute additive shares
+of it and send them to the two evaluators. Instead, the evaluators will
+re-generate shares of the tree using a XOF ({{xof}}). The basic observation is
+that if both evaluators have the same seed `s` of length `KEY_SIZE`, then
+expanding `s` using a XOF will also result in the same expansion. If we set the
+length of the XOF expansion to `2*KEY_SIZE`, it can then be split again into two
+seeds `s_l`, `s_r`, that can again serve as XOF seeds. Now if we view seeds as
+XOR-shares of integers, and if evaluators have the same seed at the root of the
+tree, then their expanded trees will form a secret-shared tree of zeros. The
+actual construction will additionally use a `convert` function before each
+expansion, which maps seeds into the appropriate output domain (see
+{{idpf-bbcggi21-helper-functions}}), generating a new seed for the next level in
+the process.
+
+The open task now is to ensure that evaluators have different seeds at nodes
+that lie on the path to `alpha`, while having the same seeds on all other nodes.
+This is done using so-called "correction words" that are conditionally added to
+the XOF output by both evaluators.  The condition here is a secret-shared bit,
+called a "control bit", which indicates whether the current node is on the path
+to `alpha` or not. On the path, the control bits add up to `1`, meaning only one
+evaluator will add the correction word to its XOF output. Off the path, either
+none or both evaluators add the correction word, and so the seeds at the next
+level stay the same.  What remains is to turn the -- now pseudorandom -- values
+on the path to `alpha` into the desired `beta` values. This is done by sending
+*value correction words* to the evaluators, which are chosen such that when
+added with the pseudorandom shares at the `i`th node on the path to `alpha`,
+they add up to shares of `beta_i`.
+
+In the following two sections we describe the algorithms for key generation in
+full detail.
+
+### Key Generation
 
 The description of the IDPF-key generation algorithm makes use of auxiliary
 functions `extend()` and `convert()` defined in
@@ -5287,8 +5328,6 @@ def gen(
 {: #idpf-bbcggi21-gen title="IDPF-key generation algorithm of BBCGGI21."}
 
 ### Key Evaluation
-
-> TODO Describe in prose how IDPF-key evaluation algorithm works.
 
 The description of the IDPF-evaluation algorithm makes use of auxiliary
 functions `extend()` and `convert()` defined in
