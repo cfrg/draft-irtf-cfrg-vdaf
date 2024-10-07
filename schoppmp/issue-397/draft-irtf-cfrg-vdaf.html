@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 7 April 2025</td>
+<td class="center">Expires 10 April 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-04" class="published">4 October 2024</time>
+<time datetime="2024-10-07" class="published">7 October 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-07">7 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-04-10">10 April 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 10 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -8344,7 +8344,7 @@ labeled <code>0</code>, and each right edge is labeled <code>1</code>. Then each
 of length <code>BITS</code>, where the labels on the path from the root to <code>x</code> contain the individual bits.
 Finally, all nodes on the tree have have an assigned value, with the nodes on the path from the
 root to <code>alpha</code> having values <code>beta_1, ..., beta_BITS</code>, and all other nodes having value <code>0</code>.<a href="#section-8.3.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.3.1-2">The IDPF construction now boils down to secret-sharing the node labels of that tree in an efficient way. Note
+<p id="section-8.3.1-2">The IDPF construction now boils down to secret-sharing the values at each node of that tree in an efficient way. Note
 that explicitly representing the tree requires <code>O(2^BITS)</code> space, so the generator cannot just
 compute additive shares of it and send them to the two evaluators. Instead, the evaluators will
 re-generate shares of the tree using an extendable output function (XOF). The basic observation is that if
