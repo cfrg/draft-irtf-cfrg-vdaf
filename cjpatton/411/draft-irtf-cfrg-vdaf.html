@@ -2055,92 +2055,114 @@ measurements.<a href="#section-1.1-24.4.1" class="pilcrow">¶</a></p>
 "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">Algorithms in this document are written in Python 3. Type hints are used to
-define input and output types. The type variable <code>F</code> is used in signatures to
-signify any type that is a subclass of <code>Field</code>. A fatal error in a program
+<p id="section-2-2">Algorithms in this document are written in Python 3. A fatal error in a program
 (e.g., failure to parse one of the function parameters) is usually handled by
 raising an exception.<a href="#section-2-2" class="pilcrow">¶</a></p>
-<p id="section-2-3">A variable with type <code>bytes</code> is a byte string. This document defines several
-byte-string constants. When comprised of printable ASCII characters, they are
-written as Python 3 byte-string literals (e.g., <code>b'some constant string'</code>).<a href="#section-2-3" class="pilcrow">¶</a></p>
-<p id="section-2-4">A global constant <code>VERSION</code> of type <code>int</code> is defined, which algorithms are
-free to use as desired. Its value <span class="bcp14">SHALL</span> be <code>12</code>.<a href="#section-2-4" class="pilcrow">¶</a></p>
-<p id="section-2-5">This document describes algorithms for multi-party computations in which the
-parties typically communicate over a network. Wherever a quantity is defined
-that must be be transmitted from one party to another, this document prescribes
-a particular encoding of that quantity as a byte string.<a href="#section-2-5" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-2-6.1">
-          <p id="section-2-6.1.1">OPEN ISSUE It might be better to not be prescriptive about how quantities are
-encoded on the wire. See issue #58.<a href="#section-2-6.1.1" class="pilcrow">¶</a></p>
+<p id="section-2-3">Type hints are used to define input and output types.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-4.1">
+          <p id="section-2-4.1.1">The type variable <code>F</code> is used in signatures to signify any type that is a
+subclass of <code>Field</code>.<a href="#section-2-4.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-4.2">
+          <p id="section-2-4.2.1"><code>bytes</code> is a byte string.<a href="#section-2-4.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-4.3">
+          <p id="section-2-4.3.1"><code>int</code> is an integer.<a href="#section-2-4.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-4.4">
+          <p id="section-2-4.4.1"><code>Generic</code> is used in class definitions to explicitly declare type variables
+of generic classes.<a href="#section-2-4.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-4.5">
+          <p id="section-2-4.5.1"><code>Any</code> is the universal supertype, which admits values of any type.<a href="#section-2-4.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-4.6">
+          <p id="section-2-4.6.1"><code>Optional[T]</code> is shorthand for <code>T | None</code>.<a href="#section-2-4.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-4.7">
+          <p id="section-2-4.7.1"><code>Self</code> represents the containing class of the method definition in which it
+appears.<a href="#section-2-4.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-4.8">
+          <p id="section-2-4.8.1"><code>Sequence[T]</code> is either a list or tuple.<a href="#section-2-4.8.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-2-7">Some common functionalities:<a href="#section-2-7" class="pilcrow">¶</a></p>
+<p id="section-2-5">This document defines several byte-string constants. When comprised of printable
+ASCII characters, they are written as Python 3 byte-string literals (e.g.,
+<code>b'some constant string'</code>).<a href="#section-2-5" class="pilcrow">¶</a></p>
+<p id="section-2-6">A global constant <code>VERSION</code> of type <code>int</code> is defined, which algorithms are free
+to use as desired. Its value <span class="bcp14">SHALL</span> be <code>12</code>.<a href="#section-2-6" class="pilcrow">¶</a></p>
+<p id="section-2-7">This document describes algorithms for multi-party computations in which the
+parties typically communicate over a network. Wherever a quantity is defined
+that must be be transmitted from one party to another, this document prescribes
+a particular encoding of that quantity as a byte string.<a href="#section-2-7" class="pilcrow">¶</a></p>
+<p id="section-2-8">Some common functionalities:<a href="#section-2-8" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2-8.1">
-          <p id="section-2-8.1.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of zero bytes. The length of
-<code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-8.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-2-9.1">
+          <p id="section-2-9.1.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of zero bytes. The length of
+<code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-9.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.2">
-          <p id="section-2-8.2.1"><code>gen_rand(len: int) -&gt; bytes</code> returns an array of random bytes generated by a
+        <li class="normal" id="section-2-9.2">
+          <p id="section-2-9.2.1"><code>gen_rand(len: int) -&gt; bytes</code> returns an array of random bytes generated by a
 cryptographically secure pseudorandom number generator (CSPRNG). The length
-of <code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-8.2.1" class="pilcrow">¶</a></p>
+of <code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-9.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.3">
-          <p id="section-2-8.3.1"><code>byte(int: int) -&gt; bytes</code> returns the representation of <code>int</code> as a byte
-string. The value of <code>int</code> <span class="bcp14">MUST</span> be in <code>[0,256)</code>.<a href="#section-2-8.3.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-9.3">
+          <p id="section-2-9.3.1"><code>byte(int: int) -&gt; bytes</code> returns the representation of <code>int</code> as a byte
+string. The value of <code>int</code> <span class="bcp14">MUST</span> be in <code>[0,256)</code>.<a href="#section-2-9.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.4">
-          <p id="section-2-8.4.1"><code>concat(parts: list[bytes]) -&gt; bytes</code> returns the concatenation of the input
-byte strings, i.e., <code>parts[0] || ... || parts[len(parts)-1]</code>.<a href="#section-2-8.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-9.4">
+          <p id="section-2-9.4.1"><code>concat(parts: list[bytes]) -&gt; bytes</code> returns the concatenation of the input
+byte strings, i.e., <code>parts[0] || ... || parts[len(parts)-1]</code>.<a href="#section-2-9.4.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.5">
-          <p id="section-2-8.5.1"><code>front(length: int, vec: list[Any]) -&gt; (list[Any], list[Any])</code> splits <code>vec</code>
+        <li class="normal" id="section-2-9.5">
+          <p id="section-2-9.5.1"><code>front(length: int, vec: list[Any]) -&gt; (list[Any], list[Any])</code> splits <code>vec</code>
 into two vectors, where the first vector is made up of the first <code>length</code>
-elements of the input. I.e., <code>(vec[:length], vec[length:])</code>.<a href="#section-2-8.5.1" class="pilcrow">¶</a></p>
+elements of the input. I.e., <code>(vec[:length], vec[length:])</code>.<a href="#section-2-9.5.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.6">
-          <p id="section-2-8.6.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
-and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-8.6.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-9.6">
+          <p id="section-2-9.6.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
+and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-9.6.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.7">
-          <p id="section-2-8.7.1"><code>to_be_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to big-endian
+        <li class="normal" id="section-2-9.7">
+          <p id="section-2-9.7.1"><code>to_be_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to big-endian
 bytes; its value <span class="bcp14">MUST</span> be at least <code>0</code> but less than <code>2**(8*length)</code>. Function
-<code>from_be_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-8.7.1" class="pilcrow">¶</a></p>
+<code>from_be_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-9.7.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.8">
-          <p id="section-2-8.8.1"><code>to_le_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to little-endian
+        <li class="normal" id="section-2-9.8">
+          <p id="section-2-9.8.1"><code>to_le_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to little-endian
 bytes; its value <span class="bcp14">MUST</span> be at least <code>0</code> but less than <code>2**(8*length)</code>. Function
-<code>from_le_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-8.8.1" class="pilcrow">¶</a></p>
+<code>from_le_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-9.8.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.9">
-          <p id="section-2-8.9.1"><code>next_power_of_2(n: int) -&gt; int</code> returns the smallest integer
-greater than or equal to <code>n</code> that is also a power of two.<a href="#section-2-8.9.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-9.9">
+          <p id="section-2-9.9.1"><code>next_power_of_2(n: int) -&gt; int</code> returns the smallest integer
+greater than or equal to <code>n</code> that is also a power of two.<a href="#section-2-9.9.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.10">
-          <p id="section-2-8.10.1"><code>additive_secret_share(vec: list[F], num_shares: int, field: type[F])
+        <li class="normal" id="section-2-9.10">
+          <p id="section-2-9.10.1"><code>additive_secret_share(vec: list[F], num_shares: int, field: type[F])
 -&gt; list[list[F]]</code> takes a vector of field elements and returns multiple
 vectors of the same length, such that they all add up to the input vector,
-and each proper subset of the vectors are indistinguishable from random.<a href="#section-2-8.10.1" class="pilcrow">¶</a></p>
+and each proper subset of the vectors are indistinguishable from random.<a href="#section-2-9.10.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.11">
-          <p id="section-2-8.11.1"><code>cast(typ: type, val: object) -&gt; object</code> returns the input value unchanged.
+        <li class="normal" id="section-2-9.11">
+          <p id="section-2-9.11.1"><code>cast(typ: type, val: object) -&gt; object</code> returns the input value unchanged.
 This is only present to assist with static analysis of the Python code.
 Type checkers will ignore the inferred type of the input value, and assume
-the output value has the given type.<a href="#section-2-8.11.1" class="pilcrow">¶</a></p>
+the output value has the given type.<a href="#section-2-9.11.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.12">
-          <p id="section-2-8.12.1"><code>range(stop)</code> or <code>range(start, stop[, step])</code> is the range function from the
+        <li class="normal" id="section-2-9.12">
+          <p id="section-2-9.12.1"><code>range(stop)</code> or <code>range(start, stop[, step])</code> is the range function from the
 Python standard library. The one-argument form returns the integers from zero
 (inclusive) to <code>stop</code>, exclusive. The two- and three-argument forms allow
 overriding the start of the range and overriding the step between successive
-output values.<a href="#section-2-8.12.1" class="pilcrow">¶</a></p>
+output values.<a href="#section-2-9.12.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-8.13">
-          <p id="section-2-8.13.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
+        <li class="normal" id="section-2-9.13">
+          <p id="section-2-9.13.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
 returns the coefficients of the lowest degree polynomial <code>p</code> for which
 <code>p(input[k]) == output[k]</code> for all <code>k</code>. Normally this will be computed using
-the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-8.13.1" class="pilcrow">¶</a></p>
+the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-9.13.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
@@ -4768,19 +4790,19 @@ def shard_without_joint_rand(
         seeds: list[bytes]) -&gt; tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_shares, seeds = front(self.SHARES - 1, seeds)
-    (k_prove,), seeds = front(1, seeds)
+    helper_shares, seeds = front(self.SHARES - 1, seeds)
+    (prove_seed,), seeds = front(1, seeds)
 
     # Shard the encoded measurement into shares.
     leader_meas_share = meas
     for j in range(self.SHARES - 1):
         leader_meas_share = vec_sub(
             leader_meas_share,
-            self.helper_meas_share(ctx, j + 1, k_helper_shares[j]),
+            self.helper_meas_share(ctx, j + 1, helper_shares[j]),
         )
 
     # Generate and shard each proof into shares.
-    prove_rands = self.prove_rands(ctx, k_prove)
+    prove_rands = self.prove_rands(ctx, prove_seed)
     leader_proofs_share = []
     for _ in range(self.PROOFS):
         prove_rand, prove_rands = front(
@@ -4792,7 +4814,7 @@ def shard_without_joint_rand(
             self.helper_proofs_share(
                 ctx,
                 j + 1,
-                k_helper_shares[j],
+                helper_shares[j],
             ),
         )
 
@@ -4806,7 +4828,7 @@ def shard_without_joint_rand(
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_shares[j],
+            helper_shares[j],
             None,
         ))
     return (None, input_shares)
@@ -4856,36 +4878,36 @@ def shard_with_joint_rand(
         seeds: list[bytes]) -&gt; tuple[
             Optional[list[bytes]],
             list[Prio3InputShare[F]]]:
-    k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
-    k_helper_shares = [
-        k_helper_seeds[i]
+    helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
+    helper_shares = [
+        helper_seeds[i]
         for i in range(0, (self.SHARES - 1) * 2, 2)
     ]
-    k_helper_blinds = [
-        k_helper_seeds[i]
+    helper_blinds = [
+        helper_seeds[i]
         for i in range(1, (self.SHARES - 1) * 2, 2)
     ]
-    (k_leader_blind, k_prove), seeds = front(2, seeds)
+    (leader_blind, prove_seed), seeds = front(2, seeds)
 
     # Shard the encoded measurement into shares and compute the
     # joint randomness parts.
     leader_meas_share = meas
-    k_joint_rand_parts = []
+    joint_rand_parts = []
     for j in range(self.SHARES - 1):
         helper_meas_share = self.helper_meas_share(
-            ctx, j + 1, k_helper_shares[j])
+            ctx, j + 1, helper_shares[j])
         leader_meas_share = vec_sub(leader_meas_share,
                                     helper_meas_share)
-        k_joint_rand_parts.append(self.joint_rand_part(
-            ctx, j + 1, k_helper_blinds[j],
+        joint_rand_parts.append(self.joint_rand_part(
+            ctx, j + 1, helper_blinds[j],
             helper_meas_share, nonce))
-    k_joint_rand_parts.insert(0, self.joint_rand_part(
-        ctx, 0, k_leader_blind, leader_meas_share, nonce))
+    joint_rand_parts.insert(0, self.joint_rand_part(
+        ctx, 0, leader_blind, leader_meas_share, nonce))
 
     # Generate the proof and shard it into proof shares.
-    prove_rands = self.prove_rands(ctx, k_prove)
+    prove_rands = self.prove_rands(ctx, prove_seed)
     joint_rands = self.joint_rands(
-        ctx, self.joint_rand_seed(ctx, k_joint_rand_parts))
+        ctx, self.joint_rand_seed(ctx, joint_rand_parts))
     leader_proofs_share = []
     for _ in range(self.PROOFS):
         prove_rand, prove_rands = front(
@@ -4903,7 +4925,7 @@ def shard_with_joint_rand(
             self.helper_proofs_share(
                 ctx,
                 j + 1,
-                k_helper_shares[j],
+                helper_shares[j],
             ),
         )
 
@@ -4914,14 +4936,14 @@ def shard_with_joint_rand(
     input_shares.append((
         leader_meas_share,
         leader_proofs_share,
-        k_leader_blind,
+        leader_blind,
     ))
     for j in range(self.SHARES - 1):
         input_shares.append((
-            k_helper_shares[j],
-            k_helper_blinds[j],
+            helper_shares[j],
+            helper_blinds[j],
         ))
-    return (k_joint_rand_parts, input_shares)
+    return (joint_rand_parts, input_shares)
 </pre>
 </div>
 <figcaption><a href="#figure-17" class="selfRef">Figure 17</a>:
@@ -5002,23 +5024,24 @@ def prep_init(
         input_share: Prio3InputShare[F]) -&gt; tuple[
             Prio3PrepState[F],
             Prio3PrepShare[F]]:
-    k_joint_rand_parts = public_share
-    (meas_share, proofs_share, k_blind) = \
+    joint_rand_parts = public_share
+    (meas_share, proofs_share, blind) = \
         self.expand_input_share(ctx, agg_id, input_share)
     out_share = self.flp.truncate(meas_share)
 
     # Compute the joint randomness.
     joint_rand: list[F] = []
-    k_corrected_joint_rand, k_joint_rand_part = None, None
+    corrected_joint_rand_seed, joint_rand_part = None, None
     if self.flp.JOINT_RAND_LEN &gt; 0:
-        assert k_blind is not None
-        assert k_joint_rand_parts is not None
-        k_joint_rand_part = self.joint_rand_part(
-            ctx, agg_id, k_blind, meas_share, nonce)
-        k_joint_rand_parts[agg_id] = k_joint_rand_part
-        k_corrected_joint_rand = self.joint_rand_seed(
-            ctx, k_joint_rand_parts)
-        joint_rands = self.joint_rands(ctx, k_corrected_joint_rand)
+        assert blind is not None
+        assert joint_rand_parts is not None
+        joint_rand_part = self.joint_rand_part(
+            ctx, agg_id, blind, meas_share, nonce)
+        joint_rand_parts[agg_id] = joint_rand_part
+        corrected_joint_rand_seed = self.joint_rand_seed(
+            ctx, joint_rand_parts)
+        joint_rands = self.joint_rands(
+            ctx, corrected_joint_rand_seed)
 
     # Query the measurement and proof share.
     query_rands = self.query_rands(verify_key, ctx, nonce)
@@ -5039,8 +5062,8 @@ def prep_init(
             self.SHARES,
         )
 
-    prep_state = (out_share, k_corrected_joint_rand)
-    prep_share = (verifiers_share, k_joint_rand_part)
+    prep_state = (out_share, corrected_joint_rand_seed)
+    prep_share = (verifiers_share, joint_rand_part)
     return (prep_state, prep_share)
 
 def prep_next(
@@ -5049,12 +5072,12 @@ def prep_next(
     prep_state: Prio3PrepState[F],
     prep_msg: Optional[bytes]
 ) -&gt; tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
-    k_joint_rand = prep_msg
-    (out_share, k_corrected_joint_rand) = prep_state
+    joint_rand_seed = prep_msg
+    (out_share, corrected_joint_rand_seed) = prep_state
 
     # If joint randomness was used, check that the value computed by
     # the Aggregators matches the value indicated by the Client.
-    if k_joint_rand != k_corrected_joint_rand:
+    if joint_rand_seed != corrected_joint_rand_seed:
         raise ValueError('joint randomness check failed')
 
     return out_share
@@ -5067,12 +5090,12 @@ def prep_shares_to_prep(
     # Unshard the verifier shares into the verifier message.
     verifiers = self.flp.field.zeros(
         self.flp.VERIFIER_LEN * self.PROOFS)
-    k_joint_rand_parts = []
-    for (verifiers_share, k_joint_rand_part) in prep_shares:
+    joint_rand_parts = []
+    for (verifiers_share, joint_rand_part) in prep_shares:
         verifiers = vec_add(verifiers, verifiers_share)
         if self.flp.JOINT_RAND_LEN &gt; 0:
-            assert k_joint_rand_part is not None
-            k_joint_rand_parts.append(k_joint_rand_part)
+            assert joint_rand_part is not None
+            joint_rand_parts.append(joint_rand_part)
 
     # Verify that each proof is well-formed and input is valid
     for _ in range(self.PROOFS):
@@ -5083,10 +5106,10 @@ def prep_shares_to_prep(
     # Combine the joint randomness parts computed by the
     # Aggregators into the true joint randomness seed. This is
     # used in the last step.
-    k_joint_rand = None
+    joint_rand_seed = None
     if self.flp.JOINT_RAND_LEN &gt; 0:
-        k_joint_rand = self.joint_rand_seed(ctx, k_joint_rand_parts)
-    return k_joint_rand
+        joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
+    return joint_rand_seed
 </pre>
 </div>
 <figcaption><a href="#figure-18" class="selfRef">Figure 18</a>:
@@ -5192,10 +5215,10 @@ def helper_meas_share(
         self,
         ctx: bytes,
         agg_id: int,
-        k_share: bytes) -&gt; list[F]:
+        share: bytes) -&gt; list[F]:
     return self.xof.expand_into_vec(
         self.flp.field,
-        k_share,
+        share,
         self.domain_separation_tag(USAGE_MEAS_SHARE, ctx),
         byte(agg_id),
         self.flp.MEAS_LEN,
@@ -5205,10 +5228,10 @@ def helper_proofs_share(
         self,
         ctx: bytes,
         agg_id: int,
-        k_share: bytes) -&gt; list[F]:
+        share: bytes) -&gt; list[F]:
     return self.xof.expand_into_vec(
         self.flp.field,
-        k_share,
+        share,
         self.domain_separation_tag(USAGE_PROOF_SHARE, ctx),
         byte(self.PROOFS) + byte(agg_id),
         self.flp.PROOF_LEN * self.PROOFS,
@@ -5224,18 +5247,18 @@ def expand_input_share(
             Optional[bytes]]:
     if agg_id &gt; 0:
         assert len(input_share) == 2
-        (k_share, k_blind) = input_share
-        meas_share = self.helper_meas_share(ctx, agg_id, k_share)
-        proofs_share = self.helper_proofs_share(ctx, agg_id, k_share)
+        (share, blind) = input_share
+        meas_share = self.helper_meas_share(ctx, agg_id, share)
+        proofs_share = self.helper_proofs_share(ctx, agg_id, share)
     else:
         assert len(input_share) == 3
-        (meas_share, proofs_share, k_blind) = input_share
-    return (meas_share, proofs_share, k_blind)
+        (meas_share, proofs_share, blind) = input_share
+    return (meas_share, proofs_share, blind)
 
-def prove_rands(self, ctx: bytes, k_prove: bytes) -&gt; list[F]:
+def prove_rands(self, ctx: bytes, prove_seed: bytes) -&gt; list[F]:
     return self.xof.expand_into_vec(
         self.flp.field,
-        k_prove,
+        prove_seed,
         self.domain_separation_tag(USAGE_PROVE_RANDOMNESS, ctx),
         byte(self.PROOFS),
         self.flp.PROVE_RAND_LEN * self.PROOFS,
@@ -5258,32 +5281,32 @@ def joint_rand_part(
         self,
         ctx: bytes,
         agg_id: int,
-        k_blind: bytes,
+        blind: bytes,
         meas_share: list[F],
         nonce: bytes) -&gt; bytes:
     return self.xof.derive_seed(
-        k_blind,
+        blind,
         self.domain_separation_tag(USAGE_JOINT_RAND_PART, ctx),
         byte(agg_id) + nonce + self.flp.field.encode_vec(meas_share),
     )
 
 def joint_rand_seed(self,
                     ctx: bytes,
-                    k_joint_rand_parts: list[bytes]) -&gt; bytes:
+                    joint_rand_parts: list[bytes]) -&gt; bytes:
     """Derive the joint randomness seed from its parts."""
     return self.xof.derive_seed(
         zeros(self.xof.SEED_SIZE),
         self.domain_separation_tag(USAGE_JOINT_RAND_SEED, ctx),
-        concat(k_joint_rand_parts),
+        concat(joint_rand_parts),
     )
 
 def joint_rands(self,
                 ctx: bytes,
-                k_joint_rand_seed: bytes) -&gt; list[F]:
+                joint_rand_seed: bytes) -&gt; list[F]:
     """Derive the joint randomness from its seed."""
     return self.xof.expand_into_vec(
         self.flp.field,
-        k_joint_rand_seed,
+        joint_rand_seed,
         self.domain_separation_tag(USAGE_JOINT_RANDOMNESS, ctx),
         byte(self.PROOFS),
         self.flp.JOINT_RAND_LEN * self.PROOFS,
@@ -5328,7 +5351,7 @@ parts as follows:<a href="#section-7.2.7.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.1-2">
 <pre>
 struct {
-    Prio3Seed k_joint_rand_parts[S * prio3.SHARES];
+    Prio3Seed joint_rand_parts[S * prio3.SHARES];
 } Prio3PublicShareWithJointRand;
 </pre><a href="#section-7.2.7.1-2" class="pilcrow">¶</a>
 </div>
@@ -5363,7 +5386,7 @@ as follows:<a href="#section-7.2.7.2-5" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.2-6">
 <pre>
 struct {
-    Prio3Seed k_share;
+    Prio3Seed share;
 } Prio3HelperShare;
 </pre><a href="#section-7.2.7.2-6" class="pilcrow">¶</a>
 </div>
@@ -5373,7 +5396,7 @@ follows:<a href="#section-7.2.7.2-7" class="pilcrow">¶</a></p>
 <pre>
 struct {
     Prio3LeaderShare inner;
-    Prio3Seed k_blind;
+    Prio3Seed blind;
 } Prio3LeaderShareWithJointRand;
 </pre><a href="#section-7.2.7.2-8" class="pilcrow">¶</a>
 </div>
@@ -5383,7 +5406,7 @@ follows:<a href="#section-7.2.7.2-9" class="pilcrow">¶</a></p>
 <pre>
 struct {
     Prio3HelperShare inner;
-    Prio3Seed k_blind;
+    Prio3Seed blind;
 } Prio3HelperShareWithJointRand;
 </pre><a href="#section-7.2.7.2-10" class="pilcrow">¶</a>
 </div>
@@ -5412,7 +5435,7 @@ struct {
     Prio3Field verifiers_share[
         F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
     ];
-    Prio3Seed k_joint_rand_part;
+    Prio3Seed joint_rand_part;
 } Prio3PrepShareWithJointRand;
 </pre><a href="#section-7.2.7.3-4" class="pilcrow">¶</a>
 </div>
@@ -5429,7 +5452,7 @@ the Aggregators:<a href="#section-7.2.7.4-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.4-2">
 <pre>
 struct {
-    Prio3Seed k_joint_rand;
+    Prio3Seed joint_rand;
 } Prio3PrepMessageWithJointRand;
 </pre><a href="#section-7.2.7.4-2" class="pilcrow">¶</a>
 </div>
@@ -6026,7 +6049,10 @@ def query(self,
 
     # Reduce the output.
     if self.valid.EVAL_OUTPUT_LEN &gt; 1:
-        (rand, query_rand) = front(self.valid.EVAL_OUTPUT_LEN, query_rand)
+        (rand, query_rand) = front(
+            self.valid.EVAL_OUTPUT_LEN,
+            query_rand,
+        )
         v = self.field(0)
         for (r, out_elem) in zip(rand, out):
             v += r * out_elem
@@ -7561,10 +7587,10 @@ def shard(
     idpf_rand, rand = front(self.idpf.RAND_SIZE, rand)
     seeds = [rand[i:i + l] for i in range(0, 3 * l, l)]
     corr_seed, seeds = front(2, seeds)
-    (k_shard,), seeds = front(1, seeds)
+    (shard_seed,), seeds = front(1, seeds)
 
     xof = self.xof(
-        k_shard,
+        shard_seed,
         self.domain_separation_tag(USAGE_SHARD_RAND, ctx),
         nonce,
     )
