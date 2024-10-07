@@ -123,7 +123,7 @@ class Field:
         return self.__class__((self.val * other.val) % self.MODULUS)
 
     def inv(self) -> Self:
-        return self ** (self.MODULUS - 2)
+        return self.__class__(invmod(self.val, self.MODULUS))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Field):
@@ -333,3 +333,34 @@ def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
         )
 
     return output
+
+
+def xgcd(a: int, b: int) -> tuple[int, int, int]:
+    """
+    Extended Euclidean algorithm.
+
+    Both a and b must be positive integers.
+    """
+    last_remainder, remainder = a, b
+    a, last_a, b, last_b = 0, 1, 1, 0
+    while remainder:
+        last_remainder, (quotient, remainder) = (
+            remainder,
+            divmod(last_remainder, remainder),
+        )
+        a, last_a = last_a - quotient * a, a
+        b, last_b = last_b - quotient * b, b
+    return last_remainder, last_a, last_b
+
+
+def invmod(x: int, p: int) -> int:
+    """
+    Modular multiplicative inverse.
+
+    Both x and p must be positive integers. Raises an exception if
+    x and p are coprime.
+    """
+    gcd, a, _b = xgcd(x, p)
+    if gcd != 1:
+        raise ValueError("Arguments to invmod were coprime")
+    return a % p
