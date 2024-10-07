@@ -373,11 +373,10 @@ literature. These protocols vary in their operational and security
 requirements, sometimes in subtle but consequential ways. This document
 therefore has two important goals:
 
- 1. Providing higher-level protocols like {{?DAP=I-D.draft-ietf-ppm-dap}} (RFC
-    EDITOR: remove this reference if not published before the current document)
-    with a simple, uniform interface for accessing privacy-preserving measurement
-    schemes, documenting relevant operational and security requirements, and
-    specifying constraints for safe usage:
+ 1. Providing higher-level protocols, like {{?DAP=I-D.draft-ietf-ppm-dap}},
+    with a simple, uniform interface for accessing privacy-preserving
+    measurement schemes, documenting relevant operational and security
+    requirements, and specifying constraints for safe usage:
 
     1. General patterns of communications among the various actors involved in
        the system (clients, aggregation servers, and the collector of the
@@ -1187,12 +1186,12 @@ the DAF: an aggregation parameter and a sequence of measurements. The procedure
 prescribes how a DAF is executed in a "benign" environment in which there is no
 adversary and the messages are passed among the protocol participants over
 secure point-to-point channels. In reality, these channels need to be
-instantiated by some "wrapper protocol", such as {{?DAP=I-D.draft-ietf-ppm-dap}},
-that realizes these channels using suitable cryptographic mechanisms. Moreover,
-some fraction of the Aggregators (or Clients) may be malicious and diverge from
-their prescribed behaviors. {{security}} describes the execution of the DAF in
-various adversarial environments and what properties the wrapper protocol needs
-to provide in each.
+instantiated by some "wrapper protocol", such as {{?DAP}}, that realizes these
+channels using suitable cryptographic mechanisms. Moreover, some fraction of
+the Aggregators (or Clients) may be malicious and diverge from their prescribed
+behaviors. {{security}} describes the execution of the DAF in various
+adversarial environments and what properties the wrapper protocol needs to
+provide in each.
 
 # Definition of VDAFs {#vdaf}
 
@@ -2192,10 +2191,12 @@ def expand_into_vec(cls,
 ### XofTurboShake128 {#xof-turboshake128}
 
 This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
-{{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. (RFC EDITOR: Update this
-reference to the RFC for draft-irtf-cfrg-kangarootwelve once published.) This
-XOF is RECOMMENDED for all use cases within VDAFs. The length of the domain
-separation string `dst` passed to XofTurboShake128 MUST NOT exceed 65535 bytes.
+{{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. This XOF is RECOMMENDED for
+all use cases within VDAFs. The length of the domain separation string `dst`
+passed to XofTurboShake128 MUST NOT exceed 65535 bytes.
+
+> TODO Update the {{!TurboSHAKE}} reference to point to the RFC instead of the
+> draft.
 
 ~~~ python
 class XofTurboShake128(Xof):
