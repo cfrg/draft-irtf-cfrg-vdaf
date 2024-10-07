@@ -90,8 +90,19 @@ class PingPongTester(
             "prep round {}".format(current_round+1),
         )
 
-    def aggregate(self, _agg_param: int, out_shares: list[int]) -> int:
-        return sum(out_shares)
+    def agg_init(self, _agg_param: int) -> int:
+        return 0
+
+    def agg_update(self,
+                   _agg_param: int,
+                   agg_share: int,
+                   agg_delta: int) -> int:
+        return agg_share + agg_delta
+
+    def merge(self,
+              _agg_param: int,
+              _agg_shares: list[int]) -> int:
+        raise NotImplementedError("not needed by tests")
 
     def unshard(self,
                 agg_param: int,

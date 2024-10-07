@@ -143,13 +143,30 @@ class Vdaf(
         pass
 
     @abstractmethod
-    def aggregate(self,
-                  agg_param: AggParam,
-                  out_shares: list[OutShare]) -> AggShare:
+    def agg_init(self,
+                 agg_param: AggParam) -> AggShare:
         """
-        Merge a list of output shares into an aggregate share, encoded as a byte
-        string. This is called by an aggregator after recovering a batch of
-        output shares.
+        Return an empty aggregate share.
+        """
+        pass
+
+    @abstractmethod
+    def agg_update(self,
+                   agg_param: AggParam,
+                   agg_share: AggShare,
+                   out_share: OutShare) -> AggShare:
+        """
+        Accumulate an output share into an aggregate share and return the
+        updated aggregate share.
+        """
+        pass
+
+    @abstractmethod
+    def merge(self,
+              agg_param: AggParam,
+              agg_shares: list[AggShare]) -> AggShare:
+        """
+        Merge a sequence of aggregate shares into a single aggregate share.
         """
         pass
 
@@ -258,7 +275,8 @@ def run_vdaf(
             "measurements and nonces lists have different lengths"
         )
 
-    out_shares = []
+    agg_shares = [vdaf.agg_init(agg_param)
+                  for _ in range(vdaf.SHARES)]
     for (nonce, measurement) in zip(nonces, measurements):
         assert len(nonce) == vdaf.NONCE_SIZE
 
@@ -279,7 +297,7 @@ def run_vdaf(
             prep_states.append(state)
             outbound_prep_shares.append(share)
 
-        # Aggregators recover their output shares.
+        # Aggregators complete preparation.
         for i in range(vdaf.ROUNDS - 1):
             prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                 agg_param,
@@ -292,28 +310,17 @@ def run_vdaf(
                 (prep_states[j], prep_share) = out
                 outbound_prep_shares.append(prep_share)
 
-        # The final outputs of the prepare phase are the output
-        # shares.
         prep_msg = vdaf.prep_shares_to_prep(ctx,
                                             agg_param,
                                             outbound_prep_shares)
 
-        outbound_out_shares = []
+        # Each Aggregator computes and aggregates its output share.
         for j in range(vdaf.SHARES):
             out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
-            outbound_out_shares.append(out_share)
-
-        out_shares.append(outbound_out_shares)
-
-    # Each Aggregator aggregates its output shares into an
-    # aggregate share. In a distributed VDAF computation, the
-    # aggregate shares are sent over the network.
-    agg_shares = []
-    for j in range(vdaf.SHARES):
-        out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
-        agg_shares.append(agg_share_j)
+            agg_shares[j] = vdaf.agg_update(agg_param,
+                                            agg_shares[j],
+                                            out_share)
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
