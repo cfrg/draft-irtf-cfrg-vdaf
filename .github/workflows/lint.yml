@@ -8,9 +8,14 @@ jobs:
   build:
     name: "Lint document"
     runs-on: ubuntu-latest
+    container:
+      image: docker://ghcr.io/martinthomson/i-d-template-action:latest
     steps:
     - name: "Checkout"
       uses: actions/checkout@v2
 
     - name: "Check for typos"
       run: "bash -c '! grep -r --file=rejected_dictionary draft-irtf-cfrg-vdaf.md poc'"
+
+    - name: "Check for warnings emitted by xml2rfc"
+      run: "bash -c 'make |& (! grep Warning)'"
