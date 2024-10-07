@@ -17,7 +17,7 @@ pip install git+https://github.com/cfrg/draft-irtf-cfrg-vdaf@draft-irtf-cfrg-vda
 where draft-irtf-cfrg-vdaf-11 is the desired tag. The installed package is called `vdaf_poc`:
 
 ```
-python -c "from vdaf_poc.field import Field64; print(Field64.MODULUS - 1)"
+python -c "from vdaf_poc.field import Field64; print(Field64.MODULUS)"
 ```
 
 ## Development
