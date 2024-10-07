@@ -1436,7 +1436,10 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                 <p id="section-toc.1-1.12.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-multiplication" class="internal xref">Multiplication</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.2">
-                <p id="section-toc.1-1.12.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-shims-for-generating-and-ve" class="internal xref">Shims for Generating and Verifying Proofs</a></p>
+                <p id="section-toc.1-1.12.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-polynomial-evaluation" class="internal xref">Polynomial Evaluation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.3">
+                <p id="section-toc.1-1.12.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-shims-for-generating-and-ve" class="internal xref">Shims for Generating and Verifying Proofs</a></p>
 </li>
             </ul>
 </li>
@@ -2368,7 +2371,7 @@ order to carry out the computation. In particular, it is <span class="bcp14">REC
 concrete instantiations of the <code>Daf</code> interface specify a method of encoding the
 <code>PublicShare</code>, <code>InputShare</code>, and <code>AggShare</code>.<a href="#section-4-8" class="pilcrow">¶</a></p>
 <p id="section-4-9">Each DAF is identified by a unique, 32-bit integer <code>ID</code>. Identifiers for each
-(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 22</a>.<a href="#section-4-9" class="pilcrow">¶</a></p>
+(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 21</a>.<a href="#section-4-9" class="pilcrow">¶</a></p>
 <div id="sec-daf-shard">
 <section id="section-4.1">
         <h3 id="name-sharding">
@@ -2836,7 +2839,7 @@ the computation. In particular, it is <span class="bcp14">RECOMMENDED</span> tha
 of the <code>Vdaf</code> interface specify a method of encoding the <code>PublicShare</code>,
 <code>InputShare</code>, <code>AggShare</code>, <code>PrepShare</code>, and <code>PrepMessage</code>.<a href="#section-5-7" class="pilcrow">¶</a></p>
 <p id="section-5-8">Each VDAF is identified by a unique, 32-bit integer <code>ID</code>. Identifiers for each
-(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 22</a>. The following
+(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 21</a>. The following
 method is defined for each VDAF specified in this document:<a href="#section-5-8" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5-9">
 <pre>
@@ -5907,7 +5910,7 @@ gadget.<a href="#section-7.3.3.1-2" class="pilcrow">¶</a></p>
 setting <code>g.wires[j][k]</code> to the value of the <code>j</code>-th wire for the <code>k</code>-th
 invocation of gadget <code>g</code>. This is accomplished by "wrapping" each gadget in a
 class <code>ProveGadget</code> that records the wire inputs. We list this class in
-<a href="#gadget-wrappers" class="auto internal xref">Appendix A.2</a>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
+<a href="#gadget-wrappers" class="auto internal xref">Appendix A.3</a>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.1-4">Next, we compute each of the "wire polynomials" for each gadget. The <code>j</code>-th
 wire polynomial is the lowest degree polynomial that evaluates to
 <code>g.wire[j][k]</code> at a sequence of fixed points. We obtain the gadget polynomial by
@@ -5997,7 +6000,7 @@ get the same result.<a href="#section-7.3.3.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-4">To start a gadget test, we first construct the (shares of the) wire polynomials
 just as the prover did. First, we record <code>g.wires[j][k]</code> as the input (share)
 of the <code>j</code>-th wire of the <code>k</code>-th invocation of the gadget. Again, this is
-accomplished by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix A.2</a>.
+accomplished by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix A.3</a>.
 This gadget also evaluates the gadget polynomial for each gadget invocation in order to produce the gadget's output. Then we
 compute the wire polynomials from the recorded values.<a href="#section-7.3.3.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-5">Next, we choose a random point <code>t</code> (parsed from the query randomness), evaluate
@@ -6290,114 +6293,62 @@ subtracts <code>offset</code> from the latter. It then checks if these two value
 equal. Since both the measurement and the measurement plus <code>offset</code> are in the
 same range of <code>range(2**bits)</code>, this means that the measurement itself is
 between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-7">The validity circuit checks that the input consists of ones and zeros. Its
-gadget, denoted <code>Range2</code>, is the degree-2, arity-1 gadget defined as<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-8">
+<p id="section-7.4.2-7">The circuit uses the polynomial-evaluation gadget specified in
+<a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x^2 - x</code>, which is equal to <code>0</code>
+if and only if <code>x</code> is in <code>[0, 2)</code>. The complete circuit is specified below.<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.4.2-8">
 <pre>
-def eval(self, _field: type[F], inp: list[F]) -&gt; F:
-    self.check_gadget_eval(inp)
-    return inp[0] * inp[0] - inp[0]
+class Sum(Valid[int, int, F]):
+    GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
+    JOINT_RAND_LEN = 0
+    OUTPUT_LEN = 1
+    field: type[F]
+
+    def __init__(self, field: type[F], max_measurement: int):
+        self.field = field
+        self.bits = max_measurement.bit_length()
+        self.offset = self.field(2 ** self.bits - 1 - max_measurement)
+        self.max_measurement = max_measurement
+        self.GADGET_CALLS = [2 * self.bits]
+        self.MEAS_LEN = 2 * self.bits
+        self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
+
+    def eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -&gt; list[F]:
+        shares_inv = self.field(num_shares).inv()
+
+        out = []
+        for b in meas:
+            out.append(self.GADGETS[0].eval(self.field, [b]))
+
+        range_check = self.offset * shares_inv + \
+            self.field.decode_from_bit_vector(meas[:self.bits]) - \
+            self.field.decode_from_bit_vector(meas[self.bits:])
+        out.append(range_check)
+        return out
+
+    def encode(self, measurement: int) -&gt; list[F]:
+        encoded = []
+        encoded += self.field.encode_into_bit_vector(
+            measurement,
+            self.bits
+        )
+        encoded += self.field.encode_into_bit_vector(
+            measurement + self.offset.as_unsigned(),
+            self.bits
+        )
+        return encoded
+
+    def truncate(self, meas: list[F]) -&gt; list[F]:
+        return [self.field.decode_from_bit_vector(meas[:self.bits])]
+
+    def decode(self, output: list[F], _num_measurements: int) -&gt; int:
+        return output[0].as_unsigned()
 </pre><a href="#section-7.4.2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.2-9">The <code>Sum</code> validity circuit is defined as<a href="#section-7.4.2-9" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-10">
-<pre>
-def eval(
-        self,
-        meas: list[F],
-        joint_rand: list[F],
-        num_shares: int) -&gt; list[F]:
-    shares_inv = self.field(num_shares).inv()
-
-    out = []
-    for b in meas:
-        out.append(self.GADGETS[0].eval(self.field, [b]))
-
-    range_check = self.offset * shares_inv + \
-        self.field.decode_from_bit_vector(meas[:self.bits]) - \
-        self.field.decode_from_bit_vector(meas[self.bits:])
-    out.append(range_check)
-    return out
-</pre><a href="#section-7.4.2-10" class="pilcrow">¶</a>
-</div>
-<span id="name-parameters-of-validity-circ"></span><table class="center" id="table-11">
-            <caption>
-<a href="#table-11" class="selfRef">Table 11</a>:
-<a href="#name-parameters-of-validity-circ" class="selfRef">Parameters of validity circuit Sum.</a>
-            </caption>
-<thead>
-              <tr>
-                <th class="text-left" rowspan="1" colspan="1">Parameter</th>
-                <th class="text-left" rowspan="1" colspan="1">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGETS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[Range2]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[2*bits]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>MEAS_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>2*bits</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>JOINT_RAND_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>0</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>EVAL_OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>2*bits + 1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Measurement</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code> in <code>range(max_measurement+1)</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>AggResult</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code>
-</td>
-              </tr>
-            </tbody>
-          </table>
 </section>
 </div>
 <div id="prio3sumvec">
@@ -6405,9 +6356,9 @@ def eval(
           <h4 id="name-prio3sumvec">
 <a href="#section-7.4.3" class="section-number selfRef">7.4.3. </a><a href="#name-prio3sumvec" class="section-name selfRef">Prio3SumVec</a>
           </h4>
-<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-12">
+<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-11">
             <caption>
-<a href="#table-12" class="selfRef">Table 12</a>:
+<a href="#table-11" class="selfRef">Table 11</a>:
 <a href="#name-parameters-for-prio3sumvec" class="selfRef">Parameters for Prio3SumVec.</a>
             </caption>
 <thead>
@@ -6562,10 +6513,10 @@ def eval(
     return [out]
 </pre><a href="#section-7.4.3-9" class="pilcrow">¶</a>
 </div>
-<span id="name-parameters-of-validity-circu"></span><table class="center" id="table-13">
+<span id="name-parameters-of-validity-circ"></span><table class="center" id="table-12">
             <caption>
-<a href="#table-13" class="selfRef">Table 13</a>:
-<a href="#name-parameters-of-validity-circu" class="selfRef">Parameters of validity circuit SumVec.</a>
+<a href="#table-12" class="selfRef">Table 12</a>:
+<a href="#name-parameters-of-validity-circ" class="selfRef">Parameters of validity circuit SumVec.</a>
             </caption>
 <thead>
               <tr>
@@ -6666,9 +6617,9 @@ proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-1"
           <h4 id="name-prio3histogram">
 <a href="#section-7.4.4" class="section-number selfRef">7.4.4. </a><a href="#name-prio3histogram" class="section-name selfRef">Prio3Histogram</a>
           </h4>
-<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-14">
+<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-13">
             <caption>
-<a href="#table-14" class="selfRef">Table 14</a>:
+<a href="#table-13" class="selfRef">Table 13</a>:
 <a href="#name-parameters-for-prio3histogr" class="selfRef">Parameters for Prio3Histogram.</a>
             </caption>
 <thead>
@@ -6793,10 +6744,10 @@ def eval(
 </div>
 <p id="section-7.4.4-9">Note that this circuit depends on the number of shares into which the
 measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7.4.4-9" class="pilcrow">¶</a></p>
-<span id="name-parameters-of-validity-circui"></span><table class="center" id="table-15">
+<span id="name-parameters-of-validity-circu"></span><table class="center" id="table-14">
             <caption>
-<a href="#table-15" class="selfRef">Table 15</a>:
-<a href="#name-parameters-of-validity-circui" class="selfRef">Parameters of validity circuit Histogram.</a>
+<a href="#table-14" class="selfRef">Table 14</a>:
+<a href="#name-parameters-of-validity-circu" class="selfRef">Parameters of validity circuit Histogram.</a>
             </caption>
 <thead>
               <tr>
@@ -6878,9 +6829,9 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
           <h4 id="name-prio3multihotcountvec">
 <a href="#section-7.4.5" class="section-number selfRef">7.4.5. </a><a href="#name-prio3multihotcountvec" class="section-name selfRef">Prio3MultihotCountVec</a>
           </h4>
-<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-16">
+<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-15">
             <caption>
-<a href="#table-16" class="selfRef">Table 16</a>:
+<a href="#table-15" class="selfRef">Table 15</a>:
 <a href="#name-parameters-for-prio3multiho" class="selfRef">Parameters for Prio3MultihotCountVec.</a>
             </caption>
 <thead>
@@ -7024,10 +6975,10 @@ def eval(
     return [range_check, weight_check]
 </pre><a href="#section-7.4.5-11" class="pilcrow">¶</a>
 </div>
-<span id="name-parameters-of-validity-circuit"></span><table class="center" id="table-17">
+<span id="name-parameters-of-validity-circui"></span><table class="center" id="table-16">
             <caption>
-<a href="#table-17" class="selfRef">Table 17</a>:
-<a href="#name-parameters-of-validity-circuit" class="selfRef">Parameters of validity circuit MultihotCountVec.</a>
+<a href="#table-16" class="selfRef">Table 16</a>:
+<a href="#name-parameters-of-validity-circui" class="selfRef">Parameters of validity circuit MultihotCountVec.</a>
             </caption>
 <thead>
               <tr>
@@ -7198,7 +7149,7 @@ field. We distinguish two types of fields: one for inner nodes (denoted
 instantiation of Poplar1 (<a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>) will use a much larger field for
 leaf nodes than for inner nodes. This is to ensure the IDPF is "extractable" as
 defined in <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Definition 1.)<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.1-3">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="auto internal xref">Table 18</a>.
+<p id="section-8.1-3">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="auto internal xref">Table 17</a>.
 In the remainder we write <code>Output</code> as shorthand for the type
 <code>list[list[FieldInner]] | list[list[FieldLeaf]]</code>. (This type
 denotes either a vector of inner node field elements or leaf node field
@@ -7288,9 +7239,9 @@ not include shared state across VDAF evaluations. In practice, of course, it
 will often be beneficial to expose a stateful API for IDPFs and carry the state
 across evaluations. See <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> for details.<a href="#section-8.1-7" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-b"></span><div id="idpf-param">
-<table class="center" id="table-18">
+<table class="center" id="table-17">
           <caption>
-<a href="#table-18" class="selfRef">Table 18</a>:
+<a href="#table-17" class="selfRef">Table 17</a>:
 <a href="#name-constants-and-types-defined-b" class="selfRef">Constants and types defined by a concrete IDPF.</a>
           </caption>
 <thead>
@@ -7393,13 +7344,13 @@ as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
 (<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of any <code>Idpf</code> (<a href="#idpf" class="auto internal xref">Section 8.1</a>) for which
 <code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and an implementation of <code>Xof</code>
 (<a href="#xof" class="auto internal xref">Section 6.2</a>). The associated constants and types required by the <code>Vdaf</code> interface
-are defined in <a href="#poplar1-param" class="auto internal xref">Table 19</a>. The methods required for sharding,
+are defined in <a href="#poplar1-param" class="auto internal xref">Table 18</a>. The methods required for sharding,
 preparation, aggregation, and unsharding are described in the remaining
-subsections. These methods make use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 20</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+subsections. These methods make use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 19</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-poplar1"></span><div id="poplar1-param">
-<table class="center" id="table-19">
+<table class="center" id="table-18">
           <caption>
-<a href="#table-19" class="selfRef">Table 19</a>:
+<a href="#table-18" class="selfRef">Table 18</a>:
 <a href="#name-vdaf-parameters-for-poplar1" class="selfRef">VDAF parameters for Poplar1.</a>
           </caption>
 <thead>
@@ -7531,9 +7482,9 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
         </table>
 </div>
 <span id="name-constants-used-by-poplar1"></span><div id="poplar1-const">
-<table class="center" id="table-20">
+<table class="center" id="table-19">
           <caption>
-<a href="#table-20" class="selfRef">Table 20</a>:
+<a href="#table-19" class="selfRef">Table 19</a>:
 <a href="#name-constants-used-by-poplar1" class="selfRef">Constants used by Poplar1.</a>
           </caption>
 <thead>
@@ -8286,15 +8237,15 @@ next. This would help reduce communication overhead.<a href="#section-8.2.6.6-7"
 Poplar1. The scheme gets its name from the name of the protocol of
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <p id="section-8.3-2">The constant and type definitions required by the <code>Idpf</code> interface are given in
-<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 21</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 20</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 <p id="section-8.3-3">Our IDPF requires an XOF for deriving the output shares, as well as a variety
 of other artifacts used internally. For performance reasons, we instantiate
 this object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>) wherever
 possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for more information.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-bbcggi21-param">
-<table class="center" id="table-21">
+<table class="center" id="table-20">
           <caption>
-<a href="#table-21" class="selfRef">Table 21</a>:
+<a href="#table-20" class="selfRef">Table 20</a>:
 <a href="#name-constants-and-type-definiti" class="selfRef">Constants and type definitions for the IDPF of BBCGGI21.</a>
           </caption>
 <thead>
@@ -9103,9 +9054,9 @@ Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pi
       </ul>
 <p id="section-10-7">The initial contents of the registry are as follows:<a href="#section-10-7" class="pilcrow">¶</a></p>
 <span id="name-verifiable-distributed-aggr"></span><div id="codepoints">
-<table class="center" id="table-22">
+<table class="center" id="table-21">
         <caption>
-<a href="#table-22" class="selfRef">Table 22</a>:
+<a href="#table-21" class="selfRef">Table 21</a>:
 <a href="#name-verifiable-distributed-aggr" class="selfRef">Verifiable Distributed Aggregation Function Identifiers Registry</a>
         </caption>
 <thead>
@@ -9347,7 +9298,9 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
         <h3 id="name-multiplication">
 <a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-multiplication" class="section-name selfRef">Multiplication</a>
         </h3>
-<div class="lang-python sourcecode" id="appendix-A.1-1">
+<p id="appendix-A.1-1">The multiplication gadget takes in a pair of inputs and multiplies them
+together. The degree of this circuit is <code>2</code>.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="appendix-A.1-2">
 <pre>
 class Mul(Gadget[F]):
     ARITY = 2
@@ -9356,18 +9309,72 @@ class Mul(Gadget[F]):
     def eval(self, _field: type[F], inp: list[F]) -&gt; F:
         return inp[0] * inp[1]
 
-    def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -&gt; list[F]:
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -&gt; list[F]:
         return poly_mul(field, inp_poly[0], inp_poly[1])
-</pre><a href="#appendix-A.1-1" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="gadget-poly-eval">
+<section id="appendix-A.2">
+        <h3 id="name-polynomial-evaluation">
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-polynomial-evaluation" class="section-name selfRef">Polynomial Evaluation</a>
+        </h3>
+<p id="appendix-A.2-1">The polynomial-evaluation gadget takes in a single input <code>x</code> and returns
+<code>p(x)</code>, where <code>p</code> is a polynomial specified by the user. Its degree is the same
+as <code>p</code>.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="appendix-A.2-2">
+<pre>
+class PolyEval(Gadget[F]):
+    ARITY = 1
+    p: list[int]  # polynomial coefficients
+
+    def __init__(self, p: list[int]):
+        """
+        Instantiate this gadget with the given polynomial.
+        """
+        # Strip leading zeros.
+        for i in reversed(range(len(p))):
+            if p[i] != 0:
+                p = p[:i+1]
+                break
+        if len(p) &lt; 1:
+            raise ValueError('invalid polynomial: zero length')
+
+        self.p = p
+        self.DEGREE = len(p) - 1
+
+    def eval(self, field: type[F], inp: list[F]) -&gt; F:
+        self.check_gadget_eval(inp)  # REMOVE ME
+        p = [field(coeff) for coeff in self.p]
+        return poly_eval(field, p, inp[0])
+
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -&gt; list[F]:
+        self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
+        p = [field(coeff) for coeff in self.p]
+        out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
+        out[0] = p[0]
+        x = inp_poly[0]
+        for i in range(1, len(p)):
+            for j in range(len(x)):
+                out[j] += p[i] * x[j]
+            x = poly_mul(field, x, inp_poly[0])
+        return poly_strip(field, out)
+
+</pre><a href="#appendix-A.2-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="gadget-wrappers">
-<section id="appendix-A.2">
+<section id="appendix-A.3">
         <h3 id="name-shims-for-generating-and-ve">
-<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-shims-for-generating-and-ve" class="section-name selfRef">Shims for Generating and Verifying Proofs</a>
+<a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a href="#name-shims-for-generating-and-ve" class="section-name selfRef">Shims for Generating and Verifying Proofs</a>
         </h3>
-<div class="breakable lang-python sourcecode" id="appendix-A.2-1">
+<div class="breakable lang-python sourcecode" id="appendix-A.3-1">
 <pre>
 class ProveGadget(Gadget[F]):
     """
@@ -9471,7 +9478,7 @@ class QueryGadget(Gadget[F]):
         wrapped_valid = deepcopy(valid)
         wrapped_valid.GADGETS = wrapped_gadgets
         return wrapped_valid
-</pre><a href="#appendix-A.2-1" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.3-1" class="pilcrow">¶</a>
 </div>
 </section>
 </div>

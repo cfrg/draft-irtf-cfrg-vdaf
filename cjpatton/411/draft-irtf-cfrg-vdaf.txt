@@ -153,7 +153,8 @@ Table of Contents
      11.2.  Informative References
    Appendix A.  FLP Gadgets
      A.1.  Multiplication
-     A.2.  Shims for Generating and Verifying Proofs
+     A.2.  Polynomial Evaluation
+     A.3.  Shims for Generating and Verifying Proofs
    Appendix B.  Test Vectors
      B.1.  Schema
        B.1.1.  Prio3Count
@@ -920,7 +921,7 @@ Table of Contents
    AggShare.
 
    Each DAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 22.
+   for each (V)DAF specified in this document are defined in Table 21.
 
 4.1.  Sharding
 
@@ -1257,7 +1258,7 @@ Table of Contents
    PrepMessage.
 
    Each VDAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 22.
+   for each (V)DAF specified in this document are defined in Table 21.
    The following method is defined for each VDAF specified in this
    document:
 
@@ -3713,7 +3714,7 @@ Table of Contents
    circuit, setting g.wires[j][k] to the value of the j-th wire for the
    k-th invocation of gadget g.  This is accomplished by "wrapping" each
    gadget in a class ProveGadget that records the wire inputs.  We list
-   this class in Appendix A.2.
+   this class in Appendix A.3.
 
    Next, we compute each of the "wire polynomials" for each gadget.  The
    j-th wire polynomial is the lowest degree polynomial that evaluates
@@ -3797,7 +3798,7 @@ Table of Contents
    polynomials just as the prover did.  First, we record g.wires[j][k]
    as the input (share) of the j-th wire of the k-th invocation of the
    gadget.  Again, this is accomplished by a wrapper gadget,
-   QueryGadget, listed in Appendix A.2.  This gadget also evaluates the
+   QueryGadget, listed in Appendix A.3.  This gadget also evaluates the
    gadget polynomial for each gadget invocation in order to produce the
    gadget's output.  Then we compute the wire polynomials from the
    recorded values.
@@ -4007,54 +4008,60 @@ Table of Contents
    measurement plus offset are in the same range of range(2**bits), this
    means that the measurement itself is between 0 and max_measurement.
 
-   The validity circuit checks that the input consists of ones and
-   zeros.  Its gadget, denoted Range2, is the degree-2, arity-1 gadget
-   defined as
+   The circuit uses the polynomial-evaluation gadget specified in
+   Appendix A.2.  The polynomial is p(x) = x^2 - x, which is equal to 0
+   if and only if x is in [0, 2).  The complete circuit is specified
+   below.
 
-   def eval(self, _field: type[F], inp: list[F]) -> F:
-       self.check_gadget_eval(inp)
-       return inp[0] * inp[0] - inp[0]
+  class Sum(Valid[int, int, F]):
+      GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
+      JOINT_RAND_LEN = 0
+      OUTPUT_LEN = 1
+      field: type[F]
 
-   The Sum validity circuit is defined as
+      def __init__(self, field: type[F], max_measurement: int):
+          self.field = field
+          self.bits = max_measurement.bit_length()
+          self.offset = self.field(2 ** self.bits - 1 - max_measurement)
+          self.max_measurement = max_measurement
+          self.GADGET_CALLS = [2 * self.bits]
+          self.MEAS_LEN = 2 * self.bits
+          self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
 
-   def eval(
-           self,
-           meas: list[F],
-           joint_rand: list[F],
-           num_shares: int) -> list[F]:
-       shares_inv = self.field(num_shares).inv()
+      def eval(
+              self,
+              meas: list[F],
+              joint_rand: list[F],
+              num_shares: int) -> list[F]:
+          shares_inv = self.field(num_shares).inv()
 
-       out = []
-       for b in meas:
-           out.append(self.GADGETS[0].eval(self.field, [b]))
+          out = []
+          for b in meas:
+              out.append(self.GADGETS[0].eval(self.field, [b]))
 
-       range_check = self.offset * shares_inv + \
-           self.field.decode_from_bit_vector(meas[:self.bits]) - \
-           self.field.decode_from_bit_vector(meas[self.bits:])
-       out.append(range_check)
-       return out
+          range_check = self.offset * shares_inv + \
+              self.field.decode_from_bit_vector(meas[:self.bits]) - \
+              self.field.decode_from_bit_vector(meas[self.bits:])
+          out.append(range_check)
+          return out
 
-           +=================+=================================+
-           | Parameter       | Value                           |
-           +=================+=================================+
-           | GADGETS         | [Range2]                        |
-           +-----------------+---------------------------------+
-           | GADGET_CALLS    | [2*bits]                        |
-           +-----------------+---------------------------------+
-           | MEAS_LEN        | 2*bits                          |
-           +-----------------+---------------------------------+
-           | OUTPUT_LEN      | 1                               |
-           +-----------------+---------------------------------+
-           | JOINT_RAND_LEN  | 0                               |
-           +-----------------+---------------------------------+
-           | EVAL_OUTPUT_LEN | 2*bits + 1                      |
-           +-----------------+---------------------------------+
-           | Measurement     | int in range(max_measurement+1) |
-           +-----------------+---------------------------------+
-           | AggResult       | int                             |
-           +-----------------+---------------------------------+
+      def encode(self, measurement: int) -> list[F]:
+          encoded = []
+          encoded += self.field.encode_into_bit_vector(
+              measurement,
+              self.bits
+          )
+          encoded += self.field.encode_into_bit_vector(
+              measurement + self.offset.as_unsigned(),
+              self.bits
+          )
+          return encoded
 
-               Table 11: Parameters of validity circuit Sum.
+      def truncate(self, meas: list[F]) -> list[F]:
+          return [self.field.decode_from_bit_vector(meas[:self.bits])]
+
+      def decode(self, output: list[F], _num_measurements: int) -> int:
+          return output[0].as_unsigned()
 
 7.4.3.  Prio3SumVec
 
@@ -4072,7 +4079,7 @@ Table of Contents
               |           | (Section 6.2.1)                |
               +-----------+--------------------------------+
 
-                  Table 12: Parameters for Prio3SumVec.
+                  Table 11: Parameters for Prio3SumVec.
 
    This instance of Prio3 supports summing a vector of integers.  It has
    three parameters, length, bits, and chunk_length.  Each measurement
@@ -4209,7 +4216,7 @@ Table of Contents
          | AggResult       | list[int]                          |
          +-----------------+------------------------------------+
 
-             Table 13: Parameters of validity circuit SumVec.
+             Table 12: Parameters of validity circuit SumVec.
 
 7.4.3.1.  Selection of ParallelSum chunk length
 
@@ -4244,7 +4251,7 @@ Table of Contents
                 |           | (Section 6.2.1)             |
                 +-----------+-----------------------------+
 
-                  Table 14: Parameters for Prio3Histogram.
+                  Table 13: Parameters for Prio3Histogram.
 
    This instance of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
@@ -4355,7 +4362,7 @@ Table of Contents
     | AggResult       | list[int]                                     |
     +-----------------+-----------------------------------------------+
 
-            Table 15: Parameters of validity circuit Histogram.
+            Table 14: Parameters of validity circuit Histogram.
 
 7.4.5.  Prio3MultihotCountVec
 
@@ -4372,7 +4379,7 @@ Table of Contents
           | Xof       | XofTurboShake128 (Section 6.2.1)        |
           +-----------+-----------------------------------------+
 
-              Table 16: Parameters for Prio3MultihotCountVec.
+              Table 15: Parameters for Prio3MultihotCountVec.
 
    For this instance of Prio3, each measurement is a vector of ones and
    zeros, where the number of ones is bounded.  This provides a
@@ -4497,7 +4504,7 @@ Table of Contents
          | AggResult       | list[int]                          |
          +-----------------+------------------------------------+
 
-                 Table 17: Parameters of validity circuit
+                 Table 16: Parameters of validity circuit
                             MultihotCountVec.
 
 8.  Poplar1
@@ -4594,7 +4601,7 @@ Table of Contents
    "extractable" as defined in [BBCGGI21], Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 18.  In the remainder we write Output as shorthand for the type
+   Table 17.  In the remainder we write Output as shorthand for the type
    list[list[FieldInner]] | list[list[FieldLeaf]].  (This type denotes
    either a vector of inner node field elements or leaf node field
    elements.)  The scheme is comprised of the following algorithms:
@@ -4701,7 +4708,7 @@ Table of Contents
    | FieldVec    | Alias of list[FieldInner] | list[FieldLeaf]        |
    +-------------+----------------------------------------------------+
 
-        Table 18: Constants and types defined by a concrete IDPF.
+        Table 17: Constants and types defined by a concrete IDPF.
 
 8.1.1.  Encoding inputs as indices
 
@@ -4736,10 +4743,10 @@ Table of Contents
    interface (Section 5).  It is defined in terms of any Idpf
    (Section 8.1) for which SHARES == 2 and VALUE_LEN == 2 and an
    implementation of Xof (Section 6.2).  The associated constants and
-   types required by the Vdaf interface are defined in Table 19.  The
+   types required by the Vdaf interface are defined in Table 18.  The
    methods required for sharding, preparation, aggregation, and
    unsharding are described in the remaining subsections.  These methods
-   make use of constants defined in Table 20.
+   make use of constants defined in Table 19.
 
        +=================+========================================+
        | Parameter       | Value                                  |
@@ -4776,7 +4783,7 @@ Table of Contents
        | PrepMessage     | Optional[FieldVec]                     |
        +-----------------+----------------------------------------+
 
-                  Table 19: VDAF parameters for Poplar1.
+                  Table 18: VDAF parameters for Poplar1.
 
                     +========================+=======+
                     | Variable               | Value |
@@ -4790,7 +4797,7 @@ Table of Contents
                     | USAGE_VERIFY_RAND: int | 4     |
                     +------------------------+-------+
 
-                       Table 20: Constants used by
+                       Table 19: Constants used by
                                  Poplar1.
 
 8.2.1.  Sharding
@@ -5402,7 +5409,7 @@ Table of Contents
    [BBCGGI21].
 
    The constant and type definitions required by the Idpf interface are
-   given in Table 21.
+   given in Table 20.
 
    Our IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
@@ -5425,7 +5432,7 @@ Table of Contents
                    | FieldLeaf  | Field255 (Table 3)   |
                    +------------+----------------------+
 
-                        Table 21: Constants and type
+                        Table 20: Constants and type
                         definitions for the IDPF of
                                  BBCGGI21.
 
@@ -6147,7 +6154,7 @@ Table of Contents
      | 0xFFFFFFFF    | Use                   |      |               |
      +---------------+-----------------------+------+---------------+
 
-          Table 22: Verifiable Distributed Aggregation Function
+          Table 21: Verifiable Distributed Aggregation Function
                            Identifiers Registry
 
    (RFC EDITOR: Please replace "RFC XXXX" above with the RFC number
@@ -6312,6 +6319,9 @@ Appendix A.  FLP Gadgets
 
 A.1.  Multiplication
 
+   The multiplication gadget takes in a pair of inputs and multiplies
+   them together.  The degree of this circuit is 2.
+
    class Mul(Gadget[F]):
        ARITY = 2
        DEGREE = 2
@@ -6319,10 +6329,56 @@ A.1.  Multiplication
        def eval(self, _field: type[F], inp: list[F]) -> F:
            return inp[0] * inp[1]
 
-       def eval_poly(self, field: type[F], inp_poly: list[list[F]]) -> list[F]:
+       def eval_poly(self,
+                     field: type[F],
+                     inp_poly: list[list[F]]) -> list[F]:
            return poly_mul(field, inp_poly[0], inp_poly[1])
 
-A.2.  Shims for Generating and Verifying Proofs
+A.2.  Polynomial Evaluation
+
+   The polynomial-evaluation gadget takes in a single input x and
+   returns p(x), where p is a polynomial specified by the user.  Its
+   degree is the same as p.
+
+   class PolyEval(Gadget[F]):
+       ARITY = 1
+       p: list[int]  # polynomial coefficients
+
+       def __init__(self, p: list[int]):
+           """
+           Instantiate this gadget with the given polynomial.
+           """
+           # Strip leading zeros.
+           for i in reversed(range(len(p))):
+               if p[i] != 0:
+                   p = p[:i+1]
+                   break
+           if len(p) < 1:
+               raise ValueError('invalid polynomial: zero length')
+
+           self.p = p
+           self.DEGREE = len(p) - 1
+
+       def eval(self, field: type[F], inp: list[F]) -> F:
+           self.check_gadget_eval(inp)  # REMOVE ME
+           p = [field(coeff) for coeff in self.p]
+           return poly_eval(field, p, inp[0])
+
+       def eval_poly(self,
+                     field: type[F],
+                     inp_poly: list[list[F]]) -> list[F]:
+           self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
+           p = [field(coeff) for coeff in self.p]
+           out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
+           out[0] = p[0]
+           x = inp_poly[0]
+           for i in range(1, len(p)):
+               for j in range(len(x)):
+                   out[j] += p[i] * x[j]
+               x = poly_mul(field, x, inp_poly[0])
+           return poly_strip(field, out)
+
+A.3.  Shims for Generating and Verifying Proofs
 
    class ProveGadget(Gadget[F]):
        """
