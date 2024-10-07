@@ -152,16 +152,17 @@ class Prio3(
 
         # Compute the joint randomness.
         joint_rand: list[F] = []
-        corrected_joint_rand, joint_rand_part = None, None
+        corrected_joint_rand_seed, joint_rand_part = None, None
         if self.flp.JOINT_RAND_LEN > 0:
             assert blind is not None
             assert joint_rand_parts is not None
             joint_rand_part = self.joint_rand_part(
                 ctx, agg_id, blind, meas_share, nonce)
             joint_rand_parts[agg_id] = joint_rand_part
-            corrected_joint_rand = self.joint_rand_seed(
+            corrected_joint_rand_seed = self.joint_rand_seed(
                 ctx, joint_rand_parts)
-            joint_rands = self.joint_rands(ctx, corrected_joint_rand)
+            joint_rands = self.joint_rands(
+                ctx, corrected_joint_rand_seed)
 
         # Query the measurement and proof share.
         query_rands = self.query_rands(verify_key, ctx, nonce)
@@ -182,7 +183,7 @@ class Prio3(
                 self.SHARES,
             )
 
-        prep_state = (out_share, corrected_joint_rand)
+        prep_state = (out_share, corrected_joint_rand_seed)
         prep_share = (verifiers_share, joint_rand_part)
         return (prep_state, prep_share)
 
@@ -192,12 +193,12 @@ class Prio3(
         prep_state: Prio3PrepState[F],
         prep_msg: Optional[bytes]
     ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
-        joint_rand = prep_msg
-        (out_share, corrected_joint_rand) = prep_state
+        joint_rand_seed = prep_msg
+        (out_share, corrected_joint_rand_seed) = prep_state
 
         # If joint randomness was used, check that the value computed by
         # the Aggregators matches the value indicated by the Client.
-        if joint_rand != corrected_joint_rand:
+        if joint_rand_seed != corrected_joint_rand_seed:
             raise ValueError('joint randomness check failed')
 
         return out_share
@@ -226,10 +227,10 @@ class Prio3(
         # Combine the joint randomness parts computed by the
         # Aggregators into the true joint randomness seed. This is
         # used in the last step.
-        joint_rand = None
+        joint_rand_seed = None
         if self.flp.JOINT_RAND_LEN > 0:
-            joint_rand = self.joint_rand_seed(ctx, joint_rand_parts)
-        return joint_rand
+            joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
+        return joint_rand_seed
 
     # NOTE: This method is excerpted in the document, de-indented, as
     # figure {{prio3-out2agg}}. Its width should be limited to 69 columns
@@ -339,7 +340,7 @@ class Prio3(
             helper_seeds[i]
             for i in range(1, (self.SHARES - 1) * 2, 2)
         ]
-        (leader_blind, prove), seeds = front(2, seeds)
+        (leader_blind, prove_seed), seeds = front(2, seeds)
 
         # Shard the encoded measurement into shares and compute the
         # joint randomness parts.
@@ -357,7 +358,7 @@ class Prio3(
             ctx, 0, leader_blind, leader_meas_share, nonce))
 
         # Generate the proof and shard it into proof shares.
-        prove_rands = self.prove_rands(ctx, prove)
+        prove_rands = self.prove_rands(ctx, prove_seed)
         joint_rands = self.joint_rands(
             ctx, self.joint_rand_seed(ctx, joint_rand_parts))
         leader_proofs_share = []
@@ -448,10 +449,10 @@ class Prio3(
             (meas_share, proofs_share, blind) = input_share
         return (meas_share, proofs_share, blind)
 
-    def prove_rands(self, ctx: bytes, prove: bytes) -> list[F]:
+    def prove_rands(self, ctx: bytes, prove_seed: bytes) -> list[F]:
         return self.xof.expand_into_vec(
             self.flp.field,
-            prove,
+            prove_seed,
             self.domain_separation_tag(USAGE_PROVE_RANDOMNESS, ctx),
             byte(self.PROOFS),
             self.flp.PROVE_RAND_LEN * self.PROOFS,
@@ -542,10 +543,10 @@ class Prio3(
         return encoded
 
     def test_vec_encode_prep_msg(self, prep_message: Optional[bytes]) -> bytes:
-        joint_rand = prep_message
+        joint_rand_seed = prep_message
         encoded = bytes()
-        if joint_rand is not None:  # joint randomness used
-            encoded += joint_rand
+        if joint_rand_seed is not None:  # joint randomness used
+            encoded += joint_rand_seed
         return encoded
 
 
