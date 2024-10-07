@@ -131,9 +131,10 @@ Table of Contents
        8.2.5.  Unsharding
        8.2.6.  Message Serialization
      8.3.  The IDPF scheme of BBCGGI21
-       8.3.1.  Key Generation
-       8.3.2.  Key Evaluation
-       8.3.3.  Auxiliary Functions
+       8.3.1.  Overview
+       8.3.2.  Key Generation
+       8.3.3.  Key Evaluation
+       8.3.4.  Auxiliary Functions
      8.4.  Instantiation
    9.  Security Considerations
      9.1.  Requirements for the Verification Key
@@ -150,16 +151,16 @@ Table of Contents
    11. References
      11.1.  Normative References
      11.2.  Informative References
-   Appendix A.  Acknowledgments
-   Appendix B.  FLP Gadget Wrappers
-   Appendix C.  Test Vectors
-     C.1.  Schema
-       C.1.1.  Prio3Count
-       C.1.2.  Prio3Sum
-       C.1.3.  Prio3SumVec
-       C.1.4.  Prio3Histogram
-       C.1.5.  Prio3MultihotCountVec
-       C.1.6.  Poplar1
+   Appendix A.  FLP Gadget Wrappers
+   Appendix B.  Test Vectors
+     B.1.  Schema
+       B.1.1.  Prio3Count
+       B.1.2.  Prio3Sum
+       B.1.3.  Prio3SumVec
+       B.1.4.  Prio3Histogram
+       B.1.5.  Prio3MultihotCountVec
+       B.1.6.  Poplar1
+   Acknowledgments
    Authors' Addresses
 
 1.  Introduction
@@ -670,16 +671,34 @@ Table of Contents
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   Algorithms in this document are written in Python 3.  Type hints are
-   used to define input and output types.  The type variable F is used
-   in signatures to signify any type that is a subclass of Field.  A
-   fatal error in a program (e.g., failure to parse one of the function
-   parameters) is usually handled by raising an exception.
+   Algorithms in this document are written in Python 3.  A fatal error
+   in a program (e.g., failure to parse one of the function parameters)
+   is usually handled by raising an exception.
 
-   A variable with type bytes is a byte string.  This document defines
-   several byte-string constants.  When comprised of printable ASCII
-   characters, they are written as Python 3 byte-string literals (e.g.,
-   b'some constant string').
+   Type hints are used to define input and output types.
+
+   *  The type variable F is used in signatures to signify any type that
+      is a subclass of Field.
+
+   *  bytes is a byte string.
+
+   *  int is an integer.
+
+   *  Generic is used in class definitions to explicitly declare type
+      variables of generic classes.
+
+   *  Any is the universal supertype, which admits values of any type.
+
+   *  Optional[T] is shorthand for T | None.
+
+   *  Self represents the containing class of the method definition in
+      which it appears.
+
+   *  Sequence[T] is either a list or tuple.
+
+   This document defines several byte-string constants.  When comprised
+   of printable ASCII characters, they are written as Python 3 byte-
+   string literals (e.g., b'some constant string').
 
    A global constant VERSION of type int is defined, which algorithms
    are free to use as desired.  Its value SHALL be 12.
@@ -689,9 +708,6 @@ Table of Contents
    quantity is defined that must be be transmitted from one party to
    another, this document prescribes a particular encoding of that
    quantity as a byte string.
-
-      OPEN ISSUE It might be better to not be prescriptive about how
-      quantities are encoded on the wire.  See issue #58.
 
    Some common functionalities:
 
@@ -2414,7 +2430,7 @@ Table of Contents
    suitable for any validity circuit is specified in Section 7.3.
    Finally, instantiations of Prio3 for various types of measurements
    are specified in Section 7.4.  Test vectors can be found in
-   Appendix C.
+   Appendix B.
 
 7.1.  Fully Linear Proof (FLP) Systems
 
@@ -2807,19 +2823,19 @@ Table of Contents
            seeds: list[bytes]) -> tuple[
                Optional[list[bytes]],
                list[Prio3InputShare[F]]]:
-       k_helper_shares, seeds = front(self.SHARES - 1, seeds)
-       (k_prove,), seeds = front(1, seeds)
+       helper_shares, seeds = front(self.SHARES - 1, seeds)
+       (prove_seed,), seeds = front(1, seeds)
 
        # Shard the encoded measurement into shares.
        leader_meas_share = meas
        for j in range(self.SHARES - 1):
            leader_meas_share = vec_sub(
                leader_meas_share,
-               self.helper_meas_share(ctx, j + 1, k_helper_shares[j]),
+               self.helper_meas_share(ctx, j + 1, helper_shares[j]),
            )
 
        # Generate and shard each proof into shares.
-       prove_rands = self.prove_rands(ctx, k_prove)
+       prove_rands = self.prove_rands(ctx, prove_seed)
        leader_proofs_share = []
        for _ in range(self.PROOFS):
            prove_rand, prove_rands = front(
@@ -2831,7 +2847,7 @@ Table of Contents
                self.helper_proofs_share(
                    ctx,
                    j + 1,
-                   k_helper_shares[j],
+                   helper_shares[j],
                ),
            )
 
@@ -2845,7 +2861,7 @@ Table of Contents
        ))
        for j in range(self.SHARES - 1):
            input_shares.append((
-               k_helper_shares[j],
+               helper_shares[j],
                None,
            ))
        return (None, input_shares)
@@ -2883,36 +2899,36 @@ Table of Contents
            seeds: list[bytes]) -> tuple[
                Optional[list[bytes]],
                list[Prio3InputShare[F]]]:
-       k_helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
-       k_helper_shares = [
-           k_helper_seeds[i]
+       helper_seeds, seeds = front((self.SHARES - 1) * 2, seeds)
+       helper_shares = [
+           helper_seeds[i]
            for i in range(0, (self.SHARES - 1) * 2, 2)
        ]
-       k_helper_blinds = [
-           k_helper_seeds[i]
+       helper_blinds = [
+           helper_seeds[i]
            for i in range(1, (self.SHARES - 1) * 2, 2)
        ]
-       (k_leader_blind, k_prove), seeds = front(2, seeds)
+       (leader_blind, prove_seed), seeds = front(2, seeds)
 
        # Shard the encoded measurement into shares and compute the
        # joint randomness parts.
        leader_meas_share = meas
-       k_joint_rand_parts = []
+       joint_rand_parts = []
        for j in range(self.SHARES - 1):
            helper_meas_share = self.helper_meas_share(
-               ctx, j + 1, k_helper_shares[j])
+               ctx, j + 1, helper_shares[j])
            leader_meas_share = vec_sub(leader_meas_share,
                                        helper_meas_share)
-           k_joint_rand_parts.append(self.joint_rand_part(
-               ctx, j + 1, k_helper_blinds[j],
+           joint_rand_parts.append(self.joint_rand_part(
+               ctx, j + 1, helper_blinds[j],
                helper_meas_share, nonce))
-       k_joint_rand_parts.insert(0, self.joint_rand_part(
-           ctx, 0, k_leader_blind, leader_meas_share, nonce))
+       joint_rand_parts.insert(0, self.joint_rand_part(
+           ctx, 0, leader_blind, leader_meas_share, nonce))
 
        # Generate the proof and shard it into proof shares.
-       prove_rands = self.prove_rands(ctx, k_prove)
+       prove_rands = self.prove_rands(ctx, prove_seed)
        joint_rands = self.joint_rands(
-           ctx, self.joint_rand_seed(ctx, k_joint_rand_parts))
+           ctx, self.joint_rand_seed(ctx, joint_rand_parts))
        leader_proofs_share = []
        for _ in range(self.PROOFS):
            prove_rand, prove_rands = front(
@@ -2930,7 +2946,7 @@ Table of Contents
                self.helper_proofs_share(
                    ctx,
                    j + 1,
-                   k_helper_shares[j],
+                   helper_shares[j],
                ),
            )
 
@@ -2941,14 +2957,14 @@ Table of Contents
        input_shares.append((
            leader_meas_share,
            leader_proofs_share,
-           k_leader_blind,
+           leader_blind,
        ))
        for j in range(self.SHARES - 1):
            input_shares.append((
-               k_helper_shares[j],
-               k_helper_blinds[j],
+               helper_shares[j],
+               helper_blinds[j],
            ))
-       return (k_joint_rand_parts, input_shares)
+       return (joint_rand_parts, input_shares)
 
      Figure 17: Sharding an encoded measurement with joint randomness.
 
@@ -3025,23 +3041,24 @@ Table of Contents
            input_share: Prio3InputShare[F]) -> tuple[
                Prio3PrepState[F],
                Prio3PrepShare[F]]:
-       k_joint_rand_parts = public_share
-       (meas_share, proofs_share, k_blind) = \
+       joint_rand_parts = public_share
+       (meas_share, proofs_share, blind) = \
            self.expand_input_share(ctx, agg_id, input_share)
        out_share = self.flp.truncate(meas_share)
 
        # Compute the joint randomness.
        joint_rand: list[F] = []
-       k_corrected_joint_rand, k_joint_rand_part = None, None
+       corrected_joint_rand_seed, joint_rand_part = None, None
        if self.flp.JOINT_RAND_LEN > 0:
-           assert k_blind is not None
-           assert k_joint_rand_parts is not None
-           k_joint_rand_part = self.joint_rand_part(
-               ctx, agg_id, k_blind, meas_share, nonce)
-           k_joint_rand_parts[agg_id] = k_joint_rand_part
-           k_corrected_joint_rand = self.joint_rand_seed(
-               ctx, k_joint_rand_parts)
-           joint_rands = self.joint_rands(ctx, k_corrected_joint_rand)
+           assert blind is not None
+           assert joint_rand_parts is not None
+           joint_rand_part = self.joint_rand_part(
+               ctx, agg_id, blind, meas_share, nonce)
+           joint_rand_parts[agg_id] = joint_rand_part
+           corrected_joint_rand_seed = self.joint_rand_seed(
+               ctx, joint_rand_parts)
+           joint_rands = self.joint_rands(
+               ctx, corrected_joint_rand_seed)
 
        # Query the measurement and proof share.
        query_rands = self.query_rands(verify_key, ctx, nonce)
@@ -3062,8 +3079,8 @@ Table of Contents
                self.SHARES,
            )
 
-       prep_state = (out_share, k_corrected_joint_rand)
-       prep_share = (verifiers_share, k_joint_rand_part)
+       prep_state = (out_share, corrected_joint_rand_seed)
+       prep_share = (verifiers_share, joint_rand_part)
        return (prep_state, prep_share)
 
    def prep_next(
@@ -3072,12 +3089,12 @@ Table of Contents
        prep_state: Prio3PrepState[F],
        prep_msg: Optional[bytes]
    ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
-       k_joint_rand = prep_msg
-       (out_share, k_corrected_joint_rand) = prep_state
+       joint_rand_seed = prep_msg
+       (out_share, corrected_joint_rand_seed) = prep_state
 
        # If joint randomness was used, check that the value computed by
        # the Aggregators matches the value indicated by the Client.
-       if k_joint_rand != k_corrected_joint_rand:
+       if joint_rand_seed != corrected_joint_rand_seed:
            raise ValueError('joint randomness check failed')
 
        return out_share
@@ -3090,12 +3107,12 @@ Table of Contents
        # Unshard the verifier shares into the verifier message.
        verifiers = self.flp.field.zeros(
            self.flp.VERIFIER_LEN * self.PROOFS)
-       k_joint_rand_parts = []
-       for (verifiers_share, k_joint_rand_part) in prep_shares:
+       joint_rand_parts = []
+       for (verifiers_share, joint_rand_part) in prep_shares:
            verifiers = vec_add(verifiers, verifiers_share)
            if self.flp.JOINT_RAND_LEN > 0:
-               assert k_joint_rand_part is not None
-               k_joint_rand_parts.append(k_joint_rand_part)
+               assert joint_rand_part is not None
+               joint_rand_parts.append(joint_rand_part)
 
        # Verify that each proof is well-formed and input is valid
        for _ in range(self.PROOFS):
@@ -3106,10 +3123,10 @@ Table of Contents
        # Combine the joint randomness parts computed by the
        # Aggregators into the true joint randomness seed. This is
        # used in the last step.
-       k_joint_rand = None
+       joint_rand_seed = None
        if self.flp.JOINT_RAND_LEN > 0:
-           k_joint_rand = self.joint_rand_seed(ctx, k_joint_rand_parts)
-       return k_joint_rand
+           joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
+       return joint_rand_seed
 
                   Figure 18: Preparation state for Prio3.
 
@@ -3176,10 +3193,10 @@ Table of Contents
            self,
            ctx: bytes,
            agg_id: int,
-           k_share: bytes) -> list[F]:
+           share: bytes) -> list[F]:
        return self.xof.expand_into_vec(
            self.flp.field,
-           k_share,
+           share,
            self.domain_separation_tag(USAGE_MEAS_SHARE, ctx),
            byte(agg_id),
            self.flp.MEAS_LEN,
@@ -3189,10 +3206,10 @@ Table of Contents
            self,
            ctx: bytes,
            agg_id: int,
-           k_share: bytes) -> list[F]:
+           share: bytes) -> list[F]:
        return self.xof.expand_into_vec(
            self.flp.field,
-           k_share,
+           share,
            self.domain_separation_tag(USAGE_PROOF_SHARE, ctx),
            byte(self.PROOFS) + byte(agg_id),
            self.flp.PROOF_LEN * self.PROOFS,
@@ -3208,18 +3225,18 @@ Table of Contents
                Optional[bytes]]:
        if agg_id > 0:
            assert len(input_share) == 2
-           (k_share, k_blind) = input_share
-           meas_share = self.helper_meas_share(ctx, agg_id, k_share)
-           proofs_share = self.helper_proofs_share(ctx, agg_id, k_share)
+           (share, blind) = input_share
+           meas_share = self.helper_meas_share(ctx, agg_id, share)
+           proofs_share = self.helper_proofs_share(ctx, agg_id, share)
        else:
            assert len(input_share) == 3
-           (meas_share, proofs_share, k_blind) = input_share
-       return (meas_share, proofs_share, k_blind)
+           (meas_share, proofs_share, blind) = input_share
+       return (meas_share, proofs_share, blind)
 
-   def prove_rands(self, ctx: bytes, k_prove: bytes) -> list[F]:
+   def prove_rands(self, ctx: bytes, prove_seed: bytes) -> list[F]:
        return self.xof.expand_into_vec(
            self.flp.field,
-           k_prove,
+           prove_seed,
            self.domain_separation_tag(USAGE_PROVE_RANDOMNESS, ctx),
            byte(self.PROOFS),
            self.flp.PROVE_RAND_LEN * self.PROOFS,
@@ -3242,32 +3259,32 @@ Table of Contents
            self,
            ctx: bytes,
            agg_id: int,
-           k_blind: bytes,
+           blind: bytes,
            meas_share: list[F],
            nonce: bytes) -> bytes:
        return self.xof.derive_seed(
-           k_blind,
+           blind,
            self.domain_separation_tag(USAGE_JOINT_RAND_PART, ctx),
            byte(agg_id) + nonce + self.flp.field.encode_vec(meas_share),
        )
 
    def joint_rand_seed(self,
                        ctx: bytes,
-                       k_joint_rand_parts: list[bytes]) -> bytes:
+                       joint_rand_parts: list[bytes]) -> bytes:
        """Derive the joint randomness seed from its parts."""
        return self.xof.derive_seed(
            zeros(self.xof.SEED_SIZE),
            self.domain_separation_tag(USAGE_JOINT_RAND_SEED, ctx),
-           concat(k_joint_rand_parts),
+           concat(joint_rand_parts),
        )
 
    def joint_rands(self,
                    ctx: bytes,
-                   k_joint_rand_seed: bytes) -> list[F]:
+                   joint_rand_seed: bytes) -> list[F]:
        """Derive the joint randomness from its seed."""
        return self.xof.expand_into_vec(
            self.flp.field,
-           k_joint_rand_seed,
+           joint_rand_seed,
            self.domain_separation_tag(USAGE_JOINT_RANDOMNESS, ctx),
            byte(self.PROOFS),
            self.flp.JOINT_RAND_LEN * self.PROOFS,
@@ -3300,7 +3317,7 @@ Table of Contents
    encodes the joint randomness parts as follows:
 
    struct {
-       Prio3Seed k_joint_rand_parts[S * prio3.SHARES];
+       Prio3Seed joint_rand_parts[S * prio3.SHARES];
    } Prio3PublicShareWithJointRand;
 
 7.2.7.2.  Input share
@@ -3329,7 +3346,7 @@ Table of Contents
    as follows:
 
    struct {
-       Prio3Seed k_share;
+       Prio3Seed share;
    } Prio3HelperShare;
 
    When joint randomness is used, the Leader's input share is structured
@@ -3337,7 +3354,7 @@ Table of Contents
 
    struct {
        Prio3LeaderShare inner;
-       Prio3Seed k_blind;
+       Prio3Seed blind;
    } Prio3LeaderShareWithJointRand;
 
    Finally, when joint randomness is used, the Helpers' shares are
@@ -3345,7 +3362,7 @@ Table of Contents
 
    struct {
        Prio3HelperShare inner;
-       Prio3Seed k_blind;
+       Prio3Seed blind;
    } Prio3HelperShareWithJointRand;
 
 7.2.7.3.  Prep Share
@@ -3366,7 +3383,7 @@ Table of Contents
        Prio3Field verifiers_share[
            F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
        ];
-       Prio3Seed k_joint_rand_part;
+       Prio3Seed joint_rand_part;
    } Prio3PrepShareWithJointRand;
 
 7.2.7.4.  Prep Message
@@ -3376,7 +3393,7 @@ Table of Contents
    seed computed by the Aggregators:
 
    struct {
-       Prio3Seed k_joint_rand;
+       Prio3Seed joint_rand;
    } Prio3PrepMessageWithJointRand;
 
 7.2.7.5.  Aggregation
@@ -3708,7 +3725,7 @@ Table of Contents
    circuit, setting g.wires[j][k] to the value of the j-th wire for the
    k-th invocation of gadget g.  This is accomplished by "wrapping" each
    gadget in a class ProveGadget that records the wire inputs.  We list
-   this class in Appendix B.
+   this class in Appendix A.
 
    Next, we compute each of the "wire polynomials" for each gadget.  The
    j-th wire polynomial is the lowest degree polynomial that evaluates
@@ -3792,7 +3809,7 @@ Table of Contents
    polynomials just as the prover did.  First, we record g.wires[j][k]
    as the input (share) of the j-th wire of the k-th invocation of the
    gadget.  Again, this is accomplished by a wrapper gadget,
-   QueryGadget, listed in Appendix B.  This gadget also evaluates the
+   QueryGadget, listed in Appendix A.  This gadget also evaluates the
    gadget polynomial for each gadget invocation in order to produce the
    gadget's output.  Then we compute the wire polynomials from the
    recorded values.
@@ -3820,7 +3837,10 @@ Table of Contents
 
        # Reduce the output.
        if self.valid.EVAL_OUTPUT_LEN > 1:
-           (rand, query_rand) = front(self.valid.EVAL_OUTPUT_LEN, query_rand)
+           (rand, query_rand) = front(
+               self.valid.EVAL_OUTPUT_LEN,
+               query_rand,
+           )
            v = self.field(0)
            for (r, out_elem) in zip(rand, out):
                v += r * out_elem
@@ -3903,7 +3923,7 @@ Table of Contents
    measurement types.  Each is determined by a field (Section 6.1), a
    validity circuit (Section 7.3.2), an XOF (Section 6.2). and the
    number of proofs to generate and verify.  Test vectors for each can
-   be found in Appendix C.
+   be found in Appendix B.
 
 7.4.1.  Prio3Count
 
@@ -4601,7 +4621,7 @@ Table of Contents
    defined in Section 8.1; a concrete instantiation is given
    Section 8.3.  The Poplar1 VDAF is defined in Section 8.2 in terms of
    a generic IDPF.  Finally, a concrete instantiation of Poplar1 is
-   specified in Section 8.4; test vectors can be found in Appendix C.
+   specified in Section 8.4; test vectors can be found in Appendix B.
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
@@ -4862,10 +4882,10 @@ Table of Contents
        idpf_rand, rand = front(self.idpf.RAND_SIZE, rand)
        seeds = [rand[i:i + l] for i in range(0, 3 * l, l)]
        corr_seed, seeds = front(2, seeds)
-       (k_shard,), seeds = front(1, seeds)
+       (shard_seed,), seeds = front(1, seeds)
 
        xof = self.xof(
-           k_shard,
+           shard_seed,
            self.domain_separation_tag(USAGE_SHARD_RAND, ctx),
            nonce,
        )
@@ -5458,13 +5478,59 @@ Table of Contents
                         definitions for the IDPF of
                                  BBCGGI21.
 
-8.3.1.  Key Generation
+8.3.1.  Overview
 
-      TODO Describe the construction in prose, beginning with a gentle
-      introduction to the high level idea.
+   At a high level, the IDPF maps a key generator's input (alpha,
+   beta_1, ..., beta_BITS) onto a binary tree with BITS+1 levels, where
+   each edge going from a parent node to a left child is labeled 0, and
+   each right edge is labeled 1.  Then each leaf node corresponds to a
+   bit string of length BITS, where the labels on the path from the root
+   to x contain the individual bits.  Finally, all nodes on the tree
+   have have an assigned value, with the nodes on the path from the root
+   to alpha having values beta_1, ..., beta_BITS, and all other nodes
+   having value 0.
+
+   The IDPF construction now boils down to secret-sharing the values at
+   each node of that tree in an efficient way.  Note that explicitly
+   representing the tree requires O(2^BITS) space, so the generator
+   cannot just compute additive shares of it and send them to the two
+   evaluators.  Instead, the evaluators will re-generate shares of the
+   tree using a XOF (Section 6.2).  The basic observation is that if
+   both evaluators have the same seed s of length KEY_SIZE, then
+   expanding s using a XOF will also result in the same expansion.  If
+   we set the length of the XOF expansion to 2*KEY_SIZE, it can then be
+   split again into two seeds s_l, s_r, that can again serve as XOF
+   seeds.  Now if we view seeds as XOR-shares of integers, and if
+   evaluators have the same seed at the root of the tree, then their
+   expanded trees will form a secret-shared tree of zeros.  The actual
+   construction will additionally use a convert function before each
+   expansion, which maps seeds into the appropriate output domain (see
+   Section 8.3.4), generating a new seed for the next level in the
+   process.
+
+   The open task now is to ensure that evaluators have different seeds
+   at nodes that lie on the path to alpha, while having the same seeds
+   on all other nodes.  This is done using so-called "correction words"
+   that are conditionally added to the XOF output by both evaluators.
+   The condition here is a secret-shared bit, called a "control bit",
+   which indicates whether the current node is on the path to alpha or
+   not.  On the path, the control bits add up to 1, meaning only one
+   evaluator will add the correction word to its XOF output.  Off the
+   path, either none or both evaluators add the correction word, and so
+   the seeds at the next level stay the same.  What remains is to turn
+   the -- now pseudorandom -- values on the path to alpha into the
+   desired beta values.  This is done by sending _value correction
+   words_ to the evaluators, which are chosen such that when added with
+   the pseudorandom shares at the ith node on the path to alpha, they
+   add up to shares of beta_i.
+
+   In the following two sections we describe the algorithms for key
+   generation in full detail.
+
+8.3.2.  Key Generation
 
    The description of the IDPF-key generation algorithm makes use of
-   auxiliary functions extend() and convert() defined in Section 8.3.3.
+   auxiliary functions extend() and convert() defined in Section 8.3.4.
    In the following, we let Field2 denote the field GF(2).
 
    def gen(
@@ -5547,12 +5613,10 @@ Table of Contents
 
            Figure 30: IDPF-key generation algorithm of BBCGGI21.
 
-8.3.2.  Key Evaluation
-
-      TODO Describe in prose how IDPF-key evaluation algorithm works.
+8.3.3.  Key Evaluation
 
    The description of the IDPF-evaluation algorithm makes use of
-   auxiliary functions extend() and convert() defined in Section 8.3.3.
+   auxiliary functions extend() and convert() defined in Section 8.3.4.
 
    def eval(
            self,
@@ -5663,7 +5727,7 @@ Table of Contents
 
         Figure 31: IDPF-evaluation generation algorithm of BBCGGI21.
 
-8.3.3.  Auxiliary Functions
+8.3.4.  Auxiliary Functions
 
    def extend(
            self,
@@ -5722,7 +5786,7 @@ Table of Contents
    By default, Poplar1 is instantiated with the IDPF in Section 8.3
    (VALUE_LEN == 2) and XofTurboShake128 (Section 6.2.1).  This VDAF is
    suitable for any positive value of BITS.  Test vectors can be found
-   in Appendix C.
+   in Appendix B.
 
 9.  Security Considerations
 
@@ -6290,35 +6354,7 @@ Table of Contents
               September 2024, <https://github.com/cfrg/draft-irtf-cfrg-
               vdaf/tree/main/test_vec/vdaf>.
 
-Appendix A.  Acknowledgments
-
-   The impetus of this work is the success of recent deployments of
-   predecessors of Prio3.  The Mozilla Origin Telemetry project
-   [OriginTelemetry] and the Exposure Notification Private Analytics
-   collaboration among the Internet Security Research Group (ISRG),
-   Google, Apple, and others [ENPA] have together aggregated data from
-   hundreds of millions of users.
-
-   As the name implies, Prio3 is a descendant of the original Prio
-   construction [CGB17].  A second iteration was deployed in the [ENPA]
-   system, and like the VDAF described here, the ENPA system was built
-   from techniques introduced in [BBCGGI19] that significantly improve
-   communication cost.  That system was specialized for a particular
-   aggregation function; the goal of Prio3 is to provide the same level
-   of generality as the original construction.
-
-   The security considerations in Section 9 are based largely on the
-   security analysis of [DPRS23].  Thanks to Hannah Davis and Mike
-   Rosulek, who lent their time to developing definitions and security
-   proofs.
-
-   Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
-   Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
-   Raykova, Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang,
-   Bas Westerbaan, and Christopher Wood for useful feedback on and
-   contributions to the spec.
-
-Appendix B.  FLP Gadget Wrappers
+Appendix A.  FLP Gadget Wrappers
 
    class ProveGadget(Gadget[F]):
        """
@@ -6423,7 +6459,7 @@ Appendix B.  FLP Gadget Wrappers
            wrapped_valid.GADGETS = wrapped_gadgets
            return wrapped_valid
 
-Appendix C.  Test Vectors
+Appendix B.  Test Vectors
 
       TODO Update the reference in [TestVectors] by replacing <TODO>
       with the commit hash with the final version of the test vectors.)
@@ -6434,7 +6470,7 @@ Appendix C.  Test Vectors
    preparation, aggregation, and unsharding of each of several
    measurements.  The test vector schema is defined below.
 
-C.1.  Schema
+B.1.  Schema
 
    ctx:  The application context string encoded in hexadecimal.
 
@@ -6472,18 +6508,18 @@ C.1.  Schema
    The schema also includes whatever parameters are required to
    instantiate the VDAF.  These are listed in the subsections below.
 
-C.1.1.  Prio3Count
+B.1.1.  Prio3Count
 
    shares:  The number of shares, an integer.
 
-C.1.2.  Prio3Sum
+B.1.2.  Prio3Sum
 
    shares:  The number of shares, an integer.
 
    max_measurement:  The largest measurement, an integer.  Each element
       is in range [0, max_measurement].
 
-C.1.3.  Prio3SumVec
+B.1.3.  Prio3SumVec
 
    shares:  The number of shares, an integer.
 
@@ -6494,7 +6530,7 @@ C.1.3.  Prio3SumVec
    bits:  the bit length of each element of the vector, an integer.
       Each element is in [0, 2^bits).
 
-C.1.4.  Prio3Histogram
+B.1.4.  Prio3Histogram
 
    shares:  The number of shares, an integer.
 
@@ -6502,7 +6538,7 @@ C.1.4.  Prio3Histogram
 
    chunk_length:  the length of each vector chunk, an integer.
 
-C.1.5.  Prio3MultihotCountVec
+B.1.5.  Prio3MultihotCountVec
 
    shares:  The number of shares, an integer.
 
@@ -6513,9 +6549,37 @@ C.1.5.  Prio3MultihotCountVec
    max_weight:  The largest vector weight, an integer.  The sum of the
       elements must be in [0, max_weight].
 
-C.1.6.  Poplar1
+B.1.6.  Poplar1
 
    bits:  The length of each input, an integer.
+
+Acknowledgments
+
+   The impetus of this work is the success of recent deployments of
+   predecessors of Prio3.  The Mozilla Origin Telemetry project
+   [OriginTelemetry] and the Exposure Notification Private Analytics
+   collaboration among the Internet Security Research Group (ISRG),
+   Google, Apple, and others [ENPA] have together aggregated data from
+   hundreds of millions of users.
+
+   As the name implies, Prio3 is a descendant of the original Prio
+   construction [CGB17].  A second iteration was deployed in the [ENPA]
+   system, and like the VDAF described here, the ENPA system was built
+   from techniques introduced in [BBCGGI19] that significantly improve
+   communication cost.  That system was specialized for a particular
+   aggregation function; the goal of Prio3 is to provide the same level
+   of generality as the original construction.
+
+   The security considerations in Section 9 are based largely on the
+   security analysis of [DPRS23].  Thanks to Hannah Davis and Mike
+   Rosulek, who lent their time to developing definitions and security
+   proofs.
+
+   Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
+   Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
+   Raykova, Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang,
+   Bas Westerbaan, and Christopher Wood for useful feedback on and
+   contributions to the spec.
 
 Authors' Addresses
 
