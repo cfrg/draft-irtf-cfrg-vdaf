@@ -5389,8 +5389,10 @@ Table of Contents
    seeds.  Now if we view seeds as XOR-shares of integers, and if
    evaluators have the same seed at the root of the tree, then their
    expanded trees will form a secret-shared tree of zeros.  The actual
-   construction will use a convert function that maps seeds into the
-   appropriate output domain.
+   construction will additionally use a convert function before each
+   expansion, which maps seeds into the appropriate output domain (see
+   Section 8.3.4), generating a new seed for the next level in the
+   process.
 
    The open task now is to ensure that evaluators have different seeds
    at nodes that lie on the path to alpha, while having the same seeds
