@@ -5118,7 +5118,7 @@ of integers, and if evaluators have the same seed at the root of the tree, then 
 a secret-shared tree of zeros. The actual construction will use a `convert` function that maps seeds
 into the appropriate output domain.
 
-The open task now is to ensure that evaluators have *different* seeds at nodes that lie on the path
+The open task now is to ensure that evaluators have different seeds at nodes that lie on the path
 to `alpha`, while having the same seeds on all other nodes. This is done using so-called
 *correction words* that are conditionally added to the XOF output by both evaluators.
 The condition here is a secret-shared bit, called *control bit*, which indicates whether the
