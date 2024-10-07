@@ -154,7 +154,8 @@ Table of Contents
    Appendix A.  FLP Gadgets
      A.1.  Multiplication
      A.2.  Polynomial Evaluation
-     A.3.  Shims for Generating and Verifying Proofs
+     A.3.  Parallel Sum
+     A.4.  Shims for Generating and Verifying Proofs
    Appendix B.  Test Vectors
      B.1.  Schema
        B.1.1.  Prio3Count
@@ -935,7 +936,7 @@ Table of Contents
    AggShare.
 
    Each DAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 21.
+   for each (V)DAF specified in this document are defined in Table 18.
 
 4.1.  Sharding
 
@@ -1271,7 +1272,7 @@ Table of Contents
    PrepMessage.
 
    Each VDAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 21.
+   for each (V)DAF specified in this document are defined in Table 18.
    The following method is defined for each VDAF specified in this
    document:
 
@@ -3728,7 +3729,7 @@ Table of Contents
    circuit, setting g.wires[j][k] to the value of the j-th wire for the
    k-th invocation of gadget g.  This is accomplished by "wrapping" each
    gadget in a class ProveGadget that records the wire inputs.  We list
-   this class in Appendix A.3.
+   this class in Appendix A.4.
 
    Next, we compute each of the "wire polynomials" for each gadget.  The
    j-th wire polynomial is the lowest degree polynomial that evaluates
@@ -3812,7 +3813,7 @@ Table of Contents
    polynomials just as the prover did.  First, we record g.wires[j][k]
    as the input (share) of the j-th wire of the k-th invocation of the
    gadget.  Again, this is accomplished by a wrapper gadget,
-   QueryGadget, listed in Appendix A.3.  This gadget also evaluates the
+   QueryGadget, listed in Appendix A.4.  This gadget also evaluates the
    gadget polynomial for each gadget invocation in order to produce the
    gadget's output.  Then we compute the wire polynomials from the
    recorded values.
@@ -3946,9 +3947,9 @@ Table of Contents
 
    Our first instance of Prio3 is for a simple counter: each measurement
    is either one or zero and the aggregate result is the sum of the
-   measurements.  Its validity circuit uses the multiplication gadget in
-   Appendix A.1, which takes two inputs and multiplies them.  The
-   circuit is specified below.
+   measurements.  Its validity circuit uses the multiplication gadget
+   Mul specified in Appendix A.1, which takes two inputs and multiplies
+   them.  The circuit is specified below.
 
    class Count(Valid[int, int, F]):
        GADGETS: list[Gadget[F]] = [Mul()]
@@ -4026,9 +4027,9 @@ Table of Contents
    measurement plus offset are in the same range of [0,2^bits), this
    means that the measurement itself is between 0 and max_measurement.
 
-   The circuit uses the polynomial-evaluation gadget specified in
-   Appendix A.2.  The polynomial is p(x) = x^2 - x, which is equal to 0
-   if and only if x is in [0, 2).  The complete circuit is specified
+   The circuit uses the polynomial-evaluation gadget PolyEval specified
+   in Appendix A.2.  The polynomial is p(x) = x^2 - x, which is equal to
+   0 if and only if x is in [0, 2).  The complete circuit is specified
    below.
 
    class Sum(Valid[int, int, F]):
@@ -4099,159 +4100,143 @@ Table of Contents
 
                   Table 11: Parameters for Prio3SumVec.
 
-   This instance of Prio3 supports summing a vector of integers.  It has
-   three parameters, length, bits, and chunk_length.  Each measurement
+   This instance of Prio3 supports summing vectors of integers.  It has
+   three parameters: length, bits, and chunk_length.  Each measurement
    is a vector of positive integers with length equal to the length
-   parameter.  Each element of the measurement is an integer in the [0,
+   parameter.  Each element of the measurement is an integer in [0,
    2**bits).  It is RECOMMENDED to set chunk_length to an integer near
    the square root of length * bits (see Section 7.4.3.1).
 
-   The validity circuit is denoted SumVec.  Measurements are encoded as
-   a vector of field elements with length length * bits.  The field
-   elements in the encoded vector represent all the bits of the
-   measurement vector's elements, consecutively, in LSB to MSB order:
+   The circuit is denoted SumVec.  Measurements are encoded as a vector
+   of field elements with length length * bits.  The field elements in
+   the encoded vector represent all the bits of the measurement vector's
+   elements, consecutively, in LSB to MSB order.
 
-   def encode(self, measurement: list[int]) -> list[F]:
-       if len(measurement) != self.length:
-           raise ValueError('incorrect measurement length')
+   The validity circuit uses the ParallelSum gadget in Appendix A.3.
+   This gadget applies an arithmetic subcircuit to multiple inputs in
+   parallel, then returns the sum of the results.
 
-       encoded = []
-       for val in measurement:
-           if val not in range(2**self.bits):
-               raise ValueError(
-                   'entry of measurement vector is out of range'
-               )
-
-           encoded += self.field.encode_into_bit_vector(val, self.bits)
-       return encoded
-
-   def truncate(self, meas: list[F]) -> list[F]:
-       truncated = []
-       for i in range(self.length):
-           truncated.append(self.field.decode_from_bit_vector(
-               meas[i * self.bits: (i + 1) * self.bits]
-           ))
-       return truncated
-
-   def decode(
-           self,
-           output: list[F],
-           _num_measurements: int) -> list[int]:
-       return [x.as_unsigned() for x in output]
-
-   This validity circuit uses a ParallelSum gadget to achieve a smaller
-   proof size.  This optimization for "parallel-sum circuits" is
-   described in [BBCGGI19], section 4.4.  Briefly, for circuits that add
-   up the output of multiple identical subcircuits, it is possible to
-   achieve smaller proof sizes (on the order of O(sqrt(MEAS_LEN))
-   instead of O(MEAS_LEN)) by packaging more than one such subcircuit
-   into a gadget.
-
-   The ParallelSum gadget is parameterized with an arithmetic
-   subcircuit, and a count of how many times it evaluates that
-   subcircuit.  It takes in a list of inputs and passes them through to
-   instances of the subcircuit in the same order.  It returns the sum of
-   the subcircuit outputs.  Note that only the ParallelSum gadget
-   itself, and not its subcircuit, participates in the FLP's wire
-   recording during evaluation, gadget consistency proofs, and proof
-   validation, even though the subcircuit is provided to ParallelSum as
-   an implementation of the Gadget interface.
-
-   def eval(self, field: type[F], inp: list[F]) -> F:
-       self.check_gadget_eval(inp)
-       out = field(0)
-       for i in range(self.count):
-           start_index = i * self.subcircuit.ARITY
-           end_index = (i + 1) * self.subcircuit.ARITY
-           out += self.subcircuit.eval(
-               field,
-               inp[start_index:end_index],
-           )
-       return out
+   Along with the subcircuit, the parallel-sum gadget is parameterized
+   by an integer count specifying how many times to call the subcircuit.
+   It takes in a list of inputs and passes them through to instances of
+   the subcircuit in the same order.  It returns the sum of the
+   subcircuit outputs.  Note that only the ParallelSum gadget itself,
+   and not its subcircuit, participates in the FLP's wire recording
+   during evaluation, gadget consistency proofs, and proof validation,
+   even though the subcircuit is provided to ParallelSum gadget as an
+   implementation of the Gadget interface.
 
    The SumVec validity circuit checks that the encoded measurement
-   consists of ones and zeros.  Rather than use the Range2 gadget on
+   consists of ones and zeros.  Rather than use the PolyEval gadget on
    each element, as in the Sum validity circuit, it instead uses Mul
-   subcircuits and "free" constant multiplication and addition gates to
-   simultaneously evaluate the same range check polynomial on each
-   element, and multiply by a constant.  One of the two Mul subcircuit
-   inputs is equal to a measurement element multiplied by a power of one
-   of the elements of the joint randomness vector, and the other is
-   equal to the same measurement element minus one.  These Mul
-   subcircuits are evaluated by a ParallelSum gadget, and the results
-   are added up both within the ParallelSum gadget and after it.
+   subcircuits (Appendix A.1) and "free" constant multiplication and
+   addition gates to simultaneously evaluate the same range check
+   polynomial on each element, and multiply by a constant.  One of the
+   two Mul subcircuit inputs is equal to a measurement element
+   multiplied by a power of one of the elements of the joint randomness
+   vector, and the other is equal to the same measurement element minus
+   one.  These Mul subcircuits are evaluated by a ParallelSum gadget,
+   and the results are added up both within the ParallelSum gadget and
+   after it.
 
-   def eval(
-           self,
-           meas: list[F],
-           joint_rand: list[F],
-           num_shares: int) -> list[F]:
-       out = self.field(0)
-       shares_inv = self.field(num_shares).inv()
-       for i in range(self.GADGET_CALLS[0]):
-           r = joint_rand[i]
-           r_power = r
-           inputs: list[Optional[F]]
-           inputs = [None] * (2 * self.chunk_length)
-           for j in range(self.chunk_length):
-               index = i * self.chunk_length + j
-               if index < len(meas):
-                   meas_elem = meas[index]
-               else:
-                   meas_elem = self.field(0)
+   The complete circuit is specified below.
 
-               inputs[j * 2] = r_power * meas_elem
-               inputs[j * 2 + 1] = meas_elem - shares_inv
+   class SumVec(Valid[list[int], list[int], F]):
+       EVAL_OUTPUT_LEN = 1
+       length: int
+       bits: int
+       chunk_length: int
+       field: type[F]
 
-               r_power *= r
+       def __init__(self,
+                    field: type[F],
+                    length: int,
+                    bits: int,
+                    chunk_length: int):
+           """
+           Instantiate the `SumVec` circuit for measurements with
+           `length` elements, each in the range `[0, 2^bits)`.
+           """
+           self.field = field
+           self.length = length
+           self.bits = bits
+           self.chunk_length = chunk_length
+           self.GADGETS = [ParallelSum(Mul(), chunk_length)]
+           self.GADGET_CALLS = [
+               (length * bits + chunk_length - 1) // chunk_length
+           ]
+           self.MEAS_LEN = length * bits
+           self.OUTPUT_LEN = length
+           self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-           out += self.GADGETS[0].eval(
-               self.field,
-               cast(list[F], inputs),
-           )
+       def eval(
+               self,
+               meas: list[F],
+               joint_rand: list[F],
+               num_shares: int) -> list[F]:
+           out = self.field(0)
+           shares_inv = self.field(num_shares).inv()
+           for i in range(self.GADGET_CALLS[0]):
+               r = joint_rand[i]
+               r_power = r
+               inputs: list[Optional[F]]
+               inputs = [None] * (2 * self.chunk_length)
+               for j in range(self.chunk_length):
+                   index = i * self.chunk_length + j
+                   if index < len(meas):
+                       meas_elem = meas[index]
+                   else:
+                       meas_elem = self.field(0)
 
-       return [out]
+                   inputs[j * 2] = r_power * meas_elem
+                   inputs[j * 2 + 1] = meas_elem - shares_inv
 
-         +=================+====================================+
-         | Parameter       | Value                              |
-         +=================+====================================+
-         | GADGETS         | [ParallelSum(Mul(), chunk_length)] |
-         +-----------------+------------------------------------+
-         | GADGET_CALLS    | [(length * bits + chunk_length -   |
-         |                 | 1) // chunk_length]                |
-         +-----------------+------------------------------------+
-         | MEAS_LEN        | length * bits                      |
-         +-----------------+------------------------------------+
-         | OUTPUT_LEN      | length                             |
-         +-----------------+------------------------------------+
-         | JOINT_RAND_LEN  | GADGET_CALLS[0]                    |
-         +-----------------+------------------------------------+
-         | EVAL_OUTPUT_LEN | 1                                  |
-         +-----------------+------------------------------------+
-         | Measurement     | list[int], each element in [0,     |
-         |                 | 2**bits)                           |
-         +-----------------+------------------------------------+
-         | AggResult       | list[int]                          |
-         +-----------------+------------------------------------+
+                   r_power *= r
 
-             Table 12: Parameters of validity circuit SumVec.
+               out += self.GADGETS[0].eval(
+                   self.field,
+                   cast(list[F], inputs),
+               )
+
+           return [out]
+
+       def encode(self, measurement: list[int]) -> list[F]:
+           encoded = []
+           for val in measurement:
+               encoded += self.field.encode_into_bit_vector(
+                   val, self.bits)
+           return encoded
+
+       def truncate(self, meas: list[F]) -> list[F]:
+           truncated = []
+           for i in range(self.length):
+               truncated.append(self.field.decode_from_bit_vector(
+                   meas[i * self.bits: (i + 1) * self.bits]
+               ))
+           return truncated
+
+       def decode(
+               self,
+               output: list[F],
+               _num_measurements: int) -> list[int]:
+           return [x.as_unsigned() for x in output]
 
 7.4.3.1.  Selection of ParallelSum chunk length
 
    The chunk_length parameter provides a trade-off between the arity of
-   the ParallelSum gadget and the number of times the gadget is called.
-   The proof length is asymptotically minimized when the chunk length is
-   near the square root of the length of the measurement.  However, the
-   relationship between VDAF parameters and proof length is complicated,
-   involving two forms of rounding (the circuit pads the inputs to its
-   last ParallelSum gadget call, up to the chunk length, and proof
-   system rounds the degree of wire polynomials -- determined by the
-   number of times a gadget is called -- up to the next power of two).
-   Therefore, the optimal choice of chunk_length for a concrete
-   measurement size will vary, and must be found through trial and
-   error.  Setting chunk_length equal to the square root of the
-   appropriate measurement length will result in proofs up to 50% larger
-   than the optimal proof size.
+   the ParallelSum gadget (Appendix A.3) and the number of times the
+   gadget is called.  The proof length is asymptotically minimized when
+   the chunk length is near the square root of the length of the
+   measurement.  However, the relationship between VDAF parameters and
+   proof length is complicated, involving two forms of rounding (the
+   circuit pads the inputs to its last ParallelSum gadget call, up to
+   the chunk length, and proof system rounds the degree of wire
+   polynomials -- determined by the number of times a gadget is called
+   -- up to the next power of two).  Therefore, the optimal choice of
+   chunk_length for a concrete measurement size will vary, and must be
+   found through trial and error.  Setting chunk_length equal to the
+   square root of the appropriate measurement length will result in
+   proofs up to 50% larger than the optimal proof size.
 
 7.4.4.  Prio3Histogram
 
@@ -4269,7 +4254,7 @@ Table of Contents
                 |           | (Section 6.2.1)             |
                 +-----------+-----------------------------+
 
-                  Table 13: Parameters for Prio3Histogram.
+                  Table 12: Parameters for Prio3Histogram.
 
    This instance of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
@@ -4287,100 +4272,98 @@ Table of Contents
    Section 7.4.3.1).
 
    The measurement is encoded as a one-hot vector representing the
-   bucket into which the measurement falls:
-
-   def encode(self, measurement: int) -> list[F]:
-       encoded = [self.field(0)] * self.length
-       encoded[measurement] = self.field(1)
-       return encoded
-
-   def truncate(self, meas: list[F]) -> list[F]:
-       return meas
-
-   def decode(
-           self,
-           output: list[F],
-           _num_measurements: int) -> list[int]:
-       return [bucket_count.as_unsigned() for bucket_count in output]
-
-   The Histogram validity circuit checks for one-hotness in two steps,
-   by checking that the encoded measurement consists of ones and zeros,
-   and by checking that the sum of all elements in the encoded
-   measurement is equal to one.  The individual checks constitute the
-   output of the circuit.
+   bucket into which the measurement falls.  The circuit checks for one-
+   hotness in two steps, by checking that the encoded measurement
+   consists of ones and zeros, and by checking that the sum of all
+   elements in the encoded measurement is equal to one.  The individual
+   checks constitute the output of the circuit.
 
    As in the SumVec validity circuit (Section 7.4.3), the first part of
-   the validity circuit uses the ParallelSum gadget to perform range
-   checks while achieving a smaller proof size.  The ParallelSum gadget
-   uses Mul subcircuits to evaluate a range check polynomial on each
-   element, and includes an additional constant multiplication.  One of
-   the two Mul subcircuit inputs is equal to a measurement element
-   multiplied by a power of an element of the joint randomness vector,
-   and the other is equal to the same measurement element minus one.
-   The results are added up both within the ParallelSum gadget and after
-   it.
+   the validity circuit uses the ParallelSum (Appendix A.3) gadget to
+   perform range checks while achieving a smaller proof size.  The
+   ParallelSum gadget uses Mul subcircuits (Appendix A.1) to evaluate a
+   range check polynomial on each element, and includes an additional
+   constant multiplication.  One of the two Mul subcircuit inputs is
+   equal to a measurement element multiplied by a power of an element of
+   the joint randomness vector, and the other is equal to the same
+   measurement element minus one.  The results are added up both within
+   the ParallelSum gadget and after it.
 
-   def eval(
-           self,
-           meas: list[F],
-           joint_rand: list[F],
-           num_shares: int) -> list[F]:
-       # Check that each bucket is one or zero.
-       range_check = self.field(0)
-       shares_inv = self.field(num_shares).inv()
-       for i in range(self.GADGET_CALLS[0]):
-           r = joint_rand[i]
-           r_power = r
-           inputs: list[Optional[F]]
-           inputs = [None] * (2 * self.chunk_length)
-           for j in range(self.chunk_length):
-               index = i * self.chunk_length + j
-               if index < len(meas):
-                   meas_elem = meas[index]
-               else:
-                   meas_elem = self.field(0)
+   class Histogram(Valid[int, list[int], F]):
+       EVAL_OUTPUT_LEN = 2
+       field: type[F]
+       length: int
+       chunk_length: int
 
-               inputs[j * 2] = r_power * meas_elem
-               inputs[j * 2 + 1] = meas_elem - shares_inv
+       def __init__(self,
+                    field: type[F],
+                    length: int,
+                    chunk_length: int):
+           """
+           Instantiate an instance of the `Histogram` circuit with the
+           given `length` and `chunk_length`.
+           """
+           self.field = field
+           self.length = length
+           self.chunk_length = chunk_length
+           self.GADGETS = [ParallelSum(Mul(), chunk_length)]
+           self.GADGET_CALLS = [
+               (length + chunk_length - 1) // chunk_length]
+           self.MEAS_LEN = self.length
+           self.OUTPUT_LEN = self.length
+           self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-               r_power *= r
+       def eval(
+               self,
+               meas: list[F],
+               joint_rand: list[F],
+               num_shares: int) -> list[F]:
+           # Check that each bucket is one or zero.
+           range_check = self.field(0)
+           shares_inv = self.field(num_shares).inv()
+           for i in range(self.GADGET_CALLS[0]):
+               r = joint_rand[i]
+               r_power = r
+               inputs: list[Optional[F]]
+               inputs = [None] * (2 * self.chunk_length)
+               for j in range(self.chunk_length):
+                   index = i * self.chunk_length + j
+                   if index < len(meas):
+                       meas_elem = meas[index]
+                   else:
+                       meas_elem = self.field(0)
 
-           range_check += self.GADGETS[0].eval(
-               self.field,
-               cast(list[F], inputs),
-           )
+                   inputs[j * 2] = r_power * meas_elem
+                   inputs[j * 2 + 1] = meas_elem - shares_inv
 
-       # Check that the buckets sum to 1.
-       sum_check = -shares_inv
-       for b in meas:
-           sum_check += b
+                   r_power *= r
 
-       return [range_check, sum_check]
+               range_check += self.GADGETS[0].eval(
+                   self.field,
+                   cast(list[F], inputs),
+               )
 
-   Note that this circuit depends on the number of shares into which the
-   measurement is sharded.  This is provided to the FLP by Prio3.
+           # Check that the buckets sum to 1.
+           sum_check = -shares_inv
+           for b in meas:
+               sum_check += b
 
-    +=================+===============================================+
-    | Parameter       | Value                                         |
-    +=================+===============================================+
-    | GADGETS         | [ParallelSum(Mul(), chunk_length)]            |
-    +-----------------+-----------------------------------------------+
-    | GADGET_CALLS    | [(length + chunk_length - 1) // chunk_length] |
-    +-----------------+-----------------------------------------------+
-    | MEAS_LEN        | length                                        |
-    +-----------------+-----------------------------------------------+
-    | OUTPUT_LEN      | length                                        |
-    +-----------------+-----------------------------------------------+
-    | JOINT_RAND_LEN  | GADGET_CALLS[0]                               |
-    +-----------------+-----------------------------------------------+
-    | EVAL_OUTPUT_LEN | 2                                             |
-    +-----------------+-----------------------------------------------+
-    | Measurement     | int                                           |
-    +-----------------+-----------------------------------------------+
-    | AggResult       | list[int]                                     |
-    +-----------------+-----------------------------------------------+
+           return [range_check, sum_check]
 
-            Table 14: Parameters of validity circuit Histogram.
+       def encode(self, measurement: int) -> list[F]:
+           encoded = [self.field(0)] * self.length
+           encoded[measurement] = self.field(1)
+           return encoded
+
+       def truncate(self, meas: list[F]) -> list[F]:
+           return meas
+
+       def decode(
+               self,
+               output: list[F],
+               _num_measurements: int) -> list[int]:
+           return [bucket_count.as_unsigned() \
+               for bucket_count in output]
 
 7.4.5.  Prio3MultihotCountVec
 
@@ -4397,7 +4380,7 @@ Table of Contents
           | Xof       | XofTurboShake128 (Section 6.2.1)        |
           +-----------+-----------------------------------------+
 
-              Table 15: Parameters for Prio3MultihotCountVec.
+              Table 13: Parameters for Prio3MultihotCountVec.
 
    For this instance of Prio3, each measurement is a vector of ones and
    zeros, where the number of ones is bounded.  This provides a
@@ -4407,8 +4390,7 @@ Table of Contents
    providing differential privacy.  (For example, each Client would set
    each entry to one with some small probability.)
 
-   Prio3MultihotCountVec uses XofTurboShake128 (Section 6.2.1) as its
-   XOF.  Its validity circuit is denoted MultihotCountVec.  It has three
+   The validity circuit is denoted MultihotCountVec and has three
    parameters: length, the number of of entries in the count vector;
    max_weight, the maximum number of non-zero entries (i.e., the weight
    must be at most max_weight); and chunk_length, used the same way as
@@ -4428,102 +4410,122 @@ Table of Contents
    bit (i.e., either one or zero).  It then decodes the reported weight
    and subtracts it from offset + sum(count_vec), where count_vec is the
    count vector.  The result is zero if and only if the reported weight
-   is equal to the true weight.
+   is equal to the true weight.  The complete circuit is defined below.
 
-   Encoding, truncation, and decoding are defined as follows:
+   class MultihotCountVec(Valid[list[int], list[int], F,]):
+       EVAL_OUTPUT_LEN = 2
+       field: type[F]
 
-   def encode(self, measurement: list[int]) -> list[F]:
-       if len(measurement) != self.length:
-           raise ValueError('invalid Client measurement length')
+       def __init__(self,
+                    field: type[F],
+                    length: int,
+                    max_weight: int,
+                    chunk_length: int):
+           """
+           Instantiate an instance of the this circuit with the given
+           `length`, `max_weight`, and `chunk_length`.
 
-       # The first part is the vector of counters.
-       count_vec = list(map(self.field, measurement))
+           Pre-conditions:
 
-       # The second part is the reported weight.
-       weight_reported = sum(count_vec, self.field(0))
+               - `length > 0`
+               - `0 < max_weight` and `max_weight <= length`
+               - `chunk_length > 0`
+           """
+           self.field = field
 
-       encoded = []
-       encoded += count_vec
-       encoded += self.field.encode_into_bit_vector(
-           (self.offset + weight_reported).as_unsigned(),
-           self.bits_for_weight)
-       return encoded
+           # Compute the number of bits to represent `max_weight`.
+           self.bits_for_weight = max_weight.bit_length()
+           self.offset = self.field(
+               2**self.bits_for_weight - 1 - max_weight)
 
-   def truncate(self, meas: list[F]) -> list[F]:
-       return meas[:self.length]
+           # Make sure `offset + length` doesn't overflow the field
+           # modulus. Otherwise we may not correctly compute the sum
+           # measurement vector entries during circuit evaluation.
+           if self.field.MODULUS - self.offset.as_unsigned() <= length:
+               raise ValueError('length and max_weight are too large '
+                                'for the current field size')
 
-   def decode(
-           self,
-           output: list[F],
-           _num_measurements: int) -> list[int]:
-       return [bucket_count.as_unsigned() for bucket_count in output]
+           self.length = length
+           self.max_weight = max_weight
+           self.chunk_length = chunk_length
+           self.GADGETS: list[Gadget[F]] = [
+               ParallelSum(Mul(), chunk_length),
+           ]
+           self.GADGET_CALLS = [
+               (length + self.bits_for_weight + chunk_length - 1) \
+                   // chunk_length
+           ]
+           self.MEAS_LEN = self.length + self.bits_for_weight
+           self.OUTPUT_LEN = self.length
+           self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-   Circuit evaluation is defined as follows:
+       def eval(
+               self,
+               meas: list[F],
+               joint_rand: list[F],
+               num_shares: int) -> list[F]:
+           # Check that each entry in the input vector is one or zero.
+           range_check = self.field(0)
+           shares_inv = self.field(num_shares).inv()
+           for i in range(self.GADGET_CALLS[0]):
+               r = joint_rand[i]
+               r_power = r
+               inputs: list[Optional[F]]
+               inputs = [None] * (2 * self.chunk_length)
+               for j in range(self.chunk_length):
+                   index = i * self.chunk_length + j
+                   if index < len(meas):
+                       meas_elem = meas[index]
+                   else:
+                       meas_elem = self.field(0)
 
-   def eval(
-           self,
-           meas: list[F],
-           joint_rand: list[F],
-           num_shares: int) -> list[F]:
-       # Check that each entry in the input vector is one or zero.
-       range_check = self.field(0)
-       shares_inv = self.field(num_shares).inv()
-       for i in range(self.GADGET_CALLS[0]):
-           r = joint_rand[i]
-           r_power = r
-           inputs: list[Optional[F]]
-           inputs = [None] * (2 * self.chunk_length)
-           for j in range(self.chunk_length):
-               index = i * self.chunk_length + j
-               if index < len(meas):
-                   meas_elem = meas[index]
-               else:
-                   meas_elem = self.field(0)
+                   inputs[j * 2] = r_power * meas_elem
+                   inputs[j * 2 + 1] = meas_elem - shares_inv
 
-               inputs[j * 2] = r_power * meas_elem
-               inputs[j * 2 + 1] = meas_elem - shares_inv
+                   r_power *= r
 
-               r_power *= r
+               range_check += self.GADGETS[0].eval(
+                   self.field,
+                   cast(list[F], inputs),
+               )
 
-           range_check += self.GADGETS[0].eval(
-               self.field,
-               cast(list[F], inputs),
-           )
+           # Check that the weight `offset` plus the sum of the counters
+           # is equal to the value claimed by the Client.
+           count_vec = meas[:self.length]
+           weight = sum(count_vec, self.field(0))
+           weight_reported = \
+               self.field.decode_from_bit_vector(meas[self.length:])
+           weight_check = self.offset*shares_inv + weight - \
+               weight_reported
 
-       # Check that the weight `offset` plus the sum of the counters
-       # is equal to the value claimed by the Client.
-       count_vec = meas[:self.length]
-       weight = sum(count_vec, self.field(0))
-       weight_reported = \
-           self.field.decode_from_bit_vector(meas[self.length:])
-       weight_check = self.offset*shares_inv + weight - \
-           weight_reported
+           return [range_check, weight_check]
 
-       return [range_check, weight_check]
+       def encode(self, measurement: list[int]) -> list[F]:
+           if len(measurement) != self.length:
+               raise ValueError('invalid Client measurement length')
 
-         +=================+====================================+
-         | Parameter       | Value                              |
-         +=================+====================================+
-         | GADGETS         | [ParallelSum(Mul(), chunk_length)] |
-         +-----------------+------------------------------------+
-         | GADGET_CALLS    | [(length + bits_for_weight +       |
-         |                 | chunk_length - 1) // chunk_length] |
-         +-----------------+------------------------------------+
-         | MEAS_LEN        | length + bits_for_weight           |
-         +-----------------+------------------------------------+
-         | OUTPUT_LEN      | length                             |
-         +-----------------+------------------------------------+
-         | JOINT_RAND_LEN  | GADGET_CALLS[0]                    |
-         +-----------------+------------------------------------+
-         | EVAL_OUTPUT_LEN | 2                                  |
-         +-----------------+------------------------------------+
-         | Measurement     | list[int]                          |
-         +-----------------+------------------------------------+
-         | AggResult       | list[int]                          |
-         +-----------------+------------------------------------+
+           # The first part is the vector of counters.
+           count_vec = list(map(self.field, measurement))
 
-                 Table 16: Parameters of validity circuit
-                            MultihotCountVec.
+           # The second part is the reported weight.
+           weight_reported = sum(count_vec, self.field(0))
+
+           encoded = []
+           encoded += count_vec
+           encoded += self.field.encode_into_bit_vector(
+               (self.offset + weight_reported).as_unsigned(),
+               self.bits_for_weight)
+           return encoded
+
+       def truncate(self, meas: list[F]) -> list[F]:
+           return meas[:self.length]
+
+       def decode(
+               self,
+               output: list[F],
+               _num_measurements: int) -> list[int]:
+           return [bucket_count.as_unsigned() for \
+                   bucket_count in output]
 
 8.  Poplar1
 
@@ -4619,7 +4621,7 @@ Table of Contents
    "extractable" as defined in [BBCGGI21], Definition 1.)
 
    A concrete IDPF defines the types and constants enumerated in
-   Table 17.  In the remainder we write Output as shorthand for the type
+   Table 14.  In the remainder we write Output as shorthand for the type
    list[list[FieldInner]] | list[list[FieldLeaf]].  (This type denotes
    either a vector of inner node field elements or leaf node field
    elements.)  The scheme is comprised of the following algorithms:
@@ -4726,7 +4728,7 @@ Table of Contents
    | FieldVec    | Alias of list[FieldInner] | list[FieldLeaf]        |
    +-------------+----------------------------------------------------+
 
-        Table 17: Constants and types defined by a concrete IDPF.
+        Table 14: Constants and types defined by a concrete IDPF.
 
 8.1.1.  Encoding inputs as indices
 
@@ -4761,10 +4763,10 @@ Table of Contents
    interface (Section 5).  It is defined in terms of any Idpf
    (Section 8.1) for which SHARES == 2 and VALUE_LEN == 2 and an
    implementation of Xof (Section 6.2).  The associated constants and
-   types required by the Vdaf interface are defined in Table 18.  The
+   types required by the Vdaf interface are defined in Table 15.  The
    methods required for sharding, preparation, aggregation, and
    unsharding are described in the remaining subsections.  These methods
-   make use of constants defined in Table 19.
+   make use of constants defined in Table 16.
 
        +=================+========================================+
        | Parameter       | Value                                  |
@@ -4801,7 +4803,7 @@ Table of Contents
        | PrepMessage     | Optional[FieldVec]                     |
        +-----------------+----------------------------------------+
 
-                  Table 18: VDAF parameters for Poplar1.
+                  Table 15: VDAF parameters for Poplar1.
 
                     +========================+=======+
                     | Variable               | Value |
@@ -4815,7 +4817,7 @@ Table of Contents
                     | USAGE_VERIFY_RAND: int | 4     |
                     +------------------------+-------+
 
-                       Table 19: Constants used by
+                       Table 16: Constants used by
                                  Poplar1.
 
 8.2.1.  Sharding
@@ -5427,7 +5429,7 @@ Table of Contents
    [BBCGGI21].
 
    The constant and type definitions required by the Idpf interface are
-   given in Table 20.
+   given in Table 17.
 
    Our IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
@@ -5450,7 +5452,7 @@ Table of Contents
                    | FieldLeaf  | Field255 (Table 3)   |
                    +------------+----------------------+
 
-                        Table 20: Constants and type
+                        Table 17: Constants and type
                         definitions for the IDPF of
                                  BBCGGI21.
 
@@ -6172,7 +6174,7 @@ Table of Contents
      | 0xFFFFFFFF    | Use                   |      |               |
      +---------------+-----------------------+------+---------------+
 
-          Table 21: Verifiable Distributed Aggregation Function
+          Table 18: Verifiable Distributed Aggregation Function
                            Identifiers Registry
 
    (RFC EDITOR: Please replace "RFC XXXX" above with the RFC number
@@ -6378,14 +6380,12 @@ A.2.  Polynomial Evaluation
            self.DEGREE = len(p) - 1
 
        def eval(self, field: type[F], inp: list[F]) -> F:
-           self.check_gadget_eval(inp)  # REMOVE ME
            p = [field(coeff) for coeff in self.p]
            return poly_eval(field, p, inp[0])
 
        def eval_poly(self,
                      field: type[F],
                      inp_poly: list[list[F]]) -> list[F]:
-           self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
            p = [field(coeff) for coeff in self.p]
            out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
            out[0] = p[0]
@@ -6396,7 +6396,67 @@ A.2.  Polynomial Evaluation
                x = poly_mul(field, x, inp_poly[0])
            return poly_strip(field, out)
 
-A.3.  Shims for Generating and Verifying Proofs
+A.3.  Parallel Sum
+
+   The parallel-sum gadget applies a subcircuit to multiple inputs in
+   parallel, then returns the sum of the results.
+
+   class ParallelSum(Gadget[F]):
+       """
+       Evaluates a subcircuit (represented by a Gadget) on multiple
+       inputs, adds the results, and returns the sum.
+
+       The `count` parameter determines how many times the `subcircuit`
+       gadget will be called. The arity of this gadget is equal to the
+       arity of the subcircuit multiplied by the `count` parameter, and
+       the degree of this gadget is equal to the degree of the
+       subcircuit. Input wires will be sequentially mapped to input
+       wires of the subcircuit instances.
+
+       Section 4.4 of the BBCGGI19 paper outlines an optimization for
+       circuits fitting the parallel sum form, wherein a sum of n
+       identical subcircuits can be replaced with sqrt(n) parallel sum
+       gadgets, each adding up sqrt(n) subcircuit results. This results
+       in smaller proofs, since the proof size linearly depends on both
+       the arity of gadgets and the number of times gadgets are called.
+       """
+       subcircuit: Gadget[F]
+       count: int
+
+       def __init__(self, subcircuit: Gadget[F], count: int):
+           self.subcircuit = subcircuit
+           self.count = count
+           self.ARITY = subcircuit.ARITY * count
+           self.DEGREE = subcircuit.DEGREE
+
+       def eval(self, field: type[F], inp: list[F]) -> F:
+           out = field(0)
+           for i in range(self.count):
+               start_index = i * self.subcircuit.ARITY
+               end_index = (i + 1) * self.subcircuit.ARITY
+               out += self.subcircuit.eval(
+                   field,
+                   inp[start_index:end_index],
+               )
+           return out
+
+       def eval_poly(self,
+                     field: type[F],
+                     inp_poly: list[list[F]]) -> list[F]:
+           output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
+           out_sum = [field(0) for _ in range(output_poly_length)]
+           for i in range(self.count):
+               start_index = i * self.subcircuit.ARITY
+               end_index = (i + 1) * self.subcircuit.ARITY
+               out_current = self.subcircuit.eval_poly(
+                   field,
+                   inp_poly[start_index:end_index]
+               )
+               for j in range(output_poly_length):
+                   out_sum[j] += out_current[j]
+           return poly_strip(field, out_sum)
+
+A.4.  Shims for Generating and Verifying Proofs
 
    class ProveGadget(Gadget[F]):
        """
