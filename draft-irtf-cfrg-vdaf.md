@@ -5847,30 +5847,6 @@ collisions.  Applications SHOULD prefer the use of registered code points.
 
 --- back
 
-# Acknowledgments
-
-The impetus of this work is the success of recent deployments of predecessors
-of Prio3. The Mozilla Origin Telemetry project {{OriginTelemetry}} and the
-Exposure Notification Private Analytics collaboration among the Internet
-Security Research Group (ISRG), Google, Apple, and others {{ENPA}} have
-together aggregated data from hundreds of millions of users.
-
-As the name implies, Prio3 is a descendant of the original Prio construction
-{{CGB17}}. A second iteration was deployed in the {{ENPA}} system, and like the
-VDAF described here, the ENPA system was built from techniques introduced in
-{{BBCGGI19}} that significantly improve communication cost. That system was
-specialized for a particular aggregation function; the goal of Prio3 is to
-provide the same level of generality as the original construction.
-
-The security considerations in {{security}} are based largely on the security
-analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
-time to developing definitions and security proofs.
-
-Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
-Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
-Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
-Christopher Wood for useful feedback on and contributions to the spec.
-
 # FLP Gadget Wrappers {#gadget-wrappers}
 
 ~~~ python
@@ -6097,3 +6073,29 @@ VDAF. These are listed in the subsections below.
 
 `bits`:
 : The length of each input, an integer.
+
+# Acknowledgments
+{:numbered="false"}
+
+The impetus of this work is the success of recent deployments of predecessors
+of Prio3. The Mozilla Origin Telemetry project {{OriginTelemetry}} and the
+Exposure Notification Private Analytics collaboration among the Internet
+Security Research Group (ISRG), Google, Apple, and others {{ENPA}} have
+together aggregated data from hundreds of millions of users.
+
+As the name implies, Prio3 is a descendant of the original Prio construction
+{{CGB17}}. A second iteration was deployed in the {{ENPA}} system, and like the
+VDAF described here, the ENPA system was built from techniques introduced in
+{{BBCGGI19}} that significantly improve communication cost. That system was
+specialized for a particular aggregation function; the goal of Prio3 is to
+provide the same level of generality as the original construction.
+
+The security considerations in {{security}} are based largely on the security
+analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
+time to developing definitions and security proofs.
+
+Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
+Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
+Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
+Christopher Wood for useful feedback on and contributions to the spec.
+
