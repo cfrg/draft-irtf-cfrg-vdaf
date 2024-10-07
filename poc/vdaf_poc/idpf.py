@@ -88,7 +88,7 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
             - `len(alpha) == self.BITS`
             - `len(beta_inner) == self.BITS - 1`
             - `len(beta_inner[level]) == self.VALUE_LEN` for each `level` in
-              `range(self.BITS - 1)`
+              `[0, self.BITS - 1)`
             - `len(beta_leaf) == self.VALUE_LEN`
             - `len(rand) == self.RAND_SIZE`
         """
@@ -121,8 +121,8 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
 
         Pre-conditions:
 
-            - `agg_id` in `range(self.SHARES)`
-            - `level` in `range(self.BITS)`
+            - `agg_id` in `[0, self.SHARES)`
+            - `level` in `[0, self.BITS)`
             - `len(prefix) == level + 1` for each `prefix` in `prefixes`
         """
         pass
@@ -144,7 +144,7 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
 
         Pre-conditions:
 
-            - `level` in `range(self.BITS)`
+            - `level` in `[0, self.BITS)`
         """
         return x == y[:level + 1]
 

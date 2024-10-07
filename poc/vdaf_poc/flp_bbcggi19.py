@@ -1073,8 +1073,8 @@ class Sum(
 
     def __init__(self, field: type[F], max_measurement: int):
         """
-        A circuit that checks that the measurement is in
-        `range(max_measurement+1)`. This is accomplished by encoding the
+        A circuit that checks that the measurement is in range `[0,
+        max_measurement]`. This is accomplished by encoding the
         measurement as a bit vector, encoding the measurement plus an
         offset as a bit vector, then checking that the two encoded
         integers are consistent.

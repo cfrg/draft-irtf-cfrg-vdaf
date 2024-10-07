@@ -99,8 +99,8 @@ class Daf(
 
         Pre-conditions:
 
-            - `agg_id in range(0, Daf.SHARES)`
-            - `len(nonce) == Daf.NONCE_SIZE`
+            - `agg_id` in `[0, daf.SHARES)`
+            - `len(nonce) == daf.NONCE_SIZE`
         """
         pass
 

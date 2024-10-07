@@ -150,9 +150,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in `range(0, 2 ** 8)`
-        - `algo` in `range(0, 2 ** 32)`
-        - `usage` in `range(0, 2 ** 16)`
+        - `algo_class` in `[0, 2^8)`
+        - `algo` in `[0, 2^32)`
+        - `usage` in `[0, 2^16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),
