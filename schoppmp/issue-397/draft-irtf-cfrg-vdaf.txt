@@ -5381,16 +5381,16 @@ Table of Contents
    representing the tree requires O(2^BITS) space, so the generator
    cannot just compute additive shares of it and send them to the two
    evaluators.  Instead, the evaluators will re-generate shares of the
-   tree using an extendable output function (XOF).  The basic
-   observation is that if both evaluators have the same seed s of length
-   KEY_SIZE, then expanding s using a XOF will also result in the same
-   expansion.  If we set the length of the XOF expansion to 2*KEY_SIZE,
-   it can then be split again into two seeds s_l, s_r, that can again
-   serve as XOF seeds.  Now if we view seeds as XOR-shares of integers,
-   and if evaluators have the same seed at the root of the tree, then
-   their expanded trees will form a secret-shared tree of zeros.  The
-   actual construction will use a convert function that maps seeds into
-   the appropriate output domain.
+   tree using a XOF (Section 6.2).  The basic observation is that if
+   both evaluators have the same seed s of length KEY_SIZE, then
+   expanding s using a XOF will also result in the same expansion.  If
+   we set the length of the XOF expansion to 2*KEY_SIZE, it can then be
+   split again into two seeds s_l, s_r, that can again serve as XOF
+   seeds.  Now if we view seeds as XOR-shares of integers, and if
+   evaluators have the same seed at the root of the tree, then their
+   expanded trees will form a secret-shared tree of zeros.  The actual
+   construction will use a convert function that maps seeds into the
+   appropriate output domain.
 
    The open task now is to ensure that evaluators have _different_ seeds
    at nodes that lie on the path to alpha, while having the same seeds

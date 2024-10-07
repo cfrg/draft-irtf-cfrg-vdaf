@@ -8347,7 +8347,7 @@ root to <code>alpha</code> having values <code>beta_1, ..., beta_BITS</code>, an
 <p id="section-8.3.1-2">The IDPF construction now boils down to secret-sharing the values at each node of that tree in an efficient way. Note
 that explicitly representing the tree requires <code>O(2^BITS)</code> space, so the generator cannot just
 compute additive shares of it and send them to the two evaluators. Instead, the evaluators will
-re-generate shares of the tree using an extendable output function (XOF). The basic observation is that if
+re-generate shares of the tree using a XOF (<a href="#xof" class="auto internal xref">Section 6.2</a>). The basic observation is that if
 both evaluators have the same seed <code>s</code> of length <code>KEY_SIZE</code>, then expanding <code>s</code> using a XOF will also
 result in the same expansion. If we set the length of the XOF expansion to <code>2*KEY_SIZE</code>, it can then be
 split again into two seeds <code>s_l</code>, <code>s_r</code>, that can again serve as XOF seeds. Now if we view seeds as XOR-shares
