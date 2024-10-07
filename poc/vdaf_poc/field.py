@@ -265,38 +265,71 @@ def poly_eval(field: type[F], p: list[F], eval_at: F) -> F:
 def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
     """Compute the Lagrange interpolation polynomial for the given points."""
 
-    # This is an inefficient but simple implementation of polynomial
-    # interpolation. We compute the Lagrange basis, and then take a linear
-    # combination of the basis polynomials.
+    # This uses Newton's divided difference interpolation formula.
 
     assert len(xs) == len(ys)
     n = len(xs)
-    output: list[F] = []  # zero
+    one = field(1)
 
-    for i, (xi, yi) in enumerate(zip(xs, ys)):
-        # The i-th basis polynomial is the product of (x - xj)/(xi - xj) for
-        # all j != i.
-        basis: list[F] = [field(1)]
-        for j in range(n):
-            if i == j:
-                continue
-            else:
-                xj = xs[j]
-                denominator = xi - xj
-                inverse = denominator.inv()
-                linear_coefficient = inverse
-                constant_coefficient = inverse * -xj
-                basis = poly_mul(
-                    field,
-                    basis,
-                    [constant_coefficient, linear_coefficient],
-                )
+    # We interleave three computations in each iteration of the outermost loop.
+    # First, we compute the ith Newton basis polynomial. Second, we compute the
+    # all the ith divided differences. Third, we mutliply the ith basis
+    # polynomial by the one of the ith divided differences, and add the product
+    # to the output accumulator. Computation of both the basis polynomials and
+    # the divided differences are done recurrently, depending on values from
+    # just the previous iteration. However, we calculate a full triangle of
+    # divided difference values, one row per outer loop iteration, and only
+    # those along the left side (involving y_0) are directly used in the
+    # polynomial interpolation formula. The rest of the triangle is just
+    # computed to be used in subsequent rows of the triangle.
+    #
+    # Newton basis polynomials:
+    # n_i(x) = \prod_{j=0}^{i-1} (x - x_j)
+    # n_0(x) = 1
+    # n_i(x) = n_{i-1}(x) \cdot (x - x_{i - 1})
+    #
+    # Divided differences:
+    # [y_j] = y_j
+    # [y_j, y_{j+1}] = ([y_j] - [y_{j+1}]) / (x_j - x_{j+1})
+    # [y_j, ..., y_k] = ([y_j, ..., y_k] - [y_j, ..., y_k]) / (x_j - x_k)
+    #
+    # Newton polynomial interpolation:
+    # p(x) = \sum_{i=0}^{n-1} [y_0, ..., y_{i}] \cdot n_i(x)
 
-        # Multiply the basis polynomial by the y-value, and add it to the output.
+    # Handle i=0 as a special case via initialization of variables.
+    # First basis polynomial: n_0(x) = 1
+    previous_basis_polynomial: list[F] = [one]
+    # The top row of the triangle of divided differences is just every y-value.
+    previous_divided_differences = ys
+    # Initialize the output polynomial with the constant y0. (This is equal to
+    # [y0]*n_0(x) = y0 * 1)
+    output: list[F] = [ys[0]]
+
+    for i in range(1, n):
+        next_basis_polynomial = poly_mul(
+            field,
+            previous_basis_polynomial,
+            [-xs[i - 1], one],
+        )
+        previous_basis_polynomial = next_basis_polynomial
+
+        next_divided_differences: list[F] = []
+        for k in range(len(previous_divided_differences) - 1):
+            next_divided_differences.append(
+                (previous_divided_differences[k]
+                 - previous_divided_differences[k + 1])
+                * (xs[k] - xs[k + i]).inv()
+            )
+        previous_divided_differences = next_divided_differences
+
         output = poly_add(
             field,
             output,
-            poly_mul(field, [yi], basis),
+            poly_mul(
+                field,
+                [next_divided_differences[0]],
+                next_basis_polynomial,
+            ),
         )
 
     return output
