@@ -5110,7 +5110,7 @@ root to `alpha` having values `beta_1, ..., beta_BITS`, and all other nodes havi
 The IDPF construction now boils down to secret-sharing the values at each node of that tree in an efficient way. Note
 that explicitly representing the tree requires `O(2^BITS)` space, so the generator cannot just
 compute additive shares of it and send them to the two evaluators. Instead, the evaluators will
-re-generate shares of the tree using an extendable output function (XOF). The basic observation is that if
+re-generate shares of the tree using a XOF ({{xof}}). The basic observation is that if
 both evaluators have the same seed `s` of length `KEY_SIZE`, then expanding `s` using a XOF will also
 result in the same expansion. If we set the length of the XOF expansion to `2*KEY_SIZE`, it can then be
 split again into two seeds `s_l`, `s_r`, that can again serve as XOF seeds. Now if we view seeds as XOR-shares
