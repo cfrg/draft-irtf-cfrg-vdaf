@@ -1360,13 +1360,16 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                 <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-the-idpf-scheme-of" class="internal xref">The IDPF scheme of BBCGGI21</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.1">
-                    <p id="section-toc.1-1.8.2.3.2.1.1"><a href="#section-8.3.1" class="auto internal xref">8.3.1</a>.  <a href="#name-key-generation" class="internal xref">Key Generation</a></p>
+                    <p id="section-toc.1-1.8.2.3.2.1.1"><a href="#section-8.3.1" class="auto internal xref">8.3.1</a>.  <a href="#name-overview-3" class="internal xref">Overview</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.2">
-                    <p id="section-toc.1-1.8.2.3.2.2.1"><a href="#section-8.3.2" class="auto internal xref">8.3.2</a>.  <a href="#name-key-evaluation" class="internal xref">Key Evaluation</a></p>
+                    <p id="section-toc.1-1.8.2.3.2.2.1"><a href="#section-8.3.2" class="auto internal xref">8.3.2</a>.  <a href="#name-key-generation" class="internal xref">Key Generation</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.3">
-                    <p id="section-toc.1-1.8.2.3.2.3.1"><a href="#section-8.3.3" class="auto internal xref">8.3.3</a>.  <a href="#name-auxiliary-functions-3" class="internal xref">Auxiliary Functions</a></p>
+                    <p id="section-toc.1-1.8.2.3.2.3.1"><a href="#section-8.3.3" class="auto internal xref">8.3.3</a>.  <a href="#name-key-evaluation" class="internal xref">Key Evaluation</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.4">
+                    <p id="section-toc.1-1.8.2.3.2.4.1"><a href="#section-8.3.4" class="auto internal xref">8.3.4</a>.  <a href="#name-auxiliary-functions-3" class="internal xref">Auxiliary Functions</a></p>
 </li>
                 </ul>
 </li>
@@ -8414,24 +8417,63 @@ possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> fo
           </tbody>
         </table>
 </div>
-<div id="key-generation">
+<div id="overview-1">
 <section id="section-8.3.1">
-          <h4 id="name-key-generation">
-<a href="#section-8.3.1" class="section-number selfRef">8.3.1. </a><a href="#name-key-generation" class="section-name selfRef">Key Generation</a>
+          <h4 id="name-overview-3">
+<a href="#section-8.3.1" class="section-number selfRef">8.3.1. </a><a href="#name-overview-3" class="section-name selfRef">Overview</a>
           </h4>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.3.1-1.1">
-              <p id="section-8.3.1-1.1.1">TODO Describe the construction in prose, beginning with a gentle introduction
-to the high level idea.<a href="#section-8.3.1-1.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-8.3.1-2">The description of the IDPF-key generation algorithm makes use of auxiliary
+<p id="section-8.3.1-1">At a high level, the IDPF maps a key generator's input <code>(alpha, beta_1, ...,
+beta_BITS)</code> onto a binary tree with <code>BITS+1</code> levels, where each edge going from
+a parent node to a left child is labeled <code>0</code>, and each right edge is labeled
+<code>1</code>. Then each leaf node corresponds to a bit string of length <code>BITS</code>, where the
+labels on the path from the root to <code>x</code> contain the individual bits.  Finally,
+all nodes on the tree have have an assigned value, with the nodes on the path
+from the root to <code>alpha</code> having values <code>beta_1, ..., beta_BITS</code>, and all other
+nodes having value <code>0</code>.<a href="#section-8.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.3.1-2">The IDPF construction now boils down to secret-sharing the values at each node
+of that tree in an efficient way. Note that explicitly representing the tree
+requires <code>O(2^BITS)</code> space, so the generator cannot just compute additive shares
+of it and send them to the two evaluators. Instead, the evaluators will
+re-generate shares of the tree using a XOF (<a href="#xof" class="auto internal xref">Section 6.2</a>). The basic observation is
+that if both evaluators have the same seed <code>s</code> of length <code>KEY_SIZE</code>, then
+expanding <code>s</code> using a XOF will also result in the same expansion. If we set the
+length of the XOF expansion to <code>2*KEY_SIZE</code>, it can then be split again into two
+seeds <code>s_l</code>, <code>s_r</code>, that can again serve as XOF seeds. Now if we view seeds as
+XOR-shares of integers, and if evaluators have the same seed at the root of the
+tree, then their expanded trees will form a secret-shared tree of zeros. The
+actual construction will additionally use a <code>convert</code> function before each
+expansion, which maps seeds into the appropriate output domain (see
+<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.4</a>), generating a new seed for the next level in
+the process.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
+<p id="section-8.3.1-3">The open task now is to ensure that evaluators have different seeds at nodes
+that lie on the path to <code>alpha</code>, while having the same seeds on all other nodes.
+This is done using so-called "correction words" that are conditionally added to
+the XOF output by both evaluators.  The condition here is a secret-shared bit,
+called a "control bit", which indicates whether the current node is on the path
+to <code>alpha</code> or not. On the path, the control bits add up to <code>1</code>, meaning only one
+evaluator will add the correction word to its XOF output. Off the path, either
+none or both evaluators add the correction word, and so the seeds at the next
+level stay the same.  What remains is to turn the -- now pseudorandom -- values
+on the path to <code>alpha</code> into the desired <code>beta</code> values. This is done by sending
+<em>value correction words</em> to the evaluators, which are chosen such that when
+added with the pseudorandom shares at the <code>i</code>th node on the path to <code>alpha</code>,
+they add up to shares of <code>beta_i</code>.<a href="#section-8.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.3.1-4">In the following two sections we describe the algorithms for key generation in
+full detail.<a href="#section-8.3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="key-generation">
+<section id="section-8.3.2">
+          <h4 id="name-key-generation">
+<a href="#section-8.3.2" class="section-number selfRef">8.3.2. </a><a href="#name-key-generation" class="section-name selfRef">Key Generation</a>
+          </h4>
+<p id="section-8.3.2-1">The description of the IDPF-key generation algorithm makes use of auxiliary
 functions <code>extend()</code> and <code>convert()</code> defined in
-<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>. In the following, we let <code>Field2</code> denote
-the field <code>GF(2)</code>.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
+<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.4</a>. In the following, we let <code>Field2</code> denote
+the field <code>GF(2)</code>.<a href="#section-8.3.2-1" class="pilcrow">¶</a></p>
 <span id="name-idpf-key-generation-algorit"></span><div id="idpf-bbcggi21-gen">
 <figure id="figure-30">
-            <div class="breakable lang-python sourcecode" id="section-8.3.1-3.1">
+            <div class="breakable lang-python sourcecode" id="section-8.3.2-2.1">
 <pre>
 def gen(
         self,
@@ -8519,21 +8561,16 @@ def gen(
 </section>
 </div>
 <div id="key-evaluation">
-<section id="section-8.3.2">
+<section id="section-8.3.3">
           <h4 id="name-key-evaluation">
-<a href="#section-8.3.2" class="section-number selfRef">8.3.2. </a><a href="#name-key-evaluation" class="section-name selfRef">Key Evaluation</a>
+<a href="#section-8.3.3" class="section-number selfRef">8.3.3. </a><a href="#name-key-evaluation" class="section-name selfRef">Key Evaluation</a>
           </h4>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-8.3.2-1.1">
-              <p id="section-8.3.2-1.1.1">TODO Describe in prose how IDPF-key evaluation algorithm works.<a href="#section-8.3.2-1.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-8.3.2-2">The description of the IDPF-evaluation algorithm makes use of auxiliary
+<p id="section-8.3.3-1">The description of the IDPF-evaluation algorithm makes use of auxiliary
 functions <code>extend()</code> and <code>convert()</code> defined in
-<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.3</a>.<a href="#section-8.3.2-2" class="pilcrow">¶</a></p>
+<a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.4</a>.<a href="#section-8.3.3-1" class="pilcrow">¶</a></p>
 <span id="name-idpf-evaluation-generation-"></span><div id="idpf-bbcggi21-eval">
 <figure id="figure-31">
-            <div class="breakable lang-python sourcecode" id="section-8.3.2-3.1">
+            <div class="breakable lang-python sourcecode" id="section-8.3.3-2.1">
 <pre>
 def eval(
         self,
@@ -8650,13 +8687,13 @@ def eval_next(
 </section>
 </div>
 <div id="idpf-bbcggi21-helper-functions">
-<section id="section-8.3.3">
+<section id="section-8.3.4">
           <h4 id="name-auxiliary-functions-3">
-<a href="#section-8.3.3" class="section-number selfRef">8.3.3. </a><a href="#name-auxiliary-functions-3" class="section-name selfRef">Auxiliary Functions</a>
+<a href="#section-8.3.4" class="section-number selfRef">8.3.4. </a><a href="#name-auxiliary-functions-3" class="section-name selfRef">Auxiliary Functions</a>
           </h4>
 <span id="name-helper-functions-for-the-id"></span><div id="idpf-bbcggi21-helpers">
 <figure id="figure-32">
-            <div class="breakable lang-python sourcecode" id="section-8.3.3-1.1">
+            <div class="breakable lang-python sourcecode" id="section-8.3.4-1.1">
 <pre>
 def extend(
         self,
