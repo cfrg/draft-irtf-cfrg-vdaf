@@ -3924,10 +3924,11 @@ Table of Contents
 7.4.  Variants
 
    This section specifies instantiations of Prio3 for various
-   measurement types.  Each is determined by a field (Section 6.1), a
-   validity circuit (Section 7.3.2), an XOF (Section 6.2), and the
-   number of proofs to generate and verify.  Test vectors for each can
-   be found in Appendix B.  All gadgets are listed in Appendix A.
+   aggregation tasks.  Each variant is determined by a field
+   (Section 6.1), a validity circuit (Section 7.3.2), an XOF
+   (Section 6.2), and the number of proofs to generate and verify.  Test
+   vectors for each can be found in Appendix B.  All gadgets are listed
+   in Appendix A.
 
 7.4.1.  Prio3Count
 
@@ -3945,7 +3946,7 @@ Table of Contents
 
                    Table 9: Parameters for Prio3Count.
 
-   Our first instance of Prio3 is for a simple counter: each measurement
+   Our first variant of Prio3 is for a simple counter: each measurement
    is either one or zero and the aggregate result is the sum of the
    measurements.  Its validity circuit uses the multiplication gadget
    Mul specified in Appendix A.1, which takes two inputs and multiplies
@@ -3999,10 +4000,10 @@ Table of Contents
 
                     Table 10: Parameters for Prio3Sum.
 
-   The next instance of Prio3 supports summing of integers in a pre-
+   The next variant of Prio3 supports summing of integers in a pre-
    determined range.  Each measurement is an integer in range [0,
-   max_measurement], where max_measurement is an associated parameter
-   equal to the largest valid measurement.
+   max_measurement], where max_measurement defines the largest valid
+   measurement.
 
    The range check is accomplished by encoding the measurement as a bit
    vector, encoding the measurement plus an offset as a bit vector, then
@@ -4011,7 +4012,7 @@ Table of Contents
    *  bits = max_measurement.bit_length(), the number of bits needed to
       encode the largest valid measurement
 
-   *  offset = 2**bits - 1 - max_measurement
+   *  offset = 2^bits - 1 - max_measurement
 
    The first bit-encoded integer is the measurement itself.  Note that
    only measurements between 0 and 2^bits - 1 can be encoded this way
@@ -4024,7 +4025,7 @@ Table of Contents
    or a zero.  It then decodes both the measurement and the offset
    measurement, and subtracts offset from the latter.  It then checks if
    these two values are equal.  Since both the measurement and the
-   measurement plus offset are in the same range of [0,2^bits), this
+   measurement plus offset are in the same range of [0, 2^bits), this
    means that the measurement itself is between 0 and max_measurement.
 
    The circuit uses the polynomial-evaluation gadget PolyEval specified
@@ -4104,27 +4105,28 @@ Table of Contents
    three parameters: length, bits, and chunk_length.  Each measurement
    is a vector of positive integers with length equal to the length
    parameter.  Each element of the measurement is an integer in [0,
-   2**bits).  It is RECOMMENDED to set chunk_length to an integer near
+   2^bits).  It is RECOMMENDED to set chunk_length to an integer near
    the square root of length * bits (see Section 7.4.3.1).
 
-   The circuit is denoted SumVec.  Measurements are encoded as a vector
-   of field elements with length length * bits.  The field elements in
-   the encoded vector represent all the bits of the measurement vector's
-   elements, consecutively, in LSB to MSB order.
+   The circuit is denoted SumVec.  Each measurements is encoded as a
+   vector of field elements with length length * bits.  The field
+   elements in the encoded vector represent all the bits of the
+   measurement vector's elements, consecutively, in LSB to MSB order.
 
    The validity circuit uses the ParallelSum gadget in Appendix A.3.
    This gadget applies an arithmetic subcircuit to multiple inputs in
-   parallel, then returns the sum of the results.
+   parallel, then returns the sum of the results.  Along with the
+   subcircuit, the parallel-sum gadget is parameterized by an integer
+   count specifying how many times to call the subcircuit.  It takes in
+   a list of inputs and passes them through to instances of the
+   subcircuit in the same order.  It returns the sum of the subcircuit
+   outputs.
 
-   Along with the subcircuit, the parallel-sum gadget is parameterized
-   by an integer count specifying how many times to call the subcircuit.
-   It takes in a list of inputs and passes them through to instances of
-   the subcircuit in the same order.  It returns the sum of the
-   subcircuit outputs.  Note that only the ParallelSum gadget itself,
-   and not its subcircuit, participates in the FLP's wire recording
-   during evaluation, gadget consistency proofs, and proof validation,
-   even though the subcircuit is provided to ParallelSum gadget as an
-   implementation of the Gadget interface.
+   Note that only the ParallelSum gadget itself, and not its subcircuit,
+   participates in the FLP's wire recording during evaluation, gadget
+   consistency proofs, and proof validation, even though the subcircuit
+   is provided to ParallelSum gadget as an implementation of the Gadget
+   interface.
 
    The SumVec validity circuit checks that the encoded measurement
    consists of ones and zeros.  Rather than use the PolyEval gadget on
@@ -4256,7 +4258,7 @@ Table of Contents
 
                   Table 12: Parameters for Prio3Histogram.
 
-   This instance of Prio3 allows for estimating the distribution of some
+   This variant of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
    increments one histogram bucket, out of a set of fixed buckets.
    (Bucket indexing begins at 0.)  For example, the buckets might
@@ -4265,8 +4267,8 @@ Table of Contents
    into.  The aggregate result counts the number of measurements in each
    bucket.
 
-   The validity circuit is denoted Histogram.  It has two parameters,
-   length, the number of histogram buckets, and chunk_length, which is
+   The validity circuit is denoted Histogram.  It has two parameters:
+   length, the number of histogram buckets; and chunk_length, which is
    used by by a circuit optimization described below.  It is RECOMMENDED
    to set chunk_length to an integer near the square root of length (see
    Section 7.4.3.1).
@@ -6334,7 +6336,8 @@ Table of Contents
 
 Appendix A.  FLP Gadgets
 
-   This section defines gadgets used to construct FLPs as defined in
+   This section defines gadgets used to specify variants of Prio3
+   defined in Section 7.4 and to construct FLPs as defined in
    Section 7.3.
 
 A.1.  Multiplication
@@ -6399,27 +6402,12 @@ A.2.  Polynomial Evaluation
 A.3.  Parallel Sum
 
    The parallel-sum gadget applies a subcircuit to multiple inputs in
-   parallel, then returns the sum of the results.
+   parallel, then returns the sum of the results.  The arity of the
+   gadget is equal to count times the arity of the subcircuit, where
+   count denotes the number of times the subcircuit is called.  The
+   degree of the gadget is equal to the degree of the subcircuit.
 
    class ParallelSum(Gadget[F]):
-       """
-       Evaluates a subcircuit (represented by a Gadget) on multiple
-       inputs, adds the results, and returns the sum.
-
-       The `count` parameter determines how many times the `subcircuit`
-       gadget will be called. The arity of this gadget is equal to the
-       arity of the subcircuit multiplied by the `count` parameter, and
-       the degree of this gadget is equal to the degree of the
-       subcircuit. Input wires will be sequentially mapped to input
-       wires of the subcircuit instances.
-
-       Section 4.4 of the BBCGGI19 paper outlines an optimization for
-       circuits fitting the parallel sum form, wherein a sum of n
-       identical subcircuits can be replaced with sqrt(n) parallel sum
-       gadgets, each adding up sqrt(n) subcircuit results. This results
-       in smaller proofs, since the proof size linearly depends on both
-       the arity of gadgets and the number of times gadgets are called.
-       """
        subcircuit: Gadget[F]
        count: int
 
@@ -6457,6 +6445,10 @@ A.3.  Parallel Sum
            return poly_strip(field, out_sum)
 
 A.4.  Shims for Generating and Verifying Proofs
+
+   This section specifies two "shim" gadgets, one for generating an FLP
+   as specified in Section 7.3.3.1 and another for querying an FLP as
+   specified in Section 7.3.3.2.
 
    class ProveGadget(Gadget[F]):
        """
@@ -6508,7 +6500,6 @@ A.4.  Shims for Generating and Verifying Proofs
            wrapped_valid = deepcopy(valid)
            wrapped_valid.GADGETS = wrapped_gadgets
            return wrapped_valid
-
 
    class QueryGadget(Gadget[F]):
        """

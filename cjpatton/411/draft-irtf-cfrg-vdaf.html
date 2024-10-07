@@ -6153,8 +6153,8 @@ def decide(self, verifier: list[F]) -&gt; bool:
         <h3 id="name-variants">
 <a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-variants" class="section-name selfRef">Variants</a>
         </h3>
-<p id="section-7.4-1">This section specifies instantiations of Prio3 for various measurement types.
-Each is determined by a field (<a href="#field" class="auto internal xref">Section 6.1</a>), a validity circuit
+<p id="section-7.4-1">This section specifies instantiations of Prio3 for various aggregation tasks.
+Each variant is determined by a field (<a href="#field" class="auto internal xref">Section 6.1</a>), a validity circuit
 (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>), an XOF (<a href="#xof" class="auto internal xref">Section 6.2</a>), and the number of proofs to
 generate and verify. Test vectors for each can be found in <a href="#test-vectors" class="auto internal xref">Appendix B</a>.
 All gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix A</a>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
@@ -6206,7 +6206,7 @@ All gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.1-2">Our first instance of Prio3 is for a simple counter: each measurement is either
+<p id="section-7.4.1-2">Our first variant of Prio3 is for a simple counter: each measurement is either
 one or zero and the aggregate result is the sum of the measurements. Its
 validity circuit uses the multiplication gadget <code>Mul</code> specified in
 <a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>, which takes two inputs and multiplies them. The circuit is
@@ -6296,10 +6296,9 @@ class Count(Valid[int, int, F]):
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.2-2">The next instance of Prio3 supports summing of integers in a pre-determined
+<p id="section-7.4.2-2">The next variant of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in range <code>[0, max_measurement]</code>, where
-<code>max_measurement</code> is an associated parameter equal to the largest valid
-measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
+<code>max_measurement</code> defines the largest valid measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a bit vector,
 encoding the measurement plus an offset as a bit vector, then checking that the
 two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
@@ -6309,7 +6308,7 @@ two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcro
 the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.4.2-4.2">
-              <p id="section-7.4.2-4.2.1"><code>offset = 2**bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
+              <p id="section-7.4.2-4.2.1"><code>offset = 2^bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
@@ -6322,7 +6321,7 @@ and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</
 zero. It then decodes both the measurement and the offset measurement, and
 subtracts <code>offset</code> from the latter. It then checks if these two values are
 equal. Since both the measurement and the measurement plus <code>offset</code> are in the
-same range of <code>[0,2^bits)</code>, this means that the measurement itself is
+same range of <code>[0, 2^bits)</code>, this means that the measurement itself is
 between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-7">The circuit uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
 <a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x^2 - x</code>, which is equal to <code>0</code>
@@ -6433,24 +6432,24 @@ class Sum(Valid[int, int, F]):
 <p id="section-7.4.3-2">This instance of Prio3 supports summing vectors of integers. It has three
 parameters: <code>length</code>, <code>bits</code>, and <code>chunk_length</code>. Each measurement is a vector
 of positive integers with length equal to the <code>length</code> parameter. Each element
-of the measurement is an integer in <code>[0, 2**bits)</code>. It is <span class="bcp14">RECOMMENDED</span> to set
+of the measurement is an integer in <code>[0, 2^bits)</code>. It is <span class="bcp14">RECOMMENDED</span> to set
 <code>chunk_length</code> to an integer near the square root of <code>length * bits</code> (see
 <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-3">The circuit is denoted <code>SumVec</code>. Measurements are encoded as a vector of field
-elements with length <code>length * bits</code>. The field elements in the encoded vector
-represent all the bits of the measurement vector's elements, consecutively, in
-LSB to MSB order.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-3">The circuit is denoted <code>SumVec</code>. Each measurements is encoded as a vector of
+field elements with length <code>length * bits</code>. The field elements in the encoded
+vector represent all the bits of the measurement vector's elements,
+consecutively, in LSB to MSB order.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-4">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
-then returns the sum of the results.<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-5">Along with the subcircuit, the parallel-sum gadget is parameterized by an
-integer <code>count</code> specifying how many times to call the subcircuit. It takes in a
-list of inputs and passes them through to instances of the subcircuit in the
-same order. It returns the sum of the subcircuit outputs. Note that only the
-<code>ParallelSum</code> gadget itself, and not its subcircuit, participates in the FLP's
-wire recording during evaluation, gadget consistency proofs, and proof
-validation, even though the subcircuit is provided to <code>ParallelSum</code> gadget as
-an implementation of the <code>Gadget</code> interface.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
+then returns the sum of the results. Along with the subcircuit, the
+parallel-sum gadget is parameterized by an integer <code>count</code> specifying how many
+times to call the subcircuit. It takes in a list of inputs and passes them
+through to instances of the subcircuit in the same order. It returns the sum of
+the subcircuit outputs.<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-5">Note that only the <code>ParallelSum</code> gadget itself, and not its subcircuit,
+participates in the FLP's wire recording during evaluation, gadget consistency
+proofs, and proof validation, even though the subcircuit is provided to
+<code>ParallelSum</code> gadget as an implementation of the <code>Gadget</code> interface.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-6">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
 ones and zeros. Rather than use the <code>PolyEval</code> gadget on each element, as in
 the <code>Sum</code> validity circuit, it instead uses <code>Mul</code> subcircuits (<a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>)
@@ -6614,14 +6613,15 @@ length will result in proofs up to 50% larger than the optimal proof size.<a hre
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.4-2">This instance of Prio3 allows for estimating the distribution of some quantity
+<p id="section-7.4.4-2">This variant of Prio3 allows for estimating the distribution of some quantity
 by computing a simple histogram. Each measurement increments one histogram
 bucket, out of a set of fixed buckets. (Bucket indexing begins at <code>0</code>.) For
-example, the buckets might quantize the real numbers, and each measurement would
-report the bucket that the corresponding client's real-numbered value falls
-into. The aggregate result counts the number of measurements in each bucket.<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.4-3">The validity circuit is denoted <code>Histogram</code>. It has two parameters, <code>length</code>,
-the number of histogram buckets, and <code>chunk_length</code>, which is used by by a
+example, the buckets might quantize the real numbers, and each measurement
+would report the bucket that the corresponding client's real-numbered value
+falls into. The aggregate result counts the number of measurements in each
+bucket.<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-3">The validity circuit is denoted <code>Histogram</code>. It has two parameters: <code>length</code>,
+the number of histogram buckets; and <code>chunk_length</code>, which is used by by a
 circuit optimization described below. It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code>
 to an integer near the square root of <code>length</code> (see
 <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.4-3" class="pilcrow">¶</a></p>
@@ -9152,8 +9152,8 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
       <h2 id="name-flp-gadgets">
 <a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-flp-gadgets" class="section-name selfRef">FLP Gadgets</a>
       </h2>
-<p id="appendix-A-1">This section defines gadgets used to construct FLPs as defined in
-<a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">This section defines gadgets used to specify variants of Prio3 defined in
+<a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a> and to construct FLPs as defined in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
 <div id="gadget-mul">
 <section id="appendix-A.1">
         <h3 id="name-multiplication">
@@ -9233,28 +9233,13 @@ class PolyEval(Gadget[F]):
 <a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a href="#name-parallel-sum" class="section-name selfRef">Parallel Sum</a>
         </h3>
 <p id="appendix-A.3-1">The parallel-sum gadget applies a subcircuit to multiple inputs in parallel,
-then returns the sum of the results.<a href="#appendix-A.3-1" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="appendix-A.3-2">
+then returns the sum of the results. The arity of the gadget is equal to <code>count</code>
+times the arity of the subcircuit, where <code>count</code> denotes the number of times the
+subcircuit is called. The degree of the gadget is equal to the degree of the
+subcircuit.<a href="#appendix-A.3-1" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="appendix-A.3-2">
 <pre>
 class ParallelSum(Gadget[F]):
-    """
-    Evaluates a subcircuit (represented by a Gadget) on multiple
-    inputs, adds the results, and returns the sum.
-
-    The `count` parameter determines how many times the `subcircuit`
-    gadget will be called. The arity of this gadget is equal to the
-    arity of the subcircuit multiplied by the `count` parameter, and
-    the degree of this gadget is equal to the degree of the
-    subcircuit. Input wires will be sequentially mapped to input
-    wires of the subcircuit instances.
-
-    Section 4.4 of the BBCGGI19 paper outlines an optimization for
-    circuits fitting the parallel sum form, wherein a sum of n
-    identical subcircuits can be replaced with sqrt(n) parallel sum
-    gadgets, each adding up sqrt(n) subcircuit results. This results
-    in smaller proofs, since the proof size linearly depends on both
-    the arity of gadgets and the number of times gadgets are called.
-    """
     subcircuit: Gadget[F]
     count: int
 
@@ -9299,7 +9284,10 @@ class ParallelSum(Gadget[F]):
         <h3 id="name-shims-for-generating-and-ve">
 <a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-shims-for-generating-and-ve" class="section-name selfRef">Shims for Generating and Verifying Proofs</a>
         </h3>
-<div class="breakable lang-python sourcecode" id="appendix-A.4-1">
+<p id="appendix-A.4-1">This section specifies two "shim" gadgets, one for generating an FLP as
+specified in <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3.1</a> and another for querying an FLP
+as specified in <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.3.2</a>.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="appendix-A.4-2">
 <pre>
 class ProveGadget(Gadget[F]):
     """
@@ -9352,7 +9340,6 @@ class ProveGadget(Gadget[F]):
         wrapped_valid.GADGETS = wrapped_gadgets
         return wrapped_valid
 
-
 class QueryGadget(Gadget[F]):
     """
     Gadget wrapper that records the input wires for each evaluation.
@@ -9403,7 +9390,7 @@ class QueryGadget(Gadget[F]):
         wrapped_valid = deepcopy(valid)
         wrapped_valid.GADGETS = wrapped_gadgets
         return wrapped_valid
-</pre><a href="#appendix-A.4-1" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
