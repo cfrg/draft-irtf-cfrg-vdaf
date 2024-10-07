@@ -6228,7 +6228,8 @@ class Count(Valid[int, int, F]):
             meas: list[F],
             joint_rand: list[F],
             _num_shares: int) -&gt; list[F]:
-        squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
+        squared = self.GADGETS[0].eval(self.field,
+                                       [meas[0], meas[0]])
         return [squared - meas[0]]
 
     def encode(self, measurement: int) -&gt; list[F]:
@@ -6333,7 +6334,7 @@ class Sum(Valid[int, int, F]):
     def __init__(self, field: type[F], max_measurement: int):
         self.field = field
         self.bits = max_measurement.bit_length()
-        self.offset = self.field(2 ** self.bits - 1 - max_measurement)
+        self.offset = self.field(2**self.bits - 1 - max_measurement)
         self.max_measurement = max_measurement
         self.GADGET_CALLS = [2 * self.bits]
         self.MEAS_LEN = 2 * self.bits

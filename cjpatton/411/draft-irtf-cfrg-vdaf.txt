@@ -3971,7 +3971,8 @@ Table of Contents
                meas: list[F],
                joint_rand: list[F],
                _num_shares: int) -> list[F]:
-           squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
+           squared = self.GADGETS[0].eval(self.field,
+                                          [meas[0], meas[0]])
            return [squared - meas[0]]
 
        def encode(self, measurement: int) -> list[F]:
@@ -4032,55 +4033,55 @@ Table of Contents
    if and only if x is in [0, 2).  The complete circuit is specified
    below.
 
-  class Sum(Valid[int, int, F]):
-      GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
-      JOINT_RAND_LEN = 0
-      OUTPUT_LEN = 1
-      field: type[F]
+   class Sum(Valid[int, int, F]):
+       GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
+       JOINT_RAND_LEN = 0
+       OUTPUT_LEN = 1
+       field: type[F]
 
-      def __init__(self, field: type[F], max_measurement: int):
-          self.field = field
-          self.bits = max_measurement.bit_length()
-          self.offset = self.field(2 ** self.bits - 1 - max_measurement)
-          self.max_measurement = max_measurement
-          self.GADGET_CALLS = [2 * self.bits]
-          self.MEAS_LEN = 2 * self.bits
-          self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
+       def __init__(self, field: type[F], max_measurement: int):
+           self.field = field
+           self.bits = max_measurement.bit_length()
+           self.offset = self.field(2**self.bits - 1 - max_measurement)
+           self.max_measurement = max_measurement
+           self.GADGET_CALLS = [2 * self.bits]
+           self.MEAS_LEN = 2 * self.bits
+           self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
 
-      def eval(
-              self,
-              meas: list[F],
-              joint_rand: list[F],
-              num_shares: int) -> list[F]:
-          shares_inv = self.field(num_shares).inv()
+       def eval(
+               self,
+               meas: list[F],
+               joint_rand: list[F],
+               num_shares: int) -> list[F]:
+           shares_inv = self.field(num_shares).inv()
 
-          out = []
-          for b in meas:
-              out.append(self.GADGETS[0].eval(self.field, [b]))
+           out = []
+           for b in meas:
+               out.append(self.GADGETS[0].eval(self.field, [b]))
 
-          range_check = self.offset * shares_inv + \
-              self.field.decode_from_bit_vector(meas[:self.bits]) - \
-              self.field.decode_from_bit_vector(meas[self.bits:])
-          out.append(range_check)
-          return out
+           range_check = self.offset * shares_inv + \
+               self.field.decode_from_bit_vector(meas[:self.bits]) - \
+               self.field.decode_from_bit_vector(meas[self.bits:])
+           out.append(range_check)
+           return out
 
-      def encode(self, measurement: int) -> list[F]:
-          encoded = []
-          encoded += self.field.encode_into_bit_vector(
-              measurement,
-              self.bits
-          )
-          encoded += self.field.encode_into_bit_vector(
-              measurement + self.offset.as_unsigned(),
-              self.bits
-          )
-          return encoded
+       def encode(self, measurement: int) -> list[F]:
+           encoded = []
+           encoded += self.field.encode_into_bit_vector(
+               measurement,
+               self.bits
+           )
+           encoded += self.field.encode_into_bit_vector(
+               measurement + self.offset.as_unsigned(),
+               self.bits
+           )
+           return encoded
 
-      def truncate(self, meas: list[F]) -> list[F]:
-          return [self.field.decode_from_bit_vector(meas[:self.bits])]
+       def truncate(self, meas: list[F]) -> list[F]:
+           return [self.field.decode_from_bit_vector(meas[:self.bits])]
 
-      def decode(self, output: list[F], _num_measurements: int) -> int:
-          return output[0].as_unsigned()
+       def decode(self, output: list[F], _num_measurements: int) -> int:
+           return output[0].as_unsigned()
 
 7.4.3.  Prio3SumVec
 
