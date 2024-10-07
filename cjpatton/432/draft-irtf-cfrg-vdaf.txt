@@ -1089,11 +1089,11 @@ Table of Contents
    aggregate shares can be updated and merged with other aggregate
    shares in any order.  For instance, for both Prio3 (Section 7) and
    Poplar1 (Section 8), the aggregate shares and output shares both have
-   the same type --- a vector over some finite field (Section 6.1) ---
-   and aggregation involves simply adding vectors toegther.
+   the same type, a vector over some finite field (Section 6.1); and
+   aggregation involves simply adding vectors toegther.
 
-   In theory, however, correct execution of the DAF may require each
-   Aggregator to aggregate output shares in the same order.
+   In theory, however, correct execution may require each Aggregator to
+   aggregate output shares in the same order.
 
 4.5.  Unsharding
 
