@@ -8354,10 +8354,10 @@ split again into two seeds <code>s_l</code>, <code>s_r</code>, that can again se
 of integers, and if evaluators have the same seed at the root of the tree, then their expanded trees will form
 a secret-shared tree of zeros. The actual construction will use a <code>convert</code> function that maps seeds
 into the appropriate output domain.<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.3.1-3">The open task now is to ensure that evaluators have <em>different</em> seeds at nodes that lie on the path
+<p id="section-8.3.1-3">The open task now is to ensure that evaluators have different seeds at nodes that lie on the path
 to <code>alpha</code>, while having the same seeds on all other nodes. This is done using so-called
-<em>correction words</em> that are conditionally added to the XOF output by both evaluators.
-The condition here is a secret-shared bit, called <em>control bit</em>, which indicates whether the
+"correction words" that are conditionally added to the XOF output by both evaluators.
+The condition here is a secret-shared bit, called a "control bit", which indicates whether the
 current node is on the path to <code>alpha</code> or not. On the path, the control bits add up to <code>1</code>, meaning
 only one evaluator will add the correction word to its XOF output. Off the path, either none or
 both evaluators add the correction word, and so the seeds at the next level.
