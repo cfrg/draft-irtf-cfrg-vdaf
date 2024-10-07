@@ -5133,11 +5133,11 @@ called a "control bit", which indicates whether the current node is on the path
 to `alpha` or not. On the path, the control bits add up to `1`, meaning only one
 evaluator will add the correction word to its XOF output. Off the path, either
 none or both evaluators add the correction word, and so the seeds at the next
-level.  What remains is to turn the -- now pseudorandom -- values on the path to
-`alpha` into the desired `beta` values. This is done by sending *value
-correction words* to the evaluators, which are chosen such that when added with
-the pseudorandom shares at the `i`th node on the path to `alpha`, they add up to
-shares of `beta_i`.
+level stay the same.  What remains is to turn the -- now pseudorandom -- values
+on the path to `alpha` into the desired `beta` values. This is done by sending
+*value correction words* to the evaluators, which are chosen such that when
+added with the pseudorandom shares at the `i`th node on the path to `alpha`,
+they add up to shares of `beta_i`.
 
 In the following two sections we describe the algorithms for key generation in
 full detail.
