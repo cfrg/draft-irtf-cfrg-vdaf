@@ -2276,10 +2276,11 @@ Table of Contents
    While XofTurboShake128 as described above can be securely used in all
    cases where a XOF is needed in the VDAFs described in this document,
    there are some cases where a more efficient instantiation based on a
-   blockcipher in a fixed-key mode of operation.  For now, this is
-   limited to the XOF used inside the Idpf Section 8.1 implementation in
-   Poplar1 Section 8.3.  It is NOT RECOMMENDED to use this XOF anywhere
-   else.  See Section 9 for a more detailed discussion.
+   blockcipher in a fixed-key mode of operation is possible.  For now,
+   this is limited to the XOF used inside the Idpf Section 8.1
+   implementation in Poplar1 Section 8.3.  It is NOT RECOMMENDED to use
+   this XOF anywhere else.  See Section 9 for a more detailed
+   discussion.
 
    The following XOF, denoted XofFixedKeyAes128, uses the AES-128
    blockcipher [AES].  The length of the domain separation string dst
