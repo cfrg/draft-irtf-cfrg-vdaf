@@ -36,7 +36,7 @@ Discussion Venues
    https://mailarchive.ietf.org/arch/search/?email_list=cfrg.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/cjpatton/vdaf.
+   https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
 Status of This Memo
 
@@ -6590,7 +6590,7 @@ B.1.  Schema
 
    verify_key:  The verification key encoded in hexadecimal.
 
-   agg_param:  The aggregation parameter of type Vdaf.AggParam.
+   agg_param:  The aggregation parameter encoded in hexadecimal.
 
    prep:  A list of objects with the following schema:
 
