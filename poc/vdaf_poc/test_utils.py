@@ -85,7 +85,7 @@ class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
 class VdafTestVectorDict(Generic[Measurement, AggParam, AggResult], TypedDict):
     shares: int
     verify_key: str
-    agg_param: AggParam
+    agg_param: str
     ctx: str
     prep: list[VdafPrepTestVectorDict[Measurement]]
     agg_shares: list[str]
@@ -122,7 +122,7 @@ def gen_test_vec_for_vdaf(
     test_vec: VdafTestVectorDict[Measurement, AggParam, AggResult] = {
         'shares': vdaf.SHARES,
         'verify_key': verify_key.hex(),
-        'agg_param': agg_param,
+        'agg_param': vdaf.encode_agg_param(agg_param).hex(),
         'ctx': ctx.hex(),
         'prep': [],
         'agg_shares': [],
