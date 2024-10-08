@@ -2,7 +2,7 @@
 
 This is the working area for the individual Internet-Draft, "Verifiable Distributed Aggregation Functions".
 
-* [Editor's Copy](https://cfrg.github.io/draft-irtf-cfrg-vdaf/#go.draft-patton-cfrg-vdaf.html)
+* [Editor's Copy](https://cfrg.github.io/draft-irtf-cfrg-vdaf/#go.draft-irtf-cfrg-vdaf.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-irtf-cfrg-vdaf)
 * [Individual Draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf)
 * [Compare Editor's Copy to Individual Draft](https://cfrg.github.io/draft-irtf-cfrg-vdaf/#go.draft-irtf-cfrg-vdaf.diff)
