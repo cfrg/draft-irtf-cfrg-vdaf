@@ -22,7 +22,7 @@ class Field:
 
     @classmethod
     def zeros(cls, length: int) -> list[Self]:
-        vec = [cls(0) for _ in range(length)]
+        vec = [cls(0)] * length
         return vec
 
     @classmethod
