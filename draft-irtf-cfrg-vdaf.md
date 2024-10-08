@@ -32,6 +32,21 @@ author:
     organization: Google
     email: schoppmann@google.com
 
+normative:
+
+  AES:
+    title: "Advanced Encryption Standard (AES)"
+    author:
+      - ins: M. Dworkin
+      - ins: E. Barker
+      - ins: J. Nechvatal
+      - ins: J. Foti,
+      - ins: L. Bassham
+      - ins: E. Roback
+      - ins: J. Dray Jr.
+    date: 2001
+    target: https://www.nist.gov/publications/advanced-encryption-standard-aes
+
 informative:
 
   AGJOP21:
@@ -2231,12 +2246,15 @@ class XofTurboShake128(Xof):
 
 While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
-cases where a more efficient instantiation based on fixed-key AES is possible.
-For now, this is limited to the XOF used inside the Idpf {{idpf}}
-implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT RECOMMENDED to use this
-XOF anywhere else. The length of the domain separation string `dst` passed to
-XofFixedKeyAes128 MUST NOT exceed 65535 bytes. See {{security}} for a more
-detailed discussion.
+cases where a more efficient instantiation based on a blockcipher in a
+fixed-key mode of operation is possible. For now, this is limited to the XOF used inside
+the Idpf {{idpf}} implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT
+RECOMMENDED to use this XOF anywhere else. See {{security}} for a more detailed
+discussion.
+
+The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
+{{AES}}. The length of the domain separation string `dst` MUST NOT exceed 65535
+bytes.
 
 ~~~ python
 class XofFixedKeyAes128(Xof):
