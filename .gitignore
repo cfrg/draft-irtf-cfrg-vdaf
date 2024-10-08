@@ -3,7 +3,6 @@
 archive.json
 *.bak
 draft-irtf-cfrg-vdaf.xml
-draft-patton-cfrg-vdaf.xml
 *.egg-info
 Gemfile.lock
 /.gems/
