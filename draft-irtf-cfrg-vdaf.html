@@ -4017,13 +4017,14 @@ class XofTurboShake128(Xof):
           </h4>
 <p id="section-6.2.2-1">While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
-cases where a more efficient instantiation based on fixed-key AES is possible.
-For now, this is limited to the XOF used inside the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a>
-implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this
-XOF anywhere else. The length of the domain separation string <code>dst</code> passed to
-XofFixedKeyAes128 <span class="bcp14">MUST NOT</span> exceed 65535 bytes. See <a href="#security" class="auto internal xref">Section 9</a> for a more
-detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-6.2.2-2">
+cases where a more efficient instantiation based on a blockcipher in a
+fixed-key mode of operation is possible. For now, this is limited to the XOF used inside
+the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a> implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this XOF anywhere else. See <a href="#security" class="auto internal xref">Section 9</a> for a more detailed
+discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2.2-2">The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
+<span>[<a href="#AES" class="cite xref">AES</a>]</span>. The length of the domain separation string <code>dst</code> <span class="bcp14">MUST NOT</span> exceed 65535
+bytes.<a href="#section-6.2.2-2" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-6.2.2-3">
 <pre>
 class XofFixedKeyAes128(Xof):
     """
@@ -4082,7 +4083,7 @@ class XofFixedKeyAes128(Xof):
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])
         return xor(AES128(self.fixed_key, sigma_block), sigma_block)
-</pre><a href="#section-6.2.2-2" class="pilcrow">¶</a>
+</pre><a href="#section-6.2.2-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -9323,6 +9324,10 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
 <a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
+<dt id="AES">[AES]</dt>
+        <dd>
+<span class="refAuthor">Dworkin, M.</span>, <span class="refAuthor">Barker, E.</span>, <span class="refAuthor">Nechvatal, J.</span>, <span class="refAuthor">Foti,, J.</span>, <span class="refAuthor">Bassham, L.</span>, <span class="refAuthor">Roback, E.</span>, and <span class="refAuthor">J. Dray Jr</span>, <span class="refTitle">"Advanced Encryption Standard (AES)"</span>, <time datetime="2001" class="refDate">2001</time>, <span>&lt;<a href="https://www.nist.gov/publications/advanced-encryption-standard-aes">https://www.nist.gov/publications/advanced-encryption-standard-aes</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
