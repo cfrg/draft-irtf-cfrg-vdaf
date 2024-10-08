@@ -12,7 +12,7 @@ jobs:
       image: docker://ghcr.io/martinthomson/i-d-template-action:latest
     steps:
     - name: "Checkout"
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: "Check for typos"
       run: "bash -c '! grep -r --file=rejected_dictionary draft-irtf-cfrg-vdaf.md poc'"
