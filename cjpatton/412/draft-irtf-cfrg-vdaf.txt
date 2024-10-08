@@ -283,11 +283,10 @@ Table of Contents
    security requirements, sometimes in subtle but consequential ways.
    This document therefore has two important goals:
 
-   1.  Providing higher-level protocols like [DAP] (RFC EDITOR: remove
-       this reference if not published before the current document) with
-       a simple, uniform interface for accessing privacy-preserving
-       measurement schemes, documenting relevant operational and
-       security requirements, and specifying constraints for safe usage:
+   1.  Providing higher-level protocols, like [DAP], with a simple,
+       uniform interface for accessing privacy-preserving measurement
+       schemes, documenting relevant operational and security
+       requirements, and specifying constraints for safe usage:
 
        1.  General patterns of communications among the various actors
            involved in the system (clients, aggregation servers, and the
@@ -2236,11 +2235,12 @@ Table of Contents
 6.2.1.  XofTurboShake128
 
    This section describes XofTurboShake128, an XOF based on the
-   TurboSHAKE128 [TurboSHAKE].  (RFC EDITOR: Update this reference to
-   the RFC for draft-irtf-cfrg-kangarootwelve once published.)  This XOF
-   is RECOMMENDED for all use cases within VDAFs.  The length of the
-   domain separation string dst passed to XofTurboShake128 MUST NOT
-   exceed 65535 bytes.
+   TurboSHAKE128 [TurboSHAKE].  This XOF is RECOMMENDED for all use
+   cases within VDAFs.  The length of the domain separation string dst
+   passed to XofTurboShake128 MUST NOT exceed 65535 bytes.
+
+      TODO Update the [TurboSHAKE] reference to point to the RFC instead
+      of the draft.
 
    class XofTurboShake128(Xof):
        """XOF wrapper for TurboSHAKE128."""
@@ -2274,12 +2274,16 @@ Table of Contents
 
    While XofTurboShake128 as described above can be securely used in all
    cases where a XOF is needed in the VDAFs described in this document,
-   there are some cases where a more efficient instantiation based on
-   fixed-key AES is possible.  For now, this is limited to the XOF used
-   inside the Idpf Section 8.1 implementation in Poplar1 Section 8.3.
-   It is NOT RECOMMENDED to use this XOF anywhere else.  The length of
-   the domain separation string dst passed to XofFixedKeyAes128 MUST NOT
-   exceed 65535 bytes.  See Section 9 for a more detailed discussion.
+   there are some cases where a more efficient instantiation based on a
+   blockcipher in a fixed-key mode of operation is possible.  For now,
+   this is limited to the XOF used inside the Idpf Section 8.1
+   implementation in Poplar1 Section 8.3.  It is NOT RECOMMENDED to use
+   this XOF anywhere else.  See Section 9 for a more detailed
+   discussion.
+
+   The following XOF, denoted XofFixedKeyAes128, uses the AES-128
+   blockcipher [AES].  The length of the domain separation string dst
+   MUST NOT exceed 65535 bytes.
 
    class XofFixedKeyAes128(Xof):
        """
@@ -6219,6 +6223,12 @@ Table of Contents
 11.  References
 
 11.1.  Normative References
+
+   [AES]      Dworkin, M., Barker, E., Nechvatal, J., Foti,, J.,
+              Bassham, L., Roback, E., and J. Dray Jr, "Advanced
+              Encryption Standard (AES)", 2001,
+              <https://www.nist.gov/publications/advanced-encryption-
+              standard-aes>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
