@@ -33,6 +33,10 @@ jobs:
       working-directory: poc
       run: python -m unittest
 
+    - name: Regenerate test vectors
+      working-directory: poc
+      run: python gen_test_vec.py
+
     - name: Enforce type hints
       working-directory: poc
       run: python -m mypy *.py vdaf_poc/*.py tests/*.py
