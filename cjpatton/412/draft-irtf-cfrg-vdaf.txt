@@ -1280,7 +1280,7 @@ Table of Contents
 
        Pre-conditions:
 
-           - `usage` in `[0,2^16)`
+           - `usage` in `[0, 2^16)`
        """
        return format_dst(0, self.ID, usage) + ctx
 
@@ -1403,7 +1403,7 @@ Table of Contents
 
       -  verify_key MUST have length vdaf.VERIFY_KEY_SIZE.
 
-      -  agg_id MUST be the integer in [0,vdaf.SHARES) that matches the
+      -  agg_id MUST be the integer in [0, vdaf.SHARES) that matches the
          index of input_share in the sequence of input shares output by
          the Client.
 
@@ -3442,7 +3442,7 @@ Table of Contents
 
    This circuit contains one subtraction gate (x-1) and one
    multiplication gate (x * (x-1)).  Observe that C(x) = 0 if and only
-   if x is in [0,2).
+   if x is in [0, 2).
 
    The goal of the proof system is to allow each Aggregator to privately
    and correctly compute a secret share of C(x) from its secret share of
@@ -3531,8 +3531,8 @@ Table of Contents
    x is the length-N input and r is a random field element.  The gadget
    circuit Range2 is the "range-check" polynomial described above, i.e.,
    Range2(x) = x^2 - x.  The idea is that, if x is valid (i.e., each
-   x[j] is in [0,2)), then the circuit will evaluate to zero regardless
-   of the value of r; but if some x[j] is not in [0,2), then the output
+   x[j] is in [0, 2)), then the circuit will evaluate to zero regardless
+   of the value of r; but if some x[j] is not in [0, 2), then the output
    will be non-zero with high probability.
 
    The second extension implemented by our FLP allows the validity
@@ -3545,7 +3545,7 @@ Table of Contents
                r^(L+1) * Range3(x[L]) + ... + r^N * Range3(x[N-1])
 
    where Range3(x) = x^3 - 3x^2 + 2x.  This circuit checks that the
-   first L inputs are in [0,2) and the last N-L inputs are in [0,3).
+   first L inputs are in [0, 2) and the last N-L inputs are in [0, 3).
    The same circuit can be expressed using a simpler gadget, namely
    multiplication, but the resulting proof would be longer.
 
@@ -3970,28 +3970,28 @@ Table of Contents
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.
 
-                    +=================+==============+
-                    | Parameter       | Value        |
-                    +=================+==============+
-                    | GADGETS         | [Mul]        |
-                    +-----------------+--------------+
-                    | GADGET_CALLS    | [1]          |
-                    +-----------------+--------------+
-                    | MEAS_LEN        | 1            |
-                    +-----------------+--------------+
-                    | OUTPUT_LEN      | 1            |
-                    +-----------------+--------------+
-                    | JOINT_RAND_LEN  | 0            |
-                    +-----------------+--------------+
-                    | EVAL_OUTPUT_LEN | 1            |
-                    +-----------------+--------------+
-                    | Measurement     | int in [0,2) |
-                    +-----------------+--------------+
-                    | AggResult       | int          |
-                    +-----------------+--------------+
+                    +=================+===============+
+                    | Parameter       | Value         |
+                    +=================+===============+
+                    | GADGETS         | [Mul]         |
+                    +-----------------+---------------+
+                    | GADGET_CALLS    | [1]           |
+                    +-----------------+---------------+
+                    | MEAS_LEN        | 1             |
+                    +-----------------+---------------+
+                    | OUTPUT_LEN      | 1             |
+                    +-----------------+---------------+
+                    | JOINT_RAND_LEN  | 0             |
+                    +-----------------+---------------+
+                    | EVAL_OUTPUT_LEN | 1             |
+                    +-----------------+---------------+
+                    | Measurement     | int in [0, 2) |
+                    +-----------------+---------------+
+                    | AggResult       | int           |
+                    +-----------------+---------------+
 
-                         Table 10: Parameters of
-                         validity circuit Count.
+                          Table 10: Parameters of
+                          validity circuit Count.
 
 7.4.2.  Prio3Sum
 
@@ -4035,7 +4035,7 @@ Table of Contents
    the offset measurement, and subtracts offset from the latter.  It
    then checks if these two values are equal.  Since both the
    measurement and the measurement plus offset are in the same range of
-   [0,2^bits), this means that the measurement itself is between 0 and
+   [0, 2^bits), this means that the measurement itself is between 0 and
    max_measurement.
 
    The measurement is encoded in 2*bits field elements as follows:

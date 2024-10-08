@@ -2862,7 +2862,7 @@ def domain_separation_tag(self, usage: int, ctx: bytes) -&gt; bytes:
 
     Pre-conditions:
 
-        - `usage` in `[0,2^16)`
+        - `usage` in `[0, 2^16)`
     """
     return format_dst(0, self.ID, usage) + ctx
 </pre><a href="#section-5-9" class="pilcrow">¶</a>
@@ -2999,7 +2999,7 @@ Pre-conditions:<a href="#section-5.2-6.1.4" class="pilcrow">¶</a></p>
                 <p id="section-5.2-6.1.5.1.1"><code>verify_key</code> <span class="bcp14">MUST</span> have length <code>vdaf.VERIFY_KEY_SIZE</code>.<a href="#section-5.2-6.1.5.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.2-6.1.5.2">
-                <p id="section-5.2-6.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>[0,vdaf.SHARES)</code> that matches the
+                <p id="section-5.2-6.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>[0, vdaf.SHARES)</code> that matches the
 index of <code>input_share</code> in the sequence of input shares output by the
 Client.<a href="#section-5.2-6.1.5.2.1" class="pilcrow">¶</a></p>
 </li>
@@ -5509,7 +5509,7 @@ C(x) = x * (x-1)
 </pre><a href="#section-7.3.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.3.1-7">This circuit contains one subtraction gate (<code>x-1</code>) and one multiplication gate
-(<code>x * (x-1)</code>). Observe that <code>C(x) = 0</code> if and only if <code>x</code> is in <code>[0,2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
+(<code>x * (x-1)</code>). Observe that <code>C(x) = 0</code> if and only if <code>x</code> is in <code>[0, 2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-8">The goal of the proof system is to allow each Aggregator to privately and
 correctly compute a secret share of <code>C(x)</code> from its secret share of <code>x</code>. This
 way all they need to determine validity is to add up their shares of <code>C(x)</code>.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
@@ -5595,8 +5595,8 @@ C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
 the length-<code>N</code> input and <code>r</code> is a random field element. The gadget circuit
 <code>Range2</code> is the "range-check" polynomial described above, i.e., <code>Range2(x) =
 x^2 - x</code>. The idea is that, if <code>x</code> is valid (i.e., each <code>x[j]</code> is in
-<code>[0,2)</code>), then the circuit will evaluate to zero regardless of the value of
-<code>r</code>; but if some <code>x[j]</code> is not in <code>[0,2)</code>, then the output will be non-zero
+<code>[0, 2)</code>), then the circuit will evaluate to zero regardless of the value of
+<code>r</code>; but if some <code>x[j]</code> is not in <code>[0, 2)</code>, then the output will be non-zero
 with high probability.<a href="#section-7.3.1.1-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-5">The second extension implemented by our FLP allows the validity circuit to
 contain multiple gadget types. (This generalization was suggested in
@@ -5610,7 +5610,7 @@ C(x, r) = r * Range2(x[0]) + ... + r^L * Range2(x[L-1]) + \
 </pre><a href="#section-7.3.1.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.3.1.1-7">where <code>Range3(x) = x^3 - 3x^2 + 2x</code>. This circuit checks that the first <code>L</code>
-inputs are in <code>[0,2)</code> and the last <code>N-L</code> inputs are in <code>[0,3)</code>. The same
+inputs are in <code>[0, 2)</code> and the last <code>N-L</code> inputs are in <code>[0, 3)</code>. The same
 circuit can be expressed using a simpler gadget, namely multiplication, but the
 resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-8">Third, rather than interpolate the gadget polynomial at inputs <code>1</code>, <code>2</code>, ...,
@@ -6284,7 +6284,7 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
                   <code>Measurement</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code> in <code>[0,2)</code>
+                  <code>int</code> in <code>[0, 2)</code>
 </td>
               </tr>
               <tr>
@@ -6373,7 +6373,7 @@ and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</
 a one or a zero. It then decodes both the measurement and the offset
 measurement, and subtracts <code>offset</code> from the latter. It then checks if these
 two values are equal. Since both the measurement and the measurement plus
-<code>offset</code> are in the same range of <code>[0,2^bits)</code>, this means that the
+<code>offset</code> are in the same range of <code>[0, 2^bits)</code>, this means that the
 measurement itself is between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-7">The measurement is encoded in <code>2*bits</code> field elements as follows:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.2-8">
