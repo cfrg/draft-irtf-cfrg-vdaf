@@ -241,10 +241,10 @@ def poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]:
 def poly_add(field: type[F], p: list[F], q: list[F]) -> list[F]:
     """Add two polynomials."""
     r = field.zeros(max(len(p), len(q)))
-    for i, pi in enumerate(p):
-        r[i] = pi
-    for i, qi in enumerate(q):
-        r[i] += qi
+    for i, p_i in enumerate(p):
+        r[i] = p_i
+    for i, q_i in enumerate(q):
+        r[i] += q_i
     return poly_strip(field, r)
 
 
@@ -263,18 +263,23 @@ def poly_eval(field: type[F], p: list[F], eval_at: F) -> F:
 
 
 def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
-    """Compute the Lagrange interpolation polynomial for the given points."""
+    """
+    Compute the Lagrange interpolation polynomial for the given points.
 
-    # This uses Newton's divided difference interpolation formula.
+    This uses Newton's divided difference interpolation formula.
+
+    See https://en.wikipedia.org/wiki/Newton_polynomial and
+    https://mathworld.wolfram.com/NewtonsDividedDifferenceInterpolationFormula.html.
+    """
 
     assert len(xs) == len(ys)
     n = len(xs)
     one = field(1)
 
     # We interleave three computations in each iteration of the outermost loop.
-    # First, we compute the ith Newton basis polynomial. Second, we compute the
-    # all the ith divided differences. Third, we mutliply the ith basis
-    # polynomial by the one of the ith divided differences, and add the product
+    # First, we compute the `i`th Newton basis polynomial. Second, we compute the
+    # all the `i`th divided differences. Third, we mutliply the `i`th basis
+    # polynomial by the one of the `i`th divided differences, and add the product
     # to the output accumulator. Computation of both the basis polynomials and
     # the divided differences are done recurrently, depending on values from
     # just the previous iteration. However, we calculate a full triangle of
@@ -341,26 +346,26 @@ def xgcd(a: int, b: int) -> tuple[int, int, int]:
 
     Both a and b must be positive integers.
     """
-    last_remainder, remainder = a, b
-    a, last_a, b, last_b = 0, 1, 1, 0
+    (last_remainder, remainder) = (a, b)
+    (a, last_a, b, last_b) = (0, 1, 1, 0)
     while remainder:
-        last_remainder, (quotient, remainder) = (
+        (last_remainder, (quotient, remainder)) = (
             remainder,
             divmod(last_remainder, remainder),
         )
-        a, last_a = last_a - quotient * a, a
-        b, last_b = last_b - quotient * b, b
-    return last_remainder, last_a, last_b
+        (a, last_a) = (last_a - quotient * a, a)
+        (b, last_b) = (last_b - quotient * b, b)
+    return (last_remainder, last_a, last_b)
 
 
 def invmod(x: int, p: int) -> int:
     """
-    Modular multiplicative inverse.
+    Returns x_inv such that (x_inv * x % p) == 0.
 
     Both x and p must be positive integers. Raises an exception if
     x and p are coprime.
     """
-    gcd, a, _b = xgcd(x, p)
+    (gcd, a, _b) = xgcd(x, p)
     if gcd != 1:
         raise ValueError("Arguments to invmod were coprime")
     return a % p

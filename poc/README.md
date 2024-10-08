@@ -11,7 +11,7 @@ generate test vectors.
 This code requires Python 3.12 or later to run. To install:
 
 ```
-pip install git+https://github.com/cfrg/draft-irtf-cfrg-vdaf@draft-irtf-cfrg-vdaf-11#subdirectory=poc
+python -m pip install git+https://github.com/cfrg/draft-irtf-cfrg-vdaf@draft-irtf-cfrg-vdaf-11#subdirectory=poc
 ```
 
 where draft-irtf-cfrg-vdaf-11 is the desired tag. The installed package is called `vdaf_poc`:
