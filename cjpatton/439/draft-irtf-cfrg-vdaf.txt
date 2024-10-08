@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 10 April 2025                                              ISRG
+Expires: 11 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          7 October 2024
+                                                          8 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 April 2025.
+   This Internet-Draft will expire on 11 April 2025.
 
 Copyright Notice
 
@@ -2220,11 +2220,12 @@ Table of Contents
 6.2.1.  XofTurboShake128
 
    This section describes XofTurboShake128, an XOF based on the
-   TurboSHAKE128 [TurboSHAKE].  (RFC EDITOR: Update this reference to
-   the RFC for draft-irtf-cfrg-kangarootwelve once published.)  This XOF
-   is RECOMMENDED for all use cases within VDAFs.  The length of the
-   domain separation string dst passed to XofTurboShake128 MUST NOT
-   exceed 65535 bytes.
+   TurboSHAKE128 [TurboSHAKE].  This XOF is RECOMMENDED for all use
+   cases within VDAFs.  The length of the domain separation string dst
+   passed to XofTurboShake128 MUST NOT exceed 65535 bytes.
+
+      TODO Update the [TurboSHAKE] reference to point to the RFC instead
+      of the draft.
 
    class XofTurboShake128(Xof):
        """XOF wrapper for TurboSHAKE128."""
