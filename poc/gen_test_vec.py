@@ -183,6 +183,7 @@ if __name__ == '__main__':
     )
 
     # Poplar1
+    poplar1_test_number = 0
     tests: list[tuple[int, tuple[tuple[bool, ...], ...]]] = [
         (0, ((False,), (True,))),
         (1, ((False, False), (False, True), (True, False), (True, True))),
@@ -216,8 +217,35 @@ if __name__ == '__main__':
             (test_level, prefixes),
             ctx,
             measurements,
-            test_level,
+            poplar1_test_number,
         )
+        poplar1_test_number += 1
+
+    tests = [
+        (0, ((False,), (True,))),
+        (10, (
+            (False,) * 11,
+            (True, True, False, False, True, False, False, False, False, False,
+             False),
+            (True, True, False, False, True, False, False, False, False, False,
+             True),
+            (True,) * 11,
+        )),
+    ]
+    measurements = [
+        (True, True, False, False, True, False, False, False, False, False,
+         True),
+    ]
+    for (test_level, prefixes) in tests:
+        gen_test_vec_for_vdaf(
+            vdaf_test_vec_path,
+            vdaf_poplar1.Poplar1(11),
+            (test_level, prefixes),
+            ctx,
+            measurements,
+            poplar1_test_number,
+        )
+        poplar1_test_number += 1
 
     # IdpfBBCGGI21
     gen_test_vec_for_idpf(
