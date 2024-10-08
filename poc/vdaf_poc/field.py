@@ -270,6 +270,11 @@ def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
 
     See https://en.wikipedia.org/wiki/Newton_polynomial and
     https://mathworld.wolfram.com/NewtonsDividedDifferenceInterpolationFormula.html.
+
+    Historical note: this was previously implemented using Sage, with a faster
+    version of the same algorithm. The Sage dependency was removed, and
+    operations on field elements and polynomials were re-implemented in pure
+    Python for portability and ease of use.
     """
 
     assert len(xs) == len(ys)
