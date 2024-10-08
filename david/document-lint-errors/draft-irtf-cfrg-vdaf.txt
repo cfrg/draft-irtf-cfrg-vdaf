@@ -1139,9 +1139,7 @@ Table of Contents
        if any(len(nonce) != daf.NONCE_SIZE for nonce in nonces):
            raise ValueError("incorrect nonce size")
        if len(nonces) != len(measurements):
-           raise ValueError(
-               "measurements and nonces lists have different lengths"
-           )
+           raise ValueError("measurements and nonces lists have different lengths")
 
        out_shares: list[list[OutShare]]
        out_shares = [[] for j in range(daf.SHARES)]
