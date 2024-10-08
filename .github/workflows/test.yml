@@ -16,20 +16,27 @@ jobs:
   test:
     name: "Run unit tests for reference code"
     runs-on: ubuntu-latest
-    container:
-      image: sagemath/sagemath:latest
-      options: --user root
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: pip
+
     - name: Install dependencies
-      run: sage --pip install pycryptodomex mypy
+      run: python -m pip install pycryptodomex mypy
 
     - name: Run tests
       working-directory: poc
-      run: sage -python -m unittest
+      run: python -m unittest
+
+    - name: Regenerate test vectors
+      working-directory: poc
+      run: python gen_test_vec.py
 
     - name: Enforce type hints
       working-directory: poc
-      run: sage -python -m mypy *.py vdaf_poc/*.py tests/*.py
+      run: python -m mypy *.py vdaf_poc/*.py tests/*.py

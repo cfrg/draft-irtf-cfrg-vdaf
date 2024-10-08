@@ -1,3 +1,4 @@
+import random
 import unittest
 
 from vdaf_poc.field import (Field, Field2, Field64, Field96, Field128,
@@ -7,26 +8,26 @@ from vdaf_poc.field import (Field, Field2, Field64, Field96, Field128,
 class TestFields(unittest.TestCase):
     def run_field_test(self, cls: type[Field]) -> None:
         # Test constructing a field element from an integer.
-        self.assertTrue(cls(1337) == cls(cls.gf(1337)))
+        self.assertTrue(cls(1337).val == 1337)
 
         # Test generating a zero-vector.
         vec = cls.zeros(23)
         self.assertTrue(len(vec) == 23)
         for x in vec:
-            self.assertTrue(x == cls(cls.gf.zero()))
+            self.assertTrue(x.val == 0)
 
         # Test generating a random vector.
         vec = cls.rand_vec(23)
         self.assertTrue(len(vec) == 23)
 
         # Test arithmetic.
-        x = cls(cls.gf.random_element())
-        y = cls(cls.gf.random_element())
-        self.assertTrue(x + y == cls(x.val + y.val))
-        self.assertTrue(x - y == cls(x.val - y.val))
-        self.assertTrue(-x == cls(-x.val))
-        self.assertTrue(x * y == cls(x.val * y.val))
-        self.assertTrue(x.inv() == cls(x.val**-1))
+        x = cls(random.randrange(0, cls.MODULUS))
+        y = cls(random.randrange(0, cls.MODULUS))
+        self.assertEqual(x + y, cls((x.val + y.val) % cls.MODULUS))
+        self.assertEqual(x - y, cls((x.val - y.val) % cls.MODULUS))
+        self.assertEqual(-x, cls((-x.val) % cls.MODULUS))
+        self.assertEqual(x * y, cls((x.val * y.val) % cls.MODULUS))
+        self.assertEqual(x.inv() * x, cls(1))
 
         # Test serialization.
         want = cls.rand_vec(10)

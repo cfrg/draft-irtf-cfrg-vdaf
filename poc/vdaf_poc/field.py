@@ -1,9 +1,7 @@
 """Definitions of finite fields used in this spec."""
 
+import random
 from typing import Self, TypeVar, cast
-
-from sage.all import GF, PolynomialRing
-from sage.rings.finite_rings.finite_field_constructor import FiniteFieldFactory
 
 from vdaf_poc.common import from_le_bytes, to_le_bytes
 
@@ -17,15 +15,14 @@ class Field:
     # Number of bytes used to encode each field element.
     ENCODED_SIZE: int
 
-    gf: FiniteFieldFactory
-
     def __init__(self, val: int):
-        assert int(val) < self.MODULUS
-        self.val = self.gf(val)
+        assert val >= 0
+        assert val < self.MODULUS
+        self.val = val
 
     @classmethod
     def zeros(cls, length: int) -> list[Self]:
-        vec = [cls(cls.gf.zero()) for _ in range(length)]
+        vec = [cls(0)] * length
         return vec
 
     @classmethod
@@ -33,7 +30,7 @@ class Field:
         """
         Return a random vector of field elements of length `length`.
         """
-        vec = [cls(cls.gf.random_element()) for _ in range(length)]
+        vec = [cls(random.randrange(0, cls.MODULUS)) for _ in range(length)]
         return vec
 
     # NOTE: The encode_vec() and decode_vec() methods are excerpted in
@@ -117,16 +114,16 @@ class Field:
         return decoded
 
     def __add__(self, other: Self) -> Self:
-        return self.__class__(self.val + other.val)
+        return self.__class__((self.val + other.val) % self.MODULUS)
 
     def __neg__(self) -> Self:
-        return self.__class__(-self.val)
+        return self.__class__((-self.val) % self.MODULUS)
 
     def __mul__(self, other: Self) -> Self:
-        return self.__class__(self.val * other.val)
+        return self.__class__((self.val * other.val) % self.MODULUS)
 
     def inv(self) -> Self:
-        return self.__class__(self.val**-1)
+        return self.__class__(invmod(self.val, self.MODULUS))
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Field):
@@ -134,13 +131,13 @@ class Field:
         return cast(bool, self.val == other.val)
 
     def __sub__(self, other: Self) -> Self:
-        return self + (-other)
+        return self.__class__((self.val - other.val) % self.MODULUS)
 
     def __div__(self, other: Self) -> Self:
         return self * other.inv()
 
     def __pow__(self, n: int) -> Self:
-        return self.__class__(self.val ** n)
+        return self.__class__(pow(self.val, n, self.MODULUS))
 
     def __str__(self) -> str:
         return str(self.val)
@@ -149,7 +146,7 @@ class Field:
         return str(self.val)
 
     def as_unsigned(self) -> int:
-        return int(self.gf(self.val))
+        return self.val
 
 
 class NttField(Field):
@@ -173,9 +170,6 @@ class Field2(Field):
     MODULUS = 2
     ENCODED_SIZE = 1
 
-    # Sage finite field object.
-    gf = GF(MODULUS)
-
 
 class Field64(NttField):
     """The finite field GF(2^32 * 4294967295 + 1)."""
@@ -183,9 +177,6 @@ class Field64(NttField):
     MODULUS = 2**32 * 4294967295 + 1
     GEN_ORDER = 2**32
     ENCODED_SIZE = 8
-
-    # Sage finite field object.
-    gf = GF(MODULUS)
 
     @classmethod
     def gen(cls) -> Self:
@@ -199,9 +190,6 @@ class Field96(NttField):
     GEN_ORDER = 2**64
     ENCODED_SIZE = 12
 
-    # Sage finite field object.
-    gf = GF(MODULUS)
-
     @classmethod
     def gen(cls) -> Self:
         return cls(3)**4294966555
@@ -214,9 +202,6 @@ class Field128(NttField):
     GEN_ORDER = 2**66
     ENCODED_SIZE = 16
 
-    # Sage finite field object.
-    gf = GF(MODULUS)
-
     @classmethod
     def gen(cls) -> Self:
         return cls(7)**4611686018427387897
@@ -227,9 +212,6 @@ class Field255(Field):
 
     MODULUS = 2**255 - 19
     ENCODED_SIZE = 32
-
-    # Sage finite field object.
-    gf = GF(MODULUS)
 
 
 ##
@@ -249,10 +231,20 @@ def poly_strip(field: type[F], p: list[F]) -> list[F]:
 
 def poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]:
     """Multiply two polynomials."""
-    r = [field(0) for _ in range(len(p) + len(q))]
+    r = [field(0)] * (len(p) + len(q) - 1)
     for i in range(len(p)):
         for j in range(len(q)):
             r[i + j] += p[i] * q[j]
+    return poly_strip(field, r)
+
+
+def poly_add(field: type[F], p: list[F], q: list[F]) -> list[F]:
+    """Add two polynomials."""
+    r = field.zeros(max(len(p), len(q)))
+    for i, p_i in enumerate(p):
+        r[i] = p_i
+    for i, q_i in enumerate(q):
+        r[i] += q_i
     return poly_strip(field, r)
 
 
@@ -271,7 +263,114 @@ def poly_eval(field: type[F], p: list[F], eval_at: F) -> F:
 
 
 def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
-    """Compute the Lagrange interpolation polynomial for the given points."""
-    R = PolynomialRing(field.gf, 'x')
-    p = R.lagrange_polynomial([(x.val, y.val) for (x, y) in zip(xs, ys)])
-    return poly_strip(field, list(map(field, p.coefficients())))
+    """
+    Compute the Lagrange interpolation polynomial for the given points.
+
+    This uses Newton's divided difference interpolation formula.
+
+    See https://en.wikipedia.org/wiki/Newton_polynomial and
+    https://mathworld.wolfram.com/NewtonsDividedDifferenceInterpolationFormula.html.
+
+    Historical note: this was previously implemented using Sage, with a faster
+    version of the same algorithm. The Sage dependency was removed, and
+    operations on field elements and polynomials were re-implemented in pure
+    Python for portability and ease of use.
+    """
+
+    assert len(xs) == len(ys)
+    n = len(xs)
+    one = field(1)
+
+    # We interleave three computations in each iteration of the outermost loop.
+    # First, we compute the `i`th Newton basis polynomial. Second, we compute the
+    # all the `i`th divided differences. Third, we mutliply the `i`th basis
+    # polynomial by the one of the `i`th divided differences, and add the product
+    # to the output accumulator. Computation of both the basis polynomials and
+    # the divided differences are done recurrently, depending on values from
+    # just the previous iteration. However, we calculate a full triangle of
+    # divided difference values, one row per outer loop iteration, and only
+    # those along the left side (involving y_0) are directly used in the
+    # polynomial interpolation formula. The rest of the triangle is just
+    # computed to be used in subsequent rows of the triangle.
+    #
+    # Newton basis polynomials:
+    # n_i(x) = \prod_{j=0}^{i-1} (x - x_j)
+    # n_0(x) = 1
+    # n_i(x) = n_{i-1}(x) \cdot (x - x_{i - 1})
+    #
+    # Divided differences:
+    # [y_j] = y_j
+    # [y_j, y_{j+1}] = ([y_j] - [y_{j+1}]) / (x_j - x_{j+1})
+    # [y_j, ..., y_k] = ([y_j, ..., y_k] - [y_j, ..., y_k]) / (x_j - x_k)
+    #
+    # Newton polynomial interpolation:
+    # p(x) = \sum_{i=0}^{n-1} [y_0, ..., y_{i}] \cdot n_i(x)
+
+    # Handle i=0 as a special case via initialization of variables.
+    # First basis polynomial: n_0(x) = 1
+    previous_basis_polynomial: list[F] = [one]
+    # The top row of the triangle of divided differences is just every y-value.
+    previous_divided_differences = ys
+    # Initialize the output polynomial with the constant y0. (This is equal to
+    # [y0]*n_0(x) = y0 * 1)
+    output: list[F] = [ys[0]]
+
+    for i in range(1, n):
+        next_basis_polynomial = poly_mul(
+            field,
+            previous_basis_polynomial,
+            [-xs[i - 1], one],
+        )
+        previous_basis_polynomial = next_basis_polynomial
+
+        next_divided_differences: list[F] = []
+        for k in range(len(previous_divided_differences) - 1):
+            next_divided_differences.append(
+                (previous_divided_differences[k]
+                 - previous_divided_differences[k + 1])
+                * (xs[k] - xs[k + i]).inv()
+            )
+        previous_divided_differences = next_divided_differences
+
+        output = poly_add(
+            field,
+            output,
+            poly_mul(
+                field,
+                [next_divided_differences[0]],
+                next_basis_polynomial,
+            ),
+        )
+
+    return output
+
+
+def xgcd(a: int, b: int) -> tuple[int, int, int]:
+    """
+    Extended Euclidean algorithm.
+
+    Both a and b must be positive integers.
+    """
+    (last_remainder, remainder) = (a, b)
+    (a, last_a, b, last_b) = (0, 1, 1, 0)
+    while remainder:
+        (last_remainder, (quotient, remainder)) = (
+            remainder,
+            divmod(last_remainder, remainder),
+        )
+        (a, last_a) = (last_a - quotient * a, a)
+        (b, last_b) = (last_b - quotient * b, b)
+    return (last_remainder, last_a, last_b)
+
+
+def invmod(x: int, p: int) -> int:
+    """
+    Returns x_inv such that (x_inv * x % p) == 0.
+
+    Both x and p must be positive integers. Raises an exception if
+    x and p are coprime.
+    """
+    (gcd, a, _b) = xgcd(x, p)
+    if gcd != 1:
+        raise ValueError("Arguments to invmod were coprime")
+    return a % p

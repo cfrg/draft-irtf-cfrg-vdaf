@@ -165,4 +165,8 @@ class TestGadgets(TestFlpBBCGGI19):
         self.run_gadget_test(Range2(), Field128, 10)
 
     def test_polyeval(self) -> None:
-        self.run_gadget_test(PolyEval([0, -23, 1, 3]), Field128, 10)
+        self.run_gadget_test(
+            PolyEval([0, Field128.MODULUS - 23, 1, 3]),
+            Field128,
+            10,
+        )

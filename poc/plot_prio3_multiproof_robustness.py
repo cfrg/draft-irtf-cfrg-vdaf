@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
 # Plot robustness bounds for various parameters.
 #
-# sage -python plot_prio3_multiproof_robustness.py
+# python plot_prio3_multiproof_robustness.py
 import math
 from typing import TypeVar
 
