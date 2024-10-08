@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-06T00:59:25.649855+00:00",
+  "timestamp": "2024-10-08T00:55:05.754161+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -4971,7 +4971,7 @@
       ],
       "body": "We removed them a couple of drafts ago because updating them was becoming a pain. (Note that machine-readable test vectors can be found in https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/poc/test_vec.)",
       "createdAt": "2023-11-16T15:03:15Z",
-      "updatedAt": "2024-10-03T18:35:24Z",
+      "updatedAt": "2024-10-07T20:43:15Z",
       "closedAt": null,
       "comments": [
         {
@@ -4994,6 +4994,13 @@
           "body": "Removed the draft-12 label: We're leaving a TODO that we'll resolve just before RGLC.",
           "createdAt": "2024-10-01T02:14:48Z",
           "updatedAt": "2024-10-01T02:14:48Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Per the 2024/10/4 call: I will add vectors for Prio3 exercising more distinct measurements; @divergentdave will add vectors for Poplar1 exercising bit lengths that are not a multiple of 8.",
+          "createdAt": "2024-10-07T20:43:13Z",
+          "updatedAt": "2024-10-07T20:43:13Z"
         }
       ]
     },
@@ -5775,7 +5782,7 @@
       "id": "I_kwDOGKuqOc6S4TXn",
       "title": "Gentle introduction to IDPF generation/evaluation",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/397",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5787,8 +5794,8 @@
       ],
       "body": "We need text that conveys the intuition of how IDPFs work, and whey they're private:\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4902-L4903\r\n\r\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/beaaffec1d066157deac9fe6b6367a4eaec2f2f3/draft-irtf-cfrg-vdaf.md?plain=1#L4981",
       "createdAt": "2024-08-13T21:13:44Z",
-      "updatedAt": "2024-09-06T17:06:46Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-07T16:00:03Z",
+      "closedAt": "2024-10-07T16:00:03Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -6021,14 +6028,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "divergentdave"
+      ],
       "labels": [
         "idea",
         "poc"
       ],
       "body": "[It was suggested on the CFRG mailing list](https://mailarchive.ietf.org/arch/msg/cfrg/ht4YzBMYWoQvKxlCxx-CAPJFtC0/) that VDAF implementers could integrate the reference code directly into their tests, similar to the [SUPERCOP](https://bench.cr.yp.to/supercop.html) project. However such tests would need sage as a dependency, which is not ideal. If we removed the sage dependency, then the only dependency would by python3, which is just about everywhere these days. Of course, they would also need to install pycryptodomex.\r\n\r\nI believe we only use sage for the finite field arithmetic and polynomial interpolation, neither of which would be terribly complicated to implement ourselves.\r\n\r\nNote that this conflicts with #282.",
       "createdAt": "2024-09-23T15:11:57Z",
-      "updatedAt": "2024-09-23T15:13:15Z",
+      "updatedAt": "2024-10-07T23:30:28Z",
       "closedAt": null,
       "comments": []
     },
@@ -6048,7 +6057,7 @@
       ],
       "body": "The current aggregation API takes a sequence of output shares and returns an aggregate share. This envisions VDAFs for which the aggregate result depends on the order in which output shares are aggregated, but so far this isn't true of anything we've come up with. In fact, DAP (implicitly?) requires a VDAF for which output shares can be aggregated in any order. (The Leader and Helper may not aggregate output shares in the same order.)\r\n\r\nOne problem with the current API is that it doesn't align well with practice. Normally what we expect Aggregators to do is aggregate in a \"streaming\" fashion, meaning output shares are not stored individually, but accumulated into an existing aggregate share as soon as they're ready to be aggregated.\r\n\r\nIn fact, we'd like to make this \"streaming aggregation\" normative in DAP: https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/581.\r\n\r\nHowever in order to do this, we'll need to modify the VDAF syntax. There's a few things we could do, but probably the simplest is to split `vdaf.aggregate()` into the following functions:\r\n\r\n* `vdaf.agg_init() -> AggShare`: returns an empty aggregate share.\r\n* `vdaf.agg_update(agg_share: AggShare, out_share) -> AggShare`: updates an aggregate share with the incoming output share.",
       "createdAt": "2024-09-23T22:53:16Z",
-      "updatedAt": "2024-10-04T15:27:26Z",
+      "updatedAt": "2024-10-07T21:43:00Z",
       "closedAt": null,
       "comments": [
         {
@@ -6071,6 +6080,34 @@
           "body": "I can live with:\r\n\r\n- `vdaf.aggregate_init(agg_param: AggParam) -> AggShare`\r\n- `vdaf.accumulate(agg_param: AggParam, share: AggShare, out_share: OutShare) -> AggShare`\r\n- `vdaf.merge(agg_param: AggParam, shares: list[AggShare]) -> AggShare`\r\n\r\nBut the risk is that there may be some future VDAF that won't fit this shape. I'm comfortable accepting that risk.",
           "createdAt": "2024-09-24T22:33:30Z",
           "updatedAt": "2024-09-24T22:33:30Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm working on this now and had an idea for something slightly more succinct:\r\n\r\n```python3\r\n    @abstractmethod\r\n    def agg_init(self,\r\n                 agg_param: AggParam) -> AggShare:\r\n        \"\"\"\r\n        Return an empty aggregate share.\r\n        \"\"\"\r\n        pass\r\n\r\n    @abstractmethod\r\n    def agg_update(\r\n            self,\r\n            agg_param: AggParam,\r\n            agg_share: AggShare,\r\n            agg_delta: OutShare | AggShare) -> AggShare:\r\n        \"\"\"\r\n        Accumulate an output share or an aggregate share into an aggregate\r\n        share and return the updated aggregate share.\r\n        \"\"\"\r\n        pass\r\n```",
+          "createdAt": "2024-10-07T20:55:18Z",
+          "updatedAt": "2024-10-07T20:55:18Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "My concern with the two-method API is that it leaves the conversion from output share to aggregate share implicit. While this conversion is the identity function for Prio3 and Poplar1, I could imagine that this might be nontrivial in some other VDAF, especially if the aggregation parameter is involved. Our reference implementation framework may make it hard to distinguish between the `OutShare` and `AggShare` cases. (similar to the issue we had with trying to check the type of the output of prep_next() in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/388#discussion_r1704644458)\r\n\r\nHow about a three-method API with `aggregate_init()`, `merge()`, and a conversion method that takes an `OutShare` and produces an `AggShare`? This similar to how libprio-rs requires a `From` conversion from output share to aggregate share in its `Aggregatable` trait, which encapsulates this \"streaming\" property.",
+          "createdAt": "2024-10-07T21:33:08Z",
+          "updatedAt": "2024-10-07T21:33:08Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> My concern with the two-method API is that it leaves the conversion from output share to aggregate share implicit. While this conversion is the identity function for Prio3 and Poplar1, I could imagine that this might be nontrivial in some other VDAF, especially if the aggregation parameter is involved.\r\n\r\nWhat sort of VDAF are you imagining here? I think it would help the doc if we could be more concrete. \r\n\r\n> Our reference implementation framework may make it hard to distinguish between the `OutShare` and `AggShare` cases. (similar to the issue we had with trying to check the type of the output of prep_next() in [#388 (comment)](https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/388#discussion_r1704644458))\r\n\r\nPersonally I have not seen a compelling reason to distinguish between output shares and aggregate shares at all.\r\n\r\n\r\n> How about a three-method API with `aggregate_init()`, `merge()`, and a conversion method that takes an `OutShare` and produces an `AggShare`? This similar to how libprio-rs requires a `From` conversion from output share to aggregate share in its `Aggregatable` trait, which encapsulates this \"streaming\" property.\r\n\r\nThat's more or less isomorphic to @tgeoghegan's proposal, right? I think his idea is a little cleaner.\r\n\r\n\r\n",
+          "createdAt": "2024-10-07T21:39:38Z",
+          "updatedAt": "2024-10-07T21:39:38Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> (Responding to myself here) Personally I have not seen a compelling reason to distinguish between output shares and aggregate shares at all.\r\n\r\nThat said, I would prefer not to merge the concepts of output share and aggregate share at this state of spec's development. I think let's go with @tgeoghegan's suggestion.",
+          "createdAt": "2024-10-07T21:42:59Z",
+          "updatedAt": "2024-10-07T21:42:59Z"
         }
       ]
     },
@@ -6079,7 +6116,7 @@
       "id": "I_kwDOGKuqOc6YOSzJ",
       "title": "Remove leading \"`k_`\" in variable names",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/435",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6091,8 +6128,8 @@
       ],
       "body": "This was meant to denote that something is an XOF seed, but not that we're making good use of type hints, this doesn't seem necessary anymore.",
       "createdAt": "2024-09-27T23:37:47Z",
-      "updatedAt": "2024-10-04T15:27:37Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-07T19:02:37Z",
+      "closedAt": "2024-10-07T19:02:37Z",
       "comments": []
     },
     {
@@ -6100,7 +6137,7 @@
       "id": "I_kwDOGKuqOc6YkRPz",
       "title": "Make sure all variables imported from `typing` are defined in the draft",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/438",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6112,8 +6149,8 @@
       ],
       "body": "",
       "createdAt": "2024-10-01T15:55:01Z",
-      "updatedAt": "2024-10-04T18:12:00Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-07T17:39:03Z",
+      "closedAt": "2024-10-07T17:39:03Z",
       "comments": [
         {
           "author": "divergentdave",
@@ -6149,7 +6186,7 @@
       "id": "I_kwDOGKuqOc6Y45WM",
       "title": "Move \"Acknowledgements\" to unnumbered section just before \"Authors' Addresses\"",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/441",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6161,7 +6198,26 @@
       ],
       "body": "",
       "createdAt": "2024-10-03T21:44:15Z",
-      "updatedAt": "2024-10-04T15:31:47Z",
+      "updatedAt": "2024-10-07T14:40:03Z",
+      "closedAt": "2024-10-07T14:40:03Z",
+      "comments": []
+    },
+    {
+      "number": 453,
+      "id": "I_kwDOGKuqOc6ZSRjJ",
+      "title": "Should each code listing have a caption?",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/453",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "When we specify an algorithm, sometimes we give it a figure number and caption, sometimes we don't. Which do we prefer? We don't (nor can we?) refer to these figures in the doc; we instead refer to the section that contains them.\r\n\r\nAt last count on my current development branch, we have 32 figures in the draft. If we reduced the figures to only drawings, then it would be easier to refer to them simply becausae there are less of them.",
+      "createdAt": "2024-10-07T23:18:56Z",
+      "updatedAt": "2024-10-07T23:18:56Z",
       "closedAt": null,
       "comments": []
     }
@@ -33332,7 +33388,7 @@
       ],
       "body": "This PR updates `is_valid()` for DAFs to take a list of previous aggregation parameters, following a similar change to VDAFs. It also updates the description of VDAF sharding to reflect that DAF sharding has the same sets of inputs and outputs.",
       "createdAt": "2024-07-10T21:15:16Z",
-      "updatedAt": "2024-07-11T14:16:07Z",
+      "updatedAt": "2024-10-07T16:22:30Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "80dfdd328df5a629f7095e038300a77fe15d9e91",
@@ -33946,7 +34002,7 @@
       ],
       "body": "Closes #283.\r\nBased on #386 (merge that first).\r\n\r\nAdd an implementation of the ping-pong API to the reference code. The\r\npseudocode currently in the draft doesn't compile, so replace it with\r\nthe tested, type-checked, and linted Python.\r\n\r\nAlso, in the draft, we don't need to list the encoding methods used by\r\nthe ping-pong API; these should be clear in context.",
       "createdAt": "2024-08-05T20:51:14Z",
-      "updatedAt": "2024-08-13T18:43:26Z",
+      "updatedAt": "2024-10-07T21:28:51Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "bb104e39792d7dd7400a492b3217d13784a0625b",
@@ -38079,7 +38135,7 @@
       "id": "PR_kwDOGKuqOc59n4P4",
       "title": "Add high-level overview of the IDPF construction",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/442",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "schoppmp",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -38088,17 +38144,19 @@
       ],
       "body": "Closes #397",
       "createdAt": "2024-10-04T13:33:45Z",
-      "updatedAt": "2024-10-04T17:56:03Z",
+      "updatedAt": "2024-10-07T16:00:01Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "033e2cd1eedd35a3f0e043c5f97b7d5f1f454bf5",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "schoppmp/issue-397",
-      "headRefOid": "331f32c79bc72020223459dd0e2277b09cab089b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "11d882e825ced32b07c768fdaa68b0af91e929cd",
+      "closedAt": "2024-10-07T16:00:01Z",
+      "mergedAt": "2024-10-07T16:00:01Z",
+      "mergedBy": "schoppmp",
+      "mergeCommit": {
+        "oid": "ace847c22b9b0ee2c5a04ea3ee652620792e1245"
+      },
       "comments": [],
       "reviews": [
         {
@@ -38366,6 +38424,46 @@
               "updatedAt": "2024-10-04T17:56:03Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MNUpg",
+          "commit": {
+            "abbreviatedOid": "331f32c"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-07T15:31:26Z",
+          "updatedAt": "2024-10-07T15:31:27Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Mentioned that.",
+              "createdAt": "2024-10-07T15:31:27Z",
+              "updatedAt": "2024-10-07T15:31:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MNUre",
+          "commit": {
+            "abbreviatedOid": "331f32c"
+          },
+          "author": "schoppmp",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-07T15:31:30Z",
+          "updatedAt": "2024-10-07T15:31:30Z",
+          "comments": [
+            {
+              "originalPosition": 22,
+              "body": "Done.",
+              "createdAt": "2024-10-07T15:31:30Z",
+              "updatedAt": "2024-10-07T15:31:30Z"
+            }
+          ]
         }
       ]
     },
@@ -38374,7 +38472,7 @@
       "id": "PR_kwDOGKuqOc59p9el",
       "title": "Add definitions of type hint identifiers",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/443",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -38383,17 +38481,19 @@
       ],
       "body": "Closes #438.",
       "createdAt": "2024-10-04T18:36:06Z",
-      "updatedAt": "2024-10-04T19:16:42Z",
+      "updatedAt": "2024-10-07T17:39:05Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "096be4aa5ef560e0ff2dec88622b62c2fabd5fd7",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/type-hint-definitions",
       "headRefOid": "12c846a74c1ab787a54afe860602a9e6ab1211de",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-10-07T17:39:02Z",
+      "mergedAt": "2024-10-07T17:39:02Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "96a53f85e35be3601ea455d0fc3aa3aaa070312a"
+      },
       "comments": [],
       "reviews": [
         {
@@ -38471,16 +38571,18 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-13"
+      ],
       "body": "This is a first attempt at #431. It works, and it's slower, which is to be expected, but currently it's a lot slower. Unit tests take 22 seconds instead of 2 seconds. I think I may take a second pass at polynomial interpolation, using the method of divided differences, and see if that improves the speed somewhat.",
       "createdAt": "2024-10-04T21:21:34Z",
-      "updatedAt": "2024-10-04T21:35:25Z",
+      "updatedAt": "2024-10-08T00:09:22Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9421d9cca4fa4ffc8dba93a6f905d2395c5665d5",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/eject-sage",
-      "headRefOid": "874c116b60e9bb0c78c3034af23f53a1cd73a4d1",
+      "headRefOid": "0c92b17a1cc445ef294794cb5e56f78b921dcc28",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -38492,6 +38594,474 @@
           "body": "> This is a first attempt at #431. It works, and it's slower, which is to be expected, but currently it's a lot slower. Unit tests take 22 seconds instead of 2 seconds. I think I may take a second pass at polynomial interpolation, using the method of divided differences, and see if that improves the speed somewhat.\r\n\r\n22 is definitely too slow :) Another option is to just implement NTT? We only use it in FLP anyway.",
           "createdAt": "2024-10-04T21:31:02Z",
           "updatedAt": "2024-10-04T21:31:02Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Divided differences brings the time down to 10s. These are the remaining ideas I have for algorithmic speedups:\r\n\r\n- Conditionally use NTT if the interpolation points match\r\n- Use the extended Euclidean algorithm for multiplicative inverses, instead of Euler's theorem. Sage currently uses the extended Euclidean algorithm via GMP. (addition-chain exponentiation could speed up using Euler's theorem, but we don't care about constant timeness, and extended GCD is likely faster and simpler)\r\n- I recall discovering that Python's modular exponentiation algorithm for 3-argument `pow()` is slower than what Sage has, but that might have been only relevant for much larger inputs.\r\n\r\nI'll do the extended Euclidean algorithm next, as that is easy to do, and we'll see how far that gets us.\r\n\r\n> By the time you're done, you will have written an ad hoc, informally-specified, bug-ridden, slow implementation of one percent of SageMath.\r\n\r\n-- https://cryptopals.com/sets/8",
+          "createdAt": "2024-10-07T21:01:21Z",
+          "updatedAt": "2024-10-07T21:01:21Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Test suite runtime is now 6.7s in CI and 4.1s locally for me. I think this is about as good as we can get it without a lot more complexity.",
+          "createdAt": "2024-10-07T21:44:38Z",
+          "updatedAt": "2024-10-07T21:44:38Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Test suite runtime is now 6.7s in CI and 4.1s locally for me. I think this is about as good as we can get it without a lot more complexity.\r\n\r\n4 seconds is doable. Have you tried generating the test vectors? Hopefully that's quick, too.\r\n\r\nMy main concern about landing this is the runtime of PINE's (https://github.com/junyechen1996/draft-chen-cfrg-vdaf-pine/) unit tests, which at the moment take about 10 seconds. Let's prototype this in that repo before land this.",
+          "createdAt": "2024-10-07T21:54:15Z",
+          "updatedAt": "2024-10-07T21:54:15Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Test vector generation just takes 0.6s for me.\r\n\r\nFWIW, here are the slowest tests. We could probably also speed things up by tweaking the dimensions they use, but I think that would be best handled separately.\r\n\r\n```\r\nSlowest test durations\r\n----------------------------------------------------------------------\r\n2.053s     test (tests.test_vdaf_prio3.TestPrio3SumVecWithMultiproof.test)\r\n0.905s     test (tests.test_idpf_bbcggi21.TestIdpfBBCGGI21.test)\r\n0.478s     test (tests.test_vdaf_prio3.TestPrio3SumVec.test)\r\n0.219s     test_poplar1 (tests.test_vdaf_poplar1.TestPoplar1.test_poplar1)\r\n```\r\n\r\n",
+          "createdAt": "2024-10-07T22:05:11Z",
+          "updatedAt": "2024-10-07T22:05:11Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> My main concern about landing this is the runtime of PINE's (https://github.com/junyechen1996/draft-chen-cfrg-vdaf-pine/) unit tests, which at the moment take about 10 seconds. Let's prototype this in that repo before land this.\r\n\r\nI hacked this together here: https://github.com/junyechen1996/draft-chen-cfrg-vdaf-pine/commit/bfe25cd9bb08008c608f6455bf71193990337580\r\n\r\nAs expected, the unit tests take longer, about twice as long (now 12 seconds). Test vector generation also takes about twice as long, now 120 seconds. Note that we generate test vectors for higher dimensional data for PINE than we do for Prio3.\r\n\r\nI still think we should take this change, given how much more portable it makes the reference code, but let's check with @junyechen1996 to make sure this isn't a deal breaker.",
+          "createdAt": "2024-10-08T00:00:02Z",
+          "updatedAt": "2024-10-08T00:00:02Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "For PINE's sake, there's one other algorithmic improvement we may want to consider other than those listed above: multiplying polynomials using NTT instead of the straightforward quadratic algorithm. This only matters when multiplying large polynomials.",
+          "createdAt": "2024-10-08T00:06:51Z",
+          "updatedAt": "2024-10-08T00:06:51Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> For PINE's sake, there's one other algorithmic improvement we may want to consider other than those listed above: multiplying polynomials using NTT instead of the straightforward quadratic algorithm. This only matters when multiplying large polynomials.\r\n\r\nRight, as we do in libprio already. How much would we have to change the spec? I wouldn't want to have to change too much to accommodate this. In particular, I wouldn't want to make the spec less clear.",
+          "createdAt": "2024-10-08T00:09:22Z",
+          "updatedAt": "2024-10-08T00:09:22Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 446,
+      "id": "PR_kwDOGKuqOc5900C1",
+      "title": "Move acknowledgments to last appendix",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/446",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #441.\r\n\r\nAlso, remove its section number.",
+      "createdAt": "2024-10-07T14:24:14Z",
+      "updatedAt": "2024-10-07T14:40:02Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9421d9cca4fa4ffc8dba93a6f905d2395c5665d5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/441",
+      "headRefOid": "4e9566b811f26cb9e127e6f3cbce9882e445a1f7",
+      "closedAt": "2024-10-07T14:40:02Z",
+      "mergedAt": "2024-10-07T14:40:02Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "e0037b45be192467a87344c9b787f30c1ec74067"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MMn3Y",
+          "commit": {
+            "abbreviatedOid": "4e9566b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-07T14:26:08Z",
+          "updatedAt": "2024-10-07T14:26:08Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 447,
+      "id": "PR_kwDOGKuqOc5908C2",
+      "title": "Remove RFC EDITOR note about DAP draft",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/447",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #439.\r\n\r\nRFC 9180 (HPKE) and has an informative reference to draft-ietf-tls-esni (a protocol that uses HPKE). It's therefore reasonable to believe that VDAF may have an informative reference to draft-ietf-ppm-dap.",
+      "createdAt": "2024-10-07T14:36:23Z",
+      "updatedAt": "2024-10-07T14:39:07Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9421d9cca4fa4ffc8dba93a6f905d2395c5665d5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/439",
+      "headRefOid": "d5539018306169c364c29dcc72bd65a869cc279a",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There are four remaining RFC EDITOR notes:\r\n\r\n1. Remove the paragraph in the intro pointing to the draft repo\r\n2. Remove the change log section\r\n3. Replace the normative reference to draft-irtf-cfrg-kangarootwelve with the RFC once published\r\n4. Add the RFC number to the codepoints table",
+          "createdAt": "2024-10-07T14:39:05Z",
+          "updatedAt": "2024-10-07T14:39:05Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MMxRg",
+          "commit": {
+            "abbreviatedOid": "d553901"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-07T14:38:59Z",
+          "updatedAt": "2024-10-07T14:38:59Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 448,
+      "id": "PR_kwDOGKuqOc591DhQ",
+      "title": "Remove `k_` prefix from seed variables",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/448",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #435.\r\n\r\nAlso, add a `_seed` suffix where the new variable name is confusing: `k_prove` -> `prove_seed` in Prio3; and `k_shard` -> `shard_seed` in Poplar1.",
+      "createdAt": "2024-10-07T14:49:10Z",
+      "updatedAt": "2024-10-07T19:02:36Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "e0037b45be192467a87344c9b787f30c1ec74067",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/435",
+      "headRefOid": "11db23683f68a29862280e1e4ecc7b7b88e7a45d",
+      "closedAt": "2024-10-07T19:02:36Z",
+      "mergedAt": "2024-10-07T19:02:36Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "fe5027fd8ca78090c621eb204212b8385bfd74fd"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MNgbH",
+          "commit": {
+            "abbreviatedOid": "dd9b5b8"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-07T15:52:31Z",
+          "updatedAt": "2024-10-07T16:26:27Z",
+          "comments": [
+            {
+              "originalPosition": 61,
+              "body": "This instance of `k_prove` should match the other.\r\n```suggestion\r\n    (leader_blind, prove_seed), seeds = front(2, seeds)\r\n```",
+              "createdAt": "2024-10-07T15:52:31Z",
+              "updatedAt": "2024-10-07T16:26:27Z"
+            },
+            {
+              "originalPosition": 154,
+              "body": "Same here\r\n```suggestion\r\n        (leader_blind, prove_seed), seeds = front(2, seeds)\r\n```",
+              "createdAt": "2024-10-07T15:52:45Z",
+              "updatedAt": "2024-10-07T16:26:27Z"
+            },
+            {
+              "originalPosition": 173,
+              "body": "I wonder if we should use `joint_rand_seed` in this method and prep_shares_to_prep() to avoid confusion. (since we're just checking seeds, and don't actually expand out the full joint randomness vector)",
+              "createdAt": "2024-10-07T15:57:31Z",
+              "updatedAt": "2024-10-07T16:26:27Z"
+            },
+            {
+              "originalPosition": 258,
+              "body": "This should be renamed as well.\r\n```suggestion\r\ndef prove_rands(self, ctx: bytes, prove_seed: bytes) -> list[F]:\r\n```",
+              "createdAt": "2024-10-07T16:02:08Z",
+              "updatedAt": "2024-10-07T16:26:27Z"
+            },
+            {
+              "originalPosition": 258,
+              "body": "Same here\r\n```suggestion\r\n    def prove_rands(self, ctx: bytes, prove_seed: bytes) -> list[F]:\r\n```",
+              "createdAt": "2024-10-07T16:02:33Z",
+              "updatedAt": "2024-10-07T16:26:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MOGml",
+          "commit": {
+            "abbreviatedOid": "dd9b5b8"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-07T17:05:22Z",
+          "updatedAt": "2024-10-07T17:10:56Z",
+          "comments": [
+            {
+              "originalPosition": 61,
+              "body": "Done.",
+              "createdAt": "2024-10-07T17:05:22Z",
+              "updatedAt": "2024-10-07T17:10:56Z"
+            },
+            {
+              "originalPosition": 173,
+              "body": "Agreed, done.",
+              "createdAt": "2024-10-07T17:05:37Z",
+              "updatedAt": "2024-10-07T17:10:56Z"
+            },
+            {
+              "originalPosition": 258,
+              "body": "Done.",
+              "createdAt": "2024-10-07T17:06:14Z",
+              "updatedAt": "2024-10-07T17:10:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MOlMT",
+          "commit": {
+            "abbreviatedOid": "11db236"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-07T18:13:23Z",
+          "updatedAt": "2024-10-07T18:13:23Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 449,
+      "id": "PR_kwDOGKuqOc591Oiv",
+      "title": "Express ranges in mathematical notation",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/449",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #412.\r\n\r\n* Use `[0, end)` instead of `range(end)`\r\n* Use `[start, end)` instead of `range(start,end)`\r\n* Use `[start, end]` instead of `range(start,end+1)`\r\n* Use `^` to denote exponentiation rather than `**`",
+      "createdAt": "2024-10-07T15:06:07Z",
+      "updatedAt": "2024-10-07T19:11:47Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "fe5027fd8ca78090c621eb204212b8385bfd74fd",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/412",
+      "headRefOid": "c50c4555a519b252540c677269cc5be66e5126d3",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased.",
+          "createdAt": "2024-10-07T19:11:46Z",
+          "updatedAt": "2024-10-07T19:11:46Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 450,
+      "id": "PR_kwDOGKuqOc5918uc",
+      "title": "Fix long line",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/450",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "This fixes another long line, introduced in a recent PR. It also adds a check to CI to catch such warnings going forward.\r\n\r\nI tested that this works in CI, see https://github.com/cfrg/draft-irtf-cfrg-vdaf/actions/runs/11220047961/job/31187354251.",
+      "createdAt": "2024-10-07T16:43:14Z",
+      "updatedAt": "2024-10-07T17:39:36Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "ace847c22b9b0ee2c5a04ea3ee652620792e1245",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/fix-long-line",
+      "headRefOid": "6410d900c4e77e257c6ade72e21e9e7c05234d49",
+      "closedAt": "2024-10-07T17:39:33Z",
+      "mergedAt": "2024-10-07T17:39:33Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "9188741e528550f9fda9a1b58dc59df796ccf790"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MOFvr",
+          "commit": {
+            "abbreviatedOid": "9358cd6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-07T17:03:30Z",
+          "updatedAt": "2024-10-07T17:04:48Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\r\n    - name: \"Check for warnings emitted by the I-D tool\"\r\n```",
+              "createdAt": "2024-10-07T17:03:31Z",
+              "updatedAt": "2024-10-07T17:04:48Z"
+            },
+            {
+              "originalPosition": 14,
+              "body": "nit: run `make clean` first just in case we already have run `make` in this container. \r\n\r\n(Or tell me that this can't happen because of how containers work!)",
+              "createdAt": "2024-10-07T17:04:41Z",
+              "updatedAt": "2024-10-07T17:04:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MOSbF",
+          "commit": {
+            "abbreviatedOid": "9358cd6"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-07T17:31:14Z",
+          "updatedAt": "2024-10-07T17:31:14Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "This is just reusing the same container as the reusable GitHub action we use elsewhere, so that various utilities are already present. The Markdown file is created by the checkout above, and this is the only `make` invocation in this job, so the .txt and .html output files won't exist yet.",
+              "createdAt": "2024-10-07T17:31:14Z",
+              "updatedAt": "2024-10-07T17:31:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MOSwt",
+          "commit": {
+            "abbreviatedOid": "9358cd6"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-07T17:32:02Z",
+          "updatedAt": "2024-10-07T17:32:02Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "I'm going with \"Check for warnings emitted by xml2rfc\" instead",
+              "createdAt": "2024-10-07T17:32:02Z",
+              "updatedAt": "2024-10-07T17:32:02Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 451,
+      "id": "PR_kwDOGKuqOc593aMF",
+      "title": "Prio3: Improve circuit specifications",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/451",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Stacked on #449 (to reduce rebase conflicts later on).\r\nCloses #411.\r\n\r\nRework the spec of each Prio3 variant by listing the entire class of each circuit. Also, list the specification of each gadget in \r\nthe appendix.\r\n\r\n* Prio3Sum: Use `PolyEval` instead of `Range2`, as this is a much more useful gadget to list in the doc.\r\n\r\n* Say \"variant\" instead of \"instance\".",
+      "createdAt": "2024-10-07T20:40:53Z",
+      "updatedAt": "2024-10-07T20:44:41Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/412",
+      "baseRefOid": "c50c4555a519b252540c677269cc5be66e5126d3",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/411",
+      "headRefOid": "40a9286afbca4bad4d4c53d3a02673da34879b96",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Reviewer note: the diff is quite big because we are coalescing the circuit specification, encoding scheme, and parameter table into a single listing. My recommendation would be not look at the diff, but instead pull the branch and read through {{prio3-instantiations}}.",
+          "createdAt": "2024-10-07T20:44:39Z",
+          "updatedAt": "2024-10-07T20:44:39Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 452,
+      "id": "PR_kwDOGKuqOc593rov",
+      "title": "Replace `aggregate()` with streaming API",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/452",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #432.\r\n\r\nModify both `Daf` and `Vdaf` by replacing `aggregate()` with two\r\nmethods:\r\n\r\n* `agg_init()` returns an empty aggregate share\r\n* `agg_update()` updates an aggregate share with an output share\r\n\r\nAlso, add a method `merge()` for merging two aggregate shares, as will be required for specifying aggregation in DAP.",
+      "createdAt": "2024-10-07T21:32:39Z",
+      "updatedAt": "2024-10-07T23:27:12Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "fe5027fd8ca78090c621eb204212b8385bfd74fd",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/432",
+      "headRefOid": "c21702e318afe22aab7ed70ec4e489b756b19d96",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Reviewer note: So far I've just modified the reference code. If folks are happy with this approach, then I'll propagate to the doc.",
+          "createdAt": "2024-10-07T21:33:35Z",
+          "updatedAt": "2024-10-07T21:33:35Z"
         }
       ],
       "reviews": []
