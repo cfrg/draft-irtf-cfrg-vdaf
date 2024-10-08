@@ -231,7 +231,7 @@ def poly_strip(field: type[F], p: list[F]) -> list[F]:
 
 def poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]:
     """Multiply two polynomials."""
-    r = [field(0) for _ in range(len(p) + len(q))]
+    r = [field(0)] * (len(p) + len(q) - 1)
     for i in range(len(p)):
         for j in range(len(q)):
             r[i + j] += p[i] * q[j]
