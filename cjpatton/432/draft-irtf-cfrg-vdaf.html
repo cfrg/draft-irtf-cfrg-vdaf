@@ -1097,7 +1097,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
     Crypto Forum Research Group mailing list (cfrg@ietf.org),
     which is archived at <span><a href="https://mailarchive.ietf.org/arch/search/?email_list=cfrg">https://mailarchive.ietf.org/arch/search/?email_list=cfrg</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">Source for this draft and an issue tracker can be found at
-    <span><a href="https://github.com/cjpatton/vdaf">https://github.com/cjpatton/vdaf</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+    <span><a href="https://github.com/cfrg/draft-irtf-cfrg-vdaf">https://github.com/cfrg/draft-irtf-cfrg-vdaf</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1579,11 +1579,10 @@ requirements, sometimes in subtle but consequential ways. This document
 therefore has two important goals:<a href="#section-1-16" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-1-17">
 <li id="section-1-17.1">
-          <p id="section-1-17.1.1">Providing higher-level protocols like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span> (RFC
-EDITOR: remove this reference if not published before the current document)
-with a simple, uniform interface for accessing privacy-preserving measurement
-schemes, documenting relevant operational and security requirements, and
-specifying constraints for safe usage:<a href="#section-1-17.1.1" class="pilcrow">¶</a></p>
+          <p id="section-1-17.1.1">Providing higher-level protocols, like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span>,
+with a simple, uniform interface for accessing privacy-preserving
+measurement schemes, documenting relevant operational and security
+requirements, and specifying constraints for safe usage:<a href="#section-1-17.1.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-1-17.1.2">
 <li id="section-1-17.1.2.1">
               <p id="section-1-17.1.2.1.1">General patterns of communications among the various actors involved in
@@ -2121,12 +2120,13 @@ and <code>right</code>. An exception is raised if the inputs are not the same le
 </li>
         <li class="normal" id="section-2-9.7">
           <p id="section-2-9.7.1"><code>to_be_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to big-endian
-bytes; its value <span class="bcp14">MUST</span> be at least <code>0</code> but less than <code>2**(8*length)</code>. Function
-<code>from_be_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-9.7.1" class="pilcrow">¶</a></p>
+bytes; its value <span class="bcp14">MUST</span> be in the range <code>[0, 2^(8*length))</code>, i.e., at least <code>0</code>
+but less than <code>2^(8*length)</code>. Function <code>from_be_bytes(encoded: bytes) -&gt; int</code>
+computes the inverse.<a href="#section-2-9.7.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.8">
           <p id="section-2-9.8.1"><code>to_le_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to little-endian
-bytes; its value <span class="bcp14">MUST</span> be at least <code>0</code> but less than <code>2**(8*length)</code>. Function
+bytes; its value <span class="bcp14">MUST</span> be in the range <code>[0, 2^(8*length))</code>. Function
 <code>from_le_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-9.8.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.9">
@@ -2316,7 +2316,7 @@ types enumerated in the following table.<a href="#section-4-6" class="pilcrow">�
             <td class="text-left" rowspan="1" colspan="1">
               <code>ID: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this DAF, in <code>range(2**32)</code>.</td>
+            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this DAF, in <code>[0, 2^32)</code>.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
@@ -2482,7 +2482,7 @@ Collector, and a nonce and returns an output share.<a href="#section-4.2-2.1.1" 
 Pre-conditions:<a href="#section-4.2-2.1.2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-2.1.3.1">
-                <p id="section-4.2-2.1.3.1.1"><code>agg_id</code> <span class="bcp14">MUST</span> be in <code>range(SHARES)</code> and match the index of
+                <p id="section-4.2-2.1.3.1.1"><code>agg_id</code> <span class="bcp14">MUST</span> be in <code>[0, SHARES)</code> and match the index of
 <code>input_share</code> in the sequence of input shares produced by the Client.<a href="#section-4.2-2.1.3.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-4.2-2.1.3.2">
@@ -2713,12 +2713,12 @@ the DAF: an aggregation parameter and a sequence of measurements. The procedure
 prescribes how a DAF is executed in a "benign" environment in which there is no
 adversary and the messages are passed among the protocol participants over
 secure point-to-point channels. In reality, these channels need to be
-instantiated by some "wrapper protocol", such as <span>[<a href="#DAP" class="cite xref">DAP</a>]</span>,
-that realizes these channels using suitable cryptographic mechanisms. Moreover,
-some fraction of the Aggregators (or Clients) may be malicious and diverge from
-their prescribed behaviors. <a href="#security" class="auto internal xref">Section 9</a> describes the execution of the DAF in
-various adversarial environments and what properties the wrapper protocol needs
-to provide in each.<a href="#section-4.6-3" class="pilcrow">¶</a></p>
+instantiated by some "wrapper protocol", such as <span>[<a href="#DAP" class="cite xref">DAP</a>]</span>, that realizes these
+channels using suitable cryptographic mechanisms. Moreover, some fraction of
+the Aggregators (or Clients) may be malicious and diverge from their prescribed
+behaviors. <a href="#security" class="auto internal xref">Section 9</a> describes the execution of the DAF in various
+adversarial environments and what properties the wrapper protocol needs to
+provide in each.<a href="#section-4.6-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2886,7 +2886,7 @@ def domain_separation_tag(self, usage: int, ctx: bytes) -&gt; bytes:
 
     Pre-conditions:
 
-        - `usage` in `range(2**16)`
+        - `usage` in `[0, 2^16)`
     """
     return format_dst(0, self.ID, usage) + ctx
 </pre><a href="#section-5-9" class="pilcrow">¶</a>
@@ -3023,7 +3023,7 @@ Pre-conditions:<a href="#section-5.2-6.1.4" class="pilcrow">¶</a></p>
                 <p id="section-5.2-6.1.5.1.1"><code>verify_key</code> <span class="bcp14">MUST</span> have length <code>vdaf.VERIFY_KEY_SIZE</code>.<a href="#section-5.2-6.1.5.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-5.2-6.1.5.2">
-                <p id="section-5.2-6.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>range(vdaf.SHARES)</code> that matches the
+                <p id="section-5.2-6.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>[0, vdaf.SHARES)</code> that matches the
 index of <code>input_share</code> in the sequence of input shares output by the
 Client.<a href="#section-5.2-6.1.5.2.1" class="pilcrow">¶</a></p>
 </li>
@@ -3989,12 +3989,17 @@ def expand_into_vec(cls,
 <a href="#section-6.2.1" class="section-number selfRef">6.2.1. </a><a href="#name-xofturboshake128" class="section-name selfRef">XofTurboShake128</a>
           </h4>
 <p id="section-6.2.1-1">This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
-<span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. (RFC EDITOR: Update this
-reference to the RFC for draft-irtf-cfrg-kangarootwelve once published.) This
-XOF is <span class="bcp14">RECOMMENDED</span> for all use cases within VDAFs. The length of the domain
-separation string <code>dst</code> passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 65535 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+<span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. This XOF is <span class="bcp14">RECOMMENDED</span> for
+all use cases within VDAFs. The length of the domain separation string <code>dst</code>
+passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 65535 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-6.2.1-2.1">
+              <p id="section-6.2.1-2.1.1">TODO Update the <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span> reference to point to the RFC instead of the
+draft.<a href="#section-6.2.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
 <span id="name-definition-of-xof-xofturbos"></span><figure id="figure-13">
-            <div class="lang-python sourcecode" id="section-6.2.1-2.1">
+            <div class="lang-python sourcecode" id="section-6.2.1-3.1">
 <pre>
 class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
@@ -4035,13 +4040,14 @@ class XofTurboShake128(Xof):
           </h4>
 <p id="section-6.2.2-1">While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
-cases where a more efficient instantiation based on fixed-key AES is possible.
-For now, this is limited to the XOF used inside the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a>
-implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this
-XOF anywhere else. The length of the domain separation string <code>dst</code> passed to
-XofFixedKeyAes128 <span class="bcp14">MUST NOT</span> exceed 65535 bytes. See <a href="#security" class="auto internal xref">Section 9</a> for a more
-detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-6.2.2-2">
+cases where a more efficient instantiation based on a blockcipher in a
+fixed-key mode of operation is possible. For now, this is limited to the XOF used inside
+the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a> implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this XOF anywhere else. See <a href="#security" class="auto internal xref">Section 9</a> for a more detailed
+discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2.2-2">The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
+<span>[<a href="#AES" class="cite xref">AES</a>]</span>. The length of the domain separation string <code>dst</code> <span class="bcp14">MUST NOT</span> exceed 65535
+bytes.<a href="#section-6.2.2-2" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-6.2.2-3">
 <pre>
 class XofFixedKeyAes128(Xof):
     """
@@ -4100,7 +4106,7 @@ class XofFixedKeyAes128(Xof):
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])
         return xor(AES128(self.fixed_key, sigma_block), sigma_block)
-</pre><a href="#section-6.2.2-2" class="pilcrow">¶</a>
+</pre><a href="#section-6.2.2-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -4140,9 +4146,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in `range(0, 2 ** 8)`
-        - `algo` in `range(0, 2 ** 32)`
-        - `usage` in `range(0, 2 ** 16)`
+        - `algo_class` in `[0, 2^8)`
+        - `algo` in `[0, 2^32)`
+        - `usage` in `[0, 2^16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),
@@ -4430,7 +4436,7 @@ as a vector of field elements. The return value <span class="bcp14">MUST</span> 
 <p id="section-7.1.1-3">For some FLPs, the encoded measurement also includes redundant field elements
 that are useful for checking the proof, but which are not needed after the
 proof has been checked. An example is the "integer sum" data type from
-<span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> in which an integer in <code>range(2**k)</code> is encoded as a vector of <code>k</code>
+<span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> in which an integer in <code>[0, 2^k)</code> is encoded as a vector of <code>k</code>
 field elements, each representing a bit of the integer (this type is also
 defined in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>). After consuming this vector, all that is needed is
 the integer it represents. Thus the FLP defines an algorithm for truncating the
@@ -4498,10 +4504,10 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
 <a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-construction" class="section-name selfRef">Construction</a>
         </h3>
 <p id="section-7.2-1">This section specifies <code>Prio3</code>, an implementation of the <code>Vdaf</code> interface
-(<a href="#vdaf" class="auto internal xref">Section 5</a>). It has three generic parameters: an <code>NttField ({{ntt-field}}), an
-</code>Flp<code> ({{flp}}) and a </code>Xof<code> ({{xof}}). It also has an associated constant,
-</code>PROOFS<code>, with a value in </code>range(1, 256)`, denoting the number of FLPs
-generated by the Client (<a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>).<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+(<a href="#vdaf" class="auto internal xref">Section 5</a>). It has three generic parameters: an <code>NttField</code>
+({field-ntt-friendly}}), an <code>Flp</code> (<a href="#flp" class="auto internal xref">Section 7.1</a>) and a <code>Xof</code> (<a href="#xof" class="auto internal xref">Section 6.2</a>). It also has
+an associated constant, <code>PROOFS</code>, with a value in the range <code>[1, 256)</code>,
+denoting the number of FLPs generated by the Client (<a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>).<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.2-2">The associated constants and types required by the <code>Vdaf</code> interface are
 defined in <a href="#prio3-param" class="auto internal xref">Table 5</a>. The methods required for sharding,
 preparation, aggregation, and unsharding are described in the remaining
@@ -5536,7 +5542,7 @@ C(x) = x * (x-1)
 </pre><a href="#section-7.3.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.3.1-7">This circuit contains one subtraction gate (<code>x-1</code>) and one multiplication gate
-(<code>x * (x-1)</code>). Observe that <code>C(x) = 0</code> if and only if <code>x</code> is in <code>range(2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
+(<code>x * (x-1)</code>). Observe that <code>C(x) = 0</code> if and only if <code>x</code> is in <code>[0, 2)</code>.<a href="#section-7.3.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-8">The goal of the proof system is to allow each Aggregator to privately and
 correctly compute a secret share of <code>C(x)</code> from its secret share of <code>x</code>. This
 way all they need to determine validity is to add up their shares of <code>C(x)</code>.<a href="#section-7.3.1-8" class="pilcrow">¶</a></p>
@@ -5622,8 +5628,8 @@ C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
 the length-<code>N</code> input and <code>r</code> is a random field element. The gadget circuit
 <code>Range2</code> is the "range-check" polynomial described above, i.e., <code>Range2(x) =
 x^2 - x</code>. The idea is that, if <code>x</code> is valid (i.e., each <code>x[j]</code> is in
-<code>range(2)</code>), then the circuit will evaluate to zero regardless of the value of
-<code>r</code>; but if some <code>x[j]</code> is not in <code>range(2)</code>, then the output will be non-zero
+<code>[0, 2)</code>), then the circuit will evaluate to zero regardless of the value of
+<code>r</code>; but if some <code>x[j]</code> is not in <code>[0, 2)</code>, then the output will be non-zero
 with high probability.<a href="#section-7.3.1.1-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-5">The second extension implemented by our FLP allows the validity circuit to
 contain multiple gadget types. (This generalization was suggested in
@@ -5637,9 +5643,9 @@ C(x, r) = r * Range2(x[0]) + ... + r^L * Range2(x[L-1]) + \
 </pre><a href="#section-7.3.1.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-7.3.1.1-7">where <code>Range3(x) = x^3 - 3x^2 + 2x</code>. This circuit checks that the first <code>L</code>
-inputs are in <code>range(2)</code> and the last <code>N-L</code> inputs are in <code>range(3)</code>. The
-same circuit can be expressed using a simpler gadget, namely multiplication,
-but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
+inputs are in <code>[0, 2)</code> and the last <code>N-L</code> inputs are in <code>[0, 3)</code>. The same
+circuit can be expressed using a simpler gadget, namely multiplication, but the
+resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-8">Third, rather than interpolate the gadget polynomial at inputs <code>1</code>, <code>2</code>, ...,
 <code>j</code>, ..., where <code>j</code> is the <code>j</code>-th invocation of the gadget, we use powers of
 <code>alpha</code>, where <code>alpha</code> is a root of unity for the field. This allows us to
@@ -6311,7 +6317,7 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
                   <code>Measurement</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code> in <code>range(2)</code>
+                  <code>int</code> in <code>[0, 2)</code>
 </td>
               </tr>
               <tr>
@@ -6375,8 +6381,8 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
             </tbody>
           </table>
 <p id="section-7.4.2-2">The next instance of Prio3 supports summing of integers in a pre-determined
-range. Each measurement is an integer in <code>range(max_measurement+1)</code>, where
-<code>max_measurement</code> is an associated parameter equal to the largest valid
+range. Each measurement is an integer in the range <code>[0, max_measurement]</code>,
+where <code>max_measurement</code> is an associated parameter equal to the largest valid
 measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a bit vector,
 encoding the measurement plus an offset as a bit vector, then checking that the
@@ -6387,20 +6393,20 @@ two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcro
 the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.4.2-4.2">
-              <p id="section-7.4.2-4.2.1"><code>offset = 2**bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
+              <p id="section-7.4.2-4.2.1"><code>offset = 2^bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
-measurements between <code>0</code> and <code>2**bits - 1</code> can be encoded this way with
-<code>bits</code> bits. The second bit-encoded integer is the sum of the measurement and
-<code>offset</code>. Observe that this sum can only be encoded this way if it is between <code>0</code>
-and <code>2**bits - 1</code>, which implies that the measurement is between <code>-offset</code> and
-<code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
+measurements between <code>0</code> and <code>2^bits - 1</code> can be encoded this way with <code>bits</code>
+bits. The second bit-encoded integer is the sum of the measurement and
+<code>offset</code>. Observe that this sum can only be encoded this way if it is between
+<code>0</code> and <code>2^bits - 1</code>, which implies that the measurement is between <code>-offset</code>
+and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-6">The circuit, denoted <code>Sum</code>, first checks that each entry of both bit vectors is
 a one or a zero. It then decodes both the measurement and the offset
 measurement, and subtracts <code>offset</code> from the latter. It then checks if these
 two values are equal. Since both the measurement and the measurement plus
-<code>offset</code> are in the same range of <code>range(2**bits)</code>, this means that the
+<code>offset</code> are in the same range of <code>[0, 2^bits)</code>, this means that the
 measurement itself is between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-7">The measurement is encoded in <code>2*bits</code> field elements as follows:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.2-8">
@@ -6519,7 +6525,7 @@ def eval(
                   <code>Measurement</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code> in <code>range(max_measurement+1)</code>
+                  <code>int</code> in <code>[0, max_measurement]</code>
 </td>
               </tr>
               <tr>
@@ -6585,7 +6591,7 @@ def eval(
 <p id="section-7.4.3-2">This instance of Prio3 supports summing a vector of integers. It has three
 parameters, <code>length</code>, <code>bits</code>, and <code>chunk_length</code>. Each measurement is a vector
 of positive integers with length equal to the <code>length</code> parameter. Each element
-of the measurement is an integer in the <code>range(2**bits)</code>. It is <span class="bcp14">RECOMMENDED</span>
+of the measurement is an integer in the range <code>[0, 2^bits)</code>. It is <span class="bcp14">RECOMMENDED</span>
 to set <code>chunk_length</code> to an integer near the square root of <code>length * bits</code>
 (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-3">The validity circuit is denoted <code>SumVec</code>. Measurements are encoded as a vector
@@ -6761,7 +6767,7 @@ def eval(
                   <code>Measurement</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>list[int]</code>, each element in <code>range(2**bits)</code>
+                  <code>list[int]</code>, each element in <code>[0, 2^bits)</code>
 </td>
               </tr>
               <tr>
@@ -7073,7 +7079,7 @@ maximum number of non-zero entries (i.e., the weight must be at most
               <p id="section-7.4.5-5.1.1"><code>bits_for_weight = max_weight.bit_length()</code><a href="#section-7.4.5-5.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.4.5-5.2">
-              <p id="section-7.4.5-5.2.1"><code>offset = 2**bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-5.2.1" class="pilcrow">¶</a></p>
+              <p id="section-7.4.5-5.2.1"><code>offset = 2^bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-5.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-7.4.5-6">The Client reports the weight of the count vector by adding <code>offset</code> to it and
@@ -7322,7 +7328,7 @@ test vectors can be found in <a href="#test-vectors" class="auto internal xref">
 Indices into the IDPF tree are bit strings. (In Poplar1, each Client's bit
 string is an index; see <a href="#poplar1-idpf-index-encoding" class="auto internal xref">Section 8.1.1</a> for details.) The Client
 specifies an index <code>alpha</code> and a vector of values <code>beta</code>, one for each "level"
-<code>L</code> in <code>range(BITS)</code>. The key generation algorithm generates one IDPF "key" for
+<code>L</code> in <code>[0, BITS)</code>. The key generation algorithm generates one IDPF "key" for
 each Aggregator. When evaluated at level <code>L</code> and index <code>prefix</code>, each IDPF key
 returns an additive share of <code>beta[L]</code> if <code>prefix</code> is the <code>L</code>-bit prefix of
 <code>alpha</code> and shares of zero otherwise.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
@@ -7360,7 +7366,7 @@ Pre-conditions:<a href="#section-8.1-4.1.3" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-4.1.4.3">
                 <p id="section-8.1-4.1.4.3.1"><code>beta_inner[level]</code> <span class="bcp14">MUST</span> have length <code>VALUE_LEN</code> for each <code>level</code> in
- <code>range(BITS - 1)</code>.<a href="#section-8.1-4.1.4.3.1" class="pilcrow">¶</a></p>
+ <code>[0, BITS - 1)</code>.<a href="#section-8.1-4.1.4.3.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-4.1.4.4">
                 <p id="section-8.1-4.1.4.4.1"><code>beta_leaf</code> <span class="bcp14">MUST</span> have length <code>VALUE_LEN</code>.<a href="#section-8.1-4.1.4.4.1" class="pilcrow">¶</a></p>
@@ -7392,11 +7398,11 @@ the value for a leaf node, which has type <code>list[list[FieldLeaf]]</code>.<a 
 Pre-conditions:<a href="#section-8.1-4.2.3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.1-4.2.4.1">
-                <p id="section-8.1-4.2.4.1.1"><code>agg_id</code> <span class="bcp14">MUST</span> be in <code>range(SHARES)</code> and match the index of <code>key</code> in
+                <p id="section-8.1-4.2.4.1.1"><code>agg_id</code> <span class="bcp14">MUST</span> be in <code>[0, SHARES)</code> and match the index of <code>key</code> in
 the sequence of IDPF keys output by the Client.<a href="#section-8.1-4.2.4.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-4.2.4.2">
-                <p id="section-8.1-4.2.4.2.1"><code>level</code> <span class="bcp14">MUST</span> be in <code>range(0, BITS)</code>.<a href="#section-8.1-4.2.4.2.1" class="pilcrow">¶</a></p>
+                <p id="section-8.1-4.2.4.2.1"><code>level</code> <span class="bcp14">MUST</span> be in <code>[0, BITS)</code>.<a href="#section-8.1-4.2.4.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-4.2.4.3">
                 <p id="section-8.1-4.2.4.3.1">Each <code>prefix</code> in <code>prefixes</code> <span class="bcp14">MUST</span> be distinct and have length <code>level + 1</code>.<a href="#section-8.1-4.2.4.3.1" class="pilcrow">¶</a></p>
@@ -9131,7 +9137,7 @@ are generated and verified. In general the soundness error of the FLP is given
 by the following formula:<a href="#section-9.6-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.6-4">
 <pre>
-(circuit_soundness + flp_soundness) ** PROOFS
+(circuit_soundness + flp_soundness)^PROOFS
 </pre><a href="#section-9.6-4" class="pilcrow">¶</a>
 </div>
 <p id="section-9.6-5">where:<a href="#section-9.6-5" class="pilcrow">¶</a></p>
@@ -9355,6 +9361,10 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
 <a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
+<dt id="AES">[AES]</dt>
+        <dd>
+<span class="refAuthor">Dworkin, M.</span>, <span class="refAuthor">Barker, E.</span>, <span class="refAuthor">Nechvatal, J.</span>, <span class="refAuthor">Foti,, J.</span>, <span class="refAuthor">Bassham, L.</span>, <span class="refAuthor">Roback, E.</span>, and <span class="refAuthor">J. Dray Jr</span>, <span class="refTitle">"Advanced Encryption Standard (AES)"</span>, <time datetime="2001" class="refDate">2001</time>, <span>&lt;<a href="https://www.nist.gov/publications/advanced-encryption-standard-aes">https://www.nist.gov/publications/advanced-encryption-standard-aes</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
@@ -9627,7 +9637,7 @@ below.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
 <dt id="appendix-B.1-1.5">
 <code>agg_param</code>:</dt>
           <dd style="margin-left: 1.5em" id="appendix-B.1-1.6">
-            <p id="appendix-B.1-1.6.1">The aggregation parameter of type <code>Vdaf.AggParam</code>.<a href="#appendix-B.1-1.6.1" class="pilcrow">¶</a></p>
+            <p id="appendix-B.1-1.6.1">The aggregation parameter encoded in hexadecimal.<a href="#appendix-B.1-1.6.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 <dt id="appendix-B.1-1.7">
@@ -9733,8 +9743,8 @@ VDAF. These are listed in the subsections below.<a href="#appendix-B.1-2" class=
 <dt id="appendix-B.1.2-1.3">
 <code>max_measurement</code>:</dt>
             <dd style="margin-left: 1.5em" id="appendix-B.1.2-1.4">
-              <p id="appendix-B.1.2-1.4.1">The largest measurement, an integer. Each element is in range
-<code>range(max_measurement+1)</code>.<a href="#appendix-B.1.2-1.4.1" class="pilcrow">¶</a></p>
+              <p id="appendix-B.1.2-1.4.1">The largest measurement, an integer. Each element is in the range
+  <code>[0, max_measurement]</code>.<a href="#appendix-B.1.2-1.4.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>
@@ -9767,8 +9777,8 @@ VDAF. These are listed in the subsections below.<a href="#appendix-B.1-2" class=
 <dt id="appendix-B.1.3-1.7">
 <code>bits</code>:</dt>
             <dd style="margin-left: 1.5em" id="appendix-B.1.3-1.8">
-              <p id="appendix-B.1.3-1.8.1">the bit length of each element of the vector, an integer. each element is in
-<code>range(2 ** bits)</code>.<a href="#appendix-B.1.3-1.8.1" class="pilcrow">¶</a></p>
+              <p id="appendix-B.1.3-1.8.1">the bit length of each element of the vector, an integer. Each element is in
+<code>[0, 2^bits)</code>.<a href="#appendix-B.1.3-1.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>
@@ -9829,7 +9839,7 @@ VDAF. These are listed in the subsections below.<a href="#appendix-B.1-2" class=
 <code>max_weight</code>:</dt>
             <dd style="margin-left: 1.5em" id="appendix-B.1.5-1.8">
               <p id="appendix-B.1.5-1.8.1">The largest vector weight, an integer. The sum of the elements must be in
-<code>range(max_weight+1)</code>.<a href="#appendix-B.1.5-1.8.1" class="pilcrow">¶</a></p>
+<code>[0, max_weight]</code>.<a href="#appendix-B.1.5-1.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>

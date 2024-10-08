@@ -36,7 +36,7 @@ Discussion Venues
    https://mailarchive.ietf.org/arch/search/?email_list=cfrg.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/cjpatton/vdaf.
+   https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
 Status of This Memo
 
@@ -284,11 +284,10 @@ Table of Contents
    security requirements, sometimes in subtle but consequential ways.
    This document therefore has two important goals:
 
-   1.  Providing higher-level protocols like [DAP] (RFC EDITOR: remove
-       this reference if not published before the current document) with
-       a simple, uniform interface for accessing privacy-preserving
-       measurement schemes, documenting relevant operational and
-       security requirements, and specifying constraints for safe usage:
+   1.  Providing higher-level protocols, like [DAP], with a simple,
+       uniform interface for accessing privacy-preserving measurement
+       schemes, documenting relevant operational and security
+       requirements, and specifying constraints for safe usage:
 
        1.  General patterns of communications among the various actors
            involved in the system (clients, aggregation servers, and the
@@ -736,13 +735,13 @@ Table of Contents
       same length.
 
    *  to_be_bytes(val: int, length: int) -> bytes converts val to big-
-      endian bytes; its value MUST be at least 0 but less than
-      2**(8*length).  Function from_be_bytes(encoded: bytes) -> int
-      computes the inverse.
+      endian bytes; its value MUST be in the range [0, 2^(8*length)),
+      i.e., at least 0 but less than 2^(8*length).  Function
+      from_be_bytes(encoded: bytes) -> int computes the inverse.
 
    *  to_le_bytes(val: int, length: int) -> bytes converts val to
-      little-endian bytes; its value MUST be at least 0 but less than
-      2**(8*length).  Function from_le_bytes(encoded: bytes) -> int
+      little-endian bytes; its value MUST be in the range [0,
+      2^(8*length)).  Function from_le_bytes(encoded: bytes) -> int
       computes the inverse.
 
    *  next_power_of_2(n: int) -> int returns the smallest integer
@@ -894,37 +893,36 @@ Table of Contents
    the remainder of this section.  In addition, a concrete DAF defines
    the associated constants and types enumerated in the following table.
 
-   +=============+=====================================================+
-   | Parameter   | Description                                         |
-   +=============+=====================================================+
-   | ID: int     | Algorithm identifier for this                       |
-   |             | DAF, in range(2**32).                               |
-   +-------------+-----------------------------------------------------+
-   | SHARES: int | Number of input shares into which                   |
-   |             | each measurement is sharded.                        |
-   +-------------+-----------------------------------------------------+
-   | NONCE_SIZE: | Size of the nonce passed by the                     |
-   | int         | application.                                        |
-   +-------------+-----------------------------------------------------+
-   | RAND_SIZE:  | Size of the random byte string                      |
-   | int         | passed to sharding algorithm.                       |
-   +-------------+-----------------------------------------------------+
-   | Measurement | Type of each measurement.                           |
-   +-------------+-----------------------------------------------------+
-   | PublicShare | Type of each public share.                          |
-   +-------------+-----------------------------------------------------+
-   | InputShare  | Type of each input share.                           |
-   +-------------+-----------------------------------------------------+
-   | AggParam    | Type of aggregation parameter.                      |
-   +-------------+-----------------------------------------------------+
-   | OutShare    | Type of each output share.                          |
-   +-------------+-----------------------------------------------------+
-   | AggShare    | Type of the aggregate share.                        |
-   +-------------+-----------------------------------------------------+
-   | AggResult   | Type of the aggregate result.                       |
-   +-------------+-----------------------------------------------------+
+    +=============+==================================================+
+    | Parameter   | Description                                      |
+    +=============+==================================================+
+    | ID: int     | Algorithm identifier for this DAF, in [0, 2^32). |
+    +-------------+--------------------------------------------------+
+    | SHARES: int | Number of input shares into which each           |
+    |             | measurement is sharded.                          |
+    +-------------+--------------------------------------------------+
+    | NONCE_SIZE: | Size of the nonce passed by the application.     |
+    | int         |                                                  |
+    +-------------+--------------------------------------------------+
+    | RAND_SIZE:  | Size of the random byte string passed to         |
+    | int         | sharding algorithm.                              |
+    +-------------+--------------------------------------------------+
+    | Measurement | Type of each measurement.                        |
+    +-------------+--------------------------------------------------+
+    | PublicShare | Type of each public share.                       |
+    +-------------+--------------------------------------------------+
+    | InputShare  | Type of each input share.                        |
+    +-------------+--------------------------------------------------+
+    | AggParam    | Type of aggregation parameter.                   |
+    +-------------+--------------------------------------------------+
+    | OutShare    | Type of each output share.                       |
+    +-------------+--------------------------------------------------+
+    | AggShare    | Type of the aggregate share.                     |
+    +-------------+--------------------------------------------------+
+    | AggResult   | Type of the aggregate result.                    |
+    +-------------+--------------------------------------------------+
 
-         Table 1: Constants and types defined by each concrete DAF.
+        Table 1: Constants and types defined by each concrete DAF.
 
    These types define the inputs and outputs of DAF methods at various
    stages of the computation.  Some of these values need to be written
@@ -1011,7 +1009,7 @@ Table of Contents
 
       Pre-conditions:
 
-      -  agg_id MUST be in range(SHARES) and match the index of
+      -  agg_id MUST be in [0, SHARES) and match the index of
          input_share in the sequence of input shares produced by the
          Client.
 
@@ -1296,7 +1294,7 @@ Table of Contents
 
        Pre-conditions:
 
-           - `usage` in `range(2**16)`
+           - `usage` in `[0, 2^16)`
        """
        return format_dst(0, self.ID, usage) + ctx
 
@@ -1419,9 +1417,9 @@ Table of Contents
 
       -  verify_key MUST have length vdaf.VERIFY_KEY_SIZE.
 
-      -  agg_id MUST be the integer in range(vdaf.SHARES) that matches
-         the index of input_share in the sequence of input shares output
-         by the Client.
+      -  agg_id MUST be the integer in [0, vdaf.SHARES) that matches the
+         index of input_share in the sequence of input shares output by
+         the Client.
 
       -  nonce MUST have length vdaf.NONCE_SIZE.
 
@@ -2247,11 +2245,12 @@ Table of Contents
 6.2.1.  XofTurboShake128
 
    This section describes XofTurboShake128, an XOF based on the
-   TurboSHAKE128 [TurboSHAKE].  (RFC EDITOR: Update this reference to
-   the RFC for draft-irtf-cfrg-kangarootwelve once published.)  This XOF
-   is RECOMMENDED for all use cases within VDAFs.  The length of the
-   domain separation string dst passed to XofTurboShake128 MUST NOT
-   exceed 65535 bytes.
+   TurboSHAKE128 [TurboSHAKE].  This XOF is RECOMMENDED for all use
+   cases within VDAFs.  The length of the domain separation string dst
+   passed to XofTurboShake128 MUST NOT exceed 65535 bytes.
+
+      TODO Update the [TurboSHAKE] reference to point to the RFC instead
+      of the draft.
 
    class XofTurboShake128(Xof):
        """XOF wrapper for TurboSHAKE128."""
@@ -2285,12 +2284,16 @@ Table of Contents
 
    While XofTurboShake128 as described above can be securely used in all
    cases where a XOF is needed in the VDAFs described in this document,
-   there are some cases where a more efficient instantiation based on
-   fixed-key AES is possible.  For now, this is limited to the XOF used
-   inside the Idpf Section 8.1 implementation in Poplar1 Section 8.3.
-   It is NOT RECOMMENDED to use this XOF anywhere else.  The length of
-   the domain separation string dst passed to XofFixedKeyAes128 MUST NOT
-   exceed 65535 bytes.  See Section 9 for a more detailed discussion.
+   there are some cases where a more efficient instantiation based on a
+   blockcipher in a fixed-key mode of operation is possible.  For now,
+   this is limited to the XOF used inside the Idpf Section 8.1
+   implementation in Poplar1 Section 8.3.  It is NOT RECOMMENDED to use
+   this XOF anywhere else.  See Section 9 for a more detailed
+   discussion.
+
+   The following XOF, denoted XofFixedKeyAes128, uses the AES-128
+   blockcipher [AES].  The length of the domain separation string dst
+   MUST NOT exceed 65535 bytes.
 
    class XofFixedKeyAes128(Xof):
        """
@@ -2378,9 +2381,9 @@ Table of Contents
 
        Pre-conditions:
 
-           - `algo_class` in `range(0, 2 ** 8)`
-           - `algo` in `range(0, 2 ** 32)`
-           - `usage` in `range(0, 2 ** 16)`
+           - `algo_class` in `[0, 2^8)`
+           - `algo` in `[0, 2^32)`
+           - `usage` in `[0, 2^16)`
        """
        return concat([
            to_be_bytes(VERSION, 1),
@@ -2627,7 +2630,7 @@ Table of Contents
    For some FLPs, the encoded measurement also includes redundant field
    elements that are useful for checking the proof, but which are not
    needed after the proof has been checked.  An example is the "integer
-   sum" data type from [CGB17] in which an integer in range(2**k) is
+   sum" data type from [CGB17] in which an integer in [0, 2^k) is
    encoded as a vector of k field elements, each representing a bit of
    the integer (this type is also defined in Section 7.4.2).  After
    consuming this vector, all that is needed is the integer it
@@ -2684,10 +2687,11 @@ Table of Contents
 7.2.  Construction
 
    This section specifies Prio3, an implementation of the Vdaf interface
-   (Section 5).  It has three generic parameters: an NttField ({{ntt-
-   field}}), anFlp({{flp}}) and aXof({{xof}}).  It also has an
-   associated constant,PROOFS, with a value inrange(1, 256)`, denoting
-   the number of FLPs generated by the Client (Section 7.1.2).
+   (Section 5).  It has three generic parameters: an NttField ({field-
+   ntt-friendly}}), an Flp (Section 7.1) and a Xof (Section 6.2).  It
+   also has an associated constant, PROOFS, with a value in the range
+   [1, 256), denoting the number of FLPs generated by the Client
+   (Section 7.1.2).
 
    The associated constants and types required by the Vdaf interface are
    defined in Table 5.  The methods required for sharding, preparation,
@@ -3458,7 +3462,7 @@ Table of Contents
 
    This circuit contains one subtraction gate (x-1) and one
    multiplication gate (x * (x-1)).  Observe that C(x) = 0 if and only
-   if x is in range(2).
+   if x is in [0, 2).
 
    The goal of the proof system is to allow each Aggregator to privately
    and correctly compute a secret share of C(x) from its secret share of
@@ -3547,9 +3551,9 @@ Table of Contents
    x is the length-N input and r is a random field element.  The gadget
    circuit Range2 is the "range-check" polynomial described above, i.e.,
    Range2(x) = x^2 - x.  The idea is that, if x is valid (i.e., each
-   x[j] is in range(2)), then the circuit will evaluate to zero
-   regardless of the value of r; but if some x[j] is not in range(2),
-   then the output will be non-zero with high probability.
+   x[j] is in [0, 2)), then the circuit will evaluate to zero regardless
+   of the value of r; but if some x[j] is not in [0, 2), then the output
+   will be non-zero with high probability.
 
    The second extension implemented by our FLP allows the validity
    circuit to contain multiple gadget types.  (This generalization was
@@ -3561,9 +3565,9 @@ Table of Contents
                r^(L+1) * Range3(x[L]) + ... + r^N * Range3(x[N-1])
 
    where Range3(x) = x^3 - 3x^2 + 2x.  This circuit checks that the
-   first L inputs are in range(2) and the last N-L inputs are in
-   range(3).  The same circuit can be expressed using a simpler gadget,
-   namely multiplication, but the resulting proof would be longer.
+   first L inputs are in [0, 2) and the last N-L inputs are in [0, 3).
+   The same circuit can be expressed using a simpler gadget, namely
+   multiplication, but the resulting proof would be longer.
 
    Third, rather than interpolate the gadget polynomial at inputs 1, 2,
    ..., j, ..., where j is the j-th invocation of the gadget, we use
@@ -3986,28 +3990,28 @@ Table of Contents
    The measurement is encoded and decoded as a singleton vector in the
    natural way.  The parameters for this circuit are summarized below.
 
-                   +=================+=================+
-                   | Parameter       | Value           |
-                   +=================+=================+
-                   | GADGETS         | [Mul]           |
-                   +-----------------+-----------------+
-                   | GADGET_CALLS    | [1]             |
-                   +-----------------+-----------------+
-                   | MEAS_LEN        | 1               |
-                   +-----------------+-----------------+
-                   | OUTPUT_LEN      | 1               |
-                   +-----------------+-----------------+
-                   | JOINT_RAND_LEN  | 0               |
-                   +-----------------+-----------------+
-                   | EVAL_OUTPUT_LEN | 1               |
-                   +-----------------+-----------------+
-                   | Measurement     | int in range(2) |
-                   +-----------------+-----------------+
-                   | AggResult       | int             |
-                   +-----------------+-----------------+
+                    +=================+===============+
+                    | Parameter       | Value         |
+                    +=================+===============+
+                    | GADGETS         | [Mul]         |
+                    +-----------------+---------------+
+                    | GADGET_CALLS    | [1]           |
+                    +-----------------+---------------+
+                    | MEAS_LEN        | 1             |
+                    +-----------------+---------------+
+                    | OUTPUT_LEN      | 1             |
+                    +-----------------+---------------+
+                    | JOINT_RAND_LEN  | 0             |
+                    +-----------------+---------------+
+                    | EVAL_OUTPUT_LEN | 1             |
+                    +-----------------+---------------+
+                    | Measurement     | int in [0, 2) |
+                    +-----------------+---------------+
+                    | AggResult       | int           |
+                    +-----------------+---------------+
 
-                      Table 10: Parameters of validity
-                               circuit Count.
+                          Table 10: Parameters of
+                          validity circuit Count.
 
 7.4.2.  Prio3Sum
 
@@ -4026,9 +4030,9 @@ Table of Contents
                     Table 11: Parameters for Prio3Sum.
 
    The next instance of Prio3 supports summing of integers in a pre-
-   determined range.  Each measurement is an integer in
-   range(max_measurement+1), where max_measurement is an associated
-   parameter equal to the largest valid measurement.
+   determined range.  Each measurement is an integer in the range [0,
+   max_measurement], where max_measurement is an associated parameter
+   equal to the largest valid measurement.
 
    The range check is accomplished by encoding the measurement as a bit
    vector, encoding the measurement plus an offset as a bit vector, then
@@ -4037,13 +4041,13 @@ Table of Contents
    *  bits = max_measurement.bit_length(), the number of bits needed to
       encode the largest valid measurement
 
-   *  offset = 2**bits - 1 - max_measurement
+   *  offset = 2^bits - 1 - max_measurement
 
    The first bit-encoded integer is the measurement itself.  Note that
-   only measurements between 0 and 2**bits - 1 can be encoded this way
+   only measurements between 0 and 2^bits - 1 can be encoded this way
    with bits bits.  The second bit-encoded integer is the sum of the
    measurement and offset.  Observe that this sum can only be encoded
-   this way if it is between 0 and 2**bits - 1, which implies that the
+   this way if it is between 0 and 2^bits - 1, which implies that the
    measurement is between -offset and max_measurement.
 
    The circuit, denoted Sum, first checks that each entry of both bit
@@ -4051,8 +4055,8 @@ Table of Contents
    the offset measurement, and subtracts offset from the latter.  It
    then checks if these two values are equal.  Since both the
    measurement and the measurement plus offset are in the same range of
-   range(2**bits), this means that the measurement itself is between 0
-   and max_measurement.
+   [0, 2^bits), this means that the measurement itself is between 0 and
+   max_measurement.
 
    The measurement is encoded in 2*bits field elements as follows:
 
@@ -4101,25 +4105,25 @@ Table of Contents
        out.append(range_check)
        return out
 
-           +=================+=================================+
-           | Parameter       | Value                           |
-           +=================+=================================+
-           | GADGETS         | [Range2]                        |
-           +-----------------+---------------------------------+
-           | GADGET_CALLS    | [2*bits]                        |
-           +-----------------+---------------------------------+
-           | MEAS_LEN        | 2*bits                          |
-           +-----------------+---------------------------------+
-           | OUTPUT_LEN      | 1                               |
-           +-----------------+---------------------------------+
-           | JOINT_RAND_LEN  | 0                               |
-           +-----------------+---------------------------------+
-           | EVAL_OUTPUT_LEN | 2*bits + 1                      |
-           +-----------------+---------------------------------+
-           | Measurement     | int in range(max_measurement+1) |
-           +-----------------+---------------------------------+
-           | AggResult       | int                             |
-           +-----------------+---------------------------------+
+             +=================+=============================+
+             | Parameter       | Value                       |
+             +=================+=============================+
+             | GADGETS         | [Range2]                    |
+             +-----------------+-----------------------------+
+             | GADGET_CALLS    | [2*bits]                    |
+             +-----------------+-----------------------------+
+             | MEAS_LEN        | 2*bits                      |
+             +-----------------+-----------------------------+
+             | OUTPUT_LEN      | 1                           |
+             +-----------------+-----------------------------+
+             | JOINT_RAND_LEN  | 0                           |
+             +-----------------+-----------------------------+
+             | EVAL_OUTPUT_LEN | 2*bits + 1                  |
+             +-----------------+-----------------------------+
+             | Measurement     | int in [0, max_measurement] |
+             +-----------------+-----------------------------+
+             | AggResult       | int                         |
+             +-----------------+-----------------------------+
 
                Table 12: Parameters of validity circuit Sum.
 
@@ -4145,8 +4149,8 @@ Table of Contents
    three parameters, length, bits, and chunk_length.  Each measurement
    is a vector of positive integers with length equal to the length
    parameter.  Each element of the measurement is an integer in the
-   range(2**bits).  It is RECOMMENDED to set chunk_length to an integer
-   near the square root of length * bits (see Section 7.4.3.1).
+   range [0, 2^bits).  It is RECOMMENDED to set chunk_length to an
+   integer near the square root of length * bits (see Section 7.4.3.1).
 
    The validity circuit is denoted SumVec.  Measurements are encoded as
    a vector of field elements with length length * bits.  The field
@@ -4270,8 +4274,8 @@ Table of Contents
          +-----------------+------------------------------------+
          | EVAL_OUTPUT_LEN | 1                                  |
          +-----------------+------------------------------------+
-         | Measurement     | list[int], each element in         |
-         |                 | range(2**bits)                     |
+         | Measurement     | list[int], each element in [0,     |
+         |                 | 2^bits)                            |
          +-----------------+------------------------------------+
          | AggResult       | list[int]                          |
          +-----------------+------------------------------------+
@@ -4460,7 +4464,7 @@ Table of Contents
 
    *  bits_for_weight = max_weight.bit_length()
 
-   *  offset = 2**bits_for_weight - 1 - max_weight
+   *  offset = 2^bits_for_weight - 1 - max_weight
 
    The Client reports the weight of the count vector by adding offset to
    it and bit-encoding the result.  Observe that only a weight of at
@@ -4647,7 +4651,7 @@ Table of Contents
    constant.  Indices into the IDPF tree are bit strings.  (In Poplar1,
    each Client's bit string is an index; see Section 8.1.1 for details.)
    The Client specifies an index alpha and a vector of values beta, one
-   for each "level" L in range(BITS).  The key generation algorithm
+   for each "level" L in [0, BITS).  The key generation algorithm
    generates one IDPF "key" for each Aggregator.  When evaluated at
    level L and index prefix, each IDPF key returns an additive share of
    beta[L] if prefix is the L-bit prefix of alpha and shares of zero
@@ -4686,7 +4690,7 @@ Table of Contents
       -  beta_inner MUST have length BITS - 1.
 
       -  beta_inner[level] MUST have length VALUE_LEN for each level in
-         range(BITS - 1).
+         [0, BITS - 1).
 
       -  beta_leaf MUST have length VALUE_LEN.
 
@@ -4713,10 +4717,10 @@ Table of Contents
 
       Pre-conditions:
 
-      -  agg_id MUST be in range(SHARES) and match the index of key in
-         the sequence of IDPF keys output by the Client.
+      -  agg_id MUST be in [0, SHARES) and match the index of key in the
+         sequence of IDPF keys output by the Client.
 
-      -  level MUST be in range(0, BITS).
+      -  level MUST be in [0, BITS).
 
       -  Each prefix in prefixes MUST be distinct and have length level
          + 1.
@@ -6099,7 +6103,7 @@ Table of Contents
    of proofs (at least one) that are generated and verified.  In general
    the soundness error of the FLP is given by the following formula:
 
-   (circuit_soundness + flp_soundness) ** PROOFS
+   (circuit_soundness + flp_soundness)^PROOFS
 
    where:
 
@@ -6243,6 +6247,12 @@ Table of Contents
 11.  References
 
 11.1.  Normative References
+
+   [AES]      Dworkin, M., Barker, E., Nechvatal, J., Foti,, J.,
+              Bassham, L., Roback, E., and J. Dray Jr, "Advanced
+              Encryption Standard (AES)", 2001,
+              <https://www.nist.gov/publications/advanced-encryption-
+              standard-aes>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -6502,7 +6512,7 @@ B.1.  Schema
 
    verify_key:  The verification key encoded in hexadecimal.
 
-   agg_param:  The aggregation parameter of type Vdaf.AggParam.
+   agg_param:  The aggregation parameter encoded in hexadecimal.
 
    prep:  A list of objects with the following schema:
 
@@ -6543,7 +6553,7 @@ B.1.2.  Prio3Sum
    shares:  The number of shares, an integer.
 
    max_measurement:  The largest measurement, an integer.  Each element
-      is in range range(max_measurement+1).
+      is in the range [0, max_measurement].
 
 B.1.3.  Prio3SumVec
 
@@ -6553,8 +6563,8 @@ B.1.3.  Prio3SumVec
 
    chunk_length:  the length of each vector chunk, an integer.
 
-   bits:  the bit length of each element of the vector, an integer. each
-      element is in range(2 ** bits).
+   bits:  the bit length of each element of the vector, an integer.
+      Each element is in [0, 2^bits).
 
 B.1.4.  Prio3Histogram
 
@@ -6573,7 +6583,7 @@ B.1.5.  Prio3MultihotCountVec
    chunk_length:  the length of each vector chunk, an integer.
 
    max_weight:  The largest vector weight, an integer.  The sum of the
-      elements must be in range(max_weight+1).
+      elements must be in [0, max_weight].
 
 B.1.6.  Poplar1
 
