@@ -36,7 +36,7 @@ Discussion Venues
    https://mailarchive.ietf.org/arch/search/?email_list=cfrg.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/cjpatton/vdaf.
+   https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
 Status of This Memo
 
