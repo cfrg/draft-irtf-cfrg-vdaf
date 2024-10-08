@@ -2162,10 +2162,22 @@ overriding the start of the range and overriding the step between successive
 output values.<a href="#section-2-9.12.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.13">
-          <p id="section-2-9.13.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
+          <p id="section-2-9.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns <code>p(x)</code>.<a href="#section-2-9.13.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-9.14">
+          <p id="section-2-9.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
 returns the coefficients of the lowest degree polynomial <code>p</code> for which
 <code>p(input[k]) == output[k]</code> for all <code>k</code>. Normally this will be computed using
-the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-9.13.1" class="pilcrow">¶</a></p>
+the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-9.14.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-9.15">
+          <p id="section-2-9.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
+multiplies two polynomials together.<a href="#section-2-9.15.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-9.16">
+          <p id="section-2-9.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
+end of the input polynomial. That is, it returns <code>p[:i]</code> where <code>i</code> is the
+index of the last non-zero coefficient of <code>p</code>.<a href="#section-2-9.16.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>

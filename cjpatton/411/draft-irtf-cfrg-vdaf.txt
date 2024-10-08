@@ -767,10 +767,19 @@ Table of Contents
       and three-argument forms allow overriding the start of the range
       and overriding the step between successive output values.
 
+   *  poly_eval(field: type[F], p: list[F], x: F) -> F returns p(x).
+
    *  poly_interp(field: type[F], inputs: list[F], outputs: list[F]) ->
       list[F] returns the coefficients of the lowest degree polynomial p
       for which p(input[k]) == output[k] for all k.  Normally this will
       be computed using the Number Theoretic Transform (NTT) [SML24].
+
+   *  poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]
+      returns multiplies two polynomials together.
+
+   *  poly_strip(field: type[F], p: list[F]) -> list[F] strips the zeros
+      from the end of the input polynomial.  That is, it returns p[:i]
+      where i is the index of the last non-zero coefficient of p.
 
 3.  Overview
 
