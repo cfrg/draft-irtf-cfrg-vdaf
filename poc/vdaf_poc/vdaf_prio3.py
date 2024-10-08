@@ -506,6 +506,9 @@ class Prio3(
             self.flp.JOINT_RAND_LEN * self.PROOFS,
         )
 
+    def encode_agg_param(self, agg_param: None) -> bytes:
+        return b""
+
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         return self.flp.test_vec_set_type_param(test_vec)
 

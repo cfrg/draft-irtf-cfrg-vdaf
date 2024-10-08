@@ -183,6 +183,10 @@ class Vdaf(
         """
         return format_dst(0, self.ID, usage) + ctx
 
+    @abstractmethod
+    def encode_agg_param(self, agg_param: AggParam) -> bytes:
+        pass
+
     # Methods for generating test vectors
 
     def test_vec_set_type_param(self, _test_vec: dict[str, Any]) -> list[str]:

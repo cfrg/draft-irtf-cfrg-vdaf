@@ -6053,7 +6053,7 @@ below.
 : The verification key encoded in hexadecimal.
 
 `agg_param`:
-: The aggregation parameter of type `Vdaf.AggParam`.
+: The aggregation parameter encoded in hexadecimal.
 
 `prep`:
 : A list of objects with the following schema:
