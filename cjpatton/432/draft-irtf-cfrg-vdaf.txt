@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 10 April 2025                                              ISRG
+Expires: 11 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          7 October 2024
+                                                          8 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 April 2025.
+   This Internet-Draft will expire on 11 April 2025.
 
 Copyright Notice
 
@@ -818,8 +818,8 @@ Table of Contents
          themselves as part of the validation process.
 
    *  As each Aggregator recovers output shares, it accumulates them
-      into an "aggregate share" for the batch, "aggregate share" for
-      that batch, i.e., its share of the desired aggregate result.
+      into an "aggregate share" for the batch, i.e., its share of the
+      desired aggregate result.
 
    *  The Aggregators submit their aggregate shares to the Collector,
       who combines them to obtain the aggregate result over the batch.
