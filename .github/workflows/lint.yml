@@ -18,4 +18,5 @@ jobs:
       run: "bash -c '! grep -r --file=rejected_dictionary draft-irtf-cfrg-vdaf.md poc'"
 
     - name: "Check for warnings emitted by xml2rfc"
-      run: "bash -c 'make |& (! grep Warning)'"
+      run: |
+        bash -c -o pipefail 'make |& (! grep -E "Warning|Error")'
