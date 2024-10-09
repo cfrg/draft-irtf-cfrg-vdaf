@@ -1639,15 +1639,23 @@ security considerations for DAFs and VDAFs.<a href="#section-1-20" class="pilcro
 <p id="section-1.1-3">13:<a href="#section-1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-1.1-4.1">
-            <p id="section-1.1-4.1.1">Improve the specification of the FLP system by listing the proof-generation,
-query, and decision algorithms in full.<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-4.1.1">(V)DAF: Replace the one-shot aggregation API with a streaming API. Each
+Aggregator initializes aggregation, then updates its aggregate share as
+output shares are produced. The scheme also specifies a method for merging
+multiple aggregate shares.<a href="#section-1.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.2">
             <p id="section-1.1-4.2.1">Improve the specification of each Prio3 variant by listing each
-implementation of <code>Valid</code> and <code>Gadget</code> in full.<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
+implementation of <code>Valid</code> and <code>Gadget</code> in full. Gadgets are listed in a new
+appendix section.<a href="#section-1.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.3">
-            <p id="section-1.1-4.3.1">Add a section with a high-level overview of the IDPF construction.<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
+            <p id="section-1.1-4.3.1">Improve the specification of the FLP system by listing the proof-generation,
+query, and decision algorithms in full. The wrapper gadgets are listed in the
+new section of the appendix for gadgets.<a href="#section-1.1-4.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.1-4.4">
+            <p id="section-1.1-4.4.1">Add a section with a high-level overview of the IDPF construction.<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-1.1-5">12:<a href="#section-1.1-5" class="pilcrow">¶</a></p>

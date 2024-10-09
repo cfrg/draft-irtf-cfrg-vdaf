@@ -341,11 +341,18 @@ Table of Contents
 
    13:
 
-   *  Improve the specification of the FLP system by listing the proof-
-      generation, query, and decision algorithms in full.
+   *  (V)DAF: Replace the one-shot aggregation API with a streaming API.
+      Each Aggregator initializes aggregation, then updates its
+      aggregate share as output shares are produced.  The scheme also
+      specifies a method for merging multiple aggregate shares.
 
    *  Improve the specification of each Prio3 variant by listing each
-      implementation of Valid and Gadget in full.
+      implementation of Valid and Gadget in full.  Gadgets are listed in
+      a new appendix section.
+
+   *  Improve the specification of the FLP system by listing the proof-
+      generation, query, and decision algorithms in full.  The wrapper
+      gadgets are listed in the new section of the appendix for gadgets.
 
    *  Add a section with a high-level overview of the IDPF construction.
 
