@@ -6429,11 +6429,10 @@ Appendix A.  FLP Gadget Wrappers
 Appendix B.  Test Vectors
 
    The test vectors are available at [TestVectors].  The test vector
-   directory, https://github.com/cfrg/draft-irtf-cfrg-
-   vdaf/tree/main/test_vec/vdaf, contains a set of JSON files.  Each
-   file contains a test vector for an instance of Vdaf (Section 5).  A
-   test vector covers sharding, preparation, aggregation, and unsharding
-   of each of several measurements.  The test vector schema is defined
+   directory, test_vec/vdaf, contains a set of JSON files.  Each file
+   contains a test vector for an instance of Vdaf (Section 5).  A test
+   vector covers sharding, preparation, aggregation, and unsharding of
+   each of several measurements.  The test vector schema is defined
    below.
 
 B.1.  Schema
