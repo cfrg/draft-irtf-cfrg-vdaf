@@ -2697,7 +2697,7 @@ measurement as prescribed by the FLP and calls one of two methods, depending on
 whether joint randomness is required by the FLP. The methods are defined in the
 subsections below.
 
-#### FLPs without joint randomness {#prio3-shard-without-joint-rand}
+#### FLPs Without Joint Randomness {#prio3-shard-without-joint-rand}
 
 The following method is used for FLPs that do not require joint randomness,
 i.e., when `flp.JOINT_RAND_LEN == 0`:
@@ -2769,7 +2769,7 @@ The methods on `Prio3` for deriving the prover randomness, measurement shares,
 and proof shares and the methods for encoding the input shares are defined in
 {{prio3-auxiliary}}.
 
-#### FLPs with joint randomness
+#### FLPs With Joint Randomness
 
 The following method is used for FLPs that require joint randomness,
 i.e., for which `flp.JOINT_RAND_LEN > 0`:
@@ -3200,7 +3200,7 @@ struct {
 } Prio3PublicShareWithJointRand;
 ~~~
 
-#### Input share
+#### Input Share
 
 Just as for the public share, the encoding of the input shares depends on
 whether joint randomness is used. If so, then each input share includes the
@@ -3298,7 +3298,7 @@ struct {
 } Prio3AggShare;
 ~~~
 
-## The FLP of {{BBCGGI19}} {#flp-bbcggi19}
+## The FLP Construction {#flp-bbcggi19}
 
 This section describes an FLP based on the construction from {{BBCGGI19}},
 Section 4.2. We begin in {{flp-bbcggi19-overview}} with an overview of their
@@ -4085,7 +4085,7 @@ def eval(
 | `AggResult`       | `list[int]`                                            |
 {: title="Parameters of validity circuit SumVec."}
 
-#### Selection of `ParallelSum` chunk length {#parallel-sum-chunk-length}
+#### Selection of `ParallelSum` Chunk Length {#parallel-sum-chunk-length}
 
 The `chunk_length` parameter provides a trade-off between the arity of the
 `ParallelSum` gadget and the number of times the gadget is called. The proof
@@ -4499,7 +4499,7 @@ across evaluations. See {{idpf-bbcggi21}} for details.
 | FieldVec    | Alias of `list[FieldInner] | list[FieldLeaf]` |
 {: #idpf-param title="Constants and types defined by a concrete IDPF."}
 
-### Encoding inputs as indices {#poplar1-idpf-index-encoding}
+### Encoding Inputs as Indices {#poplar1-idpf-index-encoding}
 
 How data are represented as IDPF indices is up to the application. When the
 inputs are fixed-length byte strings, the most natural choice of representation
@@ -5191,7 +5191,7 @@ than is strictly needed. In particular, it may be sufficient to convey which
 indices from the previous execution will have their children included in the
 next. This would help reduce communication overhead.
 
-## The IDPF scheme of {{BBCGGI21}} {#idpf-bbcggi21}
+## The IDPF Construction {#idpf-bbcggi21}
 
 In this section we specify a concrete IDPF suitable for instantiating
 Poplar1. The scheme gets its name from the name of the protocol of
