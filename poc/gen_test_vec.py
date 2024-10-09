@@ -102,7 +102,7 @@ if __name__ == '__main__':
     ctx = b'some application'
     vdaf_test_vec_path = TEST_VECTOR_PATH + "/vdaf/"
 
-    # Prio3 variants
+    # Prio3Count
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
         vdaf_prio3.Prio3Count(2),
@@ -121,6 +121,16 @@ if __name__ == '__main__':
     )
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
+        vdaf_prio3.Prio3Count(2),
+        None,
+        ctx,
+        [0, 1, 1, 0, 1],
+        2,
+    )
+
+    # Prio3Sum
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3Sum(2, 255),
         None,
         ctx,
@@ -135,6 +145,16 @@ if __name__ == '__main__':
         [100],
         1,
     )
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
+        vdaf_prio3.Prio3Sum(2, 1337),
+        None,
+        ctx,
+        [0, 1, 1337, 99, 42, 0, 0, 42],
+        2,
+    )
+
+    # Prio3SumVec
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
         vdaf_prio3.Prio3SumVec(2, 10, 8, 9),
@@ -159,6 +179,8 @@ if __name__ == '__main__':
         ],
         1,
     )
+
+    # Prio3Histogram
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
         vdaf_prio3.Prio3Histogram(2, 4, 2),
@@ -177,11 +199,43 @@ if __name__ == '__main__':
     )
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
+        vdaf_prio3.Prio3Histogram(2, 100, 10),
+        None,
+        ctx,
+        [2, 99, 99, 17, 42, 0, 0, 1, 2, 0],
+        2,
+    )
+
+    # Prio3MultihotCountVec
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
         vdaf_prio3.Prio3MultihotCountVec(2, 4, 2, 2),
         None,
         ctx,
         [[0, 1, 1, 0]],
         0,
+    )
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
+        vdaf_prio3.Prio3MultihotCountVec(4, 10, 2, 3),
+        None,
+        ctx,
+        [[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],
+        1,
+    )
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
+        vdaf_prio3.Prio3MultihotCountVec(2, 4, 4, 1),
+        None,
+        ctx,
+        [
+            [0, 1, 1, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 0],
+            [1, 1, 1, 0],
+            [1, 1, 1, 1],
+        ],
+        2,
     )
 
     # Poplar1
