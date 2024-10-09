@@ -1291,7 +1291,7 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
-                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-the-flp-of" class="internal xref">The FLP of BBCGGI19</a></p>
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-the-flp-construction" class="internal xref">The FLP Construction</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3.2.1">
                     <p id="section-toc.1-1.7.2.3.2.1.1"><a href="#section-7.3.1" class="auto internal xref">7.3.1</a>.  <a href="#name-overview-2" class="internal xref">Overview</a></p>
@@ -1333,7 +1333,7 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
                 <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-incremental-distributed-poi" class="internal xref">Incremental Distributed Point Functions (IDPFs)</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1.2.1">
-                    <p id="section-toc.1-1.8.2.1.2.1.1"><a href="#section-8.1.1" class="auto internal xref">8.1.1</a>.  <a href="#name-encoding-inputs-as-indices" class="internal xref">Encoding inputs as indices</a></p>
+                    <p id="section-toc.1-1.8.2.1.2.1.1"><a href="#section-8.1.1" class="auto internal xref">8.1.1</a>.  <a href="#name-encoding-inputs-as-indices" class="internal xref">Encoding Inputs as Indices</a></p>
 </li>
                 </ul>
 </li>
@@ -1361,7 +1361,7 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
-                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-the-idpf-scheme-of" class="internal xref">The IDPF scheme of BBCGGI21</a></p>
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-the-idpf-construction" class="internal xref">The IDPF Construction</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3.2.1">
                     <p id="section-toc.1-1.8.2.3.2.1.1"><a href="#section-8.3.1" class="auto internal xref">8.3.1</a>.  <a href="#name-overview-3" class="internal xref">Overview</a></p>
@@ -4722,7 +4722,7 @@ subsections below.<a href="#section-7.2.1-8" class="pilcrow">¶</a></p>
 <div id="prio3-shard-without-joint-rand">
 <section id="section-7.2.1.1">
             <h5 id="name-flps-without-joint-randomne">
-<a href="#section-7.2.1.1" class="section-number selfRef">7.2.1.1. </a><a href="#name-flps-without-joint-randomne" class="section-name selfRef">FLPs without joint randomness</a>
+<a href="#section-7.2.1.1" class="section-number selfRef">7.2.1.1. </a><a href="#name-flps-without-joint-randomne" class="section-name selfRef">FLPs Without Joint Randomness</a>
             </h5>
 <p id="section-7.2.1.1-1">The following method is used for FLPs that do not require joint randomness,
 i.e., when <code>flp.JOINT_RAND_LEN == 0</code>:<a href="#section-7.2.1.1-1" class="pilcrow">¶</a></p>
@@ -4803,7 +4803,7 @@ and proof shares and the methods for encoding the input shares are defined in
 <div id="flps-with-joint-randomness">
 <section id="section-7.2.1.2">
             <h5 id="name-flps-with-joint-randomness">
-<a href="#section-7.2.1.2" class="section-number selfRef">7.2.1.2. </a><a href="#name-flps-with-joint-randomness" class="section-name selfRef">FLPs with joint randomness</a>
+<a href="#section-7.2.1.2" class="section-number selfRef">7.2.1.2. </a><a href="#name-flps-with-joint-randomness" class="section-name selfRef">FLPs With Joint Randomness</a>
             </h5>
 <p id="section-7.2.1.2-1">The following method is used for FLPs that require joint randomness,
 i.e., for which <code>flp.JOINT_RAND_LEN &gt; 0</code>:<a href="#section-7.2.1.2-1" class="pilcrow">¶</a></p>
@@ -5271,7 +5271,7 @@ struct {
 <div id="input-share">
 <section id="section-7.2.7.2">
             <h5 id="name-input-share">
-<a href="#section-7.2.7.2" class="section-number selfRef">7.2.7.2. </a><a href="#name-input-share" class="section-name selfRef">Input share</a>
+<a href="#section-7.2.7.2" class="section-number selfRef">7.2.7.2. </a><a href="#name-input-share" class="section-name selfRef">Input Share</a>
             </h5>
 <p id="section-7.2.7.2-1">Just as for the public share, the encoding of the input shares depends on
 whether joint randomness is used. If so, then each input share includes the
@@ -5390,8 +5390,8 @@ struct {
 </div>
 <div id="flp-bbcggi19">
 <section id="section-7.3">
-        <h3 id="name-the-flp-of">
-<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-the-flp-of" class="section-name selfRef">The FLP of <span class="cite xref">[BBCGGI19]</span></a>
+        <h3 id="name-the-flp-construction">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-the-flp-construction" class="section-name selfRef">The FLP Construction</a>
         </h3>
 <p id="section-7.3-1">This section describes an FLP based on the construction from <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>,
 Section 4.2. We begin in <a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of their
@@ -6671,7 +6671,7 @@ def eval(
 <div id="parallel-sum-chunk-length">
 <section id="section-7.4.3.1">
             <h5 id="name-selection-of-parallelsum-ch">
-<a href="#section-7.4.3.1" class="section-number selfRef">7.4.3.1. </a><a href="#name-selection-of-parallelsum-ch" class="section-name selfRef">Selection of <code>ParallelSum</code> chunk length</a>
+<a href="#section-7.4.3.1" class="section-number selfRef">7.4.3.1. </a><a href="#name-selection-of-parallelsum-ch" class="section-name selfRef">Selection of <code>ParallelSum</code> Chunk Length</a>
             </h5>
 <p id="section-7.4.3.1-1">The <code>chunk_length</code> parameter provides a trade-off between the arity of the
 <code>ParallelSum</code> gadget and the number of times the gadget is called. The proof
@@ -7380,7 +7380,7 @@ across evaluations. See <a href="#idpf-bbcggi21" class="auto internal xref">Sect
 <div id="poplar1-idpf-index-encoding">
 <section id="section-8.1.1">
           <h4 id="name-encoding-inputs-as-indices">
-<a href="#section-8.1.1" class="section-number selfRef">8.1.1. </a><a href="#name-encoding-inputs-as-indices" class="section-name selfRef">Encoding inputs as indices</a>
+<a href="#section-8.1.1" class="section-number selfRef">8.1.1. </a><a href="#name-encoding-inputs-as-indices" class="section-name selfRef">Encoding Inputs as Indices</a>
           </h4>
 <p id="section-8.1.1-1">How data are represented as IDPF indices is up to the application. When the
 inputs are fixed-length byte strings, the most natural choice of representation
@@ -8277,8 +8277,8 @@ next. This would help reduce communication overhead.<a href="#section-8.2.6.6-7"
 </div>
 <div id="idpf-bbcggi21">
 <section id="section-8.3">
-        <h3 id="name-the-idpf-scheme-of">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-the-idpf-scheme-of" class="section-name selfRef">The IDPF scheme of <span class="cite xref">[BBCGGI21]</span></a>
+        <h3 id="name-the-idpf-construction">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-the-idpf-construction" class="section-name selfRef">The IDPF Construction</a>
         </h3>
 <p id="section-8.3-1">In this section we specify a concrete IDPF suitable for instantiating
 Poplar1. The scheme gets its name from the name of the protocol of

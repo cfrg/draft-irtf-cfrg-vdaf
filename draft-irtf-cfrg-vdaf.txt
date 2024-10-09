@@ -112,7 +112,7 @@ Table of Contents
        7.2.5.  Unsharding
        7.2.6.  Auxiliary Functions
        7.2.7.  Message Serialization
-     7.3.  The FLP of BBCGGI19
+     7.3.  The FLP Construction
        7.3.1.  Overview
        7.3.2.  Validity Circuits
        7.3.3.  Specification
@@ -124,7 +124,7 @@ Table of Contents
        7.4.5.  Prio3MultihotCountVec
    8.  Poplar1
      8.1.  Incremental Distributed Point Functions (IDPFs)
-       8.1.1.  Encoding inputs as indices
+       8.1.1.  Encoding Inputs as Indices
      8.2.  Construction
        8.2.1.  Sharding
        8.2.2.  Preparation
@@ -132,7 +132,7 @@ Table of Contents
        8.2.4.  Aggregation
        8.2.5.  Unsharding
        8.2.6.  Message Serialization
-     8.3.  The IDPF scheme of BBCGGI21
+     8.3.  The IDPF Construction
        8.3.1.  Overview
        8.3.2.  Key Generation
        8.3.3.  Key Evaluation
@@ -2800,7 +2800,7 @@ Table of Contents
    methods, depending on whether joint randomness is required by the
    FLP.  The methods are defined in the subsections below.
 
-7.2.1.1.  FLPs without joint randomness
+7.2.1.1.  FLPs Without Joint Randomness
 
    The following method is used for FLPs that do not require joint
    randomness, i.e., when flp.JOINT_RAND_LEN == 0:
@@ -2873,7 +2873,7 @@ Table of Contents
    shares, and proof shares and the methods for encoding the input
    shares are defined in Section 7.2.6.
 
-7.2.1.2.  FLPs with joint randomness
+7.2.1.2.  FLPs With Joint Randomness
 
    The following method is used for FLPs that require joint randomness,
    i.e., for which flp.JOINT_RAND_LEN > 0:
@@ -3297,7 +3297,7 @@ Table of Contents
        Prio3Seed joint_rand_parts[S * prio3.SHARES];
    } Prio3PublicShareWithJointRand;
 
-7.2.7.2.  Input share
+7.2.7.2.  Input Share
 
    Just as for the public share, the encoding of the input shares
    depends on whether joint randomness is used.  If so, then each input
@@ -3381,7 +3381,7 @@ Table of Contents
        Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
-7.3.  The FLP of [BBCGGI19]
+7.3.  The FLP Construction
 
    This section describes an FLP based on the construction from
    [BBCGGI19], Section 4.2.  We begin in Section 7.3.1 with an overview
@@ -4237,7 +4237,7 @@ Table of Contents
 
              Table 14: Parameters of validity circuit SumVec.
 
-7.4.3.1.  Selection of ParallelSum chunk length
+7.4.3.1.  Selection of ParallelSum Chunk Length
 
    The chunk_length parameter provides a trade-off between the arity of
    the ParallelSum gadget and the number of times the gadget is called.
@@ -4729,7 +4729,7 @@ Table of Contents
 
         Table 19: Constants and types defined by a concrete IDPF.
 
-8.1.1.  Encoding inputs as indices
+8.1.1.  Encoding Inputs as Indices
 
    How data are represented as IDPF indices is up to the application.
    When the inputs are fixed-length byte strings, the most natural
@@ -5411,7 +5411,7 @@ Table of Contents
    previous execution will have their children included in the next.
    This would help reduce communication overhead.
 
-8.3.  The IDPF scheme of [BBCGGI21]
+8.3.  The IDPF Construction
 
    In this section we specify a concrete IDPF suitable for instantiating
    Poplar1.  The scheme gets its name from the name of the protocol of
