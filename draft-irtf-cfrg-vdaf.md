@@ -259,9 +259,9 @@ informative:
 
   TestVectors:
     title: "Test vectors for Prio3 and Poplar1"
-    target: "https://github.com/cfrg/draft-irtf-cfrg-vdaf/tree/main/test_vec/vdaf"
-    seriesinfo: "commit hash <TODO>"
-    date: September 2024
+    target: "https://github.com/cfrg/draft-irtf-cfrg-vdaf"
+    seriesinfo: "commit hash 1891650"
+    date: October 2024
 
 --- abstract
 
@@ -6012,14 +6012,11 @@ class QueryGadget(Gadget[F]):
 
 # Test Vectors {#test-vectors}
 
-> TODO Update the reference in {{TestVectors}} by replacing `<TODO>` with
-> the commit hash with the final version of the test vectors.)
-
-The test vectors are available at {{TestVectors}}. The directory contains a set
-of JSON files. Each file contains a test vector for an instance of `Vdaf`
-({{vdaf}}). A test vector covers sharding, preparation, aggregation, and
-unsharding of each of several measurements. The test vector schema is defined
-below.
+The test vectors are available at {{TestVectors}}. The test vector directory,
+`test_vec/vdaf`, contains a set of JSON files. Each file contains a test vector
+for an instance of `Vdaf` ({{vdaf}}). A test vector covers sharding,
+preparation, aggregation, and unsharding of each of several measurements. The
+test vector schema is defined below.
 
 ## Schema
 
