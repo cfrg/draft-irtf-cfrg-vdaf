@@ -7,7 +7,7 @@
         "1a9fc8cca92e84a7"
     ],
     "ctx": "736f6d65206170706c69636174696f6e",
-    "max_measurement": 16,
+    "max_measurement": 255,
     "prep": [
         {
             "input_shares": [

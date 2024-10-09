@@ -1147,5 +1147,5 @@ class Sum(
         return output[0].as_unsigned()
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
-        test_vec['max_measurement'] = int(self.MEAS_LEN)
+        test_vec['max_measurement'] = int(self.max_measurement)
         return ['max_measurement']
