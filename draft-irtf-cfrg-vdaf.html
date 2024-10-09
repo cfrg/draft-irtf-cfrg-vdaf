@@ -16,14 +16,16 @@ measurements. These protocols are designed to ensure that, as long as at least
 one aggregation server executes the protocol honestly, individual measurements
 are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
-measurement that would result in an invalid aggregate result. 
+measurement that would result in an invalid aggregate result. Two concrete
+VDAFs are specified, one for general-purpose aggregation (Prio3) and another
+for heavy hitters (Poplar1). 
     " name="description">
 <meta content="xml2rfc 3.23.2" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.23.2
-    Python 3.12.6
+    Python 3.12.7
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
@@ -1086,7 +1088,9 @@ measurements. These protocols are designed to ensure that, as long as at least
 one aggregation server executes the protocol honestly, individual measurements
 are never seen by any server in the clear. At the same time, VDAFs allow the
 servers to detect if a malicious or misconfigured client submitted an
-measurement that would result in an invalid aggregate result.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+measurement that would result in an invalid aggregate result. Two concrete
+VDAFs are specified, one for general-purpose aggregation (Prio3) and another
+for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-discussion-venues">
