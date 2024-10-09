@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 11 April 2025                                              ISRG
+Expires: 12 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          8 October 2024
+                                                          9 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -25,7 +25,9 @@ Abstract
    protocol honestly, individual measurements are never seen by any
    server in the clear.  At the same time, VDAFs allow the servers to
    detect if a malicious or misconfigured client submitted an
-   measurement that would result in an invalid aggregate result.
+   measurement that would result in an invalid aggregate result.  Two
+   concrete VDAFs are specified, one for general-purpose aggregation
+   (Prio3) and another for heavy hitters (Poplar1).
 
 Discussion Venues
 
@@ -53,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 April 2025.
+   This Internet-Draft will expire on 12 April 2025.
 
 Copyright Notice
 
@@ -77,6 +79,7 @@ Table of Contents
      4.2.  Preparation
      4.3.  Validity of Aggregation Parameters
      4.4.  Aggregation
+       4.4.1.  Aggregation Order
      4.5.  Unsharding
      4.6.  Execution of a DAF
    5.  Definition of VDAFs
@@ -110,7 +113,7 @@ Table of Contents
        7.2.5.  Unsharding
        7.2.6.  Auxiliary Functions
        7.2.7.  Message Serialization
-     7.3.  The FLP of BBCGGI19
+     7.3.  The FLP Construction
        7.3.1.  Overview
        7.3.2.  Validity Circuits
        7.3.3.  Specification
@@ -122,7 +125,7 @@ Table of Contents
        7.4.5.  Prio3MultihotCountVec
    8.  Poplar1
      8.1.  Incremental Distributed Point Functions (IDPFs)
-       8.1.1.  Encoding inputs as indices
+       8.1.1.  Encoding Inputs as Indices
      8.2.  Construction
        8.2.1.  Sharding
        8.2.2.  Preparation
@@ -130,7 +133,7 @@ Table of Contents
        8.2.4.  Aggregation
        8.2.5.  Unsharding
        8.2.6.  Message Serialization
-     8.3.  The IDPF scheme of BBCGGI21
+     8.3.  The IDPF Construction
        8.3.1.  Overview
        8.3.2.  Key Generation
        8.3.3.  Key Evaluation
@@ -828,8 +831,8 @@ Table of Contents
       -  In VDAFs, Aggregators will need to exchange information among
          themselves as part of the validation process.
 
-   *  Each Aggregator combines the output shares in the batch to compute
-      the "aggregate share" for that batch, i.e., its share of the
+   *  As each Aggregator recovers output shares, it accumulates them
+      into an "aggregate share" for the batch, i.e., its share of the
       desired aggregate result.
 
    *  The Aggregators submit their aggregate shares to the Collector,
@@ -1045,47 +1048,65 @@ Table of Contents
 
 4.4.  Aggregation
 
-   Once an Aggregator holds output shares for a batch of measurements
-   (where batches are defined by the application), it combines them into
-   a share of the desired aggregate result:
+   Once an Aggregator holds an output share, it adds it into its
+   aggregate share for the batch (where batches are defined by the
+   application).
 
-   *  daf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) ->
-      AggShare is the deterministic aggregation algorithm.  It is run by
-      each Aggregator a set of recovered output shares.
+   *  daf.agg_init(agg_param: AggParam) -> AggShare returns an empty
+      aggregate share.  It is called to initialize aggregation of a
+      batch of measurements.
 
-       Aggregator 0    Aggregator 1        Aggregator SHARES-1
-       ============    ============        ===================
+   *  daf.agg_update(agg_param: AggParam, agg_share: AggShare,
+      out_share: OutShare) -> AggShare accumulates an output share into
+      an aggregate share and returns the updated aggregate share.
 
-       out_share_0_0   out_share_1_0       out_share_[SHARES-1]_0
-       out_share_0_1   out_share_1_1       out_share_[SHARES-1]_1
-       out_share_0_2   out_share_1_2       out_share_[SHARES-1]_2
-            ...             ...                     ...
-       out_share_0_B   out_share_1_B       out_share_[SHARES-1]_B
-         |               |                   |
-         V               V                   V
-       +-----------+   +-----------+       +-----------+
-       | aggregate |   | aggregate |   ... | aggregate |
-       +-----------+   +-----------+       +-----------+
-         |               |                   |
-         V               V                   V
-       agg_share_0     agg_share_1         agg_share_[SHARES-1]
+       Aggregator j
+       ============
 
-    Figure 3: Aggregation of output shares. `B` indicates the number of
-                         measurements in the batch.
+       +------------+    +------------+
+       | agg_init   |--->| agg_update |<--- out_share_0
+       +------------+    +------------+
+                            |
+                            V
+                         +------------+
+                         | agg_update |<--- out_share_1,
+                         +------------+
+                           |
+                           V
+                          ...
+                           |
+                           V
+                         +------------+
+                         | agg_update |<--- out_share_MEAS_COUNT
+                         +------------+
+                           |
+                           V
+                         agg_share_j
 
-   For simplicity, we have written this algorithm in a "one-shot" form,
-   where all output shares for a batch are provided at the same time.
-   Many DAFs may also support a "streaming" form, where shares are
-   processed one at a time.
+       Figure 3: Local aggregation of output shares by Aggregator j.
+     The number of measurements in the batch is denoted by MEAS_COUNT.
 
-   Implementation note: for most natural DAFs (and VDAFs) it is not
-   necessary for an Aggregator to store all output shares individually
-   before aggregating.  Typically it is possible to merge output shares
-   into aggregate shares as they arrive, merge these into other
-   aggregate shares, and so on.  In particular, this is the case when
-   the output shares are vectors over some finite field and aggregating
-   them involves merely adding up the vectors element-wise.  Such is the
-   case for Prio3 Section 7 and Poplar1 Section 8.
+   In many situations it is desirable to split an aggregate share across
+   multiple storage elements, then merge the aggregate shares together
+   just before releasing the completed aggregate share to the Collector.
+   DAFs facilitate this with the following method:
+
+   *  daf.merge(agg_param: AggParam, agg_shares: list[AggShare]) ->
+      AggShare merges a sequence of aggregate shares into a single
+      aggregate share.
+
+4.4.1.  Aggregation Order
+
+   For most DAFs and VDAFs, the outcome of aggregation is not sensitive
+   to the order in which ouptut shares are aggregated.  That is,
+   aggregate shares can be updated and merged with other aggregate
+   shares in any order.  For instance, for both Prio3 (Section 7) and
+   Poplar1 (Section 8), the aggregate shares and output shares both have
+   the same type, a vector over some finite field (Section 6.1);
+   aggregation involves simply adding vectors toegther.
+
+   In theory, however, correct execution may require each Aggregator to
+   aggregate output shares in the same order.
 
 4.5.  Unsharding
 
@@ -1155,8 +1176,9 @@ Table of Contents
                "measurements and nonces lists have different lengths"
            )
 
-       out_shares: list[list[OutShare]]
-       out_shares = [[] for j in range(daf.SHARES)]
+       agg_shares: list[AggShare]
+       agg_shares = [daf.agg_init(agg_param)
+                     for _ in range(daf.SHARES)]
        for (measurement, nonce) in zip(measurements, nonces):
            # Each Client shards its measurement into input shares and
            # distributes them among the Aggregators.
@@ -1164,27 +1186,20 @@ Table of Contents
            (public_share, input_shares) = \
                daf.shard(ctx, measurement, nonce, rand)
 
-           # Each Aggregator prepares its input share for aggregation.
+           # Each Aggregator computes its output share from its input
+           # share and aggregates it.
            for j in range(daf.SHARES):
-               out_shares[j].append(
-                   daf.prep(ctx, j, agg_param, nonce,
-                            public_share, input_shares[j]))
-
-       # Each Aggregator aggregates its output shares into an aggregate
-       # share and sends it to the Collector.
-       agg_shares = []
-       for j in range(daf.SHARES):
-           agg_share_j = daf.aggregate(agg_param,
-                                       out_shares[j])
-           agg_shares.append(agg_share_j)
+               out_share = daf.prep(ctx, j, agg_param, nonce,
+                                    public_share, input_shares[j])
+               agg_shares[j] = daf.agg_update(agg_param,
+                                              agg_shares[j],
+                                              out_share)
 
        # Collector unshards the aggregate result.
        num_measurements = len(measurements)
        agg_result = daf.unshard(agg_param, agg_shares,
                                 num_measurements)
        return agg_result
-
-                       Figure 5: Execution of a DAF.
 
    The inputs to this procedure are the same as the aggregation function
    computed by the DAF: an aggregation parameter and a sequence of
@@ -1383,7 +1398,7 @@ Table of Contents
          V              V                      V
        out_share_0    out_share_1         out_share_[SHARES-1]
 
-    Figure 6: VDAF preparation process on the input shares for a single
+    Figure 5: VDAF preparation process on the input shares for a single
    measurement.  At the end of the computation, each Aggregator holds an
                          output share or an error.
 
@@ -1398,7 +1413,7 @@ Table of Contents
       share.  Its inputs are the shared verification key (verify_key),
       the application context (ctx), the Aggregator's unique identifier
       (agg_id), the aggregation parameter (agg_param), the nonce
-      provided by the environment (nonce, see Figure 7), the public
+      provided by the environment (nonce, see Section 5.6), the public
       share (public_share), and one of the input shares generated by the
       Client (input_share).  Its output is the Aggregator's initial
       preparation state and initial prep share.
@@ -1475,18 +1490,23 @@ Table of Contents
 
 5.4.  Aggregation
 
-   VDAF Aggregation is identical to DAF Aggregation (cf.  Section 4.4):
+   VDAF aggregation is identical to DAF aggregation (Section 4.4):
 
-   *  vdaf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) ->
-      AggShare is the deterministic aggregation algorithm.  It is run by
-      each Aggregator over the output shares it has computed for a batch
-      of measurements.
+   *  vdaf.agg_init(agg_param: AggParam) -> AggShare returns an empty
+      aggregate share.  It is called to initialize aggregation of a
+      batch of measurements.
 
-   The data flow for this stage is illustrated in Figure 3.  Here again,
-   we have the aggregation algorithm in a "one-shot" form, where all
-   shares for a batch are provided at the same time.  VDAFs typically
-   also support a "streaming" form, where shares are processed one at a
-   time.
+   *  vdaf.agg_update(agg_param: AggParam, agg_share: AggShare,
+      out_share: OutShare) -> AggShare accumulates an output share into
+      an aggregate share and returns the updated aggregate share.
+
+   *  vdaf.merge(agg_param: AggParam, agg_shares: list[AggShare]) ->
+      AggShare merges a sequence of aggregate shares into a single
+      aggregate share.
+
+   The data flow for this stage is illustrated in Figure 3.  Like DAFs,
+   computation of the VDAF aggregate is not usually sensitive to the
+   order in which output shares are aggregated.  See Section 4.4.1.
 
 5.5.  Unsharding
 
@@ -1543,7 +1563,8 @@ Table of Contents
                "measurements and nonces lists have different lengths"
            )
 
-       out_shares = []
+       agg_shares = [vdaf.agg_init(agg_param)
+                     for _ in range(vdaf.SHARES)]
        for (nonce, measurement) in zip(nonces, measurements):
            assert len(nonce) == vdaf.NONCE_SIZE
 
@@ -1564,7 +1585,7 @@ Table of Contents
                prep_states.append(state)
                outbound_prep_shares.append(share)
 
-           # Aggregators recover their output shares.
+           # Aggregators complete preparation.
            for i in range(vdaf.ROUNDS - 1):
                prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                    agg_param,
@@ -1577,36 +1598,23 @@ Table of Contents
                    (prep_states[j], prep_share) = out
                    outbound_prep_shares.append(prep_share)
 
-           # The final outputs of the prepare phase are the output
-           # shares.
            prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                agg_param,
                                                outbound_prep_shares)
 
-           outbound_out_shares = []
+           # Each Aggregator computes and aggregates its output share.
            for j in range(vdaf.SHARES):
                out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
                assert not isinstance(out_share, tuple)
-               outbound_out_shares.append(out_share)
-
-           out_shares.append(outbound_out_shares)
-
-       # Each Aggregator aggregates its output shares into an
-       # aggregate share. In a distributed VDAF computation, the
-       # aggregate shares are sent over the network.
-       agg_shares = []
-       for j in range(vdaf.SHARES):
-           out_shares_j = [out[j] for out in out_shares]
-           agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
-           agg_shares.append(agg_share_j)
+               agg_shares[j] = vdaf.agg_update(agg_param,
+                                               agg_shares[j],
+                                               out_share)
 
        # Collector unshards the aggregate.
        num_measurements = len(measurements)
        agg_result = vdaf.unshard(agg_param, agg_shares,
                                  num_measurements)
        return agg_result
-
-                       Figure 7: Execution of a VDAF.
 
    The inputs to this algorithm are the aggregation parameter, a list of
    measurements, and a nonce for each measurement.  This document does
@@ -1625,7 +1633,7 @@ Table of Contents
    some approaches to realizing this broadcast channel functionality in
    protocols that use VDAFs.
 
-   The state machine of each Aggregator is shown in Figure 8.
+   The state machine of each Aggregator is shown in Figure 6.
 
                      +----------------+
                      |                |
@@ -1635,7 +1643,7 @@ Table of Contents
     |                |
     +--> Rejected <--+
 
-               Figure 8: State machine for VDAF preparation.
+               Figure 6: State machine for VDAF preparation.
 
    State transitions are made when the state is acted upon by the host's
    local inputs and/or messages sent by the peers.  The initial state is
@@ -2049,8 +2057,6 @@ Table of Contents
            vec.append(cls(x))
        return vec
 
-             Figure 9: Derived class methods for finite fields.
-
    Finally, Field implements the following methods for representing a
    value as a sequence of field elements, each of which represents a bit
    of the input.
@@ -2092,9 +2098,6 @@ Table of Contents
            decoded += cls(1 << l) * bit
        return decoded
 
-    Figure 10: Derived class methods to encode integers into bit vector
-                              representation.
-
 6.1.1.  Auxiliary Functions
 
    The following auxiliary functions on vectors of field elements are
@@ -2118,8 +2121,6 @@ Table of Contents
    def vec_neg(vec: list[F]) -> list[F]:
        """Negate the input vector."""
        return list(map(lambda x: -x, vec))
-
-               Figure 11: Common functions for finite fields.
 
 6.1.2.  NTT-Friendly Fields
 
@@ -2243,8 +2244,6 @@ Table of Contents
        xof = cls(seed, dst, binder)
        return xof.next_vec(field, length)
 
-                    Figure 12: Derived methods for XOFs.
-
 6.2.1.  XofTurboShake128
 
    This section describes XofTurboShake128, an XOF based on the
@@ -2280,8 +2279,6 @@ Table of Contents
            # that allows stateful handling of the stream.
            stream = TurboSHAKE128(self.m, 1, self.l)
            return stream[-length:]
-
-               Figure 13: Definition of XOF XofTurboShake128.
 
 6.2.2.  XofFixedKeyAes128
 
@@ -2597,8 +2594,6 @@ Table of Contents
        # Verifier decides if the measurement is valid.
        return flp.decide(verifier)
 
-                      Figure 14: Execution of an FLP.
-
    The proof system is constructed so that, if meas is valid, then
    run_flp(flp, meas, 1) always returns True.  On the other hand, if
    meas is invalid, then as long as joint_rand and query_rand are
@@ -2823,14 +2818,12 @@ Table of Contents
        else:
            return self.shard_without_joint_rand(ctx, meas, seeds)
 
-             Figure 15: Input-distribution algorithm for Prio3.
-
    It starts by splitting the randomness into seeds.  It then encodes
    the measurement as prescribed by the FLP and calls one of two
    methods, depending on whether joint randomness is required by the
    FLP.  The methods are defined in the subsections below.
 
-7.2.1.1.  FLPs without joint randomness
+7.2.1.1.  FLPs Without Joint Randomness
 
    The following method is used for FLPs that do not require joint
    randomness, i.e., when flp.JOINT_RAND_LEN == 0:
@@ -2885,8 +2878,6 @@ Table of Contents
            ))
        return (None, input_shares)
 
-    Figure 16: Sharding an encoded measurement without joint randomness.
-
    The steps in this method are as follows:
 
    1.  Shard the encoded measurement into shares
@@ -2905,7 +2896,7 @@ Table of Contents
    shares, and proof shares and the methods for encoding the input
    shares are defined in Section 7.2.6.
 
-7.2.1.2.  FLPs with joint randomness
+7.2.1.2.  FLPs With Joint Randomness
 
    The following method is used for FLPs that require joint randomness,
    i.e., for which flp.JOINT_RAND_LEN > 0:
@@ -2985,14 +2976,12 @@ Table of Contents
            ))
        return (joint_rand_parts, input_shares)
 
-     Figure 17: Sharding an encoded measurement with joint randomness.
-
    The difference between this procedure and previous one is that here
    we compute joint randomnesses joint_rands, split it into multiple
    joint_rand, and pass each joint_rand to the proof generationg
-   algorithm.  (In Figure 16 the joint randomness is the empty vector,
-   [].)  This requires generating an additional value, called the
-   "blind", that is incorporated into each input share.
+   algorithm.  (In Section 7.2.1.1 the joint randomness is the empty
+   vector, [].)  This requires generating an additional value, called
+   the "blind", that is incorporated into each input share.
 
    The joint randomness computation involves the following steps:
 
@@ -3147,8 +3136,6 @@ Table of Contents
            joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
        return joint_rand_seed
 
-                  Figure 18: Preparation state for Prio3.
-
 7.2.3.  Validity of Aggregation Parameters
 
    Every input share MUST only be used once, regardless of the
@@ -3164,23 +3151,27 @@ Table of Contents
        """
        return len(previous_agg_params) == 0
 
-          Figure 19: Validity of aggregation parameters for Prio3.
-
 7.2.4.  Aggregation
 
    Aggregating a set of output shares is simply a matter of adding up
    the vectors element-wise.
 
-   def aggregate(
-           self,
-           _agg_param: None,
-           out_shares: list[list[F]]) -> list[F]:
-       agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
-       for out_share in out_shares:
-           agg_share = vec_add(agg_share, out_share)
-       return agg_share
+   def agg_init(self, _agg_param: None) -> list[F]:
+       return self.flp.field.zeros(self.flp.OUTPUT_LEN)
 
-                Figure 20: Aggregation algorithm for Prio3.
+   def agg_update(self,
+                  _agg_param: None,
+                  agg_share: list[F],
+                  out_share: list[F]) -> list[F]:
+       return vec_add(agg_share, out_share)
+
+   def merge(self,
+             _agg_param: None,
+             agg_shares: list[list[F]]) -> list[F]:
+       agg = self.agg_init(None)
+       for agg_share in agg_shares:
+           agg = vec_add(agg, agg_share)
+       return agg
 
 7.2.5.  Unsharding
 
@@ -3193,12 +3184,8 @@ Table of Contents
            _agg_param: None,
            agg_shares: list[list[F]],
            num_measurements: int) -> AggResult:
-       agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
-       for agg_share in agg_shares:
-           agg = vec_add(agg, agg_share)
+       agg = self.merge(None, agg_shares)
        return self.flp.decode(agg, num_measurements)
-
-         Figure 21: Computation of the aggregate result for Prio3.
 
 7.2.6.  Auxiliary Functions
 
@@ -3339,7 +3326,7 @@ Table of Contents
        Prio3Seed joint_rand_parts[S * prio3.SHARES];
    } Prio3PublicShareWithJointRand;
 
-7.2.7.2.  Input share
+7.2.7.2.  Input Share
 
    Just as for the public share, the encoding of the input shares
    depends on whether joint randomness is used.  If so, then each input
@@ -3423,7 +3410,7 @@ Table of Contents
        Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
-7.3.  The FLP of [BBCGGI19]
+7.3.  The FLP Construction
 
    This section describes an FLP based on the construction from
    [BBCGGI19], Section 4.2.  We begin in Section 7.3.1 with an overview
@@ -3732,7 +3719,7 @@ Table of Contents
     |
     V proof
 
-          Figure 22: Components of the proof generation algorithm.
+          Figure 7: Components of the proof generation algorithm.
 
    The proof generation algorithm invokes the validity circuit on the
    encoded measurement and joint randomness.  The validity circuit in
@@ -3808,7 +3795,7 @@ Table of Contents
     |
     V verifier (share)
 
-               Figure 23: Components of the query algorithm.
+                Figure 8: Components of the query algorithm.
 
    The query algorithm invokes the validity circuit on the encoded
    measurement and joint randomness.  It evaluates the gadget
@@ -3907,7 +3894,7 @@ Table of Contents
     |
     V is_valid
 
-              Figure 24: Components of the decision algorithm.
+              Figure 9: Components of the decision algorithm.
 
    The decision algorithm consumes the verifier message.  (Each of the
    Aggregators computes an additive share of the verifier message after
@@ -4238,7 +4225,7 @@ Table of Contents
                _num_measurements: int) -> list[int]:
            return [x.as_unsigned() for x in output]
 
-7.4.3.1.  Selection of ParallelSum chunk length
+7.4.3.1.  Selection of ParallelSum Chunk Length
 
    The chunk_length parameter provides a trade-off between the arity of
    the ParallelSum gadget (Appendix A.3) and the number of times the
@@ -4747,7 +4734,7 @@ Table of Contents
 
         Table 14: Constants and types defined by a concrete IDPF.
 
-8.1.1.  Encoding inputs as indices
+8.1.1.  Encoding Inputs as Indices
 
    How data are represented as IDPF indices is up to the application.
    When the inputs are fixed-length byte strings, the most natural
@@ -4972,8 +4959,6 @@ Table of Contents
        input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
        return (public_share, input_shares)
 
-               Figure 25: The sharding algorithm for Poplar1.
-
 8.2.2.  Preparation
 
    The aggregation parameter encodes a sequence of candidate prefixes.
@@ -5144,8 +5129,6 @@ Table of Contents
        else:
            raise ValueError('incorrect sketch length')
 
-                 Figure 26: Preparation state for Poplar1.
-
 8.2.3.  Validity of Aggregation Parameters
 
    Aggregation parameters are valid for a given input share if no
@@ -5193,24 +5176,32 @@ Table of Contents
                return False
        return True
 
-         Figure 27: Validity of aggregation parameters for Poplar1.
-
 8.2.4.  Aggregation
 
    Aggregation involves simply adding up the output shares.
 
-   def aggregate(
-           self,
-           agg_param: Poplar1AggParam,
-           out_shares: list[FieldVec]) -> FieldVec:
+   def agg_init(self, agg_param: Poplar1AggParam) -> FieldVec:
        (level, prefixes) = agg_param
        field = self.idpf.current_field(level)
-       agg_share = cast(list[Field], field.zeros(len(prefixes)))
-       for out_share in out_shares:
-           agg_share = vec_add(agg_share, cast(list[Field], out_share))
-       return cast(FieldVec, agg_share)
+       return field.zeros(len(prefixes))
 
-               Figure 28: Aggregation algorithm for Poplar1.
+   def agg_update(self,
+                  agg_param: Poplar1AggParam,
+                  agg_share: FieldVec,
+                  out_share: FieldVec) -> FieldVec:
+       a = cast(list[Field], agg_share)
+       o = cast(list[Field], out_share)
+       return cast(FieldVec, vec_add(a, o))
+
+   def merge(self,
+             agg_param: Poplar1AggParam,
+             agg_shares: list[FieldVec]) -> FieldVec:
+       (level, prefixes) = agg_param
+       field = self.idpf.current_field(level)
+       agg = cast(list[Field], field.zeros(len(prefixes)))
+       for agg_share in agg_shares:
+           agg = vec_add(agg, cast(list[Field], agg_share))
+       return cast(FieldVec, agg)
 
 8.2.5.  Unsharding
 
@@ -5222,14 +5213,8 @@ Table of Contents
            agg_param: Poplar1AggParam,
            agg_shares: list[FieldVec],
            _num_measurements: int) -> list[int]:
-       (level, prefixes) = agg_param
-       field = self.idpf.current_field(level)
-       agg = cast(list[Field], field.zeros(len(prefixes)))
-       for agg_share in agg_shares:
-           agg = vec_add(agg, cast(list[Field], agg_share))
+       agg = self.merge(agg_param, agg_shares)
        return [x.as_unsigned() for x in agg]
-
-        Figure 29: Computation of the aggregate result for Poplar1.
 
 8.2.6.  Message Serialization
 
@@ -5439,7 +5424,7 @@ Table of Contents
    previous execution will have their children included in the next.
    This would help reduce communication overhead.
 
-8.3.  The IDPF scheme of [BBCGGI21]
+8.3.  The IDPF Construction
 
    In this section we specify a concrete IDPF suitable for instantiating
    Poplar1.  The scheme gets its name from the name of the protocol of
@@ -5606,8 +5591,6 @@ Table of Contents
            public_share.append((seed_cw, ctrl_cw, w_cw))
        return (public_share, key)
 
-           Figure 30: IDPF-key generation algorithm of BBCGGI21.
-
 8.3.3.  Key Evaluation
 
    The description of the IDPF-evaluation algorithm makes use of
@@ -5720,8 +5703,6 @@ Table of Contents
 
        return (next_seed, next_ctrl, cast(FieldVec, y))
 
-        Figure 31: IDPF-evaluation generation algorithm of BBCGGI21.
-
 8.3.4.  Auxiliary Functions
 
    def extend(
@@ -5773,8 +5754,6 @@ Table of Contents
        if level < self.BITS-1:
            return XofFixedKeyAes128(seed, dst, nonce)
        return XofTurboShake128(seed, dst, nonce)
-
-                 Figure 32: Helper functions for the IDPF.
 
 8.4.  Instantiation
 
@@ -6351,9 +6330,9 @@ Table of Contents
               2024, <https://eprint.iacr.org/2024/585>.
 
    [TestVectors]
-              "Test vectors for Prio3 and Poplar1", commit hash <TODO> ,
-              September 2024, <https://github.com/cfrg/draft-irtf-cfrg-
-              vdaf/tree/main/test_vec/vdaf>.
+              "Test vectors for Prio3 and Poplar1", commit hash
+              1891650 , October 2024,
+              <https://github.com/cfrg/draft-irtf-cfrg-vdaf>.
 
 Appendix A.  FLP Gadgets
 
@@ -6575,14 +6554,12 @@ A.4.  Shims for Generating and Verifying Proofs
 
 Appendix B.  Test Vectors
 
-      TODO Update the reference in [TestVectors] by replacing <TODO>
-      with the commit hash with the final version of the test vectors.)
-
-   The test vectors are available at [TestVectors].  The directory
-   contains a set of JSON files.  Each file contains a test vector for
-   an instance of Vdaf (Section 5).  A test vector covers sharding,
-   preparation, aggregation, and unsharding of each of several
-   measurements.  The test vector schema is defined below.
+   The test vectors are available at [TestVectors].  The test vector
+   directory, test_vec/vdaf, contains a set of JSON files.  Each file
+   contains a test vector for an instance of Vdaf (Section 5).  A test
+   vector covers sharding, preparation, aggregation, and unsharding of
+   each of several measurements.  The test vector schema is defined
+   below.
 
 B.1.  Schema
 
