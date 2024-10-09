@@ -1037,7 +1037,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 11 April 2025</td>
+<td class="center">Expires 12 April 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1050,12 +1050,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-08" class="published">8 October 2024</time>
+<time datetime="2024-10-09" class="published">9 October 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-11">11 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-04-12">12 April 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1118,7 +1118,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 11 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 12 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1343,7 +1343,7 @@ measurement that would result in an invalid aggregate result.<a href="#section-a
                     <p id="section-toc.1-1.8.2.2.2.2.1"><a href="#section-8.2.2" class="auto internal xref">8.2.2</a>.  <a href="#name-preparation-4" class="internal xref">Preparation</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2.2.3">
-                    <p id="section-toc.1-1.8.2.2.2.3.1"><a href="#section-8.2.3" class="auto internal xref">8.2.3</a>.  <a href="#name-validity-of-aggregation-paramet" class="internal xref">Validity of Aggregation Parameters</a></p>
+                    <p id="section-toc.1-1.8.2.2.2.3.1"><a href="#section-8.2.3" class="auto internal xref">8.2.3</a>.  <a href="#name-validity-of-aggregation-parame" class="internal xref">Validity of Aggregation Parameters</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2.2.4">
                     <p id="section-toc.1-1.8.2.2.2.4.1"><a href="#section-8.2.4" class="auto internal xref">8.2.4</a>.  <a href="#name-aggregation-5" class="internal xref">Aggregation</a></p>
@@ -2613,9 +2613,7 @@ is deterministic.<a href="#section-4.5-2.1.1" class="pilcrow">¶</a></p>
 <a href="#section-4.6" class="section-number selfRef">4.6. </a><a href="#name-execution-of-a-daf" class="section-name selfRef">Execution of a DAF</a>
         </h3>
 <p id="section-4.6-1">Securely executing a DAF involves emulating the following procedure.<a href="#section-4.6-1" class="pilcrow">¶</a></p>
-<span id="name-execution-of-a-daf-2"></span><div id="run-daf">
-<figure id="figure-5">
-          <div class="breakable lang-python sourcecode" id="section-4.6-2.1">
+<div class="breakable lang-python sourcecode" id="section-4.6-2">
 <pre>
 def run_daf(
         daf: Daf[
@@ -2677,11 +2675,7 @@ def run_daf(
     agg_result = daf.unshard(agg_param, agg_shares,
                              num_measurements)
     return agg_result
-</pre>
-</div>
-<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
-<a href="#name-execution-of-a-daf-2" class="selfRef">Execution of a DAF.</a>
-          </figcaption></figure>
+</pre><a href="#section-4.6-2" class="pilcrow">¶</a>
 </div>
 <p id="section-4.6-3">The inputs to this procedure are the same as the aggregation function computed by
 the DAF: an aggregation parameter and a sequence of measurements. The procedure
@@ -2935,7 +2929,7 @@ share.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
 input shares to output shares. The Aggregators need to agree on this parameter
 before they can begin preparing the measurement shares for aggregation.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
 <span id="name-vdaf-preparation-process-on"></span><div id="prep-flow">
-<figure id="figure-6">
+<figure id="figure-5">
           <div class="alignLeft art-text artwork" id="section-5.2-4.1">
 <pre>
     Aggregator 0   Aggregator 1           Aggregator SHARES-1
@@ -2965,7 +2959,7 @@ before they can begin preparing the measurement shares for aggregation.<a href="
     out_share_0    out_share_1         out_share_[SHARES-1]
 </pre>
 </div>
-<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
 <a href="#name-vdaf-preparation-process-on" class="selfRef">VDAF preparation process on the input shares for a single measurement. At the end of the computation, each Aggregator holds an output share or an error.</a>
           </figcaption></figure>
 </div>
@@ -2980,8 +2974,8 @@ initialization algorithm run by each Aggregator to begin processing its input
 share into an output share. Its inputs are the shared verification key
 (<code>verify_key</code>), the application context (<code>ctx</code>), the Aggregator's unique
 identifier (<code>agg_id</code>), the aggregation parameter (<code>agg_param</code>), the nonce
-provided by the environment (<code>nonce</code>, see <a href="#run-vdaf" class="auto internal xref">Figure 7</a>), the public share
-(<code>public_share</code>), and one of the input shares generated by the Client
+provided by the environment (<code>nonce</code>, see <a href="#vdaf-execution" class="auto internal xref">Section 5.6</a>), the public
+share (<code>public_share</code>), and one of the input shares generated by the Client
 (<code>input_share</code>). Its output is the Aggregator's initial preparation state and
 initial prep share.<a href="#section-5.2-6.1.1" class="pilcrow">¶</a></p>
 <p id="section-5.2-6.1.2">
@@ -3109,9 +3103,7 @@ is deterministic.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
 <a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-execution-of-a-vdaf" class="section-name selfRef">Execution of a VDAF</a>
         </h3>
 <p id="section-5.6-1">Secure execution of a VDAF involves simulating the following procedure.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
-<span id="name-execution-of-a-vdaf-2"></span><div id="run-vdaf">
-<figure id="figure-7">
-          <div class="breakable lang-python sourcecode" id="section-5.6-2.1">
+<div class="breakable lang-python sourcecode" id="section-5.6-2">
 <pre>
 def run_vdaf(
         vdaf: Vdaf[
@@ -3212,11 +3204,7 @@ def run_vdaf(
     agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
     return agg_result
-</pre>
-</div>
-<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
-<a href="#name-execution-of-a-vdaf-2" class="selfRef">Execution of a VDAF.</a>
-          </figcaption></figure>
+</pre><a href="#section-5.6-2" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6-3">The inputs to this algorithm are the aggregation parameter, a list of
 measurements, and a nonce for each measurement. This document does not specify
@@ -3236,9 +3224,9 @@ broadcast channel, which is then processed into the prep message using the
 public <code>prep_shares_to_prep()</code> algorithm and broadcast to the Aggregators to
 start the next round. In this section we describe some approaches to realizing
 this broadcast channel functionality in protocols that use VDAFs.<a href="#section-5.7-1" class="pilcrow">¶</a></p>
-<p id="section-5.7-2">The state machine of each Aggregator is shown in <a href="#vdaf-prep-state-machine" class="auto internal xref">Figure 8</a>.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
+<p id="section-5.7-2">The state machine of each Aggregator is shown in <a href="#vdaf-prep-state-machine" class="auto internal xref">Figure 6</a>.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 <span id="name-state-machine-for-vdaf-prep"></span><div id="vdaf-prep-state-machine">
-<figure id="figure-8">
+<figure id="figure-6">
           <div class="alignLeft art-text artwork" id="section-5.7-3.1">
 <pre>
                   +----------------+
@@ -3250,7 +3238,7 @@ Start ----&gt; Continued(prep_state, prep_round) --&gt; Finished(out_share)
  +--&gt; Rejected &lt;--+
 </pre>
 </div>
-<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
 <a href="#name-state-machine-for-vdaf-prep" class="selfRef">State machine for VDAF preparation.</a>
           </figcaption></figure>
 </div>
@@ -3666,9 +3654,7 @@ The value of <code>integer</code> <span class="bcp14">MUST</span> be non-negativ
 <p id="section-6.1-9">Each concrete <code>Field</code> has two derived class methods, one for encoding
 a vector of field elements as a byte string and another for decoding a vector of
 field elements.<a href="#section-6.1-9" class="pilcrow">¶</a></p>
-<span id="name-derived-class-methods-for-f"></span><div id="field-derived-methods">
-<figure id="figure-9">
-          <div class="lang-python sourcecode" id="section-6.1-10.1">
+<div class="lang-python sourcecode" id="section-6.1-10">
 <pre>
 def encode_vec(cls, vec: list[Self]) -&gt; bytes:
     """
@@ -3697,17 +3683,11 @@ def decode_vec(cls, encoded: bytes) -&gt; list[Self]:
             raise ValueError('modulus overflow')
         vec.append(cls(x))
     return vec
-</pre>
-</div>
-<figcaption><a href="#figure-9" class="selfRef">Figure 9</a>:
-<a href="#name-derived-class-methods-for-f" class="selfRef">Derived class methods for finite fields.</a>
-          </figcaption></figure>
+</pre><a href="#section-6.1-10" class="pilcrow">¶</a>
 </div>
 <p id="section-6.1-11">Finally, <code>Field</code> implements the following methods for representing a value as
 a sequence of field elements, each of which represents a bit of the input.<a href="#section-6.1-11" class="pilcrow">¶</a></p>
-<span id="name-derived-class-methods-to-en"></span><div id="field-bit-rep">
-<figure id="figure-10">
-          <div class="lang-python sourcecode" id="section-6.1-12.1">
+<div class="lang-python sourcecode" id="section-6.1-12">
 <pre>
 def encode_into_bit_vector(
         cls,
@@ -3745,11 +3725,7 @@ def decode_from_bit_vector(cls, vec: list[Self]) -&gt; Self:
     for (l, bit) in enumerate(vec):
         decoded += cls(1 &lt;&lt; l) * bit
     return decoded
-</pre>
-</div>
-<figcaption><a href="#figure-10" class="selfRef">Figure 10</a>:
-<a href="#name-derived-class-methods-to-en" class="selfRef">Derived class methods to encode integers into bit vector representation.</a>
-          </figcaption></figure>
+</pre><a href="#section-6.1-12" class="pilcrow">¶</a>
 </div>
 <div id="auxiliary-functions">
 <section id="section-6.1.1">
@@ -3759,9 +3735,7 @@ def decode_from_bit_vector(cls, vec: list[Self]) -&gt; Self:
 <p id="section-6.1.1-1">The following auxiliary functions on vectors of field elements are used in the
 remainder of this document. Note that an exception is raised by each function if
 the operands are not the same length.<a href="#section-6.1.1-1" class="pilcrow">¶</a></p>
-<span id="name-common-functions-for-finite"></span><div id="field-helper-functions">
-<figure id="figure-11">
-            <div class="lang-python sourcecode" id="section-6.1.1-2.1">
+<div class="lang-python sourcecode" id="section-6.1.1-2">
 <pre>
 def vec_sub(left: list[F], right: list[F]) -&gt; list[F]:
     """
@@ -3780,11 +3754,7 @@ def vec_add(left: list[F], right: list[F]) -&gt; list[F]:
 def vec_neg(vec: list[F]) -&gt; list[F]:
     """Negate the input vector."""
     return list(map(lambda x: -x, vec))
-</pre>
-</div>
-<figcaption><a href="#figure-11" class="selfRef">Figure 11</a>:
-<a href="#name-common-functions-for-finite" class="selfRef">Common functions for finite fields.</a>
-            </figcaption></figure>
+</pre><a href="#section-6.1.1-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -3902,9 +3872,7 @@ from an existing one. The second is used to compute a sequence of field
 elements. The third is a convenience method to construct an <code>Xof</code> from a seed,
 domain separation tag, and binder string, and then use it to compute a sequence
 of field elements.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
-<span id="name-derived-methods-for-xofs"></span><div id="xof-derived-methods">
-<figure id="figure-12">
-          <div class="breakable lang-python sourcecode" id="section-6.2-5.1">
+<div class="breakable lang-python sourcecode" id="section-6.2-5">
 <pre>
 def derive_seed(cls,
                 seed: bytes,
@@ -3955,11 +3923,7 @@ def expand_into_vec(cls,
     """
     xof = cls(seed, dst, binder)
     return xof.next_vec(field, length)
-</pre>
-</div>
-<figcaption><a href="#figure-12" class="selfRef">Figure 12</a>:
-<a href="#name-derived-methods-for-xofs" class="selfRef">Derived methods for XOFs.</a>
-          </figcaption></figure>
+</pre><a href="#section-6.2-5" class="pilcrow">¶</a>
 </div>
 <div id="xof-turboshake128">
 <section id="section-6.2.1">
@@ -3976,8 +3940,7 @@ passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 65535 byte
 draft.<a href="#section-6.2.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<span id="name-definition-of-xof-xofturbos"></span><figure id="figure-13">
-            <div class="lang-python sourcecode" id="section-6.2.1-3.1">
+<div class="lang-python sourcecode" id="section-6.2.1-3">
 <pre>
 class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
@@ -4004,11 +3967,8 @@ class XofTurboShake128(Xof):
         # that allows stateful handling of the stream.
         stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
-</pre>
+</pre><a href="#section-6.2.1-3" class="pilcrow">¶</a>
 </div>
-<figcaption><a href="#figure-13" class="selfRef">Figure 13</a>:
-<a href="#name-definition-of-xof-xofturbos" class="selfRef">Definition of XOF XofTurboShake128.</a>
-            </figcaption></figure>
 </section>
 </div>
 <div id="xof-fixed-key-aes128">
@@ -4329,9 +4289,7 @@ circuit; when the circuit contains constants, it is sometimes necessary to
 normalize those constants to ensure that the circuit's output, when run on a
 valid measurement, is the same regardless of the number of shares.<a href="#section-7.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.1-9">An FLP is executed by the prover and verifier as follows:<a href="#section-7.1-9" class="pilcrow">¶</a></p>
-<span id="name-execution-of-an-flp"></span><div id="run-flp">
-<figure id="figure-14">
-          <div class="lang-python sourcecode" id="section-7.1-10.1">
+<div class="lang-python sourcecode" id="section-7.1-10">
 <pre>
 def run_flp(
         flp: Flp[Measurement, AggResult, F],
@@ -4377,11 +4335,7 @@ def run_flp(
 
     # Verifier decides if the measurement is valid.
     return flp.decide(verifier)
-</pre>
-</div>
-<figcaption><a href="#figure-14" class="selfRef">Figure 14</a>:
-<a href="#name-execution-of-an-flp" class="selfRef">Execution of an FLP.</a>
-          </figcaption></figure>
+</pre><a href="#section-7.1-10" class="pilcrow">¶</a>
 </div>
 <p id="section-7.1-11">The proof system is constructed so that, if <code>meas</code> is valid, then <code>run_flp(flp,
 meas, 1)</code> always returns <code>True</code>. On the other hand, if <code>meas</code> is invalid, then
@@ -4732,9 +4686,7 @@ robustness of Prio3.) To support this, in Prio3:<a href="#section-7.2.1-4" class
 <p id="section-7.2.1-6">Depending on the FLP, joint randomness may not be required. In particular, when
 <code>flp.JOINT_RAND_LEN == 0</code>, the Client does not derive the joint randomness
 (Step 3). The sharding algorithm is specified below.<a href="#section-7.2.1-6" class="pilcrow">¶</a></p>
-<span id="name-input-distribution-algorith"></span><div id="prio3-eval-input">
-<figure id="figure-15">
-            <div class="lang-python sourcecode" id="section-7.2.1-7.1">
+<div class="lang-python sourcecode" id="section-7.2.1-7">
 <pre>
 def shard(
         self,
@@ -4757,26 +4709,20 @@ def shard(
         return self.shard_with_joint_rand(ctx, meas, nonce, seeds)
     else:
         return self.shard_without_joint_rand(ctx, meas, seeds)
-</pre>
-</div>
-<figcaption><a href="#figure-15" class="selfRef">Figure 15</a>:
-<a href="#name-input-distribution-algorith" class="selfRef">Input-distribution algorithm for Prio3.</a>
-            </figcaption></figure>
+</pre><a href="#section-7.2.1-7" class="pilcrow">¶</a>
 </div>
 <p id="section-7.2.1-8">It starts by splitting the randomness into seeds. It then encodes the
 measurement as prescribed by the FLP and calls one of two methods, depending on
 whether joint randomness is required by the FLP. The methods are defined in the
 subsections below.<a href="#section-7.2.1-8" class="pilcrow">¶</a></p>
-<div id="flps-without-joint-randomness">
+<div id="prio3-shard-without-joint-rand">
 <section id="section-7.2.1.1">
             <h5 id="name-flps-without-joint-randomne">
 <a href="#section-7.2.1.1" class="section-number selfRef">7.2.1.1. </a><a href="#name-flps-without-joint-randomne" class="section-name selfRef">FLPs without joint randomness</a>
             </h5>
 <p id="section-7.2.1.1-1">The following method is used for FLPs that do not require joint randomness,
 i.e., when <code>flp.JOINT_RAND_LEN == 0</code>:<a href="#section-7.2.1.1-1" class="pilcrow">¶</a></p>
-<span id="name-sharding-an-encoded-measure"></span><div id="prio3-shard-without-joint-rand">
-<figure id="figure-16">
-              <div class="breakable lang-python sourcecode" id="section-7.2.1.1-2.1">
+<div class="breakable lang-python sourcecode" id="section-7.2.1.1-2">
 <pre>
 def shard_without_joint_rand(
         self,
@@ -4827,11 +4773,7 @@ def shard_without_joint_rand(
             None,
         ))
     return (None, input_shares)
-</pre>
-</div>
-<figcaption><a href="#figure-16" class="selfRef">Figure 16</a>:
-<a href="#name-sharding-an-encoded-measure" class="selfRef">Sharding an encoded measurement without joint randomness.</a>
-              </figcaption></figure>
+</pre><a href="#section-7.2.1.1-2" class="pilcrow">¶</a>
 </div>
 <p id="section-7.2.1.1-3">The steps in this method are as follows:<a href="#section-7.2.1.1-3" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-7.2.1.1-4">
@@ -4861,9 +4803,7 @@ and proof shares and the methods for encoding the input shares are defined in
             </h5>
 <p id="section-7.2.1.2-1">The following method is used for FLPs that require joint randomness,
 i.e., for which <code>flp.JOINT_RAND_LEN &gt; 0</code>:<a href="#section-7.2.1.2-1" class="pilcrow">¶</a></p>
-<span id="name-sharding-an-encoded-measurem"></span><div id="prio3-shard-with-joint-rand">
-<figure id="figure-17">
-              <div class="breakable lang-python sourcecode" id="section-7.2.1.2-2.1">
+<div class="breakable lang-python sourcecode" id="section-7.2.1.2-2">
 <pre>
 def shard_with_joint_rand(
         self,
@@ -4939,16 +4879,12 @@ def shard_with_joint_rand(
             helper_blinds[j],
         ))
     return (joint_rand_parts, input_shares)
-</pre>
-</div>
-<figcaption><a href="#figure-17" class="selfRef">Figure 17</a>:
-<a href="#name-sharding-an-encoded-measurem" class="selfRef">Sharding an encoded measurement with joint randomness.</a>
-              </figcaption></figure>
+</pre><a href="#section-7.2.1.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-7.2.1.2-3">The difference between this procedure and previous one is that here we compute
 joint randomnesses <code>joint_rands</code>, split it into multiple <code>joint_rand</code>, and pass
 each <code>joint_rand</code> to the proof generationg algorithm. (In
-<a href="#prio3-shard-without-joint-rand" class="auto internal xref">Figure 16</a> the joint randomness is the empty vector,
+<a href="#prio3-shard-without-joint-rand" class="auto internal xref">Section 7.2.1.1</a> the joint randomness is the empty vector,
 <code>[]</code>.) This requires generating an additional value, called the "blind", that
 is incorporated into each input share.<a href="#section-7.2.1.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.2.1.2-4">The joint randomness computation involves the following steps:<a href="#section-7.2.1.2-4" class="pilcrow">¶</a></p>
@@ -5004,9 +4940,7 @@ relatively inexpensive to expand this seed into the input share, then truncate
 the input share to get the output share.<a href="#section-7.2.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.2.2-5">The definitions of constants and a few auxiliary functions are defined in
 <a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>.<a href="#section-7.2.2-5" class="pilcrow">¶</a></p>
-<span id="name-preparation-state-for-prio3"></span><div id="prio3-prep-state">
-<figure id="figure-18">
-            <div class="breakable lang-python sourcecode" id="section-7.2.2-6.1">
+<div class="breakable lang-python sourcecode" id="section-7.2.2-6">
 <pre>
 def prep_init(
         self,
@@ -5105,11 +5039,7 @@ def prep_shares_to_prep(
     if self.flp.JOINT_RAND_LEN &gt; 0:
         joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
     return joint_rand_seed
-</pre>
-</div>
-<figcaption><a href="#figure-18" class="selfRef">Figure 18</a>:
-<a href="#name-preparation-state-for-prio3" class="selfRef">Preparation state for Prio3.</a>
-            </figcaption></figure>
+</pre><a href="#section-7.2.2-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -5120,9 +5050,7 @@ def prep_shares_to_prep(
           </h4>
 <p id="section-7.2.3-1">Every input share <span class="bcp14">MUST</span> only be used once, regardless of the aggregation
 parameters used.<a href="#section-7.2.3-1" class="pilcrow">¶</a></p>
-<span id="name-validity-of-aggregation-parame"></span><div id="prio3-validity-scope">
-<figure id="figure-19">
-            <div class="lang-python sourcecode" id="section-7.2.3-2.1">
+<div class="lang-python sourcecode" id="section-7.2.3-2">
 <pre>
 def is_valid(
         self,
@@ -5133,11 +5061,7 @@ def is_valid(
     Prio3 may only be used once.
     """
     return len(previous_agg_params) == 0
-</pre>
-</div>
-<figcaption><a href="#figure-19" class="selfRef">Figure 19</a>:
-<a href="#name-validity-of-aggregation-parame" class="selfRef">Validity of aggregation parameters for Prio3.</a>
-            </figcaption></figure>
+</pre><a href="#section-7.2.3-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -5148,9 +5072,7 @@ def is_valid(
           </h4>
 <p id="section-7.2.4-1">Aggregating a set of output shares is simply a matter of adding up the vectors
 element-wise.<a href="#section-7.2.4-1" class="pilcrow">¶</a></p>
-<span id="name-aggregation-algorithm-for-p"></span><div id="prio3-out2agg">
-<figure id="figure-20">
-            <div class="lang-python sourcecode" id="section-7.2.4-2.1">
+<div class="lang-python sourcecode" id="section-7.2.4-2">
 <pre>
 def aggregate(
         self,
@@ -5160,11 +5082,7 @@ def aggregate(
     for out_share in out_shares:
         agg_share = vec_add(agg_share, out_share)
     return agg_share
-</pre>
-</div>
-<figcaption><a href="#figure-20" class="selfRef">Figure 20</a>:
-<a href="#name-aggregation-algorithm-for-p" class="selfRef">Aggregation algorithm for Prio3.</a>
-            </figcaption></figure>
+</pre><a href="#section-7.2.4-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -5175,9 +5093,7 @@ def aggregate(
           </h4>
 <p id="section-7.2.5-1">To unshard a set of aggregate shares, the Collector first adds up the vectors
 element-wise. It then converts each element of the vector into an integer.<a href="#section-7.2.5-1" class="pilcrow">¶</a></p>
-<span id="name-computation-of-the-aggregat"></span><div id="prio3-agg-output">
-<figure id="figure-21">
-            <div class="lang-python sourcecode" id="section-7.2.5-2.1">
+<div class="lang-python sourcecode" id="section-7.2.5-2">
 <pre>
 def unshard(
         self,
@@ -5188,11 +5104,7 @@ def unshard(
     for agg_share in agg_shares:
         agg = vec_add(agg, agg_share)
     return self.flp.decode(agg, num_measurements)
-</pre>
-</div>
-<figcaption><a href="#figure-21" class="selfRef">Figure 21</a>:
-<a href="#name-computation-of-the-aggregat" class="selfRef">Computation of the aggregate result for Prio3.</a>
-            </figcaption></figure>
+</pre><a href="#section-7.2.5-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -5900,7 +5812,7 @@ algorithm ares specified in the remaining subsections.<a href="#section-7.3.3-2"
             <h5 id="name-proof-generation">
 <a href="#section-7.3.3.1" class="section-number selfRef">7.3.3.1. </a><a href="#name-proof-generation" class="section-name selfRef">Proof Generation</a>
             </h5>
-<span id="name-components-of-the-proof-gen"></span><figure id="figure-22">
+<span id="name-components-of-the-proof-gen"></span><figure id="figure-7">
               <div class="alignLeft art-text artwork" id="section-7.3.3.1-1.1">
 <pre>
 +------------------+
@@ -5916,7 +5828,7 @@ algorithm ares specified in the remaining subsections.<a href="#section-7.3.3-2"
  V proof
 </pre>
 </div>
-<figcaption><a href="#figure-22" class="selfRef">Figure 22</a>:
+<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
 <a href="#name-components-of-the-proof-gen" class="selfRef">Components of the proof generation algorithm.</a>
               </figcaption></figure>
 <p id="section-7.3.3.1-2">The proof generation algorithm invokes the validity circuit on the encoded
@@ -5985,7 +5897,7 @@ def prove(self,
             <h5 id="name-query-generation">
 <a href="#section-7.3.3.2" class="section-number selfRef">7.3.3.2. </a><a href="#name-query-generation" class="section-name selfRef">Query Generation</a>
             </h5>
-<span id="name-components-of-the-query-alg"></span><figure id="figure-23">
+<span id="name-components-of-the-query-alg"></span><figure id="figure-8">
               <div class="alignLeft art-text artwork" id="section-7.3.3.2-1.1">
 <pre>
       proof (share)
@@ -6002,7 +5914,7 @@ def prove(self,
  V verifier (share)
 </pre>
 </div>
-<figcaption><a href="#figure-23" class="selfRef">Figure 23</a>:
+<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
 <a href="#name-components-of-the-query-alg" class="selfRef">Components of the query algorithm.</a>
               </figcaption></figure>
 <p id="section-7.3.3.2-2">The query algorithm invokes the validity circuit on the encoded measurement and
@@ -6093,7 +6005,7 @@ def query(self,
             <h5 id="name-decision">
 <a href="#section-7.3.3.3" class="section-number selfRef">7.3.3.3. </a><a href="#name-decision" class="section-name selfRef">Decision</a>
             </h5>
-<span id="name-components-of-the-decision-"></span><figure id="figure-24">
+<span id="name-components-of-the-decision-"></span><figure id="figure-9">
               <div class="alignLeft art-text artwork" id="section-7.3.3.3-1.1">
 <pre>
  | verifier
@@ -6105,7 +6017,7 @@ def query(self,
  V is_valid
 </pre>
 </div>
-<figcaption><a href="#figure-24" class="selfRef">Figure 24</a>:
+<figcaption><a href="#figure-9" class="selfRef">Figure 9</a>:
 <a href="#name-components-of-the-decision-" class="selfRef">Components of the decision algorithm.</a>
               </figcaption></figure>
 <p id="section-7.3.3.3-2">The decision algorithm consumes the verifier message. (Each of the Aggregators
@@ -7697,9 +7609,7 @@ addition, for each level of the tree, the prover generates random elements <code
 <p id="section-8.2.1-3">and sends additive shares of <code>a</code>, <code>b</code>, <code>c</code>, <code>A</code> and <code>B</code> to the Aggregators.
 Putting everything together, the sharding algorithm is defined as
 follows.<a href="#section-8.2.1-3" class="pilcrow">¶</a></p>
-<span id="name-the-sharding-algorithm-for-"></span><div id="poplar1-mes2inp">
-<figure id="figure-25">
-            <div class="breakable lang-python sourcecode" id="section-8.2.1-4.1">
+<div class="breakable lang-python sourcecode" id="section-8.2.1-4">
 <pre>
 def shard(
     self,
@@ -7816,11 +7726,7 @@ def shard(
     # and a share of the correlated randomness.
     input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
     return (public_share, input_shares)
-</pre>
-</div>
-<figcaption><a href="#figure-25" class="selfRef">Figure 25</a>:
-<a href="#name-the-sharding-algorithm-for-" class="selfRef">The sharding algorithm for Poplar1.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.2.1-4" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -7842,9 +7748,7 @@ of the output shares) is in fact a one-hot vector. Otherwise, sketch
 verification might fail, causing the Aggregators to erroneously reject a report
 that is actually valid. Note that enforcing the order is not strictly necessary,
 but this does allow uniqueness to be determined more efficiently.<a href="#section-8.2.2-2" class="pilcrow">¶</a></p>
-<span id="name-preparation-state-for-popla"></span><div id="poplar1-prep-state">
-<figure id="figure-26">
-            <div class="breakable lang-python sourcecode" id="section-8.2.2-3.1">
+<div class="breakable lang-python sourcecode" id="section-8.2.2-3">
 <pre>
 def prep_init(
         self,
@@ -7996,18 +7900,14 @@ def prep_shares_to_prep(
             raise ValueError('sketch verification failed')
     else:
         raise ValueError('incorrect sketch length')
-</pre>
-</div>
-<figcaption><a href="#figure-26" class="selfRef">Figure 26</a>:
-<a href="#name-preparation-state-for-popla" class="selfRef">Preparation state for Poplar1.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.2.2-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
 <div id="validity-of-aggregation-parameters-1">
 <section id="section-8.2.3">
-          <h4 id="name-validity-of-aggregation-paramet">
-<a href="#section-8.2.3" class="section-number selfRef">8.2.3. </a><a href="#name-validity-of-aggregation-paramet" class="section-name selfRef">Validity of Aggregation Parameters</a>
+          <h4 id="name-validity-of-aggregation-parame">
+<a href="#section-8.2.3" class="section-number selfRef">8.2.3. </a><a href="#name-validity-of-aggregation-parame" class="section-name selfRef">Validity of Aggregation Parameters</a>
           </h4>
 <p id="section-8.2.3-1">Aggregation parameters are valid for a given input share if no aggregation
 parameter with the same level has been used with the same input share before.
@@ -8015,9 +7915,7 @@ The whole preparation phase <span class="bcp14">MUST NOT</span> be run more than
 combination of input share and level. This function checks that levels are
 increasing between calls, and also enforces that the prefixes at each level are
 suffixes of the previous level's prefixes.<a href="#section-8.2.3-1" class="pilcrow">¶</a></p>
-<span id="name-validity-of-aggregation-paramete"></span><div id="poplar1-validity-scope">
-<figure id="figure-27">
-            <div class="lang-python sourcecode" id="section-8.2.3-2.1">
+<div class="lang-python sourcecode" id="section-8.2.3-2">
 <pre>
 def get_ancestor(
         index: tuple[bool, ...],
@@ -8055,11 +7953,7 @@ def is_valid(
             # Current prefix not a suffix of last level's prefixes.
             return False
     return True
-</pre>
-</div>
-<figcaption><a href="#figure-27" class="selfRef">Figure 27</a>:
-<a href="#name-validity-of-aggregation-paramete" class="selfRef">Validity of aggregation parameters for Poplar1.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.2.3-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -8069,9 +7963,7 @@ def is_valid(
 <a href="#section-8.2.4" class="section-number selfRef">8.2.4. </a><a href="#name-aggregation-5" class="section-name selfRef">Aggregation</a>
           </h4>
 <p id="section-8.2.4-1">Aggregation involves simply adding up the output shares.<a href="#section-8.2.4-1" class="pilcrow">¶</a></p>
-<span id="name-aggregation-algorithm-for-po"></span><div id="poplar1-out2agg">
-<figure id="figure-28">
-            <div class="lang-python sourcecode" id="section-8.2.4-2.1">
+<div class="lang-python sourcecode" id="section-8.2.4-2">
 <pre>
 def aggregate(
         self,
@@ -8083,11 +7975,7 @@ def aggregate(
     for out_share in out_shares:
         agg_share = vec_add(agg_share, cast(list[Field], out_share))
     return cast(FieldVec, agg_share)
-</pre>
-</div>
-<figcaption><a href="#figure-28" class="selfRef">Figure 28</a>:
-<a href="#name-aggregation-algorithm-for-po" class="selfRef">Aggregation algorithm for Poplar1.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.2.4-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -8098,9 +7986,7 @@ def aggregate(
           </h4>
 <p id="section-8.2.5-1">Finally, the Collector unshards the aggregate result by adding up the aggregate
 shares.<a href="#section-8.2.5-1" class="pilcrow">¶</a></p>
-<span id="name-computation-of-the-aggregate"></span><div id="poplar1-agg-output">
-<figure id="figure-29">
-            <div class="lang-python sourcecode" id="section-8.2.5-2.1">
+<div class="lang-python sourcecode" id="section-8.2.5-2">
 <pre>
 def unshard(
         self,
@@ -8113,11 +7999,7 @@ def unshard(
     for agg_share in agg_shares:
         agg = vec_add(agg, cast(list[Field], agg_share))
     return [x.as_unsigned() for x in agg]
-</pre>
-</div>
-<figcaption><a href="#figure-29" class="selfRef">Figure 29</a>:
-<a href="#name-computation-of-the-aggregate" class="selfRef">Computation of the aggregate result for Poplar1.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.2.5-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -8503,9 +8385,7 @@ full detail.<a href="#section-8.3.1-4" class="pilcrow">¶</a></p>
 functions <code>extend()</code> and <code>convert()</code> defined in
 <a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.4</a>. In the following, we let <code>Field2</code> denote
 the field <code>GF(2)</code>.<a href="#section-8.3.2-1" class="pilcrow">¶</a></p>
-<span id="name-idpf-key-generation-algorit"></span><div id="idpf-bbcggi21-gen">
-<figure id="figure-30">
-            <div class="breakable lang-python sourcecode" id="section-8.3.2-2.1">
+<div class="breakable lang-python sourcecode" id="section-8.3.2-2">
 <pre>
 def gen(
         self,
@@ -8584,11 +8464,7 @@ def gen(
 
         public_share.append((seed_cw, ctrl_cw, w_cw))
     return (public_share, key)
-</pre>
-</div>
-<figcaption><a href="#figure-30" class="selfRef">Figure 30</a>:
-<a href="#name-idpf-key-generation-algorit" class="selfRef">IDPF-key generation algorithm of BBCGGI21.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.3.2-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -8600,9 +8476,7 @@ def gen(
 <p id="section-8.3.3-1">The description of the IDPF-evaluation algorithm makes use of auxiliary
 functions <code>extend()</code> and <code>convert()</code> defined in
 <a href="#idpf-bbcggi21-helper-functions" class="auto internal xref">Section 8.3.4</a>.<a href="#section-8.3.3-1" class="pilcrow">¶</a></p>
-<span id="name-idpf-evaluation-generation-"></span><div id="idpf-bbcggi21-eval">
-<figure id="figure-31">
-            <div class="breakable lang-python sourcecode" id="section-8.3.3-2.1">
+<div class="breakable lang-python sourcecode" id="section-8.3.3-2">
 <pre>
 def eval(
         self,
@@ -8710,11 +8584,7 @@ def eval_next(
             y[i] += w_cw[i]
 
     return (next_seed, next_ctrl, cast(FieldVec, y))
-</pre>
-</div>
-<figcaption><a href="#figure-31" class="selfRef">Figure 31</a>:
-<a href="#name-idpf-evaluation-generation-" class="selfRef">IDPF-evaluation generation algorithm of BBCGGI21.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.3.3-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -8723,9 +8593,7 @@ def eval_next(
           <h4 id="name-auxiliary-functions-3">
 <a href="#section-8.3.4" class="section-number selfRef">8.3.4. </a><a href="#name-auxiliary-functions-3" class="section-name selfRef">Auxiliary Functions</a>
           </h4>
-<span id="name-helper-functions-for-the-id"></span><div id="idpf-bbcggi21-helpers">
-<figure id="figure-32">
-            <div class="breakable lang-python sourcecode" id="section-8.3.4-1.1">
+<div class="breakable lang-python sourcecode" id="section-8.3.4-1">
 <pre>
 def extend(
         self,
@@ -8776,11 +8644,7 @@ def current_xof(self,
     if level &lt; self.BITS-1:
         return XofFixedKeyAes128(seed, dst, nonce)
     return XofTurboShake128(seed, dst, nonce)
-</pre>
-</div>
-<figcaption><a href="#figure-32" class="selfRef">Figure 32</a>:
-<a href="#name-helper-functions-for-the-id" class="selfRef">Helper functions for the IDPF.</a>
-            </figcaption></figure>
+</pre><a href="#section-8.3.4-1" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
