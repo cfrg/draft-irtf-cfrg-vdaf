@@ -5863,8 +5863,8 @@ policy {{!RFC8126}}.
 
 The "VDAF Identifiers" registry lists identifiers for Distributed Aggregation
 Functions (DAFs) and Verifiable Distributed Aggregation Functions (VDAFs). These
-identifiers are four-byte values, so the minimum possible value is 0x00000000
-and the maximum possible value is 0xffffffff.
+identifiers are four-byte values, so the minimum possible value is `0x00000000`
+and the maximum possible value is `0xffffffff`.
 
 Template:
 
@@ -5891,10 +5891,9 @@ The initial contents of the registry are as follows:
 (RFC EDITOR: Please replace "RFC XXXX" above with the RFC number assigned to
 this document.)
 
-VDAF identifiers are used for domain separation, as described in {{dst-binder}}.
-Domain separation guards against failures of entropy sources, by ensuring that
-invocations of different VDAFs use different derived values, even if they are
-invoked with the same underlying random data.
+VDAF identifiers are used for domain separation, as described in
+{{dst-binder}}. Domain separation guards against cross protocol attacks and
+certain failures of entropy sources. See {{deep}}.
 
 The benefits of domain separation are undermined if different VDAFs are used
 with the same VDAF Identifier.  The "Reserved for Private Use" code points
