@@ -149,9 +149,10 @@ Table of Contents
      9.6.  Choosing FLP Parameters
      9.7.  Choosing the Number of Aggregators
      9.8.  Defense-in-Depth Measures
-   10. References
-     10.1.  Normative References
-     10.2.  Informative References
+   10. IANA Considerations
+   11. References
+     11.1.  Normative References
+     11.2.  Informative References
    Appendix A.  FLP Gadget Wrappers
    Appendix B.  Test Vectors
      B.1.  Schema
@@ -6100,6 +6101,8 @@ Table of Contents
    value of bits and length.  This is because there is no binding of the
    circuit parameters to the computation.
 
+10.  IANA Considerations
+
    IANA is requested to make one new registry:
 
    *  DAF and VDAF Identifiers
@@ -6170,9 +6173,9 @@ Table of Contents
    provide no defense against such collisions.  Applications SHOULD
    prefer the use of registered code points.
 
-10.  References
+11.  References
 
-10.1.  Normative References
+11.1.  Normative References
 
    [AES]      Dworkin, M., Barker, E., Nechvatal, J., Foti,, J.,
               Bassham, L., Roback, E., and J. Dray Jr, "Advanced
@@ -6205,7 +6208,7 @@ Table of Contents
               2024, <https://datatracker.ietf.org/doc/html/draft-irtf-
               cfrg-kangarootwelve-14>.
 
-10.2.  Informative References
+11.2.  Informative References
 
    [AGJOP21]  Addanki, S., Garbe, K., Jaffe, E., Ostrovsky, R., and A.
               Polychroniadou, "Prio+: Privacy Preserving Aggregate
