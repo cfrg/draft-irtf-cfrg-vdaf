@@ -6318,7 +6318,7 @@ Table of Contents
 
    [TestVectors]
               "Test vectors for Prio3 and Poplar1", commit hash
-              05e8f98030342c102d0f7e7a6b0dc43b56249be8 , October 2024,
+              1891650bb8d23eb82663a0c05a5e37e97c4b5a96 , October 2024,
               <https://github.com/cfrg/draft-irtf-cfrg-
               vdaf/tree/main/test_vec/vdaf>.
 
