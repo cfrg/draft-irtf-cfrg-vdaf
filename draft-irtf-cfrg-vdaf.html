@@ -1176,6 +1176,11 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4">
                 <p id="section-toc.1-1.4.2.4.1"><a href="#section-4.4" class="auto internal xref">4.4</a>.  <a href="#name-aggregation" class="internal xref">Aggregation</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.4.2.1">
+                    <p id="section-toc.1-1.4.2.4.2.1.1"><a href="#section-4.4.1" class="auto internal xref">4.4.1</a>.  <a href="#name-aggregation-order" class="internal xref">Aggregation Order</a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.5">
                 <p id="section-toc.1-1.4.2.5.1"><a href="#section-4.5" class="auto internal xref">4.5</a>.  <a href="#name-unsharding" class="internal xref">Unsharding</a></p>
@@ -2222,9 +2227,9 @@ as part of the validation process.<a href="#section-3-3.2.2.3.1" class="pilcrow"
           </ul>
 </li>
         <li class="normal" id="section-3-3.3">
-          <p id="section-3-3.3.1">Each Aggregator combines the output shares in the batch to compute the
-"aggregate share" for that batch, i.e., its share of the desired aggregate
-result.<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
+          <p id="section-3-3.3.1">As each Aggregator recovers output shares, it accumulates them into an
+"aggregate share" for the batch, i.e., its
+share of the desired aggregate result.<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-3-3.4">
           <p id="section-3-3.4.1">The Aggregators submit their aggregate shares to the Collector, who combines
@@ -2518,52 +2523,76 @@ bool</code>: checks if the <code>agg_param</code> is compatible with all element
         <h3 id="name-aggregation">
 <a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-aggregation" class="section-name selfRef">Aggregation</a>
         </h3>
-<p id="section-4.4-1">Once an Aggregator holds output shares for a batch of measurements (where
-batches are defined by the application), it combines them into a share of the
-desired aggregate result:<a href="#section-4.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.4-1">Once an Aggregator holds an output share, it adds it into its aggregate share
+for the batch (where batches are defined by the application).<a href="#section-4.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.4-2.1">
-            <p id="section-4.4-2.1.1"><code>daf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) -&gt; AggShare</code>
-is the deterministic aggregation algorithm. It is run by each Aggregator a
-set of recovered output shares.<a href="#section-4.4-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.4-2.1.1"><code>daf.agg_init(agg_param: AggParam) -&gt; AggShare</code> returns an empty aggregate
+share. It is called to initialize aggregation of a batch of measurements.<a href="#section-4.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-4.4-2.2">
+            <p id="section-4.4-2.2.1"><code>daf.agg_update(agg_param: AggParam, agg_share: AggShare, out_share:
+OutShare) -&gt; AggShare</code> accumulates an output share into an aggregate share
+and returns the updated aggregate share.<a href="#section-4.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<span id="name-aggregation-of-output-share"></span><div id="aggregate-flow">
+<span id="name-local-aggregation-of-output"></span><div id="aggregate-flow">
 <figure id="figure-3">
           <div class="alignLeft art-text artwork" id="section-4.4-3.1">
 <pre>
-    Aggregator 0    Aggregator 1        Aggregator SHARES-1
-    ============    ============        ===================
+    Aggregator j
+    ============
 
-    out_share_0_0   out_share_1_0       out_share_[SHARES-1]_0
-    out_share_0_1   out_share_1_1       out_share_[SHARES-1]_1
-    out_share_0_2   out_share_1_2       out_share_[SHARES-1]_2
-         ...             ...                     ...
-    out_share_0_B   out_share_1_B       out_share_[SHARES-1]_B
-      |               |                   |
-      V               V                   V
-    +-----------+   +-----------+       +-----------+
-    | aggregate |   | aggregate |   ... | aggregate |
-    +-----------+   +-----------+       +-----------+
-      |               |                   |
-      V               V                   V
-    agg_share_0     agg_share_1         agg_share_[SHARES-1]
+    +------------+    +------------+
+    | agg_init   |---&gt;| agg_update |&lt;--- out_share_0
+    +------------+    +------------+
+                         |
+                         V
+                      +------------+
+                      | agg_update |&lt;--- out_share_1,
+                      +------------+
+                        |
+                        V
+                       ...
+                        |
+                        V
+                      +------------+
+                      | agg_update |&lt;--- out_share_MEAS_COUNT
+                      +------------+
+                        |
+                        V
+                      agg_share_j
 </pre>
 </div>
 <figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
-<a href="#name-aggregation-of-output-share" class="selfRef">Aggregation of output shares. `B` indicates the number of measurements in the batch.</a>
+<a href="#name-local-aggregation-of-output" class="selfRef">Local aggregation of output shares by Aggregator j. The number of measurements in the batch is denoted by MEAS_COUNT.</a>
           </figcaption></figure>
 </div>
-<p id="section-4.4-4">For simplicity, we have written this algorithm in a "one-shot" form, where all
-output shares for a batch are provided at the same time. Many DAFs may also
-support a "streaming" form, where shares are processed one at a time.<a href="#section-4.4-4" class="pilcrow">¶</a></p>
-<p id="section-4.4-5">Implementation note: for most natural DAFs (and VDAFs) it is not necessary for
-an Aggregator to store all output shares individually before aggregating.
-Typically it is possible to merge output shares into aggregate shares as they
-arrive, merge these into other aggregate shares, and so on. In particular, this
-is the case when the output shares are vectors over some finite field and
-aggregating them involves merely adding up the vectors element-wise. Such is the
-case for Prio3 <a href="#prio3" class="auto internal xref">Section 7</a> and Poplar1 <a href="#poplar1" class="auto internal xref">Section 8</a>.<a href="#section-4.4-5" class="pilcrow">¶</a></p>
+<p id="section-4.4-4">In many situations it is desirable to split an aggregate share across multiple
+storage elements, then merge the aggregate shares together just before
+releasing the completed aggregate share to the Collector. DAFs facilitate this
+with the following method:<a href="#section-4.4-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.4-5.1">
+            <p id="section-4.4-5.1.1"><code>daf.merge(agg_param: AggParam, agg_shares: list[AggShare]) -&gt; AggShare</code>
+merges a sequence of aggregate shares into a single aggregate share.<a href="#section-4.4-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<div id="agg-order">
+<section id="section-4.4.1">
+          <h4 id="name-aggregation-order">
+<a href="#section-4.4.1" class="section-number selfRef">4.4.1. </a><a href="#name-aggregation-order" class="section-name selfRef">Aggregation Order</a>
+          </h4>
+<p id="section-4.4.1-1">For most DAFs and VDAFs, the outcome of aggregation is not sensitive to the
+order in which ouptut shares are aggregated. That is, aggregate shares can be
+updated and merged with other aggregate shares in any order. For instance, for
+both Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) and Poplar1 (<a href="#poplar1" class="auto internal xref">Section 8</a>), the aggregate shares and
+output shares both have the same type, a vector over some finite field
+(<a href="#field" class="auto internal xref">Section 6.1</a>); aggregation involves simply adding vectors toegther.<a href="#section-4.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.4.1-2">In theory, however, correct execution may require each Aggregator to aggregate
+output shares in the same order.<a href="#section-4.4.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="sec-daf-unshard">
@@ -2651,8 +2680,9 @@ def run_daf(
             "measurements and nonces lists have different lengths"
         )
 
-    out_shares: list[list[OutShare]]
-    out_shares = [[] for j in range(daf.SHARES)]
+    agg_shares: list[AggShare]
+    agg_shares = [daf.agg_init(agg_param)
+                  for _ in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
         # Each Client shards its measurement into input shares and
         # distributes them among the Aggregators.
@@ -2660,19 +2690,14 @@ def run_daf(
         (public_share, input_shares) = \
             daf.shard(ctx, measurement, nonce, rand)
 
-        # Each Aggregator prepares its input share for aggregation.
+        # Each Aggregator computes its output share from its input
+        # share and aggregates it.
         for j in range(daf.SHARES):
-            out_shares[j].append(
-                daf.prep(ctx, j, agg_param, nonce,
-                         public_share, input_shares[j]))
-
-    # Each Aggregator aggregates its output shares into an aggregate
-    # share and sends it to the Collector.
-    agg_shares = []
-    for j in range(daf.SHARES):
-        agg_share_j = daf.aggregate(agg_param,
-                                    out_shares[j])
-        agg_shares.append(agg_share_j)
+            out_share = daf.prep(ctx, j, agg_param, nonce,
+                                 public_share, input_shares[j])
+            agg_shares[j] = daf.agg_update(agg_param,
+                                           agg_shares[j],
+                                           out_share)
 
     # Collector unshards the aggregate result.
     num_measurements = len(measurements)
@@ -3068,18 +3093,25 @@ bool</code>: checks if the <code>agg_param</code> is compatible with all element
         <h3 id="name-aggregation-2">
 <a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-aggregation-2" class="section-name selfRef">Aggregation</a>
         </h3>
-<p id="section-5.4-1">VDAF Aggregation is identical to DAF Aggregation (cf. <a href="#sec-daf-aggregate" class="auto internal xref">Section 4.4</a>):<a href="#section-5.4-1" class="pilcrow">¶</a></p>
+<p id="section-5.4-1">VDAF aggregation is identical to DAF aggregation (<a href="#sec-daf-aggregate" class="auto internal xref">Section 4.4</a>):<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.4-2.1">
-            <p id="section-5.4-2.1.1"><code>vdaf.aggregate(agg_param: AggParam, out_shares: list[OutShare]) -&gt; AggShare</code>
-is the deterministic aggregation algorithm. It is run by each Aggregator over
-the output shares it has computed for a batch of measurements.<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-5.4-2.1.1"><code>vdaf.agg_init(agg_param: AggParam) -&gt; AggShare</code> returns an empty aggregate
+share. It is called to initialize aggregation of a batch of measurements.<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-2.2">
+            <p id="section-5.4-2.2.1"><code>vdaf.agg_update(agg_param: AggParam, agg_share: AggShare, out_share:
+OutShare) -&gt; AggShare</code> accumulates an output share into an aggregate share
+and returns the updated aggregate share.<a href="#section-5.4-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.4-2.3">
+            <p id="section-5.4-2.3.1"><code>vdaf.merge(agg_param: AggParam, agg_shares: list[AggShare]) -&gt; AggShare</code>
+merges a sequence of aggregate shares into a single aggregate share.<a href="#section-5.4-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.4-3">The data flow for this stage is illustrated in <a href="#aggregate-flow" class="auto internal xref">Figure 3</a>. Here again,
-we have the aggregation algorithm in a "one-shot" form, where all shares for a
-batch are provided at the same time. VDAFs typically also support a "streaming"
-form, where shares are processed one at a time.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+<p id="section-5.4-3">The data flow for this stage is illustrated in <a href="#aggregate-flow" class="auto internal xref">Figure 3</a>. Like DAFs,
+computation of the VDAF aggregate is not usually sensitive to the order in
+which output shares are aggregated. See <a href="#agg-order" class="auto internal xref">Section 4.4.1</a>.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-vdaf-unshard">
@@ -3146,7 +3178,8 @@ def run_vdaf(
             "measurements and nonces lists have different lengths"
         )
 
-    out_shares = []
+    agg_shares = [vdaf.agg_init(agg_param)
+                  for _ in range(vdaf.SHARES)]
     for (nonce, measurement) in zip(nonces, measurements):
         assert len(nonce) == vdaf.NONCE_SIZE
 
@@ -3167,7 +3200,7 @@ def run_vdaf(
             prep_states.append(state)
             outbound_prep_shares.append(share)
 
-        # Aggregators recover their output shares.
+        # Aggregators complete preparation.
         for i in range(vdaf.ROUNDS - 1):
             prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                 agg_param,
@@ -3180,28 +3213,17 @@ def run_vdaf(
                 (prep_states[j], prep_share) = out
                 outbound_prep_shares.append(prep_share)
 
-        # The final outputs of the prepare phase are the output
-        # shares.
         prep_msg = vdaf.prep_shares_to_prep(ctx,
                                             agg_param,
                                             outbound_prep_shares)
 
-        outbound_out_shares = []
+        # Each Aggregator computes and aggregates its output share.
         for j in range(vdaf.SHARES):
             out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
-            outbound_out_shares.append(out_share)
-
-        out_shares.append(outbound_out_shares)
-
-    # Each Aggregator aggregates its output shares into an
-    # aggregate share. In a distributed VDAF computation, the
-    # aggregate shares are sent over the network.
-    agg_shares = []
-    for j in range(vdaf.SHARES):
-        out_shares_j = [out[j] for out in out_shares]
-        agg_share_j = vdaf.aggregate(agg_param, out_shares_j)
-        agg_shares.append(agg_share_j)
+            agg_shares[j] = vdaf.agg_update(agg_param,
+                                            agg_shares[j],
+                                            out_share)
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
@@ -5078,14 +5100,22 @@ def is_valid(
 element-wise.<a href="#section-7.2.4-1" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.2.4-2">
 <pre>
-def aggregate(
-        self,
-        _agg_param: None,
-        out_shares: list[list[F]]) -&gt; list[F]:
-    agg_share = self.flp.field.zeros(self.flp.OUTPUT_LEN)
-    for out_share in out_shares:
-        agg_share = vec_add(agg_share, out_share)
-    return agg_share
+def agg_init(self, _agg_param: None) -&gt; list[F]:
+    return self.flp.field.zeros(self.flp.OUTPUT_LEN)
+
+def agg_update(self,
+               _agg_param: None,
+               agg_share: list[F],
+               out_share: list[F]) -&gt; list[F]:
+    return vec_add(agg_share, out_share)
+
+def merge(self,
+          _agg_param: None,
+          agg_shares: list[list[F]]) -&gt; list[F]:
+    agg = self.agg_init(None)
+    for agg_share in agg_shares:
+        agg = vec_add(agg, agg_share)
+    return agg
 </pre><a href="#section-7.2.4-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -5104,9 +5134,7 @@ def unshard(
         _agg_param: None,
         agg_shares: list[list[F]],
         num_measurements: int) -&gt; AggResult:
-    agg = self.flp.field.zeros(self.flp.OUTPUT_LEN)
-    for agg_share in agg_shares:
-        agg = vec_add(agg, agg_share)
+    agg = self.merge(None, agg_shares)
     return self.flp.decode(agg, num_measurements)
 </pre><a href="#section-7.2.5-2" class="pilcrow">¶</a>
 </div>
@@ -7969,16 +7997,28 @@ def is_valid(
 <p id="section-8.2.4-1">Aggregation involves simply adding up the output shares.<a href="#section-8.2.4-1" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-8.2.4-2">
 <pre>
-def aggregate(
-        self,
-        agg_param: Poplar1AggParam,
-        out_shares: list[FieldVec]) -&gt; FieldVec:
+def agg_init(self, agg_param: Poplar1AggParam) -&gt; FieldVec:
     (level, prefixes) = agg_param
     field = self.idpf.current_field(level)
-    agg_share = cast(list[Field], field.zeros(len(prefixes)))
-    for out_share in out_shares:
-        agg_share = vec_add(agg_share, cast(list[Field], out_share))
-    return cast(FieldVec, agg_share)
+    return field.zeros(len(prefixes))
+
+def agg_update(self,
+               agg_param: Poplar1AggParam,
+               agg_share: FieldVec,
+               out_share: FieldVec) -&gt; FieldVec:
+    a = cast(list[Field], agg_share)
+    o = cast(list[Field], out_share)
+    return cast(FieldVec, vec_add(a, o))
+
+def merge(self,
+          agg_param: Poplar1AggParam,
+          agg_shares: list[FieldVec]) -&gt; FieldVec:
+    (level, prefixes) = agg_param
+    field = self.idpf.current_field(level)
+    agg = cast(list[Field], field.zeros(len(prefixes)))
+    for agg_share in agg_shares:
+        agg = vec_add(agg, cast(list[Field], agg_share))
+    return cast(FieldVec, agg)
 </pre><a href="#section-8.2.4-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -7997,11 +8037,7 @@ def unshard(
         agg_param: Poplar1AggParam,
         agg_shares: list[FieldVec],
         _num_measurements: int) -&gt; list[int]:
-    (level, prefixes) = agg_param
-    field = self.idpf.current_field(level)
-    agg = cast(list[Field], field.zeros(len(prefixes)))
-    for agg_share in agg_shares:
-        agg = vec_add(agg, cast(list[Field], agg_share))
+    agg = self.merge(agg_param, agg_shares)
     return [x.as_unsigned() for x in agg]
 </pre><a href="#section-8.2.5-2" class="pilcrow">¶</a>
 </div>
