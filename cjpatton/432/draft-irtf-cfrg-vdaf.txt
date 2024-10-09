@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 11 April 2025                                              ISRG
+Expires: 12 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          8 October 2024
+                                                          9 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -53,7 +53,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 April 2025.
+   This Internet-Draft will expire on 12 April 2025.
 
 Copyright Notice
 
@@ -1043,7 +1043,7 @@ Table of Contents
 
    *  daf.agg_update(agg_param: AggParam, agg_share: AggShare,
       out_share: OutShare) -> AggShare accumulates an output share into
-      an aggregate share and return the updated aggregate share.
+      an aggregate share and returns the updated aggregate share.
 
        Aggregator j
        ============
@@ -1087,7 +1087,7 @@ Table of Contents
    aggregate shares can be updated and merged with other aggregate
    shares in any order.  For instance, for both Prio3 (Section 7) and
    Poplar1 (Section 8), the aggregate shares and output shares both have
-   the same type, a vector over some finite field (Section 6.1); and
+   the same type, a vector over some finite field (Section 6.1);
    aggregation involves simply adding vectors toegther.
 
    In theory, however, correct execution may require each Aggregator to
@@ -1479,15 +1479,15 @@ Table of Contents
 
    VDAF aggregation is identical to DAF aggregation (Section 4.4):
 
-   *  daf.agg_init(agg_param: AggParam) -> AggShare returns an empty
+   *  vdaf.agg_init(agg_param: AggParam) -> AggShare returns an empty
       aggregate share.  It is called to initialize aggregation of a
       batch of measurements.
 
-   *  daf.agg_update(agg_param: AggParam, agg_share: AggShare,
+   *  vdaf.agg_update(agg_param: AggParam, agg_share: AggShare,
       out_share: OutShare) -> AggShare accumulates an output share into
-      an aggregate share and return the updated aggregate share.
+      an aggregate share and returns the updated aggregate share.
 
-   *  daf.merge(agg_param: AggParam, agg_shares: list[AggShare]) ->
+   *  vdaf.merge(agg_param: AggParam, agg_shares: list[AggShare]) ->
       AggShare merges a sequence of aggregate shares into a single
       aggregate share.
 
@@ -1572,7 +1572,7 @@ Table of Contents
                prep_states.append(state)
                outbound_prep_shares.append(share)
 
-           # Aggregators completes preparation.
+           # Aggregators complete preparation.
            for i in range(vdaf.ROUNDS - 1):
                prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                    agg_param,
