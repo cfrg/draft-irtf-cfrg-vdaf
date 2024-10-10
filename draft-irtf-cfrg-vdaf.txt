@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 12 April 2025                                              ISRG
+Expires: 13 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          9 October 2024
+                                                         10 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 April 2025.
+   This Internet-Draft will expire on 13 April 2025.
 
 Copyright Notice
 
@@ -6188,10 +6188,8 @@ Table of Contents
    assigned to this document.)
 
    VDAF identifiers are used for domain separation, as described in
-   Section 6.2.3.  Domain separation guards against failures of entropy
-   sources, by ensuring that invocations of different VDAFs use
-   different derived values, even if they are invoked with the same
-   underlying random data.
+   Section 6.2.3.  Domain separation guards against cross protocol
+   attacks and certain failures of entropy sources.  See Section 9.8.
 
    The benefits of domain separation are undermined if different VDAFs
    are used with the same VDAF Identifier.  The "Reserved for Private
