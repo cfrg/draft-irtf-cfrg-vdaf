@@ -463,7 +463,7 @@ security considerations for DAFs and VDAFs.
 * Prio3Histogram, Prio3MultihotCountVec: Move the final reduction of the
   intermediate outputs out of the circuit. (\*)
 
-* IDPF: Add the application context string to key generation end evaluation and
+* IDPF: Add the application context string to key generation and evaluation and
   bind it to the fixed AES key. (\*)
 
 * IDPF: Use XofTurboShake128 for deriving the leaf nodes in order to ensure the
@@ -2261,7 +2261,7 @@ class XofTurboShake128(Xof):
 While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
 cases where a more efficient instantiation based on a blockcipher in a
-fixed-key mode of operation is possible. For now, this is limited to the XOF used inside
+fixed-key mode of operation is possible. This is limited to the XOF used inside
 the Idpf {{idpf}} implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT
 RECOMMENDED to use this XOF anywhere else. See {{security}} for a more detailed
 discussion.
@@ -5274,7 +5274,7 @@ beta_BITS)` onto a binary tree with `BITS+1` levels, where each edge going from
 a parent node to a left child is labeled `0`, and each right edge is labeled
 `1`. Then each leaf node corresponds to a bit string of length `BITS`, where the
 labels on the path from the root to `x` contain the individual bits.  Finally,
-all nodes on the tree have have an assigned value, with the nodes on the path
+all nodes in the tree have have an assigned value, with the nodes on the path
 from the root to `alpha` having values `beta_1, ..., beta_BITS`, and all other
 nodes having value `0`.
 
