@@ -5462,7 +5462,7 @@ struct {
 on the construction from <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Section 4.2. We begin in
 <a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of the proof system and some
 extensions to it. <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a> defines validity circuits, the core
-component of the proof system that defines measurement validity and how
+component of the proof system that determines measurement validity and how
 measurements are aggregated. The proof-generation algorithm, the query
 algorithm, and the decision algorithm are defined in
 <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3</a>, <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.4</a>, and
@@ -5480,6 +5480,12 @@ algorithm, and the decision algorithm are defined in
             </tr>
           </thead>
           <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>valid</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">instance of <code>Valid</code> (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+            </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>PROVE_RAND_LEN</code>
@@ -5559,12 +5565,6 @@ algorithm, and the decision algorithm are defined in
               <td class="text-left" rowspan="1" colspan="1">
                 <code>valid.field</code>
 </td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>valid</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">Instance of <code>Valid</code> (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
             </tr>
           </tbody>
         </table>
