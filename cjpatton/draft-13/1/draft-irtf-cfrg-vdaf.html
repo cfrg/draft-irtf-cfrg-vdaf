@@ -7139,12 +7139,13 @@ as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-construction-2" class="section-name selfRef">Construction</a>
         </h3>
 <p id="section-8.2-1">This section specifies <code>Poplar1</code>, an implementation of the <code>Vdaf</code> interface
-(<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of any <code>Idpf</code> (<a href="#idpf" class="auto internal xref">Section 8.1</a>) for which
-<code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and an implementation of <code>Xof</code>
-(<a href="#xof" class="auto internal xref">Section 6.2</a>). The associated constants and types required by the <code>Vdaf</code> interface
-are defined in <a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding,
-preparation, aggregation, and unsharding are described in the remaining
-subsections. These methods make use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+(<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of the <code>Idpf</code> implementation of
+<a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> with <code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and
+<code>XofTurboShake128</code> as specified in <a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>. The associated
+constants and types required by the <code>Vdaf</code> interface are defined in
+<a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding, preparation, aggregation,
+and unsharding are described in the remaining subsections. These methods make
+use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-poplar1"></span><div id="poplar1-param">
 <table class="center" id="table-15">
           <caption>

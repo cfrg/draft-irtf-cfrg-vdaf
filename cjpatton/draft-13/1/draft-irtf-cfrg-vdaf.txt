@@ -4754,13 +4754,14 @@ Table of Contents
 8.2.  Construction
 
    This section specifies Poplar1, an implementation of the Vdaf
-   interface (Section 5).  It is defined in terms of any Idpf
-   (Section 8.1) for which SHARES == 2 and VALUE_LEN == 2 and an
-   implementation of Xof (Section 6.2).  The associated constants and
-   types required by the Vdaf interface are defined in Table 15.  The
-   methods required for sharding, preparation, aggregation, and
-   unsharding are described in the remaining subsections.  These methods
-   make use of constants defined in Table 16.
+   interface (Section 5).  It is defined in terms of the Idpf
+   implementation of Section 8.3 with SHARES == 2 and VALUE_LEN == 2 and
+   XofTurboShake128 as specified in Section 6.2.1.  The associated
+   constants and types required by the Vdaf interface are defined in
+   Table 15.  The methods required for sharding, preparation,
+   aggregation, and unsharding are described in the remaining
+   subsections.  These methods make use of constants defined in
+   Table 16.
 
        +=================+========================================+
        | Parameter       | Value                                  |
