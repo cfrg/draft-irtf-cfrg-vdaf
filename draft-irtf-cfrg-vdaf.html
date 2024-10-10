@@ -1498,7 +1498,7 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">(RFC EDITOR: remove this paragraph.) The source for this draft and and the
+<p id="section-1-1">(RFC EDITOR: remove this paragraph.) The source for this draft and the
 reference implementation can be found at
 https://github.com/cfrg/draft-irtf-cfrg-vdaf.<a href="#section-1-1" class="pilcrow">¶</a></p>
 <p id="section-1-2">The ubiquity of the Internet makes it an ideal platform for measurement of
@@ -1982,7 +1982,7 @@ state.<a href="#section-1.1-20.14.1" class="pilcrow">¶</a></p>
 of control bits.<a href="#section-1.1-20.15.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-20.16">
-            <p id="section-1.1-20.16.1">IdpfPoplar: When decoding the the control bits in the public share, assert
+            <p id="section-1.1-20.16.1">IdpfPoplar: When decoding the control bits in the public share, assert
 that the trailing bits of the final byte are all zero. (*)<a href="#section-1.1-20.16.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
@@ -2106,7 +2106,7 @@ ASCII characters, they are written as Python 3 byte-string literals (e.g.,
 to use as desired. Its value <span class="bcp14">SHALL</span> be <code>12</code>.<a href="#section-2-6" class="pilcrow">¶</a></p>
 <p id="section-2-7">This document describes algorithms for multi-party computations in which the
 parties typically communicate over a network. Wherever a quantity is defined
-that must be be transmitted from one party to another, this document prescribes
+that must be transmitted from one party to another, this document prescribes
 a particular encoding of that quantity as a byte string.<a href="#section-2-7" class="pilcrow">¶</a></p>
 <p id="section-2-8">Some common functionalities:<a href="#section-2-8" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -3373,7 +3373,7 @@ prep share for the next round.<a href="#section-5.8-3.3.1" class="pilcrow">¶</a
         </ul>
 <p id="section-5.8-4">The Aggregators proceed in this ping-ponging fashion until a step of the
 computation fails (indicating the report is invalid and should be rejected) or
-preparation is completed. All told there there are <code>ceil((ROUNDS+1)/2)</code>
+preparation is completed. All told there are <code>ceil((ROUNDS+1)/2)</code>
 requests sent.<a href="#section-5.8-4" class="pilcrow">¶</a></p>
 <p id="section-5.8-5">Each message in the ping-pong protocol is structured as follows (expressed in
 TLS syntax as defined in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>):<a href="#section-5.8-5" class="pilcrow">¶</a></p>
@@ -6277,7 +6277,7 @@ the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</
           </ul>
 <p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
 measurements between <code>0</code> and <code>2^bits - 1</code> can be encoded this way with <code>bits</code>
-bits. The second bit-encoded integer is the sum of the measurement and
+many bits. The second bit-encoded integer is the sum of the measurement and
 <code>offset</code>. Observe that this sum can only be encoded this way if it is between
 <code>0</code> and <code>2^bits - 1</code>, which implies that the measurement is between <code>-offset</code>
 and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
@@ -6400,8 +6400,8 @@ of the measurement is an integer in the range <code>[0, 2^bits)</code>. It is <s
 to set <code>chunk_length</code> to an integer near the square root of <code>length * bits</code>
 (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-3">The circuit is denoted <code>SumVec</code>. Each measurements is encoded as a vector of
-field elements with length <code>length * bits</code>. The field elements in the encoded
-vector represent all the bits of the measurement vector's elements,
+field elements with a length of <code>length * bits</code>. The field elements in the
+encoded vector represent all the bits of the measurement vector's elements,
 consecutively, in LSB to MSB order.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-4">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
@@ -6585,7 +6585,7 @@ would report the bucket that the corresponding client's real-numbered value
 falls into. The aggregate result counts the number of measurements in each
 bucket.<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.4-3">The validity circuit is denoted <code>Histogram</code>. It has two parameters: <code>length</code>,
-the number of histogram buckets; and <code>chunk_length</code>, which is used by by a
+the number of histogram buckets; and <code>chunk_length</code>, which is used by a
 circuit optimization described below. It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code>
 to an integer near the square root of <code>length</code> (see
 <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.4-3" class="pilcrow">¶</a></p>
@@ -6739,7 +6739,7 @@ Prio3MultihotCountVec to be composed with a randomized response mechanism, like
 <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For example, each Client would
 set each entry to one with some small probability.)<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-3">The validity circuit is denoted <code>MultihotCountVec</code> and has three parameters:
-<code>length</code>, the number of of entries in the count vector; <code>max_weight</code>, the
+<code>length</code>, the number of entries in the count vector; <code>max_weight</code>, the
 maximum number of non-zero entries (i.e., the weight must be at most
 <code>max_weight</code>); and <code>chunk_length</code>, used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and
 <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>.<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
@@ -8101,7 +8101,7 @@ beta_BITS)</code> onto a binary tree with <code>BITS+1</code> levels, where each
 a parent node to a left child is labeled <code>0</code>, and each right edge is labeled
 <code>1</code>. Then each leaf node corresponds to a bit string of length <code>BITS</code>, where the
 labels on the path from the root to <code>x</code> contain the individual bits.  Finally,
-all nodes in the tree have have an assigned value, with the nodes on the path
+all nodes in the tree have an assigned value, with the nodes on the path
 from the root to <code>alpha</code> having values <code>beta_1, ..., beta_BITS</code>, and all other
 nodes having value <code>0</code>.<a href="#section-8.3.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.3.1-2">The IDPF construction now boils down to secret-sharing the values at each node
@@ -8636,7 +8636,7 @@ on its own may not be sufficient for robustness of the application. In
 particular, a malicious Client may attempt to influence the computation by
 choosing an IDPF that evaluates to <code>1</code> at more than one node at a given
 level of the tree.<a href="#section-9.4.2-1" class="pilcrow">¶</a></p>
-<p id="section-9.4.2-2">This issue can be mitigated by using an IDPF that is extractable as defined in
+<p id="section-9.4.2-2">This issue can be mitigated by using an IDPF that is extractable as defined
 in Appendix D of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>. Extractability ensures that, for a particular
 level of the tree, it is infeasible for an attacker to control values of the
 IDPF such that it takes on chosen non-zero values at more than one node. (It

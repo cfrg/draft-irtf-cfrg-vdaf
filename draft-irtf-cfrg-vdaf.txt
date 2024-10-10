@@ -173,8 +173,8 @@ Table of Contents
 1.  Introduction
 
    (RFC EDITOR: remove this paragraph.)  The source for this draft and
-   and the reference implementation can be found at
-   https://github.com/cfrg/draft-irtf-cfrg-vdaf.
+   the reference implementation can be found at https://github.com/cfrg/
+   draft-irtf-cfrg-vdaf.
 
    The ubiquity of the Internet makes it an ideal platform for
    measurement of large-scale phenomena, whether public health trends or
@@ -614,9 +614,8 @@ Table of Contents
    *  IdpfPoplar: Add implementation considerations around branching on
       the values of control bits.
 
-   *  IdpfPoplar: When decoding the the control bits in the public
-      share, assert that the trailing bits of the final byte are all
-      zero. (*)
+   *  IdpfPoplar: When decoding the control bits in the public share,
+      assert that the trailing bits of the final byte are all zero. (*)
 
    03:
 
@@ -711,7 +710,7 @@ Table of Contents
 
    This document describes algorithms for multi-party computations in
    which the parties typically communicate over a network.  Wherever a
-   quantity is defined that must be be transmitted from one party to
+   quantity is defined that must be transmitted from one party to
    another, this document prescribes a particular encoding of that
    quantity as a byte string.
 
@@ -1723,7 +1722,7 @@ Table of Contents
 
    The Aggregators proceed in this ping-ponging fashion until a step of
    the computation fails (indicating the report is invalid and should be
-   rejected) or preparation is completed.  All told there there are
+   rejected) or preparation is completed.  All told there are
    ceil((ROUNDS+1)/2) requests sent.
 
    Each message in the ping-pong protocol is structured as follows
@@ -4020,10 +4019,10 @@ Table of Contents
 
    The first bit-encoded integer is the measurement itself.  Note that
    only measurements between 0 and 2^bits - 1 can be encoded this way
-   with bits bits.  The second bit-encoded integer is the sum of the
-   measurement and offset.  Observe that this sum can only be encoded
-   this way if it is between 0 and 2^bits - 1, which implies that the
-   measurement is between -offset and max_measurement.
+   with bits many bits.  The second bit-encoded integer is the sum of
+   the measurement and offset.  Observe that this sum can only be
+   encoded this way if it is between 0 and 2^bits - 1, which implies
+   that the measurement is between -offset and max_measurement.
 
    The circuit first checks that each entry of both bit vectors is a one
    or a zero.  It then decodes both the measurement and the offset
@@ -4113,7 +4112,7 @@ Table of Contents
    integer near the square root of length * bits (see Section 7.4.3.1).
 
    The circuit is denoted SumVec.  Each measurements is encoded as a
-   vector of field elements with length length * bits.  The field
+   vector of field elements with a length of length * bits.  The field
    elements in the encoded vector represent all the bits of the
    measurement vector's elements, consecutively, in LSB to MSB order.
 
@@ -4273,8 +4272,8 @@ Table of Contents
 
    The validity circuit is denoted Histogram.  It has two parameters:
    length, the number of histogram buckets; and chunk_length, which is
-   used by by a circuit optimization described below.  It is RECOMMENDED
-   to set chunk_length to an integer near the square root of length (see
+   used by a circuit optimization described below.  It is RECOMMENDED to
+   set chunk_length to an integer near the square root of length (see
    Section 7.4.3.1).
 
    The measurement is encoded as a one-hot vector representing the
@@ -4397,7 +4396,7 @@ Table of Contents
    each entry to one with some small probability.)
 
    The validity circuit is denoted MultihotCountVec and has three
-   parameters: length, the number of of entries in the count vector;
+   parameters: length, the number of entries in the count vector;
    max_weight, the maximum number of non-zero entries (i.e., the weight
    must be at most max_weight); and chunk_length, used the same way as
    in Section 7.4.3 and Section 7.4.4.
@@ -5468,8 +5467,8 @@ Table of Contents
    each right edge is labeled 1.  Then each leaf node corresponds to a
    bit string of length BITS, where the labels on the path from the root
    to x contain the individual bits.  Finally, all nodes in the tree
-   have have an assigned value, with the nodes on the path from the root
-   to alpha having values beta_1, ..., beta_BITS, and all other nodes
+   have an assigned value, with the nodes on the path from the root to
+   alpha having values beta_1, ..., beta_BITS, and all other nodes
    having value 0.
 
    The IDPF construction now boils down to secret-sharing the values at
@@ -5960,7 +5959,7 @@ Table of Contents
    the tree.
 
    This issue can be mitigated by using an IDPF that is extractable as
-   defined in in Appendix D of [BBCGGI21].  Extractability ensures that,
+   defined in Appendix D of [BBCGGI21].  Extractability ensures that,
    for a particular level of the tree, it is infeasible for an attacker
    to control values of the IDPF such that it takes on chosen non-zero
    values at more than one node.  (It can practically only achieve the
