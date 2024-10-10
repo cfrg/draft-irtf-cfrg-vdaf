@@ -3893,7 +3893,7 @@ two encoded integers are consistent. Let
 
 The first bit-encoded integer is the measurement itself. Note that only
 measurements between `0` and `2^bits - 1` can be encoded this way with `bits`
-bits. The second bit-encoded integer is the sum of the measurement and
+many bits. The second bit-encoded integer is the sum of the measurement and
 `offset`. Observe that this sum can only be encoded this way if it is between
 `0` and `2^bits - 1`, which implies that the measurement is between `-offset`
 and `max_measurement`.
@@ -3979,8 +3979,8 @@ to set `chunk_length` to an integer near the square root of `length * bits`
 (see {{parallel-sum-chunk-length}}).
 
 The circuit is denoted `SumVec`. Each measurements is encoded as a vector of
-field elements with length `length * bits`. The field elements in the encoded
-vector represent all the bits of the measurement vector's elements,
+field elements with a length of `length * bits`. The field elements in the
+encoded vector represent all the bits of the measurement vector's elements,
 consecutively, in LSB to MSB order.
 
 The validity circuit uses the `ParallelSum` gadget in {{gadget-parallel-sum}}.
