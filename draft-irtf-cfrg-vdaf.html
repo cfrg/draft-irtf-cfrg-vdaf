@@ -1688,7 +1688,7 @@ using joint randomness. (*)<a href="#section-1.1-4.4.1" class="pilcrow">¶</a></
 intermediate outputs out of the circuit. (*)<a href="#section-1.1-4.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.6">
-            <p id="section-1.1-4.6.1">IDPF: Add the application context string to key generation end evaluation and
+            <p id="section-1.1-4.6.1">IDPF: Add the application context string to key generation and evaluation and
 bind it to the fixed AES key. (*)<a href="#section-1.1-4.6.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-1.1-4.7">
@@ -4033,7 +4033,7 @@ class XofTurboShake128(Xof):
 <p id="section-6.2.2-1">While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
 cases where a more efficient instantiation based on a blockcipher in a
-fixed-key mode of operation is possible. For now, this is limited to the XOF used inside
+fixed-key mode of operation is possible. This is limited to the XOF used inside
 the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a> implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this XOF anywhere else. See <a href="#security" class="auto internal xref">Section 9</a> for a more detailed
 discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2.2-2">The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
@@ -8101,7 +8101,7 @@ beta_BITS)</code> onto a binary tree with <code>BITS+1</code> levels, where each
 a parent node to a left child is labeled <code>0</code>, and each right edge is labeled
 <code>1</code>. Then each leaf node corresponds to a bit string of length <code>BITS</code>, where the
 labels on the path from the root to <code>x</code> contain the individual bits.  Finally,
-all nodes on the tree have have an assigned value, with the nodes on the path
+all nodes in the tree have have an assigned value, with the nodes on the path
 from the root to <code>alpha</code> having values <code>beta_1, ..., beta_BITS</code>, and all other
 nodes having value <code>0</code>.<a href="#section-8.3.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.3.1-2">The IDPF construction now boils down to secret-sharing the values at each node
