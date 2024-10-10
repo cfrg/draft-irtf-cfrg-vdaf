@@ -3427,6 +3427,8 @@ Table of Contents
           +================+===================================+
           | Parameter      | Value                             |
           +================+===================================+
+          | valid          | instance of Valid (Section 7.3.2) |
+          +----------------+-----------------------------------+
           | PROVE_RAND_LEN | valid.prove_rand_len()            |
           +----------------+-----------------------------------+
           | QUERY_RAND_LEN | valid.query_rand_len()            |
@@ -3446,8 +3448,6 @@ Table of Contents
           | AggResult      | valid.AggResult                   |
           +----------------+-----------------------------------+
           | field          | valid.field                       |
-          +----------------+-----------------------------------+
-          | valid          | Instance of Valid (Section 7.3.2) |
           +----------------+-----------------------------------+
 
              Table 7: FLP parameters for a validity circuit.
