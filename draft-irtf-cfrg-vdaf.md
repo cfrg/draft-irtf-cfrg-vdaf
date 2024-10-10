@@ -319,14 +319,15 @@ the less reliable will be the server's estimate of the aggregate. Thus systems
 relying solely on a DP mechanism must strike a delicate balance between privacy
 and utility.
 
-The ideal goal for a privacy-preserving measurement system is that of secure
-multi-party computation (MPC): no participant in the protocol should learn
-anything about an individual measurement beyond what it can deduce from the
-aggregate. MPC achieves this goal by distributing the computation of the
-aggregate across multiple aggregation servers, one of which is presumed to be
-honest, i.e., not under control of the attacker. Moreover, MPC can be composed
-with various DP mechanisms to ensure the aggregate itself does leak too much
-information about any one of the measurements {{MPRV09}}.
+Another way of constructing a privacy-preserving measurement system is to use
+multi-party computation (MPC). The goal of such a system is that no participant
+in the protocol should learn anything about an individual measurement beyond
+what it can deduce from the aggregate. MPC achieves this goal by distributing
+the computation of the aggregate across multiple aggregation servers, one of
+which is presumed to be honest, i.e., not under control of the attacker.
+Moreover, MPC can be composed with various DP mechanisms to ensure the
+aggregate itself does not leak too much information about any one of the
+measurements {{MPRV09}}.
 
 This document describes two classes of MPC protocols, each aiming for a
 different set of goals.
@@ -340,7 +341,7 @@ but one of the shares, it is impossible to learn anything about the underlying
 measurement. These properties give rise to a simple strategy for privately
 aggregating the measurements: each aggregation server adds up its measurement
 shares locally before revealing their sum to the data collector; then all
-the data collector has to do is add up these sums to get the aggregate.
+the data collector has to do is add up these sums to get the aggregate result.
 
 This strategy is compatible with any aggregation function that can be
 represented as the sum of some encoding of the measurements. Examples include:
@@ -354,16 +355,16 @@ In fact, our framework admits DAFs with slightly more
 functionality, computing aggregation functions of the form
 
 ~~~
-f(agg_param, meas_1, ..., meas_N) =
-    g(agg_param, meas_1) + ... + g(agg_param, meas_N)
+F(agg_param, meas_1, ..., meas_BATCH_SIZE) =
+    G(agg_param, meas_1) + ... + G(agg_param, meas_BATCH_SIZE)
 ~~~
 
-where `meas_1, ..., meas_N` are the measurements, `g` is a possibly non-linear
-function, and `agg_param` is a parameter of that function chosen by the data
-collector. This paradigm, known as function secret sharing {{BGI15}}, allows
-for more sophisticated data analysis tasks, such as grouping metrics by private
-client attributes {{MPDST25}} or computing heavy hitters {{BBCGGI21}}. (More
-on the latter task below.)
+where `meas_1, ..., meas_BATCH_SIZE` are the measurements, `G` is a possibly
+non-linear function, and `agg_param` is a parameter of that function chosen by
+the data collector. This paradigm, known as function secret sharing {{BGI15}},
+allows for more sophisticated data analysis tasks, such as grouping metrics by
+private client attributes {{MPDST25}} or computing heavy hitters {{BBCGGI21}}.
+(More on the latter task below.)
 
 The second class of protocols defined in this document are called Verifiable
 Distributed Aggregation Functions (VDAFs, {{vdaf}}). In addition to being
@@ -372,38 +373,37 @@ sharing of a valid measurement, e.g., a number between 1 and 10, is
 indistinguishable from a secret sharing of an invalid measurement, e.g., a
 number larger than 10. This means that DAFs are vulnerable to attacks from
 malicious clients attempting to disrupt the computation by submitting invalid
-measurements. Thus VDAFs are designed to allow the servers to detect and remove
+measurements. VDAFs are designed to allow the servers to detect and remove
 these measurements prior to aggregation. We refer to this property as
 robustness.
 
 Achieving robustness without sacrificing privacy requires the servers to
 interact with one another over a number of rounds of communication. DAFs on the
-other hand are non-interactive, and are therefore easier to deploy; but they do
-not provide robustness on their own. This may be tolerable in some
-applications. For instance, if the client's software is executed in a trusted
-execution environment, it may be reasonable to assume that no client is
-malicious.
+other hand are non-interactive, making them easier to deploy; but they do not
+provide robustness on their own. This may be tolerable in some applications.
+For instance, if the client's software is executed in a trusted execution
+environment, it may be reasonable to assume that no client is malicious.
 
 The DAF and VDAF abstractions encompass a variety of MPC techniques in the
 literature. These protocols vary in their operational and security
 requirements, sometimes in subtle but consequential ways. This document
 therefore has two important goals:
 
- 1. Providing higher-level protocols, like {{?DAP=I-D.draft-ietf-ppm-dap}},
-    with a simple, uniform interface for accessing privacy-preserving
-    measurement schemes, documenting relevant operational and security
-    requirements, and specifying constraints for safe usage:
+ 1. Provide higher-level protocols, like {{?DAP=I-D.draft-ietf-ppm-dap}}, with
+    a simple, uniform interface for accessing privacy-preserving measurement
+    schemes, document relevant operational and security requirements, and
+    specify constraints for safe usage:
 
     1. General patterns of communications among the various actors involved in
        the system (clients, aggregation servers, and the collector of the
        aggregate result);
-    1. Capabilities of a malicious coalition of servers attempting to divulge
+    1. Capabilities of a malicious coalition of parties attempting to divulge
        information about client measurements; and
     1. Conditions that are necessary to ensure that malicious clients cannot
        corrupt the computation.
 
- 1. Providing cryptographers with design criteria that provide a clear
-    deployment roadmap for new constructions.
+ 1. Provide cryptographers with design criteria that provide a clear deployment
+    roadmap for new constructions of privacy-preserving measurement systems.
 
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
@@ -415,23 +415,24 @@ from the literature.
   the original Prio protocol, but incorporates techniques introduced in
   {{BBCGGI19}} that result in significant performance gains.
 
-* The Poplar protocol {{BBCGGI21}} solves the heavy-hitters problem in a
-  privacy-preserving manner. Here each client holds a bit-string, and the goal
+* The Poplar protocol {{BBCGGI21}} solves a problem known as private
+  heavy-hitters. In this problem, each client holds a bit-string, and the goal
   of the aggregation servers is to compute the set of strings that occur at
-  least `t` times for some threshold `t`. The core primitive in their protocol
-  is a secret sharing of a point function {{GI14}} (`g` in the notation above)
-  that allows the servers to privately count how many of the clients' strings
-  begin with a given prefix (`agg_param` in the notation above). In {{poplar1}}
-  we specify a VDAF called Poplar1 that implements this functionality.
+  least `T` times for some threshold `T`. The core primitive in their protocol
+  is a secret sharing of a point function {{GI14}} (denoted `G` above) that
+  allows the servers to privately count how many of the clients' strings begin
+  with a given prefix (`agg_param` in the notation above). In {{poplar1}} we
+  specify a VDAF called Poplar1 that implements this functionality.
 
 The remainder of this document is organized as follows: {{conventions}} lists
-definitions and conventions used for specification; {{overview}} gives a brief
-overview of DAFs and VDAFs, the parties involved in the computation, and the
-requirements for non-collusion; {{daf}} defines the syntax for DAFs; {{vdaf}}
-defines the syntax for VDAFs; {{prelim}} defines various functionalities that
-are common to our constructions; {{prio3}} describes the Prio3 construction;
-{{poplar1}} describes the Poplar1 construction; and {{security}} enumerates the
-security considerations for DAFs and VDAFs.
+definitions and conventions used in the remainder of the document; {{overview}}
+gives a brief overview of DAFs and VDAFs, the parties involved in the
+computation, and the requirements for non-collusion; {{daf}} defines the syntax
+for DAFs; {{vdaf}} defines the syntax for VDAFs; {{prelim}} defines various
+functionalities that are common to our constructions; {{prio3}} specifies
+Prio3; {{poplar1}} specifies Poplar1; and {{security}} enumerates security
+considerations for DAFs and VDAFs in general and our constructions in
+particular.
 
 ## Change Log
 
@@ -746,10 +747,10 @@ Algorithms in this document are written in Python (compatible with Python 3.12
 or later). A fatal error in a program (e.g., failure to parse one of the
 function parameters) is usually handled by raising an exception.
 
-Type hints are used to define input and output types.
+Type hints are used to define input and output types:
 
 * The type variable `F` is used in signatures to signify any type that is a
-  subclass of `Field`.
+  subclass of `Field` ({{field}}).
 
 * `bytes` is a byte string.
 
@@ -760,7 +761,8 @@ Type hints are used to define input and output types.
 
 * `Any` is the universal supertype, which admits values of any type.
 
-* `Optional[T]` is shorthand for `T | None`.
+* `Optional[T]` is shorthand for `T | None`. Its value may be `None` or have
+  type `T`.
 
 * `Self` represents the containing class of the method definition in which it
   appears.
@@ -781,44 +783,43 @@ a particular encoding of that quantity as a byte string.
 
 Some common functionalities:
 
-* `zeros(len: int) -> bytes` returns an array of zero bytes. The length of
-  `output` MUST be `len`.
+* `zeros(len: int) -> bytes` returns an array of zero bytes of the requested
+  length (`len`).
 
-* `gen_rand(len: int) -> bytes` returns an array of random bytes generated by a
-  cryptographically secure pseudorandom number generator (CSPRNG). The length
-  of `output` MUST be `len`.
+* `gen_rand(len: int) -> bytes` returns a byte array of the requested length
+  (`len`) generated by a cryptographically secure pseudorandom number generator
+  (CSPRNG).
 
-* `byte(int: int) -> bytes` returns the representation of `int` as a byte
-  string. The value of `int` MUST be in `[0,256)`.
+* `byte(x: int) -> bytes` returns the representation of the integer `x` in range
+  `[0, 256)` as a single-byte byte string.
 
 * `concat(parts: list[bytes]) -> bytes` returns the concatenation of the input
-  byte strings, i.e., `parts[0] || ... || parts[len(parts)-1]`.
+  byte strings, i.e., `parts[0] + ... + parts[len(parts)-1]`.
 
-* `front(length: int, vec: list[Any]) -> (list[Any], list[Any])` splits `vec`
-  into two vectors, where the first vector is made up of the first `length`
-  elements of the input. I.e., `(vec[:length], vec[length:])`.
+* `front(len: int, x: list[Any]) -> tuple[list[Any], list[Any]]` splits `x`
+  into two vectors, where the first vector is made up of the first `len`
+  elements of `x`. I.e., `(x[:len], x[len:])`.
 
 * `xor(left: bytes, right: bytes) -> bytes` returns the bitwise XOR of `left`
   and `right`. An exception is raised if the inputs are not the same length.
 
-* `to_be_bytes(val: int, length: int) -> bytes` converts `val` to big-endian
-  bytes; its value MUST be in the range `[0, 2^(8*length))`, i.e., at least `0`
-  but less than `2^(8*length)`. Function `from_be_bytes(encoded: bytes) -> int`
-  computes the inverse.
+* `to_be_bytes(x: int, len: int) -> bytes` converts an integer `x` whose value
+  is in the range `[0, 2^(8*len))` to big-endian bytes. Function
+  `from_be_bytes(encoded: bytes) -> int` computes the inverse.
 
-* `to_le_bytes(val: int, length: int) -> bytes` converts `val` to little-endian
-  bytes; its value MUST be in the range `[0, 2^(8*length))`. Function
+* `to_le_bytes(x: int, len: int) -> bytes` converts an integer `x` whose value
+  is in the range `[0, 2^(8*len))` to little-endian bytes. Function
   `from_le_bytes(encoded: bytes) -> int` computes the inverse.
 
-* `next_power_of_2(n: int) -> int` returns the smallest integer
-  greater than or equal to `n` that is also a power of two.
+* `next_power_of_2(x: int) -> int` returns the smallest integer
+  greater than or equal to `x` that is also a power of two.
 
-* `additive_secret_share(vec: list[F], num_shares: int, field: type[F])
-  -> list[list[F]]` takes a vector of field elements and returns multiple
-  vectors of the same length, such that they all add up to the input vector,
-  and each proper subset of the vectors are indistinguishable from random.
+* `additive_secret_share(x: list[F], num_shares: int, field: type[F]) ->
+  list[list[F]]` takes a vector `x` of field elements and returns multiple
+  vectors of the same length, such that they all add up to the input vector.
+  Note that this function is not used normatively in this document.
 
-* `cast(typ: type, val: object) -> object` returns the input value unchanged.
+* `cast(typ: type, x: object) -> object` returns the input value unchanged.
   This is only present to assist with static analysis of the Python code.
   Type checkers will ignore the inferred type of the input value, and assume
   the output value has the given type.
@@ -835,8 +836,8 @@ Some common functionalities:
 
 * `poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -> list[F]`
   returns the coefficients of the lowest degree polynomial `p` for which
-  `p(input[k]) == output[k]` for all `k`. Normally this will be computed using
-  the Number Theoretic Transform (NTT) {{SML24}}.
+  `p(inputs[k]) == outputs[k]` for all `k`. Normally this will be computed
+  using the Number Theoretic Transform (NTT) {{SML24}}.
 
 * `poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]` returns
   the product of two polynomials.
@@ -850,8 +851,8 @@ Some common functionalities:
 ~~~
                  +--------------+
            +---->| Aggregator 0 |----+
-           |     +--------------+    |
-           |             ^           |
+     input |     +--------------+    | aggregate
+    shares |             ^           | shares
            |             |           |
            |             V           |
            |     +--------------+    |
@@ -867,39 +868,42 @@ Some common functionalities:
            |    +----------------+   |
            +--->| Aggregator N-1 |---+
                 +----------------+
-
-      Input shares           Aggregate shares
 ~~~
-{: #overall-flow title="Overall data flow of a (V)DAF"}
+{: #overall-flow title="Overall data flow of a (V)DAF."}
 
-In a DAF- or VDAF-based private measurement system, we distinguish three types
-of actors: Clients, Aggregators, and Collectors.  The overall flow of the
-measurement process is as follows:
+In a DAF- or VDAF-based private measurement system, we distinguish between
+three types of actors: Clients, Aggregators, and the Collector.  The overall
+flow of the measurement process is as follows:
 
 * To submit an individual measurement, the Client shards the measurement into
   "input shares" and sends one input share to each Aggregator. We sometimes
   refer to this sequence of input shares collectively as the Client's "report".
-* The Aggregators refine their input shares into "output shares".
+
+* The Aggregators refine their input shares into "output shares":
+
     * Output shares are in one-to-one correspondence with the input shares.
+
     * Just as each Aggregator receives one input share of each measurement, if
       this process succeeds, then each aggregator holds one output share.
+
     * In VDAFs, Aggregators will need to exchange information among themselves
       as part of the validation process.
+
 * As each Aggregator recovers output shares, it accumulates them into an
-  "aggregate share" for the batch, i.e., its
-  share of the desired aggregate result.
+  "aggregate share" for the batch of measurements.
+
 * The Aggregators submit their aggregate shares to the Collector, who combines
   them to obtain the aggregate result over the batch.
 
 Aggregators are a new class of actor relative to traditional measurement systems
 where Clients submit measurements to a single server.  They are critical for
 both the privacy properties of the system and, in the case of VDAFs, the
-correctness of the measurements obtained.  The privacy properties of the system
-are assured by non-collusion among Aggregators, and Aggregators are the entities
-that perform validation of Client measurements.  Thus Clients trust Aggregators
-not to collude (typically it is required that at least one Aggregator is
-honest; see {{num-aggregators}}), and Collectors trust Aggregators to correctly
-run the protocol.
+validity of the measurements obtained.  The privacy properties of the system
+are assured by non-collusion among Aggregators, and Aggregators are the
+entities that perform validation of Client measurements.  Thus Clients trust
+Aggregators not to collude (typically it is required that at least one
+Aggregator is honest; see {{num-aggregators}}), and Collectors trust
+Aggregators to correctly run the protocol.
 
 Within the bounds of the non-collusion requirements of a given (V)DAF instance,
 it is possible for the same entity to play more than one role.  For example, the
