@@ -71,7 +71,7 @@ Table of Contents
 
    1.  Introduction
      1.1.  Change Log
-   2.  Conventions and Definitions
+   2.  Conventions
    3.  Overview
    4.  Definition of DAFs
      4.1.  Sharding
@@ -89,14 +89,14 @@ Table of Contents
      5.5.  Unsharding
      5.6.  Execution of a VDAF
      5.7.  Communication Patterns for Preparation
-     5.8.  Ping-Pong Topology (Only Two Aggregators)
-     5.9.  Star Topology (Any Number of Aggregators)
+       5.7.1.  The Ping-Pong Topology (Only Two Aggregators)
+       5.7.2.  The Star Topology (Any Number of Aggregators)
    6.  Preliminaries
      6.1.  Finite Fields
        6.1.1.  Auxiliary Functions
        6.1.2.  NTT-Friendly Fields
        6.1.3.  Parameters
-     6.2.  Extendable Output Functions
+     6.2.  Extendable Output Functions (XOFs)
        6.2.1.  XofTurboShake128
        6.2.2.  XofFixedKeyAes128
        6.2.3.  The Domain Separation Tag and Binder String
@@ -112,10 +112,12 @@ Table of Contents
        7.2.5.  Unsharding
        7.2.6.  Auxiliary Functions
        7.2.7.  Message Serialization
-     7.3.  The FLP Construction
+     7.3.  FLP Construction
        7.3.1.  Overview
        7.3.2.  Validity Circuits
-       7.3.3.  Specification
+       7.3.3.  Generating the Proof
+       7.3.4.  Querying the Proof
+       7.3.5.  Deciding Validity
      7.4.  Variants
        7.4.1.  Prio3Count
        7.4.2.  Prio3Sum
@@ -132,23 +134,22 @@ Table of Contents
        8.2.4.  Aggregation
        8.2.5.  Unsharding
        8.2.6.  Message Serialization
-     8.3.  The IDPF Construction
+     8.3.  IDPF Construction
        8.3.1.  Overview
        8.3.2.  Key Generation
        8.3.3.  Key Evaluation
        8.3.4.  Auxiliary Functions
      8.4.  Instantiation
    9.  Security Considerations
-     9.1.  Requirements for the Verification Key
-     9.2.  Requirements for the Nonce
-     9.3.  Requirements for the Public Share
-     9.4.  Requirements for Aggregation Parameters
-       9.4.1.  Additional Privacy Considerations
-       9.4.2.  Safe Usage of IDPF Outputs
-     9.5.  Requirements for XOFs
-     9.6.  Choosing FLP Parameters
-     9.7.  Choosing the Number of Aggregators
-     9.8.  Defense-in-Depth Measures
+     9.1.  The Verification Key
+     9.2.  The Nonce
+     9.3.  The Public Share
+     9.4.  The Aggregation Parameter
+     9.5.  Safe Usage of IDPF Outputs
+     9.6.  Safe Usage of XOFs
+     9.7.  Choosing FLP Parameters
+     9.8.  Choosing the Number of Aggregators
+     9.9.  Defense-in-Depth Measures
    10. IANA Considerations
    11. References
      11.1.  Normative References
@@ -157,7 +158,7 @@ Table of Contents
      A.1.  Multiplication
      A.2.  Polynomial Evaluation
      A.3.  Parallel Sum
-     A.4.  Shims for Generating and Verifying Proofs
+     A.4.  Shims for Generating and Querying Proofs
    Appendix B.  Test Vectors
      B.1.  Schema
        B.1.1.  Prio3Count
@@ -667,7 +668,7 @@ Table of Contents
    *  Remove public parameter and replace verification parameter with a
       "verification key" and "Aggregator ID".
 
-2.  Conventions and Definitions
+2.  Conventions
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
@@ -848,7 +849,7 @@ Table of Contents
    collusion among Aggregators, and Aggregators are the entities that
    perform validation of Client measurements.  Thus Clients trust
    Aggregators not to collude (typically it is required that at least
-   one Aggregator is honest; see Section 9.7), and Collectors trust
+   one Aggregator is honest; see Section 9.8), and Collectors trust
    Aggregators to correctly run the protocol.
 
    Within the bounds of the non-collusion requirements of a given (V)DAF
@@ -1351,7 +1352,7 @@ Table of Contents
    a failure to validate the report, causing the report to be rejected
    without garbling the aggregate result.  The application context also
    provides some defense-in-depth against cross protocol attacks; see
-   Section 9.8.
+   Section 9.9.
 
 5.2.  Preparation
 
@@ -1689,7 +1690,7 @@ Table of Contents
    Implementations of Prio3 and Poplar1 MUST use the encoding scheme
    specified in Section 7.2.7 and Section 8.2.6 respectively.
 
-5.8.  Ping-Pong Topology (Only Two Aggregators)
+5.7.1.  The Ping-Pong Topology (Only Two Aggregators)
 
    For VDAFs with precisely two Aggregators (i.e., SHARES == 2), the
    following "ping pong" communication pattern can be used.  It is
@@ -1957,7 +1958,7 @@ Table of Contents
    there may be one more message to send before the peer can also finish
    processing (i.e., outbound != None).
 
-5.9.  Star Topology (Any Number of Aggregators)
+5.7.2.  The Star Topology (Any Number of Aggregators)
 
    The ping-pong topology of the previous section is only suitable for
    VDAFs involving exactly two Aggregators.  If the VDAF supports more
@@ -2129,7 +2130,7 @@ Table of Contents
    Some VDAFs require fields that are suitable for efficient computation
    of the number theoretic transform (NTT) [SML24], as this allows for
    fast polynomial interpolation.  (One example is Prio3 (Section 7)
-   when instantiated with the FLP of Section 7.3.3.)  Specifically, a
+   when instantiated with the FLP of Section 7.3.)  Specifically, a
    field is said to be "NTT-friendly" if, in addition to satisfying the
    interface described in Section 6.1, it implements the following
    method:
@@ -2167,7 +2168,7 @@ Table of Contents
 
      Table 3: Parameters for the finite fields used in this document.
 
-6.2.  Extendable Output Functions
+6.2.  Extendable Output Functions (XOFs)
 
    VDAFs in this specification use extendable output functions (XOFs) to
    extract short, fixed-length strings we call "seeds" from long input
@@ -2608,7 +2609,7 @@ Table of Contents
 
    Note that soundness of an FLP system is not the same as robustness
    for a VDAF In particular, soundness of the FLP is necessary, but
-   insufficient for robusntess of Prio3 (Section 7).  See Section 9.6
+   insufficient for robusntess of Prio3 (Section 7).  See Section 9.7
    for details.
 
    We remark that [BBCGGI19] defines a much larger class of fully linear
@@ -2680,7 +2681,7 @@ Table of Contents
    randomness string.  It accepts the measurement only if all the
    decision algorithm accepts on each proof.
 
-   See Section 9.6 below for discussions on choosing the right number of
+   See Section 9.7 below for discussions on choosing the right number of
    proofs.
 
 7.2.  Construction
@@ -3411,12 +3412,45 @@ Table of Contents
        Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
-7.3.  The FLP Construction
+7.3.  FLP Construction
 
-   This section describes an FLP based on the construction from
-   [BBCGGI19], Section 4.2.  We begin in Section 7.3.1 with an overview
-   of their proof system and some extensions to it.  The construction is
-   specified in Section 7.3.3.
+   This section specifies an implementation of the Flp interface
+   (Section 7.1) based on the construction from [BBCGGI19], Section 4.2.
+   We begin in Section 7.3.1 with an overview of the proof system and
+   some extensions to it.  Section 7.3.2 defines validity circuits, the
+   core component of the proof system that determines measurement
+   validity and how measurements are aggregated.  The proof-generation
+   algorithm, the query algorithm, and the decision algorithm are
+   defined in Section 7.3.3, Section 7.3.4, and Section 7.3.5
+   respectively.
+
+          +================+===================================+
+          | Parameter      | Value                             |
+          +================+===================================+
+          | valid          | instance of Valid (Section 7.3.2) |
+          +----------------+-----------------------------------+
+          | PROVE_RAND_LEN | valid.prove_rand_len()            |
+          +----------------+-----------------------------------+
+          | QUERY_RAND_LEN | valid.query_rand_len()            |
+          +----------------+-----------------------------------+
+          | JOINT_RAND_LEN | valid.JOINT_RAND_LEN              |
+          +----------------+-----------------------------------+
+          | MEAS_LEN       | valid.MEAS_LEN                    |
+          +----------------+-----------------------------------+
+          | OUTPUT_LEN     | valid.OUTPUT_LEN                  |
+          +----------------+-----------------------------------+
+          | PROOF_LEN      | valid.proof_len()                 |
+          +----------------+-----------------------------------+
+          | VERIFIER_LEN   | valid.verifier_len()              |
+          +----------------+-----------------------------------+
+          | Measurement    | valid.Measurement                 |
+          +----------------+-----------------------------------+
+          | AggResult      | valid.AggResult                   |
+          +----------------+-----------------------------------+
+          | field          | valid.field                       |
+          +----------------+-----------------------------------+
+
+             Table 7: FLP parameters for a validity circuit.
 
 7.3.1.  Overview
 
@@ -3511,11 +3545,11 @@ Table of Contents
    the Aggregators perform a probabilistic test to check that the gadget
    polynomial was constructed properly.  This "gadget test", and the
    procedure for constructing the polynomial, are described in detail in
-   Section 7.3.3.
+   Section 7.3.
 
 7.3.1.1.  Extensions
 
-   The FLP described in Section 7.3.3 extends the proof system of
+   The FLP described in Section 7.3 extends the proof system of
    [BBCGGI19], Section 4.2 in a few ways.
 
    First, the validity circuit in our construction includes an
@@ -3593,7 +3627,7 @@ Table of Contents
     | field: type[F]          | Class object for the field            |
     +-------------------------+---------------------------------------+
 
-                   Table 7: Validity circuit parameters.
+                   Table 8: Validity circuit parameters.
 
    An instance of the proof system is defined in terms of a validity
    circuit that implements the Valid interface specified in this
@@ -3670,43 +3704,7 @@ Table of Contents
            length += g.ARITY + 1
        return length
 
-7.3.3.  Specification
-
-                +================+========================+
-                | Parameter      | Value                  |
-                +================+========================+
-                | PROVE_RAND_LEN | valid.prove_rand_len() |
-                +----------------+------------------------+
-                | QUERY_RAND_LEN | valid.query_rand_len() |
-                +----------------+------------------------+
-                | JOINT_RAND_LEN | valid.JOINT_RAND_LEN   |
-                +----------------+------------------------+
-                | MEAS_LEN       | valid.MEAS_LEN         |
-                +----------------+------------------------+
-                | OUTPUT_LEN     | valid.OUTPUT_LEN       |
-                +----------------+------------------------+
-                | PROOF_LEN      | valid.proof_len()      |
-                +----------------+------------------------+
-                | VERIFIER_LEN   | valid.verifier_len()   |
-                +----------------+------------------------+
-                | Measurement    | valid.Measurement      |
-                +----------------+------------------------+
-                | AggResult      | valid.AggResult        |
-                +----------------+------------------------+
-                | field          | valid.field            |
-                +----------------+------------------------+
-
-                   Table 8: FLP parameters for a validity
-                                  circuit.
-
-   This section specifies an implementation of the Flp interface
-   (Section 7.1).  It has as a generic parameter a validity circuit,
-   denoted valid, that implements the interface defined in the previous
-   section.  Its FLP parameters are listed in the table above.  The
-   proof generation algorithm, query algorithm, and decision algorithm
-   ares specified in the remaining subsections.
-
-7.3.3.1.  Proof Generation
+7.3.3.  Generating the Proof
 
    +------------------+
    | Prove            |
@@ -3781,7 +3779,7 @@ Table of Contents
 
        return proof
 
-7.3.3.2.  Query Generation
+7.3.4.  Querying the Proof
 
          proof (share)
    +---------|--------+
@@ -3885,7 +3883,7 @@ Table of Contents
 
        return verifier
 
-7.3.3.3.  Decision
+7.3.5.  Deciding Validity
 
     | verifier
     V
@@ -4589,7 +4587,7 @@ Table of Contents
    first compute the prefix tree, then extract the heavy hitters from
    the leaves of this tree.  (Note that the prefix tree may leak more
    information about the set than the heavy hitters themselves; see
-   Section 9.4.1 for details.)
+   Section 9.4 for details.)
 
    Poplar1 composes an IDPF with the arithmetic sketch of [BBCGGI21],
    Section 4.2.  (The paper calls this a "secure sketch", but the
@@ -5425,7 +5423,7 @@ Table of Contents
    previous execution will have their children included in the next.
    This would help reduce communication overhead.
 
-8.3.  The IDPF Construction
+8.3.  IDPF Construction
 
    In this section we specify a concrete IDPF suitable for instantiating
    Poplar1.  The scheme gets its name from the name of the protocol of
@@ -5437,7 +5435,7 @@ Table of Contents
    Our IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
    we instantiate this object using XofFixedKeyAes128 (Section 6.2.2)
-   wherever possible.  See Section 9.5 for more information.
+   wherever possible.  See Section 9.6 for more information.
 
                    +============+======================+
                    | Parameter  | Value                |
@@ -5833,7 +5831,7 @@ Table of Contents
        transmission of messages between honest parties can prevent
        computation of the aggregate result by dropping messages.
 
-9.1.  Requirements for the Verification Key
+9.1.  The Verification Key
 
    The Aggregators are responsible for exchanging the verification key
    in advance of executing the VDAF.  Any procedure is acceptable as
@@ -5883,7 +5881,7 @@ Table of Contents
    implies rotating the task ID, this scheme would not allow key
    rotation over the lifetime of a task.
 
-9.2.  Requirements for the Nonce
+9.2.  The Nonce
 
    The sharding and preparation steps of VDAF execution depend on a
    nonce associated with the Client's report.  To ensure privacy of the
@@ -5899,13 +5897,13 @@ Table of Contents
    RECOMMENDED that the nonce generated by the Client be used by the
    Aggregators for replay protection.
 
-9.3.  Requirements for the Public Share
+9.3.  The Public Share
 
    The Aggregators MUST ensure they have both received the same public
    share from the Client.  It is sufficient, for example, to exchange a
    hash of the public share over a secure channel.
 
-9.4.  Requirements for Aggregation Parameters
+9.4.  The Aggregation Parameter
 
    As described in Section 4.3 and Section 5.3 respectively, DAFs and
    VDAFs may impose restrictions on the re-use of input shares.  This is
@@ -5917,8 +5915,6 @@ Table of Contents
    the set of all aggregation parameters used for a Client's input
    share, and only proceed with the preparation and aggregation phases
    if that function call returns True.
-
-9.4.1.  Additional Privacy Considerations
 
    Aggregating a batch of reports multiple times, each time with a
    different aggregation parameter, could result in information leakage
@@ -5946,7 +5942,7 @@ Table of Contents
    leakages is via differential privacy, which is RECOMMENDED for all
    protocols using Poplar1 for heavy-hitter type applications.
 
-9.4.2.  Safe Usage of IDPF Outputs
+9.5.  Safe Usage of IDPF Outputs
 
    The arithmetic sketch described in Section 8 is used by the
    Aggregators to check that the shares of the vector obtained by
@@ -5968,7 +5964,7 @@ Table of Contents
    The IDPF specified in Section 8.1 only guarantees extractability at
    the last level of the tree.  (This is by virtue of using a larger
    field for the leaves than for inner nodes and using an XOF to derive
-   leaves that is safe to model as a random oracle (see Section 9.5).)
+   leaves that is safe to model as a random oracle (see Section 9.6).)
    For intermediate levels, it is feasible for a client to produce IDPF
    shares with two controlled non-zero nodes.
 
@@ -5982,7 +5978,7 @@ Table of Contents
    Thus applications SHOULD NOT use prefix counts for intermediate
    levels for any purpose beyond the heavy-hitters tree traversal.
 
-9.5.  Requirements for XOFs
+9.6.  Safe Usage of XOFs
 
    As described in Section 6.2, our constructions rely on eXtendable
    Output Functions (XOFs).  In the security analyses of our protocols,
@@ -6022,7 +6018,7 @@ Table of Contents
    Poplar1 guarantees that every client can contribute to at most one
    prefix among the ones being evaluated by the helpers.
 
-9.6.  Choosing FLP Parameters
+9.7.  Choosing FLP Parameters
 
    Prio3 and other systems built from FLPs (Section 7.3 in particular)
    may benefit from choosing a field size that is as small as possible.
@@ -6070,18 +6066,18 @@ Table of Contents
    parameters.  To mitigate offline attacks, it is necessary to disable
    all tasks that use the weak parameters.
 
-9.7.  Choosing the Number of Aggregators
+9.8.  Choosing the Number of Aggregators
 
    Two Aggregators are required for privacy in our threat model, but
    some (V)DAFs, including Prio3 (Section 7), allow for any number of
    Aggregators, only one of which needs to be trusted in order for the
    computation to be private.  To hedge against corruptions that happen
    during the course of the attack, deployments may consider involving
-   more than two Aggregators as described for example in Section 5.9.
+   more than two Aggregators as described for example in Section 5.7.2.
    Note however that some schemes are not compatible with this mode of
    operation, such as Poplar1.
 
-9.8.  Defense-in-Depth Measures
+9.9.  Defense-in-Depth Measures
 
    Prio3 and Poplar1 are designed to resist some attacks that fall
    outside the main threat model for VDAFs.
@@ -6099,7 +6095,7 @@ Table of Contents
    2.  Weak parameters: Prio3 variants that require joint randomness are
        subject to offline attacks against robustness.  These attacks are
        feasible if the field size or number of proofs is sufficiently
-       small.  (See Section 9.6.)  The joint randomness derivation is
+       small.  (See Section 9.7.)  The joint randomness derivation is
        bound to both the field (via the algorithm ID) and the number of
        proofs, thereby ensuring that joint randomness derived for weak
        parameters is not reused for stronger parameters.  In addition,
@@ -6179,7 +6175,7 @@ Table of Contents
 
    VDAF identifiers are used for domain separation, as described in
    Section 6.2.3.  Domain separation guards against cross protocol
-   attacks and certain failures of entropy sources.  See Section 9.8.
+   attacks and certain failures of entropy sources.  See Section 9.9.
 
    The benefits of domain separation are undermined if different VDAFs
    are used with the same VDAF Identifier.  The "Reserved for Private
@@ -6443,11 +6439,11 @@ A.3.  Parallel Sum
                    out_sum[j] += out_current[j]
            return poly_strip(field, out_sum)
 
-A.4.  Shims for Generating and Verifying Proofs
+A.4.  Shims for Generating and Querying Proofs
 
    This section specifies two "shim" gadgets, one for generating an FLP
-   as specified in Section 7.3.3.1 and another for querying an FLP as
-   specified in Section 7.3.3.2.
+   as specified in Section 7.3.3 and another for querying an FLP as
+   specified in Section 7.3.4.
 
    class ProveGadget(Gadget[F]):
        """
