@@ -2261,7 +2261,7 @@ class XofTurboShake128(Xof):
 While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
 cases where a more efficient instantiation based on a blockcipher in a
-fixed-key mode of operation is possible. For now, this is limited to the XOF used inside
+fixed-key mode of operation is possible. This is limited to the XOF used inside
 the Idpf {{idpf}} implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT
 RECOMMENDED to use this XOF anywhere else. See {{security}} for a more detailed
 discussion.
