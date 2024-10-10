@@ -2175,7 +2175,7 @@ def derive_seed(cls,
 
     Pre-conditions:
 
-        - `len(seed) == Xof.SEED_SIZE`
+        - `len(seed) == cls.SEED_SIZE`
     """
     xof = cls(seed, dst, binder)
     return xof.next(cls.SEED_SIZE)
@@ -2210,7 +2210,7 @@ def expand_into_vec(cls,
     Pre-conditions:
 
         - `field` is sub-class of `Field`
-        - `len(seed) == Xof.SEED_SIZE`
+        - `len(seed) == cls.SEED_SIZE`
         - `length > 0`
     """
     xof = cls(seed, dst, binder)
@@ -2261,9 +2261,8 @@ While XofTurboShake128 as described above can be securely used in all cases
 where a XOF is needed in the VDAFs described in this document, there are some
 cases where a more efficient instantiation based on a blockcipher in a
 fixed-key mode of operation is possible. This is limited to the XOF used inside
-the Idpf {{idpf}} implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT
-RECOMMENDED to use this XOF anywhere else. See {{security}} for a more detailed
-discussion.
+the IDPF implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT RECOMMENDED to
+use this XOF anywhere else. See {{security}} for a more detailed discussion.
 
 The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
 {{AES}}. The length of the domain separation string `dst` MUST NOT exceed 65535
@@ -2626,18 +2625,20 @@ subsections. These methods refer to constants enumerated in
 
 | Parameter         | Value                                           |
 |:------------------|:------------------------------------------------|
-| `VERIFY_KEY_SIZE` | `Xof.SEED_SIZE`                                 |
-| `RAND_SIZE`       | `Xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN == 0 else 2 * Xof.SEED_SIZE * SHARES` |
+| `flp`             | an instance of `Flp` ({{flp}})                  |
+| `xof`             | `XofTurboShake128` ({{xof-turboshake128}})      |
+| `VERIFY_KEY_SIZE` | `xof.SEED_SIZE`                                 |
+| `RAND_SIZE`       | `xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN == 0 else 2 * xof.SEED_SIZE * SHARES` |
 | `NONCE_SIZE`      | `16`                                            |
 | `ROUNDS`          | `1`                                             |
 | `SHARES`          | in `[2, 256)`                                   |
-| `Measurement`     | `Flp.Measurement`                               |
+| `Measurement`     | as defined by `flp`                             |
 | `AggParam`        | `None`                                          |
 | `PublicShare`     | `Optional[list[bytes]]`                         |
 | `InputShare`      | `tuple[list[F], list[F], Optional[bytes]] | tuple[bytes, Optional[bytes]]` |
 | `OutShare`        | `list[F]`                                       |
 | `AggShare`        | `list[F]`                                       |
-| `AggResult`       | `Flp.AggResult`                                 |
+| `AggResult`       | as defined by `flp`                             |
 | `PrepState`       | `tuple[list[F], Optional[bytes]]`               |
 | `PrepShare`       | `tuple[list[F], Optional[bytes]]`               |
 | `PrepMessage`     | `Optional[bytes]`                               |
@@ -3822,7 +3823,6 @@ All gadgets are listed in {{gadgets}}.
 | `Valid`           | `Count(Field64)` (this section)            |
 | `Field`           | `Field64` ({{fields}})                     |
 | `PROOFS`          | `1`                                        |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}}) |
 {: title="Parameters for Prio3Count."}
 
 Our first variant of Prio3 is for a simple counter: each measurement is either
@@ -3872,7 +3872,6 @@ class Count(Valid[int, int, F]):
 | `Valid`           | `Sum(Field64, max_measurement)` (this section) |
 | `Field`           | `Field64` ({{fields}})                         |
 | `PROOFS`          | `1`                                            |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})     |
 {: title="Parameters for Prio3Sum."}
 
 The next variant of Prio3 supports summing of integers in a pre-determined
@@ -3965,7 +3964,6 @@ class Sum(Valid[int, int, F]):
 | `Valid`           | `SumVec(Field128, length, bits, chunk_lengh)` (this section) |
 | `Field`           | `Field128` ({{fields}})                                      |
 | `PROOFS`          | `1`                                                          |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                   |
 {: title="Parameters for Prio3SumVec."}
 
 This instance of Prio3 supports summing vectors of integers. It has three
@@ -4110,7 +4108,6 @@ length will result in proofs up to 50% larger than the optimal proof size.
 | `Valid`           | `Histogram(Field128, length, chunk_lengh)` (this section) |
 | `Field`           | `Field128` ({{fields}})                                   |
 | `PROOFS`          | `1`                                                       |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                |
 {: title="Parameters for Prio3Histogram."}
 
 This variant of Prio3 allows for estimating the distribution of some quantity
@@ -4228,7 +4225,6 @@ class Histogram(Valid[int, list[int], F]):
 | `Valid`           | `MultihotCountVec(Field128, length, max_weight, chunk_lengh)` (this section) |
 | `Field`           | `Field128` ({{fields}})                                                     |
 | `PROOFS`          | `1`                                                                         |
-| `Xof`             | `XofTurboShake128` ({{xof-turboshake128}})                                  |
 {: title="Parameters for Prio3MultihotCountVec."}
 
 For this instance of Prio3, each measurement is a vector of ones and zeros,
@@ -4437,7 +4433,7 @@ is zero everywhere except for at most one element, which is equal to one.
 The remainder of this section is structured as follows. IDPFs are defined in
 {{idpf}}; a concrete instantiation is given {{idpf-bbcggi21}}. The Poplar1 VDAF is
 defined in {{poplar1-construction}} in terms of a generic IDPF. Finally, a
-concrete instantiation of Poplar1 is specified in {{poplar1-inst}};
+concrete instantiation of Poplar1 is specified in {{poplar1-construction}};
 test vectors can be found in {{test-vectors}}.
 
 ## Incremental Distributed Point Functions (IDPFs) {#idpf}
@@ -4453,10 +4449,10 @@ returns an additive share of `beta[L]` if `prefix` is the `L`-bit prefix of
 
 Each of the programmed points `beta` is a vector of elements of some finite
 field. We distinguish two types of fields: one for inner nodes (denoted
-`FieldInner`), and one for leaf nodes (`FieldLeaf`). (Our
-instantiation of Poplar1 ({{poplar1-inst}}) will use a much larger field for
-leaf nodes than for inner nodes. This is to ensure the IDPF is "extractable" as
-defined in {{BBCGGI21}}, Definition 1.)
+`FieldInner`), and one for leaf nodes (`FieldLeaf`). (Our instantiation of
+Poplar1 ({{poplar1-construction}}) will use a much larger field for leaf nodes
+than for inner nodes. This is to ensure the IDPF is "extractable" as defined in
+{{BBCGGI21}}, Definition 1.)
 
 A concrete IDPF defines the types and constants enumerated in {{idpf-param}}.
 In the remainder we write `Output` as shorthand for the type
@@ -4483,7 +4479,7 @@ elements.) The scheme is comprised of the following algorithms:
        `[0, BITS - 1)`.
     * `beta_leaf` MUST have length `VALUE_LEN`.
     * `rand` MUST be generated by a CSPRNG and have length `RAND_SIZE`.
-    * `nonce` MUST be of length `Idpf.NONCE_SIZE` and chosen uniformly at
+    * `nonce` MUST be of length `idpf.NONCE_SIZE` and chosen uniformly at
       random by the Client (see {{nonce-requirements}}).
 
 * `idpf.eval(agg_id: int, public_share: PublicShare, key: bytes, level: int,
@@ -4573,30 +4569,33 @@ as needed.
 ## Construction {#poplar1-construction}
 
 This section specifies `Poplar1`, an implementation of the `Vdaf` interface
-({{vdaf}}). It is defined in terms of any `Idpf` ({{idpf}}) for which
-`SHARES == 2` and `VALUE_LEN == 2` and an implementation of `Xof`
-({{xof}}). The associated constants and types required by the `Vdaf` interface
-are defined in {{poplar1-param}}. The methods required for sharding,
-preparation, aggregation, and unsharding are described in the remaining
-subsections. These methods make use of constants defined in {{poplar1-const}}.
+({{vdaf}}). It is defined in terms of the `Idpf` implementation of
+{{idpf-bbcggi21}} with `SHARES == 2` and `VALUE_LEN == 2` and
+`XofTurboShake128` as specified in {{xof-turboshake128}}. The associated
+constants and types required by the `Vdaf` interface are defined in
+{{poplar1-param}}. The methods required for sharding, preparation, aggregation,
+and unsharding are described in the remaining subsections. These methods make
+use of constants defined in {{poplar1-const}}.
 
-| Parameter         | Value                                |
-|:------------------|:-------------------------------------|
-| `VERIFY_KEY_SIZE` | `Xof.SEED_SIZE`                      |
-| `RAND_SIZE`       | `Xof.SEED_SIZE * 3 + Idpf.RAND_SIZE` |
-| `NONCE_SIZE`      | `16`                                 |
-| `ROUNDS`          | `2`                                  |
-| `SHARES`          | `2`                                  |
-| `Measurement`     | `tuple[bool, ...]`                   |
-| `AggParam`        | `tuple[int, Sequence[tuple[bool, ...]]]` |
-| `PublicShare`     | same as the IDPF                     |
+| Parameter         | Value                                      |
+|:------------------|:-------------------------------------------|
+| `idpf`            | as specified in {{idpf-bbcggi21}}          |
+| `xof`             | `XofTurboShake128` ({{xof-turboshake128}}) |
+| `VERIFY_KEY_SIZE` | `xof.SEED_SIZE`                            |
+| `RAND_SIZE`       | `xof.SEED_SIZE * 3 + idpf.RAND_SIZE`       |
+| `NONCE_SIZE`      | `16`                                       |
+| `ROUNDS`          | `2`                                        |
+| `SHARES`          | `2`                                        |
+| `Measurement`     | `tuple[bool, ...]`                         |
+| `AggParam`        | `tuple[int, Sequence[tuple[bool, ...]]]`   |
+| `PublicShare`     | same as the IDPF                           |
 | `InputShare`      | `tuple[bytes, bytes, list[FieldInner], list[FieldLeaf]]` |
-| `OutShare`        | `FieldVec`                           |
-| `AggShare`        | `FieldVec`                           |
-| `AggResult`       | `list[int]`                          |
-| `PrepState`       | `tuple[bytes, int, FieldVec]`        |
-| `PrepShare`       | `FieldVec`                           |
-| `PrepMessage`     | `Optional[FieldVec]`                 |
+| `OutShare`        | `FieldVec`                                 |
+| `AggShare`        | `FieldVec`                                 |
+| `AggResult`       | `list[int]`                                |
+| `PrepState`       | `tuple[bytes, int, FieldVec]`              |
+| `PrepShare`       | `FieldVec`                                 |
+| `PrepMessage`     | `Optional[FieldVec]`                       |
 {: #poplar1-param title="VDAF parameters for Poplar1."}
 
 | Variable               | Value |
@@ -5254,14 +5253,14 @@ of other artifacts used internally. For performance reasons, we instantiate
 this object using XofFixedKeyAes128 ({{xof-fixed-key-aes128}}) wherever
 possible. See {{xof-vs-ro}} for more information.
 
-| Parameter  | Value                   |
-|:-----------|:------------------------|
-| SHARES     | `2`                     |
-| BITS       | any positive integer    |
-| VALUE_LEN  | any positive integer    |
-| KEY_SIZE   | `Xof.SEED_SIZE`         |
-| FieldInner | `Field64` ({{fields}})  |
-| FieldLeaf  | `Field255` ({{fields}}) |
+| Parameter    | Value                         |
+|:-------------|:------------------------------|
+| `SHARES`     | `2`                           |
+| `BITS`       | any positive integer          |
+| `VALUE_LEN`  | any positive integer          |
+| `KEY_SIZE`   | `XofFixedKeyAes128.SEED_SIZE` ({{xof-fixed-key-aes128}}) |
+| `FieldInner` | `Field64` ({{fields}})        |
+| `FieldLeaf`  | `Field255` ({{fields}})       |
 {: #idpf-bbcggi21-param title="Constants and type definitions for the IDPF of BBCGGI21."}
 
 ### Overview
@@ -5563,12 +5562,6 @@ def current_xof(self,
         return XofFixedKeyAes128(seed, dst, nonce)
     return XofTurboShake128(seed, dst, nonce)
 ~~~
-
-## Instantiation {#poplar1-inst}
-
-By default, Poplar1 is instantiated with the IDPF in {{idpf-bbcggi21}} (`VALUE_LEN
-== 2`) and XofTurboShake128 ({{xof-turboshake128}}). This VDAF is suitable for
-any positive value of `BITS`. Test vectors can be found in {{test-vectors}}.
 
 # Security Considerations {#security}
 
@@ -5931,7 +5924,7 @@ The initial contents of the registry are as follows:
 | `0x00000003`                 | Prio3SumVec              | VDAF | {{prio3sumvec}} of RFC XXXX           |
 | `0x00000004`                 | Prio3Histogram           | VDAF | {{prio3histogram}} of RFC XXXX        |
 | `0x00000005`                 | Prio3MultihotCountVec    | VDAF | {{prio3multihotcountvec}} of RFC XXXX |
-| `0x00000006`                 | Poplar1                  | VDAF | {{poplar1-inst}} of RFC XXXX          |
+| `0x00000006`                 | Poplar1                  | VDAF | {{poplar1-construction}} of RFC XXXX  |
 | `0xFFFF0000` to `0xFFFFFFFF` | Reserved for Private Use | n/a  | n/a                                   |
 {: #codepoints title="Verifiable Distributed Aggregation Function Identifiers Registry"}
 
