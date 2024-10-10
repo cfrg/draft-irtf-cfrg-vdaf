@@ -738,7 +738,7 @@ security considerations for DAFs and VDAFs.
 * Remove public parameter and replace verification parameter with a
   "verification key" and "Aggregator ID".
 
-# Conventions and Definitions {#conventions}
+# Conventions {#conventions}
 
 {::boilerplate bcp14-tagged}
 
@@ -1664,7 +1664,7 @@ input shares, prep shares, prep messages, and aggregation parameters.
 Implementations of Prio3 and Poplar1 MUST use the encoding scheme specified in
 {{prio3-encode}} and {{poplar1-encode}} respectively.
 
-## Ping-Pong Topology (Only Two Aggregators)
+### The Ping-Pong Topology (Only Two Aggregators)
 
 For VDAFs with precisely two Aggregators (i.e., `SHARES == 2`), the following
 "ping pong" communication pattern can be used. It is compatible with any
@@ -1937,7 +1937,7 @@ number of rounds of preparation that are required, there may be one more
 message to send before the peer can also finish processing (i.e., `outbound !=
 None`).
 
-## Star Topology (Any Number of Aggregators) {#star-topo}
+### The Star Topology (Any Number of Aggregators) {#star-topo}
 
 The ping-pong topology of the previous section is only suitable for VDAFs
 involving exactly two Aggregators. If the VDAF supports more than two
@@ -2110,9 +2110,9 @@ def vec_neg(vec: list[F]) -> list[F]:
 Some VDAFs require fields that are suitable for efficient computation of the
 number theoretic transform (NTT) {{SML24}}, as this allows for fast polynomial
 interpolation. (One example is Prio3 ({{prio3}}) when instantiated with the FLP
-of {{flp-bbcggi19-construction}}.) Specifically, a field is said to be
-"NTT-friendly" if, in addition to satisfying the interface described in
-{{field}}, it implements the following method:
+of {{flp-bbcggi19}}.) Specifically, a field is said to be "NTT-friendly" if, in
+addition to satisfying the interface described in {{field}}, it implements the
+following method:
 
 * `Field.gen() -> Field` returns the generator of a large subgroup of the
   multiplicative group. To be NTT-friendly, the order of this subgroup MUST be a
@@ -2137,7 +2137,7 @@ The tables below define finite fields used in the remainder of this document.
 | GEN_ORDER    | 2^32                  | 2^66                           | n/a        |
 {: #fields title="Parameters for the finite fields used in this document."}
 
-## Extendable Output Functions {#xof}
+## Extendable Output Functions (XOFs) {#xof}
 
 VDAFs in this specification use extendable output functions (XOFs) to extract
 short, fixed-length strings we call "seeds" from long input strings and expand
@@ -3321,12 +3321,32 @@ struct {
 } Prio3AggShare;
 ~~~
 
-## The FLP Construction {#flp-bbcggi19}
+## FLP Construction {#flp-bbcggi19}
 
-This section describes an FLP based on the construction from {{BBCGGI19}},
-Section 4.2. We begin in {{flp-bbcggi19-overview}} with an overview of their
-proof system and some extensions to it. The construction is specified in
-{{flp-bbcggi19-construction}}.
+This section specifies an implementation of the `Flp` interface ({{flp}}) based
+on the construction from {{BBCGGI19}}, Section 4.2. We begin in
+{{flp-bbcggi19-overview}} with an overview of the proof system and some
+extensions to it. {{flp-bbcggi19-valid}} defines validity circuits, the core
+component of the proof system that determines measurement validity and how
+measurements are aggregated. The proof-generation algorithm, the query
+algorithm, and the decision algorithm are defined in
+{{flp-bbcggi19-construction-prove}}, {{flp-bbcggi19-construction-query}}, and
+{{flp-bbcggi19-construction-decide}} respectively.
+
+| Parameter        | Value                    |
+|:-----------------|:-------------------------|
+| `valid`          | instance of `Valid` ({{flp-bbcggi19-valid}}) |
+| `PROVE_RAND_LEN` | `valid.prove_rand_len()` |
+| `QUERY_RAND_LEN` | `valid.query_rand_len()` |
+| `JOINT_RAND_LEN` | `valid.JOINT_RAND_LEN`   |
+| `MEAS_LEN`       | `valid.MEAS_LEN`         |
+| `OUTPUT_LEN`     | `valid.OUTPUT_LEN`       |
+| `PROOF_LEN`      | `valid.proof_len()`      |
+| `VERIFIER_LEN`   | `valid.verifier_len()`   |
+| `Measurement`    | `valid.Measurement`      |
+| `AggResult`      | `valid.AggResult`        |
+| `field`          | `valid.field`            |
+{: #flp-bbcggi19-param title="FLP parameters for a validity circuit."}
 
 ### Overview {#flp-bbcggi19-overview}
 
@@ -3418,11 +3438,11 @@ a malicious Client to produce a gadget polynomial `p` that would result in
 measurement being accepted. To prevent this, the Aggregators perform a
 probabilistic test to check that the gadget polynomial was constructed
 properly. This "gadget test", and the procedure for constructing the
-polynomial, are described in detail in {{flp-bbcggi19-construction}}.
+polynomial, are described in detail in {{flp-bbcggi19}}.
 
 #### Extensions {#flp-bbcggi19-overview-extensions}
 
-The FLP described in {{flp-bbcggi19-construction}} extends the proof system of
+The FLP described in {{flp-bbcggi19}} extends the proof system of
 {{BBCGGI19}}, Section 4.2 in a few ways.
 
 First, the validity circuit in our construction includes an additional, random
@@ -3566,29 +3586,7 @@ def verifier_len(self) -> int:
     return length
 ~~~
 
-### Specification {#flp-bbcggi19-construction}
-
-| Parameter        | Value                    |
-|:-----------------|:-------------------------|
-| `PROVE_RAND_LEN` | `valid.prove_rand_len()` |
-| `QUERY_RAND_LEN` | `valid.query_rand_len()` |
-| `JOINT_RAND_LEN` | `valid.JOINT_RAND_LEN`   |
-| `MEAS_LEN`       | `valid.MEAS_LEN`         |
-| `OUTPUT_LEN`     | `valid.OUTPUT_LEN`       |
-| `PROOF_LEN`      | `valid.proof_len()`      |
-| `VERIFIER_LEN`   | `valid.verifier_len()`   |
-| `Measurement`    | `valid.Measurement`      |
-| `AggResult`      | `valid.AggResult`        |
-| `field`          | `valid.field`            |
-{: #flp-bbcggi19-param title="FLP parameters for a validity circuit."}
-
-This section specifies an implementation of the `Flp` interface ({{flp}}). It
-has as a generic parameter a validity circuit, denoted `valid`, that implements the
-interface defined in the previous section. Its FLP parameters are listed in the
-table above. The proof generation algorithm, query algorithm, and decision
-algorithm ares specified in the remaining subsections.
-
-#### Proof Generation {#flp-bbcggi19-construction-prove}
+### Generating the Proof {#flp-bbcggi19-construction-prove}
 
 ~~~~
 +------------------+
@@ -3666,7 +3664,7 @@ def prove(self,
     return proof
 ~~~
 
-#### Query Generation {#flp-bbcggi19-construction-query}
+### Querying the Proof {#flp-bbcggi19-construction-query}
 
 ~~~~
       proof (share)
@@ -3769,7 +3767,7 @@ def query(self,
     return verifier
 ~~~
 
-#### Decision
+### Deciding Validity {#flp-bbcggi19-construction-decide}
 
 ~~~~
  | verifier
@@ -4427,7 +4425,7 @@ inputs and target threshold. To compute the `t`-heavy hitters for a set of
 inputs, the Aggregators and Collector first compute the prefix tree, then
 extract the heavy hitters from the leaves of this tree. (Note that the prefix
 tree may leak more information about the set than the heavy hitters themselves;
-see {{agg-param-privacy}} for details.)
+see {{agg-param-security}} for details.)
 
 Poplar1 composes an IDPF with the arithmetic sketch of {{BBCGGI21}}, Section
 4.2. (The paper calls this a "secure sketch", but the underlying technique was
@@ -5242,7 +5240,7 @@ than is strictly needed. In particular, it may be sufficient to convey which
 indices from the previous execution will have their children included in the
 next. This would help reduce communication overhead.
 
-## The IDPF Construction {#idpf-bbcggi21}
+## IDPF Construction {#idpf-bbcggi21}
 
 In this section we specify a concrete IDPF suitable for instantiating
 Poplar1. The scheme gets its name from the name of the protocol of
@@ -5636,7 +5634,7 @@ On their own, VDAFs do not provide:
    of messages between honest parties can prevent computation of the aggregate
    result by dropping messages.
 
-## Requirements for the Verification Key
+## The Verification Key
 
 The Aggregators are responsible for exchanging the verification key in advance
 of executing the VDAF. Any procedure is acceptable as long as the following
@@ -5680,7 +5678,7 @@ the fact would reduce to finding collisions in the underlying hash function.
 one-way.) However, since rotating the key implies rotating the task ID, this
 scheme would not allow key rotation over the lifetime of a task.
 
-## Requirements for the Nonce {#nonce-requirements}
+## The Nonce {#nonce-requirements}
 
 The sharding and preparation steps of VDAF execution depend on a nonce
 associated with the Client's report. To ensure privacy of the underlying
@@ -5695,13 +5693,13 @@ exposing" a report by including it too many times in a single batch or across
 multiple batches. It is RECOMMENDED that the nonce generated by the Client be
 used by the Aggregators for replay protection.
 
-## Requirements for the Public Share
+## The Public Share
 
 The Aggregators MUST ensure they have both received the same public share from
 the Client. It is sufficient, for example, to exchange a hash of the public
 share over a secure channel.
 
-## Requirements for Aggregation Parameters
+## The Aggregation Parameter {#agg-param-security}
 
 As described in {{sec-daf-validity-scopes}} and {{sec-vdaf-validity-scopes}}
 respectively, DAFs and VDAFs may impose restrictions on the re-use of input
@@ -5713,8 +5711,6 @@ Protocols that make use of VDAFs therefore MUST call `vdaf.is_valid`
 on the set of all aggregation parameters used for a Client's input share, and
 only proceed with the preparation and aggregation phases if that function call
 returns `True`.
-
-### Additional Privacy Considerations {#agg-param-privacy}
 
 Aggregating a batch of reports multiple times, each time with a different
 aggregation parameter, could result in information leakage beyond what is used
@@ -5741,7 +5737,7 @@ The only practical, general-purpose approach to mitigating these leakages is via
 differential privacy, which is RECOMMENDED for all protocols using Poplar1 for
 heavy-hitter type applications.
 
-### Safe Usage of IDPF Outputs
+## Safe Usage of IDPF Outputs
 
 The arithmetic sketch described in {{poplar1}} is used by the Aggregators to check
 that the shares of the vector obtained by evaluating a Client's IDPF at a
@@ -5775,7 +5771,7 @@ of certain applications.
 Thus applications SHOULD NOT use prefix counts for intermediate levels for any
 purpose beyond the heavy-hitters tree traversal.
 
-## Requirements for XOFs {#xof-vs-ro}
+## Safe Usage of XOFs {#xof-vs-ro}
 
 As described in {{xof}}, our constructions rely on eXtendable Output Functions
 (XOFs). In the security analyses of our protocols, these are usually modeled as
@@ -6068,7 +6064,7 @@ class ParallelSum(Gadget[F]):
         return poly_strip(field, out_sum)
 ~~~
 
-## Shims for Generating and Verifying Proofs {#gadget-wrappers}
+## Shims for Generating and Querying Proofs {#gadget-wrappers}
 
 This section specifies two "shim" gadgets, one for generating an FLP as
 specified in {{flp-bbcggi19-construction-prove}} and another for querying an FLP
