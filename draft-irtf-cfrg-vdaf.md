@@ -319,14 +319,15 @@ the less reliable will be the server's estimate of the aggregate. Thus systems
 relying solely on a DP mechanism must strike a delicate balance between privacy
 and utility.
 
-The ideal goal for a privacy-preserving measurement system is that of secure
-multi-party computation (MPC): no participant in the protocol should learn
-anything about an individual measurement beyond what it can deduce from the
-aggregate. MPC achieves this goal by distributing the computation of the
-aggregate across multiple aggregation servers, one of which is presumed to be
-honest, i.e., not under control of the attacker. Moreover, MPC can be composed
-with various DP mechanisms to ensure the aggregate itself does leak too much
-information about any one of the measurements {{MPRV09}}.
+Another way of constructing a privacy-preserving measurement system is to use
+multi-party computation (MPC). The goal of such a system is that no participant
+in the protocol should learn anything about an individual measurement beyond
+what it can deduce from the aggregate. MPC achieves this goal by distributing
+the computation of the aggregate across multiple aggregation servers, one of
+which is presumed to be honest, i.e., not under control of the attacker.
+Moreover, MPC can be composed with various DP mechanisms to ensure the
+aggregate itself does not leak too much information about any one of the
+measurements {{MPRV09}}.
 
 This document describes two classes of MPC protocols, each aiming for a
 different set of goals.
@@ -354,11 +355,11 @@ In fact, our framework admits DAFs with slightly more
 functionality, computing aggregation functions of the form
 
 ~~~
-f(agg_param, meas_1, ..., meas_N) =
-    g(agg_param, meas_1) + ... + g(agg_param, meas_N)
+F(agg_param, meas_1, ..., meas_N) =
+    G(agg_param, meas_1) + ... + G(agg_param, meas_N)
 ~~~
 
-where `meas_1, ..., meas_N` are the measurements, `g` is a possibly non-linear
+where `meas_1, ..., meas_N` are the measurements, `G` is a possibly non-linear
 function, and `agg_param` is a parameter of that function chosen by the data
 collector. This paradigm, known as function secret sharing {{BGI15}}, allows
 for more sophisticated data analysis tasks, such as grouping metrics by private
@@ -372,7 +373,7 @@ sharing of a valid measurement, e.g., a number between 1 and 10, is
 indistinguishable from a secret sharing of an invalid measurement, e.g., a
 number larger than 10. This means that DAFs are vulnerable to attacks from
 malicious clients attempting to disrupt the computation by submitting invalid
-measurements. Thus VDAFs are designed to allow the servers to detect and remove
+measurements. VDAFs are designed to allow the servers to detect and remove
 these measurements prior to aggregation. We refer to this property as
 robustness.
 
@@ -397,13 +398,14 @@ therefore has two important goals:
     1. General patterns of communications among the various actors involved in
        the system (clients, aggregation servers, and the collector of the
        aggregate result);
-    1. Capabilities of a malicious coalition of servers attempting to divulge
+    1. Capabilities of a malicious coalition of parties attempting to divulge
        information about client measurements; and
     1. Conditions that are necessary to ensure that malicious clients cannot
        corrupt the computation.
 
  1. Providing cryptographers with design criteria that provide a clear
-    deployment roadmap for new constructions.
+    deployment roadmap for new constructions of privacy-preserving measurement
+    systems.
 
 This document also specifies two concrete VDAF schemes, each based on a protocol
 from the literature.
@@ -415,23 +417,24 @@ from the literature.
   the original Prio protocol, but incorporates techniques introduced in
   {{BBCGGI19}} that result in significant performance gains.
 
-* The Poplar protocol {{BBCGGI21}} solves the heavy-hitters problem in a
-  privacy-preserving manner. Here each client holds a bit-string, and the goal
+* The Poplar protocol {{BBCGGI21}} solves a problem known as private
+  heavy-hitters. In this problem, each client holds a bit-string, and the goal
   of the aggregation servers is to compute the set of strings that occur at
-  least `t` times for some threshold `t`. The core primitive in their protocol
-  is a secret sharing of a point function {{GI14}} (`g` in the notation above)
-  that allows the servers to privately count how many of the clients' strings
-  begin with a given prefix (`agg_param` in the notation above). In {{poplar1}}
-  we specify a VDAF called Poplar1 that implements this functionality.
+  least `T` times for some threshold `T`. The core primitive in their protocol
+  is a secret sharing of a point function {{GI14}} (denoted `G` above) that
+  allows the servers to privately count how many of the clients' strings begin
+  with a given prefix (`agg_param` in the notation above). In {{poplar1}} we
+  specify a VDAF called Poplar1 that implements this functionality.
 
 The remainder of this document is organized as follows: {{conventions}} lists
-definitions and conventions used for specification; {{overview}} gives a brief
-overview of DAFs and VDAFs, the parties involved in the computation, and the
-requirements for non-collusion; {{daf}} defines the syntax for DAFs; {{vdaf}}
-defines the syntax for VDAFs; {{prelim}} defines various functionalities that
-are common to our constructions; {{prio3}} describes the Prio3 construction;
-{{poplar1}} describes the Poplar1 construction; and {{security}} enumerates the
-security considerations for DAFs and VDAFs.
+definitions and conventions used in the remainder of the document; {{overview}}
+gives a brief overview of DAFs and VDAFs, the parties involved in the
+computation, and the requirements for non-collusion; {{daf}} defines the syntax
+for DAFs; {{vdaf}} defines the syntax for VDAFs; {{prelim}} defines various
+functionalities that are common to our constructions; {{prio3}} specifies
+Prio3; {{poplar1}} specifies Poplar1; and {{security}} enumerates the security
+considerations for DAFs and VDAFs in general and our constructions in
+particular.
 
 ## Change Log
 
@@ -746,10 +749,10 @@ Algorithms in this document are written in Python (compatible with Python 3.12
 or later). A fatal error in a program (e.g., failure to parse one of the
 function parameters) is usually handled by raising an exception.
 
-Type hints are used to define input and output types.
+Type hints are used to define input and output types:
 
 * The type variable `F` is used in signatures to signify any type that is a
-  subclass of `Field`.
+  subclass of `Field` ({{field}}).
 
 * `bytes` is a byte string.
 
