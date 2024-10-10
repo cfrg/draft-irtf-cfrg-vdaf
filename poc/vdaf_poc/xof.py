@@ -61,7 +61,7 @@ class Xof(metaclass=ABCMeta):
 
         Pre-conditions:
 
-            - `len(seed) == Xof.SEED_SIZE`
+            - `len(seed) == cls.SEED_SIZE`
         """
         xof = cls(seed, dst, binder)
         return xof.next(cls.SEED_SIZE)
@@ -97,7 +97,7 @@ class Xof(metaclass=ABCMeta):
         Pre-conditions:
 
             - `field` is sub-class of `Field`
-            - `len(seed) == Xof.SEED_SIZE`
+            - `len(seed) == cls.SEED_SIZE`
             - `length > 0`
         """
         xof = cls(seed, dst, binder)
