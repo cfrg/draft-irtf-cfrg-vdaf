@@ -743,9 +743,9 @@ security considerations for DAFs and VDAFs.
 
 {::boilerplate bcp14-tagged}
 
-Algorithms in this document are written in Python 3. A fatal error in a program
-(e.g., failure to parse one of the function parameters) is usually handled by
-raising an exception.
+Algorithms in this document are written in Python (compatible with Python 3.12
+or later). A fatal error in a program (e.g., failure to parse one of the
+function parameters) is usually handled by raising an exception.
 
 Type hints are used to define input and output types.
 
