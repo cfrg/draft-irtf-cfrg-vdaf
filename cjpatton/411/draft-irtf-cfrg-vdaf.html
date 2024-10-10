@@ -1039,7 +1039,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 12 April 2025</td>
+<td class="center">Expires 13 April 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1052,12 +1052,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-09" class="published">9 October 2024</time>
+<time datetime="2024-10-10" class="published">10 October 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-12">12 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-04-13">13 April 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1122,7 +1122,7 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 12 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 13 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2171,7 +2171,9 @@ overriding the start of the range and overriding the step between successive
 output values.<a href="#section-2-9.12.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.13">
-          <p id="section-2-9.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns <code>p(x)</code>.<a href="#section-2-9.13.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
+evaluating the polynomial, <code>p(x)</code>. The coefficients of polynomials are stored
+in lists in ascending order of degree, starting with the constant coefficient.<a href="#section-2-9.13.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.14">
           <p id="section-2-9.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
@@ -2181,7 +2183,7 @@ the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">S
 </li>
         <li class="normal" id="section-2-9.15">
           <p id="section-2-9.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
-multiplies two polynomials together.<a href="#section-2-9.15.1" class="pilcrow">¶</a></p>
+the product of two polynomials.<a href="#section-2-9.15.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.16">
           <p id="section-2-9.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
@@ -6676,8 +6678,8 @@ class Histogram(Valid[int, list[int], F]):
             self,
             output: list[F],
             _num_measurements: int) -&gt; list[int]:
-        return [bucket_count.as_unsigned() \
-            for bucket_count in output]
+        return [bucket_count.as_unsigned()
+                for bucket_count in output]
 </pre><a href="#section-7.4.4-6" class="pilcrow">¶</a>
 </div>
 </section>
@@ -6760,7 +6762,7 @@ zero if and only if the reported weight is equal to the true weight. The
 complete circuit is defined below.<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-7.4.5-8">
 <pre>
-class MultihotCountVec(Valid[list[int], list[int], F,]):
+class MultihotCountVec(Valid[list[int], list[int], F]):
     EVAL_OUTPUT_LEN = 2
     field: type[F]
 
@@ -6800,8 +6802,8 @@ class MultihotCountVec(Valid[list[int], list[int], F,]):
             ParallelSum(Mul(), chunk_length),
         ]
         self.GADGET_CALLS = [
-            (length + self.bits_for_weight + chunk_length - 1) \
-                // chunk_length
+            (length + self.bits_for_weight + chunk_length - 1)
+            // chunk_length
         ]
         self.MEAS_LEN = self.length + self.bits_for_weight
         self.OUTPUT_LEN = self.length
@@ -6872,7 +6874,7 @@ class MultihotCountVec(Valid[list[int], list[int], F,]):
             self,
             output: list[F],
             _num_measurements: int) -&gt; list[int]:
-        return [bucket_count.as_unsigned() for \
+        return [bucket_count.as_unsigned() for
                 bucket_count in output]
 </pre><a href="#section-7.4.5-8" class="pilcrow">¶</a>
 </div>

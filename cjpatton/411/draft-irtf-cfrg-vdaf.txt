@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 12 April 2025                                              ISRG
+Expires: 13 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          9 October 2024
+                                                         10 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -55,7 +55,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 April 2025.
+   This Internet-Draft will expire on 13 April 2025.
 
 Copyright Notice
 
@@ -770,7 +770,10 @@ Table of Contents
       and three-argument forms allow overriding the start of the range
       and overriding the step between successive output values.
 
-   *  poly_eval(field: type[F], p: list[F], x: F) -> F returns p(x).
+   *  poly_eval(field: type[F], p: list[F], x: F) -> F returns the
+      result of evaluating the polynomial, p(x).  The coefficients of
+      polynomials are stored in lists in ascending order of degree,
+      starting with the constant coefficient.
 
    *  poly_interp(field: type[F], inputs: list[F], outputs: list[F]) ->
       list[F] returns the coefficients of the lowest degree polynomial p
@@ -778,7 +781,7 @@ Table of Contents
       be computed using the Number Theoretic Transform (NTT) [SML24].
 
    *  poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]
-      returns multiplies two polynomials together.
+      returns the product of two polynomials.
 
    *  poly_strip(field: type[F], p: list[F]) -> list[F] strips the zeros
       from the end of the input polynomial.  That is, it returns p[:i]
@@ -4366,8 +4369,8 @@ Table of Contents
                self,
                output: list[F],
                _num_measurements: int) -> list[int]:
-           return [bucket_count.as_unsigned() \
-               for bucket_count in output]
+           return [bucket_count.as_unsigned()
+                   for bucket_count in output]
 
 7.4.5.  Prio3MultihotCountVec
 
@@ -4416,7 +4419,7 @@ Table of Contents
    count vector.  The result is zero if and only if the reported weight
    is equal to the true weight.  The complete circuit is defined below.
 
-   class MultihotCountVec(Valid[list[int], list[int], F,]):
+   class MultihotCountVec(Valid[list[int], list[int], F]):
        EVAL_OUTPUT_LEN = 2
        field: type[F]
 
@@ -4456,8 +4459,8 @@ Table of Contents
                ParallelSum(Mul(), chunk_length),
            ]
            self.GADGET_CALLS = [
-               (length + self.bits_for_weight + chunk_length - 1) \
-                   // chunk_length
+               (length + self.bits_for_weight + chunk_length - 1)
+               // chunk_length
            ]
            self.MEAS_LEN = self.length + self.bits_for_weight
            self.OUTPUT_LEN = self.length
@@ -4528,7 +4531,7 @@ Table of Contents
                self,
                output: list[F],
                _num_measurements: int) -> list[int]:
-           return [bucket_count.as_unsigned() for \
+           return [bucket_count.as_unsigned() for
                    bucket_count in output]
 
 8.  Poplar1
