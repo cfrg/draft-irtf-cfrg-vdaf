@@ -270,10 +270,9 @@ family of multi-party protocols for computing aggregate statistics over user
 measurements. These protocols are designed to ensure that, as long as at least
 one aggregation server executes the protocol honestly, individual measurements
 are never seen by any server in the clear. At the same time, VDAFs allow the
-servers to detect if a malicious or misconfigured client submitted an
-measurement that would result in an invalid aggregate result. Two concrete
-VDAFs are specified, one for general-purpose aggregation (Prio3) and another
-for heavy hitters (Poplar1).
+servers to detect if a malicious or misconfigured client submitted an invalid
+measurement. Two concrete VDAFs are specified, one for general-purpose
+aggregation (Prio3) and another for heavy hitters (Poplar1).
 
 --- middle
 
