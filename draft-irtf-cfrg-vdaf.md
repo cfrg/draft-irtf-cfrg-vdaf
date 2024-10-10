@@ -279,7 +279,7 @@ for heavy hitters (Poplar1).
 
 # Introduction
 
-(RFC EDITOR: remove this paragraph.) The source for this draft and and the
+(RFC EDITOR: remove this paragraph.) The source for this draft and the
 reference implementation can be found at
 https://github.com/cfrg/draft-irtf-cfrg-vdaf.
 
@@ -688,7 +688,7 @@ security considerations for DAFs and VDAFs.
 * IdpfPoplar: Add implementation considerations around branching on the values
   of control bits.
 
-* IdpfPoplar: When decoding the the control bits in the public share, assert
+* IdpfPoplar: When decoding the control bits in the public share, assert
   that the trailing bits of the final byte are all zero. (\*)
 
 03:
@@ -777,7 +777,7 @@ to use as desired. Its value SHALL be `12`.
 
 This document describes algorithms for multi-party computations in which the
 parties typically communicate over a network. Wherever a quantity is defined
-that must be be transmitted from one party to another, this document prescribes
+that must be transmitted from one party to another, this document prescribes
 a particular encoding of that quantity as a byte string.
 
 Some common functionalities:
@@ -1694,7 +1694,7 @@ running the computation locally until input from their peer is required:
 
 The Aggregators proceed in this ping-ponging fashion until a step of the
 computation fails (indicating the report is invalid and should be rejected) or
-preparation is completed. All told there there are `ceil((ROUNDS+1)/2)`
+preparation is completed. All told there are `ceil((ROUNDS+1)/2)`
 requests sent.
 
 Each message in the ping-pong protocol is structured as follows (expressed in
@@ -3893,7 +3893,7 @@ two encoded integers are consistent. Let
 
 The first bit-encoded integer is the measurement itself. Note that only
 measurements between `0` and `2^bits - 1` can be encoded this way with `bits`
-bits. The second bit-encoded integer is the sum of the measurement and
+many bits. The second bit-encoded integer is the sum of the measurement and
 `offset`. Observe that this sum can only be encoded this way if it is between
 `0` and `2^bits - 1`, which implies that the measurement is between `-offset`
 and `max_measurement`.
@@ -3979,8 +3979,8 @@ to set `chunk_length` to an integer near the square root of `length * bits`
 (see {{parallel-sum-chunk-length}}).
 
 The circuit is denoted `SumVec`. Each measurements is encoded as a vector of
-field elements with length `length * bits`. The field elements in the encoded
-vector represent all the bits of the measurement vector's elements,
+field elements with a length of `length * bits`. The field elements in the
+encoded vector represent all the bits of the measurement vector's elements,
 consecutively, in LSB to MSB order.
 
 The validity circuit uses the `ParallelSum` gadget in {{gadget-parallel-sum}}.
@@ -4125,7 +4125,7 @@ falls into. The aggregate result counts the number of measurements in each
 bucket.
 
 The validity circuit is denoted `Histogram`. It has two parameters: `length`,
-the number of histogram buckets; and `chunk_length`, which is used by by a
+the number of histogram buckets; and `chunk_length`, which is used by a
 circuit optimization described below. It is RECOMMENDED to set `chunk_length`
 to an integer near the square root of `length` (see
 {{parallel-sum-chunk-length}}).
@@ -4242,7 +4242,7 @@ Prio3MultihotCountVec to be composed with a randomized response mechanism, like
 set each entry to one with some small probability.)
 
 The validity circuit is denoted `MultihotCountVec` and has three parameters:
-`length`, the number of of entries in the count vector; `max_weight`, the
+`length`, the number of entries in the count vector; `max_weight`, the
 maximum number of non-zero entries (i.e., the weight must be at most
 `max_weight`); and `chunk_length`, used the same way as in {{prio3sumvec}} and
 {{prio3histogram}}.
@@ -5274,7 +5274,7 @@ beta_BITS)` onto a binary tree with `BITS+1` levels, where each edge going from
 a parent node to a left child is labeled `0`, and each right edge is labeled
 `1`. Then each leaf node corresponds to a bit string of length `BITS`, where the
 labels on the path from the root to `x` contain the individual bits.  Finally,
-all nodes in the tree have have an assigned value, with the nodes on the path
+all nodes in the tree have an assigned value, with the nodes on the path
 from the root to `alpha` having values `beta_1, ..., beta_BITS`, and all other
 nodes having value `0`.
 
@@ -5753,7 +5753,7 @@ particular, a malicious Client may attempt to influence the computation by
 choosing an IDPF that evaluates to `1` at more than one node at a given
 level of the tree.
 
-This issue can be mitigated by using an IDPF that is extractable as defined in
+This issue can be mitigated by using an IDPF that is extractable as defined
 in Appendix D of {{BBCGGI21}}. Extractability ensures that, for a particular
 level of the tree, it is infeasible for an attacker to control values of the
 IDPF such that it takes on chosen non-zero values at more than one node. (It
