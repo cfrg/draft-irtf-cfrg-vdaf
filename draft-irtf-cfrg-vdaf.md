@@ -463,7 +463,7 @@ security considerations for DAFs and VDAFs.
 * Prio3Histogram, Prio3MultihotCountVec: Move the final reduction of the
   intermediate outputs out of the circuit. (\*)
 
-* IDPF: Add the application context string to key generation end evaluation and
+* IDPF: Add the application context string to key generation and evaluation and
   bind it to the fixed AES key. (\*)
 
 * IDPF: Use XofTurboShake128 for deriving the leaf nodes in order to ensure the
@@ -5274,7 +5274,7 @@ beta_BITS)` onto a binary tree with `BITS+1` levels, where each edge going from
 a parent node to a left child is labeled `0`, and each right edge is labeled
 `1`. Then each leaf node corresponds to a bit string of length `BITS`, where the
 labels on the path from the root to `x` contain the individual bits.  Finally,
-all nodes on the tree have have an assigned value, with the nodes on the path
+all nodes in the tree have have an assigned value, with the nodes on the path
 from the root to `alpha` having values `beta_1, ..., beta_BITS`, and all other
 nodes having value `0`.
 
