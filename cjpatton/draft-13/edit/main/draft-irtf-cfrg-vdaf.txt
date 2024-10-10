@@ -3418,10 +3418,11 @@ Table of Contents
    (Section 7.1) based on the construction from [BBCGGI19], Section 4.2.
    We begin in Section 7.3.1 with an overview of the proof system and
    some extensions to it.  Section 7.3.2 defines validity circuits, the
-   core component of the proof system that defines measurement validity
-   and how measurements are aggregated.  The proof-generation algorithm,
-   the query algorithm, and the decision algorithm are defined in
-   Section 7.3.3, Section 7.3.4, and Section 7.3.5 respectively.
+   core component of the proof system that determines measurement
+   validity and how measurements are aggregated.  The proof-generation
+   algorithm, the query algorithm, and the decision algorithm are
+   defined in Section 7.3.3, Section 7.3.4, and Section 7.3.5
+   respectively.
 
           +================+===================================+
           | Parameter      | Value                             |
