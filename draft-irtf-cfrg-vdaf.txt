@@ -139,7 +139,6 @@ Table of Contents
        8.3.2.  Key Generation
        8.3.3.  Key Evaluation
        8.3.4.  Auxiliary Functions
-     8.4.  Instantiation
    9.  Security Considerations
      9.1.  The Verification Key
      9.2.  The Nonce
@@ -2206,7 +2205,7 @@ Table of Contents
 
        Pre-conditions:
 
-           - `len(seed) == Xof.SEED_SIZE`
+           - `len(seed) == cls.SEED_SIZE`
        """
        xof = cls(seed, dst, binder)
        return xof.next(cls.SEED_SIZE)
@@ -2241,7 +2240,7 @@ Table of Contents
        Pre-conditions:
 
            - `field` is sub-class of `Field`
-           - `len(seed) == Xof.SEED_SIZE`
+           - `len(seed) == cls.SEED_SIZE`
            - `length > 0`
        """
        xof = cls(seed, dst, binder)
@@ -2289,9 +2288,9 @@ Table of Contents
    cases where a XOF is needed in the VDAFs described in this document,
    there are some cases where a more efficient instantiation based on a
    blockcipher in a fixed-key mode of operation is possible.  This is
-   limited to the XOF used inside the Idpf Section 8.1 implementation in
-   Poplar1 Section 8.3.  It is NOT RECOMMENDED to use this XOF anywhere
-   else.  See Section 9 for a more detailed discussion.
+   limited to the XOF used inside the IDPF implementation in Poplar1
+   Section 8.3.  It is NOT RECOMMENDED to use this XOF anywhere else.
+   See Section 9 for a more detailed discussion.
 
    The following XOF, denoted XofFixedKeyAes128, uses the AES-128
    blockcipher [AES].  The length of the domain separation string dst
@@ -2701,10 +2700,14 @@ Table of Contents
     +=================+==============================================+
     | Parameter       | Value                                        |
     +=================+==============================================+
-    | VERIFY_KEY_SIZE | Xof.SEED_SIZE                                |
+    | flp             | an instance of Flp (Section 7.1)             |
     +-----------------+----------------------------------------------+
-    | RAND_SIZE       | Xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN |
-    |                 | == 0 else 2 * Xof.SEED_SIZE * SHARES         |
+    | xof             | XofTurboShake128 (Section 6.2.1)             |
+    +-----------------+----------------------------------------------+
+    | VERIFY_KEY_SIZE | xof.SEED_SIZE                                |
+    +-----------------+----------------------------------------------+
+    | RAND_SIZE       | xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN |
+    |                 | == 0 else 2 * xof.SEED_SIZE * SHARES         |
     +-----------------+----------------------------------------------+
     | NONCE_SIZE      | 16                                           |
     +-----------------+----------------------------------------------+
@@ -2712,7 +2715,7 @@ Table of Contents
     +-----------------+----------------------------------------------+
     | SHARES          | in [2, 256)                                  |
     +-----------------+----------------------------------------------+
-    | Measurement     | Flp.Measurement                              |
+    | Measurement     | as defined by flp                            |
     +-----------------+----------------------------------------------+
     | AggParam        | None                                         |
     +-----------------+----------------------------------------------+
@@ -2725,7 +2728,7 @@ Table of Contents
     +-----------------+----------------------------------------------+
     | AggShare        | list[F]                                      |
     +-----------------+----------------------------------------------+
-    | AggResult       | Flp.AggResult                                |
+    | AggResult       | as defined by flp                            |
     +-----------------+----------------------------------------------+
     | PrepState       | tuple[list[F], Optional[bytes]]              |
     +-----------------+----------------------------------------------+
@@ -3933,19 +3936,17 @@ Table of Contents
 
 7.4.1.  Prio3Count
 
-             +===========+==================================+
-             | Parameter | Value                            |
-             +===========+==================================+
-             | Valid     | Count(Field64) (this section)    |
-             +-----------+----------------------------------+
-             | Field     | Field64 (Table 3)                |
-             +-----------+----------------------------------+
-             | PROOFS    | 1                                |
-             +-----------+----------------------------------+
-             | Xof       | XofTurboShake128 (Section 6.2.1) |
-             +-----------+----------------------------------+
+               +===========+===============================+
+               | Parameter | Value                         |
+               +===========+===============================+
+               | Valid     | Count(Field64) (this section) |
+               +-----------+-------------------------------+
+               | Field     | Field64 (Table 3)             |
+               +-----------+-------------------------------+
+               | PROOFS    | 1                             |
+               +-----------+-------------------------------+
 
-                   Table 9: Parameters for Prio3Count.
+                    Table 9: Parameters for Prio3Count.
 
    Our first variant of Prio3 is for a simple counter: each measurement
    is either one or zero and the aggregate result is the sum of the
@@ -3995,8 +3996,6 @@ Table of Contents
        | Field     | Field64 (Table 3)                            |
        +-----------+----------------------------------------------+
        | PROOFS    | 1                                            |
-       +-----------+----------------------------------------------+
-       | Xof       | XofTurboShake128 (Section 6.2.1)             |
        +-----------+----------------------------------------------+
 
                     Table 10: Parameters for Prio3Sum.
@@ -4095,9 +4094,6 @@ Table of Contents
               | Field     | Field128 (Table 3)             |
               +-----------+--------------------------------+
               | PROOFS    | 1                              |
-              +-----------+--------------------------------+
-              | Xof       | XofTurboShake128               |
-              |           | (Section 6.2.1)                |
               +-----------+--------------------------------+
 
                   Table 11: Parameters for Prio3SumVec.
@@ -4253,9 +4249,6 @@ Table of Contents
                 +-----------+-----------------------------+
                 | PROOFS    | 1                           |
                 +-----------+-----------------------------+
-                | Xof       | XofTurboShake128            |
-                |           | (Section 6.2.1)             |
-                +-----------+-----------------------------+
 
                   Table 12: Parameters for Prio3Histogram.
 
@@ -4379,8 +4372,6 @@ Table of Contents
           | Field     | Field128 (Table 3)                      |
           +-----------+-----------------------------------------+
           | PROOFS    | 1                                       |
-          +-----------+-----------------------------------------+
-          | Xof       | XofTurboShake128 (Section 6.2.1)        |
           +-----------+-----------------------------------------+
 
               Table 13: Parameters for Prio3MultihotCountVec.
@@ -4602,7 +4593,7 @@ Table of Contents
    defined in Section 8.1; a concrete instantiation is given
    Section 8.3.  The Poplar1 VDAF is defined in Section 8.2 in terms of
    a generic IDPF.  Finally, a concrete instantiation of Poplar1 is
-   specified in Section 8.4; test vectors can be found in Appendix B.
+   specified in Section 8.2; test vectors can be found in Appendix B.
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
@@ -4619,7 +4610,7 @@ Table of Contents
    Each of the programmed points beta is a vector of elements of some
    finite field.  We distinguish two types of fields: one for inner
    nodes (denoted FieldInner), and one for leaf nodes (FieldLeaf).  (Our
-   instantiation of Poplar1 (Section 8.4) will use a much larger field
+   instantiation of Poplar1 (Section 8.2) will use a much larger field
    for leaf nodes than for inner nodes.  This is to ensure the IDPF is
    "extractable" as defined in [BBCGGI21], Definition 1.)
 
@@ -4655,7 +4646,7 @@ Table of Contents
 
       -  rand MUST be generated by a CSPRNG and have length RAND_SIZE.
 
-      -  nonce MUST be of length Idpf.NONCE_SIZE and chosen uniformly at
+      -  nonce MUST be of length idpf.NONCE_SIZE and chosen uniformly at
          random by the Client (see Section 9.2).
 
    *  idpf.eval(agg_id: int, public_share: PublicShare, key: bytes,
@@ -4763,20 +4754,25 @@ Table of Contents
 8.2.  Construction
 
    This section specifies Poplar1, an implementation of the Vdaf
-   interface (Section 5).  It is defined in terms of any Idpf
-   (Section 8.1) for which SHARES == 2 and VALUE_LEN == 2 and an
-   implementation of Xof (Section 6.2).  The associated constants and
-   types required by the Vdaf interface are defined in Table 15.  The
-   methods required for sharding, preparation, aggregation, and
-   unsharding are described in the remaining subsections.  These methods
-   make use of constants defined in Table 16.
+   interface (Section 5).  It is defined in terms of the Idpf
+   implementation of Section 8.3 with SHARES == 2 and VALUE_LEN == 2 and
+   XofTurboShake128 as specified in Section 6.2.1.  The associated
+   constants and types required by the Vdaf interface are defined in
+   Table 15.  The methods required for sharding, preparation,
+   aggregation, and unsharding are described in the remaining
+   subsections.  These methods make use of constants defined in
+   Table 16.
 
        +=================+========================================+
        | Parameter       | Value                                  |
        +=================+========================================+
-       | VERIFY_KEY_SIZE | Xof.SEED_SIZE                          |
+       | idpf            | as specified in Section 8.3            |
        +-----------------+----------------------------------------+
-       | RAND_SIZE       | Xof.SEED_SIZE * 3 + Idpf.RAND_SIZE     |
+       | xof             | XofTurboShake128 (Section 6.2.1)       |
+       +-----------------+----------------------------------------+
+       | VERIFY_KEY_SIZE | xof.SEED_SIZE                          |
+       +-----------------+----------------------------------------+
+       | RAND_SIZE       | xof.SEED_SIZE * 3 + idpf.RAND_SIZE     |
        +-----------------+----------------------------------------+
        | NONCE_SIZE      | 16                                     |
        +-----------------+----------------------------------------+
@@ -5437,25 +5433,24 @@ Table of Contents
    we instantiate this object using XofFixedKeyAes128 (Section 6.2.2)
    wherever possible.  See Section 9.6 for more information.
 
-                   +============+======================+
-                   | Parameter  | Value                |
-                   +============+======================+
-                   | SHARES     | 2                    |
-                   +------------+----------------------+
-                   | BITS       | any positive integer |
-                   +------------+----------------------+
-                   | VALUE_LEN  | any positive integer |
-                   +------------+----------------------+
-                   | KEY_SIZE   | Xof.SEED_SIZE        |
-                   +------------+----------------------+
-                   | FieldInner | Field64 (Table 3)    |
-                   +------------+----------------------+
-                   | FieldLeaf  | Field255 (Table 3)   |
-                   +------------+----------------------+
+       +============+=============================================+
+       | Parameter  | Value                                       |
+       +============+=============================================+
+       | SHARES     | 2                                           |
+       +------------+---------------------------------------------+
+       | BITS       | any positive integer                        |
+       +------------+---------------------------------------------+
+       | VALUE_LEN  | any positive integer                        |
+       +------------+---------------------------------------------+
+       | KEY_SIZE   | XofFixedKeyAes128.SEED_SIZE (Section 6.2.2) |
+       +------------+---------------------------------------------+
+       | FieldInner | Field64 (Table 3)                           |
+       +------------+---------------------------------------------+
+       | FieldLeaf  | Field255 (Table 3)                          |
+       +------------+---------------------------------------------+
 
-                        Table 17: Constants and type
-                        definitions for the IDPF of
-                                 BBCGGI21.
+         Table 17: Constants and type definitions for the IDPF of
+                                BBCGGI21.
 
 8.3.1.  Overview
 
@@ -5753,13 +5748,6 @@ Table of Contents
        if level < self.BITS-1:
            return XofFixedKeyAes128(seed, dst, nonce)
        return XofTurboShake128(seed, dst, nonce)
-
-8.4.  Instantiation
-
-   By default, Poplar1 is instantiated with the IDPF in Section 8.3
-   (VALUE_LEN == 2) and XofTurboShake128 (Section 6.2.1).  This VDAF is
-   suitable for any positive value of BITS.  Test vectors can be found
-   in Appendix B.
 
 9.  Security Considerations
 
@@ -6160,7 +6148,7 @@ Table of Contents
      | 0x00000005    | Prio3MultihotCountVec | VDAF | Section 7.4.5 |
      |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
-     | 0x00000006    | Poplar1               | VDAF | Section 8.4   |
+     | 0x00000006    | Poplar1               | VDAF | Section 8.2   |
      |               |                       |      | of RFC XXXX   |
      +---------------+-----------------------+------+---------------+
      | 0xFFFF0000 to | Reserved for Private  | n/a  | n/a           |

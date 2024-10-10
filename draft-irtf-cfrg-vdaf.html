@@ -1388,9 +1388,6 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
 </li>
                 </ul>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
-                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-instantiation" class="internal xref">Instantiation</a></p>
-</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
@@ -3938,7 +3935,7 @@ def derive_seed(cls,
 
     Pre-conditions:
 
-        - `len(seed) == Xof.SEED_SIZE`
+        - `len(seed) == cls.SEED_SIZE`
     """
     xof = cls(seed, dst, binder)
     return xof.next(cls.SEED_SIZE)
@@ -3973,7 +3970,7 @@ def expand_into_vec(cls,
     Pre-conditions:
 
         - `field` is sub-class of `Field`
-        - `len(seed) == Xof.SEED_SIZE`
+        - `len(seed) == cls.SEED_SIZE`
         - `length &gt; 0`
     """
     xof = cls(seed, dst, binder)
@@ -4035,8 +4032,8 @@ class XofTurboShake128(Xof):
 where a XOF is needed in the VDAFs described in this document, there are some
 cases where a more efficient instantiation based on a blockcipher in a
 fixed-key mode of operation is possible. This is limited to the XOF used inside
-the Idpf <a href="#idpf" class="auto internal xref">Section 8.1</a> implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to use this XOF anywhere else. See <a href="#security" class="auto internal xref">Section 9</a> for a more detailed
-discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
+the IDPF implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to
+use this XOF anywhere else. See <a href="#security" class="auto internal xref">Section 9</a> for a more detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2.2-2">The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
 <span>[<a href="#AES" class="cite xref">AES</a>]</span>. The length of the domain separation string <code>dst</code> <span class="bcp14">MUST NOT</span> exceed 65535
 bytes.<a href="#section-6.2.2-2" class="pilcrow">¶</a></p>
@@ -4515,10 +4512,23 @@ subsections. These methods refer to constants enumerated in
           <tbody>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
+                <code>flp</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">an instance of <code>Flp</code> (<a href="#flp" class="auto internal xref">Section 7.1</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>xof</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
                 <code>VERIFY_KEY_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE</code>
+                <code>xof.SEED_SIZE</code>
 </td>
             </tr>
             <tr>
@@ -4526,7 +4536,7 @@ subsections. These methods refer to constants enumerated in
                 <code>RAND_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN == 0 else 2 * Xof.SEED_SIZE * SHARES</code>
+                <code>xof.SEED_SIZE * SHARES if flp.JOINT_RAND_LEN == 0 else 2 * xof.SEED_SIZE * SHARES</code>
 </td>
             </tr>
             <tr>
@@ -4556,8 +4566,7 @@ subsections. These methods refer to constants enumerated in
               <td class="text-left" rowspan="1" colspan="1">
                 <code>Measurement</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>Flp.Measurement</code>
+              <td class="text-left" rowspan="1" colspan="1">as defined by <code>flp</code>
 </td>
             </tr>
             <tr>
@@ -4604,8 +4613,7 @@ subsections. These methods refer to constants enumerated in
               <td class="text-left" rowspan="1" colspan="1">
                 <code>AggResult</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>Flp.AggResult</code>
+              <td class="text-left" rowspan="1" colspan="1">as defined by <code>flp</code>
 </td>
             </tr>
             <tr>
@@ -6161,13 +6169,6 @@ All gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix
                   <code>1</code>
 </td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Xof</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
-              </tr>
             </tbody>
           </table>
 <p id="section-7.4.1-2">Our first variant of Prio3 is for a simple counter: each measurement is either
@@ -6250,13 +6251,6 @@ class Count(Valid[int, int, F]):
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>1</code>
 </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Xof</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
               </tr>
             </tbody>
           </table>
@@ -6383,13 +6377,6 @@ class Sum(Valid[int, int, F]):
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>1</code>
 </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Xof</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
               </tr>
             </tbody>
           </table>
@@ -6568,13 +6555,6 @@ length will result in proofs up to 50% larger than the optimal proof size.<a hre
                   <code>1</code>
 </td>
               </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Xof</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
-              </tr>
             </tbody>
           </table>
 <p id="section-7.4.4-2">This variant of Prio3 allows for estimating the distribution of some quantity
@@ -6722,13 +6702,6 @@ class Histogram(Valid[int, list[int], F]):
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>1</code>
 </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Xof</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
               </tr>
             </tbody>
           </table>
@@ -6953,7 +6926,7 @@ is zero everywhere except for at most one element, which is equal to one.<a href
 <p id="section-8-8">The remainder of this section is structured as follows. IDPFs are defined in
 <a href="#idpf" class="auto internal xref">Section 8.1</a>; a concrete instantiation is given <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. The Poplar1 VDAF is
 defined in <a href="#poplar1-construction" class="auto internal xref">Section 8.2</a> in terms of a generic IDPF. Finally, a
-concrete instantiation of Poplar1 is specified in <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>;
+concrete instantiation of Poplar1 is specified in <a href="#poplar1-construction" class="auto internal xref">Section 8.2</a>;
 test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix B</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
 <div id="idpf">
 <section id="section-8.1">
@@ -6970,10 +6943,10 @@ returns an additive share of <code>beta[L]</code> if <code>prefix</code> is the 
 <code>alpha</code> and shares of zero otherwise.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.1-2">Each of the programmed points <code>beta</code> is a vector of elements of some finite
 field. We distinguish two types of fields: one for inner nodes (denoted
-<code>FieldInner</code>), and one for leaf nodes (<code>FieldLeaf</code>). (Our
-instantiation of Poplar1 (<a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>) will use a much larger field for
-leaf nodes than for inner nodes. This is to ensure the IDPF is "extractable" as
-defined in <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Definition 1.)<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+<code>FieldInner</code>), and one for leaf nodes (<code>FieldLeaf</code>). (Our instantiation of
+Poplar1 (<a href="#poplar1-construction" class="auto internal xref">Section 8.2</a>) will use a much larger field for leaf nodes
+than for inner nodes. This is to ensure the IDPF is "extractable" as defined in
+<span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Definition 1.)<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1-3">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="auto internal xref">Table 14</a>.
 In the remainder we write <code>Output</code> as shorthand for the type
 <code>list[list[FieldInner]] | list[list[FieldLeaf]]</code>. (This type
@@ -7011,7 +6984,7 @@ Pre-conditions:<a href="#section-8.1-4.1.3" class="pilcrow">¶</a></p>
                 <p id="section-8.1-4.1.4.5.1"><code>rand</code> <span class="bcp14">MUST</span> be generated by a CSPRNG and have length <code>RAND_SIZE</code>.<a href="#section-8.1-4.1.4.5.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-8.1-4.1.4.6">
-                <p id="section-8.1-4.1.4.6.1"><code>nonce</code> <span class="bcp14">MUST</span> be of length <code>Idpf.NONCE_SIZE</code> and chosen uniformly at
+                <p id="section-8.1-4.1.4.6.1"><code>nonce</code> <span class="bcp14">MUST</span> be of length <code>idpf.NONCE_SIZE</code> and chosen uniformly at
 random by the Client (see <a href="#nonce-requirements" class="auto internal xref">Section 9.2</a>).<a href="#section-8.1-4.1.4.6.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
@@ -7166,12 +7139,13 @@ as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-construction-2" class="section-name selfRef">Construction</a>
         </h3>
 <p id="section-8.2-1">This section specifies <code>Poplar1</code>, an implementation of the <code>Vdaf</code> interface
-(<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of any <code>Idpf</code> (<a href="#idpf" class="auto internal xref">Section 8.1</a>) for which
-<code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and an implementation of <code>Xof</code>
-(<a href="#xof" class="auto internal xref">Section 6.2</a>). The associated constants and types required by the <code>Vdaf</code> interface
-are defined in <a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding,
-preparation, aggregation, and unsharding are described in the remaining
-subsections. These methods make use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+(<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of the <code>Idpf</code> implementation of
+<a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> with <code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and
+<code>XofTurboShake128</code> as specified in <a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>. The associated
+constants and types required by the <code>Vdaf</code> interface are defined in
+<a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding, preparation, aggregation,
+and unsharding are described in the remaining subsections. These methods make
+use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-poplar1"></span><div id="poplar1-param">
 <table class="center" id="table-15">
           <caption>
@@ -7187,10 +7161,24 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
           <tbody>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
+                <code>idpf</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">as specified in <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>xof</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
                 <code>VERIFY_KEY_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE</code>
+                <code>xof.SEED_SIZE</code>
 </td>
             </tr>
             <tr>
@@ -7198,7 +7186,7 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
                 <code>RAND_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE * 3 + Idpf.RAND_SIZE</code>
+                <code>xof.SEED_SIZE * 3 + idpf.RAND_SIZE</code>
 </td>
             </tr>
             <tr>
@@ -8059,32 +8047,43 @@ possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.6</a> fo
           </thead>
           <tbody>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">SHARES</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>SHARES</code>
+</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>2</code>
 </td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">BITS</td>
-              <td class="text-left" rowspan="1" colspan="1">any positive integer</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">VALUE_LEN</td>
-              <td class="text-left" rowspan="1" colspan="1">any positive integer</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">KEY_SIZE</td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Xof.SEED_SIZE</code>
+                <code>BITS</code>
 </td>
+              <td class="text-left" rowspan="1" colspan="1">any positive integer</td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">FieldInner</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>VALUE_LEN</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">any positive integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>KEY_SIZE</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>XofFixedKeyAes128.SEED_SIZE</code> (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>FieldInner</code>
+</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
             </tr>
             <tr>
-              <td class="text-left" rowspan="1" colspan="1">FieldLeaf</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>FieldLeaf</code>
+</td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>Field255</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
             </tr>
@@ -8408,16 +8407,6 @@ def current_xof(self,
 </div>
 </section>
 </div>
-</section>
-</div>
-<div id="poplar1-inst">
-<section id="section-8.4">
-        <h3 id="name-instantiation">
-<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-instantiation" class="section-name selfRef">Instantiation</a>
-        </h3>
-<p id="section-8.4-1">By default, Poplar1 is instantiated with the IDPF in <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> (<code>VALUE_LEN
-== 2</code>) and XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>). This VDAF is suitable for
-any positive value of <code>BITS</code>. Test vectors can be found in <a href="#test-vectors" class="auto internal xref">Appendix B</a>.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -8906,7 +8895,7 @@ Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pi
             <td class="text-left" rowspan="1" colspan="1">Poplar1</td>
             <td class="text-left" rowspan="1" colspan="1">VDAF</td>
             <td class="text-left" rowspan="1" colspan="1">
-              <a href="#poplar1-inst" class="auto internal xref">Section 8.4</a> of RFC XXXX</td>
+              <a href="#poplar1-construction" class="auto internal xref">Section 8.2</a> of RFC XXXX</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
