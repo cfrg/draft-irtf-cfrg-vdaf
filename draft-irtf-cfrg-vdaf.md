@@ -439,6 +439,23 @@ security considerations for DAFs and VDAFs.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+13:
+
+* (V)DAF: Replace the one-shot aggregation API with a streaming API. Each
+  Aggregator initializes aggregation, then updates its aggregate share as
+  output shares are produced. The scheme also specifies a method for merging
+  multiple aggregate shares.
+
+* Improve the specification of each Prio3 variant by listing each
+  implementation of `Valid` and `Gadget` in full. Gadgets are listed in a new
+  appendix section.
+
+* Improve the specification of the FLP system by listing the proof-generation,
+  query, and decision algorithms in full. The wrapper gadgets are listed in the
+  new section of the appendix for gadgets.
+
+* Add a section with a high-level overview of the IDPF construction.
+
 12:
 
 * (V)DAF: Add an application context string parameter to sharding and
@@ -455,6 +472,7 @@ security considerations for DAFs and VDAFs.
 
 * Prio3: Replace the helper's measurement and proof share seeds with a single
   seed. (\*)
+
 
 * Prio3Sum: Update the circuit to support a more general range check and avoid
   using joint randomness. (\*)
