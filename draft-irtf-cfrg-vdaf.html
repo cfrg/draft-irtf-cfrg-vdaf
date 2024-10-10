@@ -1310,7 +1310,7 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
-                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-instantiations" class="internal xref">Instantiations</a></p>
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-variants" class="internal xref">Variants</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4.2.1">
                     <p id="section-toc.1-1.7.2.4.2.1.1"><a href="#section-7.4.1" class="auto internal xref">7.4.1</a>.  <a href="#name-prio3count" class="internal xref">Prio3Count</a></p>
@@ -1439,7 +1439,21 @@ for heavy hitters (Poplar1).<a href="#section-abstract-1" class="pilcrow">¶</a>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-flp-gadget-wrappers" class="internal xref">FLP Gadget Wrappers</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-flp-gadgets" class="internal xref">FLP Gadgets</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.1">
+                <p id="section-toc.1-1.12.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-multiplication" class="internal xref">Multiplication</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.2">
+                <p id="section-toc.1-1.12.2.2.1"><a href="#appendix-A.2" class="auto internal xref">A.2</a>.  <a href="#name-polynomial-evaluation" class="internal xref">Polynomial Evaluation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.3">
+                <p id="section-toc.1-1.12.2.3.1"><a href="#appendix-A.3" class="auto internal xref">A.3</a>.  <a href="#name-parallel-sum" class="internal xref">Parallel Sum</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.4">
+                <p id="section-toc.1-1.12.2.4.1"><a href="#appendix-A.4" class="auto internal xref">A.4</a>.  <a href="#name-shims-for-generating-and-ve" class="internal xref">Shims for Generating and Verifying Proofs</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
             <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
@@ -2157,10 +2171,24 @@ overriding the start of the range and overriding the step between successive
 output values.<a href="#section-2-9.12.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.13">
-          <p id="section-2-9.13.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
+          <p id="section-2-9.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
+evaluating the polynomial, <code>p(x)</code>. The coefficients of polynomials are stored
+in lists in ascending order of degree, starting with the constant coefficient.<a href="#section-2-9.13.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-9.14">
+          <p id="section-2-9.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
 returns the coefficients of the lowest degree polynomial <code>p</code> for which
 <code>p(input[k]) == output[k]</code> for all <code>k</code>. Normally this will be computed using
-the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-9.13.1" class="pilcrow">¶</a></p>
+the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-9.14.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-9.15">
+          <p id="section-2-9.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
+the product of two polynomials.<a href="#section-2-9.15.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-9.16">
+          <p id="section-2-9.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
+end of the input polynomial. That is, it returns <code>p[:i]</code> where <code>i</code> is the
+index of the last non-zero coefficient of <code>p</code>.<a href="#section-2-9.16.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
@@ -2391,7 +2419,7 @@ order to carry out the computation. In particular, it is <span class="bcp14">REC
 concrete instantiations of the <code>Daf</code> interface specify a method of encoding the
 <code>PublicShare</code>, <code>InputShare</code>, and <code>AggShare</code>.<a href="#section-4-8" class="pilcrow">¶</a></p>
 <p id="section-4-9">Each DAF is identified by a unique, 32-bit integer <code>ID</code>. Identifiers for each
-(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 23</a>.<a href="#section-4-9" class="pilcrow">¶</a></p>
+(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 18</a>.<a href="#section-4-9" class="pilcrow">¶</a></p>
 <div id="sec-daf-shard">
 <section id="section-4.1">
         <h3 id="name-sharding">
@@ -2873,7 +2901,7 @@ the computation. In particular, it is <span class="bcp14">RECOMMENDED</span> tha
 of the <code>Vdaf</code> interface specify a method of encoding the <code>PublicShare</code>,
 <code>InputShare</code>, <code>AggShare</code>, <code>PrepShare</code>, and <code>PrepMessage</code>.<a href="#section-5-7" class="pilcrow">¶</a></p>
 <p id="section-5-8">Each VDAF is identified by a unique, 32-bit integer <code>ID</code>. Identifiers for each
-(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 23</a>. The following
+(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 18</a>. The following
 method is defined for each VDAF specified in this document:<a href="#section-5-8" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5-9">
 <pre>
@@ -5872,7 +5900,7 @@ gadget.<a href="#section-7.3.3.1-2" class="pilcrow">¶</a></p>
 setting <code>g.wires[j][k]</code> to the value of the <code>j</code>-th wire for the <code>k</code>-th
 invocation of gadget <code>g</code>. This is accomplished by "wrapping" each gadget in a
 class <code>ProveGadget</code> that records the wire inputs. We list this class in
-<a href="#gadget-wrappers" class="auto internal xref">Appendix A</a>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
+<a href="#gadget-wrappers" class="auto internal xref">Appendix A.4</a>.<a href="#section-7.3.3.1-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.1-4">Next, we compute each of the "wire polynomials" for each gadget. The <code>j</code>-th
 wire polynomial is the lowest degree polynomial that evaluates to
 <code>g.wire[j][k]</code> at a sequence of fixed points. We obtain the gadget polynomial by
@@ -5962,7 +5990,7 @@ get the same result.<a href="#section-7.3.3.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-4">To start a gadget test, we first construct the (shares of the) wire polynomials
 just as the prover did. First, we record <code>g.wires[j][k]</code> as the input (share)
 of the <code>j</code>-th wire of the <code>k</code>-th invocation of the gadget. Again, this is
-accomplished by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix A</a>.
+accomplished by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix A.4</a>.
 This gadget also evaluates the gadget polynomial for each gadget invocation in order to produce the gadget's output. Then we
 compute the wire polynomials from the recorded values.<a href="#section-7.3.3.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.3.2-5">Next, we choose a random point <code>t</code> (parsed from the query randomness), evaluate
@@ -6086,13 +6114,14 @@ def decide(self, verifier: list[F]) -&gt; bool:
 </div>
 <div id="prio3-instantiations">
 <section id="section-7.4">
-        <h3 id="name-instantiations">
-<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-instantiations" class="section-name selfRef">Instantiations</a>
+        <h3 id="name-variants">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-variants" class="section-name selfRef">Variants</a>
         </h3>
-<p id="section-7.4-1">This section specifies instantiations of Prio3 for various measurement types.
-Each is determined by a field (<a href="#field" class="auto internal xref">Section 6.1</a>), a validity circuit
-(<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>), an XOF (<a href="#xof" class="auto internal xref">Section 6.2</a>). and the number of proofs to
-generate and verify. Test vectors for each can be found in <a href="#test-vectors" class="auto internal xref">Appendix B</a>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<p id="section-7.4-1">This section specifies instantiations of Prio3 for various aggregation tasks.
+Each variant is determined by a field (<a href="#field" class="auto internal xref">Section 6.1</a>), a validity circuit
+(<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>), an XOF (<a href="#xof" class="auto internal xref">Section 6.2</a>), and the number of proofs to
+generate and verify. Test vectors for each can be found in <a href="#test-vectors" class="auto internal xref">Appendix B</a>.
+All gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix A</a>.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
 <div id="prio3count">
 <section id="section-7.4.1">
           <h4 id="name-prio3count">
@@ -6141,111 +6170,46 @@ generate and verify. Test vectors for each can be found in <a href="#test-vector
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.1-2">Our first instance of Prio3 is for a simple counter: each measurement is either
-one or zero and the aggregate result is the sum of the measurements.<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-3">Its validity circuit, denoted <code>Count</code>, uses the following degree-2, arity-2
-gadget, denoted <code>Mul</code>:<a href="#section-7.4.1-3" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.1-4">
+<p id="section-7.4.1-2">Our first variant of Prio3 is for a simple counter: each measurement is either
+one or zero and the aggregate result is the sum of the measurements. Its
+validity circuit uses the multiplication gadget <code>Mul</code> specified in
+<a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>, which takes two inputs and multiplies them. The circuit is
+specified below.<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-7.4.1-3">
 <pre>
-def eval(self, _field: type[F], inp: list[F]) -&gt; F:
-    self.check_gadget_eval(inp)
-    return inp[0] * inp[1]
-</pre><a href="#section-7.4.1-4" class="pilcrow">¶</a>
+class Count(Valid[int, int, F]):
+    GADGETS: list[Gadget[F]] = [Mul()]
+    GADGET_CALLS = [1]
+    MEAS_LEN = 1
+    JOINT_RAND_LEN = 0
+    OUTPUT_LEN = 1
+    EVAL_OUTPUT_LEN = 1
+
+    # Class object for the field.
+    field: type[F]
+
+    def __init__(self, field: type[F]):
+        self.field = field
+
+    def eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F],
+            _num_shares: int) -&gt; list[F]:
+        squared = self.GADGETS[0].eval(self.field,
+                                       [meas[0], meas[0]])
+        return [squared - meas[0]]
+
+    def encode(self, measurement: int) -&gt; list[F]:
+        return [self.field(measurement)]
+
+    def truncate(self, meas: list[F]) -&gt; list[F]:
+        return meas
+
+    def decode(self, output: list[F], _num_measurements: int) -&gt; int:
+        return output[0].as_unsigned()
+</pre><a href="#section-7.4.1-3" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.1-5">The call to <code>check_gadget_eval()</code> raises an error if the length of the input is
-not equal to the gadget's <code>ARITY</code> parameter.<a href="#section-7.4.1-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-6">The <code>Count</code> validity circuit is defined as<a href="#section-7.4.1-6" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.1-7">
-<pre>
-def eval(
-        self,
-        meas: list[F],
-        joint_rand: list[F],
-        _num_shares: int) -&gt; list[F]:
-    squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])
-    return [squared - meas[0]]
-</pre><a href="#section-7.4.1-7" class="pilcrow">¶</a>
-</div>
-<p id="section-7.4.1-8">The measurement is encoded and decoded as a singleton vector in the natural
-way. The parameters for this circuit are summarized below.<a href="#section-7.4.1-8" class="pilcrow">¶</a></p>
-<span id="name-parameters-of-validity-circ"></span><table class="center" id="table-10">
-            <caption>
-<a href="#table-10" class="selfRef">Table 10</a>:
-<a href="#name-parameters-of-validity-circ" class="selfRef">Parameters of validity circuit Count.</a>
-            </caption>
-<thead>
-              <tr>
-                <th class="text-left" rowspan="1" colspan="1">Parameter</th>
-                <th class="text-left" rowspan="1" colspan="1">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGETS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[Mul]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[1]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>MEAS_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>JOINT_RAND_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>0</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>EVAL_OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Measurement</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code> in <code>[0, 2)</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>AggResult</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code>
-</td>
-              </tr>
-            </tbody>
-          </table>
 </section>
 </div>
 <div id="prio3sum">
@@ -6253,9 +6217,9 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
           <h4 id="name-prio3sum">
 <a href="#section-7.4.2" class="section-number selfRef">7.4.2. </a><a href="#name-prio3sum" class="section-name selfRef">Prio3Sum</a>
           </h4>
-<span id="name-parameters-for-prio3sum"></span><table class="center" id="table-11">
+<span id="name-parameters-for-prio3sum"></span><table class="center" id="table-10">
             <caption>
-<a href="#table-11" class="selfRef">Table 11</a>:
+<a href="#table-10" class="selfRef">Table 10</a>:
 <a href="#name-parameters-for-prio3sum" class="selfRef">Parameters for Prio3Sum.</a>
             </caption>
 <thead>
@@ -6296,10 +6260,9 @@ way. The parameters for this circuit are summarized below.<a href="#section-7.4.
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.2-2">The next instance of Prio3 supports summing of integers in a pre-determined
+<p id="section-7.4.2-2">The next variant of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in the range <code>[0, max_measurement]</code>,
-where <code>max_measurement</code> is an associated parameter equal to the largest valid
-measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
+where <code>max_measurement</code> defines the largest valid measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a bit vector,
 encoding the measurement plus an offset as a bit vector, then checking that the
 two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
@@ -6318,142 +6281,68 @@ bits. The second bit-encoded integer is the sum of the measurement and
 <code>offset</code>. Observe that this sum can only be encoded this way if it is between
 <code>0</code> and <code>2^bits - 1</code>, which implies that the measurement is between <code>-offset</code>
 and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-6">The circuit, denoted <code>Sum</code>, first checks that each entry of both bit vectors is
-a one or a zero. It then decodes both the measurement and the offset
-measurement, and subtracts <code>offset</code> from the latter. It then checks if these
-two values are equal. Since both the measurement and the measurement plus
-<code>offset</code> are in the same range of <code>[0, 2^bits)</code>, this means that the
-measurement itself is between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-7">The measurement is encoded in <code>2*bits</code> field elements as follows:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-8">
+<p id="section-7.4.2-6">The circuit first checks that each entry of both bit vectors is a one or a
+zero. It then decodes both the measurement and the offset measurement, and
+subtracts <code>offset</code> from the latter. It then checks if these two values are
+equal. Since both the measurement and the measurement plus <code>offset</code> are in the
+same range of <code>[0, 2^bits)</code>, this means that the measurement itself is
+between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-7">The circuit uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
+<a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x^2 - x</code>, which is equal to <code>0</code>
+if and only if <code>x</code> is in <code>[0, 2)</code>. The complete circuit is specified below.<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.4.2-8">
 <pre>
-def encode(self, measurement: int) -&gt; list[F]:
-    encoded = []
-    encoded += self.field.encode_into_bit_vector(
-        measurement,
-        self.bits
-    )
-    encoded += self.field.encode_into_bit_vector(
-        measurement + self.offset.as_unsigned(),
-        self.bits
-    )
-    return encoded
+class Sum(Valid[int, int, F]):
+    GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
+    JOINT_RAND_LEN = 0
+    OUTPUT_LEN = 1
+    field: type[F]
 
-def truncate(self, meas: list[F]) -&gt; list[F]:
-    return [self.field.decode_from_bit_vector(meas[:self.bits])]
+    def __init__(self, field: type[F], max_measurement: int):
+        self.field = field
+        self.bits = max_measurement.bit_length()
+        self.offset = self.field(2**self.bits - 1 - max_measurement)
+        self.max_measurement = max_measurement
+        self.GADGET_CALLS = [2 * self.bits]
+        self.MEAS_LEN = 2 * self.bits
+        self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
 
-def decode(self, output: list[F], _num_measurements: int) -&gt; int:
-    return output[0].as_unsigned()
+    def eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -&gt; list[F]:
+        shares_inv = self.field(num_shares).inv()
+
+        out = []
+        for b in meas:
+            out.append(self.GADGETS[0].eval(self.field, [b]))
+
+        range_check = self.offset * shares_inv + \
+            self.field.decode_from_bit_vector(meas[:self.bits]) - \
+            self.field.decode_from_bit_vector(meas[self.bits:])
+        out.append(range_check)
+        return out
+
+    def encode(self, measurement: int) -&gt; list[F]:
+        encoded = []
+        encoded += self.field.encode_into_bit_vector(
+            measurement,
+            self.bits
+        )
+        encoded += self.field.encode_into_bit_vector(
+            measurement + self.offset.as_unsigned(),
+            self.bits
+        )
+        return encoded
+
+    def truncate(self, meas: list[F]) -&gt; list[F]:
+        return [self.field.decode_from_bit_vector(meas[:self.bits])]
+
+    def decode(self, output: list[F], _num_measurements: int) -&gt; int:
+        return output[0].as_unsigned()
 </pre><a href="#section-7.4.2-8" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.2-9">The validity circuit checks that the input consists of ones and zeros. Its
-gadget, denoted <code>Range2</code>, is the degree-2, arity-1 gadget defined as<a href="#section-7.4.2-9" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-10">
-<pre>
-def eval(self, _field: type[F], inp: list[F]) -&gt; F:
-    self.check_gadget_eval(inp)
-    return inp[0] * inp[0] - inp[0]
-</pre><a href="#section-7.4.2-10" class="pilcrow">¶</a>
-</div>
-<p id="section-7.4.2-11">The <code>Sum</code> validity circuit is defined as<a href="#section-7.4.2-11" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.2-12">
-<pre>
-def eval(
-        self,
-        meas: list[F],
-        joint_rand: list[F],
-        num_shares: int) -&gt; list[F]:
-    shares_inv = self.field(num_shares).inv()
-
-    out = []
-    for b in meas:
-        out.append(self.GADGETS[0].eval(self.field, [b]))
-
-    range_check = self.offset * shares_inv + \
-        self.field.decode_from_bit_vector(meas[:self.bits]) - \
-        self.field.decode_from_bit_vector(meas[self.bits:])
-    out.append(range_check)
-    return out
-</pre><a href="#section-7.4.2-12" class="pilcrow">¶</a>
-</div>
-<span id="name-parameters-of-validity-circu"></span><table class="center" id="table-12">
-            <caption>
-<a href="#table-12" class="selfRef">Table 12</a>:
-<a href="#name-parameters-of-validity-circu" class="selfRef">Parameters of validity circuit Sum.</a>
-            </caption>
-<thead>
-              <tr>
-                <th class="text-left" rowspan="1" colspan="1">Parameter</th>
-                <th class="text-left" rowspan="1" colspan="1">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGETS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[Range2]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[2*bits]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>MEAS_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>2*bits</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>JOINT_RAND_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>0</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>EVAL_OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>2*bits + 1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Measurement</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code> in <code>[0, max_measurement]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>AggResult</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code>
-</td>
-              </tr>
-            </tbody>
-          </table>
 </section>
 </div>
 <div id="prio3sumvec">
@@ -6461,9 +6350,9 @@ def eval(
           <h4 id="name-prio3sumvec">
 <a href="#section-7.4.3" class="section-number selfRef">7.4.3. </a><a href="#name-prio3sumvec" class="section-name selfRef">Prio3SumVec</a>
           </h4>
-<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-13">
+<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-11">
             <caption>
-<a href="#table-13" class="selfRef">Table 13</a>:
+<a href="#table-11" class="selfRef">Table 11</a>:
 <a href="#name-parameters-for-prio3sumvec" class="selfRef">Parameters for Prio3SumVec.</a>
             </caption>
 <thead>
@@ -6504,215 +6393,138 @@ def eval(
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.3-2">This instance of Prio3 supports summing a vector of integers. It has three
-parameters, <code>length</code>, <code>bits</code>, and <code>chunk_length</code>. Each measurement is a vector
+<p id="section-7.4.3-2">This instance of Prio3 supports summing vectors of integers. It has three
+parameters: <code>length</code>, <code>bits</code>, and <code>chunk_length</code>. Each measurement is a vector
 of positive integers with length equal to the <code>length</code> parameter. Each element
 of the measurement is an integer in the range <code>[0, 2^bits)</code>. It is <span class="bcp14">RECOMMENDED</span>
 to set <code>chunk_length</code> to an integer near the square root of <code>length * bits</code>
 (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-3">The validity circuit is denoted <code>SumVec</code>. Measurements are encoded as a vector
-of field elements with length <code>length * bits</code>. The field elements in the
-encoded vector represent all the bits of the measurement vector's elements,
-consecutively, in LSB to MSB order:<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.3-4">
+<p id="section-7.4.3-3">The circuit is denoted <code>SumVec</code>. Each measurements is encoded as a vector of
+field elements with length <code>length * bits</code>. The field elements in the encoded
+vector represent all the bits of the measurement vector's elements,
+consecutively, in LSB to MSB order.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-4">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
+This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
+then returns the sum of the results. Along with the subcircuit, the
+parallel-sum gadget is parameterized by an integer <code>count</code> specifying how many
+times to call the subcircuit. It takes in a list of inputs and passes them
+through to instances of the subcircuit in the same order. It returns the sum of
+the subcircuit outputs.<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-5">Note that only the <code>ParallelSum</code> gadget itself, and not its subcircuit,
+participates in the FLP's wire recording during evaluation, gadget consistency
+proofs, and proof validation, even though the subcircuit is provided to
+<code>ParallelSum</code> gadget as an implementation of the <code>Gadget</code> interface.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-6">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
+ones and zeros. Rather than use the <code>PolyEval</code> gadget on each element, as in
+the <code>Sum</code> validity circuit, it instead uses <code>Mul</code> subcircuits (<a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>)
+and "free" constant multiplication and addition gates to simultaneously
+evaluate the same range check polynomial on each element, and multiply by a
+constant. One of the two <code>Mul</code> subcircuit inputs is equal to a measurement
+element multiplied by a power of one of the elements of the joint randomness
+vector, and the other is equal to the same measurement element minus one. These
+<code>Mul</code> subcircuits are evaluated by a <code>ParallelSum</code> gadget, and the results are
+added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-7">The complete circuit is specified below.<a href="#section-7.4.3-7" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.3-8">
 <pre>
-def encode(self, measurement: list[int]) -&gt; list[F]:
-    if len(measurement) != self.length:
-        raise ValueError('incorrect measurement length')
+class SumVec(Valid[list[int], list[int], F]):
+    EVAL_OUTPUT_LEN = 1
+    length: int
+    bits: int
+    chunk_length: int
+    field: type[F]
 
-    encoded = []
-    for val in measurement:
-        if val not in range(2**self.bits):
-            raise ValueError(
-                'entry of measurement vector is out of range'
+    def __init__(self,
+                 field: type[F],
+                 length: int,
+                 bits: int,
+                 chunk_length: int):
+        """
+        Instantiate the `SumVec` circuit for measurements with
+        `length` elements, each in the range `[0, 2^bits)`.
+        """
+        self.field = field
+        self.length = length
+        self.bits = bits
+        self.chunk_length = chunk_length
+        self.GADGETS = [ParallelSum(Mul(), chunk_length)]
+        self.GADGET_CALLS = [
+            (length * bits + chunk_length - 1) // chunk_length
+        ]
+        self.MEAS_LEN = length * bits
+        self.OUTPUT_LEN = length
+        self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
+
+    def eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -&gt; list[F]:
+        out = self.field(0)
+        shares_inv = self.field(num_shares).inv()
+        for i in range(self.GADGET_CALLS[0]):
+            r = joint_rand[i]
+            r_power = r
+            inputs: list[Optional[F]]
+            inputs = [None] * (2 * self.chunk_length)
+            for j in range(self.chunk_length):
+                index = i * self.chunk_length + j
+                if index &lt; len(meas):
+                    meas_elem = meas[index]
+                else:
+                    meas_elem = self.field(0)
+
+                inputs[j * 2] = r_power * meas_elem
+                inputs[j * 2 + 1] = meas_elem - shares_inv
+
+                r_power *= r
+
+            out += self.GADGETS[0].eval(
+                self.field,
+                cast(list[F], inputs),
             )
 
-        encoded += self.field.encode_into_bit_vector(val, self.bits)
-    return encoded
+        return [out]
 
-def truncate(self, meas: list[F]) -&gt; list[F]:
-    truncated = []
-    for i in range(self.length):
-        truncated.append(self.field.decode_from_bit_vector(
-            meas[i * self.bits: (i + 1) * self.bits]
-        ))
-    return truncated
+    def encode(self, measurement: list[int]) -&gt; list[F]:
+        encoded = []
+        for val in measurement:
+            encoded += self.field.encode_into_bit_vector(
+                val, self.bits)
+        return encoded
 
-def decode(
-        self,
-        output: list[F],
-        _num_measurements: int) -&gt; list[int]:
-    return [x.as_unsigned() for x in output]
-</pre><a href="#section-7.4.3-4" class="pilcrow">¶</a>
+    def truncate(self, meas: list[F]) -&gt; list[F]:
+        truncated = []
+        for i in range(self.length):
+            truncated.append(self.field.decode_from_bit_vector(
+                meas[i * self.bits: (i + 1) * self.bits]
+            ))
+        return truncated
+
+    def decode(
+            self,
+            output: list[F],
+            _num_measurements: int) -&gt; list[int]:
+        return [x.as_unsigned() for x in output]
+</pre><a href="#section-7.4.3-8" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.3-5">This validity circuit uses a <code>ParallelSum</code> gadget to achieve a smaller proof
-size. This optimization for "parallel-sum circuits" is described in
-<span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, section 4.4. Briefly, for circuits that add up the output of
-multiple identical subcircuits, it is possible to achieve smaller proof sizes
-(on the order of O(sqrt(MEAS_LEN)) instead of O(MEAS_LEN)) by packaging more
-than one such subcircuit into a gadget.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-6">The <code>ParallelSum</code> gadget is parameterized with an arithmetic subcircuit, and a
-<code>count</code> of how many times it evaluates that subcircuit. It takes in a list of
-inputs and passes them through to instances of the subcircuit in the same order.
-It returns the sum of the subcircuit outputs. Note that only the <code>ParallelSum</code>
-gadget itself, and not its subcircuit, participates in the FLP's wire recording
-during evaluation, gadget consistency proofs, and proof validation, even though
-the subcircuit is provided to <code>ParallelSum</code> as an implementation of the
-<code>Gadget</code> interface.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.3-7">
-<pre>
-def eval(self, field: type[F], inp: list[F]) -&gt; F:
-    self.check_gadget_eval(inp)
-    out = field(0)
-    for i in range(self.count):
-        start_index = i * self.subcircuit.ARITY
-        end_index = (i + 1) * self.subcircuit.ARITY
-        out += self.subcircuit.eval(
-            field,
-            inp[start_index:end_index],
-        )
-    return out
-</pre><a href="#section-7.4.3-7" class="pilcrow">¶</a>
-</div>
-<p id="section-7.4.3-8">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
-ones and zeros. Rather than use the <code>Range2</code> gadget on each element, as in the
-<code>Sum</code> validity circuit, it instead uses <code>Mul</code> subcircuits and "free" constant
-multiplication and addition gates to simultaneously evaluate the same range
-check polynomial on each element, and multiply by a constant. One of the two
-<code>Mul</code> subcircuit inputs is equal to a measurement element multiplied by a power
-of one of the elements of the joint randomness vector, and the other is equal
-to the same measurement element minus one. These <code>Mul</code> subcircuits are
-evaluated by a <code>ParallelSum</code> gadget, and the results are added up both within
-the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.3-8" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.3-9">
-<pre>
-def eval(
-        self,
-        meas: list[F],
-        joint_rand: list[F],
-        num_shares: int) -&gt; list[F]:
-    out = self.field(0)
-    shares_inv = self.field(num_shares).inv()
-    for i in range(self.GADGET_CALLS[0]):
-        r = joint_rand[i]
-        r_power = r
-        inputs: list[Optional[F]]
-        inputs = [None] * (2 * self.chunk_length)
-        for j in range(self.chunk_length):
-            index = i * self.chunk_length + j
-            if index &lt; len(meas):
-                meas_elem = meas[index]
-            else:
-                meas_elem = self.field(0)
-
-            inputs[j * 2] = r_power * meas_elem
-            inputs[j * 2 + 1] = meas_elem - shares_inv
-
-            r_power *= r
-
-        out += self.GADGETS[0].eval(
-            self.field,
-            cast(list[F], inputs),
-        )
-
-    return [out]
-</pre><a href="#section-7.4.3-9" class="pilcrow">¶</a>
-</div>
-<span id="name-parameters-of-validity-circui"></span><table class="center" id="table-14">
-            <caption>
-<a href="#table-14" class="selfRef">Table 14</a>:
-<a href="#name-parameters-of-validity-circui" class="selfRef">Parameters of validity circuit SumVec.</a>
-            </caption>
-<thead>
-              <tr>
-                <th class="text-left" rowspan="1" colspan="1">Parameter</th>
-                <th class="text-left" rowspan="1" colspan="1">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGETS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[ParallelSum(Mul(), chunk_length)]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[(length * bits + chunk_length - 1) // chunk_length]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>MEAS_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>length * bits</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>length</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>JOINT_RAND_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS[0]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>EVAL_OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>1</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Measurement</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>list[int]</code>, each element in <code>[0, 2^bits)</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>AggResult</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>list[int]</code>
-</td>
-              </tr>
-            </tbody>
-          </table>
 <div id="parallel-sum-chunk-length">
 <section id="section-7.4.3.1">
             <h5 id="name-selection-of-parallelsum-ch">
 <a href="#section-7.4.3.1" class="section-number selfRef">7.4.3.1. </a><a href="#name-selection-of-parallelsum-ch" class="section-name selfRef">Selection of <code>ParallelSum</code> Chunk Length</a>
             </h5>
 <p id="section-7.4.3.1-1">The <code>chunk_length</code> parameter provides a trade-off between the arity of the
-<code>ParallelSum</code> gadget and the number of times the gadget is called. The proof
-length is asymptotically minimized when the chunk length is near the square root
-of the length of the measurement. However, the relationship between VDAF
-parameters and proof length is complicated, involving two forms of rounding (the
-circuit pads the inputs to its last <code>ParallelSum</code> gadget call, up to the chunk
-length, and proof system rounds the degree of wire polynomials -- determined by
-the number of times a gadget is called -- up to the next power of two).
-Therefore, the optimal choice of <code>chunk_length</code> for a concrete measurement size
-will vary, and must be found through trial and error. Setting <code>chunk_length</code>
-equal to the square root of the appropriate measurement length will result in
-proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-1" class="pilcrow">¶</a></p>
+<code>ParallelSum</code> gadget (<a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>) and the number of times the
+gadget is called. The proof length is asymptotically minimized when the chunk
+length is near the square root of the length of the measurement. However, the
+relationship between VDAF parameters and proof length is complicated, involving
+two forms of rounding (the circuit pads the inputs to its last <code>ParallelSum</code>
+gadget call, up to the chunk length, and proof system rounds the degree of wire
+polynomials -- determined by the number of times a gadget is called -- up to
+the next power of two). Therefore, the optimal choice of <code>chunk_length</code> for a
+concrete measurement size will vary, and must be found through trial and error.
+Setting <code>chunk_length</code> equal to the square root of the appropriate measurement
+length will result in proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -6722,9 +6534,9 @@ proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-1"
           <h4 id="name-prio3histogram">
 <a href="#section-7.4.4" class="section-number selfRef">7.4.4. </a><a href="#name-prio3histogram" class="section-name selfRef">Prio3Histogram</a>
           </h4>
-<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-15">
+<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-12">
             <caption>
-<a href="#table-15" class="selfRef">Table 15</a>:
+<a href="#table-12" class="selfRef">Table 12</a>:
 <a href="#name-parameters-for-prio3histogr" class="selfRef">Parameters for Prio3Histogram.</a>
             </caption>
 <thead>
@@ -6765,168 +6577,111 @@ proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-1"
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.4-2">This instance of Prio3 allows for estimating the distribution of some quantity
+<p id="section-7.4.4-2">This variant of Prio3 allows for estimating the distribution of some quantity
 by computing a simple histogram. Each measurement increments one histogram
 bucket, out of a set of fixed buckets. (Bucket indexing begins at <code>0</code>.) For
-example, the buckets might quantize the real numbers, and each measurement would
-report the bucket that the corresponding client's real-numbered value falls
-into. The aggregate result counts the number of measurements in each bucket.<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.4-3">The validity circuit is denoted <code>Histogram</code>. It has two parameters, <code>length</code>,
-the number of histogram buckets, and <code>chunk_length</code>, which is used by by a
+example, the buckets might quantize the real numbers, and each measurement
+would report the bucket that the corresponding client's real-numbered value
+falls into. The aggregate result counts the number of measurements in each
+bucket.<a href="#section-7.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-3">The validity circuit is denoted <code>Histogram</code>. It has two parameters: <code>length</code>,
+the number of histogram buckets; and <code>chunk_length</code>, which is used by by a
 circuit optimization described below. It is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code>
 to an integer near the square root of <code>length</code> (see
 <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.4-3" class="pilcrow">¶</a></p>
 <p id="section-7.4.4-4">The measurement is encoded as a one-hot vector representing the bucket into
-which the measurement falls:<a href="#section-7.4.4-4" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.4-5">
-<pre>
-def encode(self, measurement: int) -&gt; list[F]:
-    encoded = [self.field(0)] * self.length
-    encoded[measurement] = self.field(1)
-    return encoded
-
-def truncate(self, meas: list[F]) -&gt; list[F]:
-    return meas
-
-def decode(
-        self,
-        output: list[F],
-        _num_measurements: int) -&gt; list[int]:
-    return [bucket_count.as_unsigned() for bucket_count in output]
-</pre><a href="#section-7.4.4-5" class="pilcrow">¶</a>
-</div>
-<p id="section-7.4.4-6">The <code>Histogram</code> validity circuit checks for one-hotness in two steps, by
-checking that the encoded measurement consists of ones and zeros, and by
+which the measurement falls. The circuit checks for one-hotness in two steps,
+by checking that the encoded measurement consists of ones and zeros, and by
 checking that the sum of all elements in the encoded measurement is equal to
-one. The individual checks constitute the output of the circuit.<a href="#section-7.4.4-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.4-7">As in the <code>SumVec</code> validity circuit (<a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a>), the first part of the
-validity circuit uses the <code>ParallelSum</code> gadget to perform range checks while
-achieving a smaller proof size. The <code>ParallelSum</code> gadget uses <code>Mul</code> subcircuits
-to evaluate a range check polynomial on each element, and includes an additional
-constant multiplication. One of the two <code>Mul</code> subcircuit inputs is equal to a
-measurement element multiplied by a power of an element of the joint randomness
-vector, and the other is equal to the same measurement element minus one. The
-results are added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.4-7" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.4-8">
+one. The individual checks constitute the output of the circuit.<a href="#section-7.4.4-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.4-5">As in the <code>SumVec</code> validity circuit (<a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a>), the first part of the
+validity circuit uses the <code>ParallelSum</code> (<a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>) gadget to
+perform range checks while achieving a smaller proof size. The <code>ParallelSum</code>
+gadget uses <code>Mul</code> subcircuits (<a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>) to evaluate a range check
+polynomial on each element, and includes an additional constant multiplication.
+One of the two <code>Mul</code> subcircuit inputs is equal to a measurement element
+multiplied by a power of an element of the joint randomness vector, and the
+other is equal to the same measurement element minus one. The results are added
+up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.4-5" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.4-6">
 <pre>
-def eval(
-        self,
-        meas: list[F],
-        joint_rand: list[F],
-        num_shares: int) -&gt; list[F]:
-    # Check that each bucket is one or zero.
-    range_check = self.field(0)
-    shares_inv = self.field(num_shares).inv()
-    for i in range(self.GADGET_CALLS[0]):
-        r = joint_rand[i]
-        r_power = r
-        inputs: list[Optional[F]]
-        inputs = [None] * (2 * self.chunk_length)
-        for j in range(self.chunk_length):
-            index = i * self.chunk_length + j
-            if index &lt; len(meas):
-                meas_elem = meas[index]
-            else:
-                meas_elem = self.field(0)
+class Histogram(Valid[int, list[int], F]):
+    EVAL_OUTPUT_LEN = 2
+    field: type[F]
+    length: int
+    chunk_length: int
 
-            inputs[j * 2] = r_power * meas_elem
-            inputs[j * 2 + 1] = meas_elem - shares_inv
+    def __init__(self,
+                 field: type[F],
+                 length: int,
+                 chunk_length: int):
+        """
+        Instantiate an instance of the `Histogram` circuit with the
+        given `length` and `chunk_length`.
+        """
+        self.field = field
+        self.length = length
+        self.chunk_length = chunk_length
+        self.GADGETS = [ParallelSum(Mul(), chunk_length)]
+        self.GADGET_CALLS = [
+            (length + chunk_length - 1) // chunk_length]
+        self.MEAS_LEN = self.length
+        self.OUTPUT_LEN = self.length
+        self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-            r_power *= r
+    def eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -&gt; list[F]:
+        # Check that each bucket is one or zero.
+        range_check = self.field(0)
+        shares_inv = self.field(num_shares).inv()
+        for i in range(self.GADGET_CALLS[0]):
+            r = joint_rand[i]
+            r_power = r
+            inputs: list[Optional[F]]
+            inputs = [None] * (2 * self.chunk_length)
+            for j in range(self.chunk_length):
+                index = i * self.chunk_length + j
+                if index &lt; len(meas):
+                    meas_elem = meas[index]
+                else:
+                    meas_elem = self.field(0)
 
-        range_check += self.GADGETS[0].eval(
-            self.field,
-            cast(list[F], inputs),
-        )
+                inputs[j * 2] = r_power * meas_elem
+                inputs[j * 2 + 1] = meas_elem - shares_inv
 
-    # Check that the buckets sum to 1.
-    sum_check = -shares_inv
-    for b in meas:
-        sum_check += b
+                r_power *= r
 
-    return [range_check, sum_check]
-</pre><a href="#section-7.4.4-8" class="pilcrow">¶</a>
+            range_check += self.GADGETS[0].eval(
+                self.field,
+                cast(list[F], inputs),
+            )
+
+        # Check that the buckets sum to 1.
+        sum_check = -shares_inv
+        for b in meas:
+            sum_check += b
+
+        return [range_check, sum_check]
+
+    def encode(self, measurement: int) -&gt; list[F]:
+        encoded = [self.field(0)] * self.length
+        encoded[measurement] = self.field(1)
+        return encoded
+
+    def truncate(self, meas: list[F]) -&gt; list[F]:
+        return meas
+
+    def decode(
+            self,
+            output: list[F],
+            _num_measurements: int) -&gt; list[int]:
+        return [bucket_count.as_unsigned()
+                for bucket_count in output]
+</pre><a href="#section-7.4.4-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.4-9">Note that this circuit depends on the number of shares into which the
-measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7.4.4-9" class="pilcrow">¶</a></p>
-<span id="name-parameters-of-validity-circuit"></span><table class="center" id="table-16">
-            <caption>
-<a href="#table-16" class="selfRef">Table 16</a>:
-<a href="#name-parameters-of-validity-circuit" class="selfRef">Parameters of validity circuit Histogram.</a>
-            </caption>
-<thead>
-              <tr>
-                <th class="text-left" rowspan="1" colspan="1">Parameter</th>
-                <th class="text-left" rowspan="1" colspan="1">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGETS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[ParallelSum(Mul(), chunk_length)]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[(length + chunk_length - 1) // chunk_length]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>MEAS_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>length</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>length</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>JOINT_RAND_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS[0]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>EVAL_OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>2</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Measurement</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>int</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>AggResult</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>list[int]</code>
-</td>
-              </tr>
-            </tbody>
-          </table>
 </section>
 </div>
 <div id="prio3multihotcountvec">
@@ -6934,9 +6689,9 @@ measurement is sharded. This is provided to the FLP by Prio3.<a href="#section-7
           <h4 id="name-prio3multihotcountvec">
 <a href="#section-7.4.5" class="section-number selfRef">7.4.5. </a><a href="#name-prio3multihotcountvec" class="section-name selfRef">Prio3MultihotCountVec</a>
           </h4>
-<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-17">
+<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-13">
             <caption>
-<a href="#table-17" class="selfRef">Table 17</a>:
+<a href="#table-13" class="selfRef">Table 13</a>:
 <a href="#name-parameters-for-prio3multiho" class="selfRef">Parameters for Prio3MultihotCountVec.</a>
             </caption>
 <thead>
@@ -6983,8 +6738,7 @@ Prio3Histogram except that more than one entry may be non-zero. This allows
 Prio3MultihotCountVec to be composed with a randomized response mechanism, like
 <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For example, each Client would
 set each entry to one with some small probability.)<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-3">Prio3MultihotCountVec uses XofTurboShake128 (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>) as its XOF.
-Its validity circuit is denoted <code>MultihotCountVec</code>. It has three parameters:
+<p id="section-7.4.5-3">The validity circuit is denoted <code>MultihotCountVec</code> and has three parameters:
 <code>length</code>, the number of of entries in the count vector; <code>max_weight</code>, the
 maximum number of non-zero entries (i.e., the weight must be at most
 <code>max_weight</code>); and <code>chunk_length</code>, used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and
@@ -7004,160 +6758,126 @@ be encoded with <code>bits_for_weight</code> bits.<a href="#section-7.4.5-6" cla
 <p id="section-7.4.5-7">The verifier checks that each entry of the encoded measurement is a bit (i.e.,
 either one or zero). It then decodes the reported weight and subtracts it from
 <code>offset + sum(count_vec)</code>, where <code>count_vec</code> is the count vector. The result is
-zero if and only if the reported weight is equal to the true weight.<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-8">Encoding, truncation, and decoding are defined as follows:<a href="#section-7.4.5-8" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.5-9">
+zero if and only if the reported weight is equal to the true weight. The
+complete circuit is defined below.<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.5-8">
 <pre>
-def encode(self, measurement: list[int]) -&gt; list[F]:
-    if len(measurement) != self.length:
-        raise ValueError('invalid Client measurement length')
+class MultihotCountVec(Valid[list[int], list[int], F]):
+    EVAL_OUTPUT_LEN = 2
+    field: type[F]
 
-    # The first part is the vector of counters.
-    count_vec = list(map(self.field, measurement))
+    def __init__(self,
+                 field: type[F],
+                 length: int,
+                 max_weight: int,
+                 chunk_length: int):
+        """
+        Instantiate an instance of the this circuit with the given
+        `length`, `max_weight`, and `chunk_length`.
 
-    # The second part is the reported weight.
-    weight_reported = sum(count_vec, self.field(0))
+        Pre-conditions:
 
-    encoded = []
-    encoded += count_vec
-    encoded += self.field.encode_into_bit_vector(
-        (self.offset + weight_reported).as_unsigned(),
-        self.bits_for_weight)
-    return encoded
+            - `length &gt; 0`
+            - `0 &lt; max_weight` and `max_weight &lt;= length`
+            - `chunk_length &gt; 0`
+        """
+        self.field = field
 
-def truncate(self, meas: list[F]) -&gt; list[F]:
-    return meas[:self.length]
+        # Compute the number of bits to represent `max_weight`.
+        self.bits_for_weight = max_weight.bit_length()
+        self.offset = self.field(
+            2**self.bits_for_weight - 1 - max_weight)
 
-def decode(
-        self,
-        output: list[F],
-        _num_measurements: int) -&gt; list[int]:
-    return [bucket_count.as_unsigned() for bucket_count in output]
-</pre><a href="#section-7.4.5-9" class="pilcrow">¶</a>
+        # Make sure `offset + length` doesn't overflow the field
+        # modulus. Otherwise we may not correctly compute the sum
+        # measurement vector entries during circuit evaluation.
+        if self.field.MODULUS - self.offset.as_unsigned() &lt;= length:
+            raise ValueError('length and max_weight are too large '
+                             'for the current field size')
+
+        self.length = length
+        self.max_weight = max_weight
+        self.chunk_length = chunk_length
+        self.GADGETS: list[Gadget[F]] = [
+            ParallelSum(Mul(), chunk_length),
+        ]
+        self.GADGET_CALLS = [
+            (length + self.bits_for_weight + chunk_length - 1)
+            // chunk_length
+        ]
+        self.MEAS_LEN = self.length + self.bits_for_weight
+        self.OUTPUT_LEN = self.length
+        self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
+
+    def eval(
+            self,
+            meas: list[F],
+            joint_rand: list[F],
+            num_shares: int) -&gt; list[F]:
+        # Check that each entry in the input vector is one or zero.
+        range_check = self.field(0)
+        shares_inv = self.field(num_shares).inv()
+        for i in range(self.GADGET_CALLS[0]):
+            r = joint_rand[i]
+            r_power = r
+            inputs: list[Optional[F]]
+            inputs = [None] * (2 * self.chunk_length)
+            for j in range(self.chunk_length):
+                index = i * self.chunk_length + j
+                if index &lt; len(meas):
+                    meas_elem = meas[index]
+                else:
+                    meas_elem = self.field(0)
+
+                inputs[j * 2] = r_power * meas_elem
+                inputs[j * 2 + 1] = meas_elem - shares_inv
+
+                r_power *= r
+
+            range_check += self.GADGETS[0].eval(
+                self.field,
+                cast(list[F], inputs),
+            )
+
+        # Check that the weight `offset` plus the sum of the counters
+        # is equal to the value claimed by the Client.
+        count_vec = meas[:self.length]
+        weight = sum(count_vec, self.field(0))
+        weight_reported = \
+            self.field.decode_from_bit_vector(meas[self.length:])
+        weight_check = self.offset*shares_inv + weight - \
+            weight_reported
+
+        return [range_check, weight_check]
+
+    def encode(self, measurement: list[int]) -&gt; list[F]:
+        if len(measurement) != self.length:
+            raise ValueError('invalid Client measurement length')
+
+        # The first part is the vector of counters.
+        count_vec = list(map(self.field, measurement))
+
+        # The second part is the reported weight.
+        weight_reported = sum(count_vec, self.field(0))
+
+        encoded = []
+        encoded += count_vec
+        encoded += self.field.encode_into_bit_vector(
+            (self.offset + weight_reported).as_unsigned(),
+            self.bits_for_weight)
+        return encoded
+
+    def truncate(self, meas: list[F]) -&gt; list[F]:
+        return meas[:self.length]
+
+    def decode(
+            self,
+            output: list[F],
+            _num_measurements: int) -&gt; list[int]:
+        return [bucket_count.as_unsigned() for
+                bucket_count in output]
+</pre><a href="#section-7.4.5-8" class="pilcrow">¶</a>
 </div>
-<p id="section-7.4.5-10">Circuit evaluation is defined as follows:<a href="#section-7.4.5-10" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.4.5-11">
-<pre>
-def eval(
-        self,
-        meas: list[F],
-        joint_rand: list[F],
-        num_shares: int) -&gt; list[F]:
-    # Check that each entry in the input vector is one or zero.
-    range_check = self.field(0)
-    shares_inv = self.field(num_shares).inv()
-    for i in range(self.GADGET_CALLS[0]):
-        r = joint_rand[i]
-        r_power = r
-        inputs: list[Optional[F]]
-        inputs = [None] * (2 * self.chunk_length)
-        for j in range(self.chunk_length):
-            index = i * self.chunk_length + j
-            if index &lt; len(meas):
-                meas_elem = meas[index]
-            else:
-                meas_elem = self.field(0)
-
-            inputs[j * 2] = r_power * meas_elem
-            inputs[j * 2 + 1] = meas_elem - shares_inv
-
-            r_power *= r
-
-        range_check += self.GADGETS[0].eval(
-            self.field,
-            cast(list[F], inputs),
-        )
-
-    # Check that the weight `offset` plus the sum of the counters
-    # is equal to the value claimed by the Client.
-    count_vec = meas[:self.length]
-    weight = sum(count_vec, self.field(0))
-    weight_reported = \
-        self.field.decode_from_bit_vector(meas[self.length:])
-    weight_check = self.offset*shares_inv + weight - \
-        weight_reported
-
-    return [range_check, weight_check]
-</pre><a href="#section-7.4.5-11" class="pilcrow">¶</a>
-</div>
-<span id="name-parameters-of-validity-circuit-"></span><table class="center" id="table-18">
-            <caption>
-<a href="#table-18" class="selfRef">Table 18</a>:
-<a href="#name-parameters-of-validity-circuit-" class="selfRef">Parameters of validity circuit MultihotCountVec.</a>
-            </caption>
-<thead>
-              <tr>
-                <th class="text-left" rowspan="1" colspan="1">Parameter</th>
-                <th class="text-left" rowspan="1" colspan="1">Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGETS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[ParallelSum(Mul(), chunk_length)]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>[(length + bits_for_weight + chunk_length - 1) // chunk_length]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>MEAS_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>length + bits_for_weight</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>length</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>JOINT_RAND_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>GADGET_CALLS[0]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>EVAL_OUTPUT_LEN</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>2</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Measurement</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>list[int]</code>
-</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>AggResult</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>list[int]</code>
-</td>
-              </tr>
-            </tbody>
-          </table>
 </section>
 </div>
 </section>
@@ -7254,7 +6974,7 @@ field. We distinguish two types of fields: one for inner nodes (denoted
 instantiation of Poplar1 (<a href="#poplar1-inst" class="auto internal xref">Section 8.4</a>) will use a much larger field for
 leaf nodes than for inner nodes. This is to ensure the IDPF is "extractable" as
 defined in <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Definition 1.)<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.1-3">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="auto internal xref">Table 19</a>.
+<p id="section-8.1-3">A concrete IDPF defines the types and constants enumerated in <a href="#idpf-param" class="auto internal xref">Table 14</a>.
 In the remainder we write <code>Output</code> as shorthand for the type
 <code>list[list[FieldInner]] | list[list[FieldLeaf]]</code>. (This type
 denotes either a vector of inner node field elements or leaf node field
@@ -7344,9 +7064,9 @@ not include shared state across VDAF evaluations. In practice, of course, it
 will often be beneficial to expose a stateful API for IDPFs and carry the state
 across evaluations. See <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> for details.<a href="#section-8.1-7" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-b"></span><div id="idpf-param">
-<table class="center" id="table-19">
+<table class="center" id="table-14">
           <caption>
-<a href="#table-19" class="selfRef">Table 19</a>:
+<a href="#table-14" class="selfRef">Table 14</a>:
 <a href="#name-constants-and-types-defined-b" class="selfRef">Constants and types defined by a concrete IDPF.</a>
           </caption>
 <thead>
@@ -7449,13 +7169,13 @@ as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
 (<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of any <code>Idpf</code> (<a href="#idpf" class="auto internal xref">Section 8.1</a>) for which
 <code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and an implementation of <code>Xof</code>
 (<a href="#xof" class="auto internal xref">Section 6.2</a>). The associated constants and types required by the <code>Vdaf</code> interface
-are defined in <a href="#poplar1-param" class="auto internal xref">Table 20</a>. The methods required for sharding,
+are defined in <a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding,
 preparation, aggregation, and unsharding are described in the remaining
-subsections. These methods make use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 21</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+subsections. These methods make use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-poplar1"></span><div id="poplar1-param">
-<table class="center" id="table-20">
+<table class="center" id="table-15">
           <caption>
-<a href="#table-20" class="selfRef">Table 20</a>:
+<a href="#table-15" class="selfRef">Table 15</a>:
 <a href="#name-vdaf-parameters-for-poplar1" class="selfRef">VDAF parameters for Poplar1.</a>
           </caption>
 <thead>
@@ -7587,9 +7307,9 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
         </table>
 </div>
 <span id="name-constants-used-by-poplar1"></span><div id="poplar1-const">
-<table class="center" id="table-21">
+<table class="center" id="table-16">
           <caption>
-<a href="#table-21" class="selfRef">Table 21</a>:
+<a href="#table-16" class="selfRef">Table 16</a>:
 <a href="#name-constants-used-by-poplar1" class="selfRef">Constants used by Poplar1.</a>
           </caption>
 <thead>
@@ -8320,15 +8040,15 @@ next. This would help reduce communication overhead.<a href="#section-8.2.6.6-7"
 Poplar1. The scheme gets its name from the name of the protocol of
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <p id="section-8.3-2">The constant and type definitions required by the <code>Idpf</code> interface are given in
-<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 22</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 17</a>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 <p id="section-8.3-3">Our IDPF requires an XOF for deriving the output shares, as well as a variety
 of other artifacts used internally. For performance reasons, we instantiate
 this object using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>) wherever
 possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.5</a> for more information.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-bbcggi21-param">
-<table class="center" id="table-22">
+<table class="center" id="table-17">
           <caption>
-<a href="#table-22" class="selfRef">Table 22</a>:
+<a href="#table-17" class="selfRef">Table 17</a>:
 <a href="#name-constants-and-type-definiti" class="selfRef">Constants and type definitions for the IDPF of BBCGGI21.</a>
           </caption>
 <thead>
@@ -9119,9 +8839,9 @@ Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pi
       </ul>
 <p id="section-10-7">The initial contents of the registry are as follows:<a href="#section-10-7" class="pilcrow">¶</a></p>
 <span id="name-verifiable-distributed-aggr"></span><div id="codepoints">
-<table class="center" id="table-23">
+<table class="center" id="table-18">
         <caption>
-<a href="#table-23" class="selfRef">Table 23</a>:
+<a href="#table-18" class="selfRef">Table 18</a>:
 <a href="#name-verifiable-distributed-aggr" class="selfRef">Verifiable Distributed Aggregation Function Identifiers Registry</a>
         </caption>
 <thead>
@@ -9354,12 +9074,147 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
 </div>
 </section>
 </div>
-<div id="gadget-wrappers">
+<div id="gadgets">
 <section id="appendix-A">
-      <h2 id="name-flp-gadget-wrappers">
-<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-flp-gadget-wrappers" class="section-name selfRef">FLP Gadget Wrappers</a>
+      <h2 id="name-flp-gadgets">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-flp-gadgets" class="section-name selfRef">FLP Gadgets</a>
       </h2>
-<div class="breakable lang-python sourcecode" id="appendix-A-1">
+<p id="appendix-A-1">This section defines gadgets used to specify variants of Prio3 defined in
+<a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a> and to construct FLPs as defined in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<div id="gadget-mul">
+<section id="appendix-A.1">
+        <h3 id="name-multiplication">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-multiplication" class="section-name selfRef">Multiplication</a>
+        </h3>
+<p id="appendix-A.1-1">The multiplication gadget takes in a pair of inputs and multiplies them
+together. The degree of this circuit is <code>2</code>.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="appendix-A.1-2">
+<pre>
+class Mul(Gadget[F]):
+    ARITY = 2
+    DEGREE = 2
+
+    def eval(self, _field: type[F], inp: list[F]) -&gt; F:
+        return inp[0] * inp[1]
+
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -&gt; list[F]:
+        return poly_mul(field, inp_poly[0], inp_poly[1])
+</pre><a href="#appendix-A.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="gadget-poly-eval">
+<section id="appendix-A.2">
+        <h3 id="name-polynomial-evaluation">
+<a href="#appendix-A.2" class="section-number selfRef">A.2. </a><a href="#name-polynomial-evaluation" class="section-name selfRef">Polynomial Evaluation</a>
+        </h3>
+<p id="appendix-A.2-1">The polynomial-evaluation gadget takes in a single input <code>x</code> and returns
+<code>p(x)</code>, where <code>p</code> is a polynomial specified by the user. Its degree is the same
+as <code>p</code>.<a href="#appendix-A.2-1" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="appendix-A.2-2">
+<pre>
+class PolyEval(Gadget[F]):
+    ARITY = 1
+    p: list[int]  # polynomial coefficients
+
+    def __init__(self, p: list[int]):
+        """
+        Instantiate this gadget with the given polynomial.
+        """
+        # Strip leading zeros.
+        for i in reversed(range(len(p))):
+            if p[i] != 0:
+                p = p[:i+1]
+                break
+        if len(p) &lt; 1:
+            raise ValueError('invalid polynomial: zero length')
+
+        self.p = p
+        self.DEGREE = len(p) - 1
+
+    def eval(self, field: type[F], inp: list[F]) -&gt; F:
+        p = [field(coeff) for coeff in self.p]
+        return poly_eval(field, p, inp[0])
+
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -&gt; list[F]:
+        p = [field(coeff) for coeff in self.p]
+        out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
+        out[0] = p[0]
+        x = inp_poly[0]
+        for i in range(1, len(p)):
+            for j in range(len(x)):
+                out[j] += p[i] * x[j]
+            x = poly_mul(field, x, inp_poly[0])
+        return poly_strip(field, out)
+</pre><a href="#appendix-A.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="gadget-parallel-sum">
+<section id="appendix-A.3">
+        <h3 id="name-parallel-sum">
+<a href="#appendix-A.3" class="section-number selfRef">A.3. </a><a href="#name-parallel-sum" class="section-name selfRef">Parallel Sum</a>
+        </h3>
+<p id="appendix-A.3-1">The parallel-sum gadget applies a subcircuit to multiple inputs in parallel,
+then returns the sum of the results. The arity of the gadget is equal to <code>count</code>
+times the arity of the subcircuit, where <code>count</code> denotes the number of times the
+subcircuit is called. The degree of the gadget is equal to the degree of the
+subcircuit.<a href="#appendix-A.3-1" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="appendix-A.3-2">
+<pre>
+class ParallelSum(Gadget[F]):
+    subcircuit: Gadget[F]
+    count: int
+
+    def __init__(self, subcircuit: Gadget[F], count: int):
+        self.subcircuit = subcircuit
+        self.count = count
+        self.ARITY = subcircuit.ARITY * count
+        self.DEGREE = subcircuit.DEGREE
+
+    def eval(self, field: type[F], inp: list[F]) -&gt; F:
+        out = field(0)
+        for i in range(self.count):
+            start_index = i * self.subcircuit.ARITY
+            end_index = (i + 1) * self.subcircuit.ARITY
+            out += self.subcircuit.eval(
+                field,
+                inp[start_index:end_index],
+            )
+        return out
+
+    def eval_poly(self,
+                  field: type[F],
+                  inp_poly: list[list[F]]) -&gt; list[F]:
+        output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
+        out_sum = [field(0) for _ in range(output_poly_length)]
+        for i in range(self.count):
+            start_index = i * self.subcircuit.ARITY
+            end_index = (i + 1) * self.subcircuit.ARITY
+            out_current = self.subcircuit.eval_poly(
+                field,
+                inp_poly[start_index:end_index]
+            )
+            for j in range(output_poly_length):
+                out_sum[j] += out_current[j]
+        return poly_strip(field, out_sum)
+</pre><a href="#appendix-A.3-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="gadget-wrappers">
+<section id="appendix-A.4">
+        <h3 id="name-shims-for-generating-and-ve">
+<a href="#appendix-A.4" class="section-number selfRef">A.4. </a><a href="#name-shims-for-generating-and-ve" class="section-name selfRef">Shims for Generating and Verifying Proofs</a>
+        </h3>
+<p id="appendix-A.4-1">This section specifies two "shim" gadgets, one for generating an FLP as
+specified in <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3.1</a> and another for querying an FLP
+as specified in <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.3.2</a>.<a href="#appendix-A.4-1" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="appendix-A.4-2">
 <pre>
 class ProveGadget(Gadget[F]):
     """
@@ -9412,7 +9267,6 @@ class ProveGadget(Gadget[F]):
         wrapped_valid.GADGETS = wrapped_gadgets
         return wrapped_valid
 
-
 class QueryGadget(Gadget[F]):
     """
     Gadget wrapper that records the input wires for each evaluation.
@@ -9463,7 +9317,9 @@ class QueryGadget(Gadget[F]):
         wrapped_valid = deepcopy(valid)
         wrapped_valid.GADGETS = wrapped_gadgets
         return wrapped_valid
-</pre><a href="#appendix-A-1" class="pilcrow">¶</a>
+</pre><a href="#appendix-A.4-2" class="pilcrow">¶</a>
+</div>
+</section>
 </div>
 </section>
 </div>
