@@ -4515,6 +4515,19 @@ subsections. These methods refer to constants enumerated in
           <tbody>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
+                <code>flp</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">an instance of <code>Flp</code> (<a href="#flp" class="auto internal xref">Section 7.1</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>xof</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
                 <code>VERIFY_KEY_SIZE</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
@@ -4629,19 +4642,6 @@ subsections. These methods refer to constants enumerated in
               <td class="text-left" rowspan="1" colspan="1">
                 <code>Optional[bytes]</code>
 </td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>flp</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">an instance of <code>Flp</code> (<a href="#flp" class="auto internal xref">Section 7.1</a>)</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>xof</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
             </tr>
           </tbody>
         </table>
@@ -5465,7 +5465,7 @@ struct {
 on the construction from <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Section 4.2. We begin in
 <a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of the proof system and some
 extensions to it. <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a> defines validity circuits, the core
-component of the proof system that defines measurement validity and how
+component of the proof system that determines measurement validity and how
 measurements are aggregated. The proof-generation algorithm, the query
 algorithm, and the decision algorithm are defined in
 <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3</a>, <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.4</a>, and
@@ -5483,6 +5483,12 @@ algorithm, and the decision algorithm are defined in
             </tr>
           </thead>
           <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>valid</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">instance of <code>Valid</code> (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+            </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>PROVE_RAND_LEN</code>
@@ -5562,12 +5568,6 @@ algorithm, and the decision algorithm are defined in
               <td class="text-left" rowspan="1" colspan="1">
                 <code>valid.field</code>
 </td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>valid</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">Instance of <code>Valid</code> (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
             </tr>
           </tbody>
         </table>
@@ -7142,12 +7142,13 @@ as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-construction-2" class="section-name selfRef">Construction</a>
         </h3>
 <p id="section-8.2-1">This section specifies <code>Poplar1</code>, an implementation of the <code>Vdaf</code> interface
-(<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of any <code>Idpf</code> (<a href="#idpf" class="auto internal xref">Section 8.1</a>) for which
-<code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and an implementation of <code>Xof</code>
-(<a href="#xof" class="auto internal xref">Section 6.2</a>). The associated constants and types required by the <code>Vdaf</code> interface
-are defined in <a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding,
-preparation, aggregation, and unsharding are described in the remaining
-subsections. These methods make use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+(<a href="#vdaf" class="auto internal xref">Section 5</a>). It is defined in terms of the <code>Idpf</code> implementation of
+<a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> with <code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and
+<code>XofTurboShake128</code> as specified in <a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>. The associated
+constants and types required by the <code>Vdaf</code> interface are defined in
+<a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding, preparation, aggregation,
+and unsharding are described in the remaining subsections. These methods make
+use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-poplar1"></span><div id="poplar1-param">
 <table class="center" id="table-15">
           <caption>
@@ -7161,6 +7162,20 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
             </tr>
           </thead>
           <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>idpf</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">as specified in <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>xof</code>
+</td>
+              <td class="text-left" rowspan="1" colspan="1">
+                <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
+            </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>VERIFY_KEY_SIZE</code>
@@ -7277,20 +7292,6 @@ subsections. These methods make use of constants defined in <a href="#poplar1-co
 </td>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>Optional[FieldVec]</code>
-</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>xof</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>XofTurboShake128</code> (<a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>)</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>idpf</code>
-</td>
-              <td class="text-left" rowspan="1" colspan="1">as specified in <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>
 </td>
             </tr>
           </tbody>
