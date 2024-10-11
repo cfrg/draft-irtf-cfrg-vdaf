@@ -113,7 +113,7 @@ class PingPong(
             nonce: bytes,
             public_share: bytes,
             input_share: bytes) -> tuple[State, Optional[bytes]]:
-        """Called by the leader to initialize ping-ponging."""
+        """Called by the Leader to initialize ping-ponging."""
         try:
             (prep_state, prep_share) = self.prep_init(
                 vdaf_verify_key,
@@ -142,7 +142,7 @@ class PingPong(
             input_share: bytes,
             inbound: bytes) -> tuple[State, Optional[bytes]]:
         """
-        Called by the helper in response to the leader's initial
+        Called by the Helper in response to the Leader's initial
         message.
         """
         try:
@@ -208,7 +208,7 @@ class PingPong(
         inbound: bytes,
     ) -> tuple[State, Optional[bytes]]:
         """
-        Called by the leader to start the next step of ping-ponging.
+        Called by the Leader to start the next step of ping-ponging.
         """
         return self.ping_pong_continued(
             True, ctx, agg_param, state, inbound)
@@ -272,7 +272,7 @@ class PingPong(
         state: State,
         inbound: bytes,
     ) -> tuple[State, Optional[bytes]]:
-        """Called by the helper to continue ping-ponging."""
+        """Called by the Helper to continue ping-ponging."""
         return self.ping_pong_continued(
             False, ctx, agg_param, state, inbound)
 
