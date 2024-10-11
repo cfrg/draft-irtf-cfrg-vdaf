@@ -999,8 +999,6 @@ Table of Contents
 
       -  The number of input shares MUST equal SHARES.
 
-   While its role in DAFs is relatively
-
    Sharding is bound to a specific "application context".  The
    application context is a string intended to uniquely identify an
    instance of the higher level protocol that uses the DAF.  This is
