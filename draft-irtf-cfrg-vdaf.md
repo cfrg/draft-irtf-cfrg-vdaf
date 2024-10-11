@@ -1558,13 +1558,19 @@ instantiate secure channels between each of the protocol participants.
 
 ## Communication Patterns for Preparation {#vdaf-prep-comm}
 
+The only stage of VDAF execution that requires interaction is preparation
+({{sec-vdaf-prepare}}). There are a number of ways to coordinate this
+interaction; the best strategy depends largely on the number of Aggregators
+(i.e., `vdaf.SHARES`). This section describes two strategies, one specialized
+for two Aggregators and another that is suitable for any number of Aggregators.
+
 In each round of preparation, each Aggregator writes a prep share to some
 broadcast channel, which is then processed into the prep message using the
 public `prep_shares_to_prep()` algorithm and broadcast to the Aggregators to
-start the next round. In this section we describe some approaches to realizing
-this broadcast channel functionality in protocols that use VDAFs.
+start the next round. Our goal in this section is to realize this broadcast
+channel.
 
-The state machine of each Aggregator is shown in {{vdaf-prep-state-machine}}.
+The state machine of each Aggregator is shown below.
 
 ~~~
                   +----------------+
@@ -1575,12 +1581,12 @@ Start ----> Continued(prep_state, prep_round) --> Finished(out_share)
  |                |
  +--> Rejected <--+
 ~~~
-{: #vdaf-prep-state-machine title="State machine for VDAF preparation."}
+{: #vdaf-prep-state-machine title="State machine of VDAF preparation."}
 
-State transitions are made when the state is acted upon by the host's local
-inputs and/or messages sent by the peers. The initial state is `Start`. The
-terminal states are `Rejected`, which indicates that the report cannot be
-processed any further, and `Finished(out_share)`, which indicates that the
+State transitions are made when the state is acted upon by the Aggregator's
+local inputs and/or messages sent by its co-Aggregators. The initial state is
+`Start`. The terminal states are: `Rejected`, indicating that the report cannot
+be processed any further; and `Finished(out_share)`, indicating that the
 Aggregator has recovered an output share `out_share`.
 
 ~~~ python
@@ -1619,22 +1625,23 @@ input shares, prep shares, prep messages, and aggregation parameters.
 Implementations of Prio3 and Poplar1 MUST use the encoding scheme specified in
 {{prio3-encode}} and {{poplar1-encode}} respectively.
 
-### The Ping-Pong Topology (Only Two Aggregators)
+### The Ping-Pong Topology (Only Two Aggregators) {#ping-pong-topo}
 
-For VDAFs with precisely two Aggregators (i.e., `SHARES == 2`), the following
-"ping pong" communication pattern can be used. It is compatible with any
-request/response transport protocol, such as HTTP.
+For VDAFs with precisely two Aggregators (i.e., `vdaf.SHARES == 2`), the
+following "ping pong" communication pattern can be used. It is compatible with
+any request/response transport protocol, such as HTTP.
 
-Let us call the initiating party the "Leader" and the responding party the
-"Helper". The high-level idea is that the Leader and Helper will take turns
-running the computation locally until input from their peer is required:
+Let us call the initiating Aggregator the "Leader" and the responding
+Aggregator the "Helper". The high-level idea is that the Leader and Helper will
+take turns running the computation locally until input from their peer is
+required:
 
-* For a 1-round VDAF (e.g., Prio3 ({{prio3}})), the Leader sends its prep share
+* For a 1-round VDAF (e.g., Prio3 in {{prio3}}), the Leader sends its prep share
   to the Helper, who computes the prep message locally, computes its output
   share, then sends the prep message to the Leader. Preparation requires just
   one round trip between the Leader and the Helper.
 
-* For a 2-round VDAF (e.g., Poplar1 ({{poplar1}})), the Leader sends its
+* For a 2-round VDAF (e.g., Poplar1 in {{poplar1}}), the Leader sends its
   first-round prep share to the Helper, who replies with the first-round prep
   message and its second-round prep share. In the next request, the Leader
   computes its second-round prep share locally, computes its output share, and
@@ -1648,11 +1655,11 @@ running the computation locally until input from their peer is required:
 
 The Aggregators proceed in this ping-ponging fashion until a step of the
 computation fails (indicating the report is invalid and should be rejected) or
-preparation is completed. All told there are `ceil((ROUNDS+1)/2)`
+preparation is completed. All told there are `ceil((vdaf.ROUNDS+1)/2)`
 requests sent.
 
-Each message in the ping-pong protocol is structured as follows (expressed in
-TLS syntax as defined in {{Section 3 of !RFC8446}}):
+We specify protocol messages in the presentation language of TLS; see {{Section
+3 of !RFC8446}}. Each message is structured as follows:
 
 ~~~ tls-presentation
 enum {
@@ -1676,9 +1683,10 @@ struct {
 } Message;
 ~~~
 
-These messages are used to transition between the states described in
-{{vdaf-prep-comm}}. The Leader's initial transition is computed with the
-following method, implemented on `Vdaf`:
+These messages trigger all transitions in the state machine in
+{{vdaf-prep-state-machine}}, except for the Leader's initial transition. The
+Leader's state is initialized using its local inputs with the following method
+on class `Vdaf`:
 
 ~~~ python
 def ping_pong_leader_init(
@@ -1689,7 +1697,7 @@ def ping_pong_leader_init(
         nonce: bytes,
         public_share: bytes,
         input_share: bytes) -> tuple[State, Optional[bytes]]:
-    """Called by the leader to initialize ping-ponging."""
+    """Called by the Leader to initialize ping-ponging."""
     try:
         (prep_state, prep_share) = self.prep_init(
             vdaf_verify_key,
@@ -1715,8 +1723,9 @@ Otherwise, if the state is `Continued`, then processing continues. Function
 `encode`  is used to encode the outbound message, here the `initialize` variant
 (hence `0`).
 
-The Leader sends the outbound message to the Helper. The Helper's initial
-transition is computed using the following procedure:
+To continue processing the report, the Leader sends the outbound message to the
+Helper. The Helper's initial transition is computed using the following
+procedure:
 
 ~~~ python
 def ping_pong_helper_init(
@@ -1729,7 +1738,7 @@ def ping_pong_helper_init(
         input_share: bytes,
         inbound: bytes) -> tuple[State, Optional[bytes]]:
     """
-    Called by the helper in response to the leader's initial
+    Called by the Helper in response to the Leader's initial
     message.
     """
     try:
@@ -1763,9 +1772,9 @@ def ping_pong_helper_init(
         return (Rejected(), None)
 ~~~
 
-Procedure `decode` decodes the inbound message and returns the MessageType
-variant (`initialize`, `continue`, or `finalize`) and the sequence of fields.
-Procedure `ping_pong_transition` takes in the prep shares, combines them into
+Procedure `decode()` decodes the inbound message and returns the MessageType
+variant (`initialize`, `continue`, or `finish`) and the sequence of fields.
+Procedure `ping_pong_transition()` takes in the prep shares, combines them into
 the prep message, and computes the next prep state of the caller:
 
 ~~~ python
@@ -1799,8 +1808,9 @@ The output is the `State` to which the Helper has transitioned and an encoded
 `Message`. If the Helper's state is `Finished` or `Rejected`, then processing
 halts. Otherwise, if the state is `Continued`, then processing continues.
 
-Next, the Helper sends the outbound message to the Leader. The Leader computes
-its next state transition using the function `ping_pong_leader_continued`:
+To continue processing, the Helper sends the outbound message to the Leader.
+The Leader computes its next state transition using the following method on
+class `Vdaf`:
 
 ~~~ python
 def ping_pong_leader_continued(
@@ -1811,7 +1821,7 @@ def ping_pong_leader_continued(
     inbound: bytes,
 ) -> tuple[State, Optional[bytes]]:
     """
-    Called by the leader to start the next step of ping-ponging.
+    Called by the Leader to start the next step of ping-ponging.
     """
     return self.ping_pong_continued(
         True, ctx, agg_param, state, inbound)
@@ -1871,8 +1881,7 @@ def ping_pong_continued(
 
 If the Leader's state is `Finished` or `Rejected`, then processing halts.
 Otherwise, the Leader sends the outbound message to the Helper. The Helper
-computes its next state transition using the function
-`ping_pong_helper_continued`:
+computes its next state transition using the following method on class `Vdaf`:
 
 ~~~ python
 def ping_pong_helper_continued(
@@ -1882,7 +1891,7 @@ def ping_pong_helper_continued(
     state: State,
     inbound: bytes,
 ) -> tuple[State, Optional[bytes]]:
-    """Called by the helper to continue ping-ponging."""
+    """Called by the Helper to continue ping-ponging."""
     return self.ping_pong_continued(
         False, ctx, agg_param, state, inbound)
 ~~~
@@ -1904,11 +1913,11 @@ Aggregator as the Leader and to all other Aggregators as Helpers.
 
 At the start of each round, the Leader requests from each Helper its prep
 share. After gathering each of the prep shares, the Leader computes the next
-prep message (via `prep_shares_to_prep()`) and broadcasts it to the Helpers. At
-this point, each Aggregator runs `prep_next()` locally to either recover an
-output share or, if more rounds of preparation are required, compute its updated state
-and prep share. If more are required, then the Helper responds to the broadcast
-message with its next prep share.
+prep message (via `vdaf.prep_shares_to_prep()`) and broadcasts it to the
+Helpers. At this point, each Aggregator runs `vdaf.prep_next()` locally to
+either recover an output share or, if more rounds of preparation are required,
+compute its updated state and prep share. If another round is required, then
+the Helper responds to the broadcast message with its next prep share.
 
 The Aggregators proceed in this way until each recovers an output share or some
 step of the computation fails.
