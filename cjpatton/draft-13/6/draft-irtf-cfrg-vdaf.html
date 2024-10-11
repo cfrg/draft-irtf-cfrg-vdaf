@@ -4923,31 +4923,27 @@ def shard_with_joint_rand(
           </h4>
 <p id="section-7.2.2-1">This section describes the process of recovering output shares from the input
 shares. The high-level idea is that each Aggregator first queries its
-measurement and share of proof(s) locally, then exchanges its share of
-verifier(s) with the other Aggregators. The shares of verifier(s) are then
-combined into the verifier message(s) used to decide whether to accept.<a href="#section-7.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-7.2.2-2">In addition, for FLPs that require joint randomness, the Aggregators must
-ensure that they have all used the same joint randomness for the query
-algorithm. To do so, they collectively re-derive the joint randomness from
-their measurement shares just as the Client did during sharding.<a href="#section-7.2.2-2" class="pilcrow">¶</a></p>
-<p id="section-7.2.2-3">In order to avoid extra round of communication, the Client sends each
-Aggregator a "hint" consisting of the joint randomness parts. This leaves open
-the possibility that the Client cheated by, say, forcing the Aggregators to use
-joint randomness that biases the proof check procedure some way in its favor.
-To mitigate this, the Aggregators also check that they have all computed the
-same joint randomness seed before accepting their output shares. To do so, they
-exchange their parts of the joint randomness along with their shares of
-verifier(s).<a href="#section-7.2.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.2.2-4">Implementation note: the preparation state for Prio3 includes the output share
-that will be released once preparation is complete. In some situations, it may be
+measurement share and proof(s) share(s) locally, then broadcasts its verifier
+share(s) in its prep share. The shares of verifier(s) are then combined into
+the verifier message(s) used to decide whether to accept.<a href="#section-7.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-7.2.2-2">In addition, the Aggregators must recompute the same joint randomness used by
+the Client to generate the proof(s). In order to avoid an extra round of
+communication, the Client includes the joint randomness parts in the public
+share. This leaves open the possibility that the Client cheated by, say,
+forcing the Aggregators to use joint randomness that biases the proof check
+procedure some way in its favor. To mitigate this, the Aggregators also check
+that they have all computed the same joint randomness seed before accepting
+their output shares. To do so, they exchange their parts of the joint
+randomness along with their shares of verifier(s).<a href="#section-7.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.2.2-3">Implementation note: the prep state for Prio3 includes the output share that
+will be released once preparation is complete. In some situations, it may be
 necessary for the Aggregator to encode this state as bytes and store it for
 retrieval later on. For all but the first Aggregator, it is possible to save
 storage by storing the measurement share rather than output share itself. It is
-relatively inexpensive to expand this seed into the input share, then truncate
-the input share to get the output share.<a href="#section-7.2.2-4" class="pilcrow">¶</a></p>
-<p id="section-7.2.2-5">The definitions of constants and a few auxiliary functions are defined in
-<a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>.<a href="#section-7.2.2-5" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-7.2.2-6">
+relatively inexpensive to expand this seed into the measurement share, then
+truncate the measurement share to get the output share.<a href="#section-7.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.2.2-4">All functions used in the following listing are defined in <a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>:<a href="#section-7.2.2-4" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.2.2-5">
 <pre>
 def prep_init(
         self,
@@ -5023,7 +5019,7 @@ def prep_shares_to_prep(
         ctx: bytes,
         _agg_param: None,
         prep_shares: list[Prio3PrepShare[F]]) -&gt; Optional[bytes]:
-    # Unshard the verifier shares into the verifier message.
+    # Unshard each set of verifier shares into each verifier message.
     verifiers = self.flp.field.zeros(
         self.flp.VERIFIER_LEN * self.PROOFS)
     joint_rand_parts = []
@@ -5033,7 +5029,7 @@ def prep_shares_to_prep(
             assert joint_rand_part is not None
             joint_rand_parts.append(joint_rand_part)
 
-    # Verify that each proof is well-formed and input is valid
+    # Verify that each proof is well-formed and input is valid.
     for _ in range(self.PROOFS):
         verifier, verifiers = front(self.flp.VERIFIER_LEN, verifiers)
         if not self.flp.decide(verifier):
@@ -5046,7 +5042,7 @@ def prep_shares_to_prep(
     if self.flp.JOINT_RAND_LEN &gt; 0:
         joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
     return joint_rand_seed
-</pre><a href="#section-7.2.2-6" class="pilcrow">¶</a>
+</pre><a href="#section-7.2.2-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -5055,18 +5051,13 @@ def prep_shares_to_prep(
           <h4 id="name-validity-of-aggregation-param">
 <a href="#section-7.2.3" class="section-number selfRef">7.2.3. </a><a href="#name-validity-of-aggregation-param" class="section-name selfRef">Validity of Aggregation Parameters</a>
           </h4>
-<p id="section-7.2.3-1">Every input share <span class="bcp14">MUST</span> only be used once, regardless of the aggregation
-parameters used.<a href="#section-7.2.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.2.3-1"><code>Prio3</code> only permits a report to be aggregated once.<a href="#section-7.2.3-1" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.2.3-2">
 <pre>
 def is_valid(
         self,
         _agg_param: None,
         previous_agg_params: list[None]) -&gt; bool:
-    """
-    Checks if `previous_agg_params` is empty, as input shares in
-    Prio3 may only be used once.
-    """
     return len(previous_agg_params) == 0
 </pre><a href="#section-7.2.3-2" class="pilcrow">¶</a>
 </div>
@@ -5107,7 +5098,8 @@ def merge(self,
 <a href="#section-7.2.5" class="section-number selfRef">7.2.5. </a><a href="#name-unsharding-3" class="section-name selfRef">Unsharding</a>
           </h4>
 <p id="section-7.2.5-1">To unshard a set of aggregate shares, the Collector first adds up the vectors
-element-wise. It then converts each element of the vector into an integer.<a href="#section-7.2.5-1" class="pilcrow">¶</a></p>
+element-wise, then decodes the aggregate result from the sum according to the
+FLP (<a href="#flp-encode" class="auto internal xref">Section 7.1.1</a>).<a href="#section-7.2.5-1" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.2.5-2">
 <pre>
 def unshard(
@@ -5128,8 +5120,7 @@ def unshard(
           </h4>
 <p id="section-7.2.6-1">This section defines a number of auxiliary functions referenced by the main
 algorithms for Prio3 in the preceding sections.<a href="#section-7.2.6-1" class="pilcrow">¶</a></p>
-<p id="section-7.2.6-2">The following methods are called by the sharding and preparation algorithms.<a href="#section-7.2.6-2" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-7.2.6-3">
+<div class="breakable lang-python sourcecode" id="section-7.2.6-2">
 <pre>
 def helper_meas_share(
         self,
@@ -5231,7 +5222,7 @@ def joint_rands(self,
         byte(self.PROOFS),
         self.flp.JOINT_RAND_LEN * self.PROOFS,
     )
-</pre><a href="#section-7.2.6-3" class="pilcrow">¶</a>
+</pre><a href="#section-7.2.6-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -5241,11 +5232,11 @@ def joint_rands(self,
 <a href="#section-7.2.7" class="section-number selfRef">7.2.7. </a><a href="#name-message-serialization" class="section-name selfRef">Message Serialization</a>
           </h4>
 <p id="section-7.2.7-1">This section defines serialization formats for messages exchanged over the
-network while executing Prio3. It is <span class="bcp14">RECOMMENDED</span> that implementations provide
-serialization methods for them.<a href="#section-7.2.7-1" class="pilcrow">¶</a></p>
-<p id="section-7.2.7-2">Message structures are defined following <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>). In the
-remainder we use <code>S</code> as an alias for <code>prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias
-for <code>prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
+network while executing Prio3. Messages are defined in the presentation
+language of TLS as defined in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>).<a href="#section-7.2.7-1" class="pilcrow">¶</a></p>
+<p id="section-7.2.7-2">Let <code>prio3</code> denote an instance of <code>Prio3</code>. In the remainder we use <code>S</code> as an
+alias for <code>prio3.xof.SEED_SIZE</code> and <code>F</code> as an alias for
+<code>prio3.field.ENCODED_SIZE</code>. XOF seeds are represented as follows:<a href="#section-7.2.7-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7-3">
 <pre>
 opaque Prio3Seed[S];
@@ -5263,7 +5254,7 @@ opaque Prio3Field[F];
             <h5 id="name-public-share">
 <a href="#section-7.2.7.1" class="section-number selfRef">7.2.7.1. </a><a href="#name-public-share" class="section-name selfRef">Public Share</a>
             </h5>
-<p id="section-7.2.7.1-1">The encoding of the public share depends on whether joint randomness is
+<p id="section-7.2.7.1-1">The contents of the public share depends on whether joint randomness is
 required for the underlying FLP (i.e., <code>prio3.flp.JOINT_RAND_LEN &gt; 0</code>). If
 joint randomness is not used, then the public share is the empty string. If
 joint randomness is used, then the public share encodes the joint randomness
@@ -5282,14 +5273,14 @@ struct {
             <h5 id="name-input-share">
 <a href="#section-7.2.7.2" class="section-number selfRef">7.2.7.2. </a><a href="#name-input-share" class="section-name selfRef">Input Share</a>
             </h5>
-<p id="section-7.2.7.2-1">Just as for the public share, the encoding of the input shares depends on
+<p id="section-7.2.7.2-1">Just as for the public share, the contents of the input shares depends on
 whether joint randomness is used. If so, then each input share includes the
 Aggregator's blind for generating its joint randomness part.<a href="#section-7.2.7.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.2.7.2-2">In addition, the encoding of the input shares depends on which aggregator is
 receiving the message. If the aggregator ID is <code>0</code>, then the input share
-includes the full measurement and share of proof(s). Otherwise, if the aggregator ID
-is greater than <code>0</code>, then the measurement and shares of proof(s) are
-represented by an XOF seed. We shall call the former the "Leader" and the
+includes the full measurement share and proofs(s) share(s). Otherwise, if the
+aggregator ID is greater than <code>0</code>, then the measurement and shares of proof(s)
+are represented by an XOF seed. We shall call the former the "Leader" and the
 latter the "Helpers".<a href="#section-7.2.7.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.2.7.2-3">In total there are four variants of the input share. When joint randomness is
 not used, the Leader's share is structured as follows:<a href="#section-7.2.7.2-3" class="pilcrow">¶</a></p>
@@ -5341,20 +5332,17 @@ struct {
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.3-2">
 <pre>
 struct {
-    Prio3Field verifiers_share[
-        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
-    ];
+    Prio3Field verifiers_share[F * V];
 } Prio3PrepShare;
 </pre><a href="#section-7.2.7.3-2" class="pilcrow">¶</a>
 </div>
-<p id="section-7.2.7.3-3">When joint randomness is used, the prep share includes the Aggregator's joint
-randomness part and is structured as follows:<a href="#section-7.2.7.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.2.7.3-3">where <code>V = prio3.flp.VERIFIER_LEN * prio3.PROOFS</code>. When joint randomness is
+used, the prep share includes the Aggregator's joint randomness part and is
+structured as follows:<a href="#section-7.2.7.3-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-7.2.7.3-4">
 <pre>
 struct {
-    Prio3Field verifiers_share[
-        F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
-    ];
+    Prio3Field verifiers_share[F * V];
     Prio3Seed joint_rand_part;
 } Prio3PrepShareWithJointRand;
 </pre><a href="#section-7.2.7.3-4" class="pilcrow">¶</a>

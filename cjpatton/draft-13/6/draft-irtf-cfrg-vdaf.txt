@@ -2962,37 +2962,33 @@ Table of Contents
 
    This section describes the process of recovering output shares from
    the input shares.  The high-level idea is that each Aggregator first
-   queries its measurement and share of proof(s) locally, then exchanges
-   its share of verifier(s) with the other Aggregators.  The shares of
+   queries its measurement share and proof(s) share(s) locally, then
+   broadcasts its verifier share(s) in its prep share.  The shares of
    verifier(s) are then combined into the verifier message(s) used to
    decide whether to accept.
 
-   In addition, for FLPs that require joint randomness, the Aggregators
-   must ensure that they have all used the same joint randomness for the
-   query algorithm.  To do so, they collectively re-derive the joint
-   randomness from their measurement shares just as the Client did
-   during sharding.
+   In addition, the Aggregators must recompute the same joint randomness
+   used by the Client to generate the proof(s).  In order to avoid an
+   extra round of communication, the Client includes the joint
+   randomness parts in the public share.  This leaves open the
+   possibility that the Client cheated by, say, forcing the Aggregators
+   to use joint randomness that biases the proof check procedure some
+   way in its favor.  To mitigate this, the Aggregators also check that
+   they have all computed the same joint randomness seed before
+   accepting their output shares.  To do so, they exchange their parts
+   of the joint randomness along with their shares of verifier(s).
 
-   In order to avoid extra round of communication, the Client sends each
-   Aggregator a "hint" consisting of the joint randomness parts.  This
-   leaves open the possibility that the Client cheated by, say, forcing
-   the Aggregators to use joint randomness that biases the proof check
-   procedure some way in its favor.  To mitigate this, the Aggregators
-   also check that they have all computed the same joint randomness seed
-   before accepting their output shares.  To do so, they exchange their
-   parts of the joint randomness along with their shares of verifier(s).
-
-   Implementation note: the preparation state for Prio3 includes the
-   output share that will be released once preparation is complete.  In
-   some situations, it may be necessary for the Aggregator to encode
-   this state as bytes and store it for retrieval later on.  For all but
-   the first Aggregator, it is possible to save storage by storing the
+   Implementation note: the prep state for Prio3 includes the output
+   share that will be released once preparation is complete.  In some
+   situations, it may be necessary for the Aggregator to encode this
+   state as bytes and store it for retrieval later on.  For all but the
+   first Aggregator, it is possible to save storage by storing the
    measurement share rather than output share itself.  It is relatively
-   inexpensive to expand this seed into the input share, then truncate
-   the input share to get the output share.
+   inexpensive to expand this seed into the measurement share, then
+   truncate the measurement share to get the output share.
 
-   The definitions of constants and a few auxiliary functions are
-   defined in Section 7.2.6.
+   All functions used in the following listing are defined in
+   Section 7.2.6:
 
    def prep_init(
            self,
@@ -3068,7 +3064,7 @@ Table of Contents
            ctx: bytes,
            _agg_param: None,
            prep_shares: list[Prio3PrepShare[F]]) -> Optional[bytes]:
-       # Unshard the verifier shares into the verifier message.
+       # Unshard each set of verifier shares into each verifier message.
        verifiers = self.flp.field.zeros(
            self.flp.VERIFIER_LEN * self.PROOFS)
        joint_rand_parts = []
@@ -3078,7 +3074,7 @@ Table of Contents
                assert joint_rand_part is not None
                joint_rand_parts.append(joint_rand_part)
 
-       # Verify that each proof is well-formed and input is valid
+       # Verify that each proof is well-formed and input is valid.
        for _ in range(self.PROOFS):
            verifier, verifiers = front(self.flp.VERIFIER_LEN, verifiers)
            if not self.flp.decide(verifier):
@@ -3094,17 +3090,12 @@ Table of Contents
 
 7.2.3.  Validity of Aggregation Parameters
 
-   Every input share MUST only be used once, regardless of the
-   aggregation parameters used.
+   Prio3 only permits a report to be aggregated once.
 
    def is_valid(
            self,
            _agg_param: None,
            previous_agg_params: list[None]) -> bool:
-       """
-       Checks if `previous_agg_params` is empty, as input shares in
-       Prio3 may only be used once.
-       """
        return len(previous_agg_params) == 0
 
 7.2.4.  Aggregation
@@ -3132,8 +3123,8 @@ Table of Contents
 7.2.5.  Unsharding
 
    To unshard a set of aggregate shares, the Collector first adds up the
-   vectors element-wise.  It then converts each element of the vector
-   into an integer.
+   vectors element-wise, then decodes the aggregate result from the sum
+   according to the FLP (Section 7.1.1).
 
    def unshard(
            self,
@@ -3147,9 +3138,6 @@ Table of Contents
 
    This section defines a number of auxiliary functions referenced by
    the main algorithms for Prio3 in the preceding sections.
-
-   The following methods are called by the sharding and preparation
-   algorithms.
 
    def helper_meas_share(
            self,
@@ -3255,13 +3243,12 @@ Table of Contents
 7.2.7.  Message Serialization
 
    This section defines serialization formats for messages exchanged
-   over the network while executing Prio3.  It is RECOMMENDED that
-   implementations provide serialization methods for them.
+   over the network while executing Prio3.  Messages are defined in the
+   presentation language of TLS as defined in Section 3 of [RFC8446]).
 
-   Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use S as an alias for prio3.xof.SEED_SIZE and F as
-   an alias for prio3.field.ENCODED_SIZE.  XOF seeds are represented as
-   follows:
+   Let prio3 denote an instance of Prio3.  In the remainder we use S as
+   an alias for prio3.xof.SEED_SIZE and F as an alias for
+   prio3.field.ENCODED_SIZE.  XOF seeds are represented as follows:
 
    opaque Prio3Seed[S];
 
@@ -3272,7 +3259,7 @@ Table of Contents
 
 7.2.7.1.  Public Share
 
-   The encoding of the public share depends on whether joint randomness
+   The contents of the public share depends on whether joint randomness
    is required for the underlying FLP (i.e., prio3.flp.JOINT_RAND_LEN >
    0).  If joint randomness is not used, then the public share is the
    empty string.  If joint randomness is used, then the public share
@@ -3284,17 +3271,18 @@ Table of Contents
 
 7.2.7.2.  Input Share
 
-   Just as for the public share, the encoding of the input shares
+   Just as for the public share, the contents of the input shares
    depends on whether joint randomness is used.  If so, then each input
    share includes the Aggregator's blind for generating its joint
    randomness part.
 
    In addition, the encoding of the input shares depends on which
    aggregator is receiving the message.  If the aggregator ID is 0, then
-   the input share includes the full measurement and share of proof(s).
-   Otherwise, if the aggregator ID is greater than 0, then the
-   measurement and shares of proof(s) are represented by an XOF seed.
-   We shall call the former the "Leader" and the latter the "Helpers".
+   the input share includes the full measurement share and proofs(s)
+   share(s).  Otherwise, if the aggregator ID is greater than 0, then
+   the measurement and shares of proof(s) are represented by an XOF
+   seed.  We shall call the former the "Leader" and the latter the
+   "Helpers".
 
    In total there are four variants of the input share.  When joint
    randomness is not used, the Leader's share is structured as follows:
@@ -3333,18 +3321,15 @@ Table of Contents
    follows:
 
    struct {
-       Prio3Field verifiers_share[
-           F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
-       ];
+       Prio3Field verifiers_share[F * V];
    } Prio3PrepShare;
 
-   When joint randomness is used, the prep share includes the
-   Aggregator's joint randomness part and is structured as follows:
+   where V = prio3.flp.VERIFIER_LEN * prio3.PROOFS.  When joint
+   randomness is used, the prep share includes the Aggregator's joint
+   randomness part and is structured as follows:
 
    struct {
-       Prio3Field verifiers_share[
-           F * prio3.flp.VERIFIER_LEN * prio3.PROOFS
-       ];
+       Prio3Field verifiers_share[F * V];
        Prio3Seed joint_rand_part;
    } Prio3PrepShareWithJointRand;
 
