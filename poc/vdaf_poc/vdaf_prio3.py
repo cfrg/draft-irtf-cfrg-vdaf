@@ -122,10 +122,6 @@ class Prio3(
             self,
             _agg_param: None,
             previous_agg_params: list[None]) -> bool:
-        """
-        Checks if `previous_agg_params` is empty, as input shares in
-        Prio3 may only be used once.
-        """
         return len(previous_agg_params) == 0
 
     # NOTE: The prep_init(), prep_next(), and prep_shares_to_prep()
@@ -164,7 +160,7 @@ class Prio3(
             joint_rands = self.joint_rands(
                 ctx, corrected_joint_rand_seed)
 
-        # Query the measurement and proof share.
+        # Query the measurement and proof(s) share(s).
         query_rands = self.query_rands(verify_key, ctx, nonce)
         verifiers_share = []
         for _ in range(self.PROOFS):
@@ -208,7 +204,7 @@ class Prio3(
             ctx: bytes,
             _agg_param: None,
             prep_shares: list[Prio3PrepShare[F]]) -> Optional[bytes]:
-        # Unshard the verifier shares into the verifier message.
+        # Unshard each set of verifier shares into each verifier message.
         verifiers = self.flp.field.zeros(
             self.flp.VERIFIER_LEN * self.PROOFS)
         joint_rand_parts = []
@@ -218,7 +214,7 @@ class Prio3(
                 assert joint_rand_part is not None
                 joint_rand_parts.append(joint_rand_part)
 
-        # Verify that each proof is well-formed and input is valid
+        # Verify that each proof is well-formed and input is valid.
         for _ in range(self.PROOFS):
             verifier, verifiers = front(self.flp.VERIFIER_LEN, verifiers)
             if not self.flp.decide(verifier):
@@ -311,7 +307,7 @@ class Prio3(
             )
 
         # Each Aggregator's input share contains its measurement share
-        # and share of proof(s).
+        # and its share of the proof(s).
         input_shares: list[Prio3InputShare[F]] = []
         input_shares.append((
             leader_meas_share,
@@ -364,7 +360,7 @@ class Prio3(
         joint_rand_parts.insert(0, self.joint_rand_part(
             ctx, 0, leader_blind, leader_meas_share, nonce))
 
-        # Generate the proof and shard it into proof shares.
+        # Generate each proof and shard it into proof shares.
         prove_rands = self.prove_rands(ctx, prove_seed)
         joint_rands = self.joint_rands(
             ctx, self.joint_rand_seed(ctx, joint_rand_parts))

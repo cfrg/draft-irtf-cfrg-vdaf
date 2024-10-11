@@ -108,8 +108,8 @@ class Valid(Generic[Measurement, AggResult, F], metaclass=ABCMeta):
         """Length of the proof."""
         length = 0
         for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
-            P = next_power_of_2(1 + g_calls)
-            length += g.ARITY + g.DEGREE * (P - 1) + 1
+            p = next_power_of_2(1 + g_calls)
+            length += g.ARITY + g.DEGREE * (p - 1) + 1
         return length
 
     def verifier_len(self) -> int:
@@ -353,8 +353,8 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
             # Compute the wire polynomials for this gadget. For each `j`,
             # find the lowest degree polynomial `wire_poly` for which
             # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
-            # each `g.wires[j][0]` is set to seed of wire `j`, which is
-            # included in the prove randomness.
+            # each `g.wires[j][0]` is set to the seed of wire `j`, which
+            # is included in the prove randomness.
             #
             # Implementation note: `alpha` is a root of unity, which
             # means `poly_interp()` can be evaluated using the NTT. Note
@@ -444,7 +444,7 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
         assert len(verifier) == self.VERIFIER_LEN  # REMOVE ME
 
         # Check the output of the validity circuit.
-        v, verifier = verifier[0], verifier[1:]
+        ([v], verifier) = front(1, verifier)
         if v != self.field(0):
             return False
 
