@@ -4354,17 +4354,23 @@ elements:<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-2.1">
               <p id="section-7.1.1-2.1.1"><code>flp.encode(measurement: Measurement) -&gt; list[F]</code> encodes a raw measurement
-as a vector of field elements. The return value <span class="bcp14">MUST</span> be of length <code>MEAS_LEN</code>.<a href="#section-7.1.1-2.1.1" class="pilcrow">¶</a></p>
+as a vector of field elements.<a href="#section-7.1.1-2.1.1" class="pilcrow">¶</a></p>
+<p id="section-7.1.1-2.1.2">
+Post-conditions:<a href="#section-7.1.1-2.1.2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.1.1-2.1.3.1">
+                  <p id="section-7.1.1-2.1.3.1.1">The encoded measurement <span class="bcp14">MUST</span> have length <code>flp.MEAS_LEN</code>.<a href="#section-7.1.1-2.1.3.1.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
 </li>
           </ul>
 <p id="section-7.1.1-3">For some FLPs, the encoded measurement also includes redundant field elements
 that are useful for checking the proof, but which are not needed after the
-proof has been checked. An example is the "integer sum" data type from
-<span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span> in which an integer in <code>[0, 2^k)</code> is encoded as a vector of <code>k</code>
-field elements, each representing a bit of the integer (this type is also
-defined in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>). After consuming this vector, all that is needed is
-the integer it represents. Thus the FLP defines an algorithm for truncating the
-encoded measurement to the length of the aggregated output:<a href="#section-7.1.1-3" class="pilcrow">¶</a></p>
+proof has been checked. An example is the <code>Sum</code> type defined in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>
+for which each measurement is an integer in range <code>[0, max_measurement]</code>. The
+range check requires encoding the measurement with a several field elements,
+though just one is needed for aggregation. Thus the FLP defines an algorithm
+for truncating the encoded measurement to the length of the aggregated output:<a href="#section-7.1.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-4.1">
               <p id="section-7.1.1-4.1.1"><code>flp.truncate(meas: list[F]) -&gt; list[F]</code> maps an encoded measurement (e.g.,
@@ -4373,10 +4379,10 @@ singleton vector containing the measurement). The length of the input <span clas
 <code>MEAS_LEN</code> and the length of the output <span class="bcp14">MUST</span> be <code>OUTPUT_LEN</code>.<a href="#section-7.1.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-7.1.1-5">Once the aggregate shares have been computed and combined together, their sum
-can be converted into the aggregate result. This could be a projection from
-the FLP's field to the integers, or it could include additional
-post-processing.<a href="#section-7.1.1-5" class="pilcrow">¶</a></p>
+<p id="section-7.1.1-5">Once the aggregate shares have been transmitted to the Collector, their sum can
+be converted into the aggregate result. This could be a projection from the
+FLP's field to the integers, or it could include additional post-processing.
+Either way, this functionality is implemented by the following method:<a href="#section-7.1.1-5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-6.1">
               <p id="section-7.1.1-6.1.1"><code>flp.decode(output: list[F], num_measurements: int) -&gt; AggResult</code> maps a sum
@@ -4385,17 +4391,17 @@ of aggregate shares to an aggregate result.<a href="#section-7.1.1-6.1.1" class=
 Pre-conditions:<a href="#section-7.1.1-6.1.2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.1.1-6.1.3.1">
-                  <p id="section-7.1.1-6.1.3.1.1">The length of <code>output</code> <span class="bcp14">MUST</span> be <code>OUTPUT_LEN</code>.<a href="#section-7.1.1-6.1.3.1.1" class="pilcrow">¶</a></p>
+                  <p id="section-7.1.1-6.1.3.1.1">The length of the output <span class="bcp14">MUST</span> be <code>OUTPUT_LEN</code>.<a href="#section-7.1.1-6.1.3.1.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-7.1.1-6.1.3.2">
-                  <p id="section-7.1.1-6.1.3.2.1"><code>num_measurements</code> <span class="bcp14">MUST</span> equal the number of measurements that contributed
-to the <code>output</code>.<a href="#section-7.1.1-6.1.3.2.1" class="pilcrow">¶</a></p>
+                  <p id="section-7.1.1-6.1.3.2.1"><code>num_measurements</code> <span class="bcp14">MUST</span> equal the number of measurements that were
+aggregated.<a href="#section-7.1.1-6.1.3.2.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
 </li>
           </ul>
-<p id="section-7.1.1-7">We remark that, taken together, these three functionalities correspond roughly
-to the notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span>.<a href="#section-7.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-7.1.1-7">We remark that, taken together, these three functionalities correspond to the
+notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span>.<a href="#section-7.1.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="multiproofs">
@@ -4407,16 +4413,16 @@ to the notion of "Affine-aggregatable encodings (AFEs)" from <span>[<a href="#CG
 for the same input. First, this improves the soundness of the proof system
 without having to change any of its parameters. Second, it allows a smaller
 field to be used (e.g., replace Field128 with Field64, see <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>)
-without sacrificing soundness. Generally, choosing a smaller field can
-significantly reduce communication cost. (This is a trade-off, of course, since
+without sacrificing soundness. This is useful because it reduces the overall
+communication of the protocol. (This is a trade-off, of course, since
 generating and verifying more proofs requires more time.) Given these benefits,
 this feature is implemented by Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>).<a href="#section-7.1.2-1" class="pilcrow">¶</a></p>
 <p id="section-7.1.2-2">To generate these proofs for a specific measurement, the prover calls
-<code>flp.prove</code> multiple times, each time using an independently generated prover
-and joint randomness string. The verifier checks each proof independently, each
-time with an independently generated query randomness string. It accepts the
-measurement only if all the decision algorithm accepts on each proof.<a href="#section-7.1.2-2" class="pilcrow">¶</a></p>
-<p id="section-7.1.2-3">See <a href="#security-multiproof" class="auto internal xref">Section 9.7</a> below for discussions on choosing the right number
+<code>flp.prove()</code> multiple times, each time using an fresh prover and joint
+randomness. The verifier checks each proof independently, each time with fresh
+query randomness. It accepts the measurement only if all the decision algorithm
+accepts on each proof.<a href="#section-7.1.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.1.2-3">See <a href="#security-multiproof" class="auto internal xref">Section 9.7</a> for guidance on choosing the field size and number
 of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>

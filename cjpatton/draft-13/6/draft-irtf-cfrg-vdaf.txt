@@ -2580,18 +2580,20 @@ Table of Contents
    as a vector of field elements:
 
    *  flp.encode(measurement: Measurement) -> list[F] encodes a raw
-      measurement as a vector of field elements.  The return value MUST
-      be of length MEAS_LEN.
+      measurement as a vector of field elements.
+
+      Post-conditions:
+
+      -  The encoded measurement MUST have length flp.MEAS_LEN.
 
    For some FLPs, the encoded measurement also includes redundant field
    elements that are useful for checking the proof, but which are not
-   needed after the proof has been checked.  An example is the "integer
-   sum" data type from [CGB17] in which an integer in [0, 2^k) is
-   encoded as a vector of k field elements, each representing a bit of
-   the integer (this type is also defined in Section 7.4.2).  After
-   consuming this vector, all that is needed is the integer it
-   represents.  Thus the FLP defines an algorithm for truncating the
-   encoded measurement to the length of the aggregated output:
+   needed after the proof has been checked.  An example is the Sum type
+   defined in Section 7.4.2 for which each measurement is an integer in
+   range [0, max_measurement].  The range check requires encoding the
+   measurement with a several field elements, though just one is needed
+   for aggregation.  Thus the FLP defines an algorithm for truncating
+   the encoded measurement to the length of the aggregated output:
 
    *  flp.truncate(meas: list[F]) -> list[F] maps an encoded measurement
       (e.g., the bit-encoding of the measurement) to an aggregatable
@@ -2599,24 +2601,25 @@ Table of Contents
       The length of the input MUST be MEAS_LEN and the length of the
       output MUST be OUTPUT_LEN.
 
-   Once the aggregate shares have been computed and combined together,
+   Once the aggregate shares have been transmitted to the Collector,
    their sum can be converted into the aggregate result.  This could be
    a projection from the FLP's field to the integers, or it could
-   include additional post-processing.
+   include additional post-processing.  Either way, this functionality
+   is implemented by the following method:
 
    *  flp.decode(output: list[F], num_measurements: int) -> AggResult
       maps a sum of aggregate shares to an aggregate result.
 
       Pre-conditions:
 
-      -  The length of output MUST be OUTPUT_LEN.
+      -  The length of the output MUST be OUTPUT_LEN.
 
       -  num_measurements MUST equal the number of measurements that
-         contributed to the output.
+         were aggregated.
 
    We remark that, taken together, these three functionalities
-   correspond roughly to the notion of "Affine-aggregatable encodings
-   (AFEs)" from [CGB17].
+   correspond to the notion of "Affine-aggregatable encodings (AFEs)"
+   from [CGB17].
 
 7.1.2.  Multiple Proofs
 
@@ -2624,20 +2627,19 @@ Table of Contents
    proofs for the same input.  First, this improves the soundness of the
    proof system without having to change any of its parameters.  Second,
    it allows a smaller field to be used (e.g., replace Field128 with
-   Field64, see Section 7.3) without sacrificing soundness.  Generally,
-   choosing a smaller field can significantly reduce communication cost.
+   Field64, see Section 7.3) without sacrificing soundness.  This is
+   useful because it reduces the overall communication of the protocol.
    (This is a trade-off, of course, since generating and verifying more
    proofs requires more time.)  Given these benefits, this feature is
    implemented by Prio3 (Section 7).
 
    To generate these proofs for a specific measurement, the prover calls
-   flp.prove multiple times, each time using an independently generated
-   prover and joint randomness string.  The verifier checks each proof
-   independently, each time with an independently generated query
-   randomness string.  It accepts the measurement only if all the
-   decision algorithm accepts on each proof.
+   flp.prove() multiple times, each time using an fresh prover and joint
+   randomness.  The verifier checks each proof independently, each time
+   with fresh query randomness.  It accepts the measurement only if all
+   the decision algorithm accepts on each proof.
 
-   See Section 9.7 below for discussions on choosing the right number of
+   See Section 9.7 for guidance on choosing the field size and number of
    proofs.
 
 7.2.  Construction
