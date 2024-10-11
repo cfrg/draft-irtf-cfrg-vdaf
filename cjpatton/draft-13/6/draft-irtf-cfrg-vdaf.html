@@ -3269,7 +3269,7 @@ take turns running the computation locally until input from their peer is
 required:<a href="#section-5.7.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.7.1-3.1">
-              <p id="section-5.7.1-3.1.1">For a 1-round VDAF (e.g., Prio3 in <a href="#prio3" class="auto internal xref">Section 7</a>)), the Leader sends its prep share
+              <p id="section-5.7.1-3.1.1">For a 1-round VDAF (e.g., Prio3 in <a href="#prio3" class="auto internal xref">Section 7</a>), the Leader sends its prep share
 to the Helper, who computes the prep message locally, computes its output
 share, then sends the prep message to the Leader. Preparation requires just
 one round trip between the Leader and the Helper.<a href="#section-5.7.1-3.1.1" class="pilcrow">¶</a></p>
@@ -5390,15 +5390,6 @@ struct {
         <h3 id="name-flp-construction">
 <a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-flp-construction" class="section-name selfRef">FLP Construction</a>
         </h3>
-<p id="section-7.3-1">This section specifies an implementation of the <code>Flp</code> interface (<a href="#flp" class="auto internal xref">Section 7.1</a>) based
-on the construction from <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Section 4.2. We begin in
-<a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of the proof system and some
-extensions to it. <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a> defines validity circuits, the core
-component of the proof system that determines measurement validity and how
-measurements are aggregated. The proof-generation algorithm, the query
-algorithm, and the decision algorithm are defined in
-<a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3</a>, <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.4</a>, and
-<a href="#flp-bbcggi19-construction-decide" class="auto internal xref">Section 7.3.5</a> respectively.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 <span id="name-flp-parameters-for-a-validi"></span><div id="flp-bbcggi19-param">
 <table class="center" id="table-7">
           <caption>
@@ -5416,7 +5407,7 @@ algorithm, and the decision algorithm are defined in
               <td class="text-left" rowspan="1" colspan="1">
                 <code>valid</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">instance of <code>Valid</code> (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
+              <td class="text-left" rowspan="1" colspan="1">an instance of <code>Valid</code> (<a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a>)</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
@@ -5478,16 +5469,14 @@ algorithm, and the decision algorithm are defined in
               <td class="text-left" rowspan="1" colspan="1">
                 <code>Measurement</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>valid.Measurement</code>
+              <td class="text-left" rowspan="1" colspan="1">as defined by <code>valid</code>
 </td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>AggResult</code>
 </td>
-              <td class="text-left" rowspan="1" colspan="1">
-                <code>valid.AggResult</code>
+              <td class="text-left" rowspan="1" colspan="1">as defined by <code>valid</code>
 </td>
             </tr>
             <tr>
@@ -5501,12 +5490,23 @@ algorithm, and the decision algorithm are defined in
           </tbody>
         </table>
 </div>
+<p id="section-7.3-2">This section specifies an implementation of the <code>Flp</code> interface (<a href="#flp" class="auto internal xref">Section 7.1</a>) based
+on the construction from <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Section 4.2. The types and parameters
+required by this interface are listed in the table above.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.3-3">We begin in <a href="#flp-bbcggi19-overview" class="auto internal xref">Section 7.3.1</a> with an overview of the proof system and
+some extensions to it. <a href="#flp-bbcggi19-valid" class="auto internal xref">Section 7.3.2</a> defines validity circuits, the
+core component of the proof system that determines measurement validity and how
+measurements are aggregated. The proof-generation algorithm, the query
+algorithm, and the decision algorithm are defined in
+<a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3</a>, <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.4</a>, and
+<a href="#flp-bbcggi19-construction-decide" class="auto internal xref">Section 7.3.5</a> respectively.<a href="#section-7.3-3" class="pilcrow">¶</a></p>
 <div id="flp-bbcggi19-overview">
 <section id="section-7.3.1">
           <h4 id="name-overview-2">
 <a href="#section-7.3.1" class="section-number selfRef">7.3.1. </a><a href="#name-overview-2" class="section-name selfRef">Overview</a>
           </h4>
-<p id="section-7.3.1-1">Conventional zero-knowledge proof systems involve two parties:<a href="#section-7.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.3.1-1">An FLP is a type of "zero-knowledge proof". A conventional zero-knowledge proof
+system involves two parties:<a href="#section-7.3.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.3.1-2.1">
               <p id="section-7.3.1-2.1.1">The prover, who holds a measurement and generates a proof of the
@@ -5593,7 +5593,7 @@ a malicious Client to produce a gadget polynomial <code>p</code> that would resu
 measurement being accepted. To prevent this, the Aggregators perform a
 probabilistic test to check that the gadget polynomial was constructed
 properly. This "gadget test", and the procedure for constructing the
-polynomial, are described in detail in <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>.<a href="#section-7.3.1-18" class="pilcrow">¶</a></p>
+polynomial, are described in detail in <a href="#flp-bbcggi19-construction-prove" class="auto internal xref">Section 7.3.3</a>.<a href="#section-7.3.1-18" class="pilcrow">¶</a></p>
 <div id="flp-bbcggi19-overview-extensions">
 <section id="section-7.3.1.1">
             <h5 id="name-extensions">
@@ -5619,8 +5619,8 @@ C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
 <p id="section-7.3.1.1-4">(Note that this is a special case of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 5.2.) Here <code>x</code> is
 the length-<code>N</code> input and <code>r</code> is a random field element. The gadget circuit
 <code>Range2</code> is the "range-check" polynomial described above, i.e., <code>Range2(x) =
-x^2 - x</code>. The idea is that, if <code>x</code> is valid (i.e., each <code>x[j]</code> is in
-<code>[0, 2)</code>), then the circuit will evaluate to zero regardless of the value of
+x^2 - x</code>. The idea is that, if <code>x</code> is valid, i.e., each <code>x[j]</code> is in
+<code>[0, 2)</code>, then the circuit will evaluate to zero regardless of the value of
 <code>r</code>; but if some <code>x[j]</code> is not in <code>[0, 2)</code>, then the output will be non-zero
 with high probability.<a href="#section-7.3.1.1-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-5">The second extension implemented by our FLP allows the validity circuit to
@@ -5639,12 +5639,11 @@ inputs are in <code>[0, 2)</code> and the last <code>N-L</code> inputs are in <c
 circuit can be expressed using a simpler gadget, namely multiplication, but the
 resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-8">Third, rather than interpolate the gadget polynomial at inputs <code>1</code>, <code>2</code>, ...,
-<code>j</code>, ..., where <code>j</code> is the <code>j</code>-th invocation of the gadget, we use powers of
-<code>alpha</code>, where <code>alpha</code> is a root of unity for the field. This allows us to
-construct each gadget polynomial via the number theoretic transform <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>,
-which is far more efficient than  generic formulas. Note that the roots of
-unity are powers of the generator of NTT-friendly fields (see
-<a href="#field-ntt-friendly" class="auto internal xref">Section 6.1.2</a>).<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
+<code>j</code>, ..., where <code>j</code> is the <code>j</code>-th invocation of the gadget, we use roots of
+unity for the field. This allows us to construct each gadget polynomial via the
+number theoretic transform <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>, which is far more efficient than generic
+formulas. Note that the roots of unity are powers of the generator for the
+NTT-friendly field (see <a href="#field-ntt-friendly" class="auto internal xref">Section 6.1.2</a>).<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-9">Finally, the validity circuit in our FLP may have any number of outputs (at
 least one). The input is said to be valid if each of the outputs is zero. To
 save bandwidth, we take a random linear combination of the outputs. If each of
@@ -5694,7 +5693,7 @@ probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>JOINT_RAND_LEN: int</code>
 </td>
-                <td class="text-left" rowspan="1" colspan="1">Length of the random input</td>
+                <td class="text-left" rowspan="1" colspan="1">Length of the joint randomness</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -5724,7 +5723,7 @@ probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>field: type[F]</code>
 </td>
-                <td class="text-left" rowspan="1" colspan="1">Class object for the field</td>
+                <td class="text-left" rowspan="1" colspan="1">Class object for the field (<a href="#field-ntt-friendly" class="auto internal xref">Section 6.1.2</a>)</td>
               </tr>
             </tbody>
           </table>
@@ -5742,17 +5741,17 @@ gadget <code>Mul(x,y) = x*y</code> has arity of 2.<a href="#section-7.3.2-4.1.1"
 </li>
             <li class="normal" id="section-7.3.2-4.2">
               <p id="section-7.3.2-4.2.1"><code>DEGREE: int</code> is the arithmetic degree of the gadget circuit. This is defined
-to be the degree of the polynomial that computes it. This exists because
-the circuit is arithmetic. For example, <code>Mul</code> has degree 2.<a href="#section-7.3.2-4.2.1" class="pilcrow">¶</a></p>
+to be the degree of the polynomial that computes it. This circuit exists
+because the circuit is arithmetic. For example, <code>Mul</code> has degree 2.<a href="#section-7.3.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.2-4.3">
-              <p id="section-7.3.2-4.3.1"><code>gadget.eval(field: type[F], inp: list[F]) -&gt; F</code> evaluates the gadget circuit
-over the given inputs and field.<a href="#section-7.3.2-4.3.1" class="pilcrow">¶</a></p>
+              <p id="section-7.3.2-4.3.1"><code>gadget.eval(field: type[F], inp: list[F]) -&gt; F</code> evaluates the gadget over
+the given inputs and field.<a href="#section-7.3.2-4.3.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.3.2-4.4">
               <p id="section-7.3.2-4.4.1"><code>gadget.eval_poly(field: type[F], inp_poly: list[list[F]]) -&gt; list[F]</code> is the
 same as <code>eval()</code> except it evaluates the circuit over the polynomial ring of
-the field. This is well defined since the circuit is arithmetic.<a href="#section-7.3.2-4.4.1" class="pilcrow">¶</a></p>
+the field. This is well defined because the circuit is arithmetic.<a href="#section-7.3.2-4.4.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-7.3.2-5">In addition to the list of gadgets, the validity circuit specifies how many
@@ -5795,8 +5794,8 @@ def proof_len(self) -&gt; int:
     """Length of the proof."""
     length = 0
     for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
-        P = next_power_of_2(1 + g_calls)
-        length += g.ARITY + g.DEGREE * (P - 1) + 1
+        p = next_power_of_2(1 + g_calls)
+        length += g.ARITY + g.DEGREE * (p - 1) + 1
     return length
 
 def verifier_len(self) -&gt; int:
@@ -5867,8 +5866,8 @@ def prove(self,
         # Compute the wire polynomials for this gadget. For each `j`,
         # find the lowest degree polynomial `wire_poly` for which
         # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
-        # each `g.wires[j][0]` is set to seed of wire `j`, which is
-        # included in the prove randomness.
+        # each `g.wires[j][0]` is set to the seed of wire `j`, which
+        # is included in the prove randomness.
         #
         # Implementation note: `alpha` is a root of unity, which
         # means `poly_interp()` can be evaluated using the NTT. Note
@@ -6034,7 +6033,7 @@ output will not equal the gadget check with high probability.<a href="#section-7
 <pre>
 def decide(self, verifier: list[F]) -&gt; bool:
     # Check the output of the validity circuit.
-    v, verifier = verifier[0], verifier[1:]
+    ([v], verifier) = front(1, verifier)
     if v != self.field(0):
         return False
 

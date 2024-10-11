@@ -1649,7 +1649,7 @@ Table of Contents
    Helper will take turns running the computation locally until input
    from their peer is required:
 
-   *  For a 1-round VDAF (e.g., Prio3 in Section 7)), the Leader sends
+   *  For a 1-round VDAF (e.g., Prio3 in Section 7), the Leader sends
       its prep share to the Helper, who computes the prep message
       locally, computes its output share, then sends the prep message to
       the Leader.  Preparation requires just one round trip between the
@@ -3353,8 +3353,39 @@ Table of Contents
 
 7.3.  FLP Construction
 
+         +================+======================================+
+         | Parameter      | Value                                |
+         +================+======================================+
+         | valid          | an instance of Valid (Section 7.3.2) |
+         +----------------+--------------------------------------+
+         | PROVE_RAND_LEN | valid.prove_rand_len()               |
+         +----------------+--------------------------------------+
+         | QUERY_RAND_LEN | valid.query_rand_len()               |
+         +----------------+--------------------------------------+
+         | JOINT_RAND_LEN | valid.JOINT_RAND_LEN                 |
+         +----------------+--------------------------------------+
+         | MEAS_LEN       | valid.MEAS_LEN                       |
+         +----------------+--------------------------------------+
+         | OUTPUT_LEN     | valid.OUTPUT_LEN                     |
+         +----------------+--------------------------------------+
+         | PROOF_LEN      | valid.proof_len()                    |
+         +----------------+--------------------------------------+
+         | VERIFIER_LEN   | valid.verifier_len()                 |
+         +----------------+--------------------------------------+
+         | Measurement    | as defined by valid                  |
+         +----------------+--------------------------------------+
+         | AggResult      | as defined by valid                  |
+         +----------------+--------------------------------------+
+         | field          | valid.field                          |
+         +----------------+--------------------------------------+
+
+              Table 7: FLP parameters for a validity circuit.
+
    This section specifies an implementation of the Flp interface
    (Section 7.1) based on the construction from [BBCGGI19], Section 4.2.
+   The types and parameters required by this interface are listed in the
+   table above.
+
    We begin in Section 7.3.1 with an overview of the proof system and
    some extensions to it.  Section 7.3.2 defines validity circuits, the
    core component of the proof system that determines measurement
@@ -3363,37 +3394,10 @@ Table of Contents
    defined in Section 7.3.3, Section 7.3.4, and Section 7.3.5
    respectively.
 
-          +================+===================================+
-          | Parameter      | Value                             |
-          +================+===================================+
-          | valid          | instance of Valid (Section 7.3.2) |
-          +----------------+-----------------------------------+
-          | PROVE_RAND_LEN | valid.prove_rand_len()            |
-          +----------------+-----------------------------------+
-          | QUERY_RAND_LEN | valid.query_rand_len()            |
-          +----------------+-----------------------------------+
-          | JOINT_RAND_LEN | valid.JOINT_RAND_LEN              |
-          +----------------+-----------------------------------+
-          | MEAS_LEN       | valid.MEAS_LEN                    |
-          +----------------+-----------------------------------+
-          | OUTPUT_LEN     | valid.OUTPUT_LEN                  |
-          +----------------+-----------------------------------+
-          | PROOF_LEN      | valid.proof_len()                 |
-          +----------------+-----------------------------------+
-          | VERIFIER_LEN   | valid.verifier_len()              |
-          +----------------+-----------------------------------+
-          | Measurement    | valid.Measurement                 |
-          +----------------+-----------------------------------+
-          | AggResult      | valid.AggResult                   |
-          +----------------+-----------------------------------+
-          | field          | valid.field                       |
-          +----------------+-----------------------------------+
-
-             Table 7: FLP parameters for a validity circuit.
-
 7.3.1.  Overview
 
-   Conventional zero-knowledge proof systems involve two parties:
+   An FLP is a type of "zero-knowledge proof".  A conventional zero-
+   knowledge proof system involves two parties:
 
    *  The prover, who holds a measurement and generates a proof of the
       measurement's validity
@@ -3484,7 +3488,7 @@ Table of Contents
    the Aggregators perform a probabilistic test to check that the gadget
    polynomial was constructed properly.  This "gadget test", and the
    procedure for constructing the polynomial, are described in detail in
-   Section 7.3.
+   Section 7.3.3.
 
 7.3.1.1.  Extensions
 
@@ -3508,8 +3512,8 @@ Table of Contents
    (Note that this is a special case of [BBCGGI19], Theorem 5.2.)  Here
    x is the length-N input and r is a random field element.  The gadget
    circuit Range2 is the "range-check" polynomial described above, i.e.,
-   Range2(x) = x^2 - x.  The idea is that, if x is valid (i.e., each
-   x[j] is in [0, 2)), then the circuit will evaluate to zero regardless
+   Range2(x) = x^2 - x.  The idea is that, if x is valid, i.e., each
+   x[j] is in [0, 2), then the circuit will evaluate to zero regardless
    of the value of r; but if some x[j] is not in [0, 2), then the output
    will be non-zero with high probability.
 
@@ -3529,11 +3533,11 @@ Table of Contents
 
    Third, rather than interpolate the gadget polynomial at inputs 1, 2,
    ..., j, ..., where j is the j-th invocation of the gadget, we use
-   powers of alpha, where alpha is a root of unity for the field.  This
-   allows us to construct each gadget polynomial via the number
-   theoretic transform [SML24], which is far more efficient than generic
-   formulas.  Note that the roots of unity are powers of the generator
-   of NTT-friendly fields (see Section 6.1.2).
+   roots of unity for the field.  This allows us to construct each
+   gadget polynomial via the number theoretic transform [SML24], which
+   is far more efficient than generic formulas.  Note that the roots of
+   unity are powers of the generator for the NTT-friendly field (see
+   Section 6.1.2).
 
    Finally, the validity circuit in our FLP may have any number of
    outputs (at least one).  The input is said to be valid if each of the
@@ -3553,7 +3557,7 @@ Table of Contents
     +-------------------------+---------------------------------------+
     | MEAS_LEN: int           | Length of the measurement             |
     +-------------------------+---------------------------------------+
-    | JOINT_RAND_LEN: int     | Length of the random input            |
+    | JOINT_RAND_LEN: int     | Length of the joint randomness        |
     +-------------------------+---------------------------------------+
     | EVAL_OUTPUT_LEN: int    | Length of the circuit output          |
     +-------------------------+---------------------------------------+
@@ -3564,6 +3568,7 @@ Table of Contents
     | AggResult               | Type of the aggregate result          |
     +-------------------------+---------------------------------------+
     | field: type[F]          | Class object for the field            |
+    |                         | (Section 6.1.2)                       |
     +-------------------------+---------------------------------------+
 
                    Table 8: Validity circuit parameters.
@@ -3582,16 +3587,16 @@ Table of Contents
 
    *  DEGREE: int is the arithmetic degree of the gadget circuit.  This
       is defined to be the degree of the polynomial that computes it.
-      This exists because the circuit is arithmetic.  For example, Mul
-      has degree 2.
+      This circuit exists because the circuit is arithmetic.  For
+      example, Mul has degree 2.
 
    *  gadget.eval(field: type[F], inp: list[F]) -> F evaluates the
-      gadget circuit over the given inputs and field.
+      gadget over the given inputs and field.
 
    *  gadget.eval_poly(field: type[F], inp_poly: list[list[F]]) ->
       list[F] is the same as eval() except it evaluates the circuit over
-      the polynomial ring of the field.  This is well defined since the
-      circuit is arithmetic.
+      the polynomial ring of the field.  This is well defined because
+      the circuit is arithmetic.
 
    In addition to the list of gadgets, the validity circuit specifies
    how many times each gadget is called (GADGET_CALLS).  It also
@@ -3632,8 +3637,8 @@ Table of Contents
        """Length of the proof."""
        length = 0
        for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
-           P = next_power_of_2(1 + g_calls)
-           length += g.ARITY + g.DEGREE * (P - 1) + 1
+           p = next_power_of_2(1 + g_calls)
+           length += g.ARITY + g.DEGREE * (p - 1) + 1
        return length
 
    def verifier_len(self) -> int:
@@ -3694,8 +3699,8 @@ Table of Contents
            # Compute the wire polynomials for this gadget. For each `j`,
            # find the lowest degree polynomial `wire_poly` for which
            # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
-           # each `g.wires[j][0]` is set to seed of wire `j`, which is
-           # included in the prove randomness.
+           # each `g.wires[j][0]` is set to the seed of wire `j`, which
+           # is included in the prove randomness.
            #
            # Implementation note: `alpha` is a root of unity, which
            # means `poly_interp()` can be evaluated using the NTT. Note
@@ -3848,7 +3853,7 @@ Table of Contents
 
    def decide(self, verifier: list[F]) -> bool:
        # Check the output of the validity circuit.
-       v, verifier = verifier[0], verifier[1:]
+       ([v], verifier) = front(1, verifier)
        if v != self.field(0):
            return False
 
