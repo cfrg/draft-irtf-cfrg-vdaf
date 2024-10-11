@@ -1038,7 +1038,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 13 April 2025</td>
+<td class="center">Expires 14 April 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-10" class="published">10 October 2024</time>
+<time datetime="2024-10-11" class="published">11 October 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-13">13 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-04-14">14 April 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1120,7 +1120,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 13 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 14 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2419,8 +2419,6 @@ the computation. Some of these values need to be written to the network in
 order to carry out the computation. In particular, it is <span class="bcp14">RECOMMENDED</span> that
 concrete instantiations of the <code>Daf</code> interface specify a method of encoding the
 <code>PublicShare</code>, <code>InputShare</code>, <code>AggParam</code>, and <code>AggShare</code>.<a href="#section-4-8" class="pilcrow">¶</a></p>
-<p id="section-4-9">Each DAF is identified by a unique, 32-bit integer <code>ID</code>. Identifiers for each
-(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 18</a>.<a href="#section-4-9" class="pilcrow">¶</a></p>
 <div id="sec-daf-shard">
 <section id="section-4.1">
         <h3 id="name-sharding">
@@ -2528,6 +2526,8 @@ Pre-conditions:<a href="#section-4.2-2.1.2" class="pilcrow">¶</a></p>
             </ul>
 </li>
         </ul>
+<p id="section-4.2-3">The Aggregators <span class="bcp14">MUST</span> agree on the value of the aggregation parameter.
+Otherwise, the aggregate result computed by the Collector may be garbled.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-daf-validity-scopes">
@@ -2685,8 +2685,8 @@ Pre-conditions:<a href="#section-4.5-3.1.2" class="pilcrow">¶</a></p>
         <h3 id="name-execution-of-a-daf">
 <a href="#section-4.6" class="section-number selfRef">4.6. </a><a href="#name-execution-of-a-daf" class="section-name selfRef">Execution of a DAF</a>
         </h3>
-<p id="section-4.6-1">Securely executing a DAF over a network involves emulating the following
-procedure.<a href="#section-4.6-1" class="pilcrow">¶</a></p>
+<p id="section-4.6-1">Secure execution of a DAF involves simulating the following procedure over an
+insecure network.<a href="#section-4.6-1" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-4.6-2">
 <pre>
 def run_daf(
@@ -2767,36 +2767,18 @@ provide in each.<a href="#section-4.6-3" class="pilcrow">¶</a></p>
       <h2 id="name-definition-of-vdafs">
 <a href="#section-5" class="section-number selfRef">5. </a><a href="#name-definition-of-vdafs" class="section-name selfRef">Definition of VDAFs</a>
       </h2>
-<p id="section-5-1">Like DAFs described in the previous section, a VDAF scheme is used to compute a
-particular aggregation function over a set of Client-generated measurements.
-Evaluation of a VDAF involves the same four stages as for DAFs: Sharding,
-Preparation, Aggregation, and Unsharding. However, the Preparation stage will
-require interaction among the Aggregators in order to facilitate verifiability
-of the computation's correctness. Accommodating this interaction will require
-syntactic changes.<a href="#section-5-1" class="pilcrow">¶</a></p>
-<p id="section-5-2">Overall execution of a VDAF comprises the following stages:<a href="#section-5-2" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5-3.1">
-          <p id="section-5-3.1.1">Sharding - Computing input shares from an individual measurement<a href="#section-5-3.1.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-5-3.2">
-          <p id="section-5-3.2.1">Preparation - Conversion and verification of input shares to output shares
-compatible with the aggregation function being computed<a href="#section-5-3.2.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-5-3.3">
-          <p id="section-5-3.3.1">Aggregation - Combining a sequence of output shares into an aggregate share<a href="#section-5-3.3.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-5-3.4">
-          <p id="section-5-3.4.1">Unsharding - Combining a sequence of aggregate shares into an aggregate
-result<a href="#section-5-3.4.1" class="pilcrow">¶</a></p>
-</li>
-      </ul>
-<p id="section-5-4">In contrast to DAFs, the Preparation stage for VDAFs now performs an additional
-task: verification of the validity of the recovered output shares. This process
-ensures that aggregating the output shares will not lead to a garbled aggregate
-result.<a href="#section-5-4" class="pilcrow">¶</a></p>
-<p id="section-5-5">The remainder of this section defines the VDAF interface. The attributes are
-listed in <a href="#vdaf-param" class="auto internal xref">Table 2</a> are defined by each concrete VDAF.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-1">VDAFs are identical to DAFs except that preparation is an interactive process
+carried out by the Aggregators. If successful, this process results in each
+Aggregator computing an output share. The process will fail if, for example,
+the underlying measurement is invalid.<a href="#section-5-1" class="pilcrow">¶</a></p>
+<p id="section-5-2">Failure manifests as an exception raised by one of the algorithms defined in
+this section. If an exception is raised during preparation, the Aggregators
+<span class="bcp14">MUST</span> remove the report from the batch and not attempt to aggregate it.
+Otherwise, a malicious Client can cause the Collector to compute a malformed
+aggregate result.<a href="#section-5-2" class="pilcrow">¶</a></p>
+<p id="section-5-3">The remainder of this section defines the VDAF interface, which we denote by
+<code>Vdaf</code> in the remainder. The attributes are listed in <a href="#vdaf-param" class="auto internal xref">Table 2</a> are
+defined by each concrete VDAF.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-"></span><div id="vdaf-param">
 <table class="center" id="table-2">
         <caption>
@@ -2812,39 +2794,33 @@ listed in <a href="#vdaf-param" class="auto internal xref">Table 2</a> are defin
         <tbody>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>ID</code>
+              <code>ID: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this VDAF.</td>
+            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this DAF, in <code>[0, 2^32)</code>.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>VERIFY_KEY_SIZE</code>
+              <code>SHARES: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Size (in bytes) of the verification key (<a href="#sec-vdaf-prepare" class="auto internal xref">Section 5.2</a>).</td>
+            <td class="text-left" rowspan="1" colspan="1">Number of input shares into which each measurement is sharded.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>RAND_SIZE</code>
+              <code>NONCE_SIZE: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Size of the random byte string passed to sharding algorithm.</td>
+            <td class="text-left" rowspan="1" colspan="1">Size of the nonce associated with the report.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>NONCE_SIZE</code>
+              <code>RAND_SIZE: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Size (in bytes) of the nonce.</td>
+            <td class="text-left" rowspan="1" colspan="1">Size of the random byte string consumed during sharding.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
-              <code>ROUNDS</code>
+              <code>VERIFY_KEY_SIZE: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Number of rounds of communication during the Preparation stage (<a href="#sec-vdaf-prepare" class="auto internal xref">Section 5.2</a>).</td>
-          </tr>
-          <tr>
-            <td class="text-left" rowspan="1" colspan="1">
-              <code>SHARES</code>
-</td>
-            <td class="text-left" rowspan="1" colspan="1">Number of input shares into which each measurement is sharded (<a href="#sec-vdaf-shard" class="auto internal xref">Section 5.1</a>).</td>
+            <td class="text-left" rowspan="1" colspan="1">Size of the verification key used during preparation.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
@@ -2868,7 +2844,7 @@ listed in <a href="#vdaf-param" class="auto internal xref">Table 2</a> are defin
             <td class="text-left" rowspan="1" colspan="1">
               <code>AggParam</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Type of aggregation parameter.</td>
+            <td class="text-left" rowspan="1" colspan="1">Type of the aggregation parameter.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
@@ -2909,14 +2885,14 @@ listed in <a href="#vdaf-param" class="auto internal xref">Table 2</a> are defin
         </tbody>
       </table>
 </div>
-<p id="section-5-7">Some of these values need to be written to the network in order to carry out
-the computation. In particular, it is <span class="bcp14">RECOMMENDED</span> that concrete instantiations
-of the <code>Vdaf</code> interface specify a method of encoding the <code>PublicShare</code>,
-<code>InputShare</code>, <code>AggShare</code>, <code>PrepShare</code>, and <code>PrepMessage</code>.<a href="#section-5-7" class="pilcrow">¶</a></p>
-<p id="section-5-8">Each VDAF is identified by a unique, 32-bit integer <code>ID</code>. Identifiers for each
-(V)DAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 18</a>. The following
-method is defined for each VDAF specified in this document:<a href="#section-5-8" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-5-9">
+<p id="section-5-5">Some of these values need to be written to the network in order to carry out
+the computation. It is <span class="bcp14">RECOMMENDED</span> that concrete instantiations of the <code>Vdaf</code>
+interface specify a method of encoding the <code>PublicShare</code>, <code>InputShare</code>,
+<code>AggParam</code>, <code>AggShare</code>, <code>PrepShare</code>, and <code>PrepMessage</code>.<a href="#section-5-5" class="pilcrow">¶</a></p>
+<p id="section-5-6">Each VDAF is identified by a unique, 32-bit integer <code>ID</code>. Identifiers for each
+VDAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 18</a>. The following
+method is defined for each VDAF specified in this document:<a href="#section-5-6" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-5-7">
 <pre>
 def domain_separation_tag(self, usage: int, ctx: bytes) -&gt; bytes:
     """
@@ -2928,55 +2904,26 @@ def domain_separation_tag(self, usage: int, ctx: bytes) -&gt; bytes:
         - `usage` in `[0, 2^16)`
     """
     return format_dst(0, self.ID, usage) + ctx
-</pre><a href="#section-5-9" class="pilcrow">¶</a>
+</pre><a href="#section-5-7" class="pilcrow">¶</a>
 </div>
-<p id="section-5-10">It is used to construct a domain separation tag for an instance of <code>Xof</code> used by
-the VDAF. (See <a href="#xof" class="auto internal xref">Section 6.2</a>.)<a href="#section-5-10" class="pilcrow">¶</a></p>
+<p id="section-5-8">The output, called the "domain separation tag", is used in our constructions
+for domain separation. Function <code>format_dst()</code> is defined in <a href="#dst-binder" class="auto internal xref">Section 6.2.3</a>.<a href="#section-5-8" class="pilcrow">¶</a></p>
 <div id="sec-vdaf-shard">
 <section id="section-5.1">
         <h3 id="name-sharding-2">
 <a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-sharding-2" class="section-name selfRef">Sharding</a>
         </h3>
-<p id="section-5.1-1">Sharding transforms a measurement and nonce into a public share and input shares
-as it does in DAFs (cf. <a href="#sec-daf-shard" class="auto internal xref">Section 4.1</a>):<a href="#section-5.1-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.1-2.1">
-            <p id="section-5.1-2.1.1"><code>vdaf.shard(ctx: bytes, measurement: Measurement, nonce: bytes, rand: bytes)
--&gt; tuple[PublicShare, list[InputShare]]</code> is the randomized sharding algorithm
-run by each Client that consumes the application context, a measurement, and
-a nonce and produces a public share distributed to each of the Aggregate and
-a corresponding sequence of input shares, one for each Aggregator. Depending
-on the VDAF, the input shares may encode additional information used to
-verify the recovered output shares (e.g., the "proof shares" in Prio3
-<a href="#prio3" class="auto internal xref">Section 7</a>)<a href="#section-5.1-2.1.1" class="pilcrow">¶</a></p>
-<p id="section-5.1-2.1.2">
-Pre-conditions:<a href="#section-5.1-2.1.2" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.1-2.1.3.1">
-                <p id="section-5.1-2.1.3.1.1"><code>nonce</code> <span class="bcp14">MUST</span> have length equal to <code>NONCE_SIZE</code> and <span class="bcp14">MUST</span> be generated using
-a CSPRNG. (See <a href="#security" class="auto internal xref">Section 9</a> for details.)<a href="#section-5.1-2.1.3.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="normal" id="section-5.1-2.1.3.2">
-                <p id="section-5.1-2.1.3.2.1"><code>rand</code> consists of the random bytes consumed by the algorithm. It <span class="bcp14">MUST</span> have
-length equal to <code>RAND_SIZE</code> and <span class="bcp14">MUST</span> be generated using a CSPRNG.<a href="#section-5.1-2.1.3.2.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
-<p id="section-5.1-2.1.4">
-Post-conditions:<a href="#section-5.1-2.1.4" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.1-2.1.5.1">
-                <p id="section-5.1-2.1.5.1.1">The number of input shares <span class="bcp14">MUST</span> equal <code>SHARES</code>.<a href="#section-5.1-2.1.5.1.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
-</li>
-        </ul>
-<p id="section-5.1-3">Like DAFs, sharding is bound to the application context via the <code>ctx</code> string.
-Again, this is intended to ensure that aggregation succeeds only if the Clients
-and Aggregators agree on the application context. Unlike DAFs, however,
-disagreement on the context should manifest as a failure to validate the
-report, causing the report to be rejected without garbling the aggregate
+<p id="section-5.1-1">Sharding is as described for DAFs in <a href="#sec-daf-shard" class="auto internal xref">Section 4.1</a>. The public share and
+input shares encode additional information used during preparation to validate
+the output shares before they are aggregated (e.g., the "proof shares" in
+<a href="#prio3" class="auto internal xref">Section 7</a>).<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">Like DAFs, sharding is bound to the application context via the application
+context string. Again, this is intended to ensure that aggregation succeeds
+only if the Clients and Aggregators agree on the application context. Unlike
+DAFs, however, disagreement on the context should manifest as a preparation
+failure, causing the report to be rejected without garbling the aggregate
 result. The application context also provides some defense-in-depth against
-cross protocol attacks; see <a href="#deep" class="auto internal xref">Section 9.9</a>.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+cross protocol attacks; see <a href="#deep" class="auto internal xref">Section 9.9</a>.<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-vdaf-prepare">
@@ -2984,23 +2931,9 @@ cross protocol attacks; see <a href="#deep" class="auto internal xref">Section 9
         <h3 id="name-preparation-2">
 <a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-preparation-2" class="section-name selfRef">Preparation</a>
         </h3>
-<p id="section-5.2-1">To recover and verify output shares, the Aggregators interact with one another
-over <code>ROUNDS</code> rounds. Prior to each round, each Aggregator constructs an
-outbound message. Next, the sequence of outbound messages is combined into a
-single message, called a "preparation message", or "prep message" for short.
-(Each of the outbound messages are called "preparation-message shares", or
-"prep shares" for short.) Finally, the preparation message is distributed to
-the Aggregators to begin the next round.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
-<p id="section-5.2-2">An Aggregator begins the first round with its input share and it begins each
-subsequent round with the previous prep message. Its output in the last round
-is its output share and its output in each of the preceding rounds is a prep
-share.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
-<p id="section-5.2-3">This process involves a value called the "aggregation parameter" used to map the
-input shares to output shares. The Aggregators need to agree on this parameter
-before they can begin preparing the measurement shares for aggregation.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
-<span id="name-vdaf-preparation-process-on"></span><div id="prep-flow">
+<span id="name-illustration-of-interactive"></span><div id="prep-flow">
 <figure id="figure-5">
-          <div class="alignLeft art-text artwork" id="section-5.2-4.1">
+          <div class="alignLeft art-text artwork" id="section-5.2-1.1">
 <pre>
     Aggregator 0   Aggregator 1           Aggregator SHARES-1
     ============   ============           ===================
@@ -3030,80 +2963,92 @@ before they can begin preparing the measurement shares for aggregation.<a href="
 </pre>
 </div>
 <figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
-<a href="#name-vdaf-preparation-process-on" class="selfRef">VDAF preparation process on the input shares for a single measurement. At the end of the computation, each Aggregator holds an output share or an error.</a>
+<a href="#name-illustration-of-interactive" class="selfRef">Illustration of interactive VDAF preparation.</a>
           </figcaption></figure>
 </div>
-<p id="section-5.2-5">To facilitate the preparation process, a concrete VDAF implements the following
-methods:<a href="#section-5.2-5" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">Preparation is organized into a number of rounds, generally one or two
+depending on the VDAF.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+<p id="section-5.2-3">At the start of each round, each Aggregator broadcasts a message called a
+"preparation share", or "prep share" for short. The prep shares are then
+combined into a single message called the "preparation message", or "prep
+message". This step can be carried out by any one of the Aggregators.<a href="#section-5.2-3" class="pilcrow">¶</a></p>
+<p id="section-5.2-4">The prep message is disseminated to each of the Aggregators to begin the next
+round, or compute the output shares in case of the last round.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
+<p id="section-5.2-5">An Aggregator begins the first round with its input share and it begins each
+subsequent round with the previous prep message. Its output in the last round
+is its output share and its output in each of the preceding rounds is a prep
+share.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
+<p id="section-5.2-6">Just as for DAFs (<a href="#sec-daf-prepare" class="auto internal xref">Section 4.2</a>), preparation involves an aggregation
+parameter. The aggregation parameter is consumed by each Aggregator before the
+first round of communication.<a href="#section-5.2-6" class="pilcrow">¶</a></p>
+<p id="section-5.2-7">Unlike DAFs, VDAF preparation involves a secret "verification key" held by each
+of the Aggregators. This is used to verify validity of the output shares they
+compute.<a href="#section-5.2-7" class="pilcrow">¶</a></p>
+<p id="section-5.2-8">Preparation is implemented by the following set of algorithms:<a href="#section-5.2-8" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.2-6.1">
-            <p id="section-5.2-6.1.1"><code>vdaf.prep_init(verify_key: bytes, ctx: bytes, agg_id: int, agg_param:
+<li class="normal" id="section-5.2-9.1">
+            <p id="section-5.2-9.1.1"><code>vdaf.prep_init(verify_key: bytes, ctx: bytes, agg_id: int, agg_param:
 AggParam, nonce: bytes, public_share: PublicShare, input_share: InputShare)
 -&gt; tuple[PrepState, PrepShare]</code> is the deterministic preparation-state
-initialization algorithm run by each Aggregator to begin processing its input
-share into an output share. Its inputs are the shared verification key
+initialization algorithm run by each Aggregator. It consumes the shared verification key
 (<code>verify_key</code>), the application context (<code>ctx</code>), the Aggregator's unique
 identifier (<code>agg_id</code>), the aggregation parameter (<code>agg_param</code>), the nonce
 provided by the environment (<code>nonce</code>, see <a href="#vdaf-execution" class="auto internal xref">Section 5.6</a>), the public
 share (<code>public_share</code>), and one of the input shares generated by the Client
-(<code>input_share</code>). Its output is the Aggregator's initial preparation state and
-initial prep share.<a href="#section-5.2-6.1.1" class="pilcrow">¶</a></p>
-<p id="section-5.2-6.1.2">
+(<code>input_share</code>). It produces the Aggregator's initial prep state and prep
+share.<a href="#section-5.2-9.1.1" class="pilcrow">¶</a></p>
+<p id="section-5.2-9.1.2">
 It is up to the high level protocol in which the VDAF is used to arrange for
 the distribution of the verification key prior to generating and processing
-reports. (See <a href="#security" class="auto internal xref">Section 9</a> for details.)<a href="#section-5.2-6.1.2" class="pilcrow">¶</a></p>
-<p id="section-5.2-6.1.3">
+reports. See <a href="#security" class="auto internal xref">Section 9</a> for details.<a href="#section-5.2-9.1.2" class="pilcrow">¶</a></p>
+<p id="section-5.2-9.1.3">
 Protocols <span class="bcp14">MUST</span> ensure that public share consumed by each of the Aggregators is
-identical. This is security critical for VDAFs such as Poplar1.<a href="#section-5.2-6.1.3" class="pilcrow">¶</a></p>
-<p id="section-5.2-6.1.4">
-Pre-conditions:<a href="#section-5.2-6.1.4" class="pilcrow">¶</a></p>
+identical. This is security critical for VDAFs such as Poplar1.<a href="#section-5.2-9.1.3" class="pilcrow">¶</a></p>
+<p id="section-5.2-9.1.4">
+Pre-conditions:<a href="#section-5.2-9.1.4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-5.2-6.1.5.1">
-                <p id="section-5.2-6.1.5.1.1"><code>verify_key</code> <span class="bcp14">MUST</span> have length <code>vdaf.VERIFY_KEY_SIZE</code>.<a href="#section-5.2-6.1.5.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-5.2-9.1.5.1">
+                <p id="section-5.2-9.1.5.1.1"><code>verify_key</code> <span class="bcp14">MUST</span> have length <code>vdaf.VERIFY_KEY_SIZE</code>.<a href="#section-5.2-9.1.5.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li class="normal" id="section-5.2-6.1.5.2">
-                <p id="section-5.2-6.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>[0, vdaf.SHARES)</code> that matches the
+              <li class="normal" id="section-5.2-9.1.5.2">
+                <p id="section-5.2-9.1.5.2.1"><code>agg_id</code> <span class="bcp14">MUST</span> be the integer in <code>[0, vdaf.SHARES)</code> that matches the
 index of <code>input_share</code> in the sequence of input shares output by the
-Client.<a href="#section-5.2-6.1.5.2.1" class="pilcrow">¶</a></p>
+Client.<a href="#section-5.2-9.1.5.2.1" class="pilcrow">¶</a></p>
 </li>
-              <li class="normal" id="section-5.2-6.1.5.3">
-                <p id="section-5.2-6.1.5.3.1"><code>nonce</code> <span class="bcp14">MUST</span> have length <code>vdaf.NONCE_SIZE</code>.<a href="#section-5.2-6.1.5.3.1" class="pilcrow">¶</a></p>
+              <li class="normal" id="section-5.2-9.1.5.3">
+                <p id="section-5.2-9.1.5.3.1"><code>nonce</code> <span class="bcp14">MUST</span> have length <code>vdaf.NONCE_SIZE</code>.<a href="#section-5.2-9.1.5.3.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
-          <li class="normal" id="section-5.2-6.2">
-            <p id="section-5.2-6.2.1"><code>vdaf.prep_next(ctx: bytes, prep_state: PrepState, prep_msg: PrepMessage) -&gt;
-tuple[PrepState, PrepShare] | OutShare</code> is the deterministic
-preparation-state update algorithm run by each Aggregator. It updates the
-Aggregator's preparation state (<code>prep_state</code>) and returns either its next
-preparation state and its message share for the current round or, if this is
-the last round, its output share. An exception is raised if a valid output
-share could not be recovered. The input of this algorithm is the inbound
-preparation message.<a href="#section-5.2-6.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.2-6.3">
-            <p id="section-5.2-6.3.1"><code>vdaf.prep_shares_to_prep(ctx: bytes, agg_param: AggParam, prep_shares:
+          <li class="normal" id="section-5.2-9.2">
+            <p id="section-5.2-9.2.1"><code>vdaf.prep_shares_to_prep(ctx: bytes, agg_param: AggParam, prep_shares:
 list[PrepShare]) -&gt; PrepMessage</code> is the deterministic preparation-message
 pre-processing algorithm. It combines the prep shares generated by the
-Aggregators in the previous round into the prep message consumed by each in
-the next round.<a href="#section-5.2-6.3.1" class="pilcrow">¶</a></p>
+Aggregators in the previous round into the prep message consumed by each
+Aggregator to start the next round.<a href="#section-5.2-9.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-5.2-9.3">
+            <p id="section-5.2-9.3.1"><code>vdaf.prep_next(ctx: bytes, prep_state: PrepState, prep_msg: PrepMessage) -&gt;
+tuple[PrepState, PrepShare] | OutShare</code> is the deterministic
+preparation-state update algorithm run by each Aggregator. It updates the
+Aggregator's prep state (<code>prep_state</code>) and returns either its next prep state
+and prep share for the next round or, if this is the last round, its output
+share.<a href="#section-5.2-9.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-5.2-7">In effect, each Aggregator moves through a linear state machine with <code>ROUNDS</code>
-states.  The Aggregator enters the first state on using the initialization
-algorithm, and the update algorithm advances the Aggregator to the next state.
-Thus, in addition to defining the number of rounds (<code>ROUNDS</code>), a VDAF instance
-defines the state of the Aggregator after each round.<a href="#section-5.2-7" class="pilcrow">¶</a></p>
-<p id="section-5.2-8">The preparation-state update accomplishes two tasks: recovery of output shares
-from the input shares and ensuring that the recovered output shares are valid.
-The abstraction boundary is drawn so that an Aggregator only recovers an output
-share if it is deemed valid (at least, based on the Aggregator's view of the
-protocol). Another way to draw this boundary would be to have the Aggregators
-recover output shares first, then verify that they are valid. However, this
-would allow the possibility of misusing the API by, say, aggregating an invalid
-output share. Moreover, in protocols like Prio+ <span>[<a href="#AGJOP21" class="cite xref">AGJOP21</a>]</span> based on oblivious
-transfer, it is necessary for the Aggregators to interact in order to recover
-aggregatable output shares at all.<a href="#section-5.2-8" class="pilcrow">¶</a></p>
+<p id="section-5.2-10">An exception may be raised by one of these algorithms, in which case the report
+<span class="bcp14">MUST</span> be deemed invalid and not processed any further.<a href="#section-5.2-10" class="pilcrow">¶</a></p>
+<p id="section-5.2-11">Implementation note: The preparation-state update accomplishes two tasks:
+recovery of output shares from the input shares and ensuring that the recovered
+output shares are valid. The abstraction boundary is drawn so that an
+Aggregator only recovers an output share if the underlying data is deemed valid
+(at least, based on the Aggregator's view of the protocol). Another way to draw
+this boundary would be to have the Aggregators recover output shares first,
+then verify that they are valid. However, this would allow the possibility of
+misusing the API by, say, aggregating an invalid output share. Moreover, in
+protocols like Prio+ <span>[<a href="#AGJOP21" class="cite xref">AGJOP21</a>]</span> based on oblivious transfer, it is necessary
+for the Aggregators to interact in order to recover aggregatable output shares
+at all.<a href="#section-5.2-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-vdaf-validity-scopes">
@@ -3111,22 +3056,10 @@ aggregatable output shares at all.<a href="#section-5.2-8" class="pilcrow">¶</a
         <h3 id="name-validity-of-aggregation-para">
 <a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-validity-of-aggregation-para" class="section-name selfRef">Validity of Aggregation Parameters</a>
         </h3>
-<p id="section-5.3-1">Similar to DAFs (see <a href="#sec-daf-validity-scopes" class="auto internal xref">Section 4.3</a>), VDAFs <span class="bcp14">MAY</span> impose
-restrictions for input shares and aggregation parameters. Protocols using a VDAF
-<span class="bcp14">MUST</span> ensure that for each input share and aggregation parameter <code>agg_param</code>, the
-preparation phase (including <code>vdaf.prep_init</code>, <code>vdaf.prep_next</code>, and
-<code>vdaf.prep_shares_to_prep</code>; see <a href="#sec-vdaf-prepare" class="auto internal xref">Section 5.2</a>) is only called if
-<code>vdaf.is_valid(agg_param, previous_agg_params)</code> returns True, where
-<code>previous_agg_params</code> contains all aggregation parameters that have previously
-been used with the same input share.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
-<p id="section-5.3-2">VDAFs <span class="bcp14">MUST</span> implement the following function:<a href="#section-5.3-2" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.3-3.1">
-            <p id="section-5.3-3.1.1"><code>vdaf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) -&gt;
-bool</code>: checks if the <code>agg_param</code> is compatible with all elements of
-<code>previous_agg_params</code>.<a href="#section-5.3-3.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
+<p id="section-5.3-1">Aggregation parameter validation is as described for DAFs in
+<a href="#sec-daf-validity-scopes" class="auto internal xref">Section 4.3</a>. Again, each Aggregator <span class="bcp14">MUST</span> validate each
+aggregation parameter received by the Collector before beginning the
+preparation process.<a href="#section-5.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-vdaf-aggregate">
@@ -3134,25 +3067,10 @@ bool</code>: checks if the <code>agg_param</code> is compatible with all element
         <h3 id="name-aggregation-2">
 <a href="#section-5.4" class="section-number selfRef">5.4. </a><a href="#name-aggregation-2" class="section-name selfRef">Aggregation</a>
         </h3>
-<p id="section-5.4-1">VDAF aggregation is identical to DAF aggregation (<a href="#sec-daf-aggregate" class="auto internal xref">Section 4.4</a>):<a href="#section-5.4-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.4-2.1">
-            <p id="section-5.4-2.1.1"><code>vdaf.agg_init(agg_param: AggParam) -&gt; AggShare</code> returns an empty aggregate
-share. It is called to initialize aggregation of a batch of measurements.<a href="#section-5.4-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.4-2.2">
-            <p id="section-5.4-2.2.1"><code>vdaf.agg_update(agg_param: AggParam, agg_share: AggShare, out_share:
-OutShare) -&gt; AggShare</code> accumulates an output share into an aggregate share
-and returns the updated aggregate share.<a href="#section-5.4-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-5.4-2.3">
-            <p id="section-5.4-2.3.1"><code>vdaf.merge(agg_param: AggParam, agg_shares: list[AggShare]) -&gt; AggShare</code>
-merges a sequence of aggregate shares into a single aggregate share.<a href="#section-5.4-2.3.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-5.4-3">The data flow for this stage is illustrated in <a href="#aggregate-flow" class="auto internal xref">Figure 3</a>. Like DAFs,
-computation of the VDAF aggregate is not usually sensitive to the order in
-which output shares are aggregated. See <a href="#agg-order" class="auto internal xref">Section 4.4.1</a>.<a href="#section-5.4-3" class="pilcrow">¶</a></p>
+<p id="section-5.4-1">VDAF aggregation is identical to DAF aggregation as described in
+<a href="#sec-daf-aggregate" class="auto internal xref">Section 4.4</a>. Like DAFs, computation of the VDAF aggregate is not
+usually sensitive to the order in which output shares are aggregated. See
+<a href="#agg-order" class="auto internal xref">Section 4.4.1</a>.<a href="#section-5.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-vdaf-unshard">
@@ -3160,18 +3078,8 @@ which output shares are aggregated. See <a href="#agg-order" class="auto interna
         <h3 id="name-unsharding-2">
 <a href="#section-5.5" class="section-number selfRef">5.5. </a><a href="#name-unsharding-2" class="section-name selfRef">Unsharding</a>
         </h3>
-<p id="section-5.5-1">VDAF Unsharding is identical to DAF Unsharding (cf. <a href="#sec-daf-unshard" class="auto internal xref">Section 4.5</a>):<a href="#section-5.5-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-5.5-2.1">
-            <p id="section-5.5-2.1.1"><code>vdaf.unshard(agg_param: AggParam, agg_shares: list[AggShare],
-num_measurements: int) -&gt; AggResult</code> is run by the Collector in order to
-compute the aggregate result from the Aggregators' shares. The length of
-<code>agg_shares</code> <span class="bcp14">MUST</span> be <code>SHARES</code>. <code>num_measurements</code> is the number of
-measurements that contributed to each of the aggregate shares. This algorithm
-is deterministic.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-5.5-3">The data flow for this stage is illustrated in <a href="#unshard-flow" class="auto internal xref">Figure 4</a>.<a href="#section-5.5-3" class="pilcrow">¶</a></p>
+<p id="section-5.5-1">VDAF unsharding is identical to DAF unsharding as described in
+<a href="#sec-daf-unshard" class="auto internal xref">Section 4.5</a>.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="vdaf-execution">
@@ -3179,7 +3087,8 @@ is deterministic.<a href="#section-5.5-2.1.1" class="pilcrow">¶</a></p>
         <h3 id="name-execution-of-a-vdaf">
 <a href="#section-5.6" class="section-number selfRef">5.6. </a><a href="#name-execution-of-a-vdaf" class="section-name selfRef">Execution of a VDAF</a>
         </h3>
-<p id="section-5.6-1">Secure execution of a VDAF involves simulating the following procedure.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
+<p id="section-5.6-1">Secure execution of a VDAF involves simulating the following procedure over an
+insecure network.<a href="#section-5.6-1" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-5.6-2">
 <pre>
 def run_vdaf(
@@ -3274,11 +3183,9 @@ def run_vdaf(
 </pre><a href="#section-5.6-2" class="pilcrow">¶</a>
 </div>
 <p id="section-5.6-3">The inputs to this algorithm are the aggregation parameter, a list of
-measurements, and a nonce for each measurement. This document does not specify
-how the nonces are chosen, but security requires that the nonces be unique. See
-<a href="#security" class="auto internal xref">Section 9</a> for details. As explained in <a href="#daf-execution" class="auto internal xref">Section 4.6</a>, the secure
-execution of a VDAF requires the application to instantiate secure channels
-between each of the protocol participants.<a href="#section-5.6-3" class="pilcrow">¶</a></p>
+measurements, and a nonce for each measurement. As explained in
+<a href="#daf-execution" class="auto internal xref">Section 4.6</a>, the secure execution of a VDAF requires the application to
+instantiate secure channels between each of the protocol participants.<a href="#section-5.6-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="vdaf-prep-comm">

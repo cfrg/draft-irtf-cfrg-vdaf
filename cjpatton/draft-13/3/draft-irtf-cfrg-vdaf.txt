@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 13 April 2025                                              ISRG
+Expires: 14 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         10 October 2024
+                                                         11 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 April 2025.
+   This Internet-Draft will expire on 14 April 2025.
 
 Copyright Notice
 
@@ -953,9 +953,6 @@ Table of Contents
    specify a method of encoding the PublicShare, InputShare, AggParam,
    and AggShare.
 
-   Each DAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 18.
-
 4.1.  Sharding
 
        Client
@@ -1040,6 +1037,10 @@ Table of Contents
          Client.
 
       -  nonce MUST have length NONCE_SIZE.
+
+   The Aggregators MUST agree on the value of the aggregation parameter.
+   Otherwise, the aggregate result computed by the Collector may be
+   garbled.
 
 4.3.  Validity of Aggregation Parameters
 
@@ -1157,8 +1158,8 @@ Table of Contents
 
 4.6.  Execution of a DAF
 
-   Securely executing a DAF over a network involves emulating the
-   following procedure.
+   Secure execution of a DAF involves simulating the following procedure
+   over an insecure network.
 
    def run_daf(
            daf: Daf[
@@ -1232,87 +1233,73 @@ Table of Contents
 
 5.  Definition of VDAFs
 
-   Like DAFs described in the previous section, a VDAF scheme is used to
-   compute a particular aggregation function over a set of Client-
-   generated measurements.  Evaluation of a VDAF involves the same four
-   stages as for DAFs: Sharding, Preparation, Aggregation, and
-   Unsharding.  However, the Preparation stage will require interaction
-   among the Aggregators in order to facilitate verifiability of the
-   computation's correctness.  Accommodating this interaction will
-   require syntactic changes.
+   VDAFs are identical to DAFs except that preparation is an interactive
+   process carried out by the Aggregators.  If successful, this process
+   results in each Aggregator computing an output share. The process
+   will fail if, for example, the underlying measurement is invalid.
 
-   Overall execution of a VDAF comprises the following stages:
+   Failure manifests as an exception raised by one of the algorithms
+   defined in this section.  If an exception is raised during
+   preparation, the Aggregators MUST remove the report from the batch
+   and not attempt to aggregate it.  Otherwise, a malicious Client can
+   cause the Collector to compute a malformed aggregate result.
 
-   *  Sharding - Computing input shares from an individual measurement
+   The remainder of this section defines the VDAF interface, which we
+   denote by Vdaf in the remainder.  The attributes are listed in
+   Table 2 are defined by each concrete VDAF.
 
-   *  Preparation - Conversion and verification of input shares to
-      output shares compatible with the aggregation function being
-      computed
+         +==================+===================================+
+         | Parameter        | Description                       |
+         +==================+===================================+
+         | ID: int          | Algorithm identifier for this     |
+         |                  | DAF, in [0, 2^32).                |
+         +------------------+-----------------------------------+
+         | SHARES: int      | Number of input shares into which |
+         |                  | each measurement is sharded.      |
+         +------------------+-----------------------------------+
+         | NONCE_SIZE: int  | Size of the nonce associated with |
+         |                  | the report.                       |
+         +------------------+-----------------------------------+
+         | RAND_SIZE: int   | Size of the random byte string    |
+         |                  | consumed during sharding.         |
+         +------------------+-----------------------------------+
+         | VERIFY_KEY_SIZE: | Size of the verification key used |
+         | int              | during preparation.               |
+         +------------------+-----------------------------------+
+         | Measurement      | Type of each measurement.         |
+         +------------------+-----------------------------------+
+         | PublicShare      | Type of each public share.        |
+         +------------------+-----------------------------------+
+         | InputShare       | Type of each input share.         |
+         +------------------+-----------------------------------+
+         | AggParam         | Type of the aggregation           |
+         |                  | parameter.                        |
+         +------------------+-----------------------------------+
+         | OutShare         | Type of each output share.        |
+         +------------------+-----------------------------------+
+         | AggShare         | Type of the aggregate share.      |
+         +------------------+-----------------------------------+
+         | AggResult        | Type of the aggregate result.     |
+         +------------------+-----------------------------------+
+         | PrepState        | Aggregator's state during         |
+         |                  | preparation.                      |
+         +------------------+-----------------------------------+
+         | PrepShare        | Type of each prep share.          |
+         +------------------+-----------------------------------+
+         | PrepMessage      | Type of each prep message.        |
+         +------------------+-----------------------------------+
 
-   *  Aggregation - Combining a sequence of output shares into an
-      aggregate share
-
-   *  Unsharding - Combining a sequence of aggregate shares into an
-      aggregate result
-
-   In contrast to DAFs, the Preparation stage for VDAFs now performs an
-   additional task: verification of the validity of the recovered output
-   shares.  This process ensures that aggregating the output shares will
-   not lead to a garbled aggregate result.
-
-   The remainder of this section defines the VDAF interface.  The
-   attributes are listed in Table 2 are defined by each concrete VDAF.
-
-      +=================+==========================================+
-      | Parameter       | Description                              |
-      +=================+==========================================+
-      | ID              | Algorithm identifier for this VDAF.      |
-      +-----------------+------------------------------------------+
-      | VERIFY_KEY_SIZE | Size (in bytes) of the verification key  |
-      |                 | (Section 5.2).                           |
-      +-----------------+------------------------------------------+
-      | RAND_SIZE       | Size of the random byte string passed to |
-      |                 | sharding algorithm.                      |
-      +-----------------+------------------------------------------+
-      | NONCE_SIZE      | Size (in bytes) of the nonce.            |
-      +-----------------+------------------------------------------+
-      | ROUNDS          | Number of rounds of communication during |
-      |                 | the Preparation stage (Section 5.2).     |
-      +-----------------+------------------------------------------+
-      | SHARES          | Number of input shares into which each   |
-      |                 | measurement is sharded (Section 5.1).    |
-      +-----------------+------------------------------------------+
-      | Measurement     | Type of each measurement.                |
-      +-----------------+------------------------------------------+
-      | PublicShare     | Type of each public share.               |
-      +-----------------+------------------------------------------+
-      | InputShare      | Type of each input share.                |
-      +-----------------+------------------------------------------+
-      | AggParam        | Type of aggregation parameter.           |
-      +-----------------+------------------------------------------+
-      | OutShare        | Type of each output share.               |
-      +-----------------+------------------------------------------+
-      | AggShare        | Type of the aggregate share.             |
-      +-----------------+------------------------------------------+
-      | AggResult       | Type of the aggregate result.            |
-      +-----------------+------------------------------------------+
-      | PrepState       | Aggregator's state during preparation.   |
-      +-----------------+------------------------------------------+
-      | PrepShare       | Type of each prep share.                 |
-      +-----------------+------------------------------------------+
-      | PrepMessage     | Type of each prep message.               |
-      +-----------------+------------------------------------------+
-
-       Table 2: Constants and types defined by each concrete VDAF.
+               Table 2: Constants and types defined by each
+                              concrete VDAF.
 
    Some of these values need to be written to the network in order to
-   carry out the computation.  In particular, it is RECOMMENDED that
-   concrete instantiations of the Vdaf interface specify a method of
-   encoding the PublicShare, InputShare, AggShare, PrepShare, and
+   carry out the computation.  It is RECOMMENDED that concrete
+   instantiations of the Vdaf interface specify a method of encoding the
+   PublicShare, InputShare, AggParam, AggShare, PrepShare, and
    PrepMessage.
 
    Each VDAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each (V)DAF specified in this document are defined in Table 18.
+   for each VDAF specified in this document are defined in Table 18.
    The following method is defined for each VDAF specified in this
    document:
 
@@ -1327,66 +1314,27 @@ Table of Contents
        """
        return format_dst(0, self.ID, usage) + ctx
 
-   It is used to construct a domain separation tag for an instance of
-   Xof used by the VDAF.  (See Section 6.2.)
+   The output, called the "domain separation tag", is used in our
+   constructions for domain separation.  Function format_dst() is
+   defined in Section 6.2.3.
 
 5.1.  Sharding
 
-   Sharding transforms a measurement and nonce into a public share and
-   input shares as it does in DAFs (cf.  Section 4.1):
+   Sharding is as described for DAFs in Section 4.1.  The public share
+   and input shares encode additional information used during
+   preparation to validate the output shares before they are aggregated
+   (e.g., the "proof shares" in Section 7).
 
-   *  vdaf.shard(ctx: bytes, measurement: Measurement, nonce: bytes,
-      rand: bytes) -> tuple[PublicShare, list[InputShare]] is the
-      randomized sharding algorithm run by each Client that consumes the
-      application context, a measurement, and a nonce and produces a
-      public share distributed to each of the Aggregate and a
-      corresponding sequence of input shares, one for each Aggregator.
-      Depending on the VDAF, the input shares may encode additional
-      information used to verify the recovered output shares (e.g., the
-      "proof shares" in Prio3 Section 7)
-
-      Pre-conditions:
-
-      -  nonce MUST have length equal to NONCE_SIZE and MUST be
-         generated using a CSPRNG.  (See Section 9 for details.)
-
-      -  rand consists of the random bytes consumed by the algorithm.
-         It MUST have length equal to RAND_SIZE and MUST be generated
-         using a CSPRNG.
-
-      Post-conditions:
-
-      -  The number of input shares MUST equal SHARES.
-
-   Like DAFs, sharding is bound to the application context via the ctx
-   string.  Again, this is intended to ensure that aggregation succeeds
-   only if the Clients and Aggregators agree on the application context.
-   Unlike DAFs, however, disagreement on the context should manifest as
-   a failure to validate the report, causing the report to be rejected
-   without garbling the aggregate result.  The application context also
-   provides some defense-in-depth against cross protocol attacks; see
-   Section 9.9.
+   Like DAFs, sharding is bound to the application context via the
+   application context string.  Again, this is intended to ensure that
+   aggregation succeeds only if the Clients and Aggregators agree on the
+   application context.  Unlike DAFs, however, disagreement on the
+   context should manifest as a preparation failure, causing the report
+   to be rejected without garbling the aggregate result.  The
+   application context also provides some defense-in-depth against cross
+   protocol attacks; see Section 9.9.
 
 5.2.  Preparation
-
-   To recover and verify output shares, the Aggregators interact with
-   one another over ROUNDS rounds.  Prior to each round, each Aggregator
-   constructs an outbound message.  Next, the sequence of outbound
-   messages is combined into a single message, called a "preparation
-   message", or "prep message" for short.  (Each of the outbound
-   messages are called "preparation-message shares", or "prep shares"
-   for short.)  Finally, the preparation message is distributed to the
-   Aggregators to begin the next round.
-
-   An Aggregator begins the first round with its input share and it
-   begins each subsequent round with the previous prep message.  Its
-   output in the last round is its output share and its output in each
-   of the preceding rounds is a prep share.
-
-   This process involves a value called the "aggregation parameter" used
-   to map the input shares to output shares.  The Aggregators need to
-   agree on this parameter before they can begin preparing the
-   measurement shares for aggregation.
 
        Aggregator 0   Aggregator 1           Aggregator SHARES-1
        ============   ============           ===================
@@ -1414,29 +1362,51 @@ Table of Contents
          V              V                      V
        out_share_0    out_share_1         out_share_[SHARES-1]
 
-    Figure 5: VDAF preparation process on the input shares for a single
-   measurement.  At the end of the computation, each Aggregator holds an
-                         output share or an error.
+          Figure 5: Illustration of interactive VDAF preparation.
 
-   To facilitate the preparation process, a concrete VDAF implements the
-   following methods:
+   Preparation is organized into a number of rounds, generally one or
+   two depending on the VDAF.
+
+   At the start of each round, each Aggregator broadcasts a message
+   called a "preparation share", or "prep share" for short.  The prep
+   shares are then combined into a single message called the
+   "preparation message", or "prep message".  This step can be carried
+   out by any one of the Aggregators.
+
+   The prep message is disseminated to each of the Aggregators to begin
+   the next round, or compute the output shares in case of the last
+   round.
+
+   An Aggregator begins the first round with its input share and it
+   begins each subsequent round with the previous prep message.  Its
+   output in the last round is its output share and its output in each
+   of the preceding rounds is a prep share.
+
+   Just as for DAFs (Section 4.2), preparation involves an aggregation
+   parameter.  The aggregation parameter is consumed by each Aggregator
+   before the first round of communication.
+
+   Unlike DAFs, VDAF preparation involves a secret "verification key"
+   held by each of the Aggregators.  This is used to verify validity of
+   the output shares they compute.
+
+   Preparation is implemented by the following set of algorithms:
 
    *  vdaf.prep_init(verify_key: bytes, ctx: bytes, agg_id: int,
       agg_param: AggParam, nonce: bytes, public_share: PublicShare,
       input_share: InputShare) -> tuple[PrepState, PrepShare] is the
       deterministic preparation-state initialization algorithm run by
-      each Aggregator to begin processing its input share into an output
-      share.  Its inputs are the shared verification key (verify_key),
-      the application context (ctx), the Aggregator's unique identifier
-      (agg_id), the aggregation parameter (agg_param), the nonce
-      provided by the environment (nonce, see Section 5.6), the public
-      share (public_share), and one of the input shares generated by the
-      Client (input_share).  Its output is the Aggregator's initial
-      preparation state and initial prep share.
+      each Aggregator.  It consumes the shared verification key
+      (verify_key), the application context (ctx), the Aggregator's
+      unique identifier (agg_id), the aggregation parameter (agg_param),
+      the nonce provided by the environment (nonce, see Section 5.6),
+      the public share (public_share), and one of the input shares
+      generated by the Client (input_share).  It produces the
+      Aggregator's initial prep state and prep share.
 
       It is up to the high level protocol in which the VDAF is used to
       arrange for the distribution of the verification key prior to
-      generating and processing reports.  (See Section 9 for details.)
+      generating and processing reports.  See Section 9 for details.
 
       Protocols MUST ensure that public share consumed by each of the
       Aggregators is identical.  This is security critical for VDAFs
@@ -1452,95 +1422,59 @@ Table of Contents
 
       -  nonce MUST have length vdaf.NONCE_SIZE.
 
-   *  vdaf.prep_next(ctx: bytes, prep_state: PrepState, prep_msg:
-      PrepMessage) -> tuple[PrepState, PrepShare] | OutShare is the
-      deterministic preparation-state update algorithm run by each
-      Aggregator.  It updates the Aggregator's preparation state
-      (prep_state) and returns either its next preparation state and its
-      message share for the current round or, if this is the last round,
-      its output share.  An exception is raised if a valid output share
-      could not be recovered.  The input of this algorithm is the
-      inbound preparation message.
-
    *  vdaf.prep_shares_to_prep(ctx: bytes, agg_param: AggParam,
       prep_shares: list[PrepShare]) -> PrepMessage is the deterministic
       preparation-message pre-processing algorithm.  It combines the
       prep shares generated by the Aggregators in the previous round
-      into the prep message consumed by each in the next round.
+      into the prep message consumed by each Aggregator to start the
+      next round.
 
-   In effect, each Aggregator moves through a linear state machine with
-   ROUNDS states.  The Aggregator enters the first state on using the
-   initialization algorithm, and the update algorithm advances the
-   Aggregator to the next state.  Thus, in addition to defining the
-   number of rounds (ROUNDS), a VDAF instance defines the state of the
-   Aggregator after each round.
+   *  vdaf.prep_next(ctx: bytes, prep_state: PrepState, prep_msg:
+      PrepMessage) -> tuple[PrepState, PrepShare] | OutShare is the
+      deterministic preparation-state update algorithm run by each
+      Aggregator.  It updates the Aggregator's prep state (prep_state)
+      and returns either its next prep state and prep share for the next
+      round or, if this is the last round, its output share.
 
-   The preparation-state update accomplishes two tasks: recovery of
-   output shares from the input shares and ensuring that the recovered
-   output shares are valid.  The abstraction boundary is drawn so that
-   an Aggregator only recovers an output share if it is deemed valid (at
-   least, based on the Aggregator's view of the protocol).  Another way
-   to draw this boundary would be to have the Aggregators recover output
-   shares first, then verify that they are valid.  However, this would
-   allow the possibility of misusing the API by, say, aggregating an
-   invalid output share.  Moreover, in protocols like Prio+ [AGJOP21]
-   based on oblivious transfer, it is necessary for the Aggregators to
-   interact in order to recover aggregatable output shares at all.
+   An exception may be raised by one of these algorithms, in which case
+   the report MUST be deemed invalid and not processed any further.
+
+   Implementation note: The preparation-state update accomplishes two
+   tasks: recovery of output shares from the input shares and ensuring
+   that the recovered output shares are valid.  The abstraction boundary
+   is drawn so that an Aggregator only recovers an output share if the
+   underlying data is deemed valid (at least, based on the Aggregator's
+   view of the protocol).  Another way to draw this boundary would be to
+   have the Aggregators recover output shares first, then verify that
+   they are valid.  However, this would allow the possibility of
+   misusing the API by, say, aggregating an invalid output share.
+   Moreover, in protocols like Prio+ [AGJOP21] based on oblivious
+   transfer, it is necessary for the Aggregators to interact in order to
+   recover aggregatable output shares at all.
 
 5.3.  Validity of Aggregation Parameters
 
-   Similar to DAFs (see Section 4.3), VDAFs MAY impose restrictions for
-   input shares and aggregation parameters.  Protocols using a VDAF MUST
-   ensure that for each input share and aggregation parameter agg_param,
-   the preparation phase (including vdaf.prep_init, vdaf.prep_next, and
-   vdaf.prep_shares_to_prep; see Section 5.2) is only called if
-   vdaf.is_valid(agg_param, previous_agg_params) returns True, where
-   previous_agg_params contains all aggregation parameters that have
-   previously been used with the same input share.
-
-   VDAFs MUST implement the following function:
-
-   *  vdaf.is_valid(agg_param: AggParam, previous_agg_params:
-      list[AggParam]) -> bool: checks if the agg_param is compatible
-      with all elements of previous_agg_params.
+   Aggregation parameter validation is as described for DAFs in
+   Section 4.3.  Again, each Aggregator MUST validate each aggregation
+   parameter received by the Collector before beginning the preparation
+   process.
 
 5.4.  Aggregation
 
-   VDAF aggregation is identical to DAF aggregation (Section 4.4):
-
-   *  vdaf.agg_init(agg_param: AggParam) -> AggShare returns an empty
-      aggregate share.  It is called to initialize aggregation of a
-      batch of measurements.
-
-   *  vdaf.agg_update(agg_param: AggParam, agg_share: AggShare,
-      out_share: OutShare) -> AggShare accumulates an output share into
-      an aggregate share and returns the updated aggregate share.
-
-   *  vdaf.merge(agg_param: AggParam, agg_shares: list[AggShare]) ->
-      AggShare merges a sequence of aggregate shares into a single
-      aggregate share.
-
-   The data flow for this stage is illustrated in Figure 3.  Like DAFs,
-   computation of the VDAF aggregate is not usually sensitive to the
-   order in which output shares are aggregated.  See Section 4.4.1.
+   VDAF aggregation is identical to DAF aggregation as described in
+   Section 4.4.  Like DAFs, computation of the VDAF aggregate is not
+   usually sensitive to the order in which output shares are aggregated.
+   See Section 4.4.1.
 
 5.5.  Unsharding
 
-   VDAF Unsharding is identical to DAF Unsharding (cf.  Section 4.5):
-
-   *  vdaf.unshard(agg_param: AggParam, agg_shares: list[AggShare],
-      num_measurements: int) -> AggResult is run by the Collector in
-      order to compute the aggregate result from the Aggregators'
-      shares.  The length of agg_shares MUST be SHARES. num_measurements
-      is the number of measurements that contributed to each of the
-      aggregate shares.  This algorithm is deterministic.
-
-   The data flow for this stage is illustrated in Figure 4.
+   VDAF unsharding is identical to DAF unsharding as described in
+   Section 4.5.
 
 5.6.  Execution of a VDAF
 
    Secure execution of a VDAF involves simulating the following
-   procedure.
+   procedure over an insecure network.
 
    def run_vdaf(
            vdaf: Vdaf[
@@ -1633,9 +1567,7 @@ Table of Contents
        return agg_result
 
    The inputs to this algorithm are the aggregation parameter, a list of
-   measurements, and a nonce for each measurement.  This document does
-   not specify how the nonces are chosen, but security requires that the
-   nonces be unique.  See Section 9 for details.  As explained in
+   measurements, and a nonce for each measurement.  As explained in
    Section 4.6, the secure execution of a VDAF requires the application
    to instantiate secure channels between each of the protocol
    participants.
