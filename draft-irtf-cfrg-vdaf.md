@@ -3820,8 +3820,8 @@ All gadgets are listed in {{gadgets}}.
 
 | Parameter         | Value                                      |
 |:------------------|:-------------------------------------------|
-| `Valid`           | `Count(Field64)` (this section)            |
-| `Field`           | `Field64` ({{fields}})                     |
+| `field`           | `Field64` ({{fields}})                     |
+| `Valid`           | `Count(field)` (this section)              |
 | `PROOFS`          | `1`                                        |
 {: title="Parameters for Prio3Count."}
 
@@ -3867,11 +3867,11 @@ class Count(Valid[int, int, F]):
 
 ### Prio3Sum
 
-| Parameter         | Value                                          |
-|:------------------|:-----------------------------------------------|
-| `Valid`           | `Sum(Field64, max_measurement)` (this section) |
-| `Field`           | `Field64` ({{fields}})                         |
-| `PROOFS`          | `1`                                            |
+| Parameter         | Value                                        |
+|:------------------|:---------------------------------------------|
+| `field`           | `Field64` ({{fields}})                       |
+| `Valid`           | `Sum(field, max_measurement)` (this section) |
+| `PROOFS`          | `1`                                          |
 {: title="Parameters for Prio3Sum."}
 
 The next variant of Prio3 supports summing of integers in a pre-determined
@@ -3959,11 +3959,11 @@ class Sum(Valid[int, int, F]):
 
 ### Prio3SumVec
 
-| Parameter         | Value                                                        |
-|:------------------|:-------------------------------------------------------------|
-| `Valid`           | `SumVec(Field128, length, bits, chunk_lengh)` (this section) |
-| `Field`           | `Field128` ({{fields}})                                      |
-| `PROOFS`          | `1`                                                          |
+| Parameter         | Value                                                     |
+|:------------------|:----------------------------------------------------------|
+| `field`           | `Field128` ({{fields}})                                   |
+| `Valid`           | `SumVec(field, length, bits, chunk_lengh)` (this section) |
+| `PROOFS`          | `1`                                                       |
 {: title="Parameters for Prio3SumVec."}
 
 This instance of Prio3 supports summing vectors of integers. It has three
@@ -4103,11 +4103,11 @@ length will result in proofs up to 50% larger than the optimal proof size.
 
 ### Prio3Histogram
 
-| Parameter         | Value                                                     |
-|:------------------|:----------------------------------------------------------|
-| `Valid`           | `Histogram(Field128, length, chunk_lengh)` (this section) |
-| `Field`           | `Field128` ({{fields}})                                   |
-| `PROOFS`          | `1`                                                       |
+| Parameter         | Value                                                  |
+|:------------------|:-------------------------------------------------------|
+| `field`           | `Field128` ({{fields}})                                |
+| `Valid`           | `Histogram(field, length, chunk_lengh)` (this section) |
+| `PROOFS`          | `1`                                                    |
 {: title="Parameters for Prio3Histogram."}
 
 This variant of Prio3 allows for estimating the distribution of some quantity
@@ -4220,11 +4220,11 @@ class Histogram(Valid[int, list[int], F]):
 
 ### Prio3MultihotCountVec
 
-| Parameter         | Value                                                                       |
-|:------------------|:----------------------------------------------------------------------------|
-| `Valid`           | `MultihotCountVec(Field128, length, max_weight, chunk_lengh)` (this section) |
-| `Field`           | `Field128` ({{fields}})                                                     |
-| `PROOFS`          | `1`                                                                         |
+| Parameter         | Value                                                                     |
+|:------------------|:--------------------------------------------------------------------------|
+| `field`           | `Field128` ({{fields}})                                                   |
+| `Valid`           | `MultihotCountVec(field, length, max_weight, chunk_lengh)` (this section) |
+| `PROOFS`          | `1`                                                                       |
 {: title="Parameters for Prio3MultihotCountVec."}
 
 For this instance of Prio3, each measurement is a vector of ones and zeros,
