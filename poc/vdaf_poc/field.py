@@ -3,7 +3,7 @@
 import random
 from typing import Self, TypeVar, cast
 
-from vdaf_poc.common import from_le_bytes, to_le_bytes
+from vdaf_poc.common import from_le_bytes, front, to_le_bytes
 
 
 class Field:
@@ -54,15 +54,14 @@ class Field:
         """
         Parse a vector of field elements from `encoded`.
         """
-        L = cls.ENCODED_SIZE
-        if len(encoded) % L != 0:
+        if len(encoded) % cls.ENCODED_SIZE != 0:
             raise ValueError(
                 'input length must be a multiple of the size of an '
                 'encoded field element')
 
         vec = []
-        for i in range(0, len(encoded), L):
-            encoded_x = encoded[i:i+L]
+        while len(encoded) > 0:
+            (encoded_x, encoded) = front(cls.ENCODED_SIZE, encoded)
             x = from_le_bytes(encoded_x)
             if x >= cls.MODULUS:
                 raise ValueError('modulus overflow')

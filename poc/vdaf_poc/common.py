@@ -146,7 +146,7 @@ def format_dst(algo_class: int,
                algo: int,
                usage: int) -> bytes:
     """
-    Format XOF domain separation tag for use within a (V)DAF.
+    Format XOF domain separation tag.
 
     Pre-conditions:
 

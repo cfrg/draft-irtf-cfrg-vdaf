@@ -1938,10 +1938,11 @@ parameters:
 * `ENCODED_SIZE: int` is the number of bytes used to encode a field element
   as a byte string.
 
-A concrete `Field` also implements the following class methods:
+Concrete fields, i.e., subclasses of `Field`, implement the following class
+methods:
 
-* `Field.zeros(length: int) -> list[Self]` returns a vector of
-  zeros.
+* `Field.zeros(length: int) -> list[Self]` returns a vector of zeros of the
+  requested length.
 
   Pre-conditions:
 
@@ -1951,25 +1952,27 @@ A concrete `Field` also implements the following class methods:
 
     * The length of the output MUST be `length`.
 
-* `Field.rand_vec(length: int) -> list[Self]` returns a vector of
-  random field elements. Same pre- and post-conditions as for `Field.zeros()`.
+* `Field.rand_vec(length: int) -> list[Self]` returns a vector of random field
+  elements and has the same pre- and post-conditions as for `Field.zeros()`.
+  Note that this function is not used normatively in the specification of
+  either Prio3 or Poplar1.
 
-A field element is an instance of a concrete `Field`. The concrete class defines
-the usual arithmetic operations on field elements. In addition, it defines the
-following instance method for converting a field element to an unsigned integer:
+A field element is an instance of a concrete `Field`. Addition,
+subtraction, multiplication, division, negation, and inversion are denoted,
+respectively, `x + y`, `x - y`, `x * y`, `x / y`, `-x`, and `x.inv()`.
 
-* `elem.as_unsigned() -> int` returns the integer representation of
-  field element `elem`.
+We sometimes need to convert a field element to an `int`, which we denote by
+`x.as_unsigned()`. Likewise, each concrete `Field` implements a constructor for
+converting an unsigned integer into a field element:
 
-Likewise, each concrete `Field` implements a constructor for converting an
-unsigned integer into a field element:
+* `Field(integer: int)` returns `integer` represented as a field element. The
+  value of `integer` MUST be in the range `(-Field.MODULUS, Field.MODULUS)`;
+  negative values are treated as negations.
 
-* `Field(integer: int)` returns `integer` represented as a field element.
-  The value of `integer` MUST be non-negative and less than `Field.MODULUS`.
+### Auxiliary Functions
 
-Each concrete `Field` has two derived class methods, one for encoding
-a vector of field elements as a byte string and another for decoding a vector of
-field elements.
+The following class methods on `Field` are used to encode and decode vectors of
+field elements as byte strings:
 
 ~~~ python
 def encode_vec(cls, vec: list[Self]) -> bytes:
@@ -1985,15 +1988,14 @@ def decode_vec(cls, encoded: bytes) -> list[Self]:
     """
     Parse a vector of field elements from `encoded`.
     """
-    L = cls.ENCODED_SIZE
-    if len(encoded) % L != 0:
+    if len(encoded) % cls.ENCODED_SIZE != 0:
         raise ValueError(
             'input length must be a multiple of the size of an '
             'encoded field element')
 
     vec = []
-    for i in range(0, len(encoded), L):
-        encoded_x = encoded[i:i+L]
+    while len(encoded) > 0:
+        (encoded_x, encoded) = front(cls.ENCODED_SIZE, encoded)
         x = from_le_bytes(encoded_x)
         if x >= cls.MODULUS:
             raise ValueError('modulus overflow')
@@ -2001,8 +2003,10 @@ def decode_vec(cls, encoded: bytes) -> list[Self]:
     return vec
 ~~~
 
-Finally, `Field` implements the following methods for representing a value as
-a sequence of field elements, each of which represents a bit of the input.
+`Field` provides the following class methods for representing a value as a
+sequence of field elements, each of which represents a bit of the input. These
+are used to encode measurements in some variants of Prio3
+({{prio3-instantiations}}).
 
 ~~~ python
 def encode_into_bit_vector(
@@ -2043,11 +2047,9 @@ def decode_from_bit_vector(cls, vec: list[Self]) -> Self:
     return decoded
 ~~~
 
-### Auxiliary Functions
-
-The following auxiliary functions on vectors of field elements are used in the
-remainder of this document. Note that an exception is raised by each function if
-the operands are not the same length.
+Finally, the following functions define arithmetic on vectors over a finite
+field. Note that an exception is raised by each function if the operands are
+not the same length.
 
 ~~~ python
 def vec_sub(left: list[F], right: list[F]) -> list[F]:
@@ -2071,23 +2073,23 @@ def vec_neg(vec: list[F]) -> list[F]:
 
 ### NTT-Friendly Fields {#field-ntt-friendly}
 
-Some VDAFs require fields that are suitable for efficient computation of the
-number theoretic transform (NTT) {{SML24}}, as this allows for fast polynomial
-interpolation. (One example is Prio3 ({{prio3}}) when instantiated with the FLP
-of {{flp-bbcggi19}}.) Specifically, a field is said to be "NTT-friendly" if, in
-addition to satisfying the interface described in {{field}}, it implements the
-following method:
+Some VDAFs, including Prio3, require fields that are suitable for efficient
+computation of the number theoretic transform (NTT) {{SML24}}, as this allows
+for fast polynomial interpolation. Specifically, a field is said to be
+"NTT-friendly" if, in addition to the interface described in {{field}}, it
+provides the following interface:
 
-* `Field.gen() -> Field` returns the generator of a large subgroup of the
-  multiplicative group. To be NTT-friendly, the order of this subgroup MUST be a
-  power of 2. In addition, the size of the subgroup dictates how large
-  interpolated polynomials can be. It is RECOMMENDED that a generator is chosen
-  with order at least `2^20`.
-
-NTT-friendly fields also define the following parameter:
+* `Field.gen() -> Self` is a class method that returns the generator of a large
+  subgroup of the multiplicative group. To be NTT-friendly, the order of this
+  subgroup MUST be a power of 2.
 
 * `GEN_ORDER: int` is the order of a multiplicative subgroup generated by
-  `Field.gen()`.
+  `Field.gen()`. This is the smallest positive integer for which
+  `Field.gen()**Field.GEN_ORDER == Field(1)`., where `**` denotes exponentiation
+  in Python.
+
+The size of the subgroup dictates how large interpolated polynomials can be. It
+is RECOMMENDED that a generator is chosen with order at least `2^20`.
 
 ### Parameters
 
@@ -2103,31 +2105,33 @@ The tables below define finite fields used in the remainder of this document.
 
 ## Extendable Output Functions (XOFs) {#xof}
 
-VDAFs in this specification use extendable output functions (XOFs) to extract
-short, fixed-length strings we call "seeds" from long input strings and expand
-seeds into long output strings. We specify a single interface that is suitable
-for both purposes.
+VDAFs in this specification use eXtendable Output Functions (XOFs) for two
+purposes:
 
-XOFs are defined by a class `Xof` with the following associated parameter and
-methods:
+1. Extracting short, pseudorandom strings we call "seeds" from high entropy
+   inputs
+
+1. Expanding seeds into long, pseudorandom outputs
+
+Concrete XOFs implement a class `Xof` providing the following interface:
 
 * `SEED_SIZE: int` is the size (in bytes) of a seed.
 
-* `Xof(seed: bytes, dst: bytes, binder: bytes)` constructs an instance of `Xof`
-  from the given seed, domain separation tag, and binder string. (See below for
-  definitions of these.) The length of the seed will typically be `SEED_SIZE`,
-  but some XOFs may support multiple seed sizes. The seed MUST be generated
-  securely (i.e., it is either the output of a CSPRNG or a previous invocation
-  of the XOF).
+* `Xof(seed: bytes, dst: bytes, binder: bytes)` constructs an instance of the
+  XOF from the given seed and a domain separation tag and binder string as
+  defined in {{dst-binder}}. The length of the seed will typically be
+  `SEED_SIZE`, but some XOFs may support multiple seed sizes. The seed MUST be
+  generated securely, i.e., it is either the output of a CSPRNG or a
+  previous invocation of the XOF.
 
-* `xof.next(length: int)` returns the next `length` bytes of output of
-  `xof`.
+* `xof.next(length: int)` returns the next chunk of the output of the
+  initialized XOF. The length of the chunk MUST be `length`.
 
-Each `Xof` has three derived methods. The first is used to derive a fresh seed
-from an existing one. The second is used to compute a sequence of field
-elements. The third is a convenience method to construct an `Xof` from a seed,
-domain separation tag, and binder string, and then use it to compute a sequence
-of field elements.
+The following methods are provided for all concrete XOFs. The first is a class
+method used to derive a fresh seed from an existing one. The second is an
+instance method used to compute a sequence of field elements. The third is a
+class method that provides a one-shot interface for expanding a seed into a
+field vector.
 
 ~~~ python
 def derive_seed(cls,
@@ -2184,12 +2188,20 @@ def expand_into_vec(cls,
 ### XofTurboShake128 {#xof-turboshake128}
 
 This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
-{{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. This XOF is RECOMMENDED for
-all use cases within VDAFs. The length of the domain separation string `dst`
-passed to XofTurboShake128 MUST NOT exceed 65535 bytes.
+function specified in {{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. This
+XOF is RECOMMENDED for all use cases for DAFs and VDAFs.
 
 > TODO Update the {{!TurboSHAKE}} reference to point to the RFC instead of the
 > draft.
+
+Pre-conditions:
+
+* The default seed length is `32`. The seed MAY have a different length, but MUST not
+  exceed 255. Otherwise initialization will raise an exception.
+
+* The length of the domain separation string `dst` passed to XofTurboShake128
+  MUST NOT exceed 65535 bytes. Otherwise initialization will raise an
+  exception.
 
 ~~~ python
 class XofTurboShake128(Xof):
@@ -2221,16 +2233,26 @@ class XofTurboShake128(Xof):
 
 ### XofFixedKeyAes128 {#xof-fixed-key-aes128}
 
-While XofTurboShake128 as described above can be securely used in all cases
-where a XOF is needed in the VDAFs described in this document, there are some
-cases where a more efficient instantiation based on a blockcipher in a
-fixed-key mode of operation is possible. This is limited to the XOF used inside
-the IDPF implementation in Poplar1 {{idpf-bbcggi21}}. It is NOT RECOMMENDED to
-use this XOF anywhere else. See {{security}} for a more detailed discussion.
+The XOF in the previous section can be used safely wherever a XOF is needed in
+this document. However, there are some situations where TurboSHAKE128 creates a
+performance bottleneck and a more efficient XOF can be used safely instead.
 
-The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
-{{AES}}. The length of the domain separation string `dst` MUST NOT exceed 65535
-bytes.
+This section describes XofFixedKeyAes128, which is used to implement the IDPF
+of Poplar1 ({{idpf-bbcggi21}}). It is NOT RECOMMENDED to use this XOF for any
+other purpose. See {{security}} for a more detailed discussion.
+
+XofFixedKeyAes128 uses the AES128 blockcipher {{AES}} for most of the
+computation, thereby taking advantage of the hardware implementations of this
+blockcipher that are widely available. AES128 is used in a fixed-key mode of
+operation; the key is derived during initialization using TurboSHAKE128.
+
+Pre-conditions:
+
+* The length of the seed MUST be `16`.
+
+* The length of the domain separation string `dst` passed to XofTurboShake128
+  MUST NOT exceed 65535 bytes. Otherwise initialization will raise an
+  exception.
 
 ~~~ python
 class XofFixedKeyAes128(Xof):
@@ -2295,13 +2317,14 @@ class XofFixedKeyAes128(Xof):
 ### The Domain Separation Tag and Binder String {#dst-binder}
 
 XOFs are used to map a seed to a finite domain, e.g., a fresh seed or a vector
-of field elements. To ensure domain separation, the derivation is needs to be
-bound to some distinguished domain separation tag. The domain separation tag
-encodes the following values:
+of field elements. To ensure domain separation, derivation is bound to some
+distinguished domain separation tag. The domain separation tag encodes the
+following values:
 
 1. The document version (i.e.,`VERSION`);
-1. The "class" of the algorithm using the output (e.g., VDAF);
-1. A unique identifier for the algorithm; and
+1. The "class" of the algorithm using the output (e.g., DAF, VDAF, or IDPF as
+   defined in {{idpf}});
+1. A unique identifier for the algorithm (e.g., `VDAF.ID`); and
 1. Some indication of how the output is used (e.g., for deriving the measurement
    shares in Prio3 {{prio3}}).
 
@@ -2313,7 +2336,7 @@ def format_dst(algo_class: int,
                algo: int,
                usage: int) -> bytes:
     """
-    Format XOF domain separation tag for use within a (V)DAF.
+    Format XOF domain separation tag.
 
     Pre-conditions:
 
