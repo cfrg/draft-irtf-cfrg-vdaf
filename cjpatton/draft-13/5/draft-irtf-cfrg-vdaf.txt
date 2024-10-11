@@ -1976,8 +1976,9 @@ Table of Contents
    element:
 
    *  Field(integer: int) returns integer represented as a field
-      element.  The value of integer MUST be non-negative and less than
-      Field.MODULUS.
+      element.  The value of integer MUST be in the range
+      (-Field.MODULUS, Field.MODULUS); negative values are treated as
+      negations.
 
 6.1.1.  Auxiliary Functions
 
@@ -2011,9 +2012,9 @@ Table of Contents
            vec.append(cls(x))
        return vec
 
-   Finally, Field provides the following class methods for representing
-   a value as a sequence of field elements, each of which represents a
-   bit of the input.  These are used to encode measurements in Prio3
+   Field provides the following class methods for representing a value
+   as a sequence of field elements, each of which represents a bit of
+   the input.  These are used to encode measurements in Prio3
    (Section 7).
 
    def encode_into_bit_vector(
@@ -2131,12 +2132,12 @@ Table of Contents
    *  SEED_SIZE: int is the size (in bytes) of a seed.
 
    *  Xof(seed: bytes, dst: bytes, binder: bytes) constructs an instance
-      of the XOF from the given seed, domain separation tag, and binder
-      string.  (See below for definitions of these.)  The length of the
-      seed will typically be SEED_SIZE, but some XOFs may support
-      multiple seed sizes.  The seed MUST be generated securely (i.e.,
-      it is either the output of a CSPRNG or a previous invocation of
-      the XOF).
+      of the XOF from the given seed and a domain separation tag and
+      binder string as defined in Section 6.2.3.  The length of the seed
+      will typically be SEED_SIZE, but some XOFs may support multiple
+      seed sizes.  The seed MUST be generated securely (i.e., it is
+      either the output of a CSPRNG or a previous invocation of the
+      XOF).
 
    *  xof.next(length: int) returns the next chunk of the output of the
       initialized XOF.  The length of the chunk MUST be length.
@@ -2145,7 +2146,7 @@ Table of Contents
    is a class method used to derive a fresh seed from an existing one.
    The second is an instance method used to compute a sequence of field
    elements.  The third is a class method that provides a one-shot
-   interface for initializing expanding a seed into a field vector.
+   interface for expanding a seed into a field vector.
 
    def derive_seed(cls,
                    seed: bytes,
@@ -2244,10 +2245,10 @@ Table of Contents
 
 6.2.2.  XofFixedKeyAes128
 
-   XofTurboShake128 in the previous section can be used safely wherever
-   a XOF is needed in this document.  However, there are some situations
-   where TurboSHAKE128 creates a performance bottleneck and a more
-   efficient XOF can be used safely instead.
+   The XOF in the previous section can be used safely wherever a XOF is
+   needed in this document.  However, there are some situations where
+   TurboSHAKE128 creates a performance bottleneck and a more efficient
+   XOF can be used safely instead.
 
    This section describes XofFixedKeyAes128, which is used to implement
    the IDPF of Poplar1 (Section 8.3).  It is NOT RECOMMENDED to use this
@@ -2259,6 +2260,12 @@ Table of Contents
    of this blockcipher that are widely available.  AES128 is used in a
    fixed-key mode of operation; the key is derived during initialization
    using TurboSHAKE128.
+
+   Pre-conditions:
+
+   *  The length of the domain separation string dst passed to
+      XofTurboShake128 MUST NOT exceed 65535 bytes.  Otherwise
+      initialization will raise an exception.
 
    class XofFixedKeyAes128(Xof):
        """
@@ -2327,9 +2334,10 @@ Table of Contents
 
    1.  The document version (i.e.,VERSION);
 
-   2.  The "class" of the algorithm using the output (e.g., VDAF);
+   2.  The "class" of the algorithm using the output (e.g., DAF, VDAF,
+       or IDPF as defined in Section 8.1);
 
-   3.  A unique identifier for the algorithm; and
+   3.  A unique identifier for the algorithm (e.g., VDAF.ID); and
 
    4.  Some indication of how the output is used (e.g., for deriving the
        measurement shares in Prio3 Section 7).
@@ -2341,7 +2349,7 @@ Table of Contents
                   algo: int,
                   usage: int) -> bytes:
        """
-       Format XOF domain separation tag for use within a (V)DAF.
+       Format XOF domain separation tag.
 
        Pre-conditions:
 
