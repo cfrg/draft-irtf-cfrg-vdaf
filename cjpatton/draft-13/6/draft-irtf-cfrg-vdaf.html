@@ -6106,7 +6106,7 @@ All gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix
 one or zero and the aggregate result is the sum of the measurements. Its
 validity circuit uses the multiplication gadget <code>Mul</code> specified in
 <a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>, which takes two inputs and multiplies them. The circuit is
-specified below.<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
+specified below:<a href="#section-7.4.1-2" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.4.1-3">
 <pre>
 class Count(Valid[int, int, F]):
@@ -6201,20 +6201,20 @@ the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</
 </li>
           </ul>
 <p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
-measurements between <code>0</code> and <code>2^bits - 1</code> can be encoded this way with <code>bits</code>
-many bits. The second bit-encoded integer is the sum of the measurement and
+measurements between <code>0</code> and <code>2^bits - 1</code> can be encoded this way with as many
+bits. The second bit-encoded integer is the sum of the measurement and
 <code>offset</code>. Observe that this sum can only be encoded this way if it is between
 <code>0</code> and <code>2^bits - 1</code>, which implies that the measurement is between <code>-offset</code>
 and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-6">The circuit first checks that each entry of both bit vectors is a one or a
 zero. It then decodes both the measurement and the offset measurement, and
-subtracts <code>offset</code> from the latter. It then checks if these two values are
+subtracts the offset from the latter. It then checks if these two values are
 equal. Since both the measurement and the measurement plus <code>offset</code> are in the
-same range of <code>[0, 2^bits)</code>, this means that the measurement itself is
-between <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
+same range of <code>[0, 2^bits)</code>, this means that the measurement itself is between
+<code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-7">The circuit uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
 <a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x^2 - x</code>, which is equal to <code>0</code>
-if and only if <code>x</code> is in <code>[0, 2)</code>. The complete circuit is specified below.<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
+if and only if <code>x</code> is in <code>[0, 2)</code>. The complete circuit is specified below:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.4.2-8">
 <pre>
 class Sum(Valid[int, int, F]):
@@ -6324,10 +6324,10 @@ consecutively, in LSB to MSB order.<a href="#section-7.4.3-3" class="pilcrow">¶
 <p id="section-7.4.3-4">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
 then returns the sum of the results. Along with the subcircuit, the
-parallel-sum gadget is parameterized by an integer <code>count</code> specifying how many
-times to call the subcircuit. It takes in a list of inputs and passes them
-through to instances of the subcircuit in the same order. It returns the sum of
-the subcircuit outputs.<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
+parallel-sum gadget is parameterized by an integer, denoted <code>count</code>, specifying
+how many times to call the subcircuit. It takes in a list of inputs and passes
+them through to instances of the subcircuit in the same order. It returns the
+sum of the subcircuit outputs.<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-5">Note that only the <code>ParallelSum</code> gadget itself, and not its subcircuit,
 participates in the FLP's wire recording during evaluation, gadget consistency
 proofs, and proof validation, even though the subcircuit is provided to
@@ -6342,7 +6342,7 @@ element multiplied by a power of one of the elements of the joint randomness
 vector, and the other is equal to the same measurement element minus one. These
 <code>Mul</code> subcircuits are evaluated by a <code>ParallelSum</code> gadget, and the results are
 added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-7">The complete circuit is specified below.<a href="#section-7.4.3-7" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-7">The complete circuit is specified below:<a href="#section-7.4.3-7" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-7.4.3-8">
 <pre>
 class SumVec(Valid[list[int], list[int], F]):
@@ -6436,13 +6436,21 @@ class SumVec(Valid[list[int], list[int], F]):
 gadget is called. The proof length is asymptotically minimized when the chunk
 length is near the square root of the length of the measurement. However, the
 relationship between VDAF parameters and proof length is complicated, involving
-two forms of rounding (the circuit pads the inputs to its last <code>ParallelSum</code>
-gadget call, up to the chunk length, and proof system rounds the degree of wire
-polynomials -- determined by the number of times a gadget is called -- up to
-the next power of two). Therefore, the optimal choice of <code>chunk_length</code> for a
-concrete measurement size will vary, and must be found through trial and error.
-Setting <code>chunk_length</code> equal to the square root of the appropriate measurement
-length will result in proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-1" class="pilcrow">¶</a></p>
+two forms of rounding:<a href="#section-7.4.3.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-7.4.3.1-2.1">
+                <p id="section-7.4.3.1-2.1.1">The circuit pads the inputs to its last <code>ParallelSum</code> gadget call, up to
+the chunk length.<a href="#section-7.4.3.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-7.4.3.1-2.2">
+                <p id="section-7.4.3.1-2.2.1">The proof system rounds the degree of wire polynomials, determined by the
+number of times a gadget is called, up to the next power of two.<a href="#section-7.4.3.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-7.4.3.1-3">Therefore, the optimal choice of <code>chunk_length</code> for a concrete measurement size
+will vary, and must be found through trial and error. Setting <code>chunk_length</code>
+equal to the square root of the appropriate measurement length will result in
+proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -6638,10 +6646,10 @@ class Histogram(Valid[int, list[int], F]):
           </table>
 <p id="section-7.4.5-2">For this instance of Prio3, each measurement is a vector of ones and zeros,
 where the number of ones is bounded. This provides a functionality similar to
-Prio3Histogram except that more than one entry may be non-zero. This allows
-Prio3MultihotCountVec to be composed with a randomized response mechanism, like
-<span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For example, each Client would
-set each entry to one with some small probability.)<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
+Prio3Histogram except that more than one entry (or none at all) may be
+non-zero. This allows Prio3MultihotCountVec to be composed with a randomized
+response mechanism, like <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For
+example, each Client would set each entry to one with some small probability.)<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-3">The validity circuit is denoted <code>MultihotCountVec</code> and has three parameters:
 <code>length</code>, the number of entries in the count vector; <code>max_weight</code>, the
 maximum number of non-zero entries (i.e., the weight must be at most

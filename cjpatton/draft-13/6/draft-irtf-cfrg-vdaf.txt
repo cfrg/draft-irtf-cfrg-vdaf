@@ -3893,7 +3893,7 @@ Table of Contents
    is either one or zero and the aggregate result is the sum of the
    measurements.  Its validity circuit uses the multiplication gadget
    Mul specified in Appendix A.1, which takes two inputs and multiplies
-   them.  The circuit is specified below.
+   them.  The circuit is specified below:
 
    class Count(Valid[int, int, F]):
        GADGETS: list[Gadget[F]] = [Mul()]
@@ -3957,22 +3957,23 @@ Table of Contents
 
    The first bit-encoded integer is the measurement itself.  Note that
    only measurements between 0 and 2^bits - 1 can be encoded this way
-   with bits many bits.  The second bit-encoded integer is the sum of
-   the measurement and offset.  Observe that this sum can only be
-   encoded this way if it is between 0 and 2^bits - 1, which implies
-   that the measurement is between -offset and max_measurement.
+   with as many bits.  The second bit-encoded integer is the sum of the
+   measurement and offset.  Observe that this sum can only be encoded
+   this way if it is between 0 and 2^bits - 1, which implies that the
+   measurement is between -offset and max_measurement.
 
    The circuit first checks that each entry of both bit vectors is a one
    or a zero.  It then decodes both the measurement and the offset
-   measurement, and subtracts offset from the latter.  It then checks if
-   these two values are equal.  Since both the measurement and the
-   measurement plus offset are in the same range of [0, 2^bits), this
-   means that the measurement itself is between 0 and max_measurement.
+   measurement, and subtracts the offset from the latter.  It then
+   checks if these two values are equal.  Since both the measurement and
+   the measurement plus offset are in the same range of [0, 2^bits),
+   this means that the measurement itself is between 0 and
+   max_measurement.
 
    The circuit uses the polynomial-evaluation gadget PolyEval specified
    in Appendix A.2.  The polynomial is p(x) = x^2 - x, which is equal to
    0 if and only if x is in [0, 2).  The complete circuit is specified
-   below.
+   below:
 
    class Sum(Valid[int, int, F]):
        GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
@@ -4054,9 +4055,9 @@ Table of Contents
    The validity circuit uses the ParallelSum gadget in Appendix A.3.
    This gadget applies an arithmetic subcircuit to multiple inputs in
    parallel, then returns the sum of the results.  Along with the
-   subcircuit, the parallel-sum gadget is parameterized by an integer
-   count specifying how many times to call the subcircuit.  It takes in
-   a list of inputs and passes them through to instances of the
+   subcircuit, the parallel-sum gadget is parameterized by an integer,
+   denoted count, specifying how many times to call the subcircuit.  It
+   takes in a list of inputs and passes them through to instances of the
    subcircuit in the same order.  It returns the sum of the subcircuit
    outputs.
 
@@ -4079,7 +4080,7 @@ Table of Contents
    and the results are added up both within the ParallelSum gadget and
    after it.
 
-   The complete circuit is specified below.
+   The complete circuit is specified below:
 
    class SumVec(Valid[list[int], list[int], F]):
        EVAL_OUTPUT_LEN = 1
@@ -4168,15 +4169,20 @@ Table of Contents
    gadget is called.  The proof length is asymptotically minimized when
    the chunk length is near the square root of the length of the
    measurement.  However, the relationship between VDAF parameters and
-   proof length is complicated, involving two forms of rounding (the
-   circuit pads the inputs to its last ParallelSum gadget call, up to
-   the chunk length, and proof system rounds the degree of wire
-   polynomials -- determined by the number of times a gadget is called
-   -- up to the next power of two).  Therefore, the optimal choice of
-   chunk_length for a concrete measurement size will vary, and must be
-   found through trial and error.  Setting chunk_length equal to the
-   square root of the appropriate measurement length will result in
-   proofs up to 50% larger than the optimal proof size.
+   proof length is complicated, involving two forms of rounding:
+
+   *  The circuit pads the inputs to its last ParallelSum gadget call,
+      up to the chunk length.
+
+   *  The proof system rounds the degree of wire polynomials, determined
+      by the number of times a gadget is called, up to the next power of
+      two.
+
+   Therefore, the optimal choice of chunk_length for a concrete
+   measurement size will vary, and must be found through trial and
+   error.  Setting chunk_length equal to the square root of the
+   appropriate measurement length will result in proofs up to 50% larger
+   than the optimal proof size.
 
 7.4.4.  Prio3Histogram
 
@@ -4320,10 +4326,11 @@ Table of Contents
    For this instance of Prio3, each measurement is a vector of ones and
    zeros, where the number of ones is bounded.  This provides a
    functionality similar to Prio3Histogram except that more than one
-   entry may be non-zero.  This allows Prio3MultihotCountVec to be
-   composed with a randomized response mechanism, like [EPK14], for
-   providing differential privacy.  (For example, each Client would set
-   each entry to one with some small probability.)
+   entry (or none at all) may be non-zero.  This allows
+   Prio3MultihotCountVec to be composed with a randomized response
+   mechanism, like [EPK14], for providing differential privacy.  (For
+   example, each Client would set each entry to one with some small
+   probability.)
 
    The validity circuit is denoted MultihotCountVec and has three
    parameters: length, the number of entries in the count vector;
