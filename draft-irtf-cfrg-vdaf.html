@@ -1038,7 +1038,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 13 April 2025</td>
+<td class="center">Expires 14 April 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-10" class="published">10 October 2024</time>
+<time datetime="2024-10-11" class="published">11 October 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-13">13 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-04-14">14 April 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1120,7 +1120,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 13 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 14 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -6149,17 +6149,17 @@ All gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Count(Field64)</code> (this section)</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Valid</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Count(field)</code> (this section)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6232,17 +6232,17 @@ class Count(Valid[int, int, F]):
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Sum(Field64, max_measurement)</code> (this section)</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Valid</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Sum(field, max_measurement)</code> (this section)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6358,17 +6358,17 @@ class Sum(Valid[int, int, F]):
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>SumVec(Field128, length, bits, chunk_lengh)</code> (this section)</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Valid</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>SumVec(field, length, bits, chunk_lengh)</code> (this section)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6535,17 +6535,17 @@ length will result in proofs up to 50% larger than the optimal proof size.<a hre
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Histogram(Field128, length, chunk_lengh)</code> (this section)</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Valid</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Histogram(field, length, chunk_lengh)</code> (this section)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6683,17 +6683,17 @@ class Histogram(Valid[int, list[int], F]):
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Valid</code>
-</td>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>MultihotCountVec(Field128, length, max_weight, chunk_lengh)</code> (this section)</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field</code>
+                  <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
                   <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>Valid</code>
+</td>
+                <td class="text-left" rowspan="1" colspan="1">
+                  <code>MultihotCountVec(field, length, max_weight, chunk_lengh)</code> (this section)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -8989,7 +8989,7 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
 <dd class="break"></dd>
 <dt id="DAP">[DAP]</dt>
         <dd>
-<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Pitman, B.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-11</span>, <time datetime="2024-05-21" class="refDate">21 May 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-11">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-11</a>&gt;</span>. </dd>
+<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Pitman, B.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-12</span>, <time datetime="2024-10-10" class="refDate">10 October 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-12">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-12</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Dou02">[Dou02]</dt>
         <dd>

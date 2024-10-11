@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 13 April 2025                                              ISRG
+Expires: 14 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         10 October 2024
+                                                         11 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 April 2025.
+   This Internet-Draft will expire on 14 April 2025.
 
 Copyright Notice
 
@@ -3936,15 +3936,15 @@ Table of Contents
 
 7.4.1.  Prio3Count
 
-               +===========+===============================+
-               | Parameter | Value                         |
-               +===========+===============================+
-               | Valid     | Count(Field64) (this section) |
-               +-----------+-------------------------------+
-               | Field     | Field64 (Table 3)             |
-               +-----------+-------------------------------+
-               | PROOFS    | 1                             |
-               +-----------+-------------------------------+
+                +===========+=============================+
+                | Parameter | Value                       |
+                +===========+=============================+
+                | field     | Field64 (Table 3)           |
+                +-----------+-----------------------------+
+                | Valid     | Count(field) (this section) |
+                +-----------+-----------------------------+
+                | PROOFS    | 1                           |
+                +-----------+-----------------------------+
 
                     Table 9: Parameters for Prio3Count.
 
@@ -3988,15 +3988,15 @@ Table of Contents
 
 7.4.2.  Prio3Sum
 
-       +===========+==============================================+
-       | Parameter | Value                                        |
-       +===========+==============================================+
-       | Valid     | Sum(Field64, max_measurement) (this section) |
-       +-----------+----------------------------------------------+
-       | Field     | Field64 (Table 3)                            |
-       +-----------+----------------------------------------------+
-       | PROOFS    | 1                                            |
-       +-----------+----------------------------------------------+
+        +===========+============================================+
+        | Parameter | Value                                      |
+        +===========+============================================+
+        | field     | Field64 (Table 3)                          |
+        +-----------+--------------------------------------------+
+        | Valid     | Sum(field, max_measurement) (this section) |
+        +-----------+--------------------------------------------+
+        | PROOFS    | 1                                          |
+        +-----------+--------------------------------------------+
 
                     Table 10: Parameters for Prio3Sum.
 
@@ -4085,18 +4085,18 @@ Table of Contents
 
 7.4.3.  Prio3SumVec
 
-              +===========+================================+
-              | Parameter | Value                          |
-              +===========+================================+
-              | Valid     | SumVec(Field128, length, bits, |
-              |           | chunk_lengh) (this section)    |
-              +-----------+--------------------------------+
-              | Field     | Field128 (Table 3)             |
-              +-----------+--------------------------------+
-              | PROOFS    | 1                              |
-              +-----------+--------------------------------+
+                +===========+=============================+
+                | Parameter | Value                       |
+                +===========+=============================+
+                | field     | Field128 (Table 3)          |
+                +-----------+-----------------------------+
+                | Valid     | SumVec(field, length, bits, |
+                |           | chunk_lengh) (this section) |
+                +-----------+-----------------------------+
+                | PROOFS    | 1                           |
+                +-----------+-----------------------------+
 
-                  Table 11: Parameters for Prio3SumVec.
+                   Table 11: Parameters for Prio3SumVec.
 
    This instance of Prio3 supports summing vectors of integers.  It has
    three parameters: length, bits, and chunk_length.  Each measurement
@@ -4239,18 +4239,17 @@ Table of Contents
 
 7.4.4.  Prio3Histogram
 
-                +===========+=============================+
-                | Parameter | Value                       |
-                +===========+=============================+
-                | Valid     | Histogram(Field128, length, |
-                |           | chunk_lengh) (this section) |
-                +-----------+-----------------------------+
-                | Field     | Field128 (Table 3)          |
-                +-----------+-----------------------------+
-                | PROOFS    | 1                           |
-                +-----------+-----------------------------+
+   +===========+======================================================+
+   | Parameter | Value                                                |
+   +===========+======================================================+
+   | field     | Field128 (Table 3)                                   |
+   +-----------+------------------------------------------------------+
+   | Valid     | Histogram(field, length, chunk_lengh) (this section) |
+   +-----------+------------------------------------------------------+
+   | PROOFS    | 1                                                    |
+   +-----------+------------------------------------------------------+
 
-                  Table 12: Parameters for Prio3Histogram.
+                 Table 12: Parameters for Prio3Histogram.
 
    This variant of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
@@ -4366,10 +4365,10 @@ Table of Contents
           +===========+=========================================+
           | Parameter | Value                                   |
           +===========+=========================================+
-          | Valid     | MultihotCountVec(Field128, length,      |
-          |           | max_weight, chunk_lengh) (this section) |
+          | field     | Field128 (Table 3)                      |
           +-----------+-----------------------------------------+
-          | Field     | Field128 (Table 3)                      |
+          | Valid     | MultihotCountVec(field, length,         |
+          |           | max_weight, chunk_lengh) (this section) |
           +-----------+-----------------------------------------+
           | PROOFS    | 1                                       |
           +-----------+-----------------------------------------+
@@ -6239,9 +6238,9 @@ Table of Contents
    [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
               C. A. Wood, "Distributed Aggregation Protocol for Privacy
               Preserving Measurement", Work in Progress, Internet-Draft,
-              draft-ietf-ppm-dap-11, 21 May 2024,
+              draft-ietf-ppm-dap-12, 10 October 2024,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              11>.
+              12>.
 
    [Dou02]    Douceur, J., "The Sybil Attack", IPTPS 2002 , 2002,
               <https://doi.org/10.1007/3-540-45748-8_24>.
