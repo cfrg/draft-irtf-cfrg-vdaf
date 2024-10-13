@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-10T00:54:58.565552+00:00",
+  "timestamp": "2024-10-13T00:59:08.682662+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -5832,7 +5832,7 @@
       "id": "I_kwDOGKuqOc6VgvNI",
       "title": "@armfazh: draft 11: Replace circuit and gadget descriptions with their classes",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/411",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -5844,8 +5844,8 @@
       ],
       "body": "We currently [describe a circuit](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-11#section-7.4.1) this way:\r\n\r\n```\r\nThe Count validity circuit is defined as\r\n\r\ndef eval(\r\n        self,\r\n        meas: list[F],\r\n        joint_rand: list[F],\r\n        _num_shares: int) -> list[F]:\r\n    self.check_valid_eval(meas, joint_rand)\r\n    squared = self.GADGETS[0].eval(self.field, [meas[0], meas[0]])\r\n    return [squared - meas[0]]\r\n```\r\n\r\nHere \"Count\" refers to a sub-class of \"Valid\" and \"eval()\" refers to an abstract method on Valid. This is not at all clear from the text. In particular, \"eval\" here doesn't appear to have anything to do with \"Count\".\r\n\r\n@armfazh suggests we fix this by listing the \"Count\" class here instead. This also has the benefit of making this section of the draft more copy-pastable. \r\n\r\nWe should do the same for gadgets as well. IN fact, rather than define them \"on first use\" as we're doing now, we should pull them into their own section. I believe we just have three: `Mul`, `PolyEval`, and `ParallelSum`.",
       "createdAt": "2024-09-05T17:44:50Z",
-      "updatedAt": "2024-10-04T15:24:22Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-10T14:32:47Z",
+      "closedAt": "2024-10-10T14:32:46Z",
       "comments": []
     },
     {
@@ -6294,14 +6294,179 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-13"
       ],
       "body": "This will make it easier to use as a reference.",
       "createdAt": "2024-10-09T22:04:04Z",
-      "updatedAt": "2024-10-09T22:04:10Z",
+      "updatedAt": "2024-10-11T14:07:23Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 472,
+      "id": "I_kwDOGKuqOc6ZvTTJ",
+      "title": "Section 2) specify Python 3.5 version",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/472",
+      "state": "CLOSED",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "[Type Hints](https://peps.python.org/pep-0484/) were added as of version 3.5.\r\n\r\n",
+      "createdAt": "2024-10-10T16:24:56Z",
+      "updatedAt": "2024-10-10T17:14:39Z",
+      "closedAt": "2024-10-10T17:14:39Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Good idea. I believe we're compatible with Python 3.12.",
+          "createdAt": "2024-10-10T16:29:19Z",
+          "updatedAt": "2024-10-10T16:29:19Z"
+        }
+      ]
+    },
+    {
+      "number": 477,
+      "id": "I_kwDOGKuqOc6ZxuuV",
+      "title": "Pretty pictures",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/477",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "pre-RGLC"
+      ],
+      "body": "Time permitting, we should take advantage of the work done to render nice looking diagrams and illustrations in RFCs.\r\n\r\nAccording to @martinthomson, all we have to do is change `~~~` to `~~~ aasvg` and add an npm package:\r\n```bash\r\nnpm i --save aasvg; git add package.json\r\n```",
+      "createdAt": "2024-10-10T22:14:09Z",
+      "updatedAt": "2024-10-10T22:14:29Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 480,
+      "id": "I_kwDOGKuqOc6ZzXzw",
+      "title": "Duplication of field parameter",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/480",
+      "state": "CLOSED",
+      "author": "martinthomson",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [],
+      "body": "The tables that describe Prio3 instantiations all define the field that is used, but they also specify the field as a fixed argument to the \"Valid\" function.  This seems redundant.  Is there any reason that the field can't be attached to `self`, just like the GADGETS and other things are?\r\n\r\nObviously, the functions work with any field that meets the stated requirements.  But as a fixed parameter, having it be a property (or field, pun fully intended) of the instance, seems cleaner.",
+      "createdAt": "2024-10-11T04:03:36Z",
+      "updatedAt": "2024-10-11T18:27:23Z",
+      "closedAt": "2024-10-11T18:27:23Z",
+      "comments": []
+    },
+    {
+      "number": 481,
+      "id": "I_kwDOGKuqOc6ZzY-O",
+      "title": "Define integer division operator",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/481",
+      "state": "OPEN",
+      "author": "martinthomson",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "I'm not a big Python user and so I didn't know what \"//\" did.  Outside of the code that is obviously and explicitly Python, it might help to define these things up front.  Maybe you can get away with x[i] for array indexing as that is common across many programming languages, but \"//\" starts a comment in many languages, so it is probably worth being crisp about what you mean.\r\n\r\nFWIW, I would have gone with \"/\" personally or a more explicit `floor(a / b)`; \"/\" is more easily understood to mean integer results from integer operands in most languages, but I get how that isn't compatible with the choice of Python.",
+      "createdAt": "2024-10-11T04:09:13Z",
+      "updatedAt": "2024-10-11T14:07:15Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Great idea, we'll add `//` to conventions: https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-2\r\n\r\nAlso, defining array indexing is a good idea as well.",
+          "createdAt": "2024-10-11T14:05:42Z",
+          "updatedAt": "2024-10-11T14:05:42Z"
+        }
+      ]
+    },
+    {
+      "number": 482,
+      "id": "I_kwDOGKuqOc6Zzl2o",
+      "title": "Is PROOFS ever non-unitary?",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/482",
+      "state": "OPEN",
+      "author": "martinthomson",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "There is a lot of complexity in the draft that allows for PROOFS to be something other than 1.  But none of the instantiations ever takes that option.  Is this complexity worth keeping?",
+      "createdAt": "2024-10-11T04:58:36Z",
+      "updatedAt": "2024-10-11T23:58:30Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Short answer is yes, this is worth it. You can reduce communication cost by picking a smaller field, but this may cost you dearly in terms of robustness. Our general guidance is if you swap Field128 for Field64, then you should bump the number of proofs to three: https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-9.7-7",
+          "createdAt": "2024-10-11T14:04:38Z",
+          "updatedAt": "2024-10-11T14:07:59Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "While not used in the spec today, there are non-standard Prio3 variants in use that are using PROOFS > 1.",
+          "createdAt": "2024-10-11T23:58:23Z",
+          "updatedAt": "2024-10-11T23:58:30Z"
+        }
+      ]
+    },
+    {
+      "number": 484,
+      "id": "I_kwDOGKuqOc6Z4x88",
+      "title": "Rename `field_elem.as_unsigned()` to `field_elem.int()`?",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/484",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "It's a little pithier, which I like. Plus, we no longer use the `Unsigned` type alias.",
+      "createdAt": "2024-10-11T16:48:40Z",
+      "updatedAt": "2024-10-11T16:48:46Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 488,
+      "id": "I_kwDOGKuqOc6Z6rIc",
+      "title": "comments on Section 2",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/488",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "These are some observations after my reading of Section 2. Some suggested changes are in the form of diff comments.\r\n\r\n- Some suggestions\r\n\r\n```diff\r\n- Sequence[T] is either a list or tuple\r\n+ Sequence[T] is either a list or tuple of elements of type `T`.\r\n\r\n- zeros(len: int) -> bytes returns an array of zero bytes. The length of output MUST be len\r\n+ zeros(len: int) -> bytes returns an array of `len` bytes set to zero.\r\n\r\n- gen_rand(len: int) -> bytes returns an array of random bytes generated by a cryptographically secure pseudorandom number generator (CSPRNG). The length of output MUST be len.\r\n+ gen_rand(len: int) -> bytes returns an array of `len` bytes generated by a cryptographically secure pseudorandom number generator (CSPRNG).\r\n\r\n- byte(int: int) -> bytes returns the representation of int as a byte string. The value of int MUST be in [0,256).\r\n+ byte(n: int) -> bytes returns the representation of an integer `n` in the range [0,256) as a byte string.\r\n\r\n- front(length: int, vec: list[Any]) -> (list[Any], list[Any]) splits vec into two vectors, where the first vector is made up of the first length elements of the input.\r\n+ front(length: int, vec: list[Any]) -> (list[Any], list[Any]) splits vec into two vectors, where the first vector is made up of the first length elements of the input, and the second vector contains the remainder elements. This function is equivalent to return `(vec[:length], vec[length:])` in Python.\r\n```\r\n\r\n- The `to_be_bytes` and `from_be_bytes` functions correspond to I2OSC and OS2IP defined in [RFC8017]. This covers the big-endian case, but I couldn't find a reference for the little-endian functions. [RFC7748] offers Python snippet only:\r\n\r\n```python\r\ndef decodeLittleEndian(b, bits):\r\n    return sum([b[i] << 8*i for i in range((bits+7)/8)])```\r\n```\r\n\r\n- The definition of `to_be_bytes` and `to_le_bytes` does not specify how many bytes are returned.\r\n\r\n- The `from_be_bytes` and `from_le_bytes` does not specify what are the valid encodings. For example:\r\n\r\n```python\r\n 5 = from_be_bytes([0,5])\r\n   = from_be_bytes([0,0,5])\r\n   = from_be_bytes([0,0,0,5])\r\n```\r\n\r\nall these are valid encodings of five. Also, does an empty `encoding` maps to zero?\r\n\r\n- The `num_shares` and `field` parameters don't play role in the definition of `additive_secret_share` function.\r\n\r\n- more sugestions\r\n\r\n```diff\r\n- cast(typ: type, val: object) -> object\r\n+ cast(typ: type, val: object) -> typ\r\n\r\n- range(stop) or range(start, stop[, step])\r\n+ range(stop: int) or range(start: int, stop: int[, step: int])\r\n\r\n- poly_eval(field: type[F], p: list[F], x: F) -> F returns the result of evaluating the polynomial,\r\n+ poly_eval(field: type[F], p: list[F], x: F) -> F returns `p(x)`, the result of evaluating the polynomial `p` on `x`.\r\n\r\n- p(input[k]) == output[k] for all k.\r\n+ p(inputs[k]) == outputs[k] for all k.\r\n\r\n- poly_strip(field: type[F], p: list[F]) -> list[F] strips the zeros from the end of the input polynomial.\r\n+ poly_strip(field: type[F], p: list[F]) -> list[F] continuously reduces the degree of the input polynomial until its leading coefficient is non-zero, and returns the resultant polynomial.\r\n```\r\n\r\n- In `poly_eval`, `poly_interp`, `poly_mul`, and `poly_strip` functions, it is not described the purpose of the `field` parameter.\r\n\r\n\r\n",
+      "createdAt": "2024-10-11T22:47:54Z",
+      "updatedAt": "2024-10-11T23:04:14Z",
       "closedAt": null,
       "comments": []
     }
@@ -39400,7 +39565,7 @@
       "id": "PR_kwDOGKuqOc593aMF",
       "title": "Prio3: Improve circuit specifications",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/451",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -39409,17 +39574,19 @@
       ],
       "body": "Stacked on #449 (to reduce rebase conflicts later on).\r\nCloses #411.\r\n\r\nRework the spec of each Prio3 variant by listing the entire class of each circuit. Also, list the specification of each gadget in \r\nthe appendix.\r\n\r\n* Prio3Sum: Use `PolyEval` instead of `Range2`, as this is a much more useful gadget to list in the doc.\r\n* Say \"variant\" instead of \"instance\".\r\n* Document missing operations on polynomials\r\n* Modify the constructor for `Field` elements by interpreting negative integers as additive inverses. This is necessary in  order to allow expressing polynomial coefficients in the `PolyEval` circuit independent of the field modulus.",
       "createdAt": "2024-10-07T20:40:53Z",
-      "updatedAt": "2024-10-10T00:28:43Z",
+      "updatedAt": "2024-10-10T14:32:46Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "8bbac2ea217ca4c980dceec9af6a99ffcc30deb3",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/411",
-      "headRefOid": "a1c3987b05cd980e16b597da4b1ba4542da6c45e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "517034bda83d66372ef29cef85000c724cfa9d58",
+      "closedAt": "2024-10-10T14:32:46Z",
+      "mergedAt": "2024-10-10T14:32:45Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b6aa65086be8920493d33b8dbfc0dce04c56b4f0"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -40292,7 +40459,7 @@
       ],
       "body": "",
       "createdAt": "2024-10-09T15:06:08Z",
-      "updatedAt": "2024-10-09T15:09:14Z",
+      "updatedAt": "2024-10-10T21:48:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "4756b71ab93879f4ead55fef926f1db2f87895de",
@@ -40303,8 +40470,37 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Other things to note:\r\n\r\n- [ ] Section reassignement",
+          "createdAt": "2024-10-10T21:48:53Z",
+          "updatedAt": "2024-10-10T21:48:53Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MvKZB",
+          "commit": {
+            "abbreviatedOid": "edbe477"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-10T18:55:10Z",
+          "updatedAt": "2024-10-10T18:55:10Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\n```",
+              "createdAt": "2024-10-10T18:55:10Z",
+              "updatedAt": "2024-10-10T18:55:10Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 466,
@@ -40473,7 +40669,7 @@
       "id": "PR_kwDOGKuqOc5-HgMx",
       "title": "Spot check IANA Considerations",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/468",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -40483,13 +40679,869 @@
       ],
       "body": "* Add ticks around constants in-lined in a paragraph.\r\n* Replace explanation of domain separation with reference to the defense-in-depth section.",
       "createdAt": "2024-10-09T18:40:24Z",
-      "updatedAt": "2024-10-09T18:40:56Z",
+      "updatedAt": "2024-10-10T14:31:46Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "592f767c056b2034e20c692bc2c147f62d6a1e97",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-13/edit/iana",
       "headRefOid": "3b51a6060e88804a0dda2ec5eac60e3545606f7f",
+      "closedAt": "2024-10-10T14:31:46Z",
+      "mergedAt": "2024-10-10T14:31:46Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "c56ec033ba938e003731f6edc7c98ccf383358dc"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MsXg1",
+          "commit": {
+            "abbreviatedOid": "3b51a60"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T13:55:07Z",
+          "updatedAt": "2024-10-10T13:55:07Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 470,
+      "id": "PR_kwDOGKuqOc5-PRQt",
+      "title": "Editorial tweaks",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/470",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This makes three small, unrelated editorial changes.",
+      "createdAt": "2024-10-10T15:13:10Z",
+      "updatedAt": "2024-10-10T15:15:08Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b6aa65086be8920493d33b8dbfc0dce04c56b4f0",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/editorial",
+      "headRefOid": "dfe9f088a05102ec2dffcc78ff79fc98b98673ac",
+      "closedAt": "2024-10-10T15:15:04Z",
+      "mergedAt": "2024-10-10T15:15:04Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "5585115ee3ac4b38f80e3f8a92f13fe5a38e19be"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MtWad",
+          "commit": {
+            "abbreviatedOid": "dfe9f08"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T15:14:26Z",
+          "updatedAt": "2024-10-10T15:14:26Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 471,
+      "id": "PR_kwDOGKuqOc5-PXF9",
+      "title": "Fix duplicate words",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/471",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This deletes a number of duplicate word typos, and rephrases two sentences to make more sense in plain text (where the inline code formatting does not appear).",
+      "createdAt": "2024-10-10T15:25:00Z",
+      "updatedAt": "2024-10-10T15:48:12Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "5585115ee3ac4b38f80e3f8a92f13fe5a38e19be",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/duplicate-words",
+      "headRefOid": "e5827d3098da25f0483e4149e7b495a3dc4d579e",
+      "closedAt": "2024-10-10T15:48:08Z",
+      "mergedAt": "2024-10-10T15:48:08Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "bcecd5c6a756bdb0c228930afd7d4e587f171b83"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MtrCW",
+          "commit": {
+            "abbreviatedOid": "e5827d3"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T15:47:00Z",
+          "updatedAt": "2024-10-10T15:47:00Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 473,
+      "id": "PR_kwDOGKuqOc5-P5Sn",
+      "title": "Specify Python minor version",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/473",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #472.\r\n\r\ncc @armfazh",
+      "createdAt": "2024-10-10T16:44:23Z",
+      "updatedAt": "2024-10-10T17:14:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "bcecd5c6a756bdb0c228930afd7d4e587f171b83",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/python-minor-version",
+      "headRefOid": "77af7cc3d687ded876e452218cc5759a041b3f4d",
+      "closedAt": "2024-10-10T17:14:38Z",
+      "mergedAt": "2024-10-10T17:14:38Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "0e188760b5c677adde9892a37876eafaf097a69b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MuQhQ",
+          "commit": {
+            "abbreviatedOid": "77af7cc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T16:53:14Z",
+          "updatedAt": "2024-10-10T16:53:14Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MuaHx",
+          "commit": {
+            "abbreviatedOid": "77af7cc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T17:14:00Z",
+          "updatedAt": "2024-10-10T17:14:00Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 474,
+      "id": "PR_kwDOGKuqOc5-RK2t",
+      "title": "Tweak wording for robustness in abstract",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/474",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "",
+      "createdAt": "2024-10-10T20:25:38Z",
+      "updatedAt": "2024-10-10T20:39:40Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "0e188760b5c677adde9892a37876eafaf097a69b",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/edit/abstract-1",
+      "headRefOid": "42f3f810592eb457830288b9dd791e61c6a56269",
+      "closedAt": "2024-10-10T20:39:40Z",
+      "mergedAt": "2024-10-10T20:39:40Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "399d49512612efcf7034429c70160e13986f4b93"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Mv5oR",
+          "commit": {
+            "abbreviatedOid": "42f3f81"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T20:33:20Z",
+          "updatedAt": "2024-10-10T20:33:20Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 475,
+      "id": "PR_kwDOGKuqOc5-RPoW",
+      "title": "Tweak the doc structure",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/475",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "* Move Ping-Pong and Start Topologies under Communication Patterns for Preparation\r\n\r\n* Move FLP Proof Generation, Query, and Decision out of the Specification subsection. Move the parameter table up to the top of the section and add `valid` to the parameter table.\r\n\r\n* Move \"Additional Privacy Considerations\" for aggregation parameters to the section above.\r\n\r\n* Move the limits on IDPF outputs to its own subsection of security considerations.\r\n\r\n* Harmonize section titles a little",
+      "createdAt": "2024-10-10T20:40:27Z",
+      "updatedAt": "2024-10-10T21:39:10Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "399d49512612efcf7034429c70160e13986f4b93",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/edit/main",
+      "headRefOid": "f9ab7a3efe60a8fa146b757af22758b8cf37d152",
+      "closedAt": "2024-10-10T21:39:10Z",
+      "mergedAt": "2024-10-10T21:39:10Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "2fca534f300ff9f6a3fef1ab574dab00bafa975e"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MwM_G",
+          "commit": {
+            "abbreviatedOid": "0e5eed1"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T21:22:59Z",
+          "updatedAt": "2024-10-10T21:31:02Z",
+          "comments": [
+            {
+              "originalPosition": 64,
+              "body": "A suggestion, to avoid using \"defines\" twice in a clause:\r\n```suggestion\r\ncomponent of the proof system that determines measurement validity and how\r\n```",
+              "createdAt": "2024-10-10T21:22:59Z",
+              "updatedAt": "2024-10-10T21:31:02Z"
+            },
+            {
+              "originalPosition": 82,
+              "body": "I think we should move this row to the top of the table, so we get the forward reference to the definition of a validity circuit sooner. (since the whole table references parameters of validity circuits)",
+              "createdAt": "2024-10-10T21:26:39Z",
+              "updatedAt": "2024-10-10T21:31:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MwRg1",
+          "commit": {
+            "abbreviatedOid": "89476cc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-10T21:37:03Z",
+          "updatedAt": "2024-10-10T21:37:07Z",
+          "comments": [
+            {
+              "originalPosition": 82,
+              "body": "Done (will do the same in the next PR in the stack)",
+              "createdAt": "2024-10-10T21:37:03Z",
+              "updatedAt": "2024-10-10T21:37:07Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 476,
+      "id": "PR_kwDOGKuqOc5-RZST",
+      "title": "Prio3, Poplar1: Set `xof` to `XofTurboShake128`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/476",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "Stacked on #475.\r\n\r\nPreviously we imagined making this generic in case we wanted to define variants with different XOFs. We don't have nay in this document, so fix XofTurboShake128 as the XOF as early as possible.\r\n\r\nWhile at it, don't overload `Xof` in parameter tables, as this is now just an abstract base class. Likewise for `Idpf` and `Flp`.",
+      "createdAt": "2024-10-10T21:08:53Z",
+      "updatedAt": "2024-10-10T21:48:06Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "2fca534f300ff9f6a3fef1ab574dab00bafa975e",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/1",
+      "headRefOid": "a72cc4887e6f4a74c50a12213524044636f1d9b6",
+      "closedAt": "2024-10-10T21:48:05Z",
+      "mergedAt": "2024-10-10T21:48:05Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "08a655988a743a7ff52c686ae1fa32a3e9eadbca"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Rebased and squashed.",
+          "createdAt": "2024-10-10T21:46:58Z",
+          "updatedAt": "2024-10-10T21:46:58Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MwP8p",
+          "commit": {
+            "abbreviatedOid": "13f84d0"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-10T21:32:22Z",
+          "updatedAt": "2024-10-10T21:38:22Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "We should propagate these changes back to xof.py too",
+              "createdAt": "2024-10-10T21:32:22Z",
+              "updatedAt": "2024-10-10T21:38:22Z"
+            },
+            {
+              "originalPosition": 169,
+              "body": "We could similarly make the first paragraph of section 8.2 more concrete, i.e. replace \"any IDPF for which SHARES == 2 and VALUE_LEN == 2\" with \"the IDPF from {{idpf-bbcggi21}}, with VALUE_LEN = 2 and ...\".",
+              "createdAt": "2024-10-10T21:36:56Z",
+              "updatedAt": "2024-10-10T21:38:22Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 478,
+      "id": "PR_kwDOGKuqOc5-RuHO",
+      "title": "Pass of intro, conventions, and overview",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/478",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "",
+      "createdAt": "2024-10-10T22:21:36Z",
+      "updatedAt": "2024-10-11T22:15:18Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "08a655988a743a7ff52c686ae1fa32a3e9eadbca",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/2",
+      "headRefOid": "1edc9db06d6162b1a6630cb1c7c8b1c48735b1af",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6MwfaY",
+          "commit": {
+            "abbreviatedOid": "d2723af"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-10T22:22:25Z",
+          "updatedAt": "2024-10-10T22:22:25Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "* capital letters for functions looks a little nicer in the *.txt file, which is what I'm reviewing.\r\n* `N` is used in the overview section to denote the number of aggregators.",
+              "createdAt": "2024-10-10T22:22:25Z",
+              "updatedAt": "2024-10-10T22:22:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MwfnT",
+          "commit": {
+            "abbreviatedOid": "d2723af"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-10T22:23:22Z",
+          "updatedAt": "2024-10-10T22:23:22Z",
+          "comments": [
+            {
+              "originalPosition": 63,
+              "body": "collector may be under the attacker's control and is not necessarily a server",
+              "createdAt": "2024-10-10T22:23:22Z",
+              "updatedAt": "2024-10-10T22:23:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MwfyH",
+          "commit": {
+            "abbreviatedOid": "d2723af"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-10T22:24:07Z",
+          "updatedAt": "2024-10-10T22:24:07Z",
+          "comments": [
+            {
+              "originalPosition": 139,
+              "body": "In general I've tried to harmonize variable names across all functions:\r\n* `x` denotes the input that's \"acted upon\"\r\n* `len` denotes the length when required",
+              "createdAt": "2024-10-10T22:24:07Z",
+              "updatedAt": "2024-10-10T22:24:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Mwf5p",
+          "commit": {
+            "abbreviatedOid": "d2723af"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-10T22:24:36Z",
+          "updatedAt": "2024-10-10T22:24:36Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "Don't use MUST to express bounds on outputs",
+              "createdAt": "2024-10-10T22:24:36Z",
+              "updatedAt": "2024-10-10T22:24:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6MwgBg",
+          "commit": {
+            "abbreviatedOid": "d2723af"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-10T22:25:10Z",
+          "updatedAt": "2024-10-10T22:25:10Z",
+          "comments": [
+            {
+              "originalPosition": 198,
+              "body": "this method is only used for `run_flp()` and we don't care if it's an actually secure secret sharing.",
+              "createdAt": "2024-10-10T22:25:10Z",
+              "updatedAt": "2024-10-10T22:25:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6M4Rma",
+          "commit": {
+            "abbreviatedOid": "d2723af"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-11T21:04:04Z",
+          "updatedAt": "2024-10-11T21:24:34Z",
+          "comments": [
+            {
+              "originalPosition": 156,
+              "body": "I think we should still mention that this is mapping to single-byte byte strings.\r\n```suggestion\r\n* `byte(x: int) -> bytes` returns the representation of the integer `x` in range\r\n  `[0, 256)` as a single-byte byte string.\r\n```",
+              "createdAt": "2024-10-11T21:04:05Z",
+              "updatedAt": "2024-10-11T21:24:34Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 479,
+      "id": "PR_kwDOGKuqOc5-SUpl",
+      "title": "Pass of DAP/VDAF up to communication patterns",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/479",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "Stacked on #478.\r\n\r\nThe gist is that we lean more heavily on the DAF section for the normative VDAF definition. We replace the sharding, aggregation, and unsharding sections with references to the same topics for DAFs, plus pointers to subsections or bounds on behavior wherever relevant.\r\n\r\n* Harmonize language around report rejection. That is, invalid measurements manifest as failures to complete preparation rather than \"errors computed by each Aggregator\".\r\n\r\n* Harmonize \"BATCH_SIZE\" in intro with \"MEAS_COUNT\" in DAF aggregation section. What we want is actually `num_measurements`, as this is the parameter name for unsharding, but this is a little too long to put in figures. Go with `M`, as this is short and seems the least fussy.\r\n\r\n* Move illustrations to the top of sections.\r\n\r\n* Define \"public share\" before its first use.\r\n\r\n* Remove the paragraph in the DAF overview about the ID. It doesn't really help clarify anything, and we don't use it at all in this section.\r\n\r\n* Expand the CSPRNG acronym where it's first used.\r\n\r\n* Add a paragraph to DAF sharding that explains the role of the nonce.\r\n\r\n* Add a paragraph to DAF preparation saying the Aggregators MUST agree on the agg param.\r\n\r\n* Add a forward reference to `format_dst()`.\r\n\r\n* In VDAF preparation, define `prep_shares_to_prep()` prior to `prep_next()` since this is the order in which they're executed.\r\n\r\n* RECOMMEND specifying an encoding for `AggParam`.\r\n\r\n* Use consistent language about the nonce.",
+      "createdAt": "2024-10-11T01:04:24Z",
+      "updatedAt": "2024-10-11T23:56:16Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-13/2",
+      "baseRefOid": "d2723af90cbceddc92f74a8371baf572e5a21839",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/3",
+      "headRefOid": "53d32be5788a6d6ba4bf0033e2204a6381673f63",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6M4lGo",
+          "commit": {
+            "abbreviatedOid": "53d32be"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-11T22:31:18Z",
+          "updatedAt": "2024-10-11T23:56:16Z",
+          "comments": [
+            {
+              "originalPosition": 411,
+              "body": "This table is missing `ROUNDS` compared to the old version.",
+              "createdAt": "2024-10-11T22:31:18Z",
+              "updatedAt": "2024-10-11T23:56:16Z"
+            },
+            {
+              "originalPosition": 535,
+              "body": "I think these paragraphs would be a good place to introduce \"prep state\". Its first use is currently in the definition of `vdaf.prep_init()` below. How about this?\r\n\r\n> Aggregators retain some local state between successive rounds of preparation. This is referred to as `preparation state` or `prep state` for short.",
+              "createdAt": "2024-10-11T23:17:06Z",
+              "updatedAt": "2024-10-11T23:56:16Z"
+            },
+            {
+              "originalPosition": 618,
+              "body": "This phrasing doesn't make sense any more without the context of the preceding \"linear state machine\" paragraph\r\n```suggestion\r\nImplementation note: The preparation algorithm accomplishes two tasks:\r\n```",
+              "createdAt": "2024-10-11T23:21:38Z",
+              "updatedAt": "2024-10-11T23:56:16Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 483,
+      "id": "PR_kwDOGKuqOc5-XGfn",
+      "title": "Pass of VDAF prep communication patterns",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/483",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "Stacked on #479.",
+      "createdAt": "2024-10-11T16:13:16Z",
+      "updatedAt": "2024-10-12T00:49:09Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-13/3",
+      "baseRefOid": "53d32be5788a6d6ba4bf0033e2204a6381673f63",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/4",
+      "headRefOid": "b8c68256fbf4650ba94536b39a9f75bbd1d67e9f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6M4ayZ",
+          "commit": {
+            "abbreviatedOid": "b8c6825"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-11T21:45:13Z",
+          "updatedAt": "2024-10-11T21:45:14Z",
+          "comments": [
+            {
+              "originalPosition": 63,
+              "body": "```suggestion\r\n* For a 1-round VDAF (e.g., Prio3 in {{prio3}}), the Leader sends its prep share\r\n```",
+              "createdAt": "2024-10-11T21:45:14Z",
+              "updatedAt": "2024-10-11T21:45:14Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6M4w5k",
+          "commit": {
+            "abbreviatedOid": "b8c6825"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-12T00:30:34Z",
+          "updatedAt": "2024-10-12T00:49:09Z",
+          "comments": [
+            {
+              "originalPosition": 84,
+              "body": "nit: leftover paren\r\n```suggestion\r\n3 of !RFC8446}}. Each message is structured as follows:\r\n```",
+              "createdAt": "2024-10-12T00:30:34Z",
+              "updatedAt": "2024-10-12T00:49:09Z"
+            },
+            {
+              "originalPosition": 97,
+              "body": "nit: missing word\r\n```suggestion\r\nLeader's state is initialized using its local inputs with the following method on\r\n```",
+              "createdAt": "2024-10-12T00:31:17Z",
+              "updatedAt": "2024-10-12T00:49:09Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 485,
+      "id": "PR_kwDOGKuqOc5-XlSR",
+      "title": "Fix duplication of field in Prio3 variant params",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/485",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This fixes #480 by tweaking the table to say `Count(field)`, etc.",
+      "createdAt": "2024-10-11T17:48:49Z",
+      "updatedAt": "2024-10-11T18:27:26Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "08a655988a743a7ff52c686ae1fa32a3e9eadbca",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/prio3-table-field-duplication",
+      "headRefOid": "fffb98ae4fe370741a0dc46a0774bcc69fdcd613",
+      "closedAt": "2024-10-11T18:27:22Z",
+      "mergedAt": "2024-10-11T18:27:22Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "a4c0d1cdb7a796ee3063dd28394b4926f28f6abe"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6M3VF7",
+          "commit": {
+            "abbreviatedOid": "649d94d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-11T17:52:06Z",
+          "updatedAt": "2024-10-11T17:52:10Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Let's move the `field` row to the first row of the table, as we did for `xof`, `idpf`, and `flp` elsewhere. Here and for all other variants below.",
+              "createdAt": "2024-10-11T17:52:06Z",
+              "updatedAt": "2024-10-11T17:52:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6M3Wsu",
+          "commit": {
+            "abbreviatedOid": "065e1ff"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-11T17:56:44Z",
+          "updatedAt": "2024-10-11T17:57:55Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "nit: I think `field` should be lower case since it's lower case where we reference it\r\n```suggestion\r\n| `field`           | `Field64` ({{fields}})                     |\r\n```",
+              "createdAt": "2024-10-11T17:56:44Z",
+              "updatedAt": "2024-10-11T17:57:55Z"
+            },
+            {
+              "originalPosition": 21,
+              "body": "```suggestion\r\n| `field`           | `Field64` ({{fields}})                       |\r\n```",
+              "createdAt": "2024-10-11T17:56:52Z",
+              "updatedAt": "2024-10-11T17:57:55Z"
+            },
+            {
+              "originalPosition": 38,
+              "body": "```suggestion\r\n| `field`           | `Field128` ({{fields}})                                   |\r\n```",
+              "createdAt": "2024-10-11T17:57:12Z",
+              "updatedAt": "2024-10-11T17:57:55Z"
+            },
+            {
+              "originalPosition": 55,
+              "body": "```suggestion\r\n| `field`           | `Field128` ({{fields}})                                |\r\n```",
+              "createdAt": "2024-10-11T17:57:19Z",
+              "updatedAt": "2024-10-11T17:57:55Z"
+            },
+            {
+              "originalPosition": 72,
+              "body": "```suggestion\r\n| `field`           | `Field128` ({{fields}})                                                   |\r\n```",
+              "createdAt": "2024-10-11T17:57:29Z",
+              "updatedAt": "2024-10-11T17:57:55Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 486,
+      "id": "PR_kwDOGKuqOc5-Xso6",
+      "title": "Pass of preliminaries",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/486",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "Stacked on #483.\r\n\r\n* Note that `Field.rand_vec()` is not used in the spec of any VDAF. (It's only used for `run_flp()`.)\r\n\r\n* Specify notation of arithmetic operations on fields.\r\n\r\n* Use `front()` in field element decoding, which is more in line with how we write down decoding algorithms in other parts of the draft.\r\n\r\n* Say what we mean by \"order\" of the multiplicative subgroup of NTT fields\r\n\r\n* XofTurboShake128: Set stricter bounds on the inputs (how big can the seed be)\r\n\r\n* XofFixedKeyAes128: Set bounds on the length of the domain separation tag.\r\n\r\n* Clarify the motivation for XofFixedKeyAes128.\r\n\r\n* Write \"AES128\" instead of \"AES-128\" as this is how we denote the function in the spec.",
+      "createdAt": "2024-10-11T18:13:52Z",
+      "updatedAt": "2024-10-12T02:53:16Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-13/4",
+      "baseRefOid": "b8c68256fbf4650ba94536b39a9f75bbd1d67e9f",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/5",
+      "headRefOid": "e0e7eab78aace11963d3248684dcc91a47cf2d9c",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6M4ySA",
+          "commit": {
+            "abbreviatedOid": "e0e7eab"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-12T00:53:44Z",
+          "updatedAt": "2024-10-12T02:53:16Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "nit: duplicate word\r\n```suggestion\r\nA field element is an instance of a concrete `Field`. Addition,\r\n```",
+              "createdAt": "2024-10-12T00:53:44Z",
+              "updatedAt": "2024-10-12T02:53:16Z"
+            },
+            {
+              "originalPosition": 135,
+              "body": "Technically, the definition of order also requires that `Field.gen() ** (Field.GEN_ORDER // 2) != Field(1)`, but I don't know if we need to get into that level of detail.",
+              "createdAt": "2024-10-12T00:58:07Z",
+              "updatedAt": "2024-10-12T02:53:16Z"
+            },
+            {
+              "originalPosition": 207,
+              "body": "nit: rephrasing\r\n```suggestion\r\n* The default seed length is `32`. The seed MAY have a different length, but MUST not\r\n```",
+              "createdAt": "2024-10-12T02:52:51Z",
+              "updatedAt": "2024-10-12T02:53:16Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 487,
+      "id": "PR_kwDOGKuqOc5-Yn9O",
+      "title": "Pass of Prio3",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/487",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "Stacked on #486.\r\n\r\n* Update motivating example for FLP truncation (current example is out of date).\r\n\r\n* Move FLP parameter table to the bottom of the section.\r\n\r\n* Add `PROOFS` to VDAF parameter table.\r\n\r\n* Move prose explanations of sharding, preparation to before the code listings.",
+      "createdAt": "2024-10-11T22:14:39Z",
+      "updatedAt": "2024-10-11T22:14:48Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-13/5",
+      "baseRefOid": "e0e7eab78aace11963d3248684dcc91a47cf2d9c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/6",
+      "headRefOid": "951623c5d9466292b36df7a4a5789d1979a69d16",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 489,
+      "id": "PR_kwDOGKuqOc5-Y0jQ",
+      "title": "Pass of Poplar1",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/489",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "Stacked on #487.",
+      "createdAt": "2024-10-11T23:55:00Z",
+      "updatedAt": "2024-10-11T23:55:14Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/draft-13/6",
+      "baseRefOid": "951623c5d9466292b36df7a4a5789d1979a69d16",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-13/7",
+      "headRefOid": "4fba0fea6c790c4afe19213732877a8c8e61e2af",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
