@@ -3593,11 +3593,12 @@ parameters:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 as a byte string.<a href="#section-6.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.1-3">A concrete <code>Field</code> also implements the following class methods:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-3">Concrete fields, i.e., subclasses of <code>Field</code>, implement the following class
+methods:<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1-4.1">
-            <p id="section-6.1-4.1.1"><code>Field.zeros(length: int) -&gt; list[Self]</code> returns a vector of
-zeros.<a href="#section-6.1-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-4.1.1"><code>Field.zeros(length: int) -&gt; list[Self]</code> returns a vector of zeros of the
+requested length.<a href="#section-6.1-4.1.1" class="pilcrow">¶</a></p>
 <p id="section-6.1-4.1.2">
 Pre-conditions:<a href="#section-6.1-4.1.2" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -3614,31 +3615,33 @@ Post-conditions:<a href="#section-6.1-4.1.4" class="pilcrow">¶</a></p>
             </ul>
 </li>
           <li class="normal" id="section-6.1-4.2">
-            <p id="section-6.1-4.2.1"><code>Field.rand_vec(length: int) -&gt; list[Self]</code> returns a vector of
-random field elements. Same pre- and post-conditions as for <code>Field.zeros()</code>.<a href="#section-6.1-4.2.1" class="pilcrow">¶</a></p>
+            <p id="section-6.1-4.2.1"><code>Field.rand_vec(length: int) -&gt; list[Self]</code> returns a vector of random field
+elements and has the same pre- and post-conditions as for <code>Field.zeros()</code>.
+Note that this function is not used normatively in the specification of
+either Prio3 or Poplar1.<a href="#section-6.1-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.1-5">A field element is an instance of a concrete <code>Field</code>. The concrete class defines
-the usual arithmetic operations on field elements. In addition, it defines the
-following instance method for converting a field element to an unsigned integer:<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<p id="section-6.1-5">A field element is an instance of a concrete <code>Field</code>. Addition,
+subtraction, multiplication, division, negation, and inversion are denoted,
+respectively, <code>x + y</code>, <code>x - y</code>, <code>x * y</code>, <code>x / y</code>, <code>-x</code>, and <code>x.inv()</code>.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<p id="section-6.1-6">We sometimes need to convert a field element to an <code>int</code>, which we denote by
+<code>x.as_unsigned()</code>. Likewise, each concrete <code>Field</code> implements a constructor for
+converting an unsigned integer into a field element:<a href="#section-6.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-6.1-6.1">
-            <p id="section-6.1-6.1.1"><code>elem.as_unsigned() -&gt; int</code> returns the integer representation of
-field element <code>elem</code>.<a href="#section-6.1-6.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-6.1-7.1">
+            <p id="section-6.1-7.1.1"><code>Field(integer: int)</code> returns <code>integer</code> represented as a field element. The
+value of <code>integer</code> <span class="bcp14">MUST</span> be in the range <code>(-Field.MODULUS, Field.MODULUS)</code>;
+negative values are treated as negations.<a href="#section-6.1-7.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.1-7">Likewise, each concrete <code>Field</code> implements a constructor for converting an
-unsigned integer into a field element:<a href="#section-6.1-7" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-6.1-8.1">
-            <p id="section-6.1-8.1.1"><code>Field(integer: int)</code> returns <code>integer</code> represented as a field element.
-The value of <code>integer</code> <span class="bcp14">MUST</span> be non-negative and less than <code>Field.MODULUS</code>.<a href="#section-6.1-8.1.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-6.1-9">Each concrete <code>Field</code> has two derived class methods, one for encoding
-a vector of field elements as a byte string and another for decoding a vector of
-field elements.<a href="#section-6.1-9" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-6.1-10">
+<div id="auxiliary-functions">
+<section id="section-6.1.1">
+          <h4 id="name-auxiliary-functions">
+<a href="#section-6.1.1" class="section-number selfRef">6.1.1. </a><a href="#name-auxiliary-functions" class="section-name selfRef">Auxiliary Functions</a>
+          </h4>
+<p id="section-6.1.1-1">The following class methods on <code>Field</code> are used to encode and decode vectors of
+field elements as byte strings:<a href="#section-6.1.1-1" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-6.1.1-2">
 <pre>
 def encode_vec(cls, vec: list[Self]) -&gt; bytes:
     """
@@ -3653,25 +3656,26 @@ def decode_vec(cls, encoded: bytes) -&gt; list[Self]:
     """
     Parse a vector of field elements from `encoded`.
     """
-    L = cls.ENCODED_SIZE
-    if len(encoded) % L != 0:
+    if len(encoded) % cls.ENCODED_SIZE != 0:
         raise ValueError(
             'input length must be a multiple of the size of an '
             'encoded field element')
 
     vec = []
-    for i in range(0, len(encoded), L):
-        encoded_x = encoded[i:i+L]
+    while len(encoded) &gt; 0:
+        (encoded_x, encoded) = front(cls.ENCODED_SIZE, encoded)
         x = from_le_bytes(encoded_x)
         if x &gt;= cls.MODULUS:
             raise ValueError('modulus overflow')
         vec.append(cls(x))
     return vec
-</pre><a href="#section-6.1-10" class="pilcrow">¶</a>
+</pre><a href="#section-6.1.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-6.1-11">Finally, <code>Field</code> implements the following methods for representing a value as
-a sequence of field elements, each of which represents a bit of the input.<a href="#section-6.1-11" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-6.1-12">
+<p id="section-6.1.1-3"><code>Field</code> provides the following class methods for representing a value as a
+sequence of field elements, each of which represents a bit of the input. These
+are used to encode measurements in some variants of Prio3
+(<a href="#prio3-instantiations" class="auto internal xref">Section 7.4</a>).<a href="#section-6.1.1-3" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-6.1.1-4">
 <pre>
 def encode_into_bit_vector(
         cls,
@@ -3709,17 +3713,12 @@ def decode_from_bit_vector(cls, vec: list[Self]) -&gt; Self:
     for (l, bit) in enumerate(vec):
         decoded += cls(1 &lt;&lt; l) * bit
     return decoded
-</pre><a href="#section-6.1-12" class="pilcrow">¶</a>
+</pre><a href="#section-6.1.1-4" class="pilcrow">¶</a>
 </div>
-<div id="auxiliary-functions">
-<section id="section-6.1.1">
-          <h4 id="name-auxiliary-functions">
-<a href="#section-6.1.1" class="section-number selfRef">6.1.1. </a><a href="#name-auxiliary-functions" class="section-name selfRef">Auxiliary Functions</a>
-          </h4>
-<p id="section-6.1.1-1">The following auxiliary functions on vectors of field elements are used in the
-remainder of this document. Note that an exception is raised by each function if
-the operands are not the same length.<a href="#section-6.1.1-1" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-6.1.1-2">
+<p id="section-6.1.1-5">Finally, the following functions define arithmetic on vectors over a finite
+field. Note that an exception is raised by each function if the operands are
+not the same length.<a href="#section-6.1.1-5" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-6.1.1-6">
 <pre>
 def vec_sub(left: list[F], right: list[F]) -&gt; list[F]:
     """
@@ -3738,7 +3737,7 @@ def vec_add(left: list[F], right: list[F]) -&gt; list[F]:
 def vec_neg(vec: list[F]) -&gt; list[F]:
     """Negate the input vector."""
     return list(map(lambda x: -x, vec))
-</pre><a href="#section-6.1.1-2" class="pilcrow">¶</a>
+</pre><a href="#section-6.1.1-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -3747,28 +3746,26 @@ def vec_neg(vec: list[F]) -&gt; list[F]:
           <h4 id="name-ntt-friendly-fields">
 <a href="#section-6.1.2" class="section-number selfRef">6.1.2. </a><a href="#name-ntt-friendly-fields" class="section-name selfRef">NTT-Friendly Fields</a>
           </h4>
-<p id="section-6.1.2-1">Some VDAFs require fields that are suitable for efficient computation of the
-number theoretic transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>, as this allows for fast polynomial
-interpolation. (One example is Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) when instantiated with the FLP
-of <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a>.) Specifically, a field is said to be "NTT-friendly" if, in
-addition to satisfying the interface described in <a href="#field" class="auto internal xref">Section 6.1</a>, it implements the
-following method:<a href="#section-6.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.2-1">Some VDAFs, including Prio3, require fields that are suitable for efficient
+computation of the number theoretic transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>, as this allows
+for fast polynomial interpolation. Specifically, a field is said to be
+"NTT-friendly" if, in addition to the interface described in <a href="#field" class="auto internal xref">Section 6.1</a>, it
+provides the following interface:<a href="#section-6.1.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1.2-2.1">
-              <p id="section-6.1.2-2.1.1"><code>Field.gen() -&gt; Field</code> returns the generator of a large subgroup of the
-multiplicative group. To be NTT-friendly, the order of this subgroup <span class="bcp14">MUST</span> be a
-power of 2. In addition, the size of the subgroup dictates how large
-interpolated polynomials can be. It is <span class="bcp14">RECOMMENDED</span> that a generator is chosen
-with order at least <code>2^20</code>.<a href="#section-6.1.2-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-6.1.2-2.1.1"><code>Field.gen() -&gt; Self</code> is a class method that returns the generator of a large
+subgroup of the multiplicative group. To be NTT-friendly, the order of this
+subgroup <span class="bcp14">MUST</span> be a power of 2.<a href="#section-6.1.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-6.1.2-2.2">
+              <p id="section-6.1.2-2.2.1"><code>GEN_ORDER: int</code> is the order of a multiplicative subgroup generated by
+<code>Field.gen()</code>. This is the smallest positive integer for which
+<code>Field.gen()**Field.GEN_ORDER == Field(1)</code>., where <code>**</code> denotes exponentiation
+in Python.<a href="#section-6.1.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-6.1.2-3">NTT-friendly fields also define the following parameter:<a href="#section-6.1.2-3" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-6.1.2-4.1">
-              <p id="section-6.1.2-4.1.1"><code>GEN_ORDER: int</code> is the order of a multiplicative subgroup generated by
-<code>Field.gen()</code>.<a href="#section-6.1.2-4.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+<p id="section-6.1.2-3">The size of the subgroup dictates how large interpolated polynomials can be. It
+is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order at least <code>2^20</code>.<a href="#section-6.1.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="parameters">
@@ -3828,35 +3825,41 @@ with order at least <code>2^20</code>.<a href="#section-6.1.2-2.1.1" class="pilc
         <h3 id="name-extendable-output-functions">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-extendable-output-functions" class="section-name selfRef">Extendable Output Functions (XOFs)</a>
         </h3>
-<p id="section-6.2-1">VDAFs in this specification use extendable output functions (XOFs) to extract
-short, fixed-length strings we call "seeds" from long input strings and expand
-seeds into long output strings. We specify a single interface that is suitable
-for both purposes.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
-<p id="section-6.2-2">XOFs are defined by a class <code>Xof</code> with the following associated parameter and
-methods:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">VDAFs in this specification use eXtendable Output Functions (XOFs) for two
+purposes:<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.2-2">
+<li id="section-6.2-2.1">
+            <p id="section-6.2-2.1.1">Extracting short, pseudorandom strings we call "seeds" from high entropy
+inputs<a href="#section-6.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-6.2-2.2">
+            <p id="section-6.2-2.2.1">Expanding seeds into long, pseudorandom outputs<a href="#section-6.2-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+<p id="section-6.2-3">Concrete XOFs implement a class <code>Xof</code> providing the following interface:<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-6.2-3.1">
-            <p id="section-6.2-3.1.1"><code>SEED_SIZE: int</code> is the size (in bytes) of a seed.<a href="#section-6.2-3.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-6.2-4.1">
+            <p id="section-6.2-4.1.1"><code>SEED_SIZE: int</code> is the size (in bytes) of a seed.<a href="#section-6.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-6.2-3.2">
-            <p id="section-6.2-3.2.1"><code>Xof(seed: bytes, dst: bytes, binder: bytes)</code> constructs an instance of <code>Xof</code>
-from the given seed, domain separation tag, and binder string. (See below for
-definitions of these.) The length of the seed will typically be <code>SEED_SIZE</code>,
-but some XOFs may support multiple seed sizes. The seed <span class="bcp14">MUST</span> be generated
-securely (i.e., it is either the output of a CSPRNG or a previous invocation
-of the XOF).<a href="#section-6.2-3.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-6.2-4.2">
+            <p id="section-6.2-4.2.1"><code>Xof(seed: bytes, dst: bytes, binder: bytes)</code> constructs an instance of the
+XOF from the given seed and a domain separation tag and binder string as
+defined in <a href="#dst-binder" class="auto internal xref">Section 6.2.3</a>. The length of the seed will typically be
+<code>SEED_SIZE</code>, but some XOFs may support multiple seed sizes. The seed <span class="bcp14">MUST</span> be
+generated securely, i.e., it is either the output of a CSPRNG or a
+previous invocation of the XOF.<a href="#section-6.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-6.2-3.3">
-            <p id="section-6.2-3.3.1"><code>xof.next(length: int)</code> returns the next <code>length</code> bytes of output of
-<code>xof</code>.<a href="#section-6.2-3.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-6.2-4.3">
+            <p id="section-6.2-4.3.1"><code>xof.next(length: int)</code> returns the next chunk of the output of the
+initialized XOF. The length of the chunk <span class="bcp14">MUST</span> be <code>length</code>.<a href="#section-6.2-4.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-6.2-4">Each <code>Xof</code> has three derived methods. The first is used to derive a fresh seed
-from an existing one. The second is used to compute a sequence of field
-elements. The third is a convenience method to construct an <code>Xof</code> from a seed,
-domain separation tag, and binder string, and then use it to compute a sequence
-of field elements.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-6.2-5">
+<p id="section-6.2-5">The following methods are provided for all concrete XOFs. The first is a class
+method used to derive a fresh seed from an existing one. The second is an
+instance method used to compute a sequence of field elements. The third is a
+class method that provides a one-shot interface for expanding a seed into a
+field vector.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-6.2-6">
 <pre>
 def derive_seed(cls,
                 seed: bytes,
@@ -3907,7 +3910,7 @@ def expand_into_vec(cls,
     """
     xof = cls(seed, dst, binder)
     return xof.next_vec(field, length)
-</pre><a href="#section-6.2-5" class="pilcrow">¶</a>
+</pre><a href="#section-6.2-6" class="pilcrow">¶</a>
 </div>
 <div id="xof-turboshake128">
 <section id="section-6.2.1">
@@ -3915,16 +3918,27 @@ def expand_into_vec(cls,
 <a href="#section-6.2.1" class="section-number selfRef">6.2.1. </a><a href="#name-xofturboshake128" class="section-name selfRef">XofTurboShake128</a>
           </h4>
 <p id="section-6.2.1-1">This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
-<span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. This XOF is <span class="bcp14">RECOMMENDED</span> for
-all use cases within VDAFs. The length of the domain separation string <code>dst</code>
-passed to XofTurboShake128 <span class="bcp14">MUST NOT</span> exceed 65535 bytes.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+function specified in <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. This
+XOF is <span class="bcp14">RECOMMENDED</span> for all use cases for DAFs and VDAFs.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="section-6.2.1-2.1">
               <p id="section-6.2.1-2.1.1">TODO Update the <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span> reference to point to the RFC instead of the
 draft.<a href="#section-6.2.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<div class="lang-python sourcecode" id="section-6.2.1-3">
+<p id="section-6.2.1-3">Pre-conditions:<a href="#section-6.2.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.2.1-4.1">
+              <p id="section-6.2.1-4.1.1">The default seed length is <code>32</code>. The seed <span class="bcp14">MAY</span> have a different length, but <span class="bcp14">MUST</span> not
+exceed 255. Otherwise initialization will raise an exception.<a href="#section-6.2.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-6.2.1-4.2">
+              <p id="section-6.2.1-4.2.1">The length of the domain separation string <code>dst</code> passed to XofTurboShake128
+<span class="bcp14">MUST NOT</span> exceed 65535 bytes. Otherwise initialization will raise an
+exception.<a href="#section-6.2.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<div class="lang-python sourcecode" id="section-6.2.1-5">
 <pre>
 class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
@@ -3951,7 +3965,7 @@ class XofTurboShake128(Xof):
         # that allows stateful handling of the stream.
         stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
-</pre><a href="#section-6.2.1-3" class="pilcrow">¶</a>
+</pre><a href="#section-6.2.1-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -3960,16 +3974,28 @@ class XofTurboShake128(Xof):
           <h4 id="name-xoffixedkeyaes128">
 <a href="#section-6.2.2" class="section-number selfRef">6.2.2. </a><a href="#name-xoffixedkeyaes128" class="section-name selfRef">XofFixedKeyAes128</a>
           </h4>
-<p id="section-6.2.2-1">While XofTurboShake128 as described above can be securely used in all cases
-where a XOF is needed in the VDAFs described in this document, there are some
-cases where a more efficient instantiation based on a blockcipher in a
-fixed-key mode of operation is possible. This is limited to the XOF used inside
-the IDPF implementation in Poplar1 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. It is <span class="bcp14">NOT RECOMMENDED</span> to
-use this XOF anywhere else. See <a href="#security" class="auto internal xref">Section 9</a> for a more detailed discussion.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-6.2.2-2">The following XOF, denoted XofFixedKeyAes128, uses the AES-128 blockcipher
-<span>[<a href="#AES" class="cite xref">AES</a>]</span>. The length of the domain separation string <code>dst</code> <span class="bcp14">MUST NOT</span> exceed 65535
-bytes.<a href="#section-6.2.2-2" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-6.2.2-3">
+<p id="section-6.2.2-1">The XOF in the previous section can be used safely wherever a XOF is needed in
+this document. However, there are some situations where TurboSHAKE128 creates a
+performance bottleneck and a more efficient XOF can be used safely instead.<a href="#section-6.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2.2-2">This section describes XofFixedKeyAes128, which is used to implement the IDPF
+of Poplar1 (<a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>). It is <span class="bcp14">NOT RECOMMENDED</span> to use this XOF for any
+other purpose. See <a href="#security" class="auto internal xref">Section 9</a> for a more detailed discussion.<a href="#section-6.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-6.2.2-3">XofFixedKeyAes128 uses the AES128 blockcipher <span>[<a href="#AES" class="cite xref">AES</a>]</span> for most of the
+computation, thereby taking advantage of the hardware implementations of this
+blockcipher that are widely available. AES128 is used in a fixed-key mode of
+operation; the key is derived during initialization using TurboSHAKE128.<a href="#section-6.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-6.2.2-4">Pre-conditions:<a href="#section-6.2.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.2.2-5.1">
+              <p id="section-6.2.2-5.1.1">The length of the seed <span class="bcp14">MUST</span> be <code>16</code>.<a href="#section-6.2.2-5.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-6.2.2-5.2">
+              <p id="section-6.2.2-5.2.1">The length of the domain separation string <code>dst</code> passed to XofTurboShake128
+<span class="bcp14">MUST NOT</span> exceed 65535 bytes. Otherwise initialization will raise an
+exception.<a href="#section-6.2.2-5.2.1" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+<div class="breakable lang-python sourcecode" id="section-6.2.2-6">
 <pre>
 class XofFixedKeyAes128(Xof):
     """
@@ -4028,7 +4054,7 @@ class XofFixedKeyAes128(Xof):
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])
         return xor(AES128(self.fixed_key, sigma_block), sigma_block)
-</pre><a href="#section-6.2.2-3" class="pilcrow">¶</a>
+</pre><a href="#section-6.2.2-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -4038,18 +4064,19 @@ class XofFixedKeyAes128(Xof):
 <a href="#section-6.2.3" class="section-number selfRef">6.2.3. </a><a href="#name-the-domain-separation-tag-a" class="section-name selfRef">The Domain Separation Tag and Binder String</a>
           </h4>
 <p id="section-6.2.3-1">XOFs are used to map a seed to a finite domain, e.g., a fresh seed or a vector
-of field elements. To ensure domain separation, the derivation is needs to be
-bound to some distinguished domain separation tag. The domain separation tag
-encodes the following values:<a href="#section-6.2.3-1" class="pilcrow">¶</a></p>
+of field elements. To ensure domain separation, derivation is bound to some
+distinguished domain separation tag. The domain separation tag encodes the
+following values:<a href="#section-6.2.3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.2.3-2">
 <li id="section-6.2.3-2.1">
               <p id="section-6.2.3-2.1.1">The document version (i.e.,<code>VERSION</code>);<a href="#section-6.2.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-6.2.3-2.2">
-              <p id="section-6.2.3-2.2.1">The "class" of the algorithm using the output (e.g., VDAF);<a href="#section-6.2.3-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-6.2.3-2.2.1">The "class" of the algorithm using the output (e.g., DAF, VDAF, or IDPF as
+defined in <a href="#idpf" class="auto internal xref">Section 8.1</a>);<a href="#section-6.2.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-6.2.3-2.3">
-              <p id="section-6.2.3-2.3.1">A unique identifier for the algorithm; and<a href="#section-6.2.3-2.3.1" class="pilcrow">¶</a></p>
+              <p id="section-6.2.3-2.3.1">A unique identifier for the algorithm (e.g., <code>VDAF.ID</code>); and<a href="#section-6.2.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-6.2.3-2.4">
               <p id="section-6.2.3-2.4.1">Some indication of how the output is used (e.g., for deriving the measurement
@@ -4064,7 +4091,7 @@ def format_dst(algo_class: int,
                algo: int,
                usage: int) -&gt; bytes:
     """
-    Format XOF domain separation tag for use within a (V)DAF.
+    Format XOF domain separation tag.
 
     Pre-conditions:
 
