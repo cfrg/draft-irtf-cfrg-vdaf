@@ -57,7 +57,8 @@ informative:
       - ins: E. Jaffe
       - ins: R. Ostrovsky
       - ins: A. Polychroniadou
-    date: 2021
+    date: 2022
+    seriesinfo: Security and Cryptography for Networks (SCN)
     target: https://ia.cr/2021/576
 
   BBCGGI19:
@@ -69,7 +70,7 @@ informative:
       - ins: N. Gilboa
       - ins: Y. Ishai
     date: 2019
-    seriesinfo: CRYPTO 2019
+    seriesinfo: Crypto
     target: https://ia.cr/2019/188
 
   BBCGGI21:
@@ -81,7 +82,7 @@ informative:
       - ins: N. Gilboa
       - ins: Y. Ishai
     date: 2021
-    seriesinfo: IEEE S&P 2021
+    seriesinfo: IEEE Security & Privacy (S&P)
     target: https://ia.cr/2021/017
 
   BBCGGI23:
@@ -93,7 +94,7 @@ informative:
       - ins: N. Gilboa
       - ins: Y. Ishai
     date: 2023
-    seriesinfo: CRYPTO 2023
+    seriesinfo: Crypto
     target: https://ia.cr/2023/1012
 
   BGI15:
@@ -103,7 +104,7 @@ informative:
       - ins: N. Gilboa
       - ins: Y. Ishai
     date: 2015
-    seriesinfo: EUROCRYPT 2015
+    seriesinfo: Eurocrypt
     target: https://www.iacr.org/archive/eurocrypt2015/90560300/90560300.pdf
 
   CGB17:
@@ -112,7 +113,7 @@ informative:
       - ins: H. Corrigan-Gibbs
       - ins: D. Boneh
     date: 2017
-    seriesinfo: NSDI 2017
+    seriesinfo: USENIX Symposium on Networked Systems Design and Implementation (NSDI)
     target: https://dl.acm.org/doi/10.5555/3154630.3154652
 
   Dou02:
@@ -120,7 +121,7 @@ informative:
     author:
       - ins: J. Douceur
     date: 2002
-    seriesinfo: IPTPS 2002
+    seriesinfo: International Workshop on Peer-to-Peer Systems (IPTPS)
     target: https://doi.org/10.1007/3-540-45748-8_24
 
   DPRS23:
@@ -131,7 +132,7 @@ informative:
       - ins: M. Rosulek
       - ins: P. Schoppmann
     date: 2023
-    seriesinfo: PETS 2023
+    seriesinfo: Privacy Enhancing Technologies Symposium (PETS)
     target: https://ia.cr/2023/130
 
   Dwo06:
@@ -139,7 +140,7 @@ informative:
     author:
       - ins: C. Dwork
     date: 2006
-    seriesinfo: ICALP 2006
+    seriesinfo: International Colloquium on Automata, Languages, and Programming (ICALP)
     target: https://link.springer.com/chapter/10.1007/11787006_1
 
   EPK14:
@@ -149,7 +150,7 @@ informative:
       - ins: V. Pihur
       - ins: A. Korolova
     date: 2014
-    seriesinfo: CCS 2014
+    seriesinfo: ACM Conference on Computer and Communications Security (CCS)
     target: https://dl.acm.org/doi/10.1145/2660267.2660348
 
   ENPA:
@@ -163,7 +164,7 @@ informative:
       - ins: N. Gilboa
       - ins: Y. Ishai
     date: 2014
-    seriesinfo: EUROCRYPT 2014
+    seriesinfo: Eurocrypt
     target: https://link.springer.com/chapter/10.1007/978-3-642-55220-5_35
 
   GSZ20:
@@ -173,7 +174,7 @@ informative:
       - ins: Y. Song
       - ins: C. Zhu
     date: 2020
-    seriesinfo: CRYPTO 2020
+    seriesinfo: Crypto
     target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22
 
   GKWWY20:
@@ -185,7 +186,7 @@ informative:
       - ins: C. Weng
       - ins: Y. Yu
     date: 2020
-    seriesinfo: CRYPTO 2020
+    seriesinfo: Crypto
     target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_28
 
   GKWY20:
@@ -196,7 +197,7 @@ informative:
       - ins: X. Wang
       - ins: Y. Yu
     date: 2020
-    seriesinfo: S&P 2020
+    seriesinfo: IEEE Security & Privacy (S&P)
     target: https://eprint.iacr.org/2019/074
 
   MPDST25:
@@ -208,7 +209,7 @@ informative:
       - ins: P. Sarkar
       - ins: N.G. Tsoutsos
     date: 2025
-    seriesinfo: PETS 2025
+    seriesinfo: Privacy Enhancing Technologies Symposium (PETS)
     target: https://eprint.iacr.org/2024/221
 
   MPRV09:
@@ -218,30 +219,19 @@ informative:
       - ins: O. Pandey
       - ins: O. Reingold
       - ins: S. Vadhan
-    seriesinfo: CRYPTO 2009
+    date: 2009
+    seriesinfo: Crypto
     target: https://link.springer.com/chapter/10.1007/978-3-642-03356-8_8
 
   MRH04:
     title: "Indifferentiability, impossibility results on reductions, and applications to the random oracle methodology"
-    seriesinfo:
-      "In": "TCC 2004: Theory of Cryptography"
-      "pages": 21-39
-      DOI: 10.1007/978-3-540-24638-1_2
+    seriesinfo: Theory of Cryptography (TCC)
+    date: 2004
     target: https://doi.org/10.1007/978-3-540-24638-1_2
-    date: Feb, 2004
     author:
-      -
-        ins: U. Maurer
-        name: Ueli Maurer
-        org: ETH Zurich
-      -
-        ins: R. Renner
-        name: Renato Renner
-        org: ETH Zurich
-      -
-        ins: C. Holenstein
-        name: Clemens Holenstein
-        org: ETH Zurich
+      - ins: U. Maurer
+      - ins: R. Renner
+      - ins: C. Holenstein
 
   OriginTelemetry:
     title: "Origin Telemetry"
@@ -5595,10 +5585,10 @@ application will need to assure a few security properties, for example:
 * Enforcing the non-collusion properties required of the specific VDAF in use.
 
 In such an environment, a VDAF provides the high-level privacy property
-described above: the Collector learns only the aggregate measurement, and
-nothing about individual measurements aside from what can be inferred from the
-aggregate result.  The Aggregators learn neither individual measurements nor the
-aggregate result.  The Collector is assured that the aggregate statistic
+described above: the Collector learns only the aggregate result, and nothing
+about individual measurements aside from what can be inferred from the
+aggregate result.  The Aggregators learn neither individual measurements nor
+the aggregate result.  The Collector is assured that the aggregate statistic
 accurately reflects the inputs as long as the Aggregators correctly executed
 their role in the VDAF.
 
@@ -5636,31 +5626,16 @@ conditions are met:
    accepted by the Aggregators.
 
 1. To ensure privacy of the measurements, the Aggregators MUST commit to the
-   verification key prior to processing reports generated by Clients. Otherwise,
-   a malicious Aggregator may be able to craft a verification key that, for a
+   verification key prior to processing reports generated by Clients.
+   Otherwise, the attacker may be able to craft a verification key that, for a
    given report, causes an honest Aggregator to leak information about the
    measurement during preparation.
-
-Meeting these conditions is required in order to leverage security analysis in
-the framework of {{DPRS23}}. Their definition of robustness allows the attacker,
-playing the role of a cohort of malicious Clients, to submit arbitrary reports
-to the Aggregators and eavesdrop on their communications as they process them.
-Security in this model is achievable as long as the verification key is kept
-secret from the attacker.
-
-The privacy definition of {{DPRS23}} considers an active attacker that controls
-the network and a subset of Aggregators; in addition, the attacker is allowed to
-choose the verification key used by each honest Aggregator over the course of
-the experiment. Security is achievable in this model as long as the key is
-picked at the start of the experiment, prior to any reports being generated.
-(The model also requires nonces to be generated at random; see
-{{nonce-requirements}} below.)
 
 Meeting these requirements is relatively straightforward. For example, the
 Aggregators may designate one of their peers to generate the verification key
 and distribute it to the others. To assure Clients of key commitment, the
-Clients and (honest) Aggregators could bind reports to a shared context string
-derived from the key. For instance, the "task ID" of DAP {{DAP}} could be set to
+Clients and (honest) Aggregators SHOULD bind the verification key to the
+application context. For instance, the "task ID" of DAP {{DAP}} could be set to
 the hash of the verification key; then as long as honest Aggregators only
 consume reports for the task indicated by the Client, forging a new key after
 the fact would reduce to finding collisions in the underlying hash function.
@@ -5675,13 +5650,14 @@ associated with the Client's report. To ensure privacy of the underlying
 measurement, the Client MUST generate this nonce using a CSPRNG. This is
 required in order to leverage security analysis for the privacy definition of
 {{DPRS23}}, which assumes the nonce is chosen at random prior to generating the
-report.
+report. Uniqueness of the nonce is not sufficient because the verification key
+is controlled by the attacker.
 
-Other security considerations may require the nonce to be non-repeating. For
-example, to achieve differential privacy it is necessary to avoid "over
-exposing" a report by including it too many times in a single batch or across
-multiple batches. It is RECOMMENDED that the nonce generated by the Client be
-used by the Aggregators for replay protection.
+Other security considerations may require the nonce to be non-repeating in a
+given context. For example, to achieve differential privacy it is necessary to
+avoid "over exposing" a report by including it too many times in a single batch
+or across multiple batches. It is RECOMMENDED that the nonce generated by the
+Client be used by the Aggregators for replay protection.
 
 ## The Public Share
 
@@ -5692,19 +5668,21 @@ share over a secure channel.
 ## The Aggregation Parameter {#agg-param-security}
 
 As described in {{sec-daf-validity-scopes}} and {{sec-vdaf-validity-scopes}}
-respectively, DAFs and VDAFs may impose restrictions on the re-use of input
-shares. This is to ensure that correlated randomness provided by the Client
-through the input share is not used more than once, which might compromise
-confidentiality of the Client's measurements.
+respectively, DAFs and VDAFs may impose restrictions on the re-use of reports.
+For Prio3, reports should only be aggregated once; for Poplar1, reports may be
+aggregated multiple times, but never twice at the same level of the tree.
+Otherwise, we risk re-using correlated randomness, which might compromise
+confidentiality of the Client's measurement.
 
-Protocols that make use of VDAFs therefore MUST call `vdaf.is_valid`
-on the set of all aggregation parameters used for a Client's input share, and
-only proceed with the preparation and aggregation phases if that function call
-returns `True`.
+Higher level applications that use DAFs or VDAFs MUST enforce aggregation
+parameter validity. In particular, prior to beginning preparation with an
+aggregation parameter provided by the Collector, they MUST invoke `is_valid()`
+to decide if the parameter is valid given the sequence of previously accepted
+parameters.
 
-Aggregating a batch of reports multiple times, each time with a different
-aggregation parameter, could result in information leakage beyond what is used
-by the application.
+Note that aggregating a batch of reports multiple times, even with a valid
+sequence of aggregation parameters, can result in information leakage beyond
+what is used by the application.
 
 For example, when Poplar1 is used for heavy hitters, the Aggregators learn not
 only the heavy hitters themselves, but also the prefix tree (as defined in
@@ -5721,11 +5699,11 @@ further turn arbitrary non-heavy prefixes into heavy ones by tampering with the
 IDPF output at any position. While our construction ensures that the nodes
 evaluated at one level are children of the nodes evaluated at the previous
 level, this still may allow an adversary to discover individual non-heavy
-strings.
+strings. We call this a "steering attack".
 
-The only practical, general-purpose approach to mitigating these leakages is via
-differential privacy, which is RECOMMENDED for all protocols using Poplar1 for
-heavy-hitter type applications.
+The only practical, general-purpose defense against steering attacks is to
+compose Poplar1 with some mechanism for differential privacy. It is therefore
+RECOMMENDED to use differential privacy for any heavy-hitter type application.
 
 ## Safe Usage of IDPF Outputs {#idpf-extract}
 
@@ -5748,7 +5726,7 @@ pseudorandom function.)
 The IDPF specified in {{idpf}} only guarantees extractability at the last level
 of the tree. (This is by virtue of using a larger field for the leaves than for
 inner nodes and using an XOF to derive leaves that is safe to model as a random
-oracle (see {{xof-vs-ro}}).) For intermediate levels, it is feasible for a
+oracle. See {{xof-vs-ro}}.) For intermediate levels, it is feasible for a
 client to produce IDPF shares with two controlled non-zero nodes.
 
 This is not an issue for running heavy hitters, since (1) each node in the
@@ -5759,13 +5737,12 @@ extractability at intermediate levels may result in attacks on the robustness
 of certain applications.
 
 Thus applications SHOULD NOT use prefix counts for intermediate levels for any
-purpose beyond the heavy-hitters tree traversal.
+purpose beyond computing the prefix tree for heavy hitters.
 
 ## Safe Usage of XOFs {#xof-vs-ro}
 
-As described in {{xof}}, our constructions rely on eXtendable Output Functions
-(XOFs). In the security analyses of our protocols, these are usually modeled as
-random oracles. XofTurboShake128 is designed to be indifferentiable from a
+In the security analyses of our protocols, XOFs ({{xof}}) are usually modeled
+as random oracles. XofTurboShake128 is designed to be indifferentiable from a
 random oracle {{MRH04}}, making it a suitable choice for most situations.
 
 The one exception is the IDPF of {{idpf-bbcggi21}}. Here, a random oracle is not
@@ -5783,7 +5760,7 @@ PRG(r) = H(xor(r, 1)) || H(xor(r, 2)) || ...
 since each individual hash function evaluation is indistinguishable from a random
 function.
 
-Our construction at {{xof-fixed-key-aes128}} implements a correlation-robust
+XofFixedKeyAes128 in {{xof-fixed-key-aes128}} implements a correlation-robust
 hash function using fixed-key AES. For security, it assumes that AES with a
 fixed key can be modeled as a random permutation {{GKWY20}}. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
@@ -5792,7 +5769,8 @@ to better concrete security {{GKWWY20}}.
 We note that for robustness, the analysis of {{BBCGGI21}} still assumes a
 random oracle to make the IDPF extractable. We therefore use XofTurboShake128
 instead for the last level of the tree. It is important that XofTurboShake128
-supports 16 byte seeds, as this is the seed size for the inner levels.
+supports many seed lengths, in particular 16 bytes, as this is the seed size
+for the inner levels.
 
 While XofFixedKeyAes128 has been shown to be differentiable from a random
 oracle {{GKWWY20}}, there are no known attacks exploiting this difference. We
@@ -5802,11 +5780,11 @@ evaluated by the helpers.
 
 ## Choosing FLP Parameters {#security-multiproof}
 
-Prio3 and other systems built from FLPs ({{flp-bbcggi19}} in particular) may
-benefit from choosing a field size that is as small as possible. Generally
-speaking, a smaller field results in lower communication and storage costs.
-Care must be taken, however, since a smaller field also results in degraded (or
-even vacuous) robustness.
+Prio3 and other systems built from the FLP of {{flp-bbcggi19}} may benefit from
+choosing a field size that is as small as possible. Generally speaking, a
+smaller field results in lower communication and storage costs. Care must be
+taken, however, since a smaller field also results in degraded (or even
+vacuous) robustness.
 
 Different variants of Prio3 ({{prio3}}) use different field sizes: Prio3Count
 and Prio3Sum use Field64; but Prio3SumVec, Prio3Histogram, and
@@ -6166,11 +6144,12 @@ class QueryGadget(Gadget[F]):
 
 # Test Vectors {#test-vectors}
 
-The test vectors are available at {{TestVectors}}. The test vector directory,
-`test_vec/vdaf`, contains a set of JSON files. Each file contains a test vector
-for an instance of `Vdaf` ({{vdaf}}). A test vector covers sharding,
-preparation, aggregation, and unsharding of each of several measurements. The
-test vector schema is defined below.
+Test vectors for Prio3 ({{prio3}}) and Poplar1 ({{poplar1}}) are available at
+{{TestVectors}}. The test vector directory, `test_vec/vdaf`, contains a set of
+JSON files. Each file contains a test vector for an instance of class `Vdaf` as
+defined in {{vdaf}}. A test vector covers sharding, preparation, aggregation,
+and unsharding of a batch of several measurements. The test vector schema is
+defined below.
 
 ## Schema
 
@@ -6187,7 +6166,7 @@ test vector schema is defined below.
 : A list of objects with the following schema:
 
     `measurement`:
-    : The measurement of type `Vdaf.Measurement`.
+    : The measurement of type `Measurement` defined by the VDAF.
 
     `nonce`:
     : The nonce encoded in hexadecimal.
@@ -6199,7 +6178,7 @@ test vector schema is defined below.
     : The expected public share encoded in hexadecimal.
 
     `input_shares`:
-    : The expected list of input shares, each incoded in hexadecimal.
+    : The expected list of input shares, each encoded in hexadecimal.
 
     `prep_shares`:
     : The expected list of prep shares generated by each Aggregator at each
@@ -6216,7 +6195,7 @@ test vector schema is defined below.
 : The expected aggregate shares encoded in hexadecimal.
 
 `agg_result`:
-: The expected aggregate result of type `Vdaf.AggResult`.
+: The expected aggregate result of type `AggResult` defined by the VDAF.
 
 The schema also includes whatever parameters are required to instantiate the
 VDAF. These are listed in the subsections below.
@@ -6241,7 +6220,7 @@ VDAF. These are listed in the subsections below.
  : The number of shares, an integer.
 
 `length`:
-: The lengh of the vector, an integer.
+: The length of the vector, an integer.
 
 `chunk_length`:
 : the length of each vector chunk, an integer.
@@ -6256,7 +6235,7 @@ VDAF. These are listed in the subsections below.
  : The number of shares, an integer.
 
 `length`:
-: The lengh of the vector, an integer.
+: The length of the vector, an integer.
 
 `chunk_length`:
 : the length of each vector chunk, an integer.
@@ -6267,7 +6246,7 @@ VDAF. These are listed in the subsections below.
 : The number of shares, an integer.
 
 `length`:
-: The lengh of the vector, an integer.
+: The length of the vector, an integer.
 
 `chunk_length`:
 : the length of each vector chunk, an integer.
@@ -6279,16 +6258,16 @@ VDAF. These are listed in the subsections below.
 ### Poplar1 {#poplar1-test-vec-param}
 
 `bits`:
-: The length of each input, an integer.
+: The length of each input in bits, an integer.
 
 # Acknowledgments
 {:numbered="false"}
 
 The impetus of this work is the success of recent deployments of predecessors
-of Prio3. The Mozilla Origin Telemetry project {{OriginTelemetry}} and the
-Exposure Notification Private Analytics collaboration among the Internet
-Security Research Group (ISRG), Google, Apple, and others {{ENPA}} have
-together aggregated data from hundreds of millions of users.
+of Prio3. These include the Mozilla Origin Telemetry project
+{{OriginTelemetry}} and the Exposure Notification Private Analytics system
+{{ENPA}} developed jointly by ISRG, Google, Apple, and others. Together these
+systems have aggregated data from hundreds of millions of users.
 
 As the name implies, Prio3 is a descendant of the original Prio construction
 {{CGB17}}. A second iteration was deployed in the {{ENPA}} system, and like the
