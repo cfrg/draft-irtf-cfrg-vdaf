@@ -5924,11 +5924,10 @@ Table of Contents
 
 9.6.  Safe Usage of XOFs
 
-   As described in Section 6.2, our constructions rely on eXtendable
-   Output Functions (XOFs).  In the security analyses of our protocols,
-   these are usually modeled as random oracles.  XofTurboShake128 is
-   designed to be indifferentiable from a random oracle [MRH04], making
-   it a suitable choice for most situations.
+   In the security analyses of our protocols, XOFs (Section 6.2) are
+   usually modeled as random oracles.  XofTurboShake128 is designed to
+   be indifferentiable from a random oracle [MRH04], making it a
+   suitable choice for most situations.
 
    The one exception is the IDPF of Section 8.3.  Here, a random oracle
    is not needed to prove privacy, since the analysis of [BBCGGI21],
@@ -5964,11 +5963,11 @@ Table of Contents
 
 9.7.  Choosing FLP Parameters
 
-   Prio3 and other systems built from FLPs (Section 7.3 in particular)
-   may benefit from choosing a field size that is as small as possible.
-   Generally speaking, a smaller field results in lower communication
-   and storage costs.  Care must be taken, however, since a smaller
-   field also results in degraded (or even vacuous) robustness.
+   Prio3 and other systems built from the FLP of Section 7.3 may benefit
+   from choosing a field size that is as small as possible.  Generally
+   speaking, a smaller field results in lower communication and storage
+   costs.  Care must be taken, however, since a smaller field also
+   results in degraded (or even vacuous) robustness.
 
    Different variants of Prio3 (Section 7) use different field sizes:
    Prio3Count and Prio3Sum use Field64; but Prio3SumVec, Prio3Histogram,

@@ -8637,9 +8637,8 @@ purpose beyond computing the prefix tree for heavy hitters.<a href="#section-9.5
         <h3 id="name-safe-usage-of-xofs">
 <a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-safe-usage-of-xofs" class="section-name selfRef">Safe Usage of XOFs</a>
         </h3>
-<p id="section-9.6-1">As described in <a href="#xof" class="auto internal xref">Section 6.2</a>, our constructions rely on eXtendable Output Functions
-(XOFs). In the security analyses of our protocols, these are usually modeled as
-random oracles. XofTurboShake128 is designed to be indifferentiable from a
+<p id="section-9.6-1">In the security analyses of our protocols, XOFs (<a href="#xof" class="auto internal xref">Section 6.2</a>) are usually modeled
+as random oracles. XofTurboShake128 is designed to be indifferentiable from a
 random oracle <span>[<a href="#MRH04" class="cite xref">MRH04</a>]</span>, making it a suitable choice for most situations.<a href="#section-9.6-1" class="pilcrow">¶</a></p>
 <p id="section-9.6-2">The one exception is the IDPF of <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. Here, a random oracle is not
 needed to prove privacy, since the analysis of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Proposition 1, only
@@ -8677,11 +8676,11 @@ evaluated by the helpers.<a href="#section-9.6-7" class="pilcrow">¶</a></p>
         <h3 id="name-choosing-flp-parameters">
 <a href="#section-9.7" class="section-number selfRef">9.7. </a><a href="#name-choosing-flp-parameters" class="section-name selfRef">Choosing FLP Parameters</a>
         </h3>
-<p id="section-9.7-1">Prio3 and other systems built from FLPs (<a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> in particular) may
-benefit from choosing a field size that is as small as possible. Generally
-speaking, a smaller field results in lower communication and storage costs.
-Care must be taken, however, since a smaller field also results in degraded (or
-even vacuous) robustness.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
+<p id="section-9.7-1">Prio3 and other systems built from the FLP of <a href="#flp-bbcggi19" class="auto internal xref">Section 7.3</a> may benefit from
+choosing a field size that is as small as possible. Generally speaking, a
+smaller field results in lower communication and storage costs. Care must be
+taken, however, since a smaller field also results in degraded (or even
+vacuous) robustness.<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 <p id="section-9.7-2">Different variants of Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>) use different field sizes: Prio3Count
 and Prio3Sum use Field64; but Prio3SumVec, Prio3Histogram, and
 Prio3MultihotCountVec all use Field128, a field that is twice as large as
