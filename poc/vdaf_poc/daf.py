@@ -168,12 +168,10 @@ def run_daf(
 
     Pre-conditions:
 
-        - `type(agg_param) == daf.AggParam`
-        - `type(measurement) == daf.Measurement` for each
-          `measurement` in `measurements`
-        - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
         - `len(nonces) == len(measurements)`
+        - `all(len(nonce) == daf.NONCE_SIZE for nonce in nonces)`
     """
+    # REMOVE ME
     if any(len(nonce) != daf.NONCE_SIZE for nonce in nonces):
         raise ValueError("incorrect nonce size")
     if len(nonces) != len(measurements):
@@ -185,14 +183,12 @@ def run_daf(
     agg_shares = [daf.agg_init(agg_param)
                   for _ in range(daf.SHARES)]
     for (measurement, nonce) in zip(measurements, nonces):
-        # Each Client shards its measurement into input shares and
-        # distributes them among the Aggregators.
+        # Sharding
         rand = gen_rand(daf.RAND_SIZE)
         (public_share, input_shares) = \
             daf.shard(ctx, measurement, nonce, rand)
 
-        # Each Aggregator computes its output share from its input
-        # share and aggregates it.
+        # Preparation, aggregation
         for j in range(daf.SHARES):
             out_share = daf.prep(ctx, j, agg_param, nonce,
                                  public_share, input_shares[j])
@@ -200,7 +196,7 @@ def run_daf(
                                            agg_shares[j],
                                            out_share)
 
-    # Collector unshards the aggregate result.
+    # Unsharding
     num_measurements = len(measurements)
     agg_result = daf.unshard(agg_param, agg_shares,
                              num_measurements)

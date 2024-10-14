@@ -265,7 +265,7 @@ def run_vdaf(
         - `len(nonces) == len(measurements)`
         - `all(len(nonce) == vdaf.NONCE_SIZE for nonce in nonces)`
     """
-
+    # REMOVE ME
     if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
         raise ValueError("incorrect verify_key size")
     if any(len(nonce) != vdaf.NONCE_SIZE for nonce in nonces):
@@ -280,12 +280,12 @@ def run_vdaf(
     for (nonce, measurement) in zip(nonces, measurements):
         assert len(nonce) == vdaf.NONCE_SIZE
 
-        # Each Client shards its measurement into input shares.
+        # Sharding
         rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
 
-        # Each Aggregator initializes its preparation state.
+        # Initialize preparation
         prep_states = []
         outbound_prep_shares = []
         for j in range(vdaf.SHARES):
@@ -297,7 +297,7 @@ def run_vdaf(
             prep_states.append(state)
             outbound_prep_shares.append(share)
 
-        # Aggregators complete preparation.
+        # Complete preparation
         for i in range(vdaf.ROUNDS - 1):
             prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                 agg_param,
@@ -314,7 +314,7 @@ def run_vdaf(
                                             agg_param,
                                             outbound_prep_shares)
 
-        # Each Aggregator computes and aggregates its output share.
+        # Aggregation
         for j in range(vdaf.SHARES):
             out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
@@ -322,7 +322,7 @@ def run_vdaf(
                                             agg_shares[j],
                                             out_share)
 
-    # Collector unshards the aggregate.
+    # Unsharding
     num_measurements = len(measurements)
     agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
