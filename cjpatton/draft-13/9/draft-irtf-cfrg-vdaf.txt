@@ -1017,6 +1017,21 @@ Table of Contents
 
 4.2.  Preparation
 
+       Aggregator 0   Aggregator 1           Aggregator SHARES-1
+       ============   ============           ===================
+
+       input_share_0  input_share_1          input_share_[SHARES-1]
+         |              |                 ...  |
+         V              V                      V
+       +-----------+  +-----------+          +-----------+
+       | prep      |  | prep      |          | prep      |
+       +-----------+  +-----------+          +-----------+
+         |              |                 ...  |
+         V              V                      V
+       out_share_0    out_share_1         out_share_[SHARES-1]
+
+                   Figure 3: Illustration of preparation.
+
    Once an Aggregator has received the public share and its input share,
    the next step is to prepare the input share for aggregation.  This is
    accomplished using the preparation algorithm:
@@ -1082,7 +1097,7 @@ Table of Contents
                            V
                          agg_share_j
 
-           Figure 3: Illustration of aggregation.  The number of
+           Figure 4: Illustration of aggregation.  The number of
                  measurements in the batch is denoted by M.
 
    Once an Aggregator holds an output share, it adds it into its
@@ -1138,7 +1153,7 @@ Table of Contents
        Collector
        =========
 
-                   Figure 4: Illustration of unsharding.
+                   Figure 5: Illustration of unsharding.
 
    After the Aggregators have aggregated all measurements in the batch,
    each sends its aggregate share to the Collector, who runs the
@@ -1349,7 +1364,7 @@ Table of Contents
          V              V                      V
        out_share_0    out_share_1         out_share_[SHARES-1]
 
-          Figure 5: Illustration of interactive VDAF preparation.
+          Figure 6: Illustration of interactive VDAF preparation.
 
    Preparation is organized into a number of rounds.  The number of
    rounds depends on the VDAF: Prio3 (Section 7) has one round and
@@ -1575,7 +1590,7 @@ Table of Contents
     |                |
     +--> Rejected <--+
 
-                Figure 6: State machine of VDAF preparation.
+                Figure 7: State machine of VDAF preparation.
 
    State transitions are made when the state is acted upon by the
    Aggregator's local inputs and/or messages sent by its co-Aggregators.
@@ -1653,7 +1668,7 @@ Table of Contents
    } Message;
 
    These messages trigger all transitions in the state machine in
-   Figure 6, except for the Leader's initial transition.  The Leader's
+   Figure 7, except for the Leader's initial transition.  The Leader's
    state is initialized using its local inputs with the following method
    on class Vdaf:
 
@@ -3617,7 +3632,7 @@ Table of Contents
     |
     V proof
 
-          Figure 7: Components of the proof generation algorithm.
+          Figure 8: Components of the proof generation algorithm.
 
    The proof generation algorithm invokes the validity circuit on the
    encoded measurement and joint randomness.  The validity circuit in
@@ -3693,7 +3708,7 @@ Table of Contents
     |
     V verifier (share)
 
-                Figure 8: Components of the query algorithm.
+                Figure 9: Components of the query algorithm.
 
    The query algorithm invokes the validity circuit on the encoded
    measurement and joint randomness.  It evaluates the gadget
@@ -3792,7 +3807,7 @@ Table of Contents
     |
     V is_valid
 
-              Figure 9: Components of the decision algorithm.
+              Figure 10: Components of the decision algorithm.
 
    The decision algorithm consumes the verifier message.  (Each of the
    Aggregators computes an additive share of the verifier message after
