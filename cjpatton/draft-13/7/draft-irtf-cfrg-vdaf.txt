@@ -4478,12 +4478,12 @@ Table of Contents
    of the Clients' inputs begin with each candidate prefix.
 
    This functionality is the core component of the heavy hitters
-   protocol [BBCGGI21].  The goal of this protocol is to compute the
+   protocol of [BBCGGI21].  The goal of this protocol is to compute the
    subset of inputs held by at least T Clients for some threshold T.  It
    invokes Poplar1 as follows:
 
-   1.  Each Client shards its string and uploads the report to the
-       Aggregators.
+   1.  Each Client shards its string into secret shares and uploads one
+       share to each of the Aggregators.
 
    2.  The Collector picks an initial set of candidate prefixes, say 0
        and 1, and sends them to the Aggregators.
@@ -4516,11 +4516,12 @@ Table of Contents
    Consider the sub-tree constructed from a set of input strings and a
    target threshold T by including all indices with hit count at least
    T.  We shall refer to this structure as the "prefix tree" for the
-   batch of inputs and target threshold.  To compute the T-heavy-hitters
-   for a set of inputs, the Aggregators and Collector first compute the
-   prefix tree, then extract the heavy hitters from the leaves of this
-   tree.  (Note that the prefix tree may leak more information about the
-   set than the heavy hitters themselves; see Section 9.4 for details.)
+   batch of measurements and target threshold.  To compute the T-heavy-
+   hitters for the batch, the Aggregators and Collector first compute
+   the prefix tree, then extract the heavy hitters from the leaves of
+   this tree.  Note that the prefix tree leaks more information about
+   the set than the heavy hitters themselves; see Section 9.4 for more
+   discussion.
 
    Poplar1 composes an IDPF with the arithmetic sketch of [BBCGGI21],
    Section 4.2.  (The paper calls this a "secure sketch", but the
@@ -4528,8 +4529,8 @@ Table of Contents
    called "arithmetic sketching".)  The sketch ensures that evaluating a
    set of input shares on a unique set of candidate prefixes results in
    shares of a "one-hot" vector, i.e., a vector that is zero everywhere
-   except for at most one element.  Moreover, the value of the non-zero
-   element should be one.
+   except for in at most one position.  Moreover, the value at that
+   position should be one.
 
    The remainder of this section is structured as follows.  The syntax
    of IDPFs is defined in Section 8.1; a specification of the IDPF of
@@ -4567,8 +4568,8 @@ Table of Contents
       list[list[FieldInner]], beta_leaf: list[FieldLeaf], ctx: bytes,
       nonce: bytes, rand: bytes) -> tuple[PublicShare, list[bytes]] is
       the IDPF-key generation algorithm.  Its inputs are the index
-      alpha, the values beta, the application context string, and the
-      report nonce.
+      alpha, the values beta, the application context, and the report
+      nonce.
 
       The output is a public part (of type PublicShare) that is sent to
       each Aggregator and a vector of private IDPF keys, one for each
@@ -4604,29 +4605,28 @@ Table of Contents
       identifier, the public share distributed to all of the
       Aggregators, the Aggregator's IDPF key, the "level" at which to
       evaluate the IDPF, the sequence of candidate prefixes, the
-      application context string, and the report nonce.  It returns the
-      share of the value corresponding to each candidate prefix.
+      application context, and the report nonce.  It returns the share
+      of the value corresponding to each candidate prefix.
 
-      -  Pre-conditions:
+      Pre-conditions:
 
-         o  agg_id MUST be in [0, idpf.SHARES) and match the index of
-            key in the sequence of IDPF keys output by the Client.
+      -  agg_id MUST be in [0, idpf.SHARES) and match the index of key
+         in the sequence of IDPF keys output by the Client.
 
-         o  level MUST be in [0, BITS).
+      -  level MUST be in [0, BITS).
 
-         o  Each prefix MUST be distinct and have length level + 1.
+      -  Each prefix MUST be distinct and have length level + 1.
 
-         o  The length of the nonce MUST be idpf.NONCE_SIZE.
+      -  The length of the nonce MUST be idpf.NONCE_SIZE.
 
-      -  Post-conditions:
+      Post-conditions:
 
-         o  The length of the output MUST be len(prefixes)
+      -  The length of the output MUST be len(prefixes)
 
-         o  The length of each element of the output MUST be
-            idpf.VALUE_LEN
+      -  The length of each element of the output MUST be idpf.VALUE_LEN
 
-         o  If level == idpf.BITS - 1, then the output field MUST be
-            FieldLeaf and FieldInner otherwise
+      -  If level == idpf.BITS - 1, then the output field MUST be
+         FieldLeaf and FieldInner otherwise
 
    In addition, the IDPF provides the following method:
 
@@ -4645,38 +4645,38 @@ Table of Contents
    beneficial to expose a stateful API for IDPFs and carry the state
    across evaluations.  See Section 8.3 for details.
 
-   +================+==================================================+
-   | Parameter      | Description                                      |
-   +================+==================================================+
-   | SHARES: int    | Number of IDPF keys output by IDPF-key generator |
-   +----------------+--------------------------------------------------+
-   | BITS: int      | Length in bits of each input string              |
-   +----------------+--------------------------------------------------+
-   | VALUE_LEN:     | Number of field elements of each output value    |
-   | int            |                                                  |
-   +----------------+--------------------------------------------------+
-   | RAND_SIZE:     | Size of the random string consumed by the IDPF-  |
-   | int            | key generator                                    |
-   +----------------+--------------------------------------------------+
-   | NONCE_SIZE:    | Size of the random nonce generated by the        |
-   | int            | Client.                                          |
-   +----------------+--------------------------------------------------+
-   | KEY_SIZE:      | Size in bytes of each IDPF key                   |
-   | int            |                                                  |
-   +----------------+--------------------------------------------------+
-   | FieldInner     | Implementation of Field (Section 6.1) used for   |
-   |                | values of inner nodes                            |
-   +----------------+--------------------------------------------------+
-   | FieldLeaf      | Implementation of Field used for values of leaf  |
-   |                | nodes                                            |
-   +----------------+--------------------------------------------------+
-   | PublicShare    | Type of public share for this IDPF               |
-   +----------------+--------------------------------------------------+
-   | Output         | Alias of list[list[FieldInner]] |                |
-   |                | list[list[FieldLeaf]]                            |
-   +----------------+--------------------------------------------------+
-   | FieldVec       | Alias of list[FieldInner] | list[FieldLeaf]      |
-   +----------------+--------------------------------------------------+
+    +=============+===================================================+
+    | Parameter   | Description                                       |
+    +=============+===================================================+
+    | SHARES: int | Number of IDPF keys output by IDPF-key generator. |
+    +-------------+---------------------------------------------------+
+    | BITS: int   | Length in bits of each input string.              |
+    +-------------+---------------------------------------------------+
+    | VALUE_LEN:  | Number of field elements of each output value.    |
+    | int         |                                                   |
+    +-------------+---------------------------------------------------+
+    | RAND_SIZE:  | Size of the random string consumed by the IDPF-   |
+    | int         | key generator.                                    |
+    +-------------+---------------------------------------------------+
+    | NONCE_SIZE: | Size of the random nonce generated by the Client. |
+    | int         |                                                   |
+    +-------------+---------------------------------------------------+
+    | KEY_SIZE:   | Size in bytes of each IDPF key.                   |
+    | int         |                                                   |
+    +-------------+---------------------------------------------------+
+    | FieldInner  | Implementation of Field (Section 6.1) used for    |
+    |             | values of inner nodes.                            |
+    +-------------+---------------------------------------------------+
+    | FieldLeaf   | Implementation of Field used for values of leaf   |
+    |             | nodes.                                            |
+    +-------------+---------------------------------------------------+
+    | PublicShare | Type of public share for this IDPF.               |
+    +-------------+---------------------------------------------------+
+    | Output      | Alias of list[list[FieldInner]] |                 |
+    |             | list[list[FieldLeaf]].                            |
+    +-------------+---------------------------------------------------+
+    | FieldVec    | Alias of list[FieldInner] | list[FieldLeaf].      |
+    +-------------+---------------------------------------------------+
 
          Table 14: Constants and types defined by a concrete IDPF.
 
@@ -4722,7 +4722,7 @@ Table of Contents
        +=================+========================================+
        | Parameter       | Value                                  |
        +=================+========================================+
-       | idpf            | as specified in Section 8.3            |
+       | idpf            | As specified in Section 8.3.           |
        +-----------------+----------------------------------------+
        | xof             | XofTurboShake128 (Section 6.2.1)       |
        +-----------------+----------------------------------------+
@@ -4740,7 +4740,7 @@ Table of Contents
        +-----------------+----------------------------------------+
        | AggParam        | tuple[int, Sequence[tuple[bool, ...]]] |
        +-----------------+----------------------------------------+
-       | PublicShare     | as defined by idpf                     |
+       | PublicShare     | As defined by idpf.                    |
        +-----------------+----------------------------------------+
        | InputShare      | tuple[bytes, bytes, list[FieldInner],  |
        |                 | list[FieldLeaf]]                       |
@@ -4777,20 +4777,29 @@ Table of Contents
 
 8.2.1.  Sharding
 
-   The Client's measurement is an IDPF index, denoted alpha.  (See
-   Section 8.1.1 for guidelines on index encoding.)  The programmed IDPF
-   values are pairs of field elements (1, k) where each k is chosen at
-   random.  This random value is used as part of the arithmetic
-   sketching protocol of [BBCGGI21], Appendix C.4.  After evaluating
-   their IDPF key shares on a given sequence of candidate prefixes, the
-   sketching protocol is used by the Aggregators to verify that they
-   hold shares of a one-hot vector.  In addition, for each level of the
-   tree, the prover generates random elements a, b, and c and computes
+   The Client's measurement is an IDPF index, denoted alpha, whose type
+   is a sequence of bits tuple[bool, ...] (See Section 8.1.1 for
+   guidelines on index encoding.)
+
+   The programmed IDPF values are pairs of field elements (1, k) where
+   each k is chosen at random.  This random value is used as part of the
+   arithmetic sketching protocol of [BBCGGI21], Appendix C.4.  After
+   evaluating their IDPF key shares on a given sequence of candidate
+   prefixes, the sketching protocol is used by the Aggregators to verify
+   that they hold shares of a one-hot vector at a given level of the
+   IDPF tree.
+
+   In addition to programming k into the IDPF output, for each level of
+   the tree, the Client generates random elements a, b, and c and
+   computes
 
        A = -2*a + k
        B = a^2 + b - k*a + c
 
-   and sends additive shares of a, b, c, A and B to the Aggregators.
+   and sends additive shares of a, b, c, A and B to each of the
+   Aggregators.  These help the Aggregators evaluate the sketch during
+   preparation.
+
    Putting everything together, the sharding algorithm is defined as
    follows.
 
@@ -5090,15 +5099,6 @@ Table of Contents
    enforces that the prefixes at each level are suffixes of the previous
    level's prefixes.
 
-   def get_ancestor(
-           index: tuple[bool, ...],
-           level: int) -> tuple[bool, ...]:
-       """
-       Helper function to determine the prefix of `index` at
-       `level`.
-       """
-       return index[:level + 1]
-
    def is_valid(
            self,
            agg_param: Poplar1AggParam,
@@ -5126,6 +5126,15 @@ Table of Contents
                # Current prefix not a suffix of last level's prefixes.
                return False
        return True
+
+   def get_ancestor(
+           index: tuple[bool, ...],
+           level: int) -> tuple[bool, ...]:
+       """
+       Helper function to determine the prefix of `index` at
+       `level`.
+       """
+       return index[:level + 1]
 
 8.2.4.  Aggregation
 
@@ -5170,13 +5179,13 @@ Table of Contents
 8.2.6.  Message Serialization
 
    This section defines serialization formats for messages exchanged
-   over the network while executing Poplar1.  It is RECOMMENDED that
-   implementations provide serialization methods for them.
+   over the network while executing Poplar1.  Messages are defined in
+   the presentation language of TLS as defined in Section 3 of
+   [RFC8446].
 
-   Message structures are defined following Section 3 of [RFC8446]).  In
-   the remainder we use Fi as an alias for
-   poplar1.idpf.field_inner.ENCODED_SIZE, Fl as an alias for
-   poplar1.idpf.field_leaf.ENCODED_SIZE, and B as an alias for
+   Let poplar1 be an instance of Poplar1.  In the remainder we use Fi as
+   an alias for poplar1.idpf.field_inner.ENCODED_SIZE, Fl as an alias
+   for poplar1.idpf.field_leaf.ENCODED_SIZE, and B as an alias for
    poplar1.idpf.BITS.
 
    Elements of the inner field are encoded in little-endian byte order
@@ -5251,7 +5260,7 @@ Table of Contents
    struct {
        opaque idpf_key[poplar1.idpf.KEY_SIZE];
        opaque corr_seed[poplar1.xof.SEED_SIZE];
-       Poplar1FieldInner corr_inner[Fi * 2 * (poplar1.idpf.BITS - 1)];
+       Poplar1FieldInner corr_inner[Fi * 2 * (B- 1)];
        Poplar1FieldLeaf corr_leaf[Fl * 2];
    } Poplar1InputShare;
 
@@ -5378,35 +5387,34 @@ Table of Contents
 8.3.  IDPF Construction
 
    In this section we specify a concrete IDPF suitable for instantiating
-   Poplar1.  The scheme gets its name from the name of the protocol of
-   [BBCGGI21].
-
-   The constant and type definitions required by the Idpf interface are
-   given in Table 17.
+   Poplar1.  The constant and type definitions required by the Idpf
+   interface are given in Table 17.
 
    Our IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
    we instantiate this object using XofFixedKeyAes128 (Section 6.2.2)
-   wherever possible.  See Section 9.6 for more information.
+   wherever possible.  See Section 9.6 for security considerations.
 
-       +============+=============================================+
-       | Parameter  | Value                                       |
-       +============+=============================================+
-       | SHARES     | 2                                           |
-       +------------+---------------------------------------------+
-       | BITS       | any positive integer                        |
-       +------------+---------------------------------------------+
-       | VALUE_LEN  | any positive integer                        |
-       +------------+---------------------------------------------+
-       | KEY_SIZE   | XofFixedKeyAes128.SEED_SIZE (Section 6.2.2) |
-       +------------+---------------------------------------------+
-       | FieldInner | Field64 (Table 3)                           |
-       +------------+---------------------------------------------+
-       | FieldLeaf  | Field255 (Table 3)                          |
-       +------------+---------------------------------------------+
+            +============+===================================+
+            | Parameter  | Value                             |
+            +============+===================================+
+            | xof        | XofFixedKeyAes128 (Section 6.2.2) |
+            +------------+-----------------------------------+
+            | SHARES     | 2                                 |
+            +------------+-----------------------------------+
+            | BITS       | Any positive integer.             |
+            +------------+-----------------------------------+
+            | VALUE_LEN  | Any positive integer.             |
+            +------------+-----------------------------------+
+            | KEY_SIZE   | xof.SEED_SIZE                     |
+            +------------+-----------------------------------+
+            | FieldInner | Field64 (Table 3)                 |
+            +------------+-----------------------------------+
+            | FieldLeaf  | Field255 (Table 3)                |
+            +------------+-----------------------------------+
 
-         Table 17: Constants and type definitions for the IDPF of
-                                BBCGGI21.
+               Table 17: Constants and type definitions for
+                            our concrete IDPF.
 
 8.3.1.  Overview
 
@@ -5425,34 +5433,37 @@ Table of Contents
    representing the tree requires O(2^BITS) space, so the generator
    cannot just compute additive shares of it and send them to the two
    evaluators.  Instead, the evaluators will re-generate shares of the
-   tree using a XOF (Section 6.2).  The basic observation is that if
-   both evaluators have the same seed s of length KEY_SIZE, then
-   expanding s using a XOF will also result in the same expansion.  If
-   we set the length of the XOF expansion to 2*KEY_SIZE, it can then be
-   split again into two seeds s_l, s_r, that can again serve as XOF
-   seeds.  Now if we view seeds as XOR-shares of integers, and if
-   evaluators have the same seed at the root of the tree, then their
-   expanded trees will form a secret-shared tree of zeros.  The actual
-   construction will additionally use a convert function before each
-   expansion, which maps seeds into the appropriate output domain (see
-   Section 8.3.4), generating a new seed for the next level in the
-   process.
+   tree using a XOF (Section 6.2).
+
+   The basic observation is that if both evaluators have the same seed s
+   of length KEY_SIZE, then expanding s using a XOF will also result in
+   the same expansion.  If we set the length of the XOF expansion to
+   2*KEY_SIZE, it can then be split again into two seeds s_l, s_r, that
+   can again serve as XOF seeds.  Now if we view seeds as XOR-shares of
+   integers, and if evaluators have the same seed at the root of the
+   tree, then their expanded trees will form a secret-shared tree of
+   zeros.  The actual construction will additionally use a convert()
+   function before each expansion, which maps seeds into the appropriate
+   output domain (see Section 8.3.4), generating a new seed for the next
+   level in the process.
 
    The open task now is to ensure that evaluators have different seeds
    at nodes that lie on the path to alpha, while having the same seeds
    on all other nodes.  This is done using so-called "correction words"
-   that are conditionally added to the XOF output by both evaluators.
-   The condition here is a secret-shared bit, called a "control bit",
-   which indicates whether the current node is on the path to alpha or
-   not.  On the path, the control bits add up to 1, meaning only one
-   evaluator will add the correction word to its XOF output.  Off the
-   path, either none or both evaluators add the correction word, and so
-   the seeds at the next level stay the same.  What remains is to turn
-   the -- now pseudorandom -- values on the path to alpha into the
-   desired beta values.  This is done by sending _value correction
-   words_ to the evaluators, which are chosen such that when added with
-   the pseudorandom shares at the ith node on the path to alpha, they
-   add up to shares of beta_i.
+   included in the public share.  The correction words are conditionally
+   added to the XOF output by both evaluators.  The condition here is a
+   secret-shared bit, called a "control bit", which indicates whether
+   the current node is on the path to alpha or not.  On the path, the
+   control bits add up to 1, meaning only one evaluator will add the
+   correction word to its XOF output.  Off the path, either none or both
+   evaluators add the correction word, and so the seeds at the next
+   level stay the same.
+
+   What remains is to turn the (now pseudorandom) values on the path to
+   alpha into the desired beta values.  This is done by including "value
+   correction words" in the public share, which are chosen such that
+   when added with the pseudorandom shares at the ith node on the path
+   to alpha, they add up to shares of beta_i.
 
    In the following two sections we describe the algorithms for key
    generation in full detail.
