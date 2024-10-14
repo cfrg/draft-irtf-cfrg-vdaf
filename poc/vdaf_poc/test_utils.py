@@ -208,7 +208,7 @@ def gen_test_vec_for_vdaf(
 
         for out_share in outbound_out_shares:
             prep_test_vec['out_shares'].append([
-                to_le_bytes(x.as_unsigned(), x.ENCODED_SIZE).hex()
+                to_le_bytes(x.int(), x.ENCODED_SIZE).hex()
                 for x in out_share
             ])
         test_vec['prep'].append(prep_test_vec)

@@ -211,7 +211,7 @@ class TestIdpfBBCGGI21(unittest.TestCase):
             out_share_1 = cast(list[list[Field]], idpf.eval(
                 1, public_share, keys[1], level, (prefix,), ctx, nonce))
             out = vec_add(out_share_0[0], out_share_1[0])[0]
-            self.assertEqual(out.as_unsigned(), 1)
+            self.assertEqual(out.int(), 1)
 
     def test_is_prefix(self) -> None:
         idpf = IdpfBBCGGI21(1, 8)

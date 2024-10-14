@@ -639,7 +639,7 @@ class Count(Valid[int, int, F]):
         return meas
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
-        return output[0].as_unsigned()
+        return output[0].int()
 
 
 # NOTE: This class is excerpted in the document. Its width should be
@@ -726,7 +726,7 @@ class Histogram(Valid[int, list[int], F]):
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [bucket_count.as_unsigned()
+        return [bucket_count.int()
                 for bucket_count in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
@@ -800,7 +800,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         # Make sure `offset + length` doesn't overflow the field
         # modulus. Otherwise we may not correctly compute the sum
         # measurement vector entries during circuit evaluation.
-        if self.field.MODULUS - self.offset.as_unsigned() <= length:
+        if self.field.MODULUS - self.offset.int() <= length:
             raise ValueError('length and max_weight are too large '
                              'for the current field size')
 
@@ -874,7 +874,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         encoded = []
         encoded += count_vec
         encoded += self.field.encode_into_bit_vector(
-            (self.offset + weight_reported).as_unsigned(),
+            (self.offset + weight_reported).int(),
             self.bits_for_weight)
         return encoded
 
@@ -885,7 +885,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [bucket_count.as_unsigned() for
+        return [bucket_count.int() for
                 bucket_count in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
@@ -998,7 +998,7 @@ class SumVec(Valid[list[int], list[int], F]):
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [x.as_unsigned() for x in output]
+        return [x.int() for x in output]
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         test_vec['length'] = self.length
@@ -1082,7 +1082,7 @@ class Sum(Valid[int, int, F]):
             self.bits
         )
         encoded += self.field.encode_into_bit_vector(
-            measurement + self.offset.as_unsigned(),
+            measurement + self.offset.int(),
             self.bits
         )
         return encoded
@@ -1091,7 +1091,7 @@ class Sum(Valid[int, int, F]):
         return [self.field.decode_from_bit_vector(meas[:self.bits])]
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
-        return output[0].as_unsigned()
+        return output[0].int()
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         test_vec['max_measurement'] = int(self.max_measurement)

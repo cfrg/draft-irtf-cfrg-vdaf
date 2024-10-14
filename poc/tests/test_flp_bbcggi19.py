@@ -40,7 +40,7 @@ class MultiGadget(Valid[int, int, Field64]):
         return meas
 
     def decode(self, output: list[Field64], _num_measurements: int) -> int:
-        return output[0].as_unsigned()
+        return output[0].int()
 
 
 class TestAverage(Sum):

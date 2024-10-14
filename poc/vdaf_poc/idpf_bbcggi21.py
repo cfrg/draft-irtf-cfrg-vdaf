@@ -108,13 +108,13 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             # input-dependent array indices should be replaced with
             # constant-time selects in practice in order to reduce
             # leakage via timing side channels.
-            if ctrl[0].as_unsigned():
+            if ctrl[0].int():
                 x0 = xor(s0[keep], seed_cw)
                 ctrl[0] = t0[keep] + ctrl_cw[keep]
             else:
                 x0 = s0[keep]
                 ctrl[0] = t0[keep]
-            if ctrl[1].as_unsigned():
+            if ctrl[1].int():
                 x1 = xor(s1[keep], seed_cw)
                 ctrl[1] = t1[keep] + ctrl_cw[keep]
             else:
@@ -137,7 +137,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             # replaced with a constant time select or a constant time
             # multiplication in practice in order to reduce leakage via
             # timing side channels.
-            if ctrl[1].as_unsigned():
+            if ctrl[1].int():
                 for i in range(len(w_cw)):
                     w_cw[i] = -w_cw[i]
 
@@ -238,7 +238,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         # input-dependent array indices should be replaced with
         # constant-time selects in practice in order to reduce leakage
         # via timing side channels.
-        if prev_ctrl.as_unsigned():
+        if prev_ctrl.int():
             s[0] = xor(s[0], seed_cw)
             s[1] = xor(s[1], seed_cw)
             t[0] += ctrl_cw[0]
@@ -251,7 +251,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         # Implementation note: this conditional addition should be
         # replaced with a constant-time select in practice in order to
         # reduce leakage via timing side channels.
-        if next_ctrl.as_unsigned():
+        if next_ctrl.int():
             for i in range(len(y)):
                 y[i] += w_cw[i]
 
@@ -364,7 +364,7 @@ def pack_bits(control_bits: list[Field2]) -> bytes:
     # ===================================================================
     packed_control_buf = [int(0)] * packed_len
     for i, bit in enumerate(control_bits):
-        packed_control_buf[i // 8] |= bit.as_unsigned() << (i % 8)
+        packed_control_buf[i // 8] |= bit.int() << (i % 8)
     packed_control_bits = bytes(packed_control_buf)
     # NOTE: End of exerpt.
     return packed_control_bits
