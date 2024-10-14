@@ -124,7 +124,7 @@ class Prio3(
             previous_agg_params: list[None]) -> bool:
         return len(previous_agg_params) == 0
 
-    # NOTE: The prep_init(), prep_next(), and prep_shares_to_prep()
+    # NOTE: The prep_init(), prep_shares_to_prep(), and prep_next()
     # methods are excerpted in the document, de-indented, as figure
     # {{prio3-prep-state}}. Their width should be limited to 69 columns
     # after de-indenting, or 73 columns before de-indenting, to avoid
@@ -183,22 +183,6 @@ class Prio3(
         prep_share = (verifiers_share, joint_rand_part)
         return (prep_state, prep_share)
 
-    def prep_next(
-        self,
-        _ctx: bytes,
-        prep_state: Prio3PrepState[F],
-        prep_msg: Optional[bytes]
-    ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
-        joint_rand_seed = prep_msg
-        (out_share, corrected_joint_rand_seed) = prep_state
-
-        # If joint randomness was used, check that the value computed by
-        # the Aggregators matches the value indicated by the Client.
-        if joint_rand_seed != corrected_joint_rand_seed:
-            raise ValueError('joint randomness check failed')
-
-        return out_share
-
     def prep_shares_to_prep(
             self,
             ctx: bytes,
@@ -227,6 +211,22 @@ class Prio3(
         if self.flp.JOINT_RAND_LEN > 0:
             joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
         return joint_rand_seed
+
+    def prep_next(
+        self,
+        _ctx: bytes,
+        prep_state: Prio3PrepState[F],
+        prep_msg: Optional[bytes]
+    ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
+        joint_rand_seed = prep_msg
+        (out_share, corrected_joint_rand_seed) = prep_state
+
+        # If joint randomness was used, check that the value computed by
+        # the Aggregators matches the value indicated by the Client.
+        if joint_rand_seed != corrected_joint_rand_seed:
+            raise ValueError('joint randomness check failed')
+
+        return out_share
 
     # NOTE: Methods `agg_init()`, `agg_update()`, and `merge()` are
     # excerpted in the document, de-indented, as figure

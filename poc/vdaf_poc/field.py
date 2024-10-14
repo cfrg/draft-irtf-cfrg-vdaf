@@ -68,14 +68,14 @@ class Field:
             vec.append(cls(x))
         return vec
 
-    # NOTE: The encode_into_bit_vector() and decode_from_bit_vector()
+    # NOTE: The encode_into_vit_vec() and decode_from_vit_vec()
     # methods are excerpted in the document, de-indented, as the figure
     # {{field-bit-rep}}. Their width should be limited to 69 columns
     # after de-indenting, or 73 columns before de-indenting, to avoid
     # warnings from xml2rfc.
     # ===================================================================
     @classmethod
-    def encode_into_bit_vector(
+    def encode_into_vit_vec(
             cls,
             val: int,
             bits: int) -> list[Self]:
@@ -99,7 +99,7 @@ class Field:
         return encoded
 
     @classmethod
-    def decode_from_bit_vector(cls, vec: list[Self]) -> Self:
+    def decode_from_vit_vec(cls, vec: list[Self]) -> Self:
         """
         Decode the field element from the bit representation, expressed
         as a vector of field elements `vec`.

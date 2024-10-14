@@ -38,8 +38,8 @@ class TestFields(unittest.TestCase):
         vals = [i for i in range(15)]
         bits = 4
         for val in vals:
-            encoded = cls.encode_into_bit_vector(val, bits)
-            self.assertTrue(cls.decode_from_bit_vector(
+            encoded = cls.encode_into_vit_vec(val, bits)
+            self.assertTrue(cls.decode_from_vit_vec(
                 encoded).int() == val)
 
     def run_ntt_field_test(self, cls: type[NttField]) -> None:

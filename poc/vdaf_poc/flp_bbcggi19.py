@@ -855,7 +855,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         count_vec = meas[:self.length]
         weight = sum(count_vec, self.field(0))
         weight_reported = \
-            self.field.decode_from_bit_vector(meas[self.length:])
+            self.field.decode_from_vit_vec(meas[self.length:])
         weight_check = self.offset*shares_inv + weight - \
             weight_reported
 
@@ -873,7 +873,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
 
         encoded = []
         encoded += count_vec
-        encoded += self.field.encode_into_bit_vector(
+        encoded += self.field.encode_into_vit_vec(
             (self.offset + weight_reported).int(),
             self.bits_for_weight)
         return encoded
@@ -982,14 +982,14 @@ class SumVec(Valid[list[int], list[int], F]):
                     'entry of measurement vector is out of range'
                 )
 
-            encoded += self.field.encode_into_bit_vector(
+            encoded += self.field.encode_into_vit_vec(
                 val, self.bits)
         return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
         truncated = []
         for i in range(self.length):
-            truncated.append(self.field.decode_from_bit_vector(
+            truncated.append(self.field.decode_from_vit_vec(
                 meas[i * self.bits: (i + 1) * self.bits]
             ))
         return truncated
@@ -1070,25 +1070,25 @@ class Sum(Valid[int, int, F]):
             out.append(self.GADGETS[0].eval(self.field, [b]))
 
         range_check = self.offset * shares_inv + \
-            self.field.decode_from_bit_vector(meas[:self.bits]) - \
-            self.field.decode_from_bit_vector(meas[self.bits:])
+            self.field.decode_from_vit_vec(meas[:self.bits]) - \
+            self.field.decode_from_vit_vec(meas[self.bits:])
         out.append(range_check)
         return out
 
     def encode(self, measurement: int) -> list[F]:
         encoded = []
-        encoded += self.field.encode_into_bit_vector(
+        encoded += self.field.encode_into_vit_vec(
             measurement,
             self.bits
         )
-        encoded += self.field.encode_into_bit_vector(
+        encoded += self.field.encode_into_vit_vec(
             measurement + self.offset.int(),
             self.bits
         )
         return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
-        return [self.field.decode_from_bit_vector(meas[:self.bits])]
+        return [self.field.decode_from_vit_vec(meas[:self.bits])]
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
         return output[0].int()
