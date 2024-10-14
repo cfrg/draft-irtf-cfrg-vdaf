@@ -1038,7 +1038,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 14 April 2025</td>
+<td class="center">Expires 17 April 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1051,12 +1051,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-10-11" class="published">11 October 2024</time>
+<time datetime="2024-10-14" class="published">14 October 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-04-14">14 April 2025</time></dd>
+<dd class="expires"><time datetime="2025-04-17">17 April 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1120,7 +1120,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 17 April 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1531,14 +1531,15 @@ measurement's true value. On the other hand, the more noise the clients add,
 the less reliable will be the server's estimate of the aggregate. Thus systems
 relying solely on a DP mechanism must strike a delicate balance between privacy
 and utility.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">The ideal goal for a privacy-preserving measurement system is that of secure
-multi-party computation (MPC): no participant in the protocol should learn
-anything about an individual measurement beyond what it can deduce from the
-aggregate. MPC achieves this goal by distributing the computation of the
-aggregate across multiple aggregation servers, one of which is presumed to be
-honest, i.e., not under control of the attacker. Moreover, MPC can be composed
-with various DP mechanisms to ensure the aggregate itself does leak too much
-information about any one of the measurements <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span>.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-7">Another way of constructing a privacy-preserving measurement system is to use
+multi-party computation (MPC). The goal of such a system is that no participant
+in the protocol should learn anything about an individual measurement beyond
+what it can deduce from the aggregate. MPC achieves this goal by distributing
+the computation of the aggregate across multiple aggregation servers, one of
+which is presumed to be honest, i.e., not under control of the attacker.
+Moreover, MPC can be composed with various DP mechanisms to ensure the
+aggregate itself does not leak too much information about any one of the
+measurements <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span>.<a href="#section-1-7" class="pilcrow">¶</a></p>
 <p id="section-1-8">This document describes two classes of MPC protocols, each aiming for a
 different set of goals.<a href="#section-1-8" class="pilcrow">¶</a></p>
 <p id="section-1-9">In a Distributed Aggregation Function (DAF, <a href="#daf" class="auto internal xref">Section 4</a>), each client splits its
@@ -1550,7 +1551,7 @@ but one of the shares, it is impossible to learn anything about the underlying
 measurement. These properties give rise to a simple strategy for privately
 aggregating the measurements: each aggregation server adds up its measurement
 shares locally before revealing their sum to the data collector; then all
-the data collector has to do is add up these sums to get the aggregate.<a href="#section-1-9" class="pilcrow">¶</a></p>
+the data collector has to do is add up these sums to get the aggregate result.<a href="#section-1-9" class="pilcrow">¶</a></p>
 <p id="section-1-10">This strategy is compatible with any aggregation function that can be
 represented as the sum of some encoding of the measurements. Examples include:
 summary statistics such as sum, mean, and standard deviation; estimation of
@@ -1562,16 +1563,16 @@ measurements.<a href="#section-1-10" class="pilcrow">¶</a></p>
 functionality, computing aggregation functions of the form<a href="#section-1-11" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-1-12">
 <pre>
-f(agg_param, meas_1, ..., meas_N) =
-    g(agg_param, meas_1) + ... + g(agg_param, meas_N)
+F(agg_param, meas_1, ..., meas_BATCH_SIZE) =
+    G(agg_param, meas_1) + ... + G(agg_param, meas_BATCH_SIZE)
 </pre><a href="#section-1-12" class="pilcrow">¶</a>
 </div>
-<p id="section-1-13">where <code>meas_1, ..., meas_N</code> are the measurements, <code>g</code> is a possibly non-linear
-function, and <code>agg_param</code> is a parameter of that function chosen by the data
-collector. This paradigm, known as function secret sharing <span>[<a href="#BGI15" class="cite xref">BGI15</a>]</span>, allows
-for more sophisticated data analysis tasks, such as grouping metrics by private
-client attributes <span>[<a href="#MPDST25" class="cite xref">MPDST25</a>]</span> or computing heavy hitters <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>. (More
-on the latter task below.)<a href="#section-1-13" class="pilcrow">¶</a></p>
+<p id="section-1-13">where <code>meas_1, ..., meas_BATCH_SIZE</code> are the measurements, <code>G</code> is a possibly
+non-linear function, and <code>agg_param</code> is a parameter of that function chosen by
+the data collector. This paradigm, known as function secret sharing <span>[<a href="#BGI15" class="cite xref">BGI15</a>]</span>,
+allows for more sophisticated data analysis tasks, such as grouping metrics by
+private client attributes <span>[<a href="#MPDST25" class="cite xref">MPDST25</a>]</span> or computing heavy hitters <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>.
+(More on the latter task below.)<a href="#section-1-13" class="pilcrow">¶</a></p>
 <p id="section-1-14">The second class of protocols defined in this document are called Verifiable
 Distributed Aggregation Functions (VDAFs, <a href="#vdaf" class="auto internal xref">Section 5</a>). In addition to being
 private, VDAFs are verifiable in the following sense. By design, a secret
@@ -1579,26 +1580,25 @@ sharing of a valid measurement, e.g., a number between 1 and 10, is
 indistinguishable from a secret sharing of an invalid measurement, e.g., a
 number larger than 10. This means that DAFs are vulnerable to attacks from
 malicious clients attempting to disrupt the computation by submitting invalid
-measurements. Thus VDAFs are designed to allow the servers to detect and remove
+measurements. VDAFs are designed to allow the servers to detect and remove
 these measurements prior to aggregation. We refer to this property as
 robustness.<a href="#section-1-14" class="pilcrow">¶</a></p>
 <p id="section-1-15">Achieving robustness without sacrificing privacy requires the servers to
 interact with one another over a number of rounds of communication. DAFs on the
-other hand are non-interactive, and are therefore easier to deploy; but they do
-not provide robustness on their own. This may be tolerable in some
-applications. For instance, if the client's software is executed in a trusted
-execution environment, it may be reasonable to assume that no client is
-malicious.<a href="#section-1-15" class="pilcrow">¶</a></p>
+other hand are non-interactive, making them easier to deploy; but they do not
+provide robustness on their own. This may be tolerable in some applications.
+For instance, if the client's software is executed in a trusted execution
+environment, it may be reasonable to assume that no client is malicious.<a href="#section-1-15" class="pilcrow">¶</a></p>
 <p id="section-1-16">The DAF and VDAF abstractions encompass a variety of MPC techniques in the
 literature. These protocols vary in their operational and security
 requirements, sometimes in subtle but consequential ways. This document
 therefore has two important goals:<a href="#section-1-16" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-1-17">
 <li id="section-1-17.1">
-          <p id="section-1-17.1.1">Providing higher-level protocols, like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span>,
-with a simple, uniform interface for accessing privacy-preserving
-measurement schemes, documenting relevant operational and security
-requirements, and specifying constraints for safe usage:<a href="#section-1-17.1.1" class="pilcrow">¶</a></p>
+          <p id="section-1-17.1.1">Provide higher-level protocols, like <span>[<a href="#DAP" class="cite xref">DAP</a>]</span>, with
+a simple, uniform interface for accessing privacy-preserving measurement
+schemes, document relevant operational and security requirements, and
+specify constraints for safe usage:<a href="#section-1-17.1.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-1-17.1.2">
 <li id="section-1-17.1.2.1">
               <p id="section-1-17.1.2.1.1">General patterns of communications among the various actors involved in
@@ -1606,7 +1606,7 @@ the system (clients, aggregation servers, and the collector of the
 aggregate result);<a href="#section-1-17.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-1-17.1.2.2">
-              <p id="section-1-17.1.2.2.1">Capabilities of a malicious coalition of servers attempting to divulge
+              <p id="section-1-17.1.2.2.1">Capabilities of a malicious coalition of parties attempting to divulge
 information about client measurements; and<a href="#section-1-17.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-1-17.1.2.3">
@@ -1616,8 +1616,8 @@ corrupt the computation.<a href="#section-1-17.1.2.3.1" class="pilcrow">¶</a></
           </ol>
 </li>
         <li id="section-1-17.2">
-          <p id="section-1-17.2.1">Providing cryptographers with design criteria that provide a clear
-deployment roadmap for new constructions.<a href="#section-1-17.2.1" class="pilcrow">¶</a></p>
+          <p id="section-1-17.2.1">Provide cryptographers with design criteria that provide a clear deployment
+roadmap for new constructions of privacy-preserving measurement systems.<a href="#section-1-17.2.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
 <p id="section-1-18">This document also specifies two concrete VDAF schemes, each based on a protocol
@@ -1632,24 +1632,25 @@ the original Prio protocol, but incorporates techniques introduced in
 <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span> that result in significant performance gains.<a href="#section-1-19.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-1-19.2">
-          <p id="section-1-19.2.1">The Poplar protocol <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> solves the heavy-hitters problem in a
-privacy-preserving manner. Here each client holds a bit-string, and the goal
+          <p id="section-1-19.2.1">The Poplar protocol <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> solves a problem known as private
+heavy-hitters. In this problem, each client holds a bit-string, and the goal
 of the aggregation servers is to compute the set of strings that occur at
-least <code>t</code> times for some threshold <code>t</code>. The core primitive in their protocol
-is a secret sharing of a point function <span>[<a href="#GI14" class="cite xref">GI14</a>]</span> (<code>g</code> in the notation above)
-that allows the servers to privately count how many of the clients' strings
-begin with a given prefix (<code>agg_param</code> in the notation above). In <a href="#poplar1" class="auto internal xref">Section 8</a>
-we specify a VDAF called Poplar1 that implements this functionality.<a href="#section-1-19.2.1" class="pilcrow">¶</a></p>
+least <code>T</code> times for some threshold <code>T</code>. The core primitive in their protocol
+is a secret sharing of a point function <span>[<a href="#GI14" class="cite xref">GI14</a>]</span> (denoted <code>G</code> above) that
+allows the servers to privately count how many of the clients' strings begin
+with a given prefix (<code>agg_param</code> in the notation above). In <a href="#poplar1" class="auto internal xref">Section 8</a> we
+specify a VDAF called Poplar1 that implements this functionality.<a href="#section-1-19.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-20">The remainder of this document is organized as follows: <a href="#conventions" class="auto internal xref">Section 2</a> lists
-definitions and conventions used for specification; <a href="#overview" class="auto internal xref">Section 3</a> gives a brief
-overview of DAFs and VDAFs, the parties involved in the computation, and the
-requirements for non-collusion; <a href="#daf" class="auto internal xref">Section 4</a> defines the syntax for DAFs; <a href="#vdaf" class="auto internal xref">Section 5</a>
-defines the syntax for VDAFs; <a href="#prelim" class="auto internal xref">Section 6</a> defines various functionalities that
-are common to our constructions; <a href="#prio3" class="auto internal xref">Section 7</a> describes the Prio3 construction;
-<a href="#poplar1" class="auto internal xref">Section 8</a> describes the Poplar1 construction; and <a href="#security" class="auto internal xref">Section 9</a> enumerates the
-security considerations for DAFs and VDAFs.<a href="#section-1-20" class="pilcrow">¶</a></p>
+definitions and conventions used in the remainder of the document; <a href="#overview" class="auto internal xref">Section 3</a>
+gives a brief overview of DAFs and VDAFs, the parties involved in the
+computation, and the requirements for non-collusion; <a href="#daf" class="auto internal xref">Section 4</a> defines the syntax
+for DAFs; <a href="#vdaf" class="auto internal xref">Section 5</a> defines the syntax for VDAFs; <a href="#prelim" class="auto internal xref">Section 6</a> defines various
+functionalities that are common to our constructions; <a href="#prio3" class="auto internal xref">Section 7</a> specifies
+Prio3; <a href="#poplar1" class="auto internal xref">Section 8</a> specifies Poplar1; and <a href="#security" class="auto internal xref">Section 9</a> enumerates security
+considerations for DAFs and VDAFs in general and our constructions in
+particular.<a href="#section-1-20" class="pilcrow">¶</a></p>
 <div id="change-log">
 <section id="section-1.1">
         <h3 id="name-change-log">
@@ -2067,11 +2068,11 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-2-2">Algorithms in this document are written in Python (compatible with Python 3.12
 or later). A fatal error in a program (e.g., failure to parse one of the
 function parameters) is usually handled by raising an exception.<a href="#section-2-2" class="pilcrow">¶</a></p>
-<p id="section-2-3">Type hints are used to define input and output types.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-3">Type hints are used to define input and output types:<a href="#section-2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2-4.1">
           <p id="section-2-4.1.1">The type variable <code>F</code> is used in signatures to signify any type that is a
-subclass of <code>Field</code>.<a href="#section-2-4.1.1" class="pilcrow">¶</a></p>
+subclass of <code>Field</code> (<a href="#field" class="auto internal xref">Section 6.1</a>).<a href="#section-2-4.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-4.2">
           <p id="section-2-4.2.1"><code>bytes</code> is a byte string.<a href="#section-2-4.2.1" class="pilcrow">¶</a></p>
@@ -2087,7 +2088,8 @@ of generic classes.<a href="#section-2-4.4.1" class="pilcrow">¶</a></p>
           <p id="section-2-4.5.1"><code>Any</code> is the universal supertype, which admits values of any type.<a href="#section-2-4.5.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-4.6">
-          <p id="section-2-4.6.1"><code>Optional[T]</code> is shorthand for <code>T | None</code>.<a href="#section-2-4.6.1" class="pilcrow">¶</a></p>
+          <p id="section-2-4.6.1"><code>Optional[T]</code> is shorthand for <code>T | None</code>. Its value may be <code>None</code> or have
+type <code>T</code>.<a href="#section-2-4.6.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-4.7">
           <p id="section-2-4.7.1"><code>Self</code> represents the containing class of the method definition in which it
@@ -2109,54 +2111,53 @@ a particular encoding of that quantity as a byte string.<a href="#section-2-7" c
 <p id="section-2-8">Some common functionalities:<a href="#section-2-8" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2-9.1">
-          <p id="section-2-9.1.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of zero bytes. The length of
-<code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-9.1.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.1.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of zero bytes of the requested
+length (<code>len</code>).<a href="#section-2-9.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.2">
-          <p id="section-2-9.2.1"><code>gen_rand(len: int) -&gt; bytes</code> returns an array of random bytes generated by a
-cryptographically secure pseudorandom number generator (CSPRNG). The length
-of <code>output</code> <span class="bcp14">MUST</span> be <code>len</code>.<a href="#section-2-9.2.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.2.1"><code>gen_rand(len: int) -&gt; bytes</code> returns a byte array of the requested length
+(<code>len</code>) generated by a cryptographically secure pseudorandom number generator
+(CSPRNG).<a href="#section-2-9.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.3">
-          <p id="section-2-9.3.1"><code>byte(int: int) -&gt; bytes</code> returns the representation of <code>int</code> as a byte
-string. The value of <code>int</code> <span class="bcp14">MUST</span> be in <code>[0,256)</code>.<a href="#section-2-9.3.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.3.1"><code>byte(x: int) -&gt; bytes</code> returns the representation of the integer <code>x</code> in range
+<code>[0, 256)</code> as a single-byte byte string.<a href="#section-2-9.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.4">
           <p id="section-2-9.4.1"><code>concat(parts: list[bytes]) -&gt; bytes</code> returns the concatenation of the input
-byte strings, i.e., <code>parts[0] || ... || parts[len(parts)-1]</code>.<a href="#section-2-9.4.1" class="pilcrow">¶</a></p>
+byte strings, i.e., <code>parts[0] + ... + parts[len(parts)-1]</code>.<a href="#section-2-9.4.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.5">
-          <p id="section-2-9.5.1"><code>front(length: int, vec: list[Any]) -&gt; (list[Any], list[Any])</code> splits <code>vec</code>
-into two vectors, where the first vector is made up of the first <code>length</code>
-elements of the input. I.e., <code>(vec[:length], vec[length:])</code>.<a href="#section-2-9.5.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.5.1"><code>front(len: int, x: list[Any]) -&gt; tuple[list[Any], list[Any]]</code> splits <code>x</code>
+into two vectors, where the first vector is made up of the first <code>len</code>
+elements of <code>x</code>. I.e., <code>(x[:len], x[len:])</code>.<a href="#section-2-9.5.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.6">
           <p id="section-2-9.6.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
 and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-9.6.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.7">
-          <p id="section-2-9.7.1"><code>to_be_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to big-endian
-bytes; its value <span class="bcp14">MUST</span> be in the range <code>[0, 2^(8*length))</code>, i.e., at least <code>0</code>
-but less than <code>2^(8*length)</code>. Function <code>from_be_bytes(encoded: bytes) -&gt; int</code>
-computes the inverse.<a href="#section-2-9.7.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.7.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+is in the range <code>[0, 2^(8*len))</code> to big-endian bytes. Function
+<code>from_be_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-9.7.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.8">
-          <p id="section-2-9.8.1"><code>to_le_bytes(val: int, length: int) -&gt; bytes</code> converts <code>val</code> to little-endian
-bytes; its value <span class="bcp14">MUST</span> be in the range <code>[0, 2^(8*length))</code>. Function
+          <p id="section-2-9.8.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+is in the range <code>[0, 2^(8*len))</code> to little-endian bytes. Function
 <code>from_le_bytes(encoded: bytes) -&gt; int</code> computes the inverse.<a href="#section-2-9.8.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.9">
-          <p id="section-2-9.9.1"><code>next_power_of_2(n: int) -&gt; int</code> returns the smallest integer
-greater than or equal to <code>n</code> that is also a power of two.<a href="#section-2-9.9.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.9.1"><code>next_power_of_2(x: int) -&gt; int</code> returns the smallest integer
+greater than or equal to <code>x</code> that is also a power of two.<a href="#section-2-9.9.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.10">
-          <p id="section-2-9.10.1"><code>additive_secret_share(vec: list[F], num_shares: int, field: type[F])
--&gt; list[list[F]]</code> takes a vector of field elements and returns multiple
-vectors of the same length, such that they all add up to the input vector,
-and each proper subset of the vectors are indistinguishable from random.<a href="#section-2-9.10.1" class="pilcrow">¶</a></p>
+          <p id="section-2-9.10.1"><code>additive_secret_share(x: list[F], num_shares: int, field: type[F]) -&gt;
+list[list[F]]</code> takes a vector <code>x</code> of field elements and returns multiple
+vectors of the same length, such that they all add up to the input vector.
+Note that this function is not used normatively in this document.<a href="#section-2-9.10.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.11">
-          <p id="section-2-9.11.1"><code>cast(typ: type, val: object) -&gt; object</code> returns the input value unchanged.
+          <p id="section-2-9.11.1"><code>cast(typ: type, x: object) -&gt; object</code> returns the input value unchanged.
 This is only present to assist with static analysis of the Python code.
 Type checkers will ignore the inferred type of the input value, and assume
 the output value has the given type.<a href="#section-2-9.11.1" class="pilcrow">¶</a></p>
@@ -2176,8 +2177,8 @@ in lists in ascending order of degree, starting with the constant coefficient.<a
         <li class="normal" id="section-2-9.14">
           <p id="section-2-9.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
 returns the coefficients of the lowest degree polynomial <code>p</code> for which
-<code>p(input[k]) == output[k]</code> for all <code>k</code>. Normally this will be computed using
-the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-9.14.1" class="pilcrow">¶</a></p>
+<code>p(inputs[k]) == outputs[k]</code> for all <code>k</code>. Normally this will be computed
+using the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-9.14.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-9.15">
           <p id="section-2-9.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
@@ -2202,8 +2203,8 @@ index of the last non-zero coefficient of <code>p</code>.<a href="#section-2-9.1
 <pre>
                  +--------------+
            +----&gt;| Aggregator 0 |----+
-           |     +--------------+    |
-           |             ^           |
+     input |     +--------------+    | aggregate
+    shares |             ^           | shares
            |             |           |
            |             V           |
            |     +--------------+    |
@@ -2219,17 +2220,15 @@ index of the last non-zero coefficient of <code>p</code>.<a href="#section-2-9.1
            |    +----------------+   |
            +---&gt;| Aggregator N-1 |---+
                 +----------------+
-
-      Input shares           Aggregate shares
 </pre>
 </div>
 <figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
-<a href="#name-overall-data-flow-of-a-vdaf" class="selfRef">Overall data flow of a (V)DAF</a>
+<a href="#name-overall-data-flow-of-a-vdaf" class="selfRef">Overall data flow of a (V)DAF.</a>
         </figcaption></figure>
 </div>
-<p id="section-3-2">In a DAF- or VDAF-based private measurement system, we distinguish three types
-of actors: Clients, Aggregators, and Collectors.  The overall flow of the
-measurement process is as follows:<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-2">In a DAF- or VDAF-based private measurement system, we distinguish between
+three types of actors: Clients, Aggregators, and the Collector.  The overall
+flow of the measurement process is as follows:<a href="#section-3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3-3.1">
           <p id="section-3-3.1.1">To submit an individual measurement, the Client shards the measurement into
@@ -2237,7 +2236,7 @@ measurement process is as follows:<a href="#section-3-2" class="pilcrow">¶</a><
 refer to this sequence of input shares collectively as the Client's "report".<a href="#section-3-3.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-3-3.2">
-          <p id="section-3-3.2.1">The Aggregators refine their input shares into "output shares".<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
+          <p id="section-3-3.2.1">The Aggregators refine their input shares into "output shares":<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3-3.2.2.1">
               <p id="section-3-3.2.2.1.1">Output shares are in one-to-one correspondence with the input shares.<a href="#section-3-3.2.2.1.1" class="pilcrow">¶</a></p>
@@ -2254,8 +2253,7 @@ as part of the validation process.<a href="#section-3-3.2.2.3.1" class="pilcrow"
 </li>
         <li class="normal" id="section-3-3.3">
           <p id="section-3-3.3.1">As each Aggregator recovers output shares, it accumulates them into an
-"aggregate share" for the batch, i.e., its
-share of the desired aggregate result.<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
+"aggregate share" for the batch of measurements.<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-3-3.4">
           <p id="section-3-3.4.1">The Aggregators submit their aggregate shares to the Collector, who combines
@@ -2265,12 +2263,12 @@ them to obtain the aggregate result over the batch.<a href="#section-3-3.4.1" cl
 <p id="section-3-4">Aggregators are a new class of actor relative to traditional measurement systems
 where Clients submit measurements to a single server.  They are critical for
 both the privacy properties of the system and, in the case of VDAFs, the
-correctness of the measurements obtained.  The privacy properties of the system
-are assured by non-collusion among Aggregators, and Aggregators are the entities
-that perform validation of Client measurements.  Thus Clients trust Aggregators
-not to collude (typically it is required that at least one Aggregator is
-honest; see <a href="#num-aggregators" class="auto internal xref">Section 9.8</a>), and Collectors trust Aggregators to correctly
-run the protocol.<a href="#section-3-4" class="pilcrow">¶</a></p>
+validity of the measurements obtained.  The privacy properties of the system
+are assured by non-collusion among Aggregators, and Aggregators are the
+entities that perform validation of Client measurements.  Thus Clients trust
+Aggregators not to collude (typically it is required that at least one
+Aggregator is honest; see <a href="#num-aggregators" class="auto internal xref">Section 9.8</a>), and Collectors trust
+Aggregators to correctly run the protocol.<a href="#section-3-4" class="pilcrow">¶</a></p>
 <p id="section-3-5">Within the bounds of the non-collusion requirements of a given (V)DAF instance,
 it is possible for the same entity to play more than one role.  For example, the
 Collector could also act as an Aggregator, effectively using the other
