@@ -1968,10 +1968,9 @@ Table of Contents
       Field.zeros().  Note that this function is not used normatively in
       the specification of either Prio3 or Poplar1.
 
-   A field element is an instance of a concrete Field.  Addition
-   addition, subtraction, multiplication, division, negation, and
-   inversion are denoted, respectively, x + y, x - y, x * y, x / y, -x,
-   and x.inv().
+   A field element is an instance of a concrete Field.  Addition,
+   subtraction, multiplication, division, negation, and inversion are
+   denoted, respectively, x + y, x - y, x * y, x / y, -x, and x.inv().
 
    We sometimes need to convert a field element to an int, which we
    denote by x.as_unsigned().  Likewise, each concrete Field implements
@@ -2212,9 +2211,9 @@ Table of Contents
 
    Pre-conditions:
 
-   *  The default seed length is 32.  The seed MAY have any length, but
-      MUST not exceed 255.  Otherwise initialization will raise an
-      exception.
+   *  The default seed length is 32.  The seed MAY have a different
+      length, but MUST not exceed 255.  Otherwise initialization will
+      raise an exception.
 
    *  The length of the domain separation string dst passed to
       XofTurboShake128 MUST NOT exceed 65535 bytes.  Otherwise
