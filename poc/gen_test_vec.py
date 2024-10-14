@@ -34,9 +34,9 @@ def gen_test_vec_for_idpf(idpf: Idpf,
     )
 
     printable_beta_inner = [
-        [str(elem.as_unsigned()) for elem in value] for value in beta_inner
+        [str(elem.int()) for elem in value] for value in beta_inner
     ]
-    printable_beta_leaf = [str(elem.as_unsigned()) for elem in beta_leaf]
+    printable_beta_leaf = [str(elem.int()) for elem in beta_leaf]
     printable_keys = [key.hex() for key in keys]
     test_vec = {
         'bits': int(idpf.BITS),

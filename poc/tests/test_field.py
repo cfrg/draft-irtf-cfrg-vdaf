@@ -40,7 +40,7 @@ class TestFields(unittest.TestCase):
         for val in vals:
             encoded = cls.encode_into_bit_vector(val, bits)
             self.assertTrue(cls.decode_from_bit_vector(
-                encoded).as_unsigned() == val)
+                encoded).int() == val)
 
     def run_ntt_field_test(self, cls: type[NttField]) -> None:
         self.run_field_test(cls)
@@ -62,8 +62,8 @@ class TestFields(unittest.TestCase):
 
     def test_field2(self) -> None:
         # Test GF(2).
-        self.assertEqual(Field2(1).as_unsigned(), 1)
-        self.assertEqual(Field2(0).as_unsigned(), 0)
+        self.assertEqual(Field2(1).int(), 1)
+        self.assertEqual(Field2(0).int(), 0)
         self.assertEqual(Field2(1) + Field2(1), Field2(0))
         self.assertEqual(Field2(1) * Field2(1), Field2(1))
         self.assertEqual(-Field2(1), Field2(1))

@@ -44,7 +44,7 @@ class FlpTest(Flp[int, int, F]):
         measurement."""
         if len(verifier) != 2 or \
                 verifier[0] != verifier[1] or \
-                verifier[0].as_unsigned() not in self.meas_range:
+                verifier[0].int() not in self.meas_range:
             return False
         return True
 
@@ -52,7 +52,7 @@ class FlpTest(Flp[int, int, F]):
         return [meas[0]]
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
-        return output[0].as_unsigned()
+        return output[0].int()
 
 
 class TestFlp(unittest.TestCase):

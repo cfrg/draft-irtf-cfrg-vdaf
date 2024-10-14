@@ -416,7 +416,7 @@ class Poplar1(
             agg_shares: list[FieldVec],
             _num_measurements: int) -> list[int]:
         agg = self.merge(agg_param, agg_shares)
-        return [x.as_unsigned() for x in agg]
+        return [x.int() for x in agg]
 
     def encode_agg_param(self, agg_param: Poplar1AggParam) -> bytes:
         level, prefixes = agg_param

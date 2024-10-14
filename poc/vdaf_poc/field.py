@@ -46,7 +46,7 @@ class Field:
         """
         encoded = bytes()
         for x in vec:
-            encoded += to_le_bytes(x.as_unsigned(), cls.ENCODED_SIZE)
+            encoded += to_le_bytes(x.int(), cls.ENCODED_SIZE)
         return encoded
 
     @classmethod
@@ -145,7 +145,7 @@ class Field:
     def __repr__(self) -> str:
         return str(self.val)
 
-    def as_unsigned(self) -> int:
+    def int(self) -> int:
         return self.val
 
 

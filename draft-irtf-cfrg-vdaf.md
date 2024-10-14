@@ -1976,7 +1976,7 @@ subtraction, multiplication, division, negation, and inversion are denoted,
 respectively, `x + y`, `x - y`, `x * y`, `x / y`, `-x`, and `x.inv()`.
 
 We sometimes need to convert a field element to an `int`, which we denote by
-`x.as_unsigned()`. Likewise, each concrete `Field` implements a constructor for
+`x.int()`. Likewise, each concrete `Field` implements a constructor for
 converting an unsigned integer into a field element:
 
 * `Field(integer: int)` returns `integer` represented as a field element. The
@@ -1995,7 +1995,7 @@ def encode_vec(cls, vec: list[Self]) -> bytes:
     """
     encoded = bytes()
     for x in vec:
-        encoded += to_le_bytes(x.as_unsigned(), cls.ENCODED_SIZE)
+        encoded += to_le_bytes(x.int(), cls.ENCODED_SIZE)
     return encoded
 
 def decode_vec(cls, encoded: bytes) -> list[Self]:
@@ -3838,7 +3838,7 @@ class Count(Valid[int, int, F]):
         return meas
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
-        return output[0].as_unsigned()
+        return output[0].int()
 ~~~
 
 ### Prio3Sum
@@ -3921,7 +3921,7 @@ class Sum(Valid[int, int, F]):
             self.bits
         )
         encoded += self.field.encode_into_bit_vector(
-            measurement + self.offset.as_unsigned(),
+            measurement + self.offset.int(),
             self.bits
         )
         return encoded
@@ -3930,7 +3930,7 @@ class Sum(Valid[int, int, F]):
         return [self.field.decode_from_bit_vector(meas[:self.bits])]
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
-        return output[0].as_unsigned()
+        return output[0].int()
 ~~~
 
 ### Prio3SumVec
@@ -4059,7 +4059,7 @@ class SumVec(Valid[list[int], list[int], F]):
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [x.as_unsigned() for x in output]
+        return [x.int() for x in output]
 ~~~
 
 #### Selection of `ParallelSum` Chunk Length {#parallel-sum-chunk-length}
@@ -4195,7 +4195,7 @@ class Histogram(Valid[int, list[int], F]):
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [bucket_count.as_unsigned()
+        return [bucket_count.int()
                 for bucket_count in output]
 ~~~
 
@@ -4266,7 +4266,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         # Make sure `offset + length` doesn't overflow the field
         # modulus. Otherwise we may not correctly compute the sum
         # measurement vector entries during circuit evaluation.
-        if self.field.MODULUS - self.offset.as_unsigned() <= length:
+        if self.field.MODULUS - self.offset.int() <= length:
             raise ValueError('length and max_weight are too large '
                              'for the current field size')
 
@@ -4338,7 +4338,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         encoded = []
         encoded += count_vec
         encoded += self.field.encode_into_bit_vector(
-            (self.offset + weight_reported).as_unsigned(),
+            (self.offset + weight_reported).int(),
             self.bits_for_weight)
         return encoded
 
@@ -4349,7 +4349,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
             self,
             output: list[F],
             _num_measurements: int) -> list[int]:
-        return [bucket_count.as_unsigned() for
+        return [bucket_count.int() for
                 bucket_count in output]
 ~~~
 
@@ -4999,7 +4999,7 @@ def unshard(
         agg_shares: list[FieldVec],
         _num_measurements: int) -> list[int]:
     agg = self.merge(agg_param, agg_shares)
-    return [x.as_unsigned() for x in agg]
+    return [x.int() for x in agg]
 ~~~
 
 ### Message Serialization {#poplar1-encode}
@@ -5056,7 +5056,7 @@ Field `packed_control_bits` is encoded with the following function:
 ~~~ python
 packed_control_buf = [int(0)] * packed_len
 for i, bit in enumerate(control_bits):
-    packed_control_buf[i // 8] |= bit.as_unsigned() << (i % 8)
+    packed_control_buf[i // 8] |= bit.int() << (i % 8)
 packed_control_bits = bytes(packed_control_buf)
 ~~~
 
@@ -5354,13 +5354,13 @@ def gen(
         # input-dependent array indices should be replaced with
         # constant-time selects in practice in order to reduce
         # leakage via timing side channels.
-        if ctrl[0].as_unsigned():
+        if ctrl[0].int():
             x0 = xor(s0[keep], seed_cw)
             ctrl[0] = t0[keep] + ctrl_cw[keep]
         else:
             x0 = s0[keep]
             ctrl[0] = t0[keep]
-        if ctrl[1].as_unsigned():
+        if ctrl[1].int():
             x1 = xor(s1[keep], seed_cw)
             ctrl[1] = t1[keep] + ctrl_cw[keep]
         else:
@@ -5383,7 +5383,7 @@ def gen(
         # replaced with a constant time select or a constant time
         # multiplication in practice in order to reduce leakage via
         # timing side channels.
-        if ctrl[1].as_unsigned():
+        if ctrl[1].int():
             for i in range(len(w_cw)):
                 w_cw[i] = -w_cw[i]
 
@@ -5486,7 +5486,7 @@ def eval_next(
     # input-dependent array indices should be replaced with
     # constant-time selects in practice in order to reduce leakage
     # via timing side channels.
-    if prev_ctrl.as_unsigned():
+    if prev_ctrl.int():
         s[0] = xor(s[0], seed_cw)
         s[1] = xor(s[1], seed_cw)
         t[0] += ctrl_cw[0]
@@ -5499,7 +5499,7 @@ def eval_next(
     # Implementation note: this conditional addition should be
     # replaced with a constant-time select in practice in order to
     # reduce leakage via timing side channels.
-    if next_ctrl.as_unsigned():
+    if next_ctrl.int():
         for i in range(len(y)):
             y[i] += w_cw[i]
 

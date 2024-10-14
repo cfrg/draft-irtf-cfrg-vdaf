@@ -89,7 +89,7 @@ class TestDaf(
             _agg_param: None,
             agg_shares: list[Field128],
             _num_measurements: int) -> int:
-        return reduce(lambda x, y: x + y, agg_shares).as_unsigned()
+        return reduce(lambda x, y: x + y, agg_shares).int()
 
 
 Measurement = TypeVar("Measurement")
