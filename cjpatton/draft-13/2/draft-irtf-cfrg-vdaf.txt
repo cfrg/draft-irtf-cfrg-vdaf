@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 April 2025                                              ISRG
+Expires: 17 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         11 October 2024
+                                                         14 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 April 2025.
+   This Internet-Draft will expire on 17 April 2025.
 
 Copyright Notice
 
@@ -241,7 +241,7 @@ Table of Contents
    privately aggregating the measurements: each aggregation server adds
    up its measurement shares locally before revealing their sum to the
    data collector; then all the data collector has to do is add up these
-   sums to get the aggregate.
+   sums to get the aggregate result.
 
    This strategy is compatible with any aggregation function that can be
    represented as the sum of some encoding of the measurements.
@@ -279,22 +279,21 @@ Table of Contents
 
    Achieving robustness without sacrificing privacy requires the servers
    to interact with one another over a number of rounds of
-   communication.  DAFs on the other hand are non-interactive, and are
-   therefore easier to deploy; but they do not provide robustness on
-   their own.  This may be tolerable in some applications.  For
-   instance, if the client's software is executed in a trusted execution
-   environment, it may be reasonable to assume that no client is
-   malicious.
+   communication.  DAFs on the other hand are non-interactive, making
+   them easier to deploy; but they do not provide robustness on their
+   own.  This may be tolerable in some applications.  For instance, if
+   the client's software is executed in a trusted execution environment,
+   it may be reasonable to assume that no client is malicious.
 
    The DAF and VDAF abstractions encompass a variety of MPC techniques
    in the literature.  These protocols vary in their operational and
    security requirements, sometimes in subtle but consequential ways.
    This document therefore has two important goals:
 
-   1.  Providing higher-level protocols, like [DAP], with a simple,
+   1.  Provide higher-level protocols, like [DAP], with a simple,
        uniform interface for accessing privacy-preserving measurement
-       schemes, documenting relevant operational and security
-       requirements, and specifying constraints for safe usage:
+       schemes, document relevant operational and security requirements,
+       and specify constraints for safe usage:
 
        1.  General patterns of communications among the various actors
            involved in the system (clients, aggregation servers, and the
@@ -306,9 +305,9 @@ Table of Contents
        3.  Conditions that are necessary to ensure that malicious
            clients cannot corrupt the computation.
 
-   2.  Providing cryptographers with design criteria that provide a
-       clear deployment roadmap for new constructions of privacy-
-       preserving measurement systems.
+   2.  Provide cryptographers with design criteria that provide a clear
+       deployment roadmap for new constructions of privacy-preserving
+       measurement systems.
 
    This document also specifies two concrete VDAF schemes, each based on
    a protocol from the literature.
@@ -338,9 +337,8 @@ Table of Contents
    collusion; Section 4 defines the syntax for DAFs; Section 5 defines
    the syntax for VDAFs; Section 6 defines various functionalities that
    are common to our constructions; Section 7 specifies Prio3; Section 8
-   specifies Poplar1; and Section 9 enumerates the security
-   considerations for DAFs and VDAFs in general and our constructions in
-   particular.
+   specifies Poplar1; and Section 9 enumerates security considerations
+   for DAFs and VDAFs in general and our constructions in particular.
 
 1.1.  Change Log
 
@@ -813,7 +811,7 @@ Table of Contents
               +--->| Aggregator N-1 |---+
                    +----------------+
 
-                  Figure 1: Overall data flow of a (V)DAF
+                  Figure 1: Overall data flow of a (V)DAF.
 
    In a DAF- or VDAF-based private measurement system, we distinguish
    between three types of actors: Clients, Aggregators, and the
@@ -846,7 +844,7 @@ Table of Contents
    Aggregators are a new class of actor relative to traditional
    measurement systems where Clients submit measurements to a single
    server.  They are critical for both the privacy properties of the
-   system and, in the case of VDAFs, the correctness of the measurements
+   system and, in the case of VDAFs, the validity of the measurements
    obtained.  The privacy properties of the system are assured by non-
    collusion among Aggregators, and Aggregators are the entities that
    perform validation of Client measurements.  Thus Clients trust
