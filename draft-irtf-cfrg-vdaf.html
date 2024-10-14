@@ -3196,15 +3196,20 @@ instantiate secure channels between each of the protocol participants.<a href="#
         <h3 id="name-communication-patterns-for-">
 <a href="#section-5.7" class="section-number selfRef">5.7. </a><a href="#name-communication-patterns-for-" class="section-name selfRef">Communication Patterns for Preparation</a>
         </h3>
-<p id="section-5.7-1">In each round of preparation, each Aggregator writes a prep share to some
+<p id="section-5.7-1">The only stage of VDAF execution that requires interaction is preparation
+(<a href="#sec-vdaf-prepare" class="auto internal xref">Section 5.2</a>). There are a number of ways to coordinate this
+interaction; the best strategy depends largely on the number of Aggregators
+(i.e., <code>vdaf.SHARES</code>). This section describes two strategies, one specialized
+for two Aggregators and another that is suitable for any number of Aggregators.<a href="#section-5.7-1" class="pilcrow">¶</a></p>
+<p id="section-5.7-2">In each round of preparation, each Aggregator writes a prep share to some
 broadcast channel, which is then processed into the prep message using the
 public <code>prep_shares_to_prep()</code> algorithm and broadcast to the Aggregators to
-start the next round. In this section we describe some approaches to realizing
-this broadcast channel functionality in protocols that use VDAFs.<a href="#section-5.7-1" class="pilcrow">¶</a></p>
-<p id="section-5.7-2">The state machine of each Aggregator is shown in <a href="#vdaf-prep-state-machine" class="auto internal xref">Figure 6</a>.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
-<span id="name-state-machine-for-vdaf-prep"></span><div id="vdaf-prep-state-machine">
+start the next round. Our goal in this section is to realize this broadcast
+channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
+<p id="section-5.7-3">The state machine of each Aggregator is shown below.<a href="#section-5.7-3" class="pilcrow">¶</a></p>
+<span id="name-state-machine-of-vdaf-prepa"></span><div id="vdaf-prep-state-machine">
 <figure id="figure-6">
-          <div class="alignLeft art-text artwork" id="section-5.7-3.1">
+          <div class="alignLeft art-text artwork" id="section-5.7-4.1">
 <pre>
                   +----------------+
                   |                |
@@ -3216,15 +3221,15 @@ Start ----&gt; Continued(prep_state, prep_round) --&gt; Finished(out_share)
 </pre>
 </div>
 <figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
-<a href="#name-state-machine-for-vdaf-prep" class="selfRef">State machine for VDAF preparation.</a>
+<a href="#name-state-machine-of-vdaf-prepa" class="selfRef">State machine of VDAF preparation.</a>
           </figcaption></figure>
 </div>
-<p id="section-5.7-4">State transitions are made when the state is acted upon by the host's local
-inputs and/or messages sent by the peers. The initial state is <code>Start</code>. The
-terminal states are <code>Rejected</code>, which indicates that the report cannot be
-processed any further, and <code>Finished(out_share)</code>, which indicates that the
-Aggregator has recovered an output share <code>out_share</code>.<a href="#section-5.7-4" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-5.7-5">
+<p id="section-5.7-5">State transitions are made when the state is acted upon by the Aggregator's
+local inputs and/or messages sent by its co-Aggregators. The initial state is
+<code>Start</code>. The terminal states are: <code>Rejected</code>, indicating that the report cannot
+be processed any further; and <code>Finished(out_share)</code>, indicating that the
+Aggregator has recovered an output share <code>out_share</code>.<a href="#section-5.7-5" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-5.7-6">
 <pre>
 class State:
     pass
@@ -3252,33 +3257,34 @@ class Finished(State, Generic[OutShare]):
 
 class Rejected(State):
     pass
-</pre><a href="#section-5.7-5" class="pilcrow">¶</a>
+</pre><a href="#section-5.7-6" class="pilcrow">¶</a>
 </div>
-<p id="section-5.7-6">The methods described in this section are defined in terms of opaque byte
+<p id="section-5.7-7">The methods described in this section are defined in terms of opaque byte
 strings. A compatible <code>Vdaf</code> <span class="bcp14">MUST</span> specify methods for encoding public shares,
-input shares, prep shares, prep messages, and aggregation parameters.<a href="#section-5.7-6" class="pilcrow">¶</a></p>
-<p id="section-5.7-7">Implementations of Prio3 and Poplar1 <span class="bcp14">MUST</span> use the encoding scheme specified in
-<a href="#prio3-encode" class="auto internal xref">Section 7.2.7</a> and <a href="#poplar1-encode" class="auto internal xref">Section 8.2.6</a> respectively.<a href="#section-5.7-7" class="pilcrow">¶</a></p>
-<div id="the-ping-pong-topology-only-two-aggregators">
+input shares, prep shares, prep messages, and aggregation parameters.<a href="#section-5.7-7" class="pilcrow">¶</a></p>
+<p id="section-5.7-8">Implementations of Prio3 and Poplar1 <span class="bcp14">MUST</span> use the encoding scheme specified in
+<a href="#prio3-encode" class="auto internal xref">Section 7.2.7</a> and <a href="#poplar1-encode" class="auto internal xref">Section 8.2.6</a> respectively.<a href="#section-5.7-8" class="pilcrow">¶</a></p>
+<div id="ping-pong-topo">
 <section id="section-5.7.1">
           <h4 id="name-the-ping-pong-topology-only">
 <a href="#section-5.7.1" class="section-number selfRef">5.7.1. </a><a href="#name-the-ping-pong-topology-only" class="section-name selfRef">The Ping-Pong Topology (Only Two Aggregators)</a>
           </h4>
-<p id="section-5.7.1-1">For VDAFs with precisely two Aggregators (i.e., <code>SHARES == 2</code>), the following
-"ping pong" communication pattern can be used. It is compatible with any
-request/response transport protocol, such as HTTP.<a href="#section-5.7.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.7.1-2">Let us call the initiating party the "Leader" and the responding party the
-"Helper". The high-level idea is that the Leader and Helper will take turns
-running the computation locally until input from their peer is required:<a href="#section-5.7.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-1">For VDAFs with precisely two Aggregators (i.e., <code>vdaf.SHARES == 2</code>), the
+following "ping pong" communication pattern can be used. It is compatible with
+any request/response transport protocol, such as HTTP.<a href="#section-5.7.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-2">Let us call the initiating Aggregator the "Leader" and the responding
+Aggregator the "Helper". The high-level idea is that the Leader and Helper will
+take turns running the computation locally until input from their peer is
+required:<a href="#section-5.7.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.7.1-3.1">
-              <p id="section-5.7.1-3.1.1">For a 1-round VDAF (e.g., Prio3 (<a href="#prio3" class="auto internal xref">Section 7</a>)), the Leader sends its prep share
+              <p id="section-5.7.1-3.1.1">For a 1-round VDAF (e.g., Prio3 in <a href="#prio3" class="auto internal xref">Section 7</a>), the Leader sends its prep share
 to the Helper, who computes the prep message locally, computes its output
 share, then sends the prep message to the Leader. Preparation requires just
 one round trip between the Leader and the Helper.<a href="#section-5.7.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-5.7.1-3.2">
-              <p id="section-5.7.1-3.2.1">For a 2-round VDAF (e.g., Poplar1 (<a href="#poplar1" class="auto internal xref">Section 8</a>)), the Leader sends its
+              <p id="section-5.7.1-3.2.1">For a 2-round VDAF (e.g., Poplar1 in <a href="#poplar1" class="auto internal xref">Section 8</a>), the Leader sends its
 first-round prep share to the Helper, who replies with the first-round prep
 message and its second-round prep share. In the next request, the Leader
 computes its second-round prep share locally, computes its output share, and
@@ -3294,10 +3300,9 @@ prep share for the next round.<a href="#section-5.7.1-3.3.1" class="pilcrow">¶<
           </ul>
 <p id="section-5.7.1-4">The Aggregators proceed in this ping-ponging fashion until a step of the
 computation fails (indicating the report is invalid and should be rejected) or
-preparation is completed. All told there are <code>ceil((ROUNDS+1)/2)</code>
+preparation is completed. All told there are <code>ceil((vdaf.ROUNDS+1)/2)</code>
 requests sent.<a href="#section-5.7.1-4" class="pilcrow">¶</a></p>
-<p id="section-5.7.1-5">Each message in the ping-pong protocol is structured as follows (expressed in
-TLS syntax as defined in <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>):<a href="#section-5.7.1-5" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-5">We specify protocol messages in the presentation language of TLS; see <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3" class="relref">Section 3</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>. Each message is structured as follows:<a href="#section-5.7.1-5" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-5.7.1-6">
 <pre>
 enum {
@@ -3321,9 +3326,10 @@ struct {
 } Message;
 </pre><a href="#section-5.7.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-5.7.1-7">These messages are used to transition between the states described in
-<a href="#vdaf-prep-comm" class="auto internal xref">Section 5.7</a>. The Leader's initial transition is computed with the
-following method, implemented on <code>Vdaf</code>:<a href="#section-5.7.1-7" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-7">These messages trigger all transitions in the state machine in
+<a href="#vdaf-prep-state-machine" class="auto internal xref">Figure 6</a>, except for the Leader's initial transition. The
+Leader's state is initialized using its local inputs with the following method
+on class <code>Vdaf</code>:<a href="#section-5.7.1-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-8">
 <pre>
 def ping_pong_leader_init(
@@ -3334,7 +3340,7 @@ def ping_pong_leader_init(
         nonce: bytes,
         public_share: bytes,
         input_share: bytes) -&gt; tuple[State, Optional[bytes]]:
-    """Called by the leader to initialize ping-ponging."""
+    """Called by the Leader to initialize ping-ponging."""
     try:
         (prep_state, prep_share) = self.prep_init(
             vdaf_verify_key,
@@ -3359,8 +3365,9 @@ def ping_pong_leader_init(
 Otherwise, if the state is <code>Continued</code>, then processing continues. Function
 <code>encode</code>  is used to encode the outbound message, here the <code>initialize</code> variant
 (hence <code>0</code>).<a href="#section-5.7.1-9" class="pilcrow">¶</a></p>
-<p id="section-5.7.1-10">The Leader sends the outbound message to the Helper. The Helper's initial
-transition is computed using the following procedure:<a href="#section-5.7.1-10" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-10">To continue processing the report, the Leader sends the outbound message to the
+Helper. The Helper's initial transition is computed using the following
+procedure:<a href="#section-5.7.1-10" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-11">
 <pre>
 def ping_pong_helper_init(
@@ -3373,7 +3380,7 @@ def ping_pong_helper_init(
         input_share: bytes,
         inbound: bytes) -&gt; tuple[State, Optional[bytes]]:
     """
-    Called by the helper in response to the leader's initial
+    Called by the Helper in response to the Leader's initial
     message.
     """
     try:
@@ -3407,9 +3414,9 @@ def ping_pong_helper_init(
         return (Rejected(), None)
 </pre><a href="#section-5.7.1-11" class="pilcrow">¶</a>
 </div>
-<p id="section-5.7.1-12">Procedure <code>decode</code> decodes the inbound message and returns the MessageType
-variant (<code>initialize</code>, <code>continue</code>, or <code>finalize</code>) and the sequence of fields.
-Procedure <code>ping_pong_transition</code> takes in the prep shares, combines them into
+<p id="section-5.7.1-12">Procedure <code>decode()</code> decodes the inbound message and returns the MessageType
+variant (<code>initialize</code>, <code>continue</code>, or <code>finish</code>) and the sequence of fields.
+Procedure <code>ping_pong_transition()</code> takes in the prep shares, combines them into
 the prep message, and computes the next prep state of the caller:<a href="#section-5.7.1-12" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-13">
 <pre>
@@ -3442,8 +3449,9 @@ def ping_pong_transition(
 <p id="section-5.7.1-14">The output is the <code>State</code> to which the Helper has transitioned and an encoded
 <code>Message</code>. If the Helper's state is <code>Finished</code> or <code>Rejected</code>, then processing
 halts. Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.7.1-14" class="pilcrow">¶</a></p>
-<p id="section-5.7.1-15">Next, the Helper sends the outbound message to the Leader. The Leader computes
-its next state transition using the function <code>ping_pong_leader_continued</code>:<a href="#section-5.7.1-15" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-15">To continue processing, the Helper sends the outbound message to the Leader.
+The Leader computes its next state transition using the following method on
+class <code>Vdaf</code>:<a href="#section-5.7.1-15" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-5.7.1-16">
 <pre>
 def ping_pong_leader_continued(
@@ -3454,7 +3462,7 @@ def ping_pong_leader_continued(
     inbound: bytes,
 ) -&gt; tuple[State, Optional[bytes]]:
     """
-    Called by the leader to start the next step of ping-ponging.
+    Called by the Leader to start the next step of ping-ponging.
     """
     return self.ping_pong_continued(
         True, ctx, agg_param, state, inbound)
@@ -3514,8 +3522,7 @@ def ping_pong_continued(
 </div>
 <p id="section-5.7.1-17">If the Leader's state is <code>Finished</code> or <code>Rejected</code>, then processing halts.
 Otherwise, the Leader sends the outbound message to the Helper. The Helper
-computes its next state transition using the function
-<code>ping_pong_helper_continued</code>:<a href="#section-5.7.1-17" class="pilcrow">¶</a></p>
+computes its next state transition using the following method on class <code>Vdaf</code>:<a href="#section-5.7.1-17" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-18">
 <pre>
 def ping_pong_helper_continued(
@@ -3525,7 +3532,7 @@ def ping_pong_helper_continued(
     state: State,
     inbound: bytes,
 ) -&gt; tuple[State, Optional[bytes]]:
-    """Called by the helper to continue ping-ponging."""
+    """Called by the Helper to continue ping-ponging."""
     return self.ping_pong_continued(
         False, ctx, agg_param, state, inbound)
 </pre><a href="#section-5.7.1-18" class="pilcrow">¶</a>
@@ -3549,11 +3556,11 @@ be used instead.<a href="#section-5.7.2-1" class="pilcrow">¶</a></p>
 Aggregator as the Leader and to all other Aggregators as Helpers.<a href="#section-5.7.2-2" class="pilcrow">¶</a></p>
 <p id="section-5.7.2-3">At the start of each round, the Leader requests from each Helper its prep
 share. After gathering each of the prep shares, the Leader computes the next
-prep message (via <code>prep_shares_to_prep()</code>) and broadcasts it to the Helpers. At
-this point, each Aggregator runs <code>prep_next()</code> locally to either recover an
-output share or, if more rounds of preparation are required, compute its updated state
-and prep share. If more are required, then the Helper responds to the broadcast
-message with its next prep share.<a href="#section-5.7.2-3" class="pilcrow">¶</a></p>
+prep message (via <code>vdaf.prep_shares_to_prep()</code>) and broadcasts it to the
+Helpers. At this point, each Aggregator runs <code>vdaf.prep_next()</code> locally to
+either recover an output share or, if more rounds of preparation are required,
+compute its updated state and prep share. If another round is required, then
+the Helper responds to the broadcast message with its next prep share.<a href="#section-5.7.2-3" class="pilcrow">¶</a></p>
 <p id="section-5.7.2-4">The Aggregators proceed in this way until each recovers an output share or some
 step of the computation fails.<a href="#section-5.7.2-4" class="pilcrow">¶</a></p>
 </section>
