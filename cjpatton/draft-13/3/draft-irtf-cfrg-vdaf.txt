@@ -944,12 +944,12 @@ Table of Contents
 
         Table 1: Constants and types defined by each concrete DAF.
 
-   These types define the inputs and outputs of DAF methods at various
-   stages of the computation.  Some of these values need to be written
-   to the network in order to carry out the computation.  In particular,
-   it is RECOMMENDED that concrete instantiations of the Daf interface
-   specify a method of encoding the PublicShare, InputShare, AggParam,
-   and AggShare.
+   The types in this table define the inputs and outputs of DAF methods
+   at various stages of the computation.  Some of these values need to
+   be written to the network in order to carry forward the computation.
+   In particular, it is RECOMMENDED that concrete instantiations of the
+   Daf interface specify a standard encoding the PublicShare,
+   InputShare, AggParam, and AggShare.
 
 4.1.  Sharding
 
@@ -999,12 +999,13 @@ Table of Contents
 
    Sharding is bound to a specific "application context".  The
    application context is a string intended to uniquely identify an
-   instance of the higher level protocol that uses the DAF.  This is
-   intended to ensure that aggregation succeeds only if the Clients and
-   Aggregators agree on the application context.  (Preparation binds the
-   application context, too; see Section 4.2.)  Note that, unlike VDAFs
-   (Section 5), there is no explicit signal of disagreement; it may only
-   manifest as a garbled aggregate result.
+   instance of the higher level protocol that uses the DAF.  The goal of
+   binding the application to DAF execution is to ensure that
+   aggregation succeeds only if the Clients and Aggregators agree on the
+   application context.  (Preparation binds the application context,
+   too; see Section 4.2.)  Note that, unlike VDAFs (Section 5), there is
+   no explicit signal of disagreement; it may only manifest as a garbled
+   aggregate result.
 
    The nonce is a public random value associated with the report.  It is
    referred to as a nonce because normally it will also be used as a
@@ -1249,16 +1250,15 @@ Table of Contents
          | Parameter        | Description                       |
          +==================+===================================+
          | ID: int          | Algorithm identifier for this     |
-         |                  | DAF, in [0, 2^32).                |
+         |                  | VDAF, in [0, 2^32).               |
          +------------------+-----------------------------------+
          | SHARES: int      | Number of input shares into which |
          |                  | each measurement is sharded.      |
          +------------------+-----------------------------------+
          | ROUNDS: int      | Number of rounds of communication |
-         |                  | during the preparation.           |
+         |                  | during preparation.               |
          +------------------+-----------------------------------+
-         | NONCE_SIZE: int  | Size of the nonce associated with |
-         |                  | the report.                       |
+         | NONCE_SIZE: int  | Size of the report nonce.         |
          +------------------+-----------------------------------+
          | RAND_SIZE: int   | Size of the random byte string    |
          |                  | consumed during sharding.         |
@@ -1281,8 +1281,7 @@ Table of Contents
          +------------------+-----------------------------------+
          | AggResult        | Type of the aggregate result.     |
          +------------------+-----------------------------------+
-         | PrepState        | Aggregator's state during         |
-         |                  | preparation.                      |
+         | PrepState        | Type of the prep state.           |
          +------------------+-----------------------------------+
          | PrepShare        | Type of each prep share.          |
          +------------------+-----------------------------------+
@@ -1292,16 +1291,15 @@ Table of Contents
                Table 2: Constants and types defined by each
                               concrete VDAF.
 
-   Some of these values need to be written to the network in order to
-   carry out the computation.  It is RECOMMENDED that concrete
-   instantiations of the Vdaf interface specify a method of encoding the
-   PublicShare, InputShare, AggParam, AggShare, PrepShare, and
-   PrepMessage.
+   Some of type types in the table above need to be written to the
+   network in order to carry out the computation.  It is RECOMMENDED
+   that concrete instantiations of the Vdaf interface specify a method
+   of encoding the PublicShare, InputShare, AggParam, AggShare,
+   PrepShare, and PrepMessage.
 
-   Each VDAF is identified by a unique, 32-bit integer ID.  Identifiers
-   for each VDAF specified in this document are defined in Table 18.
-   The following method is defined for each VDAF specified in this
-   document:
+   Each VDAF is identified by a unique, 32-bit integer, denoted ID.
+   Identifiers for each VDAF specified in this document are defined in
+   Table 18.  The following method is used by both Prio3 and Poplar1:
 
    def domain_separation_tag(self, usage: int, ctx: bytes) -> bytes:
        """
@@ -1375,7 +1373,7 @@ Table of Contents
    At the start of each round, each Aggregator broadcasts a message
    called a "preparation share", or "prep share" for short.  The prep
    shares are then combined into a single message called the
-   "preparation message", or "prep message".  The prep message may be
+   "preparation message", or "prep message".  The prep message MAY be
    computed by any one of the Aggregators.
 
    The prep message is disseminated to each of the Aggregators to begin
@@ -1390,8 +1388,11 @@ Table of Contents
    before the first round of communication.
 
    Unlike DAFs, VDAF preparation involves a secret "verification key"
-   held by each of the Aggregators.  This is used to verify validity of
-   the output shares they compute.
+   held by each of the Aggregators.  This key is used to verify validity
+   of the output shares they compute.  It is up to the high level
+   protocol in which the VDAF is used to arrange for the distribution of
+   the verification key prior to generating and processing reports.  See
+   Section 9 for details.
 
    Preparation is implemented by the following set of algorithms:
 
@@ -1405,10 +1406,6 @@ Table of Contents
       the public share, and one of the input shares generated by the
       Client.  It produces the Aggregator's initial prep state and prep
       share.
-
-      It is up to the high level protocol in which the VDAF is used to
-      arrange for the distribution of the verification key prior to
-      generating and processing reports.  See Section 9 for details.
 
       Protocols MUST ensure that public share consumed by each of the
       Aggregators is identical.  This is security critical for VDAFs
@@ -1458,7 +1455,8 @@ Table of Contents
 
    Aggregation parameter validation is as described for DAFs in
    Section 4.3.  Again, each Aggregator MUST validate each aggregation
-   parameter received by the Collector before beginning preparation.
+   parameter received by the Collector before beginning preparation with
+   that parameter.
 
 5.4.  Aggregation
 
