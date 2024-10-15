@@ -8582,7 +8582,7 @@ For Prio3, reports should only be aggregated once; for Poplar1, reports may be
 aggregated multiple times, but never twice at the same level of the tree.
 Otherwise, we risk re-using correlated randomness, which might compromise
 confidentiality of the Client's measurement.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
-<p id="section-9.4-2">Higher level application that use DAFs or VDAFs <span class="bcp14">MUST</span> enforce aggregation
+<p id="section-9.4-2">Higher level applications that use DAFs or VDAFs <span class="bcp14">MUST</span> enforce aggregation
 parameter validity. In particular, prior to beginning preparation with an
 aggregation parameter provided by the Collector, they <span class="bcp14">MUST</span> invoke <code>is_valid()</code>
 to decide if the parameter is valid given the sequence of previously accepted
@@ -9317,7 +9317,7 @@ class QueryGadget(Gadget[F]):
 <span>[<a href="#TestVectors" class="cite xref">TestVectors</a>]</span>. The test vector directory, <code>test_vec/vdaf</code>, contains a set of
 JSON files. Each file contains a test vector for an instance of class <code>Vdaf</code> as
 defined in <a href="#vdaf" class="auto internal xref">Section 5</a>. A test vector covers sharding, preparation, aggregation,
-and unsharding of each of several measurements. The test vector schema is
+and unsharding of a batch of several measurements. The test vector schema is
 defined below.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
 <div id="schema">
 <section id="appendix-B.1">

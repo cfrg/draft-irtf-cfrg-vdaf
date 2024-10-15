@@ -5861,7 +5861,7 @@ Table of Contents
    tree.  Otherwise, we risk re-using correlated randomness, which might
    compromise confidentiality of the Client's measurement.
 
-   Higher level application that use DAFs or VDAFs MUST enforce
+   Higher level applications that use DAFs or VDAFs MUST enforce
    aggregation parameter validity.  In particular, prior to beginning
    preparation with an aggregation parameter provided by the Collector,
    they MUST invoke is_valid() to decide if the parameter is valid given
@@ -6512,8 +6512,8 @@ Appendix B.  Test Vectors
    available at [TestVectors].  The test vector directory, test_vec/
    vdaf, contains a set of JSON files.  Each file contains a test vector
    for an instance of class Vdaf as defined in Section 5.  A test vector
-   covers sharding, preparation, aggregation, and unsharding of each of
-   several measurements.  The test vector schema is defined below.
+   covers sharding, preparation, aggregation, and unsharding of a batch
+   of several measurements.  The test vector schema is defined below.
 
 B.1.  Schema
 
