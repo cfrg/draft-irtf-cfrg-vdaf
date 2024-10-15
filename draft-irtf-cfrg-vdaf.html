@@ -2106,7 +2106,7 @@ type <code>T</code>.<a href="#section-2-7.6.1" class="pilcrow">¶</a></p>
 appears.<a href="#section-2-7.7.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-7.8">
-          <p id="section-2-7.8.1"><code>Sequence[T]</code> is either a list or tuple.<a href="#section-2-7.8.1" class="pilcrow">¶</a></p>
+          <p id="section-2-7.8.1"><code>Sequence[T]</code> is either a list or tuple of values of type <code>T</code>.<a href="#section-2-7.8.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-2-8">This document defines several byte-string constants. When comprised of printable
@@ -2122,8 +2122,8 @@ a particular encoding of that quantity as a byte string.<a href="#section-2-10" 
 <ul class="normal">
 <li class="normal" id="section-2-12.1">
           <p id="section-2-12.1.1"><code>additive_secret_share(x: list[F], num_shares: int, field: type[F]) -&gt;
-list[list[F]]</code> takes a vector <code>x</code> of field elements and returns multiple
-vectors of the same length, such that they all add up to the input vector.
+list[list[F]]</code> takes a vector <code>x</code> of field elements and returns <code>num_shares</code>
+vectors of length <code>len(x)</code> such that they all add up to the input vector.
 Note that this function is not used normatively in this document.<a href="#section-2-12.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.2">
@@ -2141,17 +2141,20 @@ the output value has the given type.<a href="#section-2-12.3.1" class="pilcrow">
 byte strings, i.e., <code>parts[0] + ... + parts[len(parts)-1]</code>.<a href="#section-2-12.4.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.5">
-          <p id="section-2-12.5.1"><code>from_be_bytes(encoded: bytes) -&gt; int</code> computes the inverse of
-<code>to_be_bytes()</code>.<a href="#section-2-12.5.1" class="pilcrow">¶</a></p>
+          <p id="section-2-12.5.1"><code>from_be_bytes(encoded: bytes) -&gt; int</code> decodes a big-endian byte string,
+i.e., returns the integer <code>x</code> for which <code>to_be_bytes(x, len(encoded)) ==
+encoded</code>.<a href="#section-2-12.5.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.6">
-          <p id="section-2-12.6.1"><code>from_le_bytes(encoded: bytes) -&gt; int</code> computes the inverse of
-<code>to_le_bytes()</code>.<a href="#section-2-12.6.1" class="pilcrow">¶</a></p>
+          <p id="section-2-12.6.1"><code>from_le_bytes(encoded: bytes) -&gt; int</code> decodes a little-endian byte string,
+i.e., returns the integer <code>x</code> for which <code>to_le_bytes(x, len(encoded)) ==
+encoded</code>.<a href="#section-2-12.6.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.7">
           <p id="section-2-12.7.1"><code>front(len: int, x: list[Any]) -&gt; tuple[list[Any], list[Any]]</code> splits <code>x</code>
 into two vectors, where the first vector is made up of the first <code>len</code>
-elements of <code>x</code>. I.e., <code>(x[:len], x[len:])</code>.<a href="#section-2-12.7.1" class="pilcrow">¶</a></p>
+elements of <code>x</code> and the second is made up of the remaining elements. This
+function is equivalent to <code>(x[:len], x[len:])</code>.<a href="#section-2-12.7.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.8">
           <p id="section-2-12.8.1"><code>gen_rand(len: int) -&gt; bytes</code> returns a byte array of the requested length
@@ -2171,16 +2174,18 @@ output values.<a href="#section-2-12.10.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.11">
           <p id="section-2-12.11.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
-is in the range <code>[0, 2^(8*len))</code> to big-endian bytes.<a href="#section-2-12.11.1" class="pilcrow">¶</a></p>
+is in the range <code>[0, 2^(8*len))</code> to a big-endian, <code>len</code>-byte string.<a href="#section-2-12.11.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.12">
           <p id="section-2-12.12.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
-is in the range <code>[0, 2^(8*len))</code> to little-endian bytes.<a href="#section-2-12.12.1" class="pilcrow">¶</a></p>
+is in the range <code>[0, 2^(8*len))</code> to a little-endian, <code>len</code>-byte string.<a href="#section-2-12.12.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.13">
           <p id="section-2-12.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
 evaluating the polynomial, <code>p(x)</code>. The coefficients of polynomials are stored
-in lists in ascending order of degree, starting with the constant coefficient.<a href="#section-2-12.13.1" class="pilcrow">¶</a></p>
+in lists in ascending order of degree, starting with the constant
+coefficient. The <code>field</code> parameter is the class object for <code>F</code> and is used by
+the implementation to construct field elements. (See <a href="#field" class="auto internal xref">Section 6.1</a>.)<a href="#section-2-12.13.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.14">
           <p id="section-2-12.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
@@ -2202,8 +2207,8 @@ index of the last non-zero coefficient of <code>p</code>.<a href="#section-2-12.
 and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-12.17.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-12.18">
-          <p id="section-2-12.18.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of zero bytes of the requested
-length (<code>len</code>).<a href="#section-2-12.18.1" class="pilcrow">¶</a></p>
+          <p id="section-2-12.18.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of bytes of the requested
+length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-12.18.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
