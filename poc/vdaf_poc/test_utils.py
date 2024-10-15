@@ -60,13 +60,11 @@ class TestVdaf(unittest.TestCase):
         self.assertTrue(0 <= vdaf.ID and vdaf.ID < 2 ** 32)
 
         # Run the VDAF on the set of measurmenets.
-        nonces = [gen_rand(vdaf.NONCE_SIZE) for _ in range(len(measurements))]
         verify_key = gen_rand(vdaf.VERIFY_KEY_SIZE)
         agg_result = run_vdaf(vdaf,
                               verify_key,
                               agg_param,
                               b"some application context",
-                              nonces,
                               measurements)
         self.assertEqual(agg_result, expected_agg_result)
 

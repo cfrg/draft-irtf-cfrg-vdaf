@@ -254,33 +254,21 @@ def run_vdaf(
         verify_key: bytes,
         agg_param: AggParam,
         ctx: bytes,
-        nonces: list[bytes],
         measurements: list[Measurement]) -> AggResult:
     """
-    Run the VDAF on a list of measurements.
-
     Pre-conditions:
 
         - `len(verify_key) == vdaf.VERIFY_KEY_SIZE`
-        - `len(nonces) == len(measurements)`
-        - `all(len(nonce) == vdaf.NONCE_SIZE for nonce in nonces)`
     """
     # REMOVE ME
     if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
         raise ValueError("incorrect verify_key size")
-    if any(len(nonce) != vdaf.NONCE_SIZE for nonce in nonces):
-        raise ValueError("incorrect nonce size")
-    if len(nonces) != len(measurements):
-        raise ValueError(
-            "measurements and nonces lists have different lengths"
-        )
 
     agg_shares = [vdaf.agg_init(agg_param)
                   for _ in range(vdaf.SHARES)]
-    for (nonce, measurement) in zip(nonces, measurements):
-        assert len(nonce) == vdaf.NONCE_SIZE
-
+    for measurement in measurements:
         # Sharding
+        nonce = gen_rand(vdaf.NONCE_SIZE)
         rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
