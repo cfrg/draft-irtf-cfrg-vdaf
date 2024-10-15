@@ -1979,7 +1979,7 @@ are used to encode measurements in some variants of Prio3
 ({{prio3-instantiations}}).
 
 ~~~ python
-def encode_into_vit_vec(
+def encode_into_bit_vec(
         cls,
         val: int,
         bits: int) -> list[Self]:
@@ -2002,7 +2002,7 @@ def encode_into_vit_vec(
         encoded.append(cls((val >> l) & 1))
     return encoded
 
-def decode_from_vit_vec(cls, vec: list[Self]) -> Self:
+def decode_from_bit_vec(cls, vec: list[Self]) -> Self:
     """
     Decode the field element from the bit representation, expressed
     as a vector of field elements `vec`.
@@ -3865,25 +3865,25 @@ class Sum(Valid[int, int, F]):
             out.append(self.GADGETS[0].eval(self.field, [b]))
 
         range_check = self.offset * shares_inv + \
-            self.field.decode_from_vit_vec(meas[:self.bits]) - \
-            self.field.decode_from_vit_vec(meas[self.bits:])
+            self.field.decode_from_bit_vec(meas[:self.bits]) - \
+            self.field.decode_from_bit_vec(meas[self.bits:])
         out.append(range_check)
         return out
 
     def encode(self, measurement: int) -> list[F]:
         encoded = []
-        encoded += self.field.encode_into_vit_vec(
+        encoded += self.field.encode_into_bit_vec(
             measurement,
             self.bits
         )
-        encoded += self.field.encode_into_vit_vec(
+        encoded += self.field.encode_into_bit_vec(
             measurement + self.offset.int(),
             self.bits
         )
         return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
-        return [self.field.decode_from_vit_vec(meas[:self.bits])]
+        return [self.field.decode_from_bit_vec(meas[:self.bits])]
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
         return output[0].int()
@@ -3999,14 +3999,14 @@ class SumVec(Valid[list[int], list[int], F]):
     def encode(self, measurement: list[int]) -> list[F]:
         encoded = []
         for val in measurement:
-            encoded += self.field.encode_into_vit_vec(
+            encoded += self.field.encode_into_bit_vec(
                 val, self.bits)
         return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
         truncated = []
         for i in range(self.length):
-            truncated.append(self.field.decode_from_vit_vec(
+            truncated.append(self.field.decode_from_bit_vec(
                 meas[i * self.bits: (i + 1) * self.bits]
             ))
         return truncated
@@ -4275,7 +4275,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         count_vec = meas[:self.length]
         weight = sum(count_vec, self.field(0))
         weight_reported = \
-            self.field.decode_from_vit_vec(meas[self.length:])
+            self.field.decode_from_bit_vec(meas[self.length:])
         weight_check = self.offset*shares_inv + weight - \
             weight_reported
 
@@ -4293,7 +4293,7 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
 
         encoded = []
         encoded += count_vec
-        encoded += self.field.encode_into_vit_vec(
+        encoded += self.field.encode_into_bit_vec(
             (self.offset + weight_reported).int(),
             self.bits_for_weight)
         return encoded
