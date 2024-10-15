@@ -101,10 +101,10 @@ Table of Contents
        6.2.2.  XofFixedKeyAes128
        6.2.3.  The Domain Separation Tag and Binder String
    7.  Prio3
-     7.1.  Fully Linear Proof (FLP) Systems
+     7.1.  Fully Linear Proofs (FLPs)
        7.1.1.  Encoding the Input
        7.1.2.  Multiple Proofs
-     7.2.  Construction
+     7.2.  Specification
        7.2.1.  Sharding
        7.2.2.  Preparation
        7.2.3.  Validity of Aggregation Parameters
@@ -112,7 +112,7 @@ Table of Contents
        7.2.5.  Unsharding
        7.2.6.  Auxiliary Functions
        7.2.7.  Message Serialization
-     7.3.  FLP Construction
+     7.3.  FLP Specification
        7.3.1.  Overview
        7.3.2.  Validity Circuits
        7.3.3.  Generating the Proof
@@ -127,14 +127,14 @@ Table of Contents
    8.  Poplar1
      8.1.  Incremental Distributed Point Functions (IDPFs)
        8.1.1.  Encoding Inputs as Indices
-     8.2.  Construction
+     8.2.  Specification
        8.2.1.  Sharding
        8.2.2.  Preparation
        8.2.3.  Validity of Aggregation Parameters
        8.2.4.  Aggregation
        8.2.5.  Unsharding
        8.2.6.  Message Serialization
-     8.3.  IDPF Construction
+     8.3.  IDPF Specification
        8.3.1.  Overview
        8.3.2.  Key Generation
        8.3.3.  Key Evaluation
@@ -158,14 +158,15 @@ Table of Contents
      A.2.  Polynomial Evaluation
      A.3.  Parallel Sum
      A.4.  Shims for Generating and Querying Proofs
-   Appendix B.  Test Vectors
-     B.1.  Schema
-       B.1.1.  Prio3Count
-       B.1.2.  Prio3Sum
-       B.1.3.  Prio3SumVec
-       B.1.4.  Prio3Histogram
-       B.1.5.  Prio3MultihotCountVec
-       B.1.6.  Poplar1
+   Appendix B.  VDAF Preparation State
+   Appendix C.  Test Vectors
+     C.1.  Schema
+       C.1.1.  Prio3Count
+       C.1.2.  Prio3Sum
+       C.1.3.  Prio3SumVec
+       C.1.4.  Prio3Histogram
+       C.1.5.  Prio3MultihotCountVec
+       C.1.6.  Poplar1
    Acknowledgments
    Authors' Addresses
 
@@ -1028,6 +1029,21 @@ Table of Contents
 
 4.2.  Preparation
 
+       Aggregator 0   Aggregator 1           Aggregator SHARES-1
+       ============   ============           ===================
+
+       input_share_0  input_share_1          input_share_[SHARES-1]
+         |              |                 ...  |
+         V              V                      V
+       +-----------+  +-----------+          +-----------+
+       | prep      |  | prep      |          | prep      |
+       +-----------+  +-----------+          +-----------+
+         |              |                 ...  |
+         V              V                      V
+       out_share_0    out_share_1         out_share_[SHARES-1]
+
+                   Figure 3: Illustration of preparation.
+
    Once an Aggregator has received the public share and its input share,
    the next step is to prepare the input share for aggregation.  This is
    accomplished using the preparation algorithm:
@@ -1093,7 +1109,7 @@ Table of Contents
                            V
                          agg_share_j
 
-           Figure 3: Illustration of aggregation.  The number of
+           Figure 4: Illustration of aggregation.  The number of
                  measurements in the batch is denoted by M.
 
    Once an Aggregator holds an output share, it adds it into its
@@ -1149,7 +1165,7 @@ Table of Contents
        Collector
        =========
 
-                   Figure 4: Illustration of unsharding.
+                   Figure 5: Illustration of unsharding.
 
    After the Aggregators have aggregated all measurements in the batch,
    each sends its aggregate share to the Collector, who runs the
@@ -1190,31 +1206,19 @@ Table of Contents
 
        Pre-conditions:
 
-           - `type(agg_param) == daf.AggParam`
-           - `type(measurement) == daf.Measurement` for each
-             `measurement` in `measurements`
-           - `len(nonce) == daf.NONCE_SIZE` for each `nonce` in `nonces`
            - `len(nonces) == len(measurements)`
+           - `all(len(nonce) == daf.NONCE_SIZE for nonce in nonces)`
        """
-       if any(len(nonce) != daf.NONCE_SIZE for nonce in nonces):
-           raise ValueError("incorrect nonce size")
-       if len(nonces) != len(measurements):
-           raise ValueError(
-               "measurements and nonces lists have different lengths"
-           )
-
        agg_shares: list[AggShare]
        agg_shares = [daf.agg_init(agg_param)
                      for _ in range(daf.SHARES)]
        for (measurement, nonce) in zip(measurements, nonces):
-           # Each Client shards its measurement into input shares and
-           # distributes them among the Aggregators.
+           # Sharding
            rand = gen_rand(daf.RAND_SIZE)
            (public_share, input_shares) = \
                daf.shard(ctx, measurement, nonce, rand)
 
-           # Each Aggregator computes its output share from its input
-           # share and aggregates it.
+           # Preparation, aggregation
            for j in range(daf.SHARES):
                out_share = daf.prep(ctx, j, agg_param, nonce,
                                     public_share, input_shares[j])
@@ -1222,7 +1226,7 @@ Table of Contents
                                               agg_shares[j],
                                               out_share)
 
-       # Collector unshards the aggregate result.
+       # Unsharding
        num_measurements = len(measurements)
        agg_result = daf.unshard(agg_param, agg_shares,
                                 num_measurements)
@@ -1372,7 +1376,7 @@ Table of Contents
          V              V                      V
        out_share_0    out_share_1         out_share_[SHARES-1]
 
-          Figure 5: Illustration of interactive VDAF preparation.
+          Figure 6: Illustration of interactive VDAF preparation.
 
    Preparation is organized into a number of rounds.  The number of
    rounds depends on the VDAF: Prio3 (Section 7) has one round and
@@ -1514,27 +1518,17 @@ Table of Contents
            - `len(nonces) == len(measurements)`
            - `all(len(nonce) == vdaf.NONCE_SIZE for nonce in nonces)`
        """
-
-       if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
-           raise ValueError("incorrect verify_key size")
-       if any(len(nonce) != vdaf.NONCE_SIZE for nonce in nonces):
-           raise ValueError("incorrect nonce size")
-       if len(nonces) != len(measurements):
-           raise ValueError(
-               "measurements and nonces lists have different lengths"
-           )
-
        agg_shares = [vdaf.agg_init(agg_param)
                      for _ in range(vdaf.SHARES)]
        for (nonce, measurement) in zip(nonces, measurements):
            assert len(nonce) == vdaf.NONCE_SIZE
 
-           # Each Client shards its measurement into input shares.
+           # Sharding
            rand = gen_rand(vdaf.RAND_SIZE)
            (public_share, input_shares) = \
                vdaf.shard(ctx, measurement, nonce, rand)
 
-           # Each Aggregator initializes its preparation state.
+           # Initialize preparation
            prep_states = []
            outbound_prep_shares = []
            for j in range(vdaf.SHARES):
@@ -1546,7 +1540,7 @@ Table of Contents
                prep_states.append(state)
                outbound_prep_shares.append(share)
 
-           # Aggregators complete preparation.
+           # Complete preparation
            for i in range(vdaf.ROUNDS - 1):
                prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                    agg_param,
@@ -1563,7 +1557,7 @@ Table of Contents
                                                agg_param,
                                                outbound_prep_shares)
 
-           # Each Aggregator computes and aggregates its output share.
+           # Aggregation
            for j in range(vdaf.SHARES):
                out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
                assert not isinstance(out_share, tuple)
@@ -1571,7 +1565,7 @@ Table of Contents
                                                agg_shares[j],
                                                out_share)
 
-       # Collector unshards the aggregate.
+       # Unsharding
        num_measurements = len(measurements)
        agg_result = vdaf.unshard(agg_param, agg_shares,
                                  num_measurements)
@@ -1608,41 +1602,15 @@ Table of Contents
     |                |
     +--> Rejected <--+
 
-                Figure 6: State machine of VDAF preparation.
+                Figure 7: State machine of VDAF preparation.
 
    State transitions are made when the state is acted upon by the
    Aggregator's local inputs and/or messages sent by its co-Aggregators.
    The initial state is Start.  The terminal states are: Rejected,
    indicating that the report cannot be processed any further; and
    Finished(out_share), indicating that the Aggregator has recovered an
-   output share out_share.
-
-   class State:
-       pass
-
-   class Start(State):
-       pass
-
-   class Continued(State, Generic[PrepState]):
-       def __init__(self, prep_state: PrepState, prep_round: int):
-           self.prep_state = prep_state
-           self.prep_round = prep_round
-
-       def __eq__(self, other: object) -> bool:
-           return isinstance(other, Continued) and \
-               self.prep_state == other.prep_state and \
-               self.prep_round == other.prep_round
-
-   class Finished(State, Generic[OutShare]):
-       def __init__(self, out_share: OutShare):
-           self.out_share = out_share
-
-       def __eq__(self, other: object) -> bool:
-           return isinstance(other, Finished) and \
-               self.out_share == other.out_share
-
-   class Rejected(State):
-       pass
+   output share out_share.  For completeness, we define these states in
+   Appendix B.
 
    The methods described in this section are defined in terms of opaque
    byte strings.  A compatible Vdaf MUST specify methods for encoding
@@ -1712,7 +1680,7 @@ Table of Contents
    } Message;
 
    These messages trigger all transitions in the state machine in
-   Figure 6, except for the Leader's initial transition.  The Leader's
+   Figure 7, except for the Leader's initial transition.  The Leader's
    state is initialized using its local inputs with the following method
    on class Vdaf:
 
@@ -2030,7 +1998,7 @@ Table of Contents
    the input.  These are used to encode measurements in some variants of
    Prio3 (Section 7.4).
 
-   def encode_into_bit_vector(
+   def encode_into_bit_vec(
            cls,
            val: int,
            bits: int) -> list[Self]:
@@ -2053,7 +2021,7 @@ Table of Contents
            encoded.append(cls((val >> l) & 1))
        return encoded
 
-   def decode_from_bit_vector(cls, vec: list[Self]) -> Self:
+   def decode_from_bit_vec(cls, vec: list[Self]) -> Self:
        """
        Decode the field element from the bit representation, expressed
        as a vector of field elements `vec`.
@@ -2423,9 +2391,9 @@ Table of Contents
    suitable for any validity circuit is specified in Section 7.3.
    Finally, variants of Prio3 for various types of aggregation tasks are
    specified in Section 7.4.  Test vectors for each variant can be found
-   in Appendix B.
+   in Appendix C.
 
-7.1.  Fully Linear Proof (FLP) Systems
+7.1.  Fully Linear Proofs (FLPs)
 
    Conceptually, an FLP is a two-party protocol executed by a prover and
    a verifier.  In actual use, however, the prover's computation is
@@ -2665,7 +2633,7 @@ Table of Contents
    See Section 9.7 for guidance on choosing the field size and number of
    proofs.
 
-7.2.  Construction
+7.2.  Specification
 
    This section specifies Prio3, an implementation of the Vdaf interface
    defined in Section 5.  The parameters and types required by the Vdaf
@@ -3057,22 +3025,6 @@ Table of Contents
        prep_share = (verifiers_share, joint_rand_part)
        return (prep_state, prep_share)
 
-   def prep_next(
-       self,
-       _ctx: bytes,
-       prep_state: Prio3PrepState[F],
-       prep_msg: Optional[bytes]
-   ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
-       joint_rand_seed = prep_msg
-       (out_share, corrected_joint_rand_seed) = prep_state
-
-       # If joint randomness was used, check that the value computed by
-       # the Aggregators matches the value indicated by the Client.
-       if joint_rand_seed != corrected_joint_rand_seed:
-           raise ValueError('joint randomness check failed')
-
-       return out_share
-
    def prep_shares_to_prep(
            self,
            ctx: bytes,
@@ -3101,6 +3053,22 @@ Table of Contents
        if self.flp.JOINT_RAND_LEN > 0:
            joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
        return joint_rand_seed
+
+   def prep_next(
+       self,
+       _ctx: bytes,
+       prep_state: Prio3PrepState[F],
+       prep_msg: Optional[bytes]
+   ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
+       joint_rand_seed = prep_msg
+       (out_share, corrected_joint_rand_seed) = prep_state
+
+       # If joint randomness was used, check that the value computed by
+       # the Aggregators matches the value indicated by the Client.
+       if joint_rand_seed != corrected_joint_rand_seed:
+           raise ValueError('joint randomness check failed')
+
+       return out_share
 
 7.2.3.  Validity of Aggregation Parameters
 
@@ -3365,7 +3333,7 @@ Table of Contents
        Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
    } Prio3AggShare;
 
-7.3.  FLP Construction
+7.3.  FLP Specification
 
         +================+=======================================+
         | Parameter      | Value                                 |
@@ -3674,7 +3642,7 @@ Table of Contents
     |
     V proof
 
-          Figure 7: Components of the proof generation algorithm.
+          Figure 8: Components of the proof generation algorithm.
 
    The proof generation algorithm invokes the validity circuit on the
    encoded measurement and joint randomness.  The validity circuit in
@@ -3750,7 +3718,7 @@ Table of Contents
     |
     V verifier (share)
 
-                Figure 8: Components of the query algorithm.
+                Figure 9: Components of the query algorithm.
 
    The query algorithm invokes the validity circuit on the encoded
    measurement and joint randomness.  It evaluates the gadget
@@ -3849,7 +3817,7 @@ Table of Contents
     |
     V is_valid
 
-              Figure 9: Components of the decision algorithm.
+              Figure 10: Components of the decision algorithm.
 
    The decision algorithm consumes the verifier message.  (Each of the
    Aggregators computes an additive share of the verifier message after
@@ -3884,7 +3852,7 @@ Table of Contents
    aggregation tasks.  Each variant is determined by a field
    (Section 6.1), a validity circuit (Section 7.3.2),and the number of
    proofs to generate and verify.  All gadgets are listed in Appendix A.
-   Test vectors for each can be found in Appendix B.
+   Test vectors for each can be found in Appendix C.
 
 7.4.1.  Prio3Count
 
@@ -4013,25 +3981,25 @@ Table of Contents
                out.append(self.GADGETS[0].eval(self.field, [b]))
 
            range_check = self.offset * shares_inv + \
-               self.field.decode_from_bit_vector(meas[:self.bits]) - \
-               self.field.decode_from_bit_vector(meas[self.bits:])
+               self.field.decode_from_bit_vec(meas[:self.bits]) - \
+               self.field.decode_from_bit_vec(meas[self.bits:])
            out.append(range_check)
            return out
 
        def encode(self, measurement: int) -> list[F]:
            encoded = []
-           encoded += self.field.encode_into_bit_vector(
+           encoded += self.field.encode_into_bit_vec(
                measurement,
                self.bits
            )
-           encoded += self.field.encode_into_bit_vector(
+           encoded += self.field.encode_into_bit_vec(
                measurement + self.offset.int(),
                self.bits
            )
            return encoded
 
        def truncate(self, meas: list[F]) -> list[F]:
-           return [self.field.decode_from_bit_vector(meas[:self.bits])]
+           return [self.field.decode_from_bit_vec(meas[:self.bits])]
 
        def decode(self, output: list[F], _num_measurements: int) -> int:
            return output[0].int()
@@ -4155,14 +4123,14 @@ Table of Contents
        def encode(self, measurement: list[int]) -> list[F]:
            encoded = []
            for val in measurement:
-               encoded += self.field.encode_into_bit_vector(
+               encoded += self.field.encode_into_bit_vec(
                    val, self.bits)
            return encoded
 
        def truncate(self, meas: list[F]) -> list[F]:
            truncated = []
            for i in range(self.length):
-               truncated.append(self.field.decode_from_bit_vector(
+               truncated.append(self.field.decode_from_bit_vec(
                    meas[i * self.bits: (i + 1) * self.bits]
                ))
            return truncated
@@ -4446,7 +4414,7 @@ Table of Contents
            count_vec = meas[:self.length]
            weight = sum(count_vec, self.field(0))
            weight_reported = \
-               self.field.decode_from_bit_vector(meas[self.length:])
+               self.field.decode_from_bit_vec(meas[self.length:])
            weight_check = self.offset*shares_inv + weight - \
                weight_reported
 
@@ -4464,7 +4432,7 @@ Table of Contents
 
            encoded = []
            encoded += count_vec
-           encoded += self.field.encode_into_bit_vector(
+           encoded += self.field.encode_into_bit_vec(
                (self.offset + weight_reported).int(),
                self.bits_for_weight)
            return encoded
@@ -4546,7 +4514,7 @@ Table of Contents
    of IDPFs is defined in Section 8.1; a specification of the IDPF of
    [BBCGGI21] is given in Section 8.3.  The Poplar1 VDAF is defined in
    Section 8.2 in terms of a generic IDPF.  Test vectors for Poplar1 can
-   be found in Appendix B.
+   be found in Appendix C.
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
@@ -4717,7 +4685,7 @@ Table of Contents
    ambiguous.  For example, each input could be padded with b"\x01"
    followed by as many b"\x00" bytes as needed.
 
-8.2.  Construction
+8.2.  Specification
 
    This section specifies Poplar1, an implementation of the Vdaf
    interface (Section 5).  It is defined in terms of the Idpf
@@ -5394,7 +5362,7 @@ Table of Contents
    previous execution will have their children included in the next.
    This would help reduce communication overhead.
 
-8.3.  IDPF Construction
+8.3.  IDPF Specification
 
    In this section we specify a concrete IDPF suitable for instantiating
    Poplar1.  The constant and type definitions required by the Idpf
@@ -6506,7 +6474,39 @@ A.4.  Shims for Generating and Querying Proofs
            wrapped_valid.GADGETS = wrapped_gadgets
            return wrapped_valid
 
-Appendix B.  Test Vectors
+Appendix B.  VDAF Preparation State
+
+   This section lists the classes used to define each Aggregator's state
+   during VDAF preparation (Section 5.7).
+
+   class State:
+       pass
+
+   class Start(State):
+       pass
+
+   class Continued(State, Generic[PrepState]):
+       def __init__(self, prep_state: PrepState, prep_round: int):
+           self.prep_state = prep_state
+           self.prep_round = prep_round
+
+       def __eq__(self, other: object) -> bool:
+           return isinstance(other, Continued) and \
+               self.prep_state == other.prep_state and \
+               self.prep_round == other.prep_round
+
+   class Finished(State, Generic[OutShare]):
+       def __init__(self, out_share: OutShare):
+           self.out_share = out_share
+
+       def __eq__(self, other: object) -> bool:
+           return isinstance(other, Finished) and \
+               self.out_share == other.out_share
+
+   class Rejected(State):
+       pass
+
+Appendix C.  Test Vectors
 
    Test vectors for Prio3 (Section 7) and Poplar1 (Section 8) are
    available at [TestVectors].  The test vector directory, test_vec/
@@ -6515,7 +6515,7 @@ Appendix B.  Test Vectors
    covers sharding, preparation, aggregation, and unsharding of a batch
    of several measurements.  The test vector schema is defined below.
 
-B.1.  Schema
+C.1.  Schema
 
    ctx:  The application context string encoded in hexadecimal.
 
@@ -6555,18 +6555,18 @@ B.1.  Schema
    The schema also includes whatever parameters are required to
    instantiate the VDAF.  These are listed in the subsections below.
 
-B.1.1.  Prio3Count
+C.1.1.  Prio3Count
 
    shares:  The number of shares, an integer.
 
-B.1.2.  Prio3Sum
+C.1.2.  Prio3Sum
 
    shares:  The number of shares, an integer.
 
    max_measurement:  The largest measurement, an integer.  Each element
       is in the range [0, max_measurement].
 
-B.1.3.  Prio3SumVec
+C.1.3.  Prio3SumVec
 
    shares:  The number of shares, an integer.
 
@@ -6577,7 +6577,7 @@ B.1.3.  Prio3SumVec
    bits:  the bit length of each element of the vector, an integer.
       Each element is in [0, 2^bits).
 
-B.1.4.  Prio3Histogram
+C.1.4.  Prio3Histogram
 
    shares:  The number of shares, an integer.
 
@@ -6585,7 +6585,7 @@ B.1.4.  Prio3Histogram
 
    chunk_length:  the length of each vector chunk, an integer.
 
-B.1.5.  Prio3MultihotCountVec
+C.1.5.  Prio3MultihotCountVec
 
    shares:  The number of shares, an integer.
 
@@ -6596,7 +6596,7 @@ B.1.5.  Prio3MultihotCountVec
    max_weight:  The largest vector weight, an integer.  The sum of the
       elements must be in [0, max_weight].
 
-B.1.6.  Poplar1
+C.1.6.  Poplar1
 
    bits:  The length of each input in bits, an integer.
 
