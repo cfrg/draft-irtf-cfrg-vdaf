@@ -220,29 +220,13 @@ def run_daf(
         ],
         ctx: bytes,
         agg_param: AggParam,
-        measurements: list[Measurement],
-        nonces: list[bytes]) -> AggResult:
-    """
-    Run a DAF on a list of measurements.
-
-    Pre-conditions:
-
-        - `len(nonces) == len(measurements)`
-        - `all(len(nonce) == daf.NONCE_SIZE for nonce in nonces)`
-    """
-    # REMOVE ME
-    if any(len(nonce) != daf.NONCE_SIZE for nonce in nonces):
-        raise ValueError("incorrect nonce size")
-    if len(nonces) != len(measurements):
-        raise ValueError(
-            "measurements and nonces lists have different lengths"
-        )
-
+        measurements: list[Measurement]) -> AggResult:
     agg_shares: list[AggShare]
     agg_shares = [daf.agg_init(agg_param)
                   for _ in range(daf.SHARES)]
-    for (measurement, nonce) in zip(measurements, nonces):
+    for measurement in measurements:
         # Sharding
+        nonce = gen_rand(daf.NONCE_SIZE)
         rand = gen_rand(daf.RAND_SIZE)
         (public_share, input_shares) = \
             daf.shard(ctx, measurement, nonce, rand)

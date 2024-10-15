@@ -1202,7 +1202,6 @@ recover the aggregate result:
 Secure execution of a DAF involves simulating the following procedure over an
 insecure network.
 
-
 ~~~ python
 def run_daf(
         daf: Daf[
@@ -1216,21 +1215,13 @@ def run_daf(
         ],
         ctx: bytes,
         agg_param: AggParam,
-        measurements: list[Measurement],
-        nonces: list[bytes]) -> AggResult:
-    """
-    Run a DAF on a list of measurements.
-
-    Pre-conditions:
-
-        - `len(nonces) == len(measurements)`
-        - `all(len(nonce) == daf.NONCE_SIZE for nonce in nonces)`
-    """
+        measurements: list[Measurement]) -> AggResult:
     agg_shares: list[AggShare]
     agg_shares = [daf.agg_init(agg_param)
                   for _ in range(daf.SHARES)]
-    for (measurement, nonce) in zip(measurements, nonces):
+    for measurement in measurements:
         # Sharding
+        nonce = gen_rand(daf.NONCE_SIZE)
         rand = gen_rand(daf.RAND_SIZE)
         (public_share, input_shares) = \
             daf.shard(ctx, measurement, nonce, rand)
@@ -1250,17 +1241,17 @@ def run_daf(
     return agg_result
 ~~~
 
-The inputs to this procedure are the same as the aggregation function computed by
-the DAF: an aggregation parameter and a sequence of measurements. The procedure
-prescribes how a DAF is executed in a "benign" environment in which there is no
-adversary and the messages are passed among the protocol participants over
-secure point-to-point channels. In reality, these channels need to be
-instantiated by some "wrapper protocol", such as {{?DAP}}, that realizes these
-channels using suitable cryptographic mechanisms. Moreover, some fraction of
-the Aggregators (or Clients) may be malicious and diverge from their prescribed
-behaviors. {{security}} describes the execution of the DAF in various
-adversarial environments and what properties the wrapper protocol needs to
-provide in each.
+The inputs to this procedure include the parameters of the aggregation function
+computed by the DAF: an aggregation parameter and a sequence of measurements.
+It also includes the application context. The procedure prescribes how a DAF is
+executed in a "benign" environment in which there is no adversary and the
+messages are passed among the protocol participants over secure point-to-point
+channels. In reality, these channels need to be instantiated by some "wrapper
+protocol", such as {{?DAP}}, that realizes these channels using suitable
+cryptographic mechanisms. Moreover, some fraction of the Aggregators (or
+Clients) may be malicious and diverge from their prescribed behaviors.
+{{security}} describes the execution of the DAF in various adversarial
+environments and what properties the wrapper protocol needs to provide in each.
 
 # Definition of VDAFs {#vdaf}
 
@@ -1489,23 +1480,17 @@ def run_vdaf(
         verify_key: bytes,
         agg_param: AggParam,
         ctx: bytes,
-        nonces: list[bytes],
         measurements: list[Measurement]) -> AggResult:
     """
-    Run the VDAF on a list of measurements.
-
     Pre-conditions:
 
         - `len(verify_key) == vdaf.VERIFY_KEY_SIZE`
-        - `len(nonces) == len(measurements)`
-        - `all(len(nonce) == vdaf.NONCE_SIZE for nonce in nonces)`
     """
     agg_shares = [vdaf.agg_init(agg_param)
                   for _ in range(vdaf.SHARES)]
-    for (nonce, measurement) in zip(nonces, measurements):
-        assert len(nonce) == vdaf.NONCE_SIZE
-
+    for measurement in measurements:
         # Sharding
+        nonce = gen_rand(vdaf.NONCE_SIZE)
         rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
@@ -1554,8 +1539,8 @@ def run_vdaf(
     return agg_result
 ~~~
 
-The inputs to this algorithm are the aggregation parameter, a list of
-measurements, and a nonce for each measurement. As explained in
+The inputs to this algorithm are the verification key, application context,
+aggregation parameter, and a list of measurements. As explained in
 {{daf-execution}}, the secure execution of a VDAF requires the application to
 instantiate secure channels between each of the protocol participants.
 

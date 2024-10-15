@@ -2,7 +2,6 @@ import unittest
 from functools import reduce
 from typing import TypeVar
 
-from vdaf_poc.common import gen_rand
 from vdaf_poc.daf import Daf, run_daf
 from vdaf_poc.field import Field128
 from vdaf_poc.xof import XofTurboShake128
@@ -120,12 +119,10 @@ class TestDafCase(unittest.TestCase):
         self.assertTrue(0 <= daf.ID and daf.ID < 2 ** 32)
 
         # Run the DAF on the set of measurements.
-        nonces = [gen_rand(daf.NONCE_SIZE) for _ in range(len(measurements))]
         agg_result = run_daf(daf,
                              b'some application',
                              agg_param,
-                             measurements,
-                             nonces)
+                             measurements)
         self.assertEqual(agg_result, expected_agg_result)
 
     def test_test_daf(self) -> None:
