@@ -749,7 +749,7 @@ Table of Contents
 
    *  from_be_bytes(encoded: bytes) -> int decodes a big-endian byte
       string, i.e., returns the integer x for which to_be_bytes(x,
-      len(encoded)) == encoded.
+      len(encoded)) = encoded.
 
    *  from_le_bytes(encoded: bytes) -> int decodes a little-endian byte
       string, i.e., returns the integer x for which to_le_bytes(x,
