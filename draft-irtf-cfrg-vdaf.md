@@ -37,13 +37,14 @@ normative:
   AES:
     title: "Advanced Encryption Standard (AES)"
     author:
-      - ins: M. Dworkin
-      - ins: E. Barker
-      - ins: J. Nechvatal
-      - ins: J. Foti,
-      - ins: L. Bassham
-      - ins: E. Roback
-      - ins: J. Dray Jr.
+      - name: Morris J. Dworkin
+      - name: Elaine Barker
+      - name: James R. Nechvatal
+      - name: James Foti
+      - name: Lawrence E. Bassham
+      - name: E. Roback
+      - name: James F. Dray Jr.
+        ins: J. Dray Jr. # xml2rfc abbreviates "name" as "J F. D. Jr."
     date: 2001
     target: https://www.nist.gov/publications/advanced-encryption-standard-aes
 
@@ -52,105 +53,105 @@ informative:
   AGJOP21:
     title: "Prio+: Privacy Preserving Aggregate Statistics via Boolean Shares"
     author:
-      - ins: S. Addanki
-      - ins: K. Garbe
-      - ins: E. Jaffe
-      - ins: R. Ostrovsky
-      - ins: A. Polychroniadou
+      - name: Surya Addanki
+      - name: Kevin Garbe
+      - name: Eli Jaffe
+      - name: Rafail Ostrovsky
+      - name: Antigoni Polychroniadou
     date: 2022
-    seriesinfo: Security and Cryptography for Networks (SCN)
+    refcontent: "Security and Cryptography for Networks (SCN)"
     target: https://ia.cr/2021/576
 
   BBCGGI19:
     title: "Zero-Knowledge Proofs on Secret-Shared Data via Fully Linear PCPs"
     author:
-      - ins: D. Boneh
-      - ins: E. Boyle
-      - ins: H. Corrigan-Gibbs
-      - ins: N. Gilboa
-      - ins: Y. Ishai
+      - name: Dan Boneh
+      - name: Elette Boyle
+      - name: Henry Corrigan-Gibbs
+      - name: Niv Gilboa
+      - name: Yuval Ishai
     date: 2019
-    seriesinfo: Crypto
+    refcontent: "Crypto"
     target: https://ia.cr/2019/188
 
   BBCGGI21:
     title: "Lightweight Techniques for Private Heavy Hitters"
     author:
-      - ins: D. Boneh
-      - ins: E. Boyle
-      - ins: H. Corrigan-Gibbs
-      - ins: N. Gilboa
-      - ins: Y. Ishai
+      - name: Dan Boneh
+      - name: Elette Boyle
+      - name: Henry Corrigan-Gibbs
+      - name: Niv Gilboa
+      - name: Yuval Ishai
     date: 2021
-    seriesinfo: IEEE Security & Privacy (S&P)
+    refcontent: "IEEE Security & Privacy (S&P)"
     target: https://ia.cr/2021/017
 
   BBCGGI23:
     title: "Arithmetic Sketching"
     author:
-      - ins: D. Boneh
-      - ins: E. Boyle
-      - ins: H. Corrigan-Gibbs
-      - ins: N. Gilboa
-      - ins: Y. Ishai
+      - name: Dan Boneh
+      - name: Elette Boyle
+      - name: Henry Corrigan-Gibbs
+      - name: Niv Gilboa
+      - name: Yuval Ishai
     date: 2023
-    seriesinfo: Crypto
+    refcontent: "Crypto"
     target: https://ia.cr/2023/1012
 
   BGI15:
     title: "Function Secret Sharing"
     author:
-      - ins: E. Boyle
-      - ins: N. Gilboa
-      - ins: Y. Ishai
+      - name: Elette Boyle
+      - name: Niv Gilboa
+      - name: Yuval Ishai
     date: 2015
-    seriesinfo: Eurocrypt
+    refcontent: "Eurocrypt"
     target: https://www.iacr.org/archive/eurocrypt2015/90560300/90560300.pdf
 
   CGB17:
     title: "Prio: Private, Robust, and Scalable Computation of Aggregate Statistics"
     author:
-      - ins: H. Corrigan-Gibbs
-      - ins: D. Boneh
+      - name: Dan Boneh
+      - name: Henry Corrigan-Gibbs
     date: 2017
-    seriesinfo: USENIX Symposium on Networked Systems Design and Implementation (NSDI)
+    refcontent: "USENIX Symposium on Networked Systems Design and Implementation (NSDI)"
     target: https://dl.acm.org/doi/10.5555/3154630.3154652
 
   Dou02:
     title: "The Sybil Attack"
     author:
-      - ins: J. Douceur
+      - name: John R. Douceur
     date: 2002
-    seriesinfo: International Workshop on Peer-to-Peer Systems (IPTPS)
+    refcontent: "International Workshop on Peer-to-Peer Systems (IPTPS)"
     target: https://doi.org/10.1007/3-540-45748-8_24
 
   DPRS23:
     title: "Verifiable Distributed Aggregation Functions"
     author:
-      - ins: H. Davis
-      - ins: C. Patton
-      - ins: M. Rosulek
-      - ins: P. Schoppmann
+      - ins: Hannah Davis
+      - ins: Christopher Patton
+      - ins: Mike Rosulek
+      - ins: Phillipp Schoppmann
     date: 2023
-    seriesinfo: Privacy Enhancing Technologies Symposium (PETS)
+    refcontent: "Privacy Enhancing Technologies Symposium (PETS)"
     target: https://ia.cr/2023/130
 
   Dwo06:
     title: "Differential Privacy"
     author:
-      - ins: C. Dwork
+      - ins: Cynthia Dwork
     date: 2006
-    seriesinfo: International Colloquium on Automata, Languages, and Programming (ICALP)
+    refcontent: "International Colloquium on Automata, Languages, and Programming (ICALP)"
     target: https://link.springer.com/chapter/10.1007/11787006_1
 
   EPK14:
     title: "RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response"
     author:
-      - ins: Ú. Erlingsson
-      - ins: V. Pihur
-      - ins: A. Korolova
+      - name: Úlfar Erlingsson
+      - name: Vasyl Pihur
+      - name: Aleksandra Korolova
     date: 2014
-    seriesinfo: ACM Conference on Computer and Communications Security (CCS)
+    refcontent: "ACM Conference on Computer and Communications Security (CCS)"
     target: https://dl.acm.org/doi/10.1145/2660267.2660348
 
   ENPA:
@@ -161,77 +162,77 @@ informative:
   GI14:
     title: "Distributed Point Functions and Their Applications"
     author:
-      - ins: N. Gilboa
-      - ins: Y. Ishai
+      - name: Niv Gilboa
+      - name: Yuval Ishai
     date: 2014
-    seriesinfo: Eurocrypt
+    refcontent: "Eurocrypt"
     target: https://link.springer.com/chapter/10.1007/978-3-642-55220-5_35
 
   GSZ20:
     title: "Guaranteed Output Delivery Comes Free in Honest Majority MPC"
     author:
-      - ins: V. Goyal
-      - ins: Y. Song
-      - ins: C. Zhu
+      - name: Vipul Goyal
+      - name: Yifan Song
+      - name: Chenzhi Zhu
     date: 2020
-    seriesinfo: Crypto
+    refcontent: "Crypto"
     target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_22
 
   GKWWY20:
-    title: Better concrete security for half-gates garbling (in the multi-instance setting)
+    title: "Better concrete security for half-gates garbling (in the multi-instance setting)"
     author:
-      - ins: C. Guo
-      - ins: J. Katz
-      - ins: X. Wang
-      - ins: C. Weng
-      - ins: Y. Yu
+      - name: Chun Guo
+      - name: Jonathan Katz
+      - name: Xiao Wang
+      - name: Chenkai Weng
+      - name: and Yu Yu
     date: 2020
-    seriesinfo: Crypto
+    refcontent: "Crypto"
     target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_28
 
   GKWY20:
-    title: Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers
+    title: "Efficient and Secure Multiparty Computation from Fixed-Key Block Ciphers"
     author:
-      - ins: C. Guo
-      - ins: J. Katz
-      - ins: X. Wang
-      - ins: Y. Yu
+      - name: Chun Guo
+      - name: Jonathan Katz
+      - name: Xiao Wang
+      - name: Yu Yu
     date: 2020
-    seriesinfo: IEEE Security & Privacy (S&P)
+    refcontent: "IEEE Security & Privacy (S&P)"
     target: https://eprint.iacr.org/2019/074
 
   MPDST25:
     title: "Mastic: Private Weighted Heavy-Hitters and Attribute-Based Metrics"
     author:
-      - ins: D. Mouris
-      - ins: C. Patton
-      - ins: H. Davis
-      - ins: P. Sarkar
-      - ins: N.G. Tsoutsos
+      - name: Dimitris Mouris
+      - name: Christopher Patton
+      - name: Hannah Davis
+      - name: Pratik Sarkar
+      - name: Nektarios Georgios Tsoutsos
     date: 2025
-    seriesinfo: Privacy Enhancing Technologies Symposium (PETS)
+    refcontent: "Privacy Enhancing Technologies Symposium (PETS)"
     target: https://eprint.iacr.org/2024/221
 
   MPRV09:
     title: "Computational Differential Privacy"
     author:
-      - ins: I. Mironov
-      - ins: O. Pandey
-      - ins: O. Reingold
-      - ins: S. Vadhan
+      - name: Ilya Mironov
+      - name: Omkant Pandey
+      - name: Omer Reingold
+      - name: Salil Vadhan
     date: 2009
-    seriesinfo: Crypto
+    refcontent: "Crypto"
     target: https://link.springer.com/chapter/10.1007/978-3-642-03356-8_8
 
   MRH04:
     title: "Indifferentiability, impossibility results on reductions, and applications to the random oracle methodology"
-    seriesinfo: Theory of Cryptography (TCC)
-    date: 2004
-    target: https://doi.org/10.1007/978-3-540-24638-1_2
     author:
-      - ins: U. Maurer
-      - ins: R. Renner
-      - ins: C. Holenstein
+      - name: Ueli Maurer
+      - name: Renato Renner
+      - name: Clemens Holenstein
+    date: 2004
+    refcontent: "Theory of Cryptography (TCC)"
+    target: https://doi.org/10.1007/978-3-540-24638-1_2
 
   OriginTelemetry:
     title: "Origin Telemetry"
@@ -240,17 +241,18 @@ informative:
 
   SML24:
     title: "A Complete Beginner Guide to the Number Theoretic Transform (NTT)"
-    target: https://eprint.iacr.org/2024/585
     author:
-      - ins: A. Satriawan
-      - ins: R. Mareta
-      - ins: H. Lee
+      - name: Ardianto Satriawan
+      - name: Rella Mareta
+      - name: Hanho Lee
     date: 2024
+    refcontent: "IEEE Access, vol. 11"
+    target: https://eprint.iacr.org/2024/585
 
   TestVectors:
     title: "Test vectors for Prio3 and Poplar1"
     target: "https://github.com/cfrg/draft-irtf-cfrg-vdaf"
-    seriesinfo: "commit hash 1891650"
+    refcontent: "commit hash 1891650"
     date: October 2024
 
 --- abstract
