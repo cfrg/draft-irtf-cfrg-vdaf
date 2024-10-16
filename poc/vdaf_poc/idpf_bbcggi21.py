@@ -4,7 +4,7 @@ import itertools
 from typing import Sequence, TypeAlias, cast
 
 from vdaf_poc.common import format_dst, front, vec_add, vec_neg, vec_sub, xor
-from vdaf_poc.field import Field, Field2, Field64, Field255
+from vdaf_poc.field import Field, Field64, Field255
 from vdaf_poc.idpf import Idpf
 from vdaf_poc.xof import Xof, XofFixedKeyAes128, XofTurboShake128
 
@@ -24,7 +24,7 @@ from vdaf_poc.xof import Xof, XofFixedKeyAes128, XofTurboShake128
 # types, which aids with self-documentation.
 
 FieldVec: TypeAlias = list[Field64] | list[Field255]
-CorrectionWord: TypeAlias = tuple[bytes, tuple[Field2, Field2], FieldVec]
+CorrectionWord: TypeAlias = tuple[bytes, tuple[bool, bool], FieldVec]
 
 
 class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
@@ -89,34 +89,34 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         ]
 
         seed = key.copy()
-        ctrl = [Field2(0), Field2(1)]
+        ctrl = [False, True]
         public_share = []
         for level in range(self.BITS):
-            keep = int(alpha[level])
+            bit = alpha[level]
+            keep = int(bit)
             lose = 1 - keep
-            bit = Field2(keep)
 
             (s0, t0) = self.extend(level, seed[0], ctx, nonce)
             (s1, t1) = self.extend(level, seed[1], ctx, nonce)
             seed_cw = xor(s0[lose], s1[lose])
             ctrl_cw = (
-                t0[0] + t1[0] + bit + Field2(1),
-                t0[1] + t1[1] + bit,
+                t0[0] ^ t1[0] ^ (not bit),
+                t0[1] ^ t1[1] ^ bit,
             )
 
             # Implementation note: these conditional XORs and
             # input-dependent array indices should be replaced with
             # constant-time selects in practice in order to reduce
             # leakage via timing side channels.
-            if ctrl[0].int():
+            if ctrl[0]:
                 x0 = xor(s0[keep], seed_cw)
-                ctrl[0] = t0[keep] + ctrl_cw[keep]
+                ctrl[0] = t0[keep] ^ ctrl_cw[keep]
             else:
                 x0 = s0[keep]
                 ctrl[0] = t0[keep]
-            if ctrl[1].int():
+            if ctrl[1]:
                 x1 = xor(s1[keep], seed_cw)
-                ctrl[1] = t1[keep] + ctrl_cw[keep]
+                ctrl[1] = t1[keep] ^ ctrl_cw[keep]
             else:
                 x1 = s1[keep]
                 ctrl[1] = t1[keep]
@@ -137,7 +137,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             # replaced with a constant time select or a constant time
             # multiplication in practice in order to reduce leakage via
             # timing side channels.
-            if ctrl[1].int():
+            if ctrl[1]:
                 for i in range(len(w_cw)):
                     w_cw[i] = -w_cw[i]
 
@@ -177,7 +177,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             # `prefix`. Each node in the tree is represented by a seed
             # (`seed`) and a control bit (`ctrl`).
             seed = key
-            ctrl = Field2(agg_id)
+            ctrl = bool(agg_id)
             y: FieldVec
             for current_level in range(level + 1):
                 bit = int(prefix[current_level])
@@ -217,12 +217,12 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
     def eval_next(
             self,
             prev_seed: bytes,
-            prev_ctrl: Field2,
+            prev_ctrl: bool,
             correction_word: CorrectionWord,
             level: int,
             bit: int,
             ctx: bytes,
-            nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
+            nonce: bytes) -> tuple[bytes, bool, FieldVec]:
         """
         Compute the next node in the IDPF tree along the path determined
         by a candidate prefix. The next node is determined by `bit`, the
@@ -238,11 +238,11 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         # input-dependent array indices should be replaced with
         # constant-time selects in practice in order to reduce leakage
         # via timing side channels.
-        if prev_ctrl.int():
+        if prev_ctrl:
             s[0] = xor(s[0], seed_cw)
             s[1] = xor(s[1], seed_cw)
-            t[0] += ctrl_cw[0]
-            t[1] += ctrl_cw[1]
+            t[0] ^= ctrl_cw[0]
+            t[1] ^= ctrl_cw[1]
 
         next_ctrl = t[bit]
         convert_output = self.convert(level, s[bit], ctx, nonce)
@@ -251,7 +251,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         # Implementation note: this conditional addition should be
         # replaced with a constant-time select in practice in order to
         # reduce leakage via timing side channels.
-        if next_ctrl.int():
+        if next_ctrl:
             for i in range(len(y)):
                 y[i] += w_cw[i]
 
@@ -267,7 +267,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             level: int,
             seed: bytes,
             ctx: bytes,
-            nonce: bytes) -> tuple[list[bytes], list[Field2]]:
+            nonce: bytes) -> tuple[list[bytes], list[bool]]:
         xof = self.current_xof(
             level,
             seed,
@@ -281,7 +281,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         # Use the least significant bits as the control bit correction,
         # and then zero it out. This gives effectively 127 bits of
         # security, but reduces the number of AES calls needed by 1/3.
-        t = [Field2(s[0][0] & 1), Field2(s[1][0] & 1)]
+        t = [bool(s[0][0] & 1), bool(s[1][0] & 1)]
         s[0][0] &= 0xFE
         s[1][0] &= 0xFE
         return ([bytes(s[0]), bytes(s[1])], t)
@@ -356,7 +356,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
         return self.encode_public_share(public_share)
 
 
-def pack_bits(control_bits: list[Field2]) -> bytes:
+def pack_bits(control_bits: list[bool]) -> bytes:
     packed_len = (len(control_bits) + 7) // 8
     # NOTE: The following is excerpted in the document, de-indented. Thee width
     # should be limited to 69 columns after de-indenting, or 73 columns before,
@@ -364,20 +364,20 @@ def pack_bits(control_bits: list[Field2]) -> bytes:
     # ===================================================================
     packed_control_buf = [int(0)] * packed_len
     for i, bit in enumerate(control_bits):
-        packed_control_buf[i // 8] |= bit.int() << (i % 8)
+        packed_control_buf[i // 8] |= bit << (i % 8)
     packed_control_bits = bytes(packed_control_buf)
     # NOTE: End of exerpt.
     return packed_control_bits
 
 
-def unpack_bits(packed_control_bits: bytes, length: int) -> list[Field2]:
+def unpack_bits(packed_control_bits: bytes, length: int) -> list[bool]:
     # NOTE: The following is excerpted in the document, de-indented. Thee width
     # should be limited to 69 columns after de-indenting, or 73 columns before,
     # to avoid warnings from xml2rfc.
     # ===================================================================
     control_bits = []
     for i in range(length):
-        control_bits.append(Field2(
+        control_bits.append(bool(
             (packed_control_bits[i // 8] >> (i % 8)) & 1
         ))
     leftover_bits = packed_control_bits[-1] >> (

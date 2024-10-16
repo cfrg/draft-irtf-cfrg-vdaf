@@ -1,8 +1,8 @@
 import random
 import unittest
 
-from vdaf_poc.field import (Field, Field2, Field64, Field96, Field128,
-                            Field255, NttField, poly_eval, poly_interp)
+from vdaf_poc.field import (Field, Field64, Field96, Field128, Field255,
+                            NttField, poly_eval, poly_interp)
 
 
 class TestFields(unittest.TestCase):
@@ -59,14 +59,6 @@ class TestFields(unittest.TestCase):
 
     def test_field255(self) -> None:
         self.run_field_test(Field255)
-
-    def test_field2(self) -> None:
-        # Test GF(2).
-        self.assertEqual(Field2(1).int(), 1)
-        self.assertEqual(Field2(0).int(), 0)
-        self.assertEqual(Field2(1) + Field2(1), Field2(0))
-        self.assertEqual(Field2(1) * Field2(1), Field2(1))
-        self.assertEqual(-Field2(1), Field2(1))
 
     def test_interp(self) -> None:
         # Test polynomial interpolation.

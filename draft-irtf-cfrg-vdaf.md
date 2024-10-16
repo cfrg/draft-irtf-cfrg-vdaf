@@ -4979,7 +4979,7 @@ The public share of the IDPF scheme in {{idpf-bbcggi21}} consists of a sequence
 of "correction words". A correction word has three components:
 
 1. the XOF seed of type `bytes`;
-2. the control bits of type `tuple[Field2, Field2]`; and
+2. the control bits of type `tuple[bool, bool]`; and
 3. the payload of type `list[Field64]` for the first `BITS-1` words and
    `list[Field255]` for the last word.
 
@@ -5017,7 +5017,7 @@ last bytes are not zero, it throws an error:
 ~~~ python
 control_bits = []
 for i in range(length):
-    control_bits.append(Field2(
+    control_bits.append(bool(
         (packed_control_bits[i // 8] >> (i % 8)) & 1
     ))
 leftover_bits = packed_control_bits[-1] >> (
@@ -5254,8 +5254,7 @@ full detail.
 
 The description of the IDPF-key generation algorithm makes use of auxiliary
 functions `extend()` and `convert()` defined in
-{{idpf-bbcggi21-helper-functions}}. In the following, we let `Field2` denote
-the field `GF(2)`.
+{{idpf-bbcggi21-helper-functions}}.
 
 ~~~ python
 def gen(
@@ -5281,34 +5280,34 @@ def gen(
     ]
 
     seed = key.copy()
-    ctrl = [Field2(0), Field2(1)]
+    ctrl = [False, True]
     public_share = []
     for level in range(self.BITS):
-        keep = int(alpha[level])
+        bit = alpha[level]
+        keep = int(bit)
         lose = 1 - keep
-        bit = Field2(keep)
 
         (s0, t0) = self.extend(level, seed[0], ctx, nonce)
         (s1, t1) = self.extend(level, seed[1], ctx, nonce)
         seed_cw = xor(s0[lose], s1[lose])
         ctrl_cw = (
-            t0[0] + t1[0] + bit + Field2(1),
-            t0[1] + t1[1] + bit,
+            t0[0] ^ t1[0] ^ (not bit),
+            t0[1] ^ t1[1] ^ bit,
         )
 
         # Implementation note: these conditional XORs and
         # input-dependent array indices should be replaced with
         # constant-time selects in practice in order to reduce
         # leakage via timing side channels.
-        if ctrl[0].int():
+        if ctrl[0]:
             x0 = xor(s0[keep], seed_cw)
-            ctrl[0] = t0[keep] + ctrl_cw[keep]
+            ctrl[0] = t0[keep] ^ ctrl_cw[keep]
         else:
             x0 = s0[keep]
             ctrl[0] = t0[keep]
-        if ctrl[1].int():
+        if ctrl[1]:
             x1 = xor(s1[keep], seed_cw)
-            ctrl[1] = t1[keep] + ctrl_cw[keep]
+            ctrl[1] = t1[keep] ^ ctrl_cw[keep]
         else:
             x1 = s1[keep]
             ctrl[1] = t1[keep]
@@ -5329,7 +5328,7 @@ def gen(
         # replaced with a constant time select or a constant time
         # multiplication in practice in order to reduce leakage via
         # timing side channels.
-        if ctrl[1].int():
+        if ctrl[1]:
             for i in range(len(w_cw)):
                 w_cw[i] = -w_cw[i]
 
@@ -5371,7 +5370,7 @@ def eval(
         # `prefix`. Each node in the tree is represented by a seed
         # (`seed`) and a control bit (`ctrl`).
         seed = key
-        ctrl = Field2(agg_id)
+        ctrl = bool(agg_id)
         y: FieldVec
         for current_level in range(level + 1):
             bit = int(prefix[current_level])
@@ -5411,12 +5410,12 @@ def eval(
 def eval_next(
         self,
         prev_seed: bytes,
-        prev_ctrl: Field2,
+        prev_ctrl: bool,
         correction_word: CorrectionWord,
         level: int,
         bit: int,
         ctx: bytes,
-        nonce: bytes) -> tuple[bytes, Field2, FieldVec]:
+        nonce: bytes) -> tuple[bytes, bool, FieldVec]:
     """
     Compute the next node in the IDPF tree along the path determined
     by a candidate prefix. The next node is determined by `bit`, the
@@ -5432,11 +5431,11 @@ def eval_next(
     # input-dependent array indices should be replaced with
     # constant-time selects in practice in order to reduce leakage
     # via timing side channels.
-    if prev_ctrl.int():
+    if prev_ctrl:
         s[0] = xor(s[0], seed_cw)
         s[1] = xor(s[1], seed_cw)
-        t[0] += ctrl_cw[0]
-        t[1] += ctrl_cw[1]
+        t[0] ^= ctrl_cw[0]
+        t[1] ^= ctrl_cw[1]
 
     next_ctrl = t[bit]
     convert_output = self.convert(level, s[bit], ctx, nonce)
@@ -5445,7 +5444,7 @@ def eval_next(
     # Implementation note: this conditional addition should be
     # replaced with a constant-time select in practice in order to
     # reduce leakage via timing side channels.
-    if next_ctrl.int():
+    if next_ctrl:
         for i in range(len(y)):
             y[i] += w_cw[i]
 
@@ -5460,7 +5459,7 @@ def extend(
         level: int,
         seed: bytes,
         ctx: bytes,
-        nonce: bytes) -> tuple[list[bytes], list[Field2]]:
+        nonce: bytes) -> tuple[list[bytes], list[bool]]:
     xof = self.current_xof(
         level,
         seed,
@@ -5474,7 +5473,7 @@ def extend(
     # Use the least significant bits as the control bit correction,
     # and then zero it out. This gives effectively 127 bits of
     # security, but reduces the number of AES calls needed by 1/3.
-    t = [Field2(s[0][0] & 1), Field2(s[1][0] & 1)]
+    t = [bool(s[0][0] & 1), bool(s[1][0] & 1)]
     s[0][0] &= 0xFE
     s[1][0] &= 0xFE
     return ([bytes(s[0]), bytes(s[1])], t)
