@@ -1,7 +1,7 @@
 """Definition of DAFs."""
 
 from abc import ABCMeta, abstractmethod
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, override
 
 from vdaf_poc.common import gen_rand
 
@@ -14,12 +14,65 @@ AggShare = TypeVar("AggShare")
 AggResult = TypeVar("AggResult")
 
 
-class Daf(
+class DistributedAggregation(
         Generic[
             Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
             AggResult
         ],
         metaclass=ABCMeta):
+    """
+    Abstract base class containing methods common to DAFs and VDAFs.
+    """
+
+    @abstractmethod
+    def shard(self,
+              ctx: bytes,
+              measurement: Measurement,
+              nonce: bytes,
+              rand: bytes,
+              ) -> tuple[PublicShare, list[InputShare]]:
+        pass
+
+    @abstractmethod
+    def is_valid(self,
+                 agg_param: AggParam,
+                 previous_agg_params: list[AggParam]) -> bool:
+        pass
+
+    @abstractmethod
+    def agg_init(self, agg_param: AggParam) -> AggShare:
+        pass
+
+    @abstractmethod
+    def agg_update(self,
+                   agg_param: AggParam,
+                   agg_share: AggShare,
+                   out_share: OutShare) -> AggShare:
+        pass
+
+    @abstractmethod
+    def merge(self,
+              agg_param: AggParam,
+              agg_shares: list[AggShare]) -> AggShare:
+        pass
+
+    @abstractmethod
+    def unshard(self,
+                agg_param: AggParam,
+                agg_shares: list[AggShare],
+                num_measurements: int) -> AggResult:
+        pass
+
+
+class Daf(
+        Generic[
+            Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
+            AggResult
+        ],
+        DistributedAggregation[
+            Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
+            AggResult
+        ]):
     """
     A Distributed Aggregation Function (DAF).
 
@@ -51,6 +104,7 @@ class Daf(
     # Number of random bytes consumed by `shard()`.
     RAND_SIZE: int
 
+    @override
     @abstractmethod
     def shard(
             self,
@@ -69,6 +123,7 @@ class Daf(
         """
         pass
 
+    @override
     @abstractmethod
     def is_valid(
             self,
@@ -104,6 +159,7 @@ class Daf(
         """
         pass
 
+    @override
     @abstractmethod
     def agg_init(self,
                  agg_param: AggParam) -> AggShare:
@@ -112,6 +168,7 @@ class Daf(
         """
         pass
 
+    @override
     @abstractmethod
     def agg_update(self,
                    agg_param: AggParam,
@@ -123,6 +180,7 @@ class Daf(
         """
         pass
 
+    @override
     @abstractmethod
     def merge(self,
               agg_param: AggParam,
@@ -132,6 +190,7 @@ class Daf(
         """
         pass
 
+    @override
     @abstractmethod
     def unshard(
             self,
