@@ -164,13 +164,6 @@ class NttField(Field):
         raise NotImplementedError()
 
 
-class Field2(Field):
-    """The finite field GF(2)."""
-
-    MODULUS = 2
-    ENCODED_SIZE = 1
-
-
 class Field64(NttField):
     """The finite field GF(2^32 * 4294967295 + 1)."""
 
