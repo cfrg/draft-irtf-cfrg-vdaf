@@ -1,9 +1,10 @@
 """Definition of VDAFs."""
 
-from abc import ABCMeta, abstractmethod
-from typing import Any, Generic, TypeVar
+from abc import abstractmethod
+from typing import Any, Generic, TypeVar, override
 
 from vdaf_poc.common import format_dst, gen_rand
+from vdaf_poc.daf import DistributedAggregation
 from vdaf_poc.field import Field
 
 Measurement = TypeVar("Measurement")
@@ -24,7 +25,10 @@ class Vdaf(
             Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
             AggResult, PrepState, PrepShare, PrepMessage
         ],
-        metaclass=ABCMeta):
+        DistributedAggregation[
+            Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
+            AggResult
+        ]):
     """
     A Verifiable Distributed Aggregation Function (VDAF).
 
@@ -65,6 +69,7 @@ class Vdaf(
     # Name of the VDAF, for use in test vector filenames.
     test_vec_name: str
 
+    @override
     @abstractmethod
     def shard(self,
               ctx: bytes,
@@ -83,6 +88,7 @@ class Vdaf(
         """
         pass
 
+    @override
     @abstractmethod
     def is_valid(self, agg_param: AggParam,
                  previous_agg_params: list[AggParam]) -> bool:
@@ -142,6 +148,7 @@ class Vdaf(
         """
         pass
 
+    @override
     @abstractmethod
     def agg_init(self,
                  agg_param: AggParam) -> AggShare:
@@ -150,6 +157,7 @@ class Vdaf(
         """
         pass
 
+    @override
     @abstractmethod
     def agg_update(self,
                    agg_param: AggParam,
@@ -161,6 +169,7 @@ class Vdaf(
         """
         pass
 
+    @override
     @abstractmethod
     def merge(self,
               agg_param: AggParam,
@@ -170,6 +179,7 @@ class Vdaf(
         """
         pass
 
+    @override
     @abstractmethod
     def unshard(self,
                 agg_param: AggParam,
