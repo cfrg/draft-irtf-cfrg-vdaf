@@ -220,6 +220,27 @@ class TestPoplar1(TestVdaf):
         ]
         self.assertFalse(cls.is_valid(agg_params[1], list(agg_params[:1])))
 
+        # Test `is_valid` rejects unsorted and duplicate prefixes.
+        agg_params = [
+            (0, (int_to_bit_string(0b1, 1), int_to_bit_string(0b0, 1))),
+        ]
+        self.assertFalse(cls.is_valid(agg_params[0], list(agg_params)))
+        agg_params = [
+            (2, (
+                int_to_bit_string(0b100, 3),
+                int_to_bit_string(0b011, 3),
+            )),
+        ]
+        self.assertFalse(cls.is_valid(agg_params[0], list(agg_params)))
+        agg_params = [
+            (2, (
+                int_to_bit_string(0b000, 3),
+                int_to_bit_string(0b010, 3),
+                int_to_bit_string(0b010, 3),
+            )),
+        ]
+        self.assertFalse(cls.is_valid(agg_params[0], list(agg_params)))
+
     def test_aggregation_parameter_encoding(self) -> None:
         # Test aggregation parameter encoding.
         cls = Poplar1(256)
