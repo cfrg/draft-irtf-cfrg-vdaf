@@ -3899,7 +3899,7 @@ class Sum(Valid[int, int, F]):
 | Parameter         | Value                                                     |
 |:------------------|:----------------------------------------------------------|
 | `field`           | `Field128` ({{fields}})                                   |
-| `Valid`           | `SumVec(field, length, bits, chunk_lengh)` (this section) |
+| `Valid`           | `SumVec(field, length, bits, chunk_length)` (this section) |
 | `PROOFS`          | `1`                                                       |
 {: title="Parameters for Prio3SumVec."}
 
@@ -4048,7 +4048,7 @@ proofs up to 50% larger than the optimal proof size.
 | Parameter         | Value                                                  |
 |:------------------|:-------------------------------------------------------|
 | `field`           | `Field128` ({{fields}})                                |
-| `Valid`           | `Histogram(field, length, chunk_lengh)` (this section) |
+| `Valid`           | `Histogram(field, length, chunk_length)` (this section) |
 | `PROOFS`          | `1`                                                    |
 {: title="Parameters for Prio3Histogram."}
 
@@ -4165,7 +4165,7 @@ class Histogram(Valid[int, list[int], F]):
 | Parameter         | Value                                                                     |
 |:------------------|:--------------------------------------------------------------------------|
 | `field`           | `Field128` ({{fields}})                                                   |
-| `Valid`           | `MultihotCountVec(field, length, max_weight, chunk_lengh)` (this section) |
+| `Valid`           | `MultihotCountVec(field, length, max_weight, chunk_length)` (this section) |
 | `PROOFS`          | `1`                                                                       |
 {: title="Parameters for Prio3MultihotCountVec."}
 
