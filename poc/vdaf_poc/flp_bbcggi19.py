@@ -618,6 +618,11 @@ class Count(Valid[int, int, F]):
     def __init__(self, field: type[F]):
         self.field = field
 
+    def encode(self, measurement: int) -> list[F]:
+        if measurement not in range(2):  # REMOVE ME
+            raise ValueError('measurement out of range')  # REMOVE ME
+        return [self.field(measurement)]
+
     def eval(
             self,
             meas: list[F],
@@ -627,11 +632,6 @@ class Count(Valid[int, int, F]):
         squared = self.GADGETS[0].eval(self.field,
                                        [meas[0], meas[0]])
         return [squared - meas[0]]
-
-    def encode(self, measurement: int) -> list[F]:
-        if measurement not in range(2):  # REMOVE ME
-            raise ValueError('measurement out of range')  # REMOVE ME
-        return [self.field(measurement)]
 
     def truncate(self, meas: list[F]) -> list[F]:
         if len(meas) != 1:  # REMOVE ME
@@ -675,6 +675,11 @@ class Histogram(Valid[int, list[int], F]):
         self.OUTPUT_LEN = self.length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
+    def encode(self, measurement: int) -> list[F]:
+        encoded = [self.field(0)] * self.length
+        encoded[measurement] = self.field(1)
+        return encoded
+
     def eval(
             self,
             meas: list[F],
@@ -713,11 +718,6 @@ class Histogram(Valid[int, list[int], F]):
             sum_check += b
 
         return [range_check, sum_check]
-
-    def encode(self, measurement: int) -> list[F]:
-        encoded = [self.field(0)] * self.length
-        encoded[measurement] = self.field(1)
-        return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
         return meas
@@ -818,6 +818,23 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         self.OUTPUT_LEN = self.length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
+    def encode(self, measurement: list[int]) -> list[F]:
+        if len(measurement) != self.length:
+            raise ValueError('invalid Client measurement length')
+
+        # The first part is the vector of counters.
+        count_vec = list(map(self.field, measurement))
+
+        # The second part is the reported weight.
+        weight_reported = sum(count_vec, self.field(0))
+
+        encoded = []
+        encoded += count_vec
+        encoded += self.field.encode_into_bit_vec(
+            (self.offset + weight_reported).int(),
+            self.bits_for_weight)
+        return encoded
+
     def eval(
             self,
             meas: list[F],
@@ -860,23 +877,6 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
             weight_reported
 
         return [range_check, weight_check]
-
-    def encode(self, measurement: list[int]) -> list[F]:
-        if len(measurement) != self.length:
-            raise ValueError('invalid Client measurement length')
-
-        # The first part is the vector of counters.
-        count_vec = list(map(self.field, measurement))
-
-        # The second part is the reported weight.
-        weight_reported = sum(count_vec, self.field(0))
-
-        encoded = []
-        encoded += count_vec
-        encoded += self.field.encode_into_bit_vec(
-            (self.offset + weight_reported).int(),
-            self.bits_for_weight)
-        return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
         return meas[:self.length]
@@ -936,6 +936,23 @@ class SumVec(Valid[list[int], list[int], F]):
         self.OUTPUT_LEN = length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
+    def encode(self, measurement: list[int]) -> list[F]:
+        # REMOVE ME
+        if len(measurement) != self.length:
+            raise ValueError('incorrect measurement length')
+
+        encoded = []
+        for val in measurement:
+            # REMOVE ME
+            if val not in range(2**self.bits):
+                raise ValueError(
+                    'entry of measurement vector is out of range'
+                )
+
+            encoded += self.field.encode_into_bit_vec(
+                val, self.bits)
+        return encoded
+
     def eval(
             self,
             meas: list[F],
@@ -968,23 +985,6 @@ class SumVec(Valid[list[int], list[int], F]):
             )
 
         return [out]
-
-    def encode(self, measurement: list[int]) -> list[F]:
-        # REMOVE ME
-        if len(measurement) != self.length:
-            raise ValueError('incorrect measurement length')
-
-        encoded = []
-        for val in measurement:
-            # REMOVE ME
-            if val not in range(2**self.bits):
-                raise ValueError(
-                    'entry of measurement vector is out of range'
-                )
-
-            encoded += self.field.encode_into_bit_vec(
-                val, self.bits)
-        return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
         truncated = []
@@ -1057,6 +1057,18 @@ class Sum(Valid[int, int, F]):
         self.MEAS_LEN = 2 * self.bits
         self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
 
+    def encode(self, measurement: int) -> list[F]:
+        encoded = []
+        encoded += self.field.encode_into_bit_vec(
+            measurement,
+            self.bits
+        )
+        encoded += self.field.encode_into_bit_vec(
+            measurement + self.offset.int(),
+            self.bits
+        )
+        return encoded
+
     def eval(
             self,
             meas: list[F],
@@ -1074,18 +1086,6 @@ class Sum(Valid[int, int, F]):
             self.field.decode_from_bit_vec(meas[self.bits:])
         out.append(range_check)
         return out
-
-    def encode(self, measurement: int) -> list[F]:
-        encoded = []
-        encoded += self.field.encode_into_bit_vec(
-            measurement,
-            self.bits
-        )
-        encoded += self.field.encode_into_bit_vec(
-            measurement + self.offset.int(),
-            self.bits
-        )
-        return encoded
 
     def truncate(self, meas: list[F]) -> list[F]:
         return [self.field.decode_from_bit_vec(meas[:self.bits])]
