@@ -5823,6 +5823,24 @@ for Aggregators to accept a report for Prio3SumVec from a Client who disagrees
 with them on the value of `bits` and `length`. This is because there is no
 binding of the circuit parameters to the computation.
 
+## Side-Channel Resistance
+
+Implementations of VDAFs should incorporate defenses against side-channel
+attacks. Because side-channel attacks may impact the privacy security goal, the
+relevant threat model includes an attacker that may control the Collector, a
+subset of Clients, and a subset of Aggregators, and monitor side-channel signals
+from the honest Clients and Aggregators. Thus, implementations of Clients and
+Aggregators should treat measurements, input shares, and output shares as
+secret, and avoid leaking those secret values or any intermediate computations
+that depend on them.
+
+For example, the following routines should all be implemented in a side-channel
+resistant manner.
+
+* Finite field arithmetic
+* XOFs
+* IDPF generation and evaluation, including handling of control bits
+
 # IANA Considerations
 
 IANA is requested to make one new registry:
