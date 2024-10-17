@@ -4156,18 +4156,18 @@ class Histogram(Valid[int, list[int], F]):
 | `PROOFS`          | `1`                                                                       |
 {: title="Parameters for Prio3MultihotCountVec."}
 
-For this instance of Prio3, each measurement is a vector of ones and zeros,
-where the number of ones is bounded. This provides a functionality similar to
-Prio3Histogram except that more than one entry (or none at all) may be
-non-zero. This allows Prio3MultihotCountVec to be composed with a randomized
-response mechanism, like {{EPK14}}, for providing differential privacy. (For
-example, each Client would set each entry to one with some small probability.)
+For this instance of Prio3, each measurement is a vector of true and false
+values, where the number of true values is bounded. This provides a
+functionality similar to Prio3Histogram except that more than one entry (or none
+at all) may be non-zero. This allows Prio3MultihotCountVec to be composed with a
+randomized response mechanism, like {{EPK14}}, for providing differential
+privacy. (For example, each Client would set each entry with some small
+probability.)
 
 The validity circuit is denoted `MultihotCountVec` and has three parameters:
-`length`, the number of entries in the count vector; `max_weight`, the
-maximum number of non-zero entries (i.e., the weight must be at most
-`max_weight`); and `chunk_length`, used the same way as in {{prio3sumvec}} and
-{{prio3histogram}}.
+`length`, the number of entries in the count vector; `max_weight`, the maximum
+number of true entries (i.e., the weight must be at most `max_weight`); and
+`chunk_length`, used the same way as in {{prio3sumvec}} and {{prio3histogram}}.
 
 Validation works as follows. Let
 
@@ -4185,7 +4185,7 @@ zero if and only if the reported weight is equal to the true weight. The
 complete circuit is defined below.
 
 ~~~ python
-class MultihotCountVec(Valid[list[int], list[int], F]):
+class MultihotCountVec(Valid[list[bool], list[int], F]):
     EVAL_OUTPUT_LEN = 2
     field: type[F]
 
@@ -4232,12 +4232,12 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         self.OUTPUT_LEN = self.length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-    def encode(self, measurement: list[int]) -> list[F]:
+    def encode(self, measurement: list[bool]) -> list[F]:
         if len(measurement) != self.length:
             raise ValueError('invalid Client measurement length')
 
         # The first part is the vector of counters.
-        count_vec = list(map(self.field, measurement))
+        count_vec = [self.field(int(x)) for x in measurement]
 
         # The second part is the reported weight.
         weight_reported = sum(count_vec, self.field(0))
