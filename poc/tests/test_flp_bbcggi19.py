@@ -97,10 +97,10 @@ class TestMultihotCountVec(TestFlpBBCGGI19):
 
         # Successful cases:
         cases = [
-            (flp.encode([0, 0, 0, 0]), True),
-            (flp.encode([0, 1, 0, 0]), True),
-            (flp.encode([0, 1, 1, 0]), True),
-            (flp.encode([1, 1, 0, 0]), True),
+            (flp.encode([False, False, False, False]), True),
+            (flp.encode([False, True, False, False]), True),
+            (flp.encode([False, True, True, False]), True),
+            (flp.encode([True, True, False, False]), True),
         ]
         # Failure cases: too many number of 1s, should fail weight check.
         cases += [
@@ -114,15 +114,26 @@ class TestMultihotCountVec(TestFlpBBCGGI19):
             for i in range(valid.max_weight + 1, valid.length + 1)
         ]
         # Failure case: pass count check but fail bit check.
-        cases += [(flp.encode([flp.field.MODULUS - 1, 1, 0, 0]), False)]
+        cases += [
+            (
+                [
+                    flp.field(flp.field.MODULUS - 1),
+                    flp.field(1),
+                    flp.field(0),
+                    flp.field(0),
+                ]
+                + [flp.field(0)] * valid.bits_for_weight,
+                False
+            )
+        ]
         self.run_flp_test(flp, cases)
 
     def test_small(self) -> None:
         flp = FlpBBCGGI19(MultihotCountVec(Field128, 1, 1, 1))
 
         self.run_flp_test(flp, [
-            (flp.encode([0]), True),
-            (flp.encode([1]), True),
+            (flp.encode([False]), True),
+            (flp.encode([True]), True),
             ([flp.field(0), flp.field(1337)], False),
             ([flp.field(1), flp.field(0)], False),
         ])

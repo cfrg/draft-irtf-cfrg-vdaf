@@ -135,12 +135,30 @@ class TestPrio3MultihotCountVec(TestVdaf):
         # chunk_length = 2.
         prio3 = Prio3MultihotCountVec(2, 4, 2, 2)
         self.assertEqual(prio3.ID, 0x00000005)
-        self.run_vdaf_test(prio3, None, [[0, 0, 0, 0]], [0, 0, 0, 0])
-        self.run_vdaf_test(prio3, None, [[0, 1, 0, 0]], [0, 1, 0, 0])
-        self.run_vdaf_test(prio3, None, [[0, 1, 1, 0]], [0, 1, 1, 0])
         self.run_vdaf_test(
-            prio3, None, [[0, 1, 1, 0], [0, 1, 0, 1]], [0, 2, 1, 1])
-        self.run_vdaf_test(prio3, None, [[0, 1, 1, 0]], [0, 1, 1, 0])
+            prio3,
+            None,
+            [[False, False, False, False]],
+            [0, 0, 0, 0],
+        )
+        self.run_vdaf_test(
+            prio3,
+            None,
+            [[False, True, False, False]],
+            [0, 1, 0, 0],
+        )
+        self.run_vdaf_test(
+            prio3,
+            None,
+            [[False, True, True, False]],
+            [0, 1, 1, 0],
+        )
+        self.run_vdaf_test(
+            prio3,
+            None,
+            [[False, True, True, False], [False, True, False, True]],
+            [0, 2, 1, 1],
+        )
 
     def test_3_shares(self) -> None:
         # Prio3MultihotCountVec with length = 11, max_weight = 5,
@@ -149,7 +167,7 @@ class TestPrio3MultihotCountVec(TestVdaf):
         self.run_vdaf_test(
             prio3,
             None,
-            [[1] * 5 + [0] * 6],
+            [[True] * 5 + [False] * 6],
             [1] * 5 + [0] * 6,
         )
 

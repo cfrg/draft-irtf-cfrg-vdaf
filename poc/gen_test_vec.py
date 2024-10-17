@@ -212,7 +212,7 @@ if __name__ == '__main__':
         vdaf_prio3.Prio3MultihotCountVec(2, 4, 2, 2),
         None,
         ctx,
-        [[0, 1, 1, 0]],
+        [[False, True, True, False]],
         0,
     )
     gen_test_vec_for_vdaf(
@@ -220,7 +220,7 @@ if __name__ == '__main__':
         vdaf_prio3.Prio3MultihotCountVec(4, 10, 2, 3),
         None,
         ctx,
-        [[0, 1, 0, 0, 0, 0, 0, 0, 0, 1]],
+        [[False, True, False, False, False, False, False, False, False, True]],
         1,
     )
     gen_test_vec_for_vdaf(
@@ -229,11 +229,11 @@ if __name__ == '__main__':
         None,
         ctx,
         [
-            [0, 1, 1, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 0],
-            [1, 1, 1, 0],
-            [1, 1, 1, 1],
+            [False, True, True, False],
+            [False, False, True, False],
+            [False, False, False, False],
+            [True, True, True, False],
+            [True, True, True, True],
         ],
         2,
     )

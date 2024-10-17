@@ -653,7 +653,7 @@ class Prio3SumVecWithMultiproof(Prio3[list[int], list[int], F], Generic[F]):
         )
 
 
-class Prio3MultihotCountVec(Prio3[list[int], list[int], Field128]):
+class Prio3MultihotCountVec(Prio3[list[bool], list[int], Field128]):
     ID = 0x00000005
     xof = XofTurboShake128
     VERIFY_KEY_SIZE = xof.SEED_SIZE
