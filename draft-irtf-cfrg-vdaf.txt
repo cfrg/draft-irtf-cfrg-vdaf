@@ -4001,18 +4001,18 @@ Table of Contents
 
 7.4.3.  Prio3SumVec
 
-                +===========+=============================+
-                | Parameter | Value                       |
-                +===========+=============================+
-                | field     | Field128 (Table 3)          |
-                +-----------+-----------------------------+
-                | Valid     | SumVec(field, length, bits, |
-                |           | chunk_lengh) (this section) |
-                +-----------+-----------------------------+
-                | PROOFS    | 1                           |
-                +-----------+-----------------------------+
+               +===========+==============================+
+               | Parameter | Value                        |
+               +===========+==============================+
+               | field     | Field128 (Table 3)           |
+               +-----------+------------------------------+
+               | Valid     | SumVec(field, length, bits,  |
+               |           | chunk_length) (this section) |
+               +-----------+------------------------------+
+               | PROOFS    | 1                            |
+               +-----------+------------------------------+
 
-                   Table 11: Parameters for Prio3SumVec.
+                  Table 11: Parameters for Prio3SumVec.
 
    This instance of Prio3 supports summing vectors of integers.  It has
    three parameters: length, bits, and chunk_length.  Each measurement
@@ -4160,17 +4160,18 @@ Table of Contents
 
 7.4.4.  Prio3Histogram
 
-   +===========+======================================================+
-   | Parameter | Value                                                |
-   +===========+======================================================+
-   | field     | Field128 (Table 3)                                   |
-   +-----------+------------------------------------------------------+
-   | Valid     | Histogram(field, length, chunk_lengh) (this section) |
-   +-----------+------------------------------------------------------+
-   | PROOFS    | 1                                                    |
-   +-----------+------------------------------------------------------+
+   +===========+=======================================================+
+   | Parameter | Value                                                 |
+   +===========+=======================================================+
+   | field     | Field128 (Table 3)                                    |
+   +-----------+-------------------------------------------------------+
+   | Valid     | Histogram(field, length,                              |
+   |           | chunk_length) (this section)                          |
+   +-----------+-------------------------------------------------------+
+   | PROOFS    | 1                                                     |
+   +-----------+-------------------------------------------------------+
 
-                 Table 12: Parameters for Prio3Histogram.
+                  Table 12: Parameters for Prio3Histogram.
 
    This variant of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
@@ -4283,18 +4284,18 @@ Table of Contents
 
 7.4.5.  Prio3MultihotCountVec
 
-          +===========+=========================================+
-          | Parameter | Value                                   |
-          +===========+=========================================+
-          | field     | Field128 (Table 3)                      |
-          +-----------+-----------------------------------------+
-          | Valid     | MultihotCountVec(field, length,         |
-          |           | max_weight, chunk_lengh) (this section) |
-          +-----------+-----------------------------------------+
-          | PROOFS    | 1                                       |
-          +-----------+-----------------------------------------+
+         +===========+==========================================+
+         | Parameter | Value                                    |
+         +===========+==========================================+
+         | field     | Field128 (Table 3)                       |
+         +-----------+------------------------------------------+
+         | Valid     | MultihotCountVec(field, length,          |
+         |           | max_weight, chunk_length) (this section) |
+         +-----------+------------------------------------------+
+         | PROOFS    | 1                                        |
+         +-----------+------------------------------------------+
 
-              Table 13: Parameters for Prio3MultihotCountVec.
+             Table 13: Parameters for Prio3MultihotCountVec.
 
    For this instance of Prio3, each measurement is a vector of ones and
    zeros, where the number of ones is bounded.  This provides a
