@@ -348,6 +348,41 @@ Table of Contents
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
 
+   13:
+
+   *  (V)DAF: Replace the one-shot aggregation API with a streaming API.
+      Each Aggregator initializes aggregation, then updates its
+      aggregate share as output shares are produced.  The scheme also
+      specifies a method for merging multiple aggregate shares.
+
+   *  Poplar1: Move prefix uniqueness and ordering checks from
+      prep_init() to is_valid().
+
+   *  Poplar1: Use bool to represent control bits instead of Field2.
+
+   *  Prio3MultihotCountVec: Change the measurement type from list[int]
+      to list[bool].
+
+   *  Security considerations: Define our threat model for side channel
+      attacks and enumerate the parts of the spec that are most relevant
+      to implementers.
+
+   *  Improve the specification of each Prio3 variant by listing each
+      implementation of Valid and Gadget in full.  Gadgets are listed in
+      a new appendix section.
+
+   *  Improve the specification of the FLP system by listing the proof-
+      generation, query, and decision algorithms in full.  The wrapper
+      gadgets are listed in the new section of the appendix for gadgets.
+
+   *  Add a section with a high-level overview of the IDPF construction.
+
+   *  Move some sections around: move ping-pong and star topologies
+      under communication patterns for VDAF preparation; move FLP proof
+      generation, query, and decision algorithms up one level; move
+      privacy considerations for aggregation parameters up one level;
+      and move safe usage of IDPF outputs up one level.
+
    12:
 
    *  (V)DAF: Add an application context string parameter to sharding
