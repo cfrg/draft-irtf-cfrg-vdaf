@@ -185,7 +185,7 @@ informative:
       - name: Jonathan Katz
       - name: Xiao Wang
       - name: Chenkai Weng
-      - name: and Yu Yu
+      - name: Yu Yu
     date: 2020
     refcontent: "Crypto"
     target: https://link.springer.com/chapter/10.1007/978-3-030-56880-1_28
