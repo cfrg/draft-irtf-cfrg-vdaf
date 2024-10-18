@@ -738,12 +738,12 @@ class Histogram(Valid[int, list[int], F]):
 # NOTE: This class is excerpted in the document. Its width should be
 # limited to 69 columns to avoid warnings from xml2rfc.
 # ===================================================================
-class MultihotCountVec(Valid[list[int], list[int], F]):
+class MultihotCountVec(Valid[list[bool], list[int], F]):
     # REMOVE ME
     """
     A validity circuit that checks each Client's measurement is a bit
-    vector with at most `max_weight` number of 1s. We call the number
-    of 1s in the vector the vector's "weight".
+    vector with at most `max_weight` number of true values. We call
+    the number of true values in the vector the vector's "weight".
 
     The circuit determines whether the weight of the vector is at most
     `max_weight` as follows. First, it computes the weight of the
@@ -818,12 +818,12 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         self.OUTPUT_LEN = self.length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-    def encode(self, measurement: list[int]) -> list[F]:
+    def encode(self, measurement: list[bool]) -> list[F]:
         if len(measurement) != self.length:
             raise ValueError('invalid Client measurement length')
 
         # The first part is the vector of counters.
-        count_vec = list(map(self.field, measurement))
+        count_vec = [self.field(int(x)) for x in measurement]
 
         # The second part is the reported weight.
         weight_reported = sum(count_vec, self.field(0))
