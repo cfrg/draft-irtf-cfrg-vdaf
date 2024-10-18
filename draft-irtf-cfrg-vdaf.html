@@ -6640,17 +6640,17 @@ class Histogram(Valid[int, list[int], F]):
               </tr>
             </tbody>
           </table>
-<p id="section-7.4.5-2">For this instance of Prio3, each measurement is a vector of ones and zeros,
-where the number of ones is bounded. This provides a functionality similar to
-Prio3Histogram except that more than one entry (or none at all) may be
-non-zero. This allows Prio3MultihotCountVec to be composed with a randomized
-response mechanism, like <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential privacy. (For
-example, each Client would set each entry to one with some small probability.)<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.5-2">For this instance of Prio3, each measurement is a vector of Boolean
+values, where the number of <code>True</code> values is bounded. This provides a
+functionality similar to Prio3Histogram except that more than one entry (or none
+at all) may be non-zero. This allows Prio3MultihotCountVec to be composed with a
+randomized response mechanism, like <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, for providing differential
+privacy. (For example, each Client would set each entry with some small
+probability.)<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-3">The validity circuit is denoted <code>MultihotCountVec</code> and has three parameters:
-<code>length</code>, the number of entries in the count vector; <code>max_weight</code>, the
-maximum number of non-zero entries (i.e., the weight must be at most
-<code>max_weight</code>); and <code>chunk_length</code>, used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and
-<a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>.<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
+<code>length</code>, the number of entries in the count vector; <code>max_weight</code>, the maximum
+number of <code>True</code> entries (i.e., the weight must be at most <code>max_weight</code>); and
+<code>chunk_length</code>, used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>.<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-4">Validation works as follows. Let<a href="#section-7.4.5-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.4.5-5.1">
@@ -6670,7 +6670,7 @@ zero if and only if the reported weight is equal to the true weight. The
 complete circuit is defined below.<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-7.4.5-8">
 <pre>
-class MultihotCountVec(Valid[list[int], list[int], F]):
+class MultihotCountVec(Valid[list[bool], list[int], F]):
     EVAL_OUTPUT_LEN = 2
     field: type[F]
 
@@ -6717,12 +6717,12 @@ class MultihotCountVec(Valid[list[int], list[int], F]):
         self.OUTPUT_LEN = self.length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
-    def encode(self, measurement: list[int]) -&gt; list[F]:
+    def encode(self, measurement: list[bool]) -&gt; list[F]:
         if len(measurement) != self.length:
             raise ValueError('invalid Client measurement length')
 
         # The first part is the vector of counters.
-        count_vec = list(map(self.field, measurement))
+        count_vec = [self.field(int(x)) for x in measurement]
 
         # The second part is the reported weight.
         weight_reported = sum(count_vec, self.field(0))
