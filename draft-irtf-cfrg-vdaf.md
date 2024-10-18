@@ -4156,8 +4156,8 @@ class Histogram(Valid[int, list[int], F]):
 | `PROOFS`          | `1`                                                                       |
 {: title="Parameters for Prio3MultihotCountVec."}
 
-For this instance of Prio3, each measurement is a vector of true and false
-values, where the number of true values is bounded. This provides a
+For this instance of Prio3, each measurement is a vector of Boolean
+values, where the number of `True` values is bounded. This provides a
 functionality similar to Prio3Histogram except that more than one entry (or none
 at all) may be non-zero. This allows Prio3MultihotCountVec to be composed with a
 randomized response mechanism, like {{EPK14}}, for providing differential
@@ -4166,7 +4166,7 @@ probability.)
 
 The validity circuit is denoted `MultihotCountVec` and has three parameters:
 `length`, the number of entries in the count vector; `max_weight`, the maximum
-number of true entries (i.e., the weight must be at most `max_weight`); and
+number of `True` entries (i.e., the weight must be at most `max_weight`); and
 `chunk_length`, used the same way as in {{prio3sumvec}} and {{prio3histogram}}.
 
 Validation works as follows. Let
