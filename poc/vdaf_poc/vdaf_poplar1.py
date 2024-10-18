@@ -196,14 +196,22 @@ class Poplar1(
             agg_param: Poplar1AggParam,
             previous_agg_params: list[Poplar1AggParam]) -> bool:
         """
-        Checks that levels are increasing between calls, and also
+        Checks that candidate prefixes are unique and lexicographically
+        sorted, checks that levels are increasing between calls, and also
         enforces that the prefixes at each level are suffixes of the
         previous level's prefixes.
         """
+        (level, prefixes) = agg_param
+
+        # Ensure that candidate prefixes are all unique and appear in
+        # lexicographic order.
+        for i in range(1, len(prefixes)):
+            if prefixes[i - 1] >= prefixes[i]:
+                return False
+
         if len(previous_agg_params) < 1:
             return True
 
-        (level, prefixes) = agg_param
         (last_level, last_prefixes) = previous_agg_params[-1]
         last_prefixes_set = set(last_prefixes)
 
@@ -239,12 +247,6 @@ class Poplar1(
         (level, prefixes) = agg_param
         (key, corr_seed, corr_inner, corr_leaf) = input_share
         field = self.idpf.current_field(level)
-
-        # Ensure that candidate prefixes are all unique and appear in
-        # lexicographic order.
-        for i in range(1, len(prefixes)):
-            if prefixes[i - 1] >= prefixes[i]:
-                raise ValueError('out of order prefix')
 
         # Evaluate the IDPF key at the given set of prefixes.
         value = self.idpf.eval(
