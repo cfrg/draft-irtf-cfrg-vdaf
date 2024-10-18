@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 20 April 2025                                              ISRG
+Expires: 21 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         17 October 2024
+                                                         18 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 April 2025.
+   This Internet-Draft will expire on 21 April 2025.
 
 Copyright Notice
 
@@ -149,6 +149,7 @@ Table of Contents
      9.7.  Choosing FLP Parameters
      9.8.  Choosing the Number of Aggregators
      9.9.  Defense-in-Depth Measures
+     9.10. Side-Channel Resistance
    10. IANA Considerations
    11. References
      11.1.  Normative References
@@ -6027,6 +6028,27 @@ Table of Contents
    value of bits and length.  This is because there is no binding of the
    circuit parameters to the computation.
 
+9.10.  Side-Channel Resistance
+
+   Implementations of VDAFs should incorporate defenses against side-
+   channel attacks.  Because side-channel attacks may impact the privacy
+   security goal, the relevant threat model includes an attacker that
+   may control the Collector, a subset of Clients, and a subset of
+   Aggregators, and monitor side-channel signals from the honest Clients
+   and Aggregators.  Thus, implementations of Clients and Aggregators
+   should treat measurements, input shares, and output shares as secret,
+   and avoid leaking those secret values or any intermediate
+   computations that depend on them.
+
+   For example, the following routines should all be implemented in a
+   side-channel resistant manner.
+
+   *  Finite field arithmetic
+
+   *  XOFs
+
+   *  IDPF generation and evaluation, including handling of control bits
+
 10.  IANA Considerations
 
    IANA is requested to make one new registry:
@@ -6202,9 +6224,9 @@ Table of Contents
               <https://link.springer.com/
               chapter/10.1007/978-3-642-55220-5_35>.
 
-   [GKWWY20]  Guo, C., Katz, J., Wang, X., Weng, C., and and Y. Yu,
-              "Better concrete security for half-gates garbling (in the
-              multi-instance setting)", Crypto, 2020,
+   [GKWWY20]  Guo, C., Katz, J., Wang, X., Weng, C., and Y. Yu, "Better
+              concrete security for half-gates garbling (in the multi-
+              instance setting)", Crypto, 2020,
               <https://link.springer.com/
               chapter/10.1007/978-3-030-56880-1_28>.
 
