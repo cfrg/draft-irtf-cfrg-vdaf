@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 20 April 2025                                              ISRG
+Expires: 21 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         17 October 2024
+                                                         18 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 April 2025.
+   This Internet-Draft will expire on 21 April 2025.
 
 Copyright Notice
 
@@ -4297,10 +4297,10 @@ Table of Contents
 
              Table 13: Parameters for Prio3MultihotCountVec.
 
-   For this instance of Prio3, each measurement is a vector of true and
-   false values, where the number of true values is bounded.  This
-   provides a functionality similar to Prio3Histogram except that more
-   than one entry (or none at all) may be non-zero.  This allows
+   For this instance of Prio3, each measurement is a vector of Boolean
+   values, where the number of True values is bounded.  This provides a
+   functionality similar to Prio3Histogram except that more than one
+   entry (or none at all) may be non-zero.  This allows
    Prio3MultihotCountVec to be composed with a randomized response
    mechanism, like [EPK14], for providing differential privacy.  (For
    example, each Client would set each entry with some small
@@ -4308,7 +4308,7 @@ Table of Contents
 
    The validity circuit is denoted MultihotCountVec and has three
    parameters: length, the number of entries in the count vector;
-   max_weight, the maximum number of true entries (i.e., the weight must
+   max_weight, the maximum number of True entries (i.e., the weight must
    be at most max_weight); and chunk_length, used the same way as in
    Section 7.4.3 and Section 7.4.4.
 
