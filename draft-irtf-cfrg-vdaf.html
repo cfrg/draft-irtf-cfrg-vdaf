@@ -7455,7 +7455,7 @@ for each. The Aggregators use these and the correlation shares provided by the
 Client to verify that the sequence of <code>data_share</code> values are additive shares of
 a one-hot vector.<a href="#section-8.2.2-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.2-2">Aggregators <span class="bcp14">MUST</span> ensure the candidate prefixes are all unique and appear in
-lexicographic order. (This is enforced in the definition of <code>prep_init()</code>
+lexicographic order. (This is enforced in the definition of <code>is_valid()</code>
 below.) Uniqueness is necessary to ensure the refined measurement (i.e., the sum
 of the output shares) is in fact a one-hot vector. Otherwise, sketch
 verification might fail, causing the Aggregators to erroneously reject a report
@@ -7477,12 +7477,6 @@ def prep_init(
     (level, prefixes) = agg_param
     (key, corr_seed, corr_inner, corr_leaf) = input_share
     field = self.idpf.current_field(level)
-
-    # Ensure that candidate prefixes are all unique and appear in
-    # lexicographic order.
-    for i in range(1, len(prefixes)):
-        if prefixes[i - 1] &gt;= prefixes[i]:
-            raise ValueError('out of order prefix')
 
     # Evaluate the IDPF key at the given set of prefixes.
     value = self.idpf.eval(
@@ -7625,7 +7619,8 @@ def prep_shares_to_prep(
 <p id="section-8.2.3-1">Aggregation parameters are valid for a given input share if no aggregation
 parameter with the same level has been used with the same input share before.
 The whole preparation phase <span class="bcp14">MUST NOT</span> be run more than once for a given
-combination of input share and level. This function checks that levels are
+combination of input share and level. This function checks that candidate
+prefixes are unique and lexicographically sorted, checks that levels are
 increasing between calls, and also enforces that the prefixes at each level are
 suffixes of the previous level's prefixes.<a href="#section-8.2.3-1" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-8.2.3-2">
@@ -7635,14 +7630,22 @@ def is_valid(
         agg_param: Poplar1AggParam,
         previous_agg_params: list[Poplar1AggParam]) -&gt; bool:
     """
-    Checks that levels are increasing between calls, and also
+    Checks that candidate prefixes are unique and lexicographically
+    sorted, checks that levels are increasing between calls, and also
     enforces that the prefixes at each level are suffixes of the
     previous level's prefixes.
     """
+    (level, prefixes) = agg_param
+
+    # Ensure that candidate prefixes are all unique and appear in
+    # lexicographic order.
+    for i in range(1, len(prefixes)):
+        if prefixes[i - 1] &gt;= prefixes[i]:
+            return False
+
     if len(previous_agg_params) &lt; 1:
         return True
 
-    (level, prefixes) = agg_param
     (last_level, last_prefixes) = previous_agg_params[-1]
     last_prefixes_set = set(last_prefixes)
 
