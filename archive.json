@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-17T00:55:19.200418+00:00",
+  "timestamp": "2024-10-20T01:00:16.259487+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6523,7 +6523,7 @@
       "id": "I_kwDOGKuqOc6aM_m_",
       "title": "Poplar1: Move enforcement of prefix uniqueness and order to `is_valid()`",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/494",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6534,8 +6534,8 @@
       ],
       "body": "",
       "createdAt": "2024-10-14T21:24:45Z",
-      "updatedAt": "2024-10-15T00:11:36Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-18T18:12:28Z",
+      "closedAt": "2024-10-18T18:12:27Z",
       "comments": []
     },
     {
@@ -6543,7 +6543,7 @@
       "id": "I_kwDOGKuqOc6aNMM1",
       "title": "Side channel considerations for implementations",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/495",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6555,8 +6555,8 @@
       ],
       "body": "Throughout the draft we have scattered some tips about dealing with side channels. In security considerations, we should articulate our threat model and include some general tips.\r\n\r\nThe threat model we have in mind is the following: the attacker, which includes one or more of the Aggregators, can observe how long it takes honest Clients or Aggregators to perform their computations.\r\n\r\nIn this threat model we want:\r\n\r\n1. finite field arithmetic to be constant time\r\n2. measurement encoding to be constant time (including `alpha` for Poplar1)\r\n3. IDPF generation and evaluation to hide control bits\r\n4. ... anything else?",
       "createdAt": "2024-10-14T21:57:23Z",
-      "updatedAt": "2024-10-16T16:30:39Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-18T18:03:29Z",
+      "closedAt": "2024-10-18T18:03:29Z",
       "comments": []
     },
     {
@@ -6585,7 +6585,7 @@
       "id": "I_kwDOGKuqOc6aNcKM",
       "title": "Weird formatting in references",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/497",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6597,8 +6597,8 @@
       ],
       "body": "There is a space after the \"seriesinfo\" field, e.g., \"CRYPTO 2019 ,\"\r\n\r\n![image](https://github.com/user-attachments/assets/6e610d86-0f80-456a-b1bc-7d70a124558b)\r\n\r\nI'm not sure if this is intentional.",
       "createdAt": "2024-10-14T22:47:47Z",
-      "updatedAt": "2024-10-15T18:00:22Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-17T17:36:09Z",
+      "closedAt": "2024-10-17T17:36:09Z",
       "comments": []
     },
     {
@@ -6626,7 +6626,7 @@
       "id": "I_kwDOGKuqOc6agGx4",
       "title": "Use full names for citations",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/503",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6638,8 +6638,8 @@
       ],
       "body": "I.e., `\"name\": \"Robert Paulson\"` rather than `\"ins\": \"R. Paulson\"`.\r\ncc @martinthomson",
       "createdAt": "2024-10-16T14:41:25Z",
-      "updatedAt": "2024-10-16T14:49:21Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-17T17:36:09Z",
+      "closedAt": "2024-10-17T17:36:09Z",
       "comments": []
     },
     {
@@ -6647,7 +6647,7 @@
       "id": "I_kwDOGKuqOc6agLk4",
       "title": "Reorder validity circuit methods",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/504",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6659,8 +6659,8 @@
       ],
       "body": "Inspired by discussions on draft-thomson-ppm-l1-bound-sum: I think that reordering the methods of validity circuits to match the order in which they are applied would make the AFE/circuit combination easier to understand. This would be `encode()`, `eval()`, `truncate()`, `decode()`.",
       "createdAt": "2024-10-16T14:48:04Z",
-      "updatedAt": "2024-10-16T14:48:56Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-17T20:17:45Z",
+      "closedAt": "2024-10-17T20:17:44Z",
       "comments": []
     },
     {
@@ -6668,7 +6668,7 @@
       "id": "I_kwDOGKuqOc6ai0pZ",
       "title": "Change `Measurement` of `Prio3MultihotCountVec` to `list[bool]`",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/506",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6679,8 +6679,8 @@
       ],
       "body": "We currently say that the measurement type is `list[int]`, but `list[bool]` would do a better job of narrowing the inputs to what's allowable.\r\n\r\nh/t @rozbb",
       "createdAt": "2024-10-16T19:11:35Z",
-      "updatedAt": "2024-10-16T20:27:26Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-18T18:50:56Z",
+      "closedAt": "2024-10-18T18:50:56Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -40671,7 +40671,7 @@
       "id": "PR_kwDOGKuqOc5-GHFp",
       "title": "Update change log for draft 13",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/465",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -40680,24 +40680,26 @@
       ],
       "body": "",
       "createdAt": "2024-10-09T15:06:08Z",
-      "updatedAt": "2024-10-10T21:48:54Z",
+      "updatedAt": "2024-10-18T21:50:45Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "4756b71ab93879f4ead55fef926f1db2f87895de",
+      "baseRefOid": "294c5abd2dc6e55d5a9a94eb23b87ea66e0876e9",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-13/change-log",
-      "headRefOid": "edbe47713f6a9a067c0381b72d54160303554ea3",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "53c2f190155eb2916f878a02a1ab4ad9df844020",
+      "closedAt": "2024-10-18T21:50:45Z",
+      "mergedAt": "2024-10-18T21:50:45Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "bd983637a87a7fa8353db5771c184585b2550271"
+      },
       "comments": [
         {
           "author": "cjpatton",
           "authorAssociation": "COLLABORATOR",
-          "body": "Other things to note:\r\n\r\n- [ ] Section reassignement",
+          "body": "Other things to note:\r\n\r\n- [x] Section reassignement",
           "createdAt": "2024-10-10T21:48:53Z",
-          "updatedAt": "2024-10-10T21:48:53Z"
+          "updatedAt": "2024-10-18T18:29:53Z"
         }
       ],
       "reviews": [
@@ -40718,6 +40720,26 @@
               "body": "```suggestion\r\n```",
               "createdAt": "2024-10-10T18:55:10Z",
               "updatedAt": "2024-10-10T18:55:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Nyu3m",
+          "commit": {
+            "abbreviatedOid": "809dbd5"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-18T20:04:04Z",
+          "updatedAt": "2024-10-18T20:30:56Z",
+          "comments": [
+            {
+              "originalPosition": 35,
+              "body": "nit: typo\r\n```suggestion\r\n  aggregation parameters up one level; and move safe usage of IDPF outputs up\r\n```",
+              "createdAt": "2024-10-18T20:04:04Z",
+              "updatedAt": "2024-10-18T20:30:56Z"
             }
           ]
         }
@@ -42675,7 +42697,7 @@
       "id": "PR_kwDOGKuqOc5-4r6D",
       "title": "Clean up references",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/508",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -42685,19 +42707,404 @@
       ],
       "body": "Closes #497.\r\nCloses #503.\r\n\r\n* Use \"refcontent\" instead of \"seriesinfo\". The value is a string rather than a bunch of key/value pairs. In effect, this deletes the \" \" before the \",\".\r\n\r\n* Put quotes around each \"refcontent\" value\r\n\r\n* Replace \"ins\" with \"name\" and use the author's full name as it appears in the reference. `xml2rfc` still wants to abbreviate the first name, but we at least preserve more information.\r\n\r\n* Add a \"refcontent\" for {{SML24}}.\r\n\r\n* Reorder {{MRH04}} fields to match the other references",
       "createdAt": "2024-10-16T20:34:50Z",
-      "updatedAt": "2024-10-16T20:34:57Z",
+      "updatedAt": "2024-10-17T18:27:14Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "3f2226fd6aa1cff5ea017d1bd6cdff0470995f11",
+      "baseRefOid": "342e10ca8b8316fd2f3549acfa787ea774723495",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/ref-clean-up",
-      "headRefOid": "07cec030469d7d055f0149c23dc0843981dfd54d",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "92000ee95818fd04c68ad5a949a4a8354dc6eb38",
+      "closedAt": "2024-10-17T17:36:08Z",
+      "mergedAt": "2024-10-17T17:36:08Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "8e770ec71a083a706f82ab04f24540cded8f2481"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6NnACU",
+          "commit": {
+            "abbreviatedOid": "07cec03"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-17T17:08:22Z",
+          "updatedAt": "2024-10-17T17:10:55Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "Maybe we should add the `ins` field here, since the heuristic gets it wrong\r\n```suggestion\r\n      - name: James F. Dray Jr.\r\n        ins: J. Dray Jr.\r\n```",
+              "createdAt": "2024-10-17T17:08:22Z",
+              "updatedAt": "2024-10-17T17:10:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6NnMzI",
+          "commit": {
+            "abbreviatedOid": "07cec03"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-17T17:35:10Z",
+          "updatedAt": "2024-10-17T17:35:11Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "Done, and added a comment.",
+              "createdAt": "2024-10-17T17:35:11Z",
+              "updatedAt": "2024-10-17T17:35:11Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 509,
+      "id": "PR_kwDOGKuqOc5_AQVt",
+      "title": "Move encode() before eval()",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/509",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #504.",
+      "createdAt": "2024-10-17T18:22:38Z",
+      "updatedAt": "2024-10-17T20:21:53Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "8e770ec71a083a706f82ab04f24540cded8f2481",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/reorder-circuit-methods",
+      "headRefOid": "75d9a95533781602bc61ff60ab205c11d31e7057",
+      "closedAt": "2024-10-17T20:17:44Z",
+      "mergedAt": "2024-10-17T20:17:44Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "dcadeaae14cd8fa1bbece0e95ca95a189cc9fe39"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6NogOA",
+          "commit": {
+            "abbreviatedOid": "75d9a95"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-17T20:17:08Z",
+          "updatedAt": "2024-10-17T20:17:08Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 510,
+      "id": "PR_kwDOGKuqOc5_AnSe",
+      "title": "Security considerations: side-channel attacks",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/510",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #495.",
+      "createdAt": "2024-10-17T19:22:30Z",
+      "updatedAt": "2024-10-18T18:03:32Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "8e770ec71a083a706f82ab04f24540cded8f2481",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/side-channel-considerations",
+      "headRefOid": "c85590f0b7f6d7d786397c62453abb10cd15c090",
+      "closedAt": "2024-10-18T18:03:28Z",
+      "mergedAt": "2024-10-18T18:03:28Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "06a992ab06eb3bdc91266d166a033460eb11aa44"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6NojPE",
+          "commit": {
+            "abbreviatedOid": "c85590f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-17T20:24:27Z",
+          "updatedAt": "2024-10-17T20:24:27Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 511,
+      "id": "PR_kwDOGKuqOc5_Ass-",
+      "title": "Fix typo in references",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/511",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This is a follow-up to #508.",
+      "createdAt": "2024-10-17T19:37:25Z",
+      "updatedAt": "2024-10-18T18:03:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "8e770ec71a083a706f82ab04f24540cded8f2481",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "divergentdave-patch-1",
+      "headRefOid": "fa14329bff83e5caa1a1a56c2d48b26906731812",
+      "closedAt": "2024-10-18T18:03:42Z",
+      "mergedAt": "2024-10-18T18:03:42Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "8d0d5a8c12a0c6de2dbc3483625999863d9c7457"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Noiae",
+          "commit": {
+            "abbreviatedOid": "fa14329"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-17T20:22:25Z",
+          "updatedAt": "2024-10-17T20:22:25Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 512,
+      "id": "PR_kwDOGKuqOc5_Aur4",
+      "title": "Typo: `chunk_lengh -> chunk_length`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/512",
+      "state": "MERGED",
+      "author": "rozbb",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "",
+      "createdAt": "2024-10-17T19:42:30Z",
+      "updatedAt": "2024-10-17T22:07:18Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "8e770ec71a083a706f82ab04f24540cded8f2481",
+      "headRepository": "rozbb/draft-irtf-cfrg-vdaf",
+      "headRefName": "typo-fix",
+      "headRefOid": "5c495107fb234241baf9404c39837c4ed4d6db8f",
+      "closedAt": "2024-10-17T19:57:41Z",
+      "mergedAt": "2024-10-17T19:57:40Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "ac9aa5c41a9237b099cc89c1390b0c550479282a"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6NoR2a",
+          "commit": {
+            "abbreviatedOid": "5c49510"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-17T19:53:08Z",
+          "updatedAt": "2024-10-17T19:53:08Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 513,
+      "id": "PR_kwDOGKuqOc5_A3V3",
+      "title": "Poplar1: Move prefix order check to is_valid()",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/513",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #494.",
+      "createdAt": "2024-10-17T20:04:37Z",
+      "updatedAt": "2024-10-18T18:12:30Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "ac9aa5c41a9237b099cc89c1390b0c550479282a",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/poplar1-prefix-checks-is-valid",
+      "headRefOid": "2bba2fc9f819d630b72f2c94d4e0bdd7741e7805",
+      "closedAt": "2024-10-18T18:12:27Z",
+      "mergedAt": "2024-10-18T18:12:27Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "0b30b0c18c2ef62211c5ead1c274b6f72590a123"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Noh6v",
+          "commit": {
+            "abbreviatedOid": "9c76459"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-10-17T20:21:10Z",
+          "updatedAt": "2024-10-17T20:21:19Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Somewhat random thought here: A quirk in Python's implementation of `>=` on tuples might mean these are not actually in lexicographic order. It might be worth expanding this to longer vectors, in particular checking that ordering starts with the front of the tuple rather than the end.",
+              "createdAt": "2024-10-17T20:21:10Z",
+              "updatedAt": "2024-10-17T20:21:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6NolWP",
+          "commit": {
+            "abbreviatedOid": "9c76459"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Whoops, meant to approve, not comment.",
+          "createdAt": "2024-10-17T20:29:18Z",
+          "updatedAt": "2024-10-17T20:29:18Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 514,
+      "id": "PR_kwDOGKuqOc5_BK3U",
+      "title": "Change measurement type of Prio3MultihotCountVec",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/514",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "This implements #506. Updating the commit hash of the test vectors will have to wait for a follow-up PR.",
+      "createdAt": "2024-10-17T20:54:50Z",
+      "updatedAt": "2024-10-18T18:23:01Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "dcadeaae14cd8fa1bbece0e95ca95a189cc9fe39",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/multihot-count-vec-measurement-bools",
+      "headRefOid": "2af53ae120875af573d5b33864c20c07435a0d06",
+      "closedAt": "2024-10-18T18:22:55Z",
+      "mergedAt": "2024-10-18T18:22:55Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "c8cdc965c2f04679fbcc2c53101fda5384a01f74"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6No0iq",
+          "commit": {
+            "abbreviatedOid": "ad3b6dd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-17T20:59:47Z",
+          "updatedAt": "2024-10-17T21:02:16Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Or just \"vector of bools\" or \"vector of booleans\"\r\n```suggestion\r\nFor this instance of Prio3, each measurement is a vector of `True` and `False`\r\n```",
+              "createdAt": "2024-10-17T20:59:47Z",
+              "updatedAt": "2024-10-17T21:02:16Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "```suggestion\r\nnumber of `True` entries (i.e., the weight must be at most `max_weight`); and\r\n```",
+              "createdAt": "2024-10-17T21:00:43Z",
+              "updatedAt": "2024-10-17T21:02:16Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 515,
+      "id": "PR_kwDOGKuqOc5_Ilij",
+      "title": "Update test vectors commit hash",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/515",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Follow-up to #514",
+      "createdAt": "2024-10-18T18:25:06Z",
+      "updatedAt": "2024-10-18T18:30:21Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c8cdc965c2f04679fbcc2c53101fda5384a01f74",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/update-test-vectors-commit-hash",
+      "headRefOid": "6f9899f4f3071736a5f68dc2c6490ccfe08eeb1b",
+      "closedAt": "2024-10-18T18:30:17Z",
+      "mergedAt": "2024-10-18T18:30:17Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "294c5abd2dc6e55d5a9a94eb23b87ea66e0876e9"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6NyJ21",
+          "commit": {
+            "abbreviatedOid": "6f9899f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-18T18:29:27Z",
+          "updatedAt": "2024-10-18T18:29:27Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
