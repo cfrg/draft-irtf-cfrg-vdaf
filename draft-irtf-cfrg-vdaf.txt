@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 21 April 2025                                              ISRG
+Expires: 25 April 2025                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         18 October 2024
+                                                         22 October 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 April 2025.
+   This Internet-Draft will expire on 25 April 2025.
 
 Copyright Notice
 
@@ -1402,12 +1402,12 @@ Table of Contents
        |         |              | prep_shares_to_prep  | |   |
        +---------|--------------|----------------------|-+   |
          |       |      |       |         ...  |       |     |
-         V       V      V       V              V       |     | x ROUNDS
+         V       V      V       V              V       V     | x ROUNDS
        +-----------+  +-----------+          +-----------+   |
        | prep_next |  | prep_next |          | prep_next |   |
        +-----------+  +-----------+          +-----------+   |
-         |       |      |                 ...  |       |     |
-         V       V      V                      V       V     /
+         |       |      |       |         ...  |       |     |
+         V       V      V       V              V       V     /
         ...            ...                    ...
          |              |                 ...  |
          V              V                      V
