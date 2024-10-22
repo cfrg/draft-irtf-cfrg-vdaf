@@ -1385,12 +1385,12 @@ cross protocol attacks; see {{deep}}.
     |         |              | prep_shares_to_prep  | |   |
     +---------|--------------|----------------------|-+   |
       |       |      |       |         ...  |       |     |
-      V       V      V       V              V       |     | x ROUNDS
+      V       V      V       V              V       V     | x ROUNDS
     +-----------+  +-----------+          +-----------+   |
     | prep_next |  | prep_next |          | prep_next |   |
     +-----------+  +-----------+          +-----------+   |
-      |       |      |                 ...  |       |     |
-      V       V      V                      V       V     /
+      |       |      |       |         ...  |       |     |
+      V       V      V       V              V       V     /
      ...            ...                    ...
       |              |                 ...  |
       V              V                      V
