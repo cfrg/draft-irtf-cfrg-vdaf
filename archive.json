@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-22T00:56:17.423455+00:00",
+  "timestamp": "2024-10-24T00:55:22.599672+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -43102,6 +43102,51 @@
           "body": "",
           "createdAt": "2024-10-18T18:29:27Z",
           "updatedAt": "2024-10-18T18:29:27Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 516,
+      "id": "PR_kwDOGKuqOc5_hMOy",
+      "title": "Fix up the VDAF preparation illustration",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/516",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "",
+      "createdAt": "2024-10-22T21:51:16Z",
+      "updatedAt": "2024-10-22T21:53:02Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "bd983637a87a7fa8353db5771c184585b2550271",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/prep-illustration-nits",
+      "headRefOid": "5d36eab267c955b143638bd6e5e2409fe2674c13",
+      "closedAt": "2024-10-22T21:53:02Z",
+      "mergedAt": "2024-10-22T21:53:01Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "57f83d0dd55a2c6efc922f5e59877289b106f2b2"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6OPng5",
+          "commit": {
+            "abbreviatedOid": "5d36eab"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-22T21:52:38Z",
+          "updatedAt": "2024-10-22T21:52:38Z",
           "comments": []
         }
       ]
