@@ -827,7 +827,7 @@ Some common functionalities:
 * `byte(x: int) -> bytes` returns the representation of the integer `x` in range
   `[0, 256)` as a single-byte byte string.
 
-* `cast(typ: type, x: object) -> object` returns the input value unchanged.
+* `cast(typ: type[T], x: object) -> T` returns the input value unchanged.
   This is only present to assist with static analysis of the Python code.
   Type checkers will ignore the inferred type of the input value, and assume
   the output value has the given type.
@@ -855,11 +855,11 @@ Some common functionalities:
 * `next_power_of_2(x: int) -> int` returns the smallest integer
   greater than or equal to `x` that is also a power of two.
 
-* `range(stop)` or `range(start, stop[, step])` is the range function from the
-  Python standard library. The one-argument form returns the integers from zero
-  (inclusive) to `stop`, exclusive. The two- and three-argument forms allow
-  overriding the start of the range and overriding the step between successive
-  output values.
+* `range(stop: int)` or `range(start: int, stop: int[, step: int])` is the range
+  function from the Python standard library. The one-argument form returns the
+  integers from zero (inclusive) to `stop`, exclusive. The two- and
+  three-argument forms allow overriding the start of the range and overriding
+  the step between successive output values.
 
 * `to_be_bytes(x: int, len: int) -> bytes` converts an integer `x` whose value
   is in the range `[0, 2^(8*len))` to a big-endian, `len`-byte string.
