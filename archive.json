@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-27T00:59:49.417226+00:00",
+  "timestamp": "2024-10-29T00:57:02.297286+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6697,6 +6697,22 @@
           "updatedAt": "2024-10-16T20:27:25Z"
         }
       ]
+    },
+    {
+      "number": 518,
+      "id": "I_kwDOGKuqOc6cJ9dl",
+      "title": "flp: valid.eval signature is not specified",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/518",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The Section 7.3.2 [validity-circuits](https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/draft-irtf-cfrg-vdaf.md#validity-circuits-flp-bbcggi19-valid) says..\r\n\r\n> An instance of the proof system is defined in terms of a validity circuit that implements the Valid interface specified in this section. \r\n\r\nHowever the interface description is incomplete: the signature of the method `valid.eval()` is missing.\r\n",
+      "createdAt": "2024-10-29T00:44:07Z",
+      "updatedAt": "2024-10-29T00:44:07Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
