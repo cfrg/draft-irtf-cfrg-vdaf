@@ -3474,35 +3474,12 @@ probability.
 
 An instance of the proof system is defined in terms of a validity circuit that
 implements the `Valid` interface specified in this section. The parameters are
-listed in the table above. The circuit is invoked with the following method:
+listed in the table above.
 
-* `valid.eval(meas: list[F], joint_rand: list[F], num_shares: int) -> list[F]`
-  evaluates the circuit on a measurement and joint randomness. The output is a
-  list of field elements: if every element is equal to `valid.field(0)`, then
-  the circuit is said to "accept" the measurement; otherwise, if any element is
-  not equal to `valid.field(0)`, then the circuit is said to "reject" the
-  measurement.
-
-  This method can also be called on a secret share of the measurement, in which
-  case it produces a secret share of the output.
-
-  Pre-conditions:
-
-  * The length of `meas` MUST be `valid.MEAS_LEN`.
-
-  * The length of `joint_rand` MUST be `valid.JOINT_RAND_LEN`.
-
-  * `num_shares` MUST be the number of secret shares of `meas`, or `1` if
-    `meas` is not secret shared.
-
-  Post-conditions:
-
-  * The length of the output MUST be `valid.EVAL_OUTPUT_LEN`.
-
-Each circuit has a list of gadgets, denoted `GADGETS`, that are invoked by
-`valid.eval()`. The circuit evaluated by the gadget MAY be non-affine, but MUST
-be arithmetic, i.e., composed only of multiplication, addition, and subtraction
-gates. An instance of class `Gadget` has the following interface:
+Each circuit has a list of gadgets, denoted `GADGETS`. The circuit evaluated by
+the gadget MAY be non-affine, but MUST be arithmetic, i.e., composed only of
+multiplication, addition, and subtraction gates. An instance of class `Gadget`
+has the following interface:
 
 * `ARITY: int` is the number of input wires. For example, the multiplication
   gadget `Mul(x,y) = x*y` has arity of 2.
@@ -3515,8 +3492,8 @@ gates. An instance of class `Gadget` has the following interface:
   the given inputs and field.
 
 * `gadget.eval_poly(field: type[F], inp_poly: list[list[F]]) -> list[F]` is the
-  same as `gadget.eval()` except it evaluates the circuit over the polynomial
-  ring of the field. This is well defined because the circuit is arithmetic.
+  same as `eval()` except it evaluates the circuit over the polynomial ring of
+  the field. This is well defined because the circuit is arithmetic.
 
 In addition to the list of gadgets, the validity circuit specifies how many
 times each gadget is called (`GADGET_CALLS`). It also specifies the length of
