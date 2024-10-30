@@ -5821,89 +5821,55 @@ probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
           </table>
 <p id="section-7.3.2-2">An instance of the proof system is defined in terms of a validity circuit that
 implements the <code>Valid</code> interface specified in this section. The parameters are
-listed in the table above. The circuit is invoked with the following method:<a href="#section-7.3.2-2" class="pilcrow">¶</a></p>
+listed in the table above.<a href="#section-7.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-7.3.2-3">Each circuit has a list of gadgets, denoted <code>GADGETS</code>. The circuit evaluated by
+the gadget <span class="bcp14">MAY</span> be non-affine, but <span class="bcp14">MUST</span> be arithmetic, i.e., composed only of
+multiplication, addition, and subtraction gates. An instance of class <code>Gadget</code>
+has the following interface:<a href="#section-7.3.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.2-3.1">
-              <p id="section-7.3.2-3.1.1"><code>valid.eval(meas: list[F], joint_rand: list[F], num_shares: int) -&gt; list[F]</code>
-evaluates the circuit on a measurement and joint randomness. The output is a
-list of field elements: if every element is equal to <code>valid.field(0)</code>, then
-the circuit is said to "accept" the measurement; otherwise, if any element is
-not equal to <code>valid.field(0)</code>, then the circuit is said to "reject" the
-measurement.<a href="#section-7.3.2-3.1.1" class="pilcrow">¶</a></p>
-<p id="section-7.3.2-3.1.2">
-This method can also be called on a secret share of the measurement, in which
-case it produces a secret share of the output.<a href="#section-7.3.2-3.1.2" class="pilcrow">¶</a></p>
-<p id="section-7.3.2-3.1.3">
-Pre-conditions:<a href="#section-7.3.2-3.1.3" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.2-3.1.4.1">
-                  <p id="section-7.3.2-3.1.4.1.1">The length of <code>meas</code> <span class="bcp14">MUST</span> be <code>valid.MEAS_LEN</code>.<a href="#section-7.3.2-3.1.4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-7.3.2-4.1">
+              <p id="section-7.3.2-4.1.1"><code>ARITY: int</code> is the number of input wires. For example, the multiplication
+gadget <code>Mul(x,y) = x*y</code> has arity of 2.<a href="#section-7.3.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
-                <li class="normal" id="section-7.3.2-3.1.4.2">
-                  <p id="section-7.3.2-3.1.4.2.1">The length of <code>joint_rand</code> <span class="bcp14">MUST</span> be <code>valid.JOINT_RAND_LEN</code>.<a href="#section-7.3.2-3.1.4.2.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-7.3.2-3.1.4.3">
-                  <p id="section-7.3.2-3.1.4.3.1"><code>num_shares</code> <span class="bcp14">MUST</span> be the number of secret shares of <code>meas</code>, or <code>1</code> if
-<code>meas</code> is not secret shared.<a href="#section-7.3.2-3.1.4.3.1" class="pilcrow">¶</a></p>
-</li>
-              </ul>
-<p id="section-7.3.2-3.1.5">
-Post-conditions:<a href="#section-7.3.2-3.1.5" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.2-3.1.6.1">
-                  <p id="section-7.3.2-3.1.6.1.1">The length of the output <span class="bcp14">MUST</span> be <code>valid.EVAL_OUTPUT_LEN</code>.<a href="#section-7.3.2-3.1.6.1.1" class="pilcrow">¶</a></p>
-</li>
-              </ul>
-</li>
-          </ul>
-<p id="section-7.3.2-4">Each circuit has a list of gadgets, denoted <code>GADGETS</code>, that are invoked by
-<code>valid.eval()</code>. The circuit evaluated by the gadget <span class="bcp14">MAY</span> be non-affine, but <span class="bcp14">MUST</span>
-be arithmetic, i.e., composed only of multiplication, addition, and subtraction
-gates. An instance of class <code>Gadget</code> has the following interface:<a href="#section-7.3.2-4" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.3.2-5.1">
-              <p id="section-7.3.2-5.1.1"><code>ARITY: int</code> is the number of input wires. For example, the multiplication
-gadget <code>Mul(x,y) = x*y</code> has arity of 2.<a href="#section-7.3.2-5.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-7.3.2-5.2">
-              <p id="section-7.3.2-5.2.1"><code>DEGREE: int</code> is the arithmetic degree of the gadget circuit. This is defined
+            <li class="normal" id="section-7.3.2-4.2">
+              <p id="section-7.3.2-4.2.1"><code>DEGREE: int</code> is the arithmetic degree of the gadget circuit. This is defined
 to be the degree of the polynomial that computes it. This exists
-because the circuit is arithmetic. For example, <code>Mul</code> has degree 2.<a href="#section-7.3.2-5.2.1" class="pilcrow">¶</a></p>
+because the circuit is arithmetic. For example, <code>Mul</code> has degree 2.<a href="#section-7.3.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-7.3.2-5.3">
-              <p id="section-7.3.2-5.3.1"><code>gadget.eval(field: type[F], inp: list[F]) -&gt; F</code> evaluates the gadget over
-the given inputs and field.<a href="#section-7.3.2-5.3.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-7.3.2-4.3">
+              <p id="section-7.3.2-4.3.1"><code>gadget.eval(field: type[F], inp: list[F]) -&gt; F</code> evaluates the gadget over
+the given inputs and field.<a href="#section-7.3.2-4.3.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-7.3.2-5.4">
-              <p id="section-7.3.2-5.4.1"><code>gadget.eval_poly(field: type[F], inp_poly: list[list[F]]) -&gt; list[F]</code> is the
-same as <code>gadget.eval()</code> except it evaluates the circuit over the polynomial
-ring of the field. This is well defined because the circuit is arithmetic.<a href="#section-7.3.2-5.4.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-7.3.2-4.4">
+              <p id="section-7.3.2-4.4.1"><code>gadget.eval_poly(field: type[F], inp_poly: list[list[F]]) -&gt; list[F]</code> is the
+same as <code>eval()</code> except it evaluates the circuit over the polynomial ring of
+the field. This is well defined because the circuit is arithmetic.<a href="#section-7.3.2-4.4.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-7.3.2-6">In addition to the list of gadgets, the validity circuit specifies how many
+<p id="section-7.3.2-5">In addition to the list of gadgets, the validity circuit specifies how many
 times each gadget is called (<code>GADGET_CALLS</code>). It also specifies the length of
 the circuit's input (<code>MEAS_LEN</code>), the length of the joint randomness
-(<code>JOINT_RAND_LEN</code>), and the length of the circuit's output (<code>EVAL_OUTPUT_LEN</code>).<a href="#section-7.3.2-6" class="pilcrow">¶</a></p>
-<p id="section-7.3.2-7">A validity circuit also specifies parameters and methods needed for Prio3
-aggregation. These are used to implement the interface in <a href="#flp-encode" class="auto internal xref">Section 7.1.1</a>:<a href="#section-7.3.2-7" class="pilcrow">¶</a></p>
+(<code>JOINT_RAND_LEN</code>), and the length of the circuit's output (<code>EVAL_OUTPUT_LEN</code>).<a href="#section-7.3.2-5" class="pilcrow">¶</a></p>
+<p id="section-7.3.2-6">A validity circuit also specifies parameters and methods needed for Prio3
+aggregation. These are used to implement the interface in <a href="#flp-encode" class="auto internal xref">Section 7.1.1</a>:<a href="#section-7.3.2-6" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-7.3.2-8.1">
-              <p id="section-7.3.2-8.1.1"><code>valid.encode(measurement: Measurement) -&gt; list[F]</code> returns a vector of
-length <code>MEAS_LEN</code> representing a measurement of type <code>Measurement</code>.<a href="#section-7.3.2-8.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-7.3.2-7.1">
+              <p id="section-7.3.2-7.1.1"><code>valid.encode(measurement: Measurement) -&gt; list[F]</code> returns a vector of
+length <code>MEAS_LEN</code> representing a measurement of type <code>Measurement</code>.<a href="#section-7.3.2-7.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-7.3.2-8.2">
-              <p id="section-7.3.2-8.2.1"><code>valid.truncate(meas: list[F]) -&gt; list[F]</code> returns a vector of length
-<code>OUTPUT_LEN</code> representing (a share of) an aggregatable output.<a href="#section-7.3.2-8.2.1" class="pilcrow">¶</a></p>
+            <li class="normal" id="section-7.3.2-7.2">
+              <p id="section-7.3.2-7.2.1"><code>valid.truncate(meas: list[F]) -&gt; list[F]</code> returns a vector of length
+<code>OUTPUT_LEN</code> representing (a share of) an aggregatable output.<a href="#section-7.3.2-7.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-7.3.2-8.3">
-              <p id="section-7.3.2-8.3.1"><code>valid.decode(agg: list[F], num_measurements: int) -&gt; AggResult</code> returns an
+            <li class="normal" id="section-7.3.2-7.3">
+              <p id="section-7.3.2-7.3.1"><code>valid.decode(agg: list[F], num_measurements: int) -&gt; AggResult</code> returns an
 aggregate result of type <code>AggResult</code>. This computation may depend on the
-number of outputs aggregated.<a href="#section-7.3.2-8.3.1" class="pilcrow">¶</a></p>
+number of outputs aggregated.<a href="#section-7.3.2-7.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-7.3.2-9">Finally, the following are helper methods used to instantiate parameters of the
-<code>Flp</code> interface (<a href="#flp" class="auto internal xref">Section 7.1</a>):<a href="#section-7.3.2-9" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-7.3.2-10">
+<p id="section-7.3.2-8">Finally, the following are helper methods used to instantiate parameters of the
+<code>Flp</code> interface (<a href="#flp" class="auto internal xref">Section 7.1</a>):<a href="#section-7.3.2-8" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-7.3.2-9">
 <pre>
 def prove_rand_len(self) -&gt; int:
     """Length of the prover randomness."""
@@ -5930,7 +5896,7 @@ def verifier_len(self) -&gt; int:
     for g in self.GADGETS:
         length += g.ARITY + 1
     return length
-</pre><a href="#section-7.3.2-10" class="pilcrow">¶</a>
+</pre><a href="#section-7.3.2-9" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
