@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-29T00:57:02.297286+00:00",
+  "timestamp": "2024-10-31T00:56:33.260940+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6703,15 +6703,20 @@
       "id": "I_kwDOGKuqOc6cJ9dl",
       "title": "flp: valid.eval signature is not specified",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/518",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
-      "labels": [],
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
       "body": "The Section 7.3.2 [validity-circuits](https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/main/draft-irtf-cfrg-vdaf.md#validity-circuits-flp-bbcggi19-valid) says..\r\n\r\n> An instance of the proof system is defined in terms of a validity circuit that implements the Valid interface specified in this section. \r\n\r\nHowever the interface description is incomplete: the signature of the method `valid.eval()` is missing.\r\n",
       "createdAt": "2024-10-29T00:44:07Z",
-      "updatedAt": "2024-10-29T00:44:07Z",
-      "closedAt": null,
+      "updatedAt": "2024-10-30T18:29:53Z",
+      "closedAt": "2024-10-30T18:29:53Z",
       "comments": []
     }
   ],
@@ -43215,6 +43220,63 @@
           "body": "",
           "createdAt": "2024-10-25T19:30:45Z",
           "updatedAt": "2024-10-25T19:30:45Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 519,
+      "id": "PR_kwDOGKuqOc6AZuua",
+      "title": "Define the method for evaluating a validity circuit",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/519",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-13"
+      ],
+      "body": "Closes #518 \r\n\r\ncc @armfazh ",
+      "createdAt": "2024-10-30T15:13:33Z",
+      "updatedAt": "2024-10-30T18:29:52Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "913f584b65d4b8d4430993bf2b17f8f416af2fc3",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/518",
+      "headRefOid": "e199a511da1ff2252e83220cb31f533f38170852",
+      "closedAt": "2024-10-30T18:29:52Z",
+      "mergedAt": "2024-10-30T18:29:52Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "9aabdd421b68d97ef7599fe54fd455f9cda35aa4"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6PZN9Y",
+          "commit": {
+            "abbreviatedOid": "e199a51"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-30T17:32:55Z",
+          "updatedAt": "2024-10-30T17:32:55Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6PZgul",
+          "commit": {
+            "abbreviatedOid": "e199a51"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-10-30T18:02:02Z",
+          "updatedAt": "2024-10-30T18:02:02Z",
           "comments": []
         }
       ]
