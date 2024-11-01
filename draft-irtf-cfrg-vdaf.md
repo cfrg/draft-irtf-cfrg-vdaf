@@ -862,10 +862,11 @@ Some common functionalities:
   the step between successive output values.
 
 * `to_be_bytes(x: int, len: int) -> bytes` converts an integer `x` whose value
-  is in the range `[0, 2^(8*len))` to a big-endian, `len`-byte string.
+  is in the range `[0, 2^(8*len))` to a big-endian byte string of length `len`.
 
 * `to_le_bytes(x: int, len: int) -> bytes` converts an integer `x` whose value
-  is in the range `[0, 2^(8*len))` to a little-endian, `len`-byte string.
+  is in the range `[0, 2^(8*len))` to a little-endian byte string of length
+  `len`.
 
 * `poly_eval(field: type[F], p: list[F], x: F) -> F` returns the result of
   evaluating the polynomial, `p(x)`. The coefficients of polynomials are stored
@@ -882,8 +883,9 @@ Some common functionalities:
   the product of two polynomials.
 
 * `poly_strip(field: type[F], p: list[F]) -> list[F]` strips the zeros from the
-  end of the input polynomial. That is, it returns `p[:i]` where `i` is the
-  index of the last non-zero coefficient of `p`.
+  end of the input polynomial's list of coefficients. That is, it returns
+  `p[:i]` where `i` is the index of the highest-degree non-zero coefficient of
+  `p`.
 
 * `xor(left: bytes, right: bytes) -> bytes` returns the bitwise XOR of `left`
   and `right`. An exception is raised if the inputs are not the same length.
@@ -943,8 +945,8 @@ flow of the measurement process is as follows:
 Aggregators are a new class of actor relative to traditional measurement systems
 where Clients submit measurements to a single server.  They are critical for
 both the privacy properties of the system and, in the case of VDAFs, the
-validity of the measurements obtained.  The privacy properties of the system
-are assured by non-collusion among Aggregators, and Aggregators are the
+validity of the aggregate results obtained.  The privacy properties of the
+system are assured by non-collusion among Aggregators, and Aggregators are the
 entities that perform validation of Client measurements.  Thus Clients trust
 Aggregators not to collude (typically it is required that at least one
 Aggregator is honest; see {{num-aggregators}}), and Collectors trust
@@ -1404,17 +1406,16 @@ on the VDAF: Prio3 ({{prio3}}) has one round and Poplar1 ({{poplar1}}) has two.
 Aggregators retain some local state between successive rounds of preparation.
 This is referred to as "preparation state" or "prep state" for short.
 
-At the start of each round, each Aggregator broadcasts a message called a
+During each round, each Aggregator broadcasts a message called a
 "preparation share", or "prep share" for short. The prep shares are then
 combined into a single message called the "preparation message", or "prep
 message". The prep message MAY be computed by any one of the Aggregators.
 
 The prep message is disseminated to each of the Aggregators to begin the next
-round, or compute the output shares in case of the last round. An Aggregator
-begins the first round with its input share and it begins each subsequent round
-with the current prep state and the previous prep message. Its output in the
-last round is its output share and its output in each of the preceding rounds
-is a prep share.
+round. An Aggregator begins the first round with its input share and it begins
+each subsequent round with the current prep state and the previous prep
+message. Its output in the last round is its output share and its output in
+each of the preceding rounds is a prep share.
 
 Just as for DAFs ({{sec-daf-prepare}}), preparation involves an aggregation
 parameter. The aggregation parameter is consumed by each Aggregator before the
@@ -1894,15 +1895,15 @@ def ping_pong_helper_continued(
 ~~~
 
 They continue in this way until processing halts. Note that, depending on the
-number of rounds of preparation that are required, there may be one more
-message to send before the peer can also finish processing (i.e., `outbound !=
-None`).
+number of rounds of preparation that are required, when one party reaches the
+`Finished` state, there may be one more message to send before the peer can
+also finish processing (i.e., the outbound message is not `None`).
 
 ### The Star Topology (Any Number of Aggregators) {#star-topo}
 
-The ping-pong topology of the previous section is only suitable for VDAFs
-involving exactly two Aggregators. If the VDAF supports more than two
-Aggregators, then the star topology described in this section can
+The ping-pong topology of the previous section is only suitable for applications
+of VDAFs involving exactly two Aggregators. In applications with more than two
+Aggregators, the star topology described in this section can
 be used instead.
 
 We again designate an Aggregator to initiate the computation. We refer to this
@@ -1960,7 +1961,7 @@ respectively, `x + y`, `x - y`, `x * y`, `x / y`, `-x`, and `x.inv()`.
 
 We sometimes need to convert a field element to an `int`, which we denote by
 `x.int()`. Likewise, each concrete `Field` implements a constructor for
-converting an unsigned integer into a field element:
+converting an integer into a field element:
 
 * `Field(integer: int)` returns `integer` represented as a field element. The
   value of `integer` MUST be in the range `(-Field.MODULUS, Field.MODULUS)`;
@@ -2000,7 +2001,7 @@ def decode_vec(cls, encoded: bytes) -> list[Self]:
     return vec
 ~~~
 
-`Field` provides the following class methods for representing a value as a
+`Field` provides the following class methods for representing an integer as a
 sequence of field elements, each of which represents a bit of the input. These
 are used to encode measurements in some variants of Prio3
 ({{prio3-instantiations}}).
@@ -2121,7 +2122,7 @@ Concrete XOFs implement a class `Xof` providing the following interface:
   previous invocation of the XOF.
 
 * `xof.next(length: int)` returns the next chunk of the output of the
-  initialized XOF. The length of the chunk MUST be `length`.
+  initialized XOF as a byte string. The length of the chunk MUST be `length`.
 
 The following methods are provided for all concrete XOFs. The first is a class
 method used to derive a fresh seed from an existing one. The second is an
@@ -2373,7 +2374,7 @@ valid, the Aggregators run a multi-party computation on their shares, the
 result of which is the output of the arithmetic circuit. This involves
 verification of a "Fully Linear Proof (FLP)" ({{flp}}) generated by the Client.
 FLPs are the core component of Prio3, as they specify the types of
-measurements, how they are encoded, and how they are aggregated. In fact Prio3
+measurements and how they are encoded, verified, and aggregated. In fact Prio3
 can be thought of as a transformation of an FLP into a VDAF.
 
 Prio3 does not have an aggregation parameter. Instead, each output share is
@@ -2778,8 +2779,9 @@ involves the following steps:
 This three-step process is designed to ensure that the joint randomness does
 not leak the measurement to the Aggregators while preventing a malicious Client
 from tampering with the joint randomness in a way that allows it to break
-robustness. To bootstrap the required check, the Client encodes the joint
-randomness parts in the public share. (See {{prio3-preparation}} for details.)
+robustness. To save a round of communication between the Aggregators later, the
+Client encodes the joint randomness parts in the public share. (See
+{{prio3-preparation}} for details.)
 
 All functions used in the following listing are defined in {{prio3-auxiliary}}:
 
@@ -3319,8 +3321,8 @@ system involves two parties:
   and checks the proof
 
 Our proof system is much the same, except the verifier is split across multiple
-Aggregators, each of which has a secret share of the measurement rather than an
-encryption of it.
+Aggregators, each of which has a secret share of the measurement rather than a
+commitment to it.
 
 Validity is defined in terms of an arithmetic circuit evaluated over the
 measurement. The inputs to this circuit are elements of a finite field that
@@ -4075,9 +4077,9 @@ class SumVec(Valid[list[int], list[int], F]):
 The `chunk_length` parameter provides a trade-off between the arity of the
 `ParallelSum` gadget ({{gadget-parallel-sum}}) and the number of times the
 gadget is called. The proof length is asymptotically minimized when the chunk
-length is near the square root of the length of the measurement. However, the
-relationship between VDAF parameters and proof length is complicated, involving
-two forms of rounding:
+length is near the square root of the length of the encoded measurement.
+However, the relationship between VDAF parameters and proof length is
+complicated, involving two forms of rounding:
 
   * The circuit pads the inputs to its last `ParallelSum` gadget call, up to
     the chunk length.
@@ -4241,8 +4243,9 @@ be encoded with `bits_for_weight` bits.
 The verifier checks that each entry of the encoded measurement is a bit (i.e.,
 either one or zero). It then decodes the reported weight and subtracts it from
 `offset + sum(count_vec)`, where `count_vec` is the count vector. The result is
-zero if and only if the reported weight is equal to the true weight. The
-complete circuit is defined below.
+zero if and only if the reported weight is equal to the true weight. The two
+checks constitute the output of the circuit. The complete circuit is defined
+below.
 
 ~~~ python
 class MultihotCountVec(Valid[list[bool], list[int], F]):
@@ -4455,10 +4458,10 @@ comprised of the following algorithms:
 
   The output is a public part (of type `PublicShare`) that is sent to each
   Aggregator and a vector of private IDPF keys, one for each Aggregator. The
-  nonce is used to derive the fixed AES key for XofFixedKeyAes128
-  ({{xof-fixed-key-aes128}}). Looking ahead, this key is used for extending the
-  seed into the seeds for the child nodes at each level of the tree; see
-  {{idpf-bbcggi21}}.
+  nonce and application context are used to derive the fixed AES key for
+  XofFixedKeyAes128 ({{xof-fixed-key-aes128}}). Looking ahead, this key is used
+  for extending a node's seed into the seeds for the child nodes at each level
+  of the tree; see {{idpf-bbcggi21}}.
 
   Pre-conditions:
 
@@ -5281,7 +5284,8 @@ The IDPF construction now boils down to secret-sharing the values at each node
 of that tree in an efficient way. Note that explicitly representing the tree
 requires `O(2^BITS)` space, so the generator cannot just compute additive shares
 of it and send them to the two evaluators. Instead, the evaluators will
-re-generate shares of the tree using a XOF ({{xof}}).
+re-generate shares of values at selected nodes of the tree using a XOF
+({{xof}}).
 
 The basic observation is that if both evaluators have the same seed `s` of
 length `KEY_SIZE`, then expanding `s` using a XOF will also result in the same
@@ -5882,7 +5886,8 @@ There are also some important limitations to be aware of. For example, Prio3
 provides domain separation between families of circuits, but does not provide
 domain separation between instances of a circuit. Concretely, it is possible
 for Aggregators to accept a report for Prio3SumVec from a Client who disagrees
-with them on the value of `bits` and `length`. This is because there is no
+with them on the value of `bits` and `length` (so long as the encoded
+measurement is the same size). This is because there is no
 binding of the circuit parameters to the computation.
 
 ## Side-Channel Resistance
@@ -6282,7 +6287,7 @@ VDAF. These are listed in the subsections below.
  : The number of shares, an integer.
 
 `max_measurement`:
- : The largest measurement, an integer. Each element is in the range
+ : The largest valid measurement, an integer. Each measurement is in the range
   `[0, max_measurement]`.
 
 ### Prio3SumVec
@@ -6323,8 +6328,8 @@ VDAF. These are listed in the subsections below.
 : the length of each vector chunk, an integer.
 
 `max_weight`:
-: The largest vector weight, an integer. The sum of the elements must be in
-  the range `[0, max_weight]`.
+: The largest vector weight, an integer. The sum of the elements of the
+  measurement must be in the range `[0, max_weight]`.
 
 ### Poplar1 {#poplar1-test-vec-param}
 
