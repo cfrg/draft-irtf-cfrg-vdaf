@@ -1130,7 +1130,7 @@ Otherwise, the aggregate result may be computed incorrectly by the Collector.
 In general, it is permissible to aggregate a batch of reports multiple times.
 However, to prevent privacy violations, DAFs may impose certain restrictions on
 the aggregation parameters selected by the Collector. Restrictions are
-expressed by the aggregation-parameter validity function:
+expressed by the aggregation parameter validity function:
 
 * `daf.is_valid(agg_param: AggParam, previous_agg_params: list[AggParam]) ->
   bool` returns `True` if `agg_param` is allowed given the sequence
@@ -1430,7 +1430,7 @@ Preparation is implemented by the following set of algorithms:
 
 * `vdaf.prep_init(verify_key: bytes, ctx: bytes, agg_id: int, agg_param:
   AggParam, nonce: bytes, public_share: PublicShare, input_share: InputShare)
-  -> tuple[PrepState, PrepShare]` is the deterministic preparation-state
+  -> tuple[PrepState, PrepShare]` is the deterministic preparation state
   initialization algorithm run by each Aggregator. It consumes the shared
   verification key, the application context, the Aggregator's unique
   identifier, the aggregation parameter chosen by the Collector, the report
@@ -1449,14 +1449,14 @@ Preparation is implemented by the following set of algorithms:
     * `nonce` MUST have length `vdaf.NONCE_SIZE`.
 
 * `vdaf.prep_shares_to_prep(ctx: bytes, agg_param: AggParam, prep_shares:
-  list[PrepShare]) -> PrepMessage` is the deterministic preparation-message
+  list[PrepShare]) -> PrepMessage` is the deterministic preparation message
   pre-processing algorithm. It combines the prep shares produced by the
   Aggregators in the previous round into the prep message consumed by each
   Aggregator to start the next round.
 
 * `vdaf.prep_next(ctx: bytes, prep_state: PrepState, prep_msg: PrepMessage) ->
   tuple[PrepState, PrepShare] | OutShare` is the deterministic
-  preparation-state update algorithm run by each Aggregator. It updates the
+  preparation state update algorithm run by each Aggregator. It updates the
   Aggregator's prep state (`prep_state`) and returns either its next prep state
   and prep share for the next round or, if this is the last round, its output
   share.
