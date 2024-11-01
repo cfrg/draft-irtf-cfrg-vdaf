@@ -2392,13 +2392,15 @@ for various types of aggregation tasks are specified in
 ## Fully Linear Proofs (FLPs) {#flp}
 
 Conceptually, an FLP is a two-party protocol executed by a prover and a
-verifier. In actual use, however, the prover's computation is carried out by
-the Client, and the verifier's computation is distributed among the
-Aggregators. The Client generates a "proof" of its measurement's validity and
-distributes shares of the proof to the Aggregators. During preparation, each
-Aggregator performs some computation on its measurement share and proof share
-locally, then broadcasts the result in its prep share. The validity decision is
-then made by the `prep_shares_to_prep()` algorithm ({{sec-vdaf-prepare}}).
+verifier. The verifier is restricted to only access the messages it receives
+from the prover via linear queries. In actual use in Prio3, however, the
+prover's computation is carried out by the Client, and the verifier's
+computation is distributed among the Aggregators. The Client generates a
+"proof" of its measurement's validity and distributes shares of the proof to
+the Aggregators. During preparation, each Aggregator performs some computation
+on its measurement share and proof share locally, then broadcasts the result in
+its prep share. The validity decision is then made by the
+`prep_shares_to_prep()` algorithm ({{sec-vdaf-prepare}}).
 
 As usual, we describe the interface implemented by a concrete FLP in terms of
 an abstract base class, denoted `Flp`, that specifies the set of methods and
@@ -2415,7 +2417,7 @@ proofs of validity (encoding is described below in {{flp-encode}}):
   but the joint randomness is shared by both the prover and verifier.
 
 * `flp.query(meas: list[F], proof: list[F], query_rand: list[F], joint_rand:
-  list[F], num_shares: int) -> list[F]` is the query algorithm run by the
+  list[F], num_shares: int) -> list[F]` is the linear query algorithm run by the
   verifier on the encoded measurement and proof. The result of the query (i.e.,
   the output of this function) is called the "verifier message". In addition to
   the measurement and proof, this algorithm takes as input the query randomness
