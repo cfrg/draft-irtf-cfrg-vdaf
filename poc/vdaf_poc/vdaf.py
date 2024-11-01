@@ -118,7 +118,7 @@ class Vdaf(
         Pre-conditions:
 
             - `len(verify_key) == vdaf.VERIFY_KEY_SIZE`
-            - `agg_id` in `[0, vdaf.SHARES)`
+            - `agg_id` in the range `[0, vdaf.SHARES)`
             - `len(nonce) == vdaf.NONCE_SIZE`
         """
         pass
@@ -206,7 +206,7 @@ class Vdaf(
 
         Pre-conditions:
 
-            - `usage` in `[0, 2^16)`
+            - `usage` in the range `[0, 2^16)`
         """
         return format_dst(0, self.ID, usage) + ctx
 

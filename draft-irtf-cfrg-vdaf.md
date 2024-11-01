@@ -824,8 +824,8 @@ Some common functionalities:
   vectors of length `len(x)` such that they all add up to the input vector.
   Note that this function is not used normatively in this document.
 
-* `byte(x: int) -> bytes` returns the representation of the integer `x` in range
-  `[0, 256)` as a single-byte byte string.
+* `byte(x: int) -> bytes` returns the representation of the integer `x` in the
+  range `[0, 256)` as a single-byte byte string.
 
 * `cast(typ: type[T], x: object) -> T` returns the input value unchanged.
   This is only present to assist with static analysis of the Python code.
@@ -1006,7 +1006,7 @@ enumerated in the following table.
 
 | Parameter         | Description                                                    |
 |:------------------|:---------------------------------------------------------------|
-| `ID: int`         | Algorithm identifier for this DAF, in `[0, 2^32)`.             |
+| `ID: int`         | Algorithm identifier for this DAF, in the range `[0, 2^32)`.   |
 | `SHARES: int`     | Number of input shares into which each measurement is sharded. |
 | `NONCE_SIZE: int` | Size of the nonce associated with the report.                  |
 | `RAND_SIZE: int`  | Size of the random byte string consumed by the sharding algorithm. |
@@ -1308,7 +1308,7 @@ defined by each concrete VDAF.
 
 | Parameter              | Description                                                    |
 |:-----------------------|:---------------------------------------------------------------|
-| `ID: int`              | Algorithm identifier for this VDAF, in `[0, 2^32)`.            |
+| `ID: int`              | Algorithm identifier for this VDAF, in the range `[0, 2^32)`.  |
 | `SHARES: int`          | Number of input shares into which each measurement is sharded. |
 | `ROUNDS: int`          | Number of rounds of communication during preparation.          |
 | `NONCE_SIZE: int`      | Size of the report nonce.                                      |
@@ -1344,7 +1344,7 @@ def domain_separation_tag(self, usage: int, ctx: bytes) -> bytes:
 
     Pre-conditions:
 
-        - `usage` in `[0, 2^16)`
+        - `usage` in the range `[0, 2^16)`
     """
     return format_dst(0, self.ID, usage) + ctx
 ~~~
@@ -1443,7 +1443,7 @@ Preparation is implemented by the following set of algorithms:
   Pre-conditions:
 
     * `verify_key` MUST have length `vdaf.VERIFY_KEY_SIZE`.
-    * `agg_id` MUST be the integer in `[0, vdaf.SHARES)` that matches the
+    * `agg_id` MUST be the integer in the range `[0, vdaf.SHARES)` that matches the
       index of `input_share` in the sequence of input shares output by the
       Client.
     * `nonce` MUST have length `vdaf.NONCE_SIZE`.
@@ -2335,9 +2335,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in `[0, 2^8)`
-        - `algo` in `[0, 2^32)`
-        - `usage` in `[0, 2^16)`
+        - `algo_class` in the range `[0, 2^8)`
+        - `algo` in the range `[0, 2^32)`
+        - `usage` in the range `[0, 2^16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),
@@ -2542,8 +2542,8 @@ elements:
 For some FLPs, the encoded measurement also includes redundant field elements
 that are useful for checking the proof, but which are not needed after the
 proof has been checked. An example is the `Sum` type defined in {{prio3sum}}
-for which each measurement is an integer in range `[0, max_measurement]`. The
-range check requires encoding the measurement with several field elements,
+for which each measurement is an integer in the range `[0, max_measurement]`.
+The range check requires encoding the measurement with several field elements,
 though just one is needed for aggregation. Thus the FLP defines an algorithm
 for truncating the encoded measurement to the length of the aggregated output:
 
@@ -3336,7 +3336,8 @@ C(x) = x * (x-1)
 ~~~
 
 This circuit contains one subtraction gate (`x-1`) and one multiplication gate
-(`x * (x-1)`). Observe that `C(x) = 0` if and only if `x` is in `[0, 2)`.
+(`x * (x-1)`). Observe that `C(x) = 0` if and only if `x` is in the range
+`[0, 2)`.
 
 The goal of the proof system is to allow each Aggregator to privately and
 correctly compute a share of `C(x)` from its share of `x`. Then all they need
@@ -3423,9 +3424,9 @@ C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
 the length-`N` input and `r` is a random field element. The gadget circuit
 `Range2` is the "range-check" polynomial described above, i.e., `Range2(x) =
 x^2 - x`. The idea is that, if `x` is valid, i.e., each `x[j]` is in
-`[0, 2)`, then the circuit will evaluate to zero regardless of the value of
-`r`; but if some `x[j]` is not in `[0, 2)`, then the output will be non-zero
-with high probability.
+the range `[0, 2)`, then the circuit will evaluate to zero regardless of the
+value of `r`; but if some `x[j]` is not in the range `[0, 2)`, then the output
+will be non-zero with high probability.
 
 The second extension implemented by our FLP allows the validity circuit to
 contain multiple gadget types. (This generalization was suggested in
@@ -3439,9 +3440,9 @@ C(x, r) = r * Range2(x[0]) + ... + r^L * Range2(x[L-1]) + \
 ~~~
 
 where `Range3(x) = x^3 - 3x^2 + 2x`. This circuit checks that the first `L`
-inputs are in `[0, 2)` and the last `N-L` inputs are in `[0, 3)`. The same
-circuit can be expressed using a simpler gadget, namely multiplication, but the
-resulting proof would be longer.
+inputs are in the range `[0, 2)` and the last `N-L` inputs are in the range
+`[0, 3)`. The same circuit can be expressed using a simpler gadget, namely
+multiplication, but the resulting proof would be longer.
 
 Third, rather than interpolate the gadget polynomial at inputs `1`, `2`, ...,
 `j`, ..., where `j` is the `j`-th invocation of the gadget, we use roots of
@@ -3884,7 +3885,8 @@ same range of `[0, 2^bits)`, this means that the measurement itself is between
 
 The circuit uses the polynomial-evaluation gadget `PolyEval` specified in
 {{gadget-poly-eval}}. The polynomial is `p(x) = x^2 - x`, which is equal to `0`
-if and only if `x` is in `[0, 2)`. The complete circuit is specified below:
+if and only if `x` is in the range `[0, 2)`. The complete circuit is specified
+below:
 
 ~~~
 class Sum(Valid[int, int, F]):
@@ -4428,10 +4430,10 @@ An IDPF is defined over a domain of size `2^BITS`, where `BITS` is a constant.
 Indices into the IDPF tree are bit strings. (In Poplar1, each Client's bit
 string is an index; see {{poplar1-idpf-index-encoding}} for details.) The Client
 specifies an index `alpha` and a vector of values `beta`, one for each "level"
-`L` in `[0, BITS)`. The key generation algorithm generates one IDPF "key" for
-each Aggregator. When evaluated at level `L` and index `prefix`, each IDPF key
-returns an additive share of `beta[L]` if `prefix` is the `L`-bit prefix of
-`alpha` and shares of zero otherwise.
+`L` in the range `[0, BITS)`. The key generation algorithm generates one IDPF
+"key" for each Aggregator. When evaluated at level `L` and index `prefix`, each
+IDPF key returns an additive share of `beta[L]` if `prefix` is the `L`-bit
+prefix of `alpha` and shares of zero otherwise.
 
 Each of the programmed points `beta` is a vector of elements of some finite
 field. We distinguish two types of fields: one for inner nodes (denoted
@@ -4463,7 +4465,7 @@ comprised of the following algorithms:
     * `alpha` MUST have length `BITS`.
     * `beta_inner` MUST have length `BITS - 1`.
     * `beta_inner[level]` MUST have length `VALUE_LEN` for each `level` in
-       `[0, BITS - 1)`.
+       the range `[0, BITS - 1)`.
     * `beta_leaf` MUST have length `VALUE_LEN`.
     * `rand` MUST be generated by a CSPRNG and have length `RAND_SIZE`.
     * `nonce` MUST be generated by a CSPRNG (see {{nonce-requirements}} for
@@ -4484,9 +4486,9 @@ comprised of the following algorithms:
 
   Pre-conditions:
 
-  * `agg_id` MUST be in `[0, idpf.SHARES)` and match the index of `key` in
-    the sequence of IDPF keys output by the Client.
-  * `level` MUST be in `[0, BITS)`.
+  * `agg_id` MUST be in the range `[0, idpf.SHARES)` and match the index of
+    `key` in the sequence of IDPF keys output by the Client.
+  * `level` MUST be in the range `[0, BITS)`.
   * Each prefix MUST be distinct and have length `level + 1`.
   * The length of the nonce MUST be `idpf.NONCE_SIZE`.
 
@@ -6296,7 +6298,7 @@ VDAF. These are listed in the subsections below.
 
 `bits`:
 : the bit length of each element of the vector, an integer. Each element is in
-  `[0, 2^bits)`.
+  the range `[0, 2^bits)`.
 
 ### Prio3Histogram
 
@@ -6322,7 +6324,7 @@ VDAF. These are listed in the subsections below.
 
 `max_weight`:
 : The largest vector weight, an integer. The sum of the elements must be in
-  `[0, max_weight]`.
+  the range `[0, max_weight]`.
 
 ### Poplar1 {#poplar1-test-vec-param}
 
