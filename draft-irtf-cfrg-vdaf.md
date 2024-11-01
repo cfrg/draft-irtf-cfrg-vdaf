@@ -3284,6 +3284,18 @@ struct {
 
 ## FLP Specification {#flp-bbcggi19}
 
+This section specifies an implementation of the `Flp` interface ({{flp}}) based
+on the construction from {{BBCGGI19}}, Section 4.2. The types and parameters
+required by this interface are listed in the table below.
+
+We begin in {{flp-bbcggi19-overview}} with an overview of the proof system and
+some extensions to it. {{flp-bbcggi19-valid}} defines validity circuits, the
+core component of the proof system that determines measurement validity and how
+measurements are aggregated. The proof-generation algorithm, query algorithm,
+and decision algorithm are defined in {{flp-bbcggi19-construction-prove}},
+{{flp-bbcggi19-construction-query}}, and {{flp-bbcggi19-construction-decide}}
+respectively.
+
 | Parameter        | Value                                            |
 |:-----------------|:-------------------------------------------------|
 | `valid`          | An instance of `Valid` ({{flp-bbcggi19-valid}}). |
@@ -3298,18 +3310,6 @@ struct {
 | `Measurement`    | As defined by `valid`.                           |
 | `AggResult`      | As defined by `valid`.                           |
 {: #flp-bbcggi19-param title="FLP parameters for a validity circuit."}
-
-This section specifies an implementation of the `Flp` interface ({{flp}}) based
-on the construction from {{BBCGGI19}}, Section 4.2. The types and parameters
-required by this interface are listed in the table above.
-
-We begin in {{flp-bbcggi19-overview}} with an overview of the proof system and
-some extensions to it. {{flp-bbcggi19-valid}} defines validity circuits, the
-core component of the proof system that determines measurement validity and how
-measurements are aggregated. The proof-generation algorithm, query algorithm,
-and decision algorithm are defined in {{flp-bbcggi19-construction-prove}},
-{{flp-bbcggi19-construction-query}}, and {{flp-bbcggi19-construction-decide}}
-respectively.
 
 ### Overview {#flp-bbcggi19-overview}
 
@@ -3465,6 +3465,10 @@ probability.
 
 ### Validity Circuits {#flp-bbcggi19-valid}
 
+An instance of the proof system is defined in terms of a validity circuit that
+implements the `Valid` interface specified in this section. The parameters are
+listed in the table below.
+
 | Parameter                 | Description                                         |
 |:--------------------------|:----------------------------------------------------|
 | `GADGETS: list[Gadget]`   | A list of gadgets.                                  |
@@ -3478,9 +3482,7 @@ probability.
 | `field: type[F]`          | Class object for the field ({{field-ntt-friendly}}) |
 {: title="Validity circuit parameters."}
 
-An instance of the proof system is defined in terms of a validity circuit that
-implements the `Valid` interface specified in this section. The parameters are
-listed in the table above. The circuit is invoked with the following method:
+The circuit is invoked with the following method:
 
 * `valid.eval(meas: list[F], joint_rand: list[F], num_shares: int) -> list[F]`
   evaluates the arithmetic circuit on a measurement and joint randomness. The
