@@ -3483,14 +3483,20 @@ implements the `Valid` interface specified in this section. The parameters are
 listed in the table above. The circuit is invoked with the following method:
 
 * `valid.eval(meas: list[F], joint_rand: list[F], num_shares: int) -> list[F]`
-  evaluates the circuit on a measurement and joint randomness. The output is a
-  list of field elements: if every element is equal to `valid.field(0)`, then
-  the circuit is said to "accept" the measurement; otherwise, if any element is
-  not equal to `valid.field(0)`, then the circuit is said to "reject" the
-  measurement.
+  evaluates the arithmetic circuit on a measurement and joint randomness. The
+  output is a list of field elements: if every element is equal to
+  `valid.field(0)`, then the circuit is said to "accept" the measurement;
+  otherwise, if any element is not equal to `valid.field(0)`, then the circuit
+  is said to "reject" the measurement.
 
   This method can also be called on a secret share of the measurement, in which
   case it produces a secret share of the output.
+
+  The circuit must be composed of affine gates and gadget calls, so that the
+  verifier may check the prover's proof and circuit evaluation using linear
+  queries. This means that all non-affine multiplications in the circuit must
+  be encapsulated in gadget calls. Additions of constants must be rescaled by
+  the inverse of `num_shares`.
 
   Pre-conditions:
 
@@ -3525,9 +3531,11 @@ gates. An instance of class `Gadget` has the following interface:
   ring of the field. This is well defined because the circuit is arithmetic.
 
 In addition to the list of gadgets, the validity circuit specifies how many
-times each gadget is called (`GADGET_CALLS`). It also specifies the length of
-the circuit's input (`MEAS_LEN`), the length of the joint randomness
-(`JOINT_RAND_LEN`), and the length of the circuit's output (`EVAL_OUTPUT_LEN`).
+times each gadget is called (`GADGET_CALLS`). The circuit needs to define an
+ordering of the calls it makes to each gadget, so that all parties agree on how
+to identify recorded wire values. It also specifies the length of the circuit's
+input (`MEAS_LEN`), the length of the joint randomness (`JOINT_RAND_LEN`), and
+the length of the circuit's output (`EVAL_OUTPUT_LEN`).
 
 A validity circuit also specifies parameters and methods needed for Prio3
 aggregation. These are used to implement the interface in {{flp-encode}}:
