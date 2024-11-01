@@ -5897,13 +5897,15 @@ binding of the circuit parameters to the computation.
 ## Side-Channel Resistance
 
 Implementations of VDAFs should incorporate defenses against side-channel
-attacks. Because side-channel attacks may impact the privacy security goal, the
+attacks. For side-channel attacks against the privacy security goal, the
 relevant threat model includes an attacker that may control the Collector, a
-subset of Clients, and a subset of Aggregators, and monitor side-channel signals
-from the honest Clients and Aggregators. Thus, implementations of Clients and
-Aggregators should treat measurements, input shares, and output shares as
-secret, and avoid leaking those secret values or any intermediate computations
-that depend on them.
+subset of Clients, and a subset of Aggregators, and monitor side-channel
+signals from the honest Clients and Aggregators. Side-channel attacks by third
+parties may indirectly target robustness by trying to leak the Aggregators'
+verification key. Thus, implementations of Clients and Aggregators should treat
+measurements, input shares, output shares, and the verification key as secret,
+and avoid leaking those secret values or any intermediate computations that
+depend on them.
 
 For example, the following routines should all be implemented in a side-channel
 resistant manner.
