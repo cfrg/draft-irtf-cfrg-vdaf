@@ -2034,6 +2034,9 @@ def decode_from_bit_vec(cls, vec: list[Self]) -> Self:
     """
     Decode the field element from the bit representation, expressed
     as a vector of field elements `vec`.
+
+    This may also be used with secret shares of a bit representation,
+    since it is linear.
     """
     bits = len(vec)
     if cls.MODULUS >> bits == 0:
@@ -3902,6 +3905,12 @@ The circuit uses the polynomial-evaluation gadget `PolyEval` specified in
 {{gadget-poly-eval}}. The polynomial is `p(x) = x^2 - x`, which is equal to `0`
 if and only if `x` is in the range `[0, 2)`. The complete circuit is specified
 below:
+
+Note that decoding a sequence of bits into an integer is a linear operation,
+specifically, a linear combination with a sequence of powers of two, so it can
+be done within a validity circuit using "free" affine gates. Furthermore,
+decoding secret shares of a bit-encoded integer will produce secret shares of
+the original integer.
 
 ~~~
 class Sum(Valid[int, int, F]):

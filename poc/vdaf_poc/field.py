@@ -103,6 +103,9 @@ class Field:
         """
         Decode the field element from the bit representation, expressed
         as a vector of field elements `vec`.
+
+        This may also be used with secret shares of a bit representation,
+        since it is linear.
         """
         bits = len(vec)
         if cls.MODULUS >> bits == 0:
