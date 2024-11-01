@@ -77,7 +77,7 @@ def vec_neg(vec: list[F]) -> list[F]:
 
 def to_le_bytes(val: int, length: int) -> bytes:
     """
-    Convert unsigned integer `val` in range `[0, 2 ^ (8 * length))` to a
+    Convert unsigned integer `val` in the range `[0, 2 ^ (8 * length))` to a
     little-endian byte string.
     """
     val = int(val)
@@ -94,7 +94,7 @@ def from_le_bytes(encoded: bytes) -> int:
 
 def to_be_bytes(val: int, length: int) -> bytes:
     """
-    Convert unsigned integer `val` in range `[0, 2 ^ (8 * length))` to a
+    Convert unsigned integer `val` in the range `[0, 2 ^ (8 * length))` to a
     big-endian byte string.
     """
     val = int(val)
@@ -150,9 +150,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in `[0, 2^8)`
-        - `algo` in `[0, 2^32)`
-        - `usage` in `[0, 2^16)`
+        - `algo_class` in the range `[0, 2^8)`
+        - `algo` in the range `[0, 2^32)`
+        - `usage` in the range `[0, 2^16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),

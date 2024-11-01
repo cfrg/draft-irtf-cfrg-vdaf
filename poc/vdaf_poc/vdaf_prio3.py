@@ -62,7 +62,7 @@ class Prio3(
     ROUNDS = 1
 
     xof: type[Xof]
-    PROOFS: int  # Number of proofs, in range `[1, 256)`
+    PROOFS: int  # Number of proofs, in the range `[1, 256)`
 
     @abstractmethod
     def __init__(

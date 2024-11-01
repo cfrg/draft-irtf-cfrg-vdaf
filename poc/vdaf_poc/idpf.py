@@ -121,8 +121,8 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
 
         Pre-conditions:
 
-            - `agg_id` in `[0, self.SHARES)`
-            - `level` in `[0, self.BITS)`
+            - `agg_id` in the range `[0, self.SHARES)`
+            - `level` in the range `[0, self.BITS)`
             - `len(prefix) == level + 1` for each `prefix` in `prefixes`
         """
         pass
@@ -144,7 +144,7 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
 
         Pre-conditions:
 
-            - `level` in `[0, self.BITS)`
+            - `level` in the range `[0, self.BITS)`
         """
         return x == y[:level + 1]
 

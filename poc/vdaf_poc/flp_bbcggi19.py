@@ -1020,7 +1020,7 @@ class Sum(Valid[int, int, F]):
     def __init__(self, field: type[F], max_measurement: int):
         # REMOVE ME
         """
-        A circuit that checks that the measurement is in range `[0,
+        A circuit that checks that the measurement is in the range `[0,
         max_measurement]`. This is accomplished by encoding the
         measurement as a bit vector, encoding the measurement plus an
         offset as a bit vector, then checking that the two encoded
