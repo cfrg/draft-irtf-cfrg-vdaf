@@ -92,7 +92,7 @@ class Xof(metaclass=ABCMeta):
                         binder: bytes,
                         length: int) -> list[F]:
         """
-        Expand the input `seed` into vector of `length` field elements.
+        Expand the input `seed` into a vector of `length` field elements.
 
         Pre-conditions:
 

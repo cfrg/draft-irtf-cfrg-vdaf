@@ -575,7 +575,7 @@ particular.
   calls per level from 3 to 2. The cost is a slight reduction in the concrete
   privacy bound. (\*)
 
-* Prio3: Add support for generating and verifying mutliple proofs per
+* Prio3: Add support for generating and verifying multiple proofs per
   measurement. This enables a trade-off between communication cost and runtime:
   if more proofs are used, then a smaller field can be used without impacting
   robustness. (\*)
@@ -857,7 +857,7 @@ Some common functionalities:
 
 * `range(stop: int)` or `range(start: int, stop: int[, step: int])` is the range
   function from the Python standard library. The one-argument form returns the
-  integers from zero (inclusive) to `stop`, exclusive. The two- and
+  integers from zero (inclusive) to `stop` (exclusive). The two- and
   three-argument forms allow overriding the start of the range and overriding
   the step between successive output values.
 
@@ -978,7 +978,7 @@ Aggregators. The semantics of this parameter is specific to the aggregation
 function, but in general it is used to represent the set of "queries" that can
 be made by the Collector on the batch of measurements. For example, the
 aggregation parameter is used to represent the candidate prefixes in the
-Poplar1 VDAF {{poplar1}}.
+Poplar1 VDAF ({{poplar1}}).
 
 Execution of a DAF has four distinct stages:
 
@@ -1021,9 +1021,9 @@ enumerated in the following table.
 
 The types in this table define the inputs and outputs of DAF methods at various
 stages of the computation. Some of these values need to be written to the
-network in order to carry forward the computation. In particular, it is
-RECOMMENDED that concrete instantiations of the `Daf` interface specify a
-standard encoding the `PublicShare`, `InputShare`, `AggParam`, and `AggShare`.
+network in order to carry out the computation. In particular, it is RECOMMENDED
+that concrete instantiations of the `Daf` interface specify a standard encoding
+for the `PublicShare`, `InputShare`, `AggParam`, and `AggShare` types.
 
 ## Sharding {#sec-daf-shard}
 
@@ -1279,7 +1279,7 @@ def run_daf(
 
 The inputs to this procedure include the parameters of the aggregation function
 computed by the DAF: an aggregation parameter and a sequence of measurements.
-It also includes the application context. The procedure prescribes how a DAF is
+They also include the application context. The procedure prescribes how a DAF is
 executed in a "benign" environment in which there is no adversary and the
 messages are passed among the protocol participants over secure point-to-point
 channels. In reality, these channels need to be instantiated by some "wrapper
@@ -1303,8 +1303,8 @@ Otherwise, a malicious Client can cause the Collector to compute a malformed
 aggregate result.
 
 The remainder of this section defines the VDAF interface, which we denote by
-`Vdaf` in the remainder. The attributes are listed in {{vdaf-param}} are
-defined by each concrete VDAF.
+`Vdaf`. The attributes listed in {{vdaf-param}} are defined by each concrete
+VDAF.
 
 | Parameter              | Description                                                    |
 |:-----------------------|:---------------------------------------------------------------|
@@ -1326,13 +1326,13 @@ defined by each concrete VDAF.
 | `PrepMessage`          | Type of each prep message.                                     |
 {: #vdaf-param title="Constants and types defined by each concrete VDAF."}
 
-Some of type types in the table above need to be written to the network in
+Some of the types in the table above need to be written to the network in
 order to carry out the computation. It is RECOMMENDED that concrete
 instantiations of the `Vdaf` interface specify a method of encoding the
 `PublicShare`, `InputShare`, `AggParam`, `AggShare`, `PrepShare`, and
-`PrepMessage`.
+`PrepMessage` types.
 
-Each VDAF is identified by a unique, 32-bit integer, denoted `ID`. Identifiers
+Each VDAF is identified by a unique 32-bit integer, denoted `ID`. Identifiers
 for each VDAF specified in this document are defined in {{codepoints}}. The
 following method is used by both Prio3 and Poplar1:
 
@@ -1480,13 +1480,13 @@ at all.
 
 Aggregation parameter validation is as described for DAFs in
 {{sec-daf-validity-scopes}}. Again, each Aggregator MUST validate each
-aggregation parameter received by the Collector before beginning preparation
+aggregation parameter received from the Collector before beginning preparation
 with that parameter.
 
 ## Aggregation {#sec-vdaf-aggregate}
 
 Aggregation is identical to DAF aggregation as described in
-{{sec-daf-aggregate}}. Like DAFs, computation of the VDAF aggregate is not
+{{sec-daf-aggregate}}. As with DAFs, computation of the VDAF aggregate is not
 usually sensitive to the order in which output shares are aggregated. See
 {{agg-order}}.
 
@@ -1618,7 +1618,7 @@ The methods described in this section are defined in terms of opaque byte
 strings. A compatible `Vdaf` MUST specify methods for encoding public shares,
 input shares, prep shares, prep messages, and aggregation parameters.
 
-Implementations of Prio3 and Poplar1 MUST use the encoding scheme specified in
+Implementations of Prio3 and Poplar1 MUST use the encoding schemes specified in
 {{prio3-encode}} and {{poplar1-encode}} respectively.
 
 ### The Ping-Pong Topology (Only Two Aggregators) {#ping-pong-topo}
@@ -1715,9 +1715,9 @@ def ping_pong_leader_init(
 
 The output is the `State` to which the Leader has transitioned and an encoded
 `Message`. If the Leader's state is `Rejected`, then processing halts.
-Otherwise, if the state is `Continued`, then processing continues. Function
-`encode`  is used to encode the outbound message, here the `initialize` variant
-(hence `0`).
+Otherwise, if the state is `Continued`, then processing continues. The function
+`encode`  is used to encode the outbound message, which has the message type of
+`initialize` (identified by the number `0`).
 
 To continue processing the report, the Leader sends the outbound message to the
 Helper. The Helper's initial transition is computed using the following
@@ -1768,10 +1768,11 @@ def ping_pong_helper_init(
         return (Rejected(), None)
 ~~~
 
-Procedure `decode()` decodes the inbound message and returns the MessageType
-variant (`initialize`, `continue`, or `finish`) and the sequence of fields.
-Procedure `ping_pong_transition()` takes in the prep shares, combines them into
-the prep message, and computes the next prep state of the caller:
+The procedure `decode()` decodes the inbound message and returns the
+MessageType variant (`initialize`, `continue`, or `finish`) and the fields of
+the message. The procedure `ping_pong_transition()` takes in the prep shares,
+combines them into the prep message, and computes the next prep state of the
+caller:
 
 ~~~ python
 def ping_pong_transition(
@@ -2079,7 +2080,7 @@ provides the following interface:
   subgroup of the multiplicative group. To be NTT-friendly, the order of this
   subgroup MUST be a power of 2.
 
-* `GEN_ORDER: int` is the order of a multiplicative subgroup generated by
+* `GEN_ORDER: int` is the order of the multiplicative subgroup generated by
   `Field.gen()`. This is the smallest positive integer for which
   `Field.gen()**Field.GEN_ORDER == Field(1)`.
 
@@ -2088,7 +2089,7 @@ is RECOMMENDED that a generator is chosen with order at least `2^20`.
 
 ### Parameters
 
-The tables below define finite fields used in the remainder of this document.
+{{fields}} defines finite fields used in the remainder of this document.
 
 | Parameter    | Field64               | Field128                       | Field255   |
 |:-------------|:----------------------|:-------------------------------|:-----------|
@@ -2168,7 +2169,7 @@ def expand_into_vec(cls,
                     binder: bytes,
                     length: int) -> list[F]:
     """
-    Expand the input `seed` into vector of `length` field elements.
+    Expand the input `seed` into a vector of `length` field elements.
 
     Pre-conditions:
 
@@ -2191,8 +2192,8 @@ XOF is RECOMMENDED for all use cases for DAFs and VDAFs.
 
 Pre-conditions:
 
-* The default seed length is `32`. The seed MAY have a different length, but MUST not
-  exceed 255. Otherwise initialization will raise an exception.
+* The default seed length is `32`. The seed MAY have a different length, but it
+  MUST not exceed 255. Otherwise initialization will raise an exception.
 
 * The length of the domain separation string `dst` passed to XofTurboShake128
   MUST NOT exceed 65535 bytes. Otherwise initialization will raise an
@@ -2234,7 +2235,7 @@ performance bottleneck and a more efficient XOF can be used safely instead.
 
 This section describes XofFixedKeyAes128, which is used to implement the IDPF
 of Poplar1 ({{idpf-bbcggi21}}). It is NOT RECOMMENDED to use this XOF for any
-other purpose. See {{security}} for a more detailed discussion.
+other purpose. See {{xof-vs-ro}} for a more detailed discussion.
 
 XofFixedKeyAes128 uses the AES128 blockcipher {{AES}} for most of the
 computation, thereby taking advantage of the hardware implementations of this
@@ -2245,7 +2246,7 @@ Pre-conditions:
 
 * The length of the seed MUST be `16`.
 
-* The length of the domain separation string `dst` passed to XofTurboShake128
+* The length of the domain separation string `dst` passed to XofFixedKeyAes128
   MUST NOT exceed 65535 bytes. Otherwise initialization will raise an
   exception.
 
@@ -2379,7 +2380,7 @@ Prio3 does not have an aggregation parameter. Instead, each output share is
 derived from each input share by applying a fixed map. See {{poplar1}} for an
 example of a VDAF that makes meaningful use of the aggregation parameter.
 
-The remainder of this section is structured as follows. The syntax for FLPs is
+The remainder of this section is structured as follows. The interface of FLPs is
 described in {{flp}}. The generic transformation of an FLP into Prio3 is
 specified in {{prio3-construction}}. Next, a concrete FLP suitable for any
 validity circuit is specified in {{flp-bbcggi19}}. Finally, variants of Prio3
@@ -2545,7 +2546,7 @@ proof has been checked. An example is the `Sum` type defined in {{prio3sum}}
 for which each measurement is an integer in the range `[0, max_measurement]`.
 The range check requires encoding the measurement with several field elements,
 though just one is needed for aggregation. Thus the FLP defines an algorithm
-for truncating the encoded measurement to the length of the aggregated output:
+for truncating the encoded measurement to the length of the aggregatable output:
 
 * `flp.truncate(meas: list[F]) -> list[F]` maps an encoded measurement (e.g.,
   the bit-encoding of the measurement) to an aggregatable output (e.g., the
@@ -2581,7 +2582,7 @@ notion of "Affine-aggregatable encodings (AFEs)" from {{CGB17}}.
 It is sometimes desirable to generate and verify multiple independent proofs
 for the same input. First, this improves the soundness of the proof system
 without having to change any of its parameters. Second, it allows a smaller
-field to be used (e.g., replace Field128 with Field64, see {{flp-bbcggi19}})
+field to be used (e.g., replace Field128 with Field64)
 without sacrificing soundness. This is useful because it reduces the overall
 communication of the protocol. (This is a trade-off, of course, since
 generating and verifying more proofs requires more time.) Given these benefits,
@@ -2704,8 +2705,8 @@ i.e., when `flp.JOINT_RAND_LEN == 0`. It consists of the following steps:
 1. Generate proofs and shard each into shares
 1. Encode each measurement share and shares of each proof into an input share
 
-Only one pair of measurement and proof(s) share (called the "Leader" shares
-above) are vectors of field elements. The other shares (called the "Helper"
+Only one pair of measurement and proof(s) share (called the "Leader" shares)
+are vectors of field elements. The other shares (called the "Helper"
 shares) are represented instead by an XOF seed, which is expanded into vectors
 of field elements. The methods on `Prio3` for deriving the prover randomness,
 measurement shares, and proof shares are defined in {{prio3-auxiliary}}.
@@ -3170,7 +3171,7 @@ opaque Prio3Field[F];
 
 #### Public Share
 
-The content of the public share depends on whether joint randomness is
+The contents of the public share depend on whether joint randomness is
 required for the underlying FLP (i.e., `prio3.flp.JOINT_RAND_LEN > 0`). If
 joint randomness is not used, then the public share is the empty string.
 Otherwise, if joint randomness is used, then the public share encodes the joint
@@ -3341,7 +3342,7 @@ This circuit contains one subtraction gate (`x-1`) and one multiplication gate
 
 The goal of the proof system is to allow each Aggregator to privately and
 correctly compute a share of `C(x)` from its share of `x`. Then all they need
-to determine validity is to broadcast their shares of `C(x)`.
+to do to determine validity is to broadcast their shares of `C(x)`.
 
 Suppose for a moment that `C` is an affine arithmetic circuit, meaning its only
 operations are addition, subtraction, and multiplication-by-constant. (The
@@ -3671,7 +3672,7 @@ consists of (a share of) the validity circuit's output and (a share of) each
 gadget test. The gadget tests consume the query randomness.
 
 The goal of each gadget test is to ensure the inputs used by the prover to
-generate the gadget polynomial matches the inputs we used to evaluate it. We do
+generate the gadget polynomial match the inputs we used to evaluate it. We do
 this by partially reconstructing the gadget polynomial and evaluating it at a random
 point: when we evaluate the gadget polynomial at the same point, we expect to
 get the same result.
@@ -3956,14 +3957,14 @@ of the measurement is an integer in the range `[0, 2^bits)`. It is RECOMMENDED
 to set `chunk_length` to an integer near the square root of `length * bits`
 (see {{parallel-sum-chunk-length}}).
 
-The circuit is denoted `SumVec`. Each measurements is encoded as a vector of
+The circuit is denoted `SumVec`. Each measurement is encoded as a vector of
 field elements with a length of `length * bits`. The field elements in the
 encoded vector represent all the bits of the measurement vector's elements,
 consecutively, in LSB to MSB order.
 
 The validity circuit uses the `ParallelSum` gadget in {{gadget-parallel-sum}}.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
-then returns the sum of the results. Along with the subcircuit, the
+then sums the results. Along with the subcircuit, the
 parallel-sum gadget is parameterized by an integer, denoted `count`, specifying
 how many times to call the subcircuit. It takes in a list of inputs and passes
 them through to instances of the subcircuit in the same order. It returns the
@@ -4364,7 +4365,7 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
 This section specifies Poplar1, a VDAF for the following task. Each Client
 holds a bit-string of length `BITS` and the Collector chooses a sequence of
-`L`-bit strings, where `L <= BITS`. We will refer to the latter as the of
+`L`-bit strings, where `L <= BITS`. We will refer to the latter as the
 "candidate prefixes". The goal is to count how many of the Clients' inputs
 begin with each candidate prefix.
 
@@ -4413,16 +4414,15 @@ information about the set than the heavy hitters themselves; see
 Poplar1 composes an IDPF with the arithmetic sketch of {{BBCGGI21}}, Section
 4.2. (The paper calls this a "secure sketch", but the underlying technique was
 later generalized in {{BBCGGI23}}, where it is called "arithmetic sketching".)
-The sketch ensures that evaluating a set of input shares on a unique set of
+The sketch ensures that evaluating a set of input shares on a set of unique
 candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
 is zero everywhere except for in at most one position. Moreover, the value at
 that position should be one.
 
 The remainder of this section is structured as follows. The syntax of IDPFs is
-defined in {{idpf}}; a specification of the IDPF of {{BBCGGI21}} is given in
-{{idpf-bbcggi21}}. The Poplar1 VDAF is defined in {{poplar1-construction}} in
-terms of a generic IDPF. Test vectors for Poplar1 can be found in
-{{test-vectors}}.
+defined in {{idpf}}. The Poplar1 VDAF is defined in {{poplar1-construction}} in
+terms of a generic IDPF. A specification of the IDPF of {{BBCGGI21}} is given in
+{{idpf-bbcggi21}}. Test vectors for Poplar1 can be found in {{test-vectors}}.
 
 ## Incremental Distributed Point Functions (IDPFs) {#idpf}
 
@@ -4473,7 +4473,7 @@ comprised of the following algorithms:
 
   Post-conditions:
 
-    * The number IDPF keys MUST be `idpf.SHARES`.
+    * The number of IDPF keys MUST be `idpf.SHARES`.
 
 * `idpf.eval(agg_id: int, public_share: PublicShare, key: bytes, level: int,
   prefixes: Sequence[tuple[bool, ...]], ctx: bytes, nonce: bytes) -> Output` is
@@ -4611,8 +4611,8 @@ guidelines on index encoding.)
 The programmed IDPF values are pairs of field elements `(1, k)` where each `k` is
 chosen at random. This random value is used as part of the arithmetic sketching
 protocol of {{BBCGGI21}}, Appendix C.4. After evaluating their IDPF key shares
-on a given sequence of candidate prefixes, the sketching protocol is used by
-the Aggregators to verify that they hold shares of a one-hot vector at a given
+on a given sequence of candidate prefixes, the Aggregators use the sketching
+protocol to verify that they hold shares of a one-hot vector at a given
 level of the IDPF tree.
 
 In addition to programming `k` into the IDPF output, for each level of the
