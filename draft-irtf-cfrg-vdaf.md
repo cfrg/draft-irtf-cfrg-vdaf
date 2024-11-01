@@ -5588,8 +5588,10 @@ VDAFs ({{vdaf}}) have two essential security goals:
 
 1. Robustness: an attacker that controls a subset of Clients cannot cause the
    Collector to compute anything other than the aggregate of the measurements
-   of honest Clients. We assume the attacker eavesdrops on the network but does
-   not control transmission of messages between honest parties.
+   of honest Clients, plus valid measurements from some of the
+   attacker-controlled Clients. We assume the attacker eavesdrops on the
+   network but does not control transmission of messages between honest
+   parties.
 
 Formal definitions of privacy and robustness can be found in {{DPRS23}}. A VDAF
 is the core cryptographic primitive of a protocol that achieves the above
