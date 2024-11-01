@@ -4420,9 +4420,9 @@ Poplar1 composes an IDPF with the arithmetic sketch of {{BBCGGI21}}, Section
 4.2. (The paper calls this a "secure sketch", but the underlying technique was
 later generalized in {{BBCGGI23}}, where it is called "arithmetic sketching".)
 The sketch ensures that evaluating a set of input shares on a set of unique
-candidate prefixes results in shares of a "one-hot" vector, i.e., a vector that
-is zero everywhere except for in at most one position. Moreover, the value at
-that position should be one.
+candidate prefixes results in shares of a zero vector or a "one-hot" vector,
+i.e., a vector that is zero everywhere except for in at most one position.
+Moreover, the value at that position should be one.
 
 The remainder of this section is structured as follows. The syntax of IDPFs is
 defined in {{idpf}}. The Poplar1 VDAF is defined in {{poplar1-construction}} in
@@ -4617,8 +4617,8 @@ The programmed IDPF values are pairs of field elements `(1, k)` where each `k` i
 chosen at random. This random value is used as part of the arithmetic sketching
 protocol of {{BBCGGI21}}, Appendix C.4. After evaluating their IDPF key shares
 on a given sequence of candidate prefixes, the Aggregators use the sketching
-protocol to verify that they hold shares of a one-hot vector at a given
-level of the IDPF tree.
+protocol to verify that they hold shares of a zero vector or a one-hot vector at
+a given level of the IDPF tree.
 
 In addition to programming `k` into the IDPF output, for each level of the
 tree, the Client generates random elements `a`, `b`, and `c` and computes
@@ -4759,7 +4759,7 @@ Aggregator receives an input share from the Client, it begins by evaluating its
 IDPF share on each candidate prefix, recovering a `data_share` and `auth_share`
 for each. The Aggregators use these and the correlation shares provided by the
 Client to verify that the sequence of `data_share` values are additive shares of
-a one-hot vector.
+a zero vector or a one-hot vector.
 
 Aggregators MUST ensure the candidate prefixes are all unique and appear in
 lexicographic order. (This is enforced in the definition of `is_valid()`
