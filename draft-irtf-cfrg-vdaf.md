@@ -6317,7 +6317,7 @@ VDAF. These are listed in the subsections below.
 : The length of the vector, an integer.
 
 `chunk_length`:
-: the length of each vector chunk, an integer.
+: a parameter of the ParallelSum gadget, an integer.
 
 `bits`:
 : the bit length of each element of the vector, an integer. Each element is in
@@ -6332,7 +6332,7 @@ VDAF. These are listed in the subsections below.
 : The length of the vector, an integer.
 
 `chunk_length`:
-: the length of each vector chunk, an integer.
+: a parameter of the ParallelSum gadget, an integer.
 
 ### Prio3MultihotCountVec
 
@@ -6343,7 +6343,7 @@ VDAF. These are listed in the subsections below.
 : The length of the vector, an integer.
 
 `chunk_length`:
-: the length of each vector chunk, an integer.
+: a parameter of the ParallelSum gadget, an integer.
 
 `max_weight`:
 : The largest vector weight, an integer. The sum of the elements of the
