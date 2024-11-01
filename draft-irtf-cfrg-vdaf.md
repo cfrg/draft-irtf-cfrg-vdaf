@@ -5224,7 +5224,9 @@ struct {
 The fields in this struct are: `level`, the level of the IDPF tree of each
 prefixes; `num_prefixes`, the number of prefixes to evaluate; and
 `encoded_prefixes`, the sequence of prefixes encoded into a byte string of
-length `prefixes_len`. The prefixes are encoded with the following procedure:
+length `prefixes_len`. Each prefix is packed into a byte string, with the bits
+assigned in MSB-to-LSB order, and then the byte strings for each prefix are
+concatenated together. The prefixes are encoded with the following procedure:
 
 ~~~ python
 prefixes_len = ((level + 1) + 7) // 8 * len(prefixes)
