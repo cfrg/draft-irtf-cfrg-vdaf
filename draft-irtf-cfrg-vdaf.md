@@ -3597,10 +3597,10 @@ gadget polynomials that the verifier will use to compute the outputs of each
 gadget.
 
 To generate the gadget polynomials, the prover evaluates the validity circuit,
-setting `g.wires[j][k]` to the value of the `j`-th wire for the `k`-th
-invocation of gadget `g`. This is accomplished by "wrapping" each gadget in a
-class `ProveGadget` that records the wire inputs. We list this class in
-{{gadget-wrappers}}.
+and records the values on each input wire of each call to each gadget. This is
+accomplished by "wrapping" each gadget in a class `ProveGadget` that records
+the wire inputs. We list this class in {{gadget-wrappers}}. We denote the value
+of the `j`-th wire for the `k`-th invocation of gadget `g` as `g.wires[j][k]`.
 
 Next, we compute each of the "wire polynomials" for each gadget. The `j`-th
 wire polynomial is the lowest degree polynomial that evaluates to
@@ -3682,8 +3682,8 @@ point: when we evaluate the gadget polynomial at the same point, we expect to
 get the same result.
 
 To start a gadget test, we first construct the (shares of the) wire polynomials
-just as the prover did. First, we record `g.wires[j][k]` as the input (share)
-of the `j`-th wire of the `k`-th invocation of the gadget. Again, this is
+just as the prover did. First, we record the input (share) of the `j`-th wire
+of the `k`-th invocation of the gadget as `g.wires[j][k]`. Again, this is
 accomplished by a wrapper gadget, `QueryGadget`, listed in {{gadget-wrappers}}.
 This gadget also evaluates the gadget polynomial for each gadget invocation in
 order to produce the gadget's output. Then we compute the wire polynomials from
