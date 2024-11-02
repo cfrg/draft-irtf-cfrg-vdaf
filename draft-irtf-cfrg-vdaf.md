@@ -2241,9 +2241,9 @@ This section describes XofFixedKeyAes128, which is used to implement the IDPF
 of Poplar1 ({{idpf-bbcggi21}}). It is NOT RECOMMENDED to use this XOF for any
 other purpose. See {{xof-vs-ro}} for a more detailed discussion.
 
-XofFixedKeyAes128 uses the AES128 blockcipher {{AES}} for most of the
+XofFixedKeyAes128 uses the AES-128 blockcipher {{AES}} for most of the
 computation, thereby taking advantage of the hardware implementations of this
-blockcipher that are widely available. AES128 is used in a fixed-key mode of
+blockcipher that are widely available. AES-128 is used in a fixed-key mode of
 operation; the key is derived during initialization using TurboSHAKE128.
 
 Pre-conditions:
