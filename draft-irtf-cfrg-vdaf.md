@@ -2926,7 +2926,7 @@ def prep_init(
         joint_rands = self.joint_rands(
             ctx, corrected_joint_rand_seed)
 
-    # Query the measurement and proof share.
+    # Query the measurement and proof(s) share(s).
     query_rands = self.query_rands(verify_key, ctx, nonce)
     verifiers_share = []
     for _ in range(self.PROOFS):
@@ -5090,7 +5090,7 @@ Field `packed_control_bits` is encoded with the following function:
 ~~~ python
 packed_control_buf = [int(0)] * packed_len
 for i, bit in enumerate(control_bits):
-    packed_control_buf[i // 8] |= bit.int() << (i % 8)
+    packed_control_buf[i // 8] |= bit << (i % 8)
 packed_control_bits = bytes(packed_control_buf)
 ~~~
 
@@ -6202,7 +6202,8 @@ class QueryGadget(Gadget[F]):
             wrapped = cls(valid.field,
                           wire_seeds,
                           gadget_poly,
-                          g, g_calls)
+                          g,
+                          g_calls)
             wrapped_gadgets.append(wrapped)
         wrapped_valid = deepcopy(valid)
         wrapped_valid.GADGETS = wrapped_gadgets
