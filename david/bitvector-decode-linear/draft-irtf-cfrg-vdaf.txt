@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 5 May 2025                                                 ISRG
+Expires: 6 May 2025                                                 ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         1 November 2024
+                                                         2 November 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 May 2025.
+   This Internet-Draft will expire on 6 May 2025.
 
 Copyright Notice
 
@@ -2277,9 +2277,9 @@ Table of Contents
    XOF for any other purpose.  See Section 9.6 for a more detailed
    discussion.
 
-   XofFixedKeyAes128 uses the AES128 blockcipher [AES] for most of the
+   XofFixedKeyAes128 uses the AES-128 blockcipher [AES] for most of the
    computation, thereby taking advantage of the hardware implementations
-   of this blockcipher that are widely available.  AES128 is used in a
+   of this blockcipher that are widely available.  AES-128 is used in a
    fixed-key mode of operation; the key is derived during initialization
    using TurboSHAKE128.
 
@@ -3046,7 +3046,7 @@ Table of Contents
            joint_rands = self.joint_rands(
                ctx, corrected_joint_rand_seed)
 
-       # Query the measurement and proof share.
+       # Query the measurement and proof(s) share(s).
        query_rands = self.query_rands(verify_key, ctx, nonce)
        verifiers_share = []
        for _ in range(self.PROOFS):
@@ -5301,7 +5301,7 @@ Table of Contents
 
    packed_control_buf = [int(0)] * packed_len
    for i, bit in enumerate(control_bits):
-       packed_control_buf[i // 8] |= bit.int() << (i % 8)
+       packed_control_buf[i // 8] |= bit << (i % 8)
    packed_control_bits = bytes(packed_control_buf)
 
    It encodes each group of eight bits into a byte, in LSB to MSB order,
@@ -6587,7 +6587,8 @@ A.4.  Shims for Generating and Querying Proofs
                wrapped = cls(valid.field,
                              wire_seeds,
                              gadget_poly,
-                             g, g_calls)
+                             g,
+                             g_calls)
                wrapped_gadgets.append(wrapped)
            wrapped_valid = deepcopy(valid)
            wrapped_valid.GADGETS = wrapped_gadgets
