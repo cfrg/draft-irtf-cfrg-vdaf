@@ -3517,7 +3517,7 @@ The circuit is invoked with the following method:
   * The length of the output MUST be `valid.EVAL_OUTPUT_LEN`.
 
 Each circuit has a list of gadgets, denoted `GADGETS`, that are invoked by
-`valid.eval()`. The circuit evaluated by the gadget SHOULD be non-affine, but MUST
+`valid.eval()`. The circuit evaluated by the gadget should be non-affine, and MUST
 be arithmetic, i.e., composed only of multiplication, addition, and subtraction
 gates. An instance of class `Gadget` has the following interface:
 
