@@ -239,7 +239,7 @@ class XofFixedKeyAes128(Xof):
         key that stays constant for all XOF evaluations of the same
         Client, but differs between Clients.
 
-        Function `AES128(key, block)` is the AES128 blockcipher.
+        Function `AES128(key, block)` is the AES-128 blockcipher.
 
         ---
 
