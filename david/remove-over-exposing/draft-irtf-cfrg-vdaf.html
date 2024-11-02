@@ -1091,7 +1091,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 5 May 2025</td>
+<td class="center">Expires 6 May 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1104,12 +1104,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2024-11-01" class="published">1 November 2024</time>
+<time datetime="2024-11-02" class="published">2 November 2024</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-05-05">5 May 2025</time></dd>
+<dd class="expires"><time datetime="2025-05-06">6 May 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1173,7 +1173,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 5 May 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 6 May 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3784,6 +3784,9 @@ def decode_from_bit_vec(cls, vec: list[Self]) -&gt; Self:
     """
     Decode the field element from the bit representation, expressed
     as a vector of field elements `vec`.
+
+    This may also be used with secret shares of a bit representation,
+    since it is linear.
     """
     bits = len(vec)
     if cls.MODULUS &gt;&gt; bits == 0:
@@ -6358,7 +6361,12 @@ same range of <code>[0, 2^bits)</code>, this means that the measurement itself i
 <a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x^2 - x</code>, which is equal to <code>0</code>
 if and only if <code>x</code> is in the range <code>[0, 2)</code>. The complete circuit is specified
 below:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.2-8">
+<p id="section-7.4.2-8">Note that decoding a sequence of bits into an integer is a linear operation,
+specifically, a linear combination with a sequence of powers of two, so it can
+be done within a validity circuit using "free" affine gates. Furthermore,
+decoding secret shares of a bit-encoded integer will produce secret shares of
+the original integer.<a href="#section-7.4.2-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-7.4.2-9">
 <pre>
 class Sum(Valid[int, int, F]):
     GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
@@ -6409,7 +6417,7 @@ class Sum(Valid[int, int, F]):
 
     def decode(self, output: list[F], _num_measurements: int) -&gt; int:
         return output[0].int()
-</pre><a href="#section-7.4.2-8" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.2-9" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
