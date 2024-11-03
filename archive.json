@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-10-31T00:56:33.260940+00:00",
+  "timestamp": "2024-11-03T00:59:40.989922+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -43277,6 +43277,279 @@
           "body": "",
           "createdAt": "2024-10-30T18:02:02Z",
           "updatedAt": "2024-10-30T18:02:02Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 520,
+      "id": "PR_kwDOGKuqOc6AkfA9",
+      "title": "poc: Add an example showcasing FLP with Shamir's",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/520",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A demonstration of the composition of FLP with Shamir's secret sharing.\r\nThis could be the basis of a Prio3 variant that tolerates drop out of an\r\nAggregator.\r\n\r\nImagine a DAP setup [1] where a Leader wants to be able to run the\r\nprotocol with one of two Helpers so that if the first Helper goes\r\noffline, it can continue the computation with the other.\r\n\r\nFor this to work, the Client still needs to know the identities of the\r\ntwo Helpers prior to generating its report.\r\n\r\n[1] https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/22",
+      "createdAt": "2024-10-31T20:37:45Z",
+      "updatedAt": "2024-10-31T20:51:46Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9aabdd421b68d97ef7599fe54fd455f9cda35aa4",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/idea/shamir",
+      "headRefOid": "d81e25f1eba53472a779630a9b61df3746bf7a59",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 521,
+      "id": "PR_kwDOGKuqOc6ArPS_",
+      "title": "Editorial pass",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/521",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This rolls up a bunch of editorial changes, clarifications, and rephrasings from my pass over the document. I split it out into several topical commits, plus a couple omnibus commits of more minor changes.",
+      "createdAt": "2024-11-01T22:03:17Z",
+      "updatedAt": "2024-11-02T15:19:58Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9aabdd421b68d97ef7599fe54fd455f9cda35aa4",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/editorial",
+      "headRefOid": "9ea5133584c0754d5af3429d86e65a0e5eee5afa",
+      "closedAt": "2024-11-02T15:02:55Z",
+      "mergedAt": "2024-11-02T15:02:55Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "d007a4ea792fa38bdef23fe550e3eabf5d9d98f9"
+      },
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yeah, looking at RFC 2119, maybe this ought to be a lower-case \"should\". There's no valid reason for an affine gadget, but also an affine gadget wouldn't break anything.",
+          "createdAt": "2024-11-02T15:19:54Z",
+          "updatedAt": "2024-11-02T15:19:54Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6PuP_M",
+          "commit": {
+            "abbreviatedOid": "9ea5133"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Excellent. I think the only thing I slightly disagree with is MAY versus SHOULD for the the none-affineness of the gadget, given the semantics of SHOULD in RFCs. But I agree that it would be silly for this to be non-affine.",
+          "createdAt": "2024-11-02T15:02:38Z",
+          "updatedAt": "2024-11-02T15:02:38Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 522,
+      "id": "PR_kwDOGKuqOc6ArQby",
+      "title": "Rewrite mention of replay attacks in nonce section",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/522",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The current text here seems too permissive about processing a report more than once, given that two sections below we say that \"DAFs and VDAFs may impose restrictions on the re-use of reports\". This PR strengthens the text leading into the recommendation to make use of the nonce in replay protections.",
+      "createdAt": "2024-11-01T22:09:23Z",
+      "updatedAt": "2024-11-02T18:25:41Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "f8974cef327c67679dab5c57da8ce2ce79c363f4",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/remove-over-exposing",
+      "headRefOid": "61698b0bd505b2a378b376de7b0416befbbaf85a",
+      "closedAt": "2024-11-02T18:25:41Z",
+      "mergedAt": "2024-11-02T18:25:41Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "4b2eedce020ca8a23df04df1664130ec45273260"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6PuQDh",
+          "commit": {
+            "abbreviatedOid": "a16c6b5"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2024-11-02T15:04:39Z",
+          "updatedAt": "2024-11-02T15:04:42Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "I'm fine with the stronger language, but I think we want to keep the mention DP consideration around.",
+              "createdAt": "2024-11-02T15:04:40Z",
+              "updatedAt": "2024-11-02T15:04:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6PvqVD",
+          "commit": {
+            "abbreviatedOid": "61698b0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-11-02T18:25:36Z",
+          "updatedAt": "2024-11-02T18:25:36Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 523,
+      "id": "PR_kwDOGKuqOc6ArVck",
+      "title": "Mention that decode_from_bit_vec() is linear",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/523",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This mentions in a couple places that decoding a bit representation is a linear operation, and thus we can use it in validity circuits, transparently processing secret shares of bit representations.",
+      "createdAt": "2024-11-01T22:38:40Z",
+      "updatedAt": "2024-11-02T15:05:38Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "david/remove-over-exposing",
+      "baseRefOid": "a16c6b5bfac7d507a0a23a3ed8a5d7935964ca0c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/bitvector-decode-linear",
+      "headRefOid": "823f8d2589f90f4d4412b3acc3eb195e8abed921",
+      "closedAt": "2024-11-02T15:05:38Z",
+      "mergedAt": "2024-11-02T15:05:38Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "73e2e309e1dac4e2c97122cc5e8d27aa5ce4ac6f"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6PuQE7",
+          "commit": {
+            "abbreviatedOid": "823f8d2"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Nice.",
+          "createdAt": "2024-11-02T15:05:26Z",
+          "updatedAt": "2024-11-02T15:05:26Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 524,
+      "id": "PR_kwDOGKuqOc6ArsTT",
+      "title": "Update excerpts",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/524",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-13"
+      ],
+      "body": "This updates excerpts from the proof of concept implementation.",
+      "createdAt": "2024-11-02T01:02:43Z",
+      "updatedAt": "2024-11-02T15:06:04Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "david/bitvector-decode-linear",
+      "baseRefOid": "823f8d2589f90f4d4412b3acc3eb195e8abed921",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/update-excerpts",
+      "headRefOid": "16d548d34ff0706e35534c55e70ec00823fe5dfb",
+      "closedAt": "2024-11-02T15:06:03Z",
+      "mergedAt": "2024-11-02T15:06:03Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "c76e8d9f7eaa87d0b0fc97b10fb3dbcf455e5b10"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6PuPsd",
+          "commit": {
+            "abbreviatedOid": "16d548d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-11-02T14:53:16Z",
+          "updatedAt": "2024-11-02T14:53:16Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 525,
+      "id": "PR_kwDOGKuqOc6AsvIK",
+      "title": "Don't use SHOULD for gadgets being non-affine",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/525",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is a follow-up to #521.",
+      "createdAt": "2024-11-02T15:35:52Z",
+      "updatedAt": "2024-11-02T18:26:10Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "f8974cef327c67679dab5c57da8ce2ce79c363f4",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/lowercase-should",
+      "headRefOid": "120ee08984d9f9c5b1df01b47a407a1f6c127db0",
+      "closedAt": "2024-11-02T18:26:10Z",
+      "mergedAt": "2024-11-02T18:26:10Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "a4874547794818573acd8734874c9784043b1140"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Pvqf-",
+          "commit": {
+            "abbreviatedOid": "120ee08"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2024-11-02T18:25:58Z",
+          "updatedAt": "2024-11-02T18:25:58Z",
           "comments": []
         }
       ]
