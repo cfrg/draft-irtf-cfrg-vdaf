@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 6 May 2025                                                 ISRG
+Expires: 22 May 2025                                                ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         2 November 2024
+                                                        18 November 2024
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 May 2025.
+   This Internet-Draft will expire on 22 May 2025.
 
 Copyright Notice
 
@@ -6255,9 +6255,9 @@ Table of Contents
    [TurboSHAKE]
               Viguier, B., Wong, D., Van Assche, G., Dang, Q., and J.
               Daemen, "KangarooTwelve and TurboSHAKE", Work in Progress,
-              Internet-Draft, draft-irtf-cfrg-kangarootwelve-14, 9 May
-              2024, <https://datatracker.ietf.org/doc/html/draft-irtf-
-              cfrg-kangarootwelve-14>.
+              Internet-Draft, draft-irtf-cfrg-kangarootwelve-15, 7
+              November 2024, <https://datatracker.ietf.org/doc/html/
+              draft-irtf-cfrg-kangarootwelve-15>.
 
 11.2.  Informative References
 
@@ -6293,9 +6293,9 @@ Table of Contents
    [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
               C. A. Wood, "Distributed Aggregation Protocol for Privacy
               Preserving Measurement", Work in Progress, Internet-Draft,
-              draft-ietf-ppm-dap-12, 10 October 2024,
+              draft-ietf-ppm-dap-13, 2 November 2024,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              12>.
+              13>.
 
    [Dou02]    Douceur, J. R., "The Sybil Attack", International Workshop
               on Peer-to-Peer Systems (IPTPS), 2002,
