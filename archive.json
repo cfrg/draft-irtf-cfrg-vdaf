@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-11-17T01:01:38.467053+00:00",
+  "timestamp": "2024-11-19T00:58:31.053019+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -43286,24 +43286,26 @@
       "id": "PR_kwDOGKuqOc6AkfA9",
       "title": "poc: Add an example showcasing FLP with Shamir's",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/520",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "A demonstration of the composition of FLP with Shamir's secret sharing.\r\nThis could be the basis of a Prio3 variant that tolerates drop out of an\r\nAggregator.\r\n\r\nImagine a DAP setup [1] where a Leader wants to be able to run the\r\nprotocol with one of two Helpers so that if the first Helper goes\r\noffline, it can continue the computation with the other.\r\n\r\nFor this to work, the Client still needs to know the identities of the\r\ntwo Helpers prior to generating its report.\r\n\r\n[1] https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/22",
       "createdAt": "2024-10-31T20:37:45Z",
-      "updatedAt": "2024-11-05T19:24:38Z",
+      "updatedAt": "2024-11-18T18:28:21Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9aabdd421b68d97ef7599fe54fd455f9cda35aa4",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/idea/shamir",
       "headRefOid": "d81e25f1eba53472a779630a9b61df3746bf7a59",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-11-18T18:28:21Z",
+      "mergedAt": "2024-11-18T18:28:21Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "a57cc40e3ef348dae4ac5f15128df2568a8f19e9"
+      },
       "comments": [],
       "reviews": [
         {
