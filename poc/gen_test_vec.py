@@ -4,7 +4,7 @@ import json
 import os
 
 from vdaf_poc.common import print_wrapped_line
-from vdaf_poc.field import Field128
+from vdaf_poc.field import Field64, Field128
 from vdaf_poc.idpf import Idpf
 from vdaf_poc.test_utils import gen_test_vec_for_vdaf, test_vec_gen_rand
 from vdaf_poc.xof import Xof
@@ -170,6 +170,33 @@ if __name__ == '__main__':
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
         vdaf_prio3.Prio3SumVec(3, 3, 16, 7),
+        None,
+        ctx,
+        [
+            [10000, 32000, 9],
+            [19342, 19615, 3061],
+            [15986, 24671, 23910]
+        ],
+        1,
+    )
+
+    # Prio3SumVec with a different field and multiple proofs
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
+        vdaf_prio3.Prio3SumVecWithMultiproof(2, Field64, 3, 10, 8, 9),
+        None,
+        ctx,
+        [
+            list(range(10)),
+            [1] * 10,
+            [255] * 10
+        ],
+        0,
+    )
+
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
+        vdaf_prio3.Prio3SumVecWithMultiproof(3, Field64, 3, 3, 16, 7),
         None,
         ctx,
         [
