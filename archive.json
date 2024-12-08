@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-05T01:00:58.947545+00:00",
+  "timestamp": "2024-12-08T01:05:27.472755+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -43575,24 +43575,26 @@
       "id": "PR_kwDOGKuqOc6EGIWc",
       "title": "Add test vector exercising multiple proofs",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/526",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This adds a case to `gen_test_vec.py` exercising our handling of multiple proofs in Prio3. This is based on divviup/libprio-rs#1019.",
       "createdAt": "2024-12-04T20:59:24Z",
-      "updatedAt": "2024-12-04T21:03:41Z",
+      "updatedAt": "2024-12-06T22:02:57Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "a57cc40e3ef348dae4ac5f15128df2568a8f19e9",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/multiproof-test-vec",
       "headRefOid": "a464236bfa084becc836cd9c6794ff6d7358bc7f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2024-12-06T22:02:53Z",
+      "mergedAt": "2024-12-06T22:02:53Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "c0e76dcf8f78d7d36332582f060ab791e5bb1115"
+      },
       "comments": [],
       "reviews": [
         {
