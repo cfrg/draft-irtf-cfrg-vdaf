@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-10T01:01:50.391946+00:00",
+  "timestamp": "2024-12-12T01:00:39.133014+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6717,6 +6717,24 @@
       "createdAt": "2024-10-29T00:44:07Z",
       "updatedAt": "2024-10-30T18:29:53Z",
       "closedAt": "2024-10-30T18:29:53Z",
+      "comments": []
+    },
+    {
+      "number": 527,
+      "id": "I_kwDOGKuqOc6iwhHX",
+      "title": "Update commit hash for test vectors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/527",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "pre-RGLC"
+      ],
+      "body": "We've added some test vectors. Before publishing the RFC, we should point to a version of the repo that includes them.",
+      "createdAt": "2024-12-10T16:39:31Z",
+      "updatedAt": "2024-12-10T16:39:31Z",
+      "closedAt": null,
       "comments": []
     }
   ],
