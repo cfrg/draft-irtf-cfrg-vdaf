@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-15T01:05:26.395880+00:00",
+  "timestamp": "2024-12-17T01:00:59.454907+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6736,6 +6736,37 @@
       "updatedAt": "2024-12-10T16:39:31Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 528,
+      "id": "I_kwDOGKuqOc6jgSvI",
+      "title": "Prio3: Usage of nonce when Shard w/o joint randomness.",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/528",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "For Prio3: the Shard function ([`shard`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-13#section-7.2.1) ) in the case of no joint randomness does not make use of nonce at all. However, `shard` still requires to pass a nonce even if it is not used.\r\n\r\nLater in the protocol, the same nonce is passed to `prep_init`.\r\n\r\nSuggestion: if sharding uses one nonce per-measurement, would it be ok: \r\n 1) to generate the nonce internally by the Shard function, rather than receiving it from the caller?, and\r\n 2) to store the nonce as part of the `public_share`?\r\n\r\n",
+      "createdAt": "2024-12-16T18:58:51Z",
+      "updatedAt": "2024-12-16T20:35:11Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I don't think it would make sense for sharding to produce the nonce, because we also expect the application to also make use of this nonce in its mitigations against replay attacks.\r\n\r\nPrio3 without joint randomness doesn't need the nonce in part because it doesn't need the same random oracle model computational security assumptions as Prio3 with joint randomness. The only XOF calls in `shard_without_joint_rand()` are for the helper measurement share, helper proof share, and proof randomness. In each case, we are using the XOF as a PRG expanding a fresh random seed, so there's no need to mix in the application context or nonce, as the values would still be uniformly random.",
+          "createdAt": "2024-12-16T19:26:39Z",
+          "updatedAt": "2024-12-16T19:26:39Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "For the record, @hannahdaviscrypto made the same suggestion while we were working on https://eprint.iacr.org/2023/130. As @divergentdave observes, our main consideration for keeping the nonce separate in the syntax is to allow the application to generate it, and at the time we weren't 100% certain about all the requirements for the nonce.\r\n\r\nAnother option is to modify Prio3 by binding the nonce to the XOF calls that are there when no joint randomness is used. This follows more or less the design pattern described [here](https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-9.9). However I'm hesitant to make this change since it's wire breaking.",
+          "createdAt": "2024-12-16T20:35:10Z",
+          "updatedAt": "2024-12-16T20:35:10Z"
+        }
+      ]
     }
   ],
   "pulls": [
