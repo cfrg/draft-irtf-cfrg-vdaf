@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2024-12-17T01:00:59.454907+00:00",
+  "timestamp": "2024-12-19T00:59:01.049619+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -102,6 +102,11 @@
       "name": "draft-13",
       "description": "",
       "color": "27D6F4"
+    },
+    {
+      "name": "draft-14",
+      "description": "",
+      "color": "0EC5A3"
     }
   ],
   "issues": [
@@ -6742,15 +6747,15 @@
       "id": "I_kwDOGKuqOc6jgSvI",
       "title": "Prio3: Usage of nonce when Shard w/o joint randomness.",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/528",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [],
       "body": "For Prio3: the Shard function ([`shard`](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-13#section-7.2.1) ) in the case of no joint randomness does not make use of nonce at all. However, `shard` still requires to pass a nonce even if it is not used.\r\n\r\nLater in the protocol, the same nonce is passed to `prep_init`.\r\n\r\nSuggestion: if sharding uses one nonce per-measurement, would it be ok: \r\n 1) to generate the nonce internally by the Shard function, rather than receiving it from the caller?, and\r\n 2) to store the nonce as part of the `public_share`?\r\n\r\n",
       "createdAt": "2024-12-16T18:58:51Z",
-      "updatedAt": "2024-12-16T20:35:11Z",
-      "closedAt": null,
+      "updatedAt": "2024-12-18T16:39:33Z",
+      "closedAt": "2024-12-18T16:39:33Z",
       "comments": [
         {
           "author": "divergentdave",
@@ -6765,8 +6770,34 @@
           "body": "For the record, @hannahdaviscrypto made the same suggestion while we were working on https://eprint.iacr.org/2023/130. As @divergentdave observes, our main consideration for keeping the nonce separate in the syntax is to allow the application to generate it, and at the time we weren't 100% certain about all the requirements for the nonce.\r\n\r\nAnother option is to modify Prio3 by binding the nonce to the XOF calls that are there when no joint randomness is used. This follows more or less the design pattern described [here](https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-9.9). However I'm hesitant to make this change since it's wire breaking.",
           "createdAt": "2024-12-16T20:35:10Z",
           "updatedAt": "2024-12-16T20:35:10Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@armfazh we're closing this because we don't think there's anything to do here. Feel free to re-open if you wanna continue discussion.",
+          "createdAt": "2024-12-18T16:39:33Z",
+          "updatedAt": "2024-12-18T16:39:33Z"
         }
       ]
+    },
+    {
+      "number": 529,
+      "id": "I_kwDOGKuqOc6j1asT",
+      "title": "Poplar1: require trailing bits of each encoded prefix to be cleared",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/529",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "feature",
+        "draft-14"
+      ],
+      "body": "See https://github.com/divviup/libprio-rs/pull/1171#discussion_r1890769958 for initial discussion.",
+      "createdAt": "2024-12-18T20:25:27Z",
+      "updatedAt": "2024-12-18T20:25:45Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
