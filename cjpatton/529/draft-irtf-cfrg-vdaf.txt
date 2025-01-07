@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 7 June 2025                                                ISRG
+Expires: 11 July 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         4 December 2024
+                                                          7 January 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,11 +54,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 June 2025.
+   This Internet-Draft will expire on 11 July 2025.
 
 Copyright Notice
 
-   Copyright (c) 2024 IETF Trust and the persons identified as the
+   Copyright (c) 2025 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -5440,8 +5440,19 @@ Table of Contents
    Decoding involves the following procedure:
 
    prefixes = []
+
+   last_byte_mask = 0
+   leftover_bits = (level + 1) % 8
+   if leftover_bits > 0:
+       for bit_index in range(8 - leftover_bits, 8):
+           last_byte_mask |= 1 << bit_index;
+       last_byte_mask ^= 255
+
    bytes_per_prefix = ((level + 1) + 7) // 8
    for chunk in itertools.batched(encoded_prefixes, bytes_per_prefix):
+       if chunk[-1] & last_byte_mask > 0:
+           raise ValueError('trailing bits in prefix')
+
        prefix = []
        for i in range(level + 1):
            byte_index = i // 8
@@ -6255,9 +6266,9 @@ Table of Contents
    [TurboSHAKE]
               Viguier, B., Wong, D., Van Assche, G., Dang, Q., and J.
               Daemen, "KangarooTwelve and TurboSHAKE", Work in Progress,
-              Internet-Draft, draft-irtf-cfrg-kangarootwelve-15, 7
-              November 2024, <https://datatracker.ietf.org/doc/html/
-              draft-irtf-cfrg-kangarootwelve-15>.
+              Internet-Draft, draft-irtf-cfrg-kangarootwelve-16, 21
+              December 2024, <https://datatracker.ietf.org/doc/html/
+              draft-irtf-cfrg-kangarootwelve-16>.
 
 11.2.  Informative References
 
