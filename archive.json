@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-05T01:00:35.129962+00:00",
+  "timestamp": "2025-01-07T00:56:23.210383+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6351,11 +6351,12 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "pre-RGLC"
+        "editorial",
+        "draft-14"
       ],
       "body": "Time permitting, we should take advantage of the work done to render nice looking diagrams and illustrations in RFCs.\r\n\r\nAccording to @martinthomson, all we have to do is change `~~~` to `~~~ aasvg` and add an npm package:\r\n```bash\r\nnpm i --save aasvg; git add package.json\r\n```",
       "createdAt": "2024-10-10T22:14:09Z",
-      "updatedAt": "2024-10-10T22:14:29Z",
+      "updatedAt": "2025-01-06T18:05:00Z",
       "closedAt": null,
       "comments": []
     },
@@ -6734,11 +6735,11 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "pre-RGLC"
+        "draft-14"
       ],
       "body": "We've added some test vectors. Before publishing the RFC, we should point to a version of the repo that includes them.",
       "createdAt": "2024-12-10T16:39:31Z",
-      "updatedAt": "2024-12-10T16:39:31Z",
+      "updatedAt": "2025-01-06T18:03:37Z",
       "closedAt": null,
       "comments": []
     },
