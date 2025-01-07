@@ -895,9 +895,9 @@ Some common functionalities:
 
 # Overview
 
-~~~
+~~~ aasvg
                  +--------------+
-           +---->| Aggregator 0 |----+
+           +---->| Aggregator 0 +----+
      input |     +--------------+    | aggregate
     shares |             ^           | shares
            |             |           |
@@ -906,7 +906,7 @@ Some common functionalities:
            | +-->| Aggregator 1 |--+ |
            | |   +--------------+  | |
 +--------+-+ |           ^         | +->+-----------+
-| Client |---+           |         +--->| Collector |--> aggregate
+| Client +---+           |         +--->| Collector +--> aggregate
 +--------+-+                         +->+-----------+
            |            ...          |
            |                         |
@@ -1029,25 +1029,27 @@ for the `PublicShare`, `InputShare`, `AggParam`, and `AggShare` types.
 
 ## Sharding {#sec-daf-shard}
 
-~~~~
+~~~~ aasvg
     Client
     ======
 
     measurement
       |
+      |
       V
     +----------------------------------------------+
     | shard                                        |
-    +----------------------------------------------+
+    +-+--------------+--------------+-----+--------+
       |              |              |     |
       |              |         ...  |    public_share
       |              |              |     |
       |    +---------|-----+--------|-----+
       |    |         |     |        |     |
-      V    |         V     |        V     |
+      v    |         v     |        v     |
      input_share_0  input_share_1  input_share_[SHARES-1]
+      |    |         |     |        |     |
       |    |         |     |   ...  |     |
-      V    V         V     V        V     V
+      v    v         v     v        v     v
     Aggregator 0   Aggregator 1    Aggregator SHARES-1
 ~~~~
 {: #shard-flow title="Illustration of the sharding algorithm."}
@@ -1090,19 +1092,19 @@ derive per-report randomness for verification of the computation. See
 
 ## Preparation {#sec-daf-prepare}
 
-~~~
+~~~ aasvg
     Aggregator 0   Aggregator 1           Aggregator SHARES-1
     ============   ============           ===================
 
     input_share_0  input_share_1          input_share_[SHARES-1]
       |              |                 ...  |
-      V              V                      V
+      v              v                      v
     +-----------+  +-----------+          +-----------+
     | prep      |  | prep      |          | prep      |
-    +-----------+  +-----------+          +-----------+
+    +-+---------+  +-+---------+          +-+---------+
       |              |                 ...  |
-      V              V                      V
-    out_share_0    out_share_1         out_share_[SHARES-1]
+      v              v                      v
+    out_share_0    out_share_1            out_share_[SHARES-1]
 ~~~
 {: #daf-prep-flow title="Illustration of preparation."}
 
@@ -1143,29 +1145,31 @@ preparation, each Aggregator MUST validate it using this function.
 
 ## Aggregation {#sec-daf-aggregate}
 
-~~~~
+~~~~ aasvg
     Aggregator j
     ============
 
     +------------+    +------------+
-    | agg_init   |--->| agg_update |<--- out_share_0
-    +------------+    +------------+
+    | agg_init   +--->| agg_update |<--- out_share_0
+    +------------+    +--+---------+
                          |
-                         V
+                         v
                       +------------+
-                      | agg_update |<--- out_share_1,
-                      +------------+
-                        |
-                        V
-                       ...
-                        |
-                        V
+                      | agg_update |<--- out_share_1
+                      +--+---------+
+                         |
+                         v
+
+                        ...
+
+                         |
+                         v
                       +------------+
                       | agg_update |<--- out_share_M
-                      +------------+
-                        |
-                        V
-                      agg_share_j
+                      +--+---------+
+                         |
+                         v
+                       agg_share_j
 ~~~~
 {: #aggregate-flow title="Illustration of aggregation. The number of measurements in the batch is denoted by M."}
 
@@ -1202,18 +1206,18 @@ requires each Aggregator to aggregate output shares in the same order.
 
 ## Unsharding {#sec-daf-unshard}
 
-~~~~
+~~~~ aasvg
     Aggregator 0    Aggregator 1        Aggregator SHARES-1
     ============    ============        ===================
 
     agg_share_0     agg_share_1         agg_share_[SHARES-1]
       |               |                   |
-      V               V                   V
+      v               v                   v
     +-----------------------------------------------+
     | unshard                                       |
-    +-----------------------------------------------+
+    +-+---------------------------------------------+
       |
-      V
+      v
     agg_result
 
     Collector
@@ -1371,31 +1375,34 @@ cross protocol attacks; see {{deep}}.
 
 ## Preparation {#sec-vdaf-prepare}
 
-~~~~
+~~~~ aasvg
     Aggregator 0   Aggregator 1           Aggregator SHARES-1
     ============   ============           ===================
 
     input_share_0  input_share_1          input_share_[SHARES-1]
       |              |                 ...  |
-      V              V                      V
+      v              v                      v
     +-----------+  +-----------+          +-----------+
     | prep_init |  | prep_init |          | prep_init |
-    +-----------+  +-----------+          +-----------+
+    +-+-------+-+  +-+-------+-+          +-+-------+-+
       |       |      |       |         ...  |       |
-      V       |      V       |              V       |
-    +---------|--------------|----------------------|-+   \
-    |         |              | prep_shares_to_prep  | |   |
-    +---------|--------------|----------------------|-+   |
-      |       |      |       |         ...  |       |     |
-      V       V      V       V              V       V     | x ROUNDS
-    +-----------+  +-----------+          +-----------+   |
-    | prep_next |  | prep_next |          | prep_next |   |
-    +-----------+  +-----------+          +-----------+   |
-      |       |      |       |         ...  |       |     |
-      V       V      V       V              V       V     /
+      v       |      v       |              v       |
+    +---------|--------------|----------------------|--+ -.
+    |         |              |  prep_shares_to_prep |  |   |
+    +-+-------|------+-------|--------------+-------|--+   |
+      |       |      |       |         ...  |       |      |
+      v       v      v       v              v       v      | x ROUNDS
+    +-----------+  +-----------+          +-----------+    |
+    | prep_next |  | prep_next |          | prep_next |    |
+    +-+-------+-+  +-+-------+-+          +-+-------+-+    |
+      |       |      |       |         ...  |       |      |
+      v       v      v       v              v       v    -'
+
      ...            ...                    ...
+
       |              |                 ...  |
-      V              V                      V
+      |              |                      |
+      v              v                      v
     out_share_0    out_share_1         out_share_[SHARES-1]
 ~~~~
 {: #prep-flow title="Illustration of interactive VDAF preparation."}
@@ -1597,7 +1604,7 @@ channel.
 
 The state machine of each Aggregator is shown below.
 
-~~~
+~~~ aasvg
                   +----------------+
                   |                |
                   v                |
@@ -3588,19 +3595,21 @@ def verifier_len(self) -> int:
 
 ### Generating the Proof {#flp-bbcggi19-construction-prove}
 
-~~~~
-+------------------+
-| Prove            |
-| +-------------+  |
-| | Valid       |<---- meas
-| | +--------+  |<---- joint rand
-| | | Gadget |  |  |<- prove rand
-| | +--------+  |  |
-| +-------------+  |
-+------------------+
- |
- V proof
-~~~~
+~~~ aasvg
++--------------------+
+| prove()            |
+|  +--------------+  |
+|  | Valid        |<----- meas
+|  |  +--------+  |<----- joint rand
+|  |  | Gadget |  |  |<-- prove rand
+|  |  +--------+  |  |
+|  |              |  |
+|  +--------------+  |
+|                    |
++-+------------------+
+  |
+  v proof
+~~~
 {: title="Components of the proof generation algorithm."}
 
 The proof generation algorithm invokes the validity circuit on the encoded
@@ -3666,19 +3675,22 @@ def prove(self,
 
 ### Querying the Proof {#flp-bbcggi19-construction-query}
 
-~~~~
+~~~~ aasvg
       proof (share)
-+---------|--------+
-| Query   |        |
-| +-------|-----+  |
-| | Valid |     |<---- meas (share)
-| | +-----V--+  |<---- joint rand
-| | | Gadget |  |  |<- query rand
-| | +--------+  |  |
-| +-------------+  |
-+------------------+
- |
- V verifier (share)
+           |
++----------|---------+
+| query()  |         |
+|  +-------|------+  |
+|  | Valid |      |<----- meas (share)
+|  |  +----v---+  |<----- joint rand
+|  |  | Gadget |  |  |<-- query rand
+|  |  +--------+  |  |
+|  |              |  |
+|  +--------------+  |
+|                    |
++-+------------------+
+  |
+  v verifier (share)
 ~~~~
 {: title="Components of the query algorithm."}
 
@@ -3770,15 +3782,15 @@ def query(self,
 
 ### Deciding Validity {#flp-bbcggi19-construction-decide}
 
-~~~~
- | verifier
- V
-+------------------+
+~~~ aasvg
+   | verifier
+   v
+ +----------------+
 | Decide           |
-+------------------+
- |
- V is_valid
-~~~~
+ +-+--------------+
+   |
+   v is_valid
+~~~
 {: title="Components of the decision algorithm." }
 
 The decision algorithm consumes the verifier message. (Each of the Aggregators
@@ -3912,7 +3924,7 @@ be done within a validity circuit using "free" affine gates. Furthermore,
 decoding secret shares of a bit-encoded integer will produce secret shares of
 the original integer.
 
-~~~
+~~~ python
 class Sum(Valid[int, int, F]):
     GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
     JOINT_RAND_LEN = 0
