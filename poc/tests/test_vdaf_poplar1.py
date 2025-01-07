@@ -285,6 +285,45 @@ class TestPoplar1(TestVdaf):
         self.assertEqual(want, cls.decode_agg_param(
             cls.encode_agg_param(want)))
 
+    def test_aggregation_parameter_encoding_clear_trailing_bits(self) -> None:
+        cls = Poplar1(256)
+
+        # Set the first bit of the first prefix, which should be cleared.
+        malformed = bytearray(cls.encode_agg_param(
+            (6, (
+                (False,) * 7,
+                (True,) * 7,
+            ))))
+        malformed[6] |= 1
+        with self.assertRaises(ValueError):
+            cls.decode_agg_param(malformed)
+
+        # Set the first bit of the second prefix, which should be cleared.
+        malformed = bytearray(cls.encode_agg_param(
+            (6, (
+                (False,) * 7,
+                (True,) * 7,
+            ))))
+        malformed[7] |= 1
+        with self.assertRaises(ValueError):
+            cls.decode_agg_param(malformed)
+
+        # Try a longer prefix.
+        malformed = bytearray(cls.encode_agg_param(
+            (110, (
+                (False,) * 111,
+            ))))
+        malformed[19] |= 1
+        with self.assertRaises(ValueError):
+            cls.decode_agg_param(malformed)
+
+        # Try setting each bit following the first level.
+        for level in range(1, 8):
+            malformed = bytearray(cls.encode_agg_param((0, ((True,),))))
+            malformed[6] |= 1 << (7 - level)
+            with self.assertRaises(ValueError):
+                cls.decode_agg_param(malformed)
+
     def test_generate_test_vectors(self) -> None:
         # Generate test vectors.
         cls = Poplar1(4)
