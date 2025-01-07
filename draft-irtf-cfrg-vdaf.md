@@ -432,6 +432,11 @@ particular.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+14:
+
+* Poplar1: Require trailing bits of each prefix of the aggregation parameter to
+  be cleared.
+
 13:
 
 * (V)DAF: Replace the one-shot aggregation API with a streaming API. Each
