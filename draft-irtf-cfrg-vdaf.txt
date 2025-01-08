@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 9 June 2025                                                ISRG
+Expires: 12 July 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         6 December 2024
+                                                          8 January 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,11 +54,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 June 2025.
+   This Internet-Draft will expire on 12 July 2025.
 
 Copyright Notice
 
-   Copyright (c) 2024 IETF Trust and the persons identified as the
+   Copyright (c) 2025 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -6255,9 +6255,9 @@ Table of Contents
    [TurboSHAKE]
               Viguier, B., Wong, D., Van Assche, G., Dang, Q., and J.
               Daemen, "KangarooTwelve and TurboSHAKE", Work in Progress,
-              Internet-Draft, draft-irtf-cfrg-kangarootwelve-15, 7
-              November 2024, <https://datatracker.ietf.org/doc/html/
-              draft-irtf-cfrg-kangarootwelve-15>.
+              Internet-Draft, draft-irtf-cfrg-kangarootwelve-16, 21
+              December 2024, <https://datatracker.ietf.org/doc/html/
+              draft-irtf-cfrg-kangarootwelve-16>.
 
 11.2.  Informative References
 
@@ -6373,8 +6373,8 @@ Table of Contents
               <https://eprint.iacr.org/2024/585>.
 
    [TestVectors]
-              "Test vectors for Prio3 and Poplar1", commit hash c8cdc96,
-              October 2024,
+              "Test vectors for Prio3 and Poplar1", commit hash c0e76dc,
+              December 2024,
               <https://github.com/cfrg/draft-irtf-cfrg-vdaf>.
 
 Appendix A.  FLP Gadgets
