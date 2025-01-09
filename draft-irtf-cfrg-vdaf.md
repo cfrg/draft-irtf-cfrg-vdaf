@@ -3783,13 +3783,13 @@ def query(self,
 ### Deciding Validity {#flp-bbcggi19-construction-decide}
 
 ~~~ aasvg
-   | verifier
-   v
- +----------------+
+  | verifier
+  v
++------------------+
 | Decide           |
- +-+--------------+
-   |
-   v is_valid
++-+----------------+
+  |
+  v is_valid
 ~~~
 {: title="Components of the decision algorithm." }
 
