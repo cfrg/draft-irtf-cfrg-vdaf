@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-07T00:56:23.210383+00:00",
+  "timestamp": "2025-01-09T00:55:46.501920+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6259,9 +6259,17 @@
       ],
       "body": "We're currently pointing to the CFRG draft.\r\nWe should also verify that the version we use is wire compatible with the RFC version.",
       "createdAt": "2024-10-08T15:00:11Z",
-      "updatedAt": "2024-10-08T15:15:17Z",
+      "updatedAt": "2025-01-07T23:47:50Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@wbl claims this issue doesn't block RGLC: https://mailarchive.ietf.org/arch/msg/cfrg/0KadgFU0aAdSSQagLAzsUk4Hwj8/",
+          "createdAt": "2025-01-07T23:47:49Z",
+          "updatedAt": "2025-01-07T23:47:49Z"
+        }
+      ]
     },
     {
       "number": 460,
@@ -6349,14 +6357,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-14"
       ],
       "body": "Time permitting, we should take advantage of the work done to render nice looking diagrams and illustrations in RFCs.\r\n\r\nAccording to @martinthomson, all we have to do is change `~~~` to `~~~ aasvg` and add an npm package:\r\n```bash\r\nnpm i --save aasvg; git add package.json\r\n```",
       "createdAt": "2024-10-10T22:14:09Z",
-      "updatedAt": "2025-01-06T18:05:00Z",
+      "updatedAt": "2025-01-07T22:56:12Z",
       "closedAt": null,
       "comments": []
     },
@@ -6730,17 +6740,19 @@
       "id": "I_kwDOGKuqOc6iwhHX",
       "title": "Update commit hash for test vectors",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/527",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "draft-14"
       ],
       "body": "We've added some test vectors. Before publishing the RFC, we should point to a version of the repo that includes them.",
       "createdAt": "2024-12-10T16:39:31Z",
-      "updatedAt": "2025-01-06T18:03:37Z",
-      "closedAt": null,
+      "updatedAt": "2025-01-08T17:19:48Z",
+      "closedAt": "2025-01-08T17:19:48Z",
       "comments": []
     },
     {
@@ -6786,18 +6798,20 @@
       "id": "I_kwDOGKuqOc6j1asT",
       "title": "Poplar1: require trailing bits of each encoded prefix to be cleared",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/529",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "feature",
         "draft-14"
       ],
       "body": "See https://github.com/divviup/libprio-rs/pull/1171#discussion_r1890769958 for initial discussion.",
       "createdAt": "2024-12-18T20:25:27Z",
-      "updatedAt": "2024-12-18T20:25:45Z",
-      "closedAt": null,
+      "updatedAt": "2025-01-08T22:41:20Z",
+      "closedAt": "2025-01-08T22:41:20Z",
       "comments": []
     }
   ],
@@ -43692,6 +43706,376 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 530,
+      "id": "PR_kwDOGKuqOc6G_lXO",
+      "title": "Poplar1: Check for trailing bits in agg param",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/530",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-14"
+      ],
+      "body": "Closes #529.",
+      "createdAt": "2025-01-07T22:30:29Z",
+      "updatedAt": "2025-01-08T22:41:19Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b4752681f97fa9114ce974298a949acd43ba355d",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/529",
+      "headRefOid": "6effaf908c7b7eb585f43bef2ec1aedca3e4bfb5",
+      "closedAt": "2025-01-08T22:41:19Z",
+      "mergedAt": "2025-01-08T22:41:19Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "ce6293b4a87595e16e1196fe6eb256fa3baf23a2"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6XQk_s",
+          "commit": {
+            "abbreviatedOid": "23efbb6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T17:00:44Z",
+          "updatedAt": "2025-01-08T17:00:44Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "@divergentdave These only cover the last trailing bit being set. Shoiuld we add some test for the last 7?",
+              "createdAt": "2025-01-08T17:00:44Z",
+              "updatedAt": "2025-01-08T17:00:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XQ0E-",
+          "commit": {
+            "abbreviatedOid": "23efbb6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T17:29:57Z",
+          "updatedAt": "2025-01-08T17:29:57Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Added more tests for this.",
+              "createdAt": "2025-01-08T17:29:57Z",
+              "updatedAt": "2025-01-08T17:29:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XTDRK",
+          "commit": {
+            "abbreviatedOid": "6effaf9"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-01-08T21:47:36Z",
+          "updatedAt": "2025-01-08T21:47:36Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 531,
+      "id": "PR_kwDOGKuqOc6G_mfR",
+      "title": "Update test vector hash to c0e76dcf8f78d7d36332582f060ab791e5bb1115",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/531",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-14"
+      ],
+      "body": "Closes #527.",
+      "createdAt": "2025-01-07T22:35:07Z",
+      "updatedAt": "2025-01-08T17:19:47Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c0e76dcf8f78d7d36332582f060ab791e5bb1115",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/527",
+      "headRefOid": "2f143458c343ff3c9b0c67c9b6b589e9cf214a23",
+      "closedAt": "2025-01-08T17:19:47Z",
+      "mergedAt": "2025-01-08T17:19:47Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b4752681f97fa9114ce974298a949acd43ba355d"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6XQnx4",
+          "commit": {
+            "abbreviatedOid": "2f14345"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-01-08T17:05:13Z",
+          "updatedAt": "2025-01-08T17:05:13Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 532,
+      "id": "PR_kwDOGKuqOc6G_0fd",
+      "title": "Make the pictures pretty",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/532",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-14"
+      ],
+      "body": "Closes #477.",
+      "createdAt": "2025-01-07T23:39:43Z",
+      "updatedAt": "2025-01-08T18:24:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b4752681f97fa9114ce974298a949acd43ba355d",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/477",
+      "headRefOid": "27af3457ed232920cd095d66383ae74a76bf25a7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Moved to draft while I work on CI.",
+          "createdAt": "2025-01-08T17:01:16Z",
+          "updatedAt": "2025-01-08T17:01:16Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6XIhIa",
+          "commit": {
+            "abbreviatedOid": "99a378d"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T00:07:59Z",
+          "updatedAt": "2025-01-08T00:08:03Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "We need to filter this message out first, since we're using the error code of the sub-shell inside the parentheses\n```suggestion\n          grep -v 'Warning: Found SVG with width or height specified, which will make the artwork not scale.  Specify a viewBox only to let the artwork scale.' | \\\n          (! grep -E \"Warning|Error)\")\n```",
+              "createdAt": "2025-01-08T00:07:59Z",
+              "updatedAt": "2025-01-08T00:08:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XIkQ6",
+          "commit": {
+            "abbreviatedOid": "99a378d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T00:23:39Z",
+          "updatedAt": "2025-01-08T00:23:39Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Hmm... I took your suggestion but I'm not sure it had the intended effect. Here's what I've gotten working on the command line:\r\n```bash\r\nmake |& (! grep -E \"Warning|Error\") | (! grep -v 'Warning: Found SVG with width or height specified, which will make the artwork not scale.  Specify a viewBox only to let the artwork scale.')\r\n```",
+              "createdAt": "2025-01-08T00:23:39Z",
+              "updatedAt": "2025-01-08T00:23:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XIkVx",
+          "commit": {
+            "abbreviatedOid": "99a378d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T00:24:05Z",
+          "updatedAt": "2025-01-08T00:24:06Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "I'm trying to figure out how to plumb this into GH actions. I'll have to resume tomorrow however.",
+              "createdAt": "2025-01-08T00:24:05Z",
+              "updatedAt": "2025-01-08T00:24:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XQx8k",
+          "commit": {
+            "abbreviatedOid": "30218c7"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T17:25:54Z",
+          "updatedAt": "2025-01-08T17:50:34Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "We could move the option in here, and add the interpreter. We can also set the executable bit on the file in the git repository to avoid having to chmod the script before running it.\r\n```suggestion\r\n#!/bin/bash\r\nset -o pipefail\r\nmake |& \\\r\n```",
+              "createdAt": "2025-01-08T17:25:54Z",
+              "updatedAt": "2025-01-08T17:50:34Z"
+            },
+            {
+              "originalPosition": 2,
+              "body": "I don't think we should have this `(! ... )` around this grep invocation, because it negates the exit status, and causes a failure. See this abbreviated example:\r\n\r\n```\r\n$ make clean && bash -c -o pipefail \"make |& (! grep -v 'SVG with width') | (! grep -E 'Warning|Error')\" && echo ok || echo fail\r\nrm -f .tags .targets.mk issues.json \\\r\n    draft-irtf-cfrg-vdaf.{txt,html,pdf} index.html \\\r\n    draft-irtf-cfrg-vdaf-[0-9][0-9].{xml,md,org,txt,raw.txt,html,pdf} \\\r\n    draft-irtf-cfrg-vdaf.xml \\\r\n     diff-draft-irtf-cfrg-vdaf.html\r\nfail\r\n```",
+              "createdAt": "2025-01-08T17:34:09Z",
+              "updatedAt": "2025-01-08T17:50:34Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "Since we are now invoking a separate script, I think we need to set the `-e` option as well in order to propagate failures back out to the parent shell. I think this is masking the unconditional failure introduced by `(! grep -v 'Warning: Found SVG ...')`.",
+              "createdAt": "2025-01-08T17:35:46Z",
+              "updatedAt": "2025-01-08T17:50:34Z"
+            },
+            {
+              "originalPosition": 7,
+              "body": "We're missing a few more connections, here and on the other boxes in the middle\r\n```suggestion\r\n           +---->| Aggregator 0 +----+\r\n```",
+              "createdAt": "2025-01-08T17:37:38Z",
+              "updatedAt": "2025-01-08T17:50:34Z"
+            },
+            {
+              "originalPosition": 180,
+              "body": "We could make this a curved line as follows:\r\n\r\n```\r\n    +---------|--------------|----------------------|--+  -.\r\n    |         |              |  prep_shares_to_prep |  |    |\r\n    +-+-------|------+-------|--------------+-------|--+    |\r\n      |       |      |       |         ...  |       |       |\r\n      v       v      v       v              v       v       | x ROUNDS\r\n    +-----------+  +-----------+          +-----------+     |\r\n    | prep_next |  | prep_next |          | prep_next |     |\r\n    +-+-------+-+  +-+-------+-+          +-+-------+-+     |\r\n      |       |      |       |         ...  |       |       |\r\n      v       v      v       v              v       v     -'\r\n```",
+              "createdAt": "2025-01-08T17:47:05Z",
+              "updatedAt": "2025-01-08T17:50:34Z"
+            },
+            {
+              "originalPosition": 228,
+              "body": "These aren't quite aligned, and turned into rounded corners\r\n```suggestion\r\n|  +--------------+  |\r\n|  | Valid        |<----- meas\r\n|  |  +--------+  |<----- joint rand\r\n|  |  | Gadget |  |  |<-- prove rand\r\n|  |  +--------+  |  |\r\n|  |              |  |\r\n|  +--------------+  |\r\n|                    |\r\n+-+------------------+\r\n```",
+              "createdAt": "2025-01-08T17:48:15Z",
+              "updatedAt": "2025-01-08T17:50:34Z"
+            },
+            {
+              "originalPosition": 264,
+              "body": "Same here\r\n```suggestion\r\n|  +-------|------+  |\r\n|  | Valid |      |<----- meas (share)\r\n|  |  +----v---+  |<----- joint rand\r\n|  |  | Gadget |  |  |<-- query rand\r\n|  |  +--------+  |  |\r\n|  |              |  |\r\n|  +--------------+  |\r\n|                    |\r\n+-+------------------+\r\n```",
+              "createdAt": "2025-01-08T17:49:30Z",
+              "updatedAt": "2025-01-08T17:50:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XRBvc",
+          "commit": {
+            "abbreviatedOid": "30218c7"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T17:55:51Z",
+          "updatedAt": "2025-01-08T17:55:51Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Added `set -e`. However I tested this by modifying the match string, and it caused the action to fail as expected.",
+              "createdAt": "2025-01-08T17:55:51Z",
+              "updatedAt": "2025-01-08T17:55:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XRI0o",
+          "commit": {
+            "abbreviatedOid": "9b21126"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T18:10:06Z",
+          "updatedAt": "2025-01-08T18:10:06Z",
+          "comments": [
+            {
+              "originalPosition": 228,
+              "body": "I was being artistic, lol. I'm fine making these square.",
+              "createdAt": "2025-01-08T18:10:06Z",
+              "updatedAt": "2025-01-08T18:10:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6XRPvt",
+          "commit": {
+            "abbreviatedOid": "7431d4a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-08T18:22:57Z",
+          "updatedAt": "2025-01-08T18:22:58Z",
+          "comments": [
+            {
+              "originalPosition": 180,
+              "body": "nit: I changed the number of columns between the curved line and the rest of the figure from 2 to 1, in order to accommodate the artwork width requirements.",
+              "createdAt": "2025-01-08T18:22:57Z",
+              "updatedAt": "2025-01-08T18:22:58Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 533,
+      "id": "PR_kwDOGKuqOc6G_1Ze",
+      "title": "Update Change Log for draft 14",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/533",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-14"
+      ],
+      "body": "",
+      "createdAt": "2025-01-07T23:44:39Z",
+      "updatedAt": "2025-01-07T23:44:57Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c0e76dcf8f78d7d36332582f060ab791e5bb1115",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-14-cl",
+      "headRefOid": "ba4e237ab56393751c7704ad673931c7eecda2fa",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
