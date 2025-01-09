@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 12 July 2025                                               ISRG
+Expires: 13 July 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          8 January 2025
+                                                          9 January 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 July 2025.
+   This Internet-Draft will expire on 13 July 2025.
 
 Copyright Notice
 
@@ -3905,13 +3905,13 @@ Table of Contents
 
 7.3.5.  Deciding Validity
 
-      | verifier
-      v
-    +----------------+
+     | verifier
+     v
+   +------------------+
    | Decide           |
-    +-+--------------+
-      |
-      v is_valid
+   +-+----------------+
+     |
+     v is_valid
 
               Figure 10: Components of the decision algorithm.
 
