@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 12 July 2025                                               ISRG
+Expires: 14 July 2025                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          8 January 2025
+                                                         10 January 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 July 2025.
+   This Internet-Draft will expire on 14 July 2025.
 
 Copyright Notice
 
@@ -850,7 +850,7 @@ Table of Contents
 3.  Overview
 
                     +--------------+
-              +---->| Aggregator 0 |----+
+              +---->| Aggregator 0 +----+
         input |     +--------------+    | aggregate
        shares |             ^           | shares
               |             |           |
@@ -859,7 +859,7 @@ Table of Contents
               | +-->| Aggregator 1 |--+ |
               | |   +--------------+  | |
    +--------+-+ |           ^         | +->+-----------+
-   | Client |---+           |         +--->| Collector |--> aggregate
+   | Client +---+           |         +--->| Collector +--> aggregate
    +--------+-+                         +->+-----------+
               |            ...          |
               |                         |
@@ -1019,19 +1019,21 @@ Table of Contents
 
        measurement
          |
+         |
          V
        +----------------------------------------------+
        | shard                                        |
-       +----------------------------------------------+
+       +-+--------------+--------------+-----+--------+
          |              |              |     |
          |              |         ...  |    public_share
          |              |              |     |
          |    +---------|-----+--------|-----+
          |    |         |     |        |     |
-         V    |         V     |        V     |
+         v    |         v     |        v     |
         input_share_0  input_share_1  input_share_[SHARES-1]
+         |    |         |     |        |     |
          |    |         |     |   ...  |     |
-         V    V         V     V        V     V
+         v    v         v     v        v     v
        Aggregator 0   Aggregator 1    Aggregator SHARES-1
 
              Figure 2: Illustration of the sharding algorithm.
@@ -1082,13 +1084,13 @@ Table of Contents
 
        input_share_0  input_share_1          input_share_[SHARES-1]
          |              |                 ...  |
-         V              V                      V
+         v              v                      v
        +-----------+  +-----------+          +-----------+
        | prep      |  | prep      |          | prep      |
-       +-----------+  +-----------+          +-----------+
+       +-+---------+  +-+---------+          +-+---------+
          |              |                 ...  |
-         V              V                      V
-       out_share_0    out_share_1         out_share_[SHARES-1]
+         v              v                      v
+       out_share_0    out_share_1            out_share_[SHARES-1]
 
                    Figure 3: Illustration of preparation.
 
@@ -1138,24 +1140,26 @@ Table of Contents
        ============
 
        +------------+    +------------+
-       | agg_init   |--->| agg_update |<--- out_share_0
-       +------------+    +------------+
+       | agg_init   +--->| agg_update |<--- out_share_0
+       +------------+    +--+---------+
                             |
-                            V
+                            v
                          +------------+
-                         | agg_update |<--- out_share_1,
-                         +------------+
-                           |
-                           V
-                          ...
-                           |
-                           V
+                         | agg_update |<--- out_share_1
+                         +--+---------+
+                            |
+                            v
+
+                           ...
+
+                            |
+                            v
                          +------------+
                          | agg_update |<--- out_share_M
-                         +------------+
-                           |
-                           V
-                         agg_share_j
+                         +--+---------+
+                            |
+                            v
+                          agg_share_j
 
            Figure 4: Illustration of aggregation.  The number of
                  measurements in the batch is denoted by M.
@@ -1202,12 +1206,12 @@ Table of Contents
 
        agg_share_0     agg_share_1         agg_share_[SHARES-1]
          |               |                   |
-         V               V                   V
+         v               v                   v
        +-----------------------------------------------+
        | unshard                                       |
-       +-----------------------------------------------+
+       +-+---------------------------------------------+
          |
-         V
+         v
        agg_result
 
        Collector
@@ -1396,25 +1400,28 @@ Table of Contents
 
        input_share_0  input_share_1          input_share_[SHARES-1]
          |              |                 ...  |
-         V              V                      V
+         v              v                      v
        +-----------+  +-----------+          +-----------+
        | prep_init |  | prep_init |          | prep_init |
-       +-----------+  +-----------+          +-----------+
+       +-+-------+-+  +-+-------+-+          +-+-------+-+
          |       |      |       |         ...  |       |
-         V       |      V       |              V       |
-       +---------|--------------|----------------------|-+   \
-       |         |              | prep_shares_to_prep  | |   |
-       +---------|--------------|----------------------|-+   |
-         |       |      |       |         ...  |       |     |
-         V       V      V       V              V       V     | x ROUNDS
-       +-----------+  +-----------+          +-----------+   |
-       | prep_next |  | prep_next |          | prep_next |   |
-       +-----------+  +-----------+          +-----------+   |
-         |       |      |       |         ...  |       |     |
-         V       V      V       V              V       V     /
+         v       |      v       |              v       |
+       +---------|--------------|----------------------|--+ -.
+       |         |              |  prep_shares_to_prep |  |   |
+       +-+-------|------+-------|--------------+-------|--+   |
+         |       |      |       |         ...  |       |      |
+         v       v      v       v              v       v      | x ROUNDS
+       +-----------+  +-----------+          +-----------+    |
+       | prep_next |  | prep_next |          | prep_next |    |
+       +-+-------+-+  +-+-------+-+          +-+-------+-+    |
+         |       |      |       |         ...  |       |      |
+         v       v      v       v              v       v    -'
+
         ...            ...                    ...
+
          |              |                 ...  |
-         V              V                      V
+         |              |                      |
+         v              v                      v
        out_share_0    out_share_1         out_share_[SHARES-1]
 
           Figure 6: Illustration of interactive VDAF preparation.
@@ -3713,17 +3720,19 @@ Table of Contents
 
 7.3.3.  Generating the Proof
 
-   +------------------+
-   | Prove            |
-   | +-------------+  |
-   | | Valid       |<---- meas
-   | | +--------+  |<---- joint rand
-   | | | Gadget |  |  |<- prove rand
-   | | +--------+  |  |
-   | +-------------+  |
-   +------------------+
-    |
-    V proof
+   +--------------------+
+   | prove()            |
+   |  +--------------+  |
+   |  | Valid        |<----- meas
+   |  |  +--------+  |<----- joint rand
+   |  |  | Gadget |  |  |<-- prove rand
+   |  |  +--------+  |  |
+   |  |              |  |
+   |  +--------------+  |
+   |                    |
+   +-+------------------+
+     |
+     v proof
 
           Figure 8: Components of the proof generation algorithm.
 
@@ -3790,17 +3799,20 @@ Table of Contents
 7.3.4.  Querying the Proof
 
          proof (share)
-   +---------|--------+
-   | Query   |        |
-   | +-------|-----+  |
-   | | Valid |     |<---- meas (share)
-   | | +-----V--+  |<---- joint rand
-   | | | Gadget |  |  |<- query rand
-   | | +--------+  |  |
-   | +-------------+  |
-   +------------------+
-    |
-    V verifier (share)
+              |
+   +----------|---------+
+   | query()  |         |
+   |  +-------|------+  |
+   |  | Valid |      |<----- meas (share)
+   |  |  +----v---+  |<----- joint rand
+   |  |  | Gadget |  |  |<-- query rand
+   |  |  +--------+  |  |
+   |  |              |  |
+   |  +--------------+  |
+   |                    |
+   +-+------------------+
+     |
+     v verifier (share)
 
                 Figure 9: Components of the query algorithm.
 
@@ -3893,13 +3905,13 @@ Table of Contents
 
 7.3.5.  Deciding Validity
 
-    | verifier
-    V
+     | verifier
+     v
    +------------------+
    | Decide           |
-   +------------------+
-    |
-    V is_valid
+   +-+----------------+
+     |
+     v is_valid
 
               Figure 10: Components of the decision algorithm.
 

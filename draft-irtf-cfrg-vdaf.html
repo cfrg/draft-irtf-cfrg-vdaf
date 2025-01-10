@@ -1058,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 12 July 2025</td>
+<td class="center">Expires 14 July 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-01-08" class="published">8 January 2025</time>
+<time datetime="2025-01-10" class="published">10 January 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-07-12">12 July 2025</time></dd>
+<dd class="expires"><time datetime="2025-07-14">14 July 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 12 July 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 14 July 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2289,28 +2289,77 @@ length (<code>len</code>). Each element of the array is set to zero.<a href="#se
       </h2>
 <span id="name-overall-data-flow-of-a-vdaf"></span><div id="overall-flow">
 <figure id="figure-1">
-        <div class="alignLeft art-text artwork" id="section-3-1.1">
-<pre>
-                 +--------------+
-           +----&gt;| Aggregator 0 |----+
-     input |     +--------------+    | aggregate
-    shares |             ^           | shares
-           |             |           |
-           |             V           |
-           |     +--------------+    |
-           | +--&gt;| Aggregator 1 |--+ |
-           | |   +--------------+  | |
-+--------+-+ |           ^         | +-&gt;+-----------+
-| Client |---+           |         +---&gt;| Collector |--&gt; aggregate
-+--------+-+                         +-&gt;+-----------+
-           |            ...          |
-           |                         |
-           |             |           |
-           |             V           |
-           |    +----------------+   |
-           +---&gt;| Aggregator N-1 |---+
-                +----------------+
-</pre>
+        <div id="section-3-1.1">
+          <div class="alignLeft art-svg artwork" id="section-3-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="336" width="536" viewBox="0 0 536 336" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+              <path d="M 8,176 L 8,208" fill="none" stroke="black"></path>
+              <path d="M 80,176 L 80,208" fill="none" stroke="black"></path>
+              <path d="M 96,48 L 96,176" fill="none" stroke="black"></path>
+              <path d="M 96,208 L 96,304" fill="none" stroke="black"></path>
+              <path d="M 112,144 L 112,192" fill="none" stroke="black"></path>
+              <path d="M 136,288 L 136,320" fill="none" stroke="black"></path>
+              <path d="M 144,32 L 144,64" fill="none" stroke="black"></path>
+              <path d="M 144,128 L 144,160" fill="none" stroke="black"></path>
+              <path d="M 208,72 L 208,120" fill="none" stroke="black"></path>
+              <path d="M 208,168 L 208,192" fill="none" stroke="black"></path>
+              <path d="M 208,272 L 208,280" fill="none" stroke="black"></path>
+              <path d="M 264,32 L 264,64" fill="none" stroke="black"></path>
+              <path d="M 264,128 L 264,160" fill="none" stroke="black"></path>
+              <path d="M 272,288 L 272,320" fill="none" stroke="black"></path>
+              <path d="M 288,144 L 288,192" fill="none" stroke="black"></path>
+              <path d="M 304,48 L 304,176" fill="none" stroke="black"></path>
+              <path d="M 304,208 L 304,304" fill="none" stroke="black"></path>
+              <path d="M 328,176 L 328,208" fill="none" stroke="black"></path>
+              <path d="M 424,176 L 424,208" fill="none" stroke="black"></path>
+              <path d="M 144,32 L 264,32" fill="none" stroke="black"></path>
+              <path d="M 96,48 L 136,48" fill="none" stroke="black"></path>
+              <path d="M 264,48 L 304,48" fill="none" stroke="black"></path>
+              <path d="M 144,64 L 264,64" fill="none" stroke="black"></path>
+              <path d="M 144,128 L 264,128" fill="none" stroke="black"></path>
+              <path d="M 112,144 L 136,144" fill="none" stroke="black"></path>
+              <path d="M 272,144 L 288,144" fill="none" stroke="black"></path>
+              <path d="M 144,160 L 264,160" fill="none" stroke="black"></path>
+              <path d="M 8,176 L 96,176" fill="none" stroke="black"></path>
+              <path d="M 304,176 L 424,176" fill="none" stroke="black"></path>
+              <path d="M 80,192 L 112,192" fill="none" stroke="black"></path>
+              <path d="M 288,192 L 320,192" fill="none" stroke="black"></path>
+              <path d="M 424,192 L 448,192" fill="none" stroke="black"></path>
+              <path d="M 8,208 L 96,208" fill="none" stroke="black"></path>
+              <path d="M 304,208 L 424,208" fill="none" stroke="black"></path>
+              <path d="M 136,288 L 272,288" fill="none" stroke="black"></path>
+              <path d="M 96,304 L 128,304" fill="none" stroke="black"></path>
+              <path d="M 280,304 L 304,304" fill="none" stroke="black"></path>
+              <path d="M 136,320 L 272,320" fill="none" stroke="black"></path>
+              <polygon class="arrowhead" points="456,192 444,186.4 444,197.6" fill="black" transform="rotate(0,448,192)"></polygon>
+              <polygon class="arrowhead" points="328,208 316,202.4 316,213.6" fill="black" transform="rotate(0,320,208)"></polygon>
+              <polygon class="arrowhead" points="328,192 316,186.4 316,197.6" fill="black" transform="rotate(0,320,192)"></polygon>
+              <polygon class="arrowhead" points="328,176 316,170.4 316,181.6" fill="black" transform="rotate(0,320,176)"></polygon>
+              <polygon class="arrowhead" points="216,280 204,274.4 204,285.6" fill="black" transform="rotate(90,208,280)"></polygon>
+              <polygon class="arrowhead" points="216,168 204,162.4 204,173.6" fill="black" transform="rotate(270,208,168)"></polygon>
+              <polygon class="arrowhead" points="216,120 204,114.4 204,125.6" fill="black" transform="rotate(90,208,120)"></polygon>
+              <polygon class="arrowhead" points="216,72 204,66.4 204,77.6" fill="black" transform="rotate(270,208,72)"></polygon>
+              <polygon class="arrowhead" points="144,144 132,138.4 132,149.6" fill="black" transform="rotate(0,136,144)"></polygon>
+              <polygon class="arrowhead" points="144,48 132,42.4 132,53.6" fill="black" transform="rotate(0,136,48)"></polygon>
+              <polygon class="arrowhead" points="136,304 124,298.4 124,309.6" fill="black" transform="rotate(0,128,304)"></polygon>
+              <g class="text">
+                <text x="196" y="52">Aggregator</text>
+                <text x="248" y="52">0</text>
+                <text x="64" y="68">input</text>
+                <text x="352" y="68">aggregate</text>
+                <text x="60" y="84">shares</text>
+                <text x="340" y="84">shares</text>
+                <text x="196" y="148">Aggregator</text>
+                <text x="248" y="148">1</text>
+                <text x="44" y="196">Client</text>
+                <text x="376" y="196">Collector</text>
+                <text x="496" y="196">aggregate</text>
+                <text x="208" y="228">...</text>
+                <text x="208" y="260">|</text>
+                <text x="188" y="308">Aggregator</text>
+                <text x="248" y="308">N-1</text>
+              </g>
+            </svg><a href="#section-3-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-1" class="selfRef">Figure 1</a>:
 <a href="#name-overall-data-flow-of-a-vdaf" class="selfRef">Overall data flow of a (V)DAF.</a>
@@ -2514,28 +2563,61 @@ for the <code>PublicShare</code>, <code>InputShare</code>, <code>AggParam</code>
         </h3>
 <span id="name-illustration-of-the-shardin"></span><div id="shard-flow">
 <figure id="figure-2">
-          <div class="alignLeft art-text artwork" id="section-4.1-1.1">
-<pre>
-    Client
-    ======
-
-    measurement
-      |
-      V
-    +----------------------------------------------+
-    | shard                                        |
-    +----------------------------------------------+
-      |              |              |     |
-      |              |         ...  |    public_share
-      |              |              |     |
-      |    +---------|-----+--------|-----+
-      |    |         |     |        |     |
-      V    |         V     |        V     |
-     input_share_0  input_share_1  input_share_[SHARES-1]
-      |    |         |     |   ...  |     |
-      V    V         V     V        V     V
-    Aggregator 0   Aggregator 1    Aggregator SHARES-1
-</pre>
+          <div id="section-4.1-1.1">
+            <div class="alignLeft art-svg artwork" id="section-4.1-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="384" width="432" viewBox="0 0 432 384" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 8,144 L 8,176" fill="none" stroke="black"></path>
+                <path d="M 24,96 L 24,136" fill="none" stroke="black"></path>
+                <path d="M 24,176 L 24,272" fill="none" stroke="black"></path>
+                <path d="M 24,304 L 24,336" fill="none" stroke="black"></path>
+                <path d="M 64,240 L 64,272" fill="none" stroke="black"></path>
+                <path d="M 64,296 L 64,336" fill="none" stroke="black"></path>
+                <path d="M 144,176 L 144,272" fill="none" stroke="black"></path>
+                <path d="M 144,304 L 144,336" fill="none" stroke="black"></path>
+                <path d="M 192,240 L 192,272" fill="none" stroke="black"></path>
+                <path d="M 192,304 L 192,336" fill="none" stroke="black"></path>
+                <path d="M 264,176 L 264,272" fill="none" stroke="black"></path>
+                <path d="M 264,304 L 264,336" fill="none" stroke="black"></path>
+                <path d="M 312,176 L 312,192" fill="none" stroke="black"></path>
+                <path d="M 312,224 L 312,272" fill="none" stroke="black"></path>
+                <path d="M 312,304 L 312,336" fill="none" stroke="black"></path>
+                <path d="M 384,144 L 384,176" fill="none" stroke="black"></path>
+                <path d="M 8,46 L 48,46" fill="none" stroke="black"></path>
+                <path d="M 8,50 L 48,50" fill="none" stroke="black"></path>
+                <path d="M 8,144 L 384,144" fill="none" stroke="black"></path>
+                <path d="M 8,176 L 384,176" fill="none" stroke="black"></path>
+                <path d="M 64,240 L 136,240" fill="none" stroke="black"></path>
+                <path d="M 152,240 L 256,240" fill="none" stroke="black"></path>
+                <path d="M 272,240 L 312,240" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="320,336 308,330.4 308,341.6" fill="black" transform="rotate(90,312,336)"></polygon>
+                <polygon class="arrowhead" points="272,336 260,330.4 260,341.6" fill="black" transform="rotate(90,264,336)"></polygon>
+                <polygon class="arrowhead" points="272,272 260,266.4 260,277.6" fill="black" transform="rotate(90,264,272)"></polygon>
+                <polygon class="arrowhead" points="200,336 188,330.4 188,341.6" fill="black" transform="rotate(90,192,336)"></polygon>
+                <polygon class="arrowhead" points="152,336 140,330.4 140,341.6" fill="black" transform="rotate(90,144,336)"></polygon>
+                <polygon class="arrowhead" points="152,272 140,266.4 140,277.6" fill="black" transform="rotate(90,144,272)"></polygon>
+                <polygon class="arrowhead" points="72,336 60,330.4 60,341.6" fill="black" transform="rotate(90,64,336)"></polygon>
+                <polygon class="arrowhead" points="32,336 20,330.4 20,341.6" fill="black" transform="rotate(90,24,336)"></polygon>
+                <polygon class="arrowhead" points="32,272 20,266.4 20,277.6" fill="black" transform="rotate(90,24,272)"></polygon>
+                <polygon class="arrowhead" points="32,136 20,130.4 20,141.6" fill="black" transform="rotate(90,24,136)"></polygon>
+                <g class="text">
+                  <text x="28" y="36">Client</text>
+                  <text x="48" y="84">measurement</text>
+                  <text x="40" y="164">shard</text>
+                  <text x="232" y="212">...</text>
+                  <text x="348" y="212">public_share</text>
+                  <text x="64" y="292">input_share_0</text>
+                  <text x="184" y="292">input_share_1</text>
+                  <text x="340" y="292">input_share_[SHARES-1]</text>
+                  <text x="232" y="324">...</text>
+                  <text x="44" y="356">Aggregator</text>
+                  <text x="96" y="356">0</text>
+                  <text x="164" y="356">Aggregator</text>
+                  <text x="216" y="356">1</text>
+                  <text x="292" y="356">Aggregator</text>
+                  <text x="372" y="356">SHARES-1</text>
+                </g>
+              </svg><a href="#section-4.1-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
 <a href="#name-illustration-of-the-shardin" class="selfRef">Illustration of the sharding algorithm.</a>
@@ -2593,21 +2675,60 @@ derive per-report randomness for verification of the computation. See
         </h3>
 <span id="name-illustration-of-preparation"></span><div id="daf-prep-flow">
 <figure id="figure-3">
-          <div class="alignLeft art-text artwork" id="section-4.2-1.1">
-<pre>
-    Aggregator 0   Aggregator 1           Aggregator SHARES-1
-    ============   ============           ===================
-
-    input_share_0  input_share_1          input_share_[SHARES-1]
-      |              |                 ...  |
-      V              V                      V
-    +-----------+  +-----------+          +-----------+
-    | prep      |  | prep      |          | prep      |
-    +-----------+  +-----------+          +-----------+
-      |              |                 ...  |
-      V              V                      V
-    out_share_0    out_share_1         out_share_[SHARES-1]
-</pre>
+          <div id="section-4.2-1.1">
+            <div class="alignLeft art-svg artwork" id="section-4.2-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="240" width="488" viewBox="0 0 488 240" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 8,128 L 8,160" fill="none" stroke="black"></path>
+                <path d="M 24,96 L 24,120" fill="none" stroke="black"></path>
+                <path d="M 24,160 L 24,192" fill="none" stroke="black"></path>
+                <path d="M 104,128 L 104,160" fill="none" stroke="black"></path>
+                <path d="M 128,128 L 128,160" fill="none" stroke="black"></path>
+                <path d="M 144,96 L 144,120" fill="none" stroke="black"></path>
+                <path d="M 144,160 L 144,192" fill="none" stroke="black"></path>
+                <path d="M 224,128 L 224,160" fill="none" stroke="black"></path>
+                <path d="M 312,128 L 312,160" fill="none" stroke="black"></path>
+                <path d="M 328,96 L 328,120" fill="none" stroke="black"></path>
+                <path d="M 328,160 L 328,192" fill="none" stroke="black"></path>
+                <path d="M 408,128 L 408,160" fill="none" stroke="black"></path>
+                <path d="M 8,46 L 96,46" fill="none" stroke="black"></path>
+                <path d="M 8,50 L 96,50" fill="none" stroke="black"></path>
+                <path d="M 128,46 L 216,46" fill="none" stroke="black"></path>
+                <path d="M 128,50 L 216,50" fill="none" stroke="black"></path>
+                <path d="M 312,46 L 456,46" fill="none" stroke="black"></path>
+                <path d="M 312,50 L 456,50" fill="none" stroke="black"></path>
+                <path d="M 8,128 L 104,128" fill="none" stroke="black"></path>
+                <path d="M 128,128 L 224,128" fill="none" stroke="black"></path>
+                <path d="M 312,128 L 408,128" fill="none" stroke="black"></path>
+                <path d="M 8,160 L 104,160" fill="none" stroke="black"></path>
+                <path d="M 128,160 L 224,160" fill="none" stroke="black"></path>
+                <path d="M 312,160 L 408,160" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="336,192 324,186.4 324,197.6" fill="black" transform="rotate(90,328,192)"></polygon>
+                <polygon class="arrowhead" points="336,120 324,114.4 324,125.6" fill="black" transform="rotate(90,328,120)"></polygon>
+                <polygon class="arrowhead" points="152,192 140,186.4 140,197.6" fill="black" transform="rotate(90,144,192)"></polygon>
+                <polygon class="arrowhead" points="152,120 140,114.4 140,125.6" fill="black" transform="rotate(90,144,120)"></polygon>
+                <polygon class="arrowhead" points="32,192 20,186.4 20,197.6" fill="black" transform="rotate(90,24,192)"></polygon>
+                <polygon class="arrowhead" points="32,120 20,114.4 20,125.6" fill="black" transform="rotate(90,24,120)"></polygon>
+                <g class="text">
+                  <text x="44" y="36">Aggregator</text>
+                  <text x="96" y="36">0</text>
+                  <text x="164" y="36">Aggregator</text>
+                  <text x="216" y="36">1</text>
+                  <text x="348" y="36">Aggregator</text>
+                  <text x="428" y="36">SHARES-1</text>
+                  <text x="56" y="84">input_share_0</text>
+                  <text x="176" y="84">input_share_1</text>
+                  <text x="396" y="84">input_share_[SHARES-1]</text>
+                  <text x="296" y="100">...</text>
+                  <text x="36" y="148">prep</text>
+                  <text x="156" y="148">prep</text>
+                  <text x="340" y="148">prep</text>
+                  <text x="296" y="180">...</text>
+                  <text x="48" y="212">out_share_0</text>
+                  <text x="168" y="212">out_share_1</text>
+                  <text x="388" y="212">out_share_[SHARES-1]</text>
+                </g>
+              </svg><a href="#section-4.2-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
 <a href="#name-illustration-of-preparation" class="selfRef">Illustration of preparation.</a>
@@ -2668,31 +2789,58 @@ preparation, each Aggregator <span class="bcp14">MUST</span> validate it using t
         </h3>
 <span id="name-illustration-of-aggregation"></span><div id="aggregate-flow">
 <figure id="figure-4">
-          <div class="alignLeft art-text artwork" id="section-4.4-1.1">
-<pre>
-    Aggregator j
-    ============
-
-    +------------+    +------------+
-    | agg_init   |---&gt;| agg_update |&lt;--- out_share_0
-    +------------+    +------------+
-                         |
-                         V
-                      +------------+
-                      | agg_update |&lt;--- out_share_1,
-                      +------------+
-                        |
-                        V
-                       ...
-                        |
-                        V
-                      +------------+
-                      | agg_update |&lt;--- out_share_M
-                      +------------+
-                        |
-                        V
-                      agg_share_j
-</pre>
+          <div id="section-4.4-1.1">
+            <div class="alignLeft art-svg artwork" id="section-4.4-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="432" width="392" viewBox="0 0 392 432" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 8,80 L 8,112" fill="none" stroke="black"></path>
+                <path d="M 112,80 L 112,112" fill="none" stroke="black"></path>
+                <path d="M 152,80 L 152,112" fill="none" stroke="black"></path>
+                <path d="M 152,160 L 152,192" fill="none" stroke="black"></path>
+                <path d="M 152,320 L 152,352" fill="none" stroke="black"></path>
+                <path d="M 176,112 L 176,152" fill="none" stroke="black"></path>
+                <path d="M 176,192 L 176,224" fill="none" stroke="black"></path>
+                <path d="M 176,288 L 176,312" fill="none" stroke="black"></path>
+                <path d="M 176,352 L 176,384" fill="none" stroke="black"></path>
+                <path d="M 256,80 L 256,112" fill="none" stroke="black"></path>
+                <path d="M 256,160 L 256,192" fill="none" stroke="black"></path>
+                <path d="M 256,320 L 256,352" fill="none" stroke="black"></path>
+                <path d="M 8,46 L 96,46" fill="none" stroke="black"></path>
+                <path d="M 8,50 L 96,50" fill="none" stroke="black"></path>
+                <path d="M 8,80 L 112,80" fill="none" stroke="black"></path>
+                <path d="M 152,80 L 256,80" fill="none" stroke="black"></path>
+                <path d="M 112,96 L 144,96" fill="none" stroke="black"></path>
+                <path d="M 264,96 L 288,96" fill="none" stroke="black"></path>
+                <path d="M 8,112 L 112,112" fill="none" stroke="black"></path>
+                <path d="M 152,112 L 256,112" fill="none" stroke="black"></path>
+                <path d="M 152,160 L 256,160" fill="none" stroke="black"></path>
+                <path d="M 264,176 L 288,176" fill="none" stroke="black"></path>
+                <path d="M 152,192 L 256,192" fill="none" stroke="black"></path>
+                <path d="M 152,320 L 256,320" fill="none" stroke="black"></path>
+                <path d="M 264,336 L 288,336" fill="none" stroke="black"></path>
+                <path d="M 152,352 L 256,352" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="272,336 260,330.4 260,341.6" fill="black" transform="rotate(180,264,336)"></polygon>
+                <polygon class="arrowhead" points="272,176 260,170.4 260,181.6" fill="black" transform="rotate(180,264,176)"></polygon>
+                <polygon class="arrowhead" points="272,96 260,90.4 260,101.6" fill="black" transform="rotate(180,264,96)"></polygon>
+                <polygon class="arrowhead" points="184,384 172,378.4 172,389.6" fill="black" transform="rotate(90,176,384)"></polygon>
+                <polygon class="arrowhead" points="184,312 172,306.4 172,317.6" fill="black" transform="rotate(90,176,312)"></polygon>
+                <polygon class="arrowhead" points="184,224 172,218.4 172,229.6" fill="black" transform="rotate(90,176,224)"></polygon>
+                <polygon class="arrowhead" points="184,152 172,146.4 172,157.6" fill="black" transform="rotate(90,176,152)"></polygon>
+                <polygon class="arrowhead" points="152,96 140,90.4 140,101.6" fill="black" transform="rotate(0,144,96)"></polygon>
+                <g class="text">
+                  <text x="44" y="36">Aggregator</text>
+                  <text x="96" y="36">j</text>
+                  <text x="52" y="100">agg_init</text>
+                  <text x="204" y="100">agg_update</text>
+                  <text x="344" y="100">out_share_0</text>
+                  <text x="204" y="180">agg_update</text>
+                  <text x="344" y="180">out_share_1</text>
+                  <text x="176" y="260">...</text>
+                  <text x="204" y="340">agg_update</text>
+                  <text x="344" y="340">out_share_M</text>
+                  <text x="200" y="404">agg_share_j</text>
+                </g>
+              </svg><a href="#section-4.4-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
 <a href="#name-illustration-of-aggregation" class="selfRef">Illustration of aggregation. The number of measurements in the batch is denoted by M.</a>
@@ -2746,24 +2894,45 @@ requires each Aggregator to aggregate output shares in the same order.<a href="#
         </h3>
 <span id="name-illustration-of-unsharding"></span><div id="unshard-flow">
 <figure id="figure-5">
-          <div class="alignLeft art-text artwork" id="section-4.5-1.1">
-<pre>
-    Aggregator 0    Aggregator 1        Aggregator SHARES-1
-    ============    ============        ===================
-
-    agg_share_0     agg_share_1         agg_share_[SHARES-1]
-      |               |                   |
-      V               V                   V
-    +-----------------------------------------------+
-    | unshard                                       |
-    +-----------------------------------------------+
-      |
-      V
-    agg_result
-
-    Collector
-    =========
-</pre>
+          <div id="section-4.5-1.1">
+            <div class="alignLeft art-svg artwork" id="section-4.5-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="288" width="456" viewBox="0 0 456 288" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 8,128 L 8,160" fill="none" stroke="black"></path>
+                <path d="M 24,88 L 24,120" fill="none" stroke="black"></path>
+                <path d="M 24,160 L 24,192" fill="none" stroke="black"></path>
+                <path d="M 152,88 L 152,120" fill="none" stroke="black"></path>
+                <path d="M 312,88 L 312,120" fill="none" stroke="black"></path>
+                <path d="M 392,128 L 392,160" fill="none" stroke="black"></path>
+                <path d="M 8,46 L 96,46" fill="none" stroke="black"></path>
+                <path d="M 8,50 L 96,50" fill="none" stroke="black"></path>
+                <path d="M 136,46 L 224,46" fill="none" stroke="black"></path>
+                <path d="M 136,50 L 224,50" fill="none" stroke="black"></path>
+                <path d="M 296,46 L 440,46" fill="none" stroke="black"></path>
+                <path d="M 296,50 L 440,50" fill="none" stroke="black"></path>
+                <path d="M 8,128 L 392,128" fill="none" stroke="black"></path>
+                <path d="M 8,160 L 392,160" fill="none" stroke="black"></path>
+                <path d="M 8,254 L 72,254" fill="none" stroke="black"></path>
+                <path d="M 8,258 L 72,258" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="320,120 308,114.4 308,125.6" fill="black" transform="rotate(90,312,120)"></polygon>
+                <polygon class="arrowhead" points="160,120 148,114.4 148,125.6" fill="black" transform="rotate(90,152,120)"></polygon>
+                <polygon class="arrowhead" points="32,192 20,186.4 20,197.6" fill="black" transform="rotate(90,24,192)"></polygon>
+                <polygon class="arrowhead" points="32,120 20,114.4 20,125.6" fill="black" transform="rotate(90,24,120)"></polygon>
+                <g class="text">
+                  <text x="44" y="36">Aggregator</text>
+                  <text x="96" y="36">0</text>
+                  <text x="172" y="36">Aggregator</text>
+                  <text x="224" y="36">1</text>
+                  <text x="332" y="36">Aggregator</text>
+                  <text x="412" y="36">SHARES-1</text>
+                  <text x="48" y="84">agg_share_0</text>
+                  <text x="176" y="84">agg_share_1</text>
+                  <text x="372" y="84">agg_share_[SHARES-1]</text>
+                  <text x="48" y="148">unshard</text>
+                  <text x="44" y="212">agg_result</text>
+                  <text x="40" y="244">Collector</text>
+                </g>
+              </svg><a href="#section-4.5-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
 <a href="#name-illustration-of-unsharding" class="selfRef">Illustration of unsharding.</a>
@@ -3031,34 +3200,127 @@ cross protocol attacks; see <a href="#deep" class="auto internal xref">Section 9
         </h3>
 <span id="name-illustration-of-interactive"></span><div id="prep-flow">
 <figure id="figure-6">
-          <div class="alignLeft art-text artwork" id="section-5.2-1.1">
-<pre>
-    Aggregator 0   Aggregator 1           Aggregator SHARES-1
-    ============   ============           ===================
-
-    input_share_0  input_share_1          input_share_[SHARES-1]
-      |              |                 ...  |
-      V              V                      V
-    +-----------+  +-----------+          +-----------+
-    | prep_init |  | prep_init |          | prep_init |
-    +-----------+  +-----------+          +-----------+
-      |       |      |       |         ...  |       |
-      V       |      V       |              V       |
-    +---------|--------------|----------------------|-+   \
-    |         |              | prep_shares_to_prep  | |   |
-    +---------|--------------|----------------------|-+   |
-      |       |      |       |         ...  |       |     |
-      V       V      V       V              V       V     | x ROUNDS
-    +-----------+  +-----------+          +-----------+   |
-    | prep_next |  | prep_next |          | prep_next |   |
-    +-----------+  +-----------+          +-----------+   |
-      |       |      |       |         ...  |       |     |
-      V       V      V       V              V       V     /
-     ...            ...                    ...
-      |              |                 ...  |
-      V              V                      V
-    out_share_0    out_share_1         out_share_[SHARES-1]
-</pre>
+          <div id="section-5.2-1.1">
+            <div class="alignLeft art-svg artwork" id="section-5.2-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="496" width="528" viewBox="0 0 528 496" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 8,128 L 8,160" fill="none" stroke="black"></path>
+                <path d="M 8,208 L 8,240" fill="none" stroke="black"></path>
+                <path d="M 8,288 L 8,320" fill="none" stroke="black"></path>
+                <path d="M 24,96 L 24,120" fill="none" stroke="black"></path>
+                <path d="M 24,160 L 24,200" fill="none" stroke="black"></path>
+                <path d="M 24,240 L 24,280" fill="none" stroke="black"></path>
+                <path d="M 24,320 L 24,352" fill="none" stroke="black"></path>
+                <path d="M 24,416 L 24,448" fill="none" stroke="black"></path>
+                <path d="M 88,160 L 88,280" fill="none" stroke="black"></path>
+                <path d="M 88,320 L 88,352" fill="none" stroke="black"></path>
+                <path d="M 104,128 L 104,160" fill="none" stroke="black"></path>
+                <path d="M 104,288 L 104,320" fill="none" stroke="black"></path>
+                <path d="M 128,128 L 128,160" fill="none" stroke="black"></path>
+                <path d="M 128,288 L 128,320" fill="none" stroke="black"></path>
+                <path d="M 144,96 L 144,120" fill="none" stroke="black"></path>
+                <path d="M 144,160 L 144,200" fill="none" stroke="black"></path>
+                <path d="M 144,240 L 144,280" fill="none" stroke="black"></path>
+                <path d="M 144,320 L 144,352" fill="none" stroke="black"></path>
+                <path d="M 144,416 L 144,448" fill="none" stroke="black"></path>
+                <path d="M 208,160 L 208,280" fill="none" stroke="black"></path>
+                <path d="M 208,320 L 208,352" fill="none" stroke="black"></path>
+                <path d="M 224,128 L 224,160" fill="none" stroke="black"></path>
+                <path d="M 224,288 L 224,320" fill="none" stroke="black"></path>
+                <path d="M 312,128 L 312,160" fill="none" stroke="black"></path>
+                <path d="M 312,288 L 312,320" fill="none" stroke="black"></path>
+                <path d="M 328,96 L 328,120" fill="none" stroke="black"></path>
+                <path d="M 328,160 L 328,200" fill="none" stroke="black"></path>
+                <path d="M 328,240 L 328,280" fill="none" stroke="black"></path>
+                <path d="M 328,320 L 328,352" fill="none" stroke="black"></path>
+                <path d="M 328,416 L 328,448" fill="none" stroke="black"></path>
+                <path d="M 392,160 L 392,280" fill="none" stroke="black"></path>
+                <path d="M 392,320 L 392,352" fill="none" stroke="black"></path>
+                <path d="M 408,128 L 408,160" fill="none" stroke="black"></path>
+                <path d="M 408,288 L 408,320" fill="none" stroke="black"></path>
+                <path d="M 416,208 L 416,240" fill="none" stroke="black"></path>
+                <path d="M 448,224 L 448,336" fill="none" stroke="black"></path>
+                <path d="M 8,46 L 96,46" fill="none" stroke="black"></path>
+                <path d="M 8,50 L 96,50" fill="none" stroke="black"></path>
+                <path d="M 128,46 L 216,46" fill="none" stroke="black"></path>
+                <path d="M 128,50 L 216,50" fill="none" stroke="black"></path>
+                <path d="M 312,46 L 456,46" fill="none" stroke="black"></path>
+                <path d="M 312,50 L 456,50" fill="none" stroke="black"></path>
+                <path d="M 8,128 L 104,128" fill="none" stroke="black"></path>
+                <path d="M 128,128 L 224,128" fill="none" stroke="black"></path>
+                <path d="M 312,128 L 408,128" fill="none" stroke="black"></path>
+                <path d="M 8,160 L 104,160" fill="none" stroke="black"></path>
+                <path d="M 128,160 L 224,160" fill="none" stroke="black"></path>
+                <path d="M 312,160 L 408,160" fill="none" stroke="black"></path>
+                <path d="M 8,208 L 80,208" fill="none" stroke="black"></path>
+                <path d="M 96,208 L 200,208" fill="none" stroke="black"></path>
+                <path d="M 216,208 L 384,208" fill="none" stroke="black"></path>
+                <path d="M 400,208 L 416,208" fill="none" stroke="black"></path>
+                <path d="M 8,240 L 80,240" fill="none" stroke="black"></path>
+                <path d="M 96,240 L 200,240" fill="none" stroke="black"></path>
+                <path d="M 216,240 L 384,240" fill="none" stroke="black"></path>
+                <path d="M 400,240 L 416,240" fill="none" stroke="black"></path>
+                <path d="M 8,288 L 104,288" fill="none" stroke="black"></path>
+                <path d="M 128,288 L 224,288" fill="none" stroke="black"></path>
+                <path d="M 312,288 L 408,288" fill="none" stroke="black"></path>
+                <path d="M 8,320 L 104,320" fill="none" stroke="black"></path>
+                <path d="M 128,320 L 224,320" fill="none" stroke="black"></path>
+                <path d="M 312,320 L 408,320" fill="none" stroke="black"></path>
+                <path d="M 432,208 C 440.83064,208 448,215.16936 448,224" fill="none" stroke="black"></path>
+                <path d="M 432,352 C 440.83064,352 448,344.83064 448,336" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="400,352 388,346.4 388,357.6" fill="black" transform="rotate(90,392,352)"></polygon>
+                <polygon class="arrowhead" points="400,280 388,274.4 388,285.6" fill="black" transform="rotate(90,392,280)"></polygon>
+                <polygon class="arrowhead" points="336,448 324,442.4 324,453.6" fill="black" transform="rotate(90,328,448)"></polygon>
+                <polygon class="arrowhead" points="336,352 324,346.4 324,357.6" fill="black" transform="rotate(90,328,352)"></polygon>
+                <polygon class="arrowhead" points="336,280 324,274.4 324,285.6" fill="black" transform="rotate(90,328,280)"></polygon>
+                <polygon class="arrowhead" points="336,200 324,194.4 324,205.6" fill="black" transform="rotate(90,328,200)"></polygon>
+                <polygon class="arrowhead" points="336,120 324,114.4 324,125.6" fill="black" transform="rotate(90,328,120)"></polygon>
+                <polygon class="arrowhead" points="216,352 204,346.4 204,357.6" fill="black" transform="rotate(90,208,352)"></polygon>
+                <polygon class="arrowhead" points="216,280 204,274.4 204,285.6" fill="black" transform="rotate(90,208,280)"></polygon>
+                <polygon class="arrowhead" points="152,448 140,442.4 140,453.6" fill="black" transform="rotate(90,144,448)"></polygon>
+                <polygon class="arrowhead" points="152,352 140,346.4 140,357.6" fill="black" transform="rotate(90,144,352)"></polygon>
+                <polygon class="arrowhead" points="152,280 140,274.4 140,285.6" fill="black" transform="rotate(90,144,280)"></polygon>
+                <polygon class="arrowhead" points="152,200 140,194.4 140,205.6" fill="black" transform="rotate(90,144,200)"></polygon>
+                <polygon class="arrowhead" points="152,120 140,114.4 140,125.6" fill="black" transform="rotate(90,144,120)"></polygon>
+                <polygon class="arrowhead" points="96,352 84,346.4 84,357.6" fill="black" transform="rotate(90,88,352)"></polygon>
+                <polygon class="arrowhead" points="96,280 84,274.4 84,285.6" fill="black" transform="rotate(90,88,280)"></polygon>
+                <polygon class="arrowhead" points="32,448 20,442.4 20,453.6" fill="black" transform="rotate(90,24,448)"></polygon>
+                <polygon class="arrowhead" points="32,352 20,346.4 20,357.6" fill="black" transform="rotate(90,24,352)"></polygon>
+                <polygon class="arrowhead" points="32,280 20,274.4 20,285.6" fill="black" transform="rotate(90,24,280)"></polygon>
+                <polygon class="arrowhead" points="32,200 20,194.4 20,205.6" fill="black" transform="rotate(90,24,200)"></polygon>
+                <polygon class="arrowhead" points="32,120 20,114.4 20,125.6" fill="black" transform="rotate(90,24,120)"></polygon>
+                <g class="text">
+                  <text x="44" y="36">Aggregator</text>
+                  <text x="96" y="36">0</text>
+                  <text x="164" y="36">Aggregator</text>
+                  <text x="216" y="36">1</text>
+                  <text x="348" y="36">Aggregator</text>
+                  <text x="428" y="36">SHARES-1</text>
+                  <text x="56" y="84">input_share_0</text>
+                  <text x="176" y="84">input_share_1</text>
+                  <text x="396" y="84">input_share_[SHARES-1]</text>
+                  <text x="296" y="100">...</text>
+                  <text x="56" y="148">prep_init</text>
+                  <text x="176" y="148">prep_init</text>
+                  <text x="360" y="148">prep_init</text>
+                  <text x="296" y="180">...</text>
+                  <text x="304" y="228">prep_shares_to_prep</text>
+                  <text x="296" y="260">...</text>
+                  <text x="464" y="276">x</text>
+                  <text x="500" y="276">ROUNDS</text>
+                  <text x="56" y="308">prep_next</text>
+                  <text x="176" y="308">prep_next</text>
+                  <text x="360" y="308">prep_next</text>
+                  <text x="296" y="340">...</text>
+                  <text x="24" y="388">...</text>
+                  <text x="144" y="388">...</text>
+                  <text x="328" y="388">...</text>
+                  <text x="296" y="420">...</text>
+                  <text x="48" y="468">out_share_0</text>
+                  <text x="168" y="468">out_share_1</text>
+                  <text x="364" y="468">out_share_[SHARES-1]</text>
+                </g>
+              </svg><a href="#section-5.2-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
 <a href="#name-illustration-of-interactive" class="selfRef">Illustration of interactive VDAF preparation.</a>
@@ -3284,16 +3546,32 @@ channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 <p id="section-5.7-3">The state machine of each Aggregator is shown below.<a href="#section-5.7-3" class="pilcrow">¶</a></p>
 <span id="name-state-machine-of-vdaf-prepa"></span><div id="vdaf-prep-state-machine">
 <figure id="figure-7">
-          <div class="alignLeft art-text artwork" id="section-5.7-4.1">
-<pre>
-                  +----------------+
-                  |                |
-                  v                |
-Start ----&gt; Continued(prep_state, prep_round) --&gt; Finished(out_share)
- |                |
- |                |
- +--&gt; Rejected &lt;--+
-</pre>
+          <div id="section-5.7-4.1">
+            <div class="alignLeft art-svg artwork" id="section-5.7-4.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="560" viewBox="0 0 560 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 16,96 L 16,128" fill="none" stroke="black"></path>
+                <path d="M 152,32 L 152,64" fill="none" stroke="black"></path>
+                <path d="M 152,96 L 152,128" fill="none" stroke="black"></path>
+                <path d="M 288,32 L 288,64" fill="none" stroke="black"></path>
+                <path d="M 152,32 L 288,32" fill="none" stroke="black"></path>
+                <path d="M 56,80 L 88,80" fill="none" stroke="black"></path>
+                <path d="M 376,80 L 392,80" fill="none" stroke="black"></path>
+                <path d="M 16,128 L 40,128" fill="none" stroke="black"></path>
+                <path d="M 128,128 L 152,128" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="400,80 388,74.4 388,85.6" fill="black" transform="rotate(0,392,80)"></polygon>
+                <polygon class="arrowhead" points="160,64 148,58.4 148,69.6" fill="black" transform="rotate(90,152,64)"></polygon>
+                <polygon class="arrowhead" points="136,128 124,122.4 124,133.6" fill="black" transform="rotate(180,128,128)"></polygon>
+                <polygon class="arrowhead" points="96,80 84,74.4 84,85.6" fill="black" transform="rotate(0,88,80)"></polygon>
+                <polygon class="arrowhead" points="48,128 36,122.4 36,133.6" fill="black" transform="rotate(0,40,128)"></polygon>
+                <g class="text">
+                  <text x="24" y="84">Start</text>
+                  <text x="184" y="84">Continued(prep_state,</text>
+                  <text x="320" y="84">prep_round)</text>
+                  <text x="480" y="84">Finished(out_share)</text>
+                  <text x="84" y="132">Rejected</text>
+                </g>
+              </svg><a href="#section-5.7-4.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
 <a href="#name-state-machine-of-vdaf-prepa" class="selfRef">State machine of VDAF preparation.</a>
@@ -5925,20 +6203,43 @@ def verifier_len(self) -&gt; int:
 <a href="#section-7.3.3" class="section-number selfRef">7.3.3. </a><a href="#name-generating-the-proof" class="section-name selfRef">Generating the Proof</a>
           </h4>
 <span id="name-components-of-the-proof-gen"></span><figure id="figure-8">
-            <div class="alignLeft art-text artwork" id="section-7.3.3-1.1">
-<pre>
-+------------------+
-| Prove            |
-| +-------------+  |
-| | Valid       |&lt;---- meas
-| | +--------+  |&lt;---- joint rand
-| | | Gadget |  |  |&lt;- prove rand
-| | +--------+  |  |
-| +-------------+  |
-+------------------+
- |
- V proof
-</pre>
+            <div id="section-7.3.3-1.1">
+              <div class="alignLeft art-svg artwork" id="section-7.3.3-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="240" width="296" viewBox="0 0 296 240" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                  <path d="M 8,32 L 8,192" fill="none" stroke="black"></path>
+                  <path d="M 24,192 L 24,224" fill="none" stroke="black"></path>
+                  <path d="M 32,64 L 32,160" fill="none" stroke="black"></path>
+                  <path d="M 56,96 L 56,128" fill="none" stroke="black"></path>
+                  <path d="M 128,96 L 128,128" fill="none" stroke="black"></path>
+                  <path d="M 152,64 L 152,160" fill="none" stroke="black"></path>
+                  <path d="M 176,32 L 176,72" fill="none" stroke="black"></path>
+                  <path d="M 176,104 L 176,192" fill="none" stroke="black"></path>
+                  <path d="M 8,32 L 176,32" fill="none" stroke="black"></path>
+                  <path d="M 32,64 L 152,64" fill="none" stroke="black"></path>
+                  <path d="M 160,80 L 200,80" fill="none" stroke="black"></path>
+                  <path d="M 56,96 L 128,96" fill="none" stroke="black"></path>
+                  <path d="M 160,96 L 200,96" fill="none" stroke="black"></path>
+                  <path d="M 184,112 L 200,112" fill="none" stroke="black"></path>
+                  <path d="M 56,128 L 128,128" fill="none" stroke="black"></path>
+                  <path d="M 32,160 L 152,160" fill="none" stroke="black"></path>
+                  <path d="M 8,192 L 176,192" fill="none" stroke="black"></path>
+                  <polygon class="arrowhead" points="192,112 180,106.4 180,117.6" fill="black" transform="rotate(180,184,112)"></polygon>
+                  <polygon class="arrowhead" points="168,96 156,90.4 156,101.6" fill="black" transform="rotate(180,160,96)"></polygon>
+                  <polygon class="arrowhead" points="168,80 156,74.4 156,85.6" fill="black" transform="rotate(180,160,80)"></polygon>
+                  <polygon class="arrowhead" points="32,224 20,218.4 20,229.6" fill="black" transform="rotate(90,24,224)"></polygon>
+                  <g class="text">
+                    <text x="48" y="52">prove()</text>
+                    <text x="64" y="84">Valid</text>
+                    <text x="228" y="84">meas</text>
+                    <text x="232" y="100">joint</text>
+                    <text x="276" y="100">rand</text>
+                    <text x="92" y="116">Gadget</text>
+                    <text x="232" y="116">prove</text>
+                    <text x="276" y="116">rand</text>
+                    <text x="56" y="228">proof</text>
+                  </g>
+                </svg><a href="#section-7.3.3-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
 <a href="#name-components-of-the-proof-gen" class="selfRef">Components of the proof generation algorithm.</a>
@@ -6010,21 +6311,52 @@ def prove(self,
 <a href="#section-7.3.4" class="section-number selfRef">7.3.4. </a><a href="#name-querying-the-proof" class="section-name selfRef">Querying the Proof</a>
           </h4>
 <span id="name-components-of-the-query-alg"></span><figure id="figure-9">
-            <div class="alignLeft art-text artwork" id="section-7.3.4-1.1">
-<pre>
-      proof (share)
-+---------|--------+
-| Query   |        |
-| +-------|-----+  |
-| | Valid |     |&lt;---- meas (share)
-| | +-----V--+  |&lt;---- joint rand
-| | | Gadget |  |  |&lt;- query rand
-| | +--------+  |  |
-| +-------------+  |
-+------------------+
- |
- V verifier (share)
-</pre>
+            <div id="section-7.3.4-1.1">
+              <div class="alignLeft art-svg artwork" id="section-7.3.4-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="272" width="312" viewBox="0 0 312 272" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                  <path d="M 8,64 L 8,224" fill="none" stroke="black"></path>
+                  <path d="M 24,224 L 24,256" fill="none" stroke="black"></path>
+                  <path d="M 32,96 L 32,192" fill="none" stroke="black"></path>
+                  <path d="M 56,128 L 56,160" fill="none" stroke="black"></path>
+                  <path d="M 96,48 L 96,128" fill="none" stroke="black"></path>
+                  <path d="M 128,128 L 128,160" fill="none" stroke="black"></path>
+                  <path d="M 152,96 L 152,192" fill="none" stroke="black"></path>
+                  <path d="M 176,64 L 176,104" fill="none" stroke="black"></path>
+                  <path d="M 176,136 L 176,224" fill="none" stroke="black"></path>
+                  <path d="M 8,64 L 88,64" fill="none" stroke="black"></path>
+                  <path d="M 104,64 L 176,64" fill="none" stroke="black"></path>
+                  <path d="M 32,96 L 88,96" fill="none" stroke="black"></path>
+                  <path d="M 104,96 L 152,96" fill="none" stroke="black"></path>
+                  <path d="M 160,112 L 200,112" fill="none" stroke="black"></path>
+                  <path d="M 56,128 L 88,128" fill="none" stroke="black"></path>
+                  <path d="M 104,128 L 128,128" fill="none" stroke="black"></path>
+                  <path d="M 160,128 L 200,128" fill="none" stroke="black"></path>
+                  <path d="M 184,144 L 200,144" fill="none" stroke="black"></path>
+                  <path d="M 56,160 L 128,160" fill="none" stroke="black"></path>
+                  <path d="M 32,192 L 152,192" fill="none" stroke="black"></path>
+                  <path d="M 8,224 L 176,224" fill="none" stroke="black"></path>
+                  <polygon class="arrowhead" points="192,144 180,138.4 180,149.6" fill="black" transform="rotate(180,184,144)"></polygon>
+                  <polygon class="arrowhead" points="168,128 156,122.4 156,133.6" fill="black" transform="rotate(180,160,128)"></polygon>
+                  <polygon class="arrowhead" points="168,112 156,106.4 156,117.6" fill="black" transform="rotate(180,160,112)"></polygon>
+                  <polygon class="arrowhead" points="104,128 92,122.4 92,133.6" fill="black" transform="rotate(90,96,128)"></polygon>
+                  <polygon class="arrowhead" points="32,256 20,250.4 20,261.6" fill="black" transform="rotate(90,24,256)"></polygon>
+                  <g class="text">
+                    <text x="72" y="36">proof</text>
+                    <text x="128" y="36">(share)</text>
+                    <text x="48" y="84">query()</text>
+                    <text x="64" y="116">Valid</text>
+                    <text x="228" y="116">meas</text>
+                    <text x="280" y="116">(share)</text>
+                    <text x="232" y="132">joint</text>
+                    <text x="276" y="132">rand</text>
+                    <text x="92" y="148">Gadget</text>
+                    <text x="232" y="148">query</text>
+                    <text x="276" y="148">rand</text>
+                    <text x="68" y="260">verifier</text>
+                    <text x="136" y="260">(share)</text>
+                  </g>
+                </svg><a href="#section-7.3.4-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-9" class="selfRef">Figure 9</a>:
 <a href="#name-components-of-the-query-alg" class="selfRef">Components of the query algorithm.</a>
@@ -6119,16 +6451,24 @@ def query(self,
 <a href="#section-7.3.5" class="section-number selfRef">7.3.5. </a><a href="#name-deciding-validity" class="section-name selfRef">Deciding Validity</a>
           </h4>
 <span id="name-components-of-the-decision-"></span><figure id="figure-10">
-            <div class="alignLeft art-text artwork" id="section-7.3.5-1.1">
-<pre>
- | verifier
- V
-+------------------+
-| Decide           |
-+------------------+
- |
- V is_valid
-</pre>
+            <div id="section-7.3.5-1.1">
+              <div class="alignLeft art-svg artwork" id="section-7.3.5-1.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="168" viewBox="0 0 168 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                  <path d="M 8,64 L 8,96" fill="none" stroke="black"></path>
+                  <path d="M 24,32 L 24,56" fill="none" stroke="black"></path>
+                  <path d="M 24,96 L 24,128" fill="none" stroke="black"></path>
+                  <path d="M 160,64 L 160,96" fill="none" stroke="black"></path>
+                  <path d="M 8,64 L 160,64" fill="none" stroke="black"></path>
+                  <path d="M 8,96 L 160,96" fill="none" stroke="black"></path>
+                  <polygon class="arrowhead" points="32,128 20,122.4 20,133.6" fill="black" transform="rotate(90,24,128)"></polygon>
+                  <polygon class="arrowhead" points="32,56 20,50.4 20,61.6" fill="black" transform="rotate(90,24,56)"></polygon>
+                  <g class="text">
+                    <text x="68" y="36">verifier</text>
+                    <text x="44" y="84">Decide</text>
+                    <text x="68" y="132">is_valid</text>
+                  </g>
+                </svg><a href="#section-7.3.5-1.1.1" class="pilcrow">¶</a>
+</div>
 </div>
 <figcaption><a href="#figure-10" class="selfRef">Figure 10</a>:
 <a href="#name-components-of-the-decision-" class="selfRef">Components of the decision algorithm.</a>
@@ -6333,7 +6673,7 @@ specifically, a linear combination with a sequence of powers of two, so it can
 be done within a validity circuit using "free" affine gates. Furthermore,
 decoding secret shares of a bit-encoded integer will produce secret shares of
 the original integer.<a href="#section-7.4.2-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-7.4.2-9">
+<div class="breakable lang-python sourcecode" id="section-7.4.2-9">
 <pre>
 class Sum(Valid[int, int, F]):
     GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
