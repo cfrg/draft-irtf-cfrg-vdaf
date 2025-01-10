@@ -434,8 +434,8 @@ particular.
 
 14:
 
-* Poplar1: Require trailing bits of each prefix of the aggregation parameter to
-  be cleared.
+* Poplar1: When decoding an aggregation parameter, require the padding bits
+  after each prefix to be cleared.
 
 13:
 
