@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-09T00:55:46.501920+00:00",
+  "timestamp": "2025-01-12T01:01:36.122468+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6354,7 +6354,7 @@
       "id": "I_kwDOGKuqOc6ZxuuV",
       "title": "Pretty pictures",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/477",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6366,8 +6366,8 @@
       ],
       "body": "Time permitting, we should take advantage of the work done to render nice looking diagrams and illustrations in RFCs.\r\n\r\nAccording to @martinthomson, all we have to do is change `~~~` to `~~~ aasvg` and add an npm package:\r\n```bash\r\nnpm i --save aasvg; git add package.json\r\n```",
       "createdAt": "2024-10-10T22:14:09Z",
-      "updatedAt": "2025-01-07T22:56:12Z",
-      "closedAt": null,
+      "updatedAt": "2025-01-10T21:15:34Z",
+      "closedAt": "2025-01-10T21:15:34Z",
       "comments": []
     },
     {
@@ -43840,7 +43840,7 @@
       "id": "PR_kwDOGKuqOc6G_0fd",
       "title": "Make the pictures pretty",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/532",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -43849,17 +43849,19 @@
       ],
       "body": "Closes #477.",
       "createdAt": "2025-01-07T23:39:43Z",
-      "updatedAt": "2025-01-08T18:24:03Z",
+      "updatedAt": "2025-01-10T21:15:33Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b4752681f97fa9114ce974298a949acd43ba355d",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/477",
-      "headRefOid": "27af3457ed232920cd095d66383ae74a76bf25a7",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "71389e74ad7ea061eae11d7a862b259ef326eb16",
+      "closedAt": "2025-01-10T21:15:33Z",
+      "mergedAt": "2025-01-10T21:15:33Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "5d54cc6f6025561b2a925c0bb3c8fd4c41aecdf5"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -44045,6 +44047,19 @@
               "updatedAt": "2025-01-08T18:22:58Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6Xn7W7",
+          "commit": {
+            "abbreviatedOid": "71389e7"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-01-10T20:54:40Z",
+          "updatedAt": "2025-01-10T20:54:40Z",
+          "comments": []
         }
       ]
     },
@@ -44053,7 +44068,7 @@
       "id": "PR_kwDOGKuqOc6G_1Ze",
       "title": "Update Change Log for draft 14",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/533",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -44063,19 +44078,42 @@
       ],
       "body": "",
       "createdAt": "2025-01-07T23:44:39Z",
-      "updatedAt": "2025-01-07T23:44:57Z",
+      "updatedAt": "2025-01-10T21:19:06Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c0e76dcf8f78d7d36332582f060ab791e5bb1115",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft-14-cl",
-      "headRefOid": "ba4e237ab56393751c7704ad673931c7eecda2fa",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "b6bd96dbd362f649a10e87f8ddf53c17ed22fc95",
+      "closedAt": "2025-01-10T21:19:06Z",
+      "mergedAt": "2025-01-10T21:19:06Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "d43de995ae83e40050c0d42e853644e0a34db022"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6Xn-P8",
+          "commit": {
+            "abbreviatedOid": "ba4e237"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-01-10T20:58:05Z",
+          "updatedAt": "2025-01-10T20:58:16Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "We should make it clear this is about the serialization format, and not the candidate prefixes themselves.\r\n```suggestion\r\n* Poplar1: When decoding an aggregation parameter, require the padding bits\r\n  after each prefix to be cleared.\r\n```",
+              "createdAt": "2025-01-10T20:58:05Z",
+              "updatedAt": "2025-01-10T20:58:16Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
