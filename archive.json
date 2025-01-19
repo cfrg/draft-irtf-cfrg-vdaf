@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-16T00:54:28.536166+00:00",
+  "timestamp": "2025-01-19T00:58:36.198506+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6813,6 +6813,85 @@
       "updatedAt": "2025-01-08T22:41:20Z",
       "closedAt": "2025-01-08T22:41:20Z",
       "comments": []
+    },
+    {
+      "number": 534,
+      "id": "I_kwDOGKuqOc6msKmf",
+      "title": "Disambiguate the \"+\" operator",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/534",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/):\n\n> ... the + (plus) operator is used for both concatenation of lists, concatenation of bytes, and for addition of numbers (or field elements). This may be confusing for people not familiar with Python.\n\n",
+      "createdAt": "2025-01-18T02:38:42Z",
+      "updatedAt": "2025-01-18T03:30:45Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "My first idea here is to clarify that \"+\", \"-\", \"*\", etc. are either on `int` or `Field`. Then we can use `concat()` for concatenating lists, but it would be easier to just explain the syntax in the conventions section.",
+          "createdAt": "2025-01-18T03:26:48Z",
+          "updatedAt": "2025-01-18T03:30:39Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @armfazh \n",
+          "createdAt": "2025-01-18T03:30:44Z",
+          "updatedAt": "2025-01-18T03:30:44Z"
+        }
+      ]
+    },
+    {
+      "number": 535,
+      "id": "I_kwDOGKuqOc6msKsM",
+      "title": "Explain abstract base classes",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/535",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/)\n\n> Another [confusing part of the spec for readers not familiar with Python] is the use of abstract classes, which is not explicitly indicated in the main document, one has to rely on the actual Python code to understand what is the logic of Valid circuits. I can only recommend to hint the reader about this programming feature.",
+      "createdAt": "2025-01-18T02:39:54Z",
+      "updatedAt": "2025-01-18T03:31:01Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @armfazh ",
+          "createdAt": "2025-01-18T03:31:00Z",
+          "updatedAt": "2025-01-18T03:31:00Z"
+        }
+      ]
+    },
+    {
+      "number": 536,
+      "id": "I_kwDOGKuqOc6msNsS",
+      "title": "Add test vectors for preparation failures",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/536",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/):\n\nIt should be pretty easy to modify `gen_test_vec.py` to output tweaked test vectors that trigger preparation to fail. For example:\n* Tweak the nonce\n* Tweak the first byte of the public share\n* Tweak the first byte of a random input share\n* Tweak the first byte of a random prep share\n* Tweak the first byte of the prep message",
+      "createdAt": "2025-01-18T03:13:51Z",
+      "updatedAt": "2025-01-18T03:31:45Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @armfazh ",
+          "createdAt": "2025-01-18T03:31:33Z",
+          "updatedAt": "2025-01-18T03:31:45Z"
+        }
+      ]
     }
   ],
   "pulls": [
