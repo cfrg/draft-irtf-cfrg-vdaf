@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-19T00:58:36.198506+00:00",
+  "timestamp": "2025-01-21T00:54:11.749947+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6823,10 +6823,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "editorial"
+      ],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/):\n\n> ... the + (plus) operator is used for both concatenation of lists, concatenation of bytes, and for addition of numbers (or field elements). This may be confusing for people not familiar with Python.\n\n",
       "createdAt": "2025-01-18T02:38:42Z",
-      "updatedAt": "2025-01-18T03:30:45Z",
+      "updatedAt": "2025-01-19T17:56:07Z",
       "closedAt": null,
       "comments": [
         {
@@ -6854,10 +6856,12 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "editorial"
+      ],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/)\n\n> Another [confusing part of the spec for readers not familiar with Python] is the use of abstract classes, which is not explicitly indicated in the main document, one has to rely on the actual Python code to understand what is the logic of Valid circuits. I can only recommend to hint the reader about this programming feature.",
       "createdAt": "2025-01-18T02:39:54Z",
-      "updatedAt": "2025-01-18T03:31:01Z",
+      "updatedAt": "2025-01-19T17:56:19Z",
       "closedAt": null,
       "comments": [
         {
