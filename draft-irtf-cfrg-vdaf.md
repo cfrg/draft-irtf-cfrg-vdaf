@@ -255,6 +255,10 @@ informative:
     refcontent: "commit hash c0e76dc"
     date: December 2024
 
+v3xml2rfc:
+  silence:
+  - Found SVG with width or height specified
+
 --- abstract
 
 This document describes Verifiable Distributed Aggregation Functions (VDAFs), a
