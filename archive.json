@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-28T00:54:38.879704+00:00",
+  "timestamp": "2025-01-30T00:53:46.977023+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6885,7 +6885,7 @@
       "labels": [],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/):\n\nIt should be pretty easy to modify `gen_test_vec.py` to output tweaked test vectors that trigger preparation to fail. For example:\n* Tweak the nonce\n* Tweak the first byte of the public share\n* Tweak the first byte of a random input share\n* Tweak the first byte of a random prep share\n* Tweak the first byte of the prep message",
       "createdAt": "2025-01-18T03:13:51Z",
-      "updatedAt": "2025-01-18T03:31:45Z",
+      "updatedAt": "2025-01-29T21:51:35Z",
       "closedAt": null,
       "comments": [
         {
@@ -6894,6 +6894,13 @@
           "body": "cc @armfazh ",
           "createdAt": "2025-01-18T03:31:33Z",
           "updatedAt": "2025-01-18T03:31:45Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Negative test vectors will need to be a bit more focused than the existing test vectors, at minimum to specify which stages of execution should succeed or fail. On the happy path, many fields serve double duty as an expected output from one step and an input for the next step.\n\nOne idea: we could add a top-level field that contains an array of objects representing which computations should be run on a test vector. We could indicate which computation with one of \"shard\", \"prepare_init\", \"prepare_next\", \"prep_shares_to_prep\", and \"aggregate\", plus the aggregator ID, round number, and index of the report in the `prep` array as appropriate. Existing test vectors would just list all operations, and new negative test vectors would only list one or two computations, providing the appropriate tampered inputs for them. We'd also need some flags elsewhere in the schema to signal that a preparation failure is expected.",
+          "createdAt": "2025-01-29T21:51:34Z",
+          "updatedAt": "2025-01-29T21:51:34Z"
         }
       ]
     }
