@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 July 2025                                               ISRG
+Expires: 18 August 2025                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         10 January 2025
+                                                        14 February 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 July 2025.
+   This Internet-Draft will expire on 18 August 2025.
 
 Copyright Notice
 
@@ -6321,9 +6321,9 @@ Table of Contents
    [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
               C. A. Wood, "Distributed Aggregation Protocol for Privacy
               Preserving Measurement", Work in Progress, Internet-Draft,
-              draft-ietf-ppm-dap-13, 2 November 2024,
+              draft-ietf-ppm-dap-14, 3 February 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              13>.
+              14>.
 
    [Dou02]    Douceur, J. R., "The Sybil Attack", International Workshop
               on Peer-to-Peer Systems (IPTPS), 2002,
