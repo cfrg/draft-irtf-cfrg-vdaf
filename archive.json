@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-13T00:56:06.297089+00:00",
+  "timestamp": "2025-02-16T01:00:20.304651+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -44210,26 +44210,50 @@
       "id": "PR_kwDOGKuqOc6I6-7Z",
       "title": "Silence SVG warning via front matter",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/537",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This adds some configuration to the front matter to silence the SVG warning we're getting, and cleans up the shell script we were using to filter these out previously. See https://mailarchive.ietf.org/arch/msg/rfc-markdown/reUEfraLI_-XH7fO0wKe2ErFxno/.\r\n\r\nThis works locally, but I think we'll need to wait for a new Docker image to be built that includes kramdown-rfc 1.7.22 before it'll work in CI.",
       "createdAt": "2025-01-24T16:44:10Z",
-      "updatedAt": "2025-01-24T16:44:10Z",
+      "updatedAt": "2025-02-14T23:02:01Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "d43de995ae83e40050c0d42e853644e0a34db022",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/silence-warning",
       "headRefOid": "eb8d5f144162110b1832406f65f600ea26a7042a",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
-      "reviews": []
+      "closedAt": "2025-02-14T23:01:54Z",
+      "mergedAt": "2025-02-14T23:01:54Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "8d7e07de26e33ef24a5c36f64153de1d7c9f0faf"
+      },
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The Docker image has been updated, and this works now.",
+          "createdAt": "2025-02-14T22:38:06Z",
+          "updatedAt": "2025-02-14T22:38:06Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6cGmpK",
+          "commit": {
+            "abbreviatedOid": "eb8d5f1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-14T23:01:04Z",
+          "updatedAt": "2025-02-14T23:01:04Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
