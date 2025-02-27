@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-25T00:57:37.398654+00:00",
+  "timestamp": "2025-02-27T00:57:25.836234+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -319,7 +319,7 @@
       ],
       "body": "With `prio3` it's straightforward to roughly estimate quantiles using a histogram (cf https://docs.rs/prio/0.6.1/prio/vdaf/prio3/type.Prio3Histogram64.html). But what if you wanted to precisely compute, say, the 50th percentile (i.e., the median) or the 95th percentile? Prio isn't well-suited for this (cf [[CGB17], Appendix G]).\r\n\r\nIf your application allows for multiple rounds of interaction with the clients, maybe you could do a kind of binary search to find the quantile you're after. Suppose the client measurements are arbitrary 32-bit integers and you want to compute the median. Suppose there are `N` measurements in all. Let `buckets = [2^31]`. Have the clients shard their measurements using `buckets` as the bucket boundaries. Execute the VDAF over the set of input shares, getting bucket counts `agg` as the aggregate result. `agg[0]` is equal to the number of measurements less than or equal to `2^31`, and `agg[1] <= N/2`, then the median must be less than `2^31`. On the other hand, if `agg[1] > N/2` then you know the median must greater than `2^31`. You then repeat the process, adjusting the bucket boundaries based on the previous result: if the median is less than `2^31`, then let `buckets = [2^31 - 2^30]`; otherwise let `buckets = [2^31 + 2^30]`.\r\n\r\nI'm not sure how many iterations would be needed, or how precisely you could compute quantiles this way. Regardless, ideally there would be a VDAF that allows for computing quantiles without interacting with clients more than once.\r\n\r\n\r\n\r\n\r\n\r\n[CGB17]: https://crypto.stanford.edu/prio/paper.pdf",
       "createdAt": "2021-11-17T17:58:28Z",
-      "updatedAt": "2024-05-07T14:05:53Z",
+      "updatedAt": "2025-02-25T16:07:37Z",
       "closedAt": "2024-05-07T14:05:53Z",
       "comments": [
         {
@@ -363,6 +363,13 @@
           "body": "Thanks for the analysis here, @divergentdave. This issue is no longer purely editorial, since resolving it probably requires a warning for Popplar1. On the other hand, it seems like we should be able to use Mastic for this use case without running into the same extractability issue (https://github.com/jimouris/draft-mouris-cfrg-mastic/issues/53).",
           "createdAt": "2024-01-25T17:51:21Z",
           "updatedAt": "2024-01-25T17:51:21Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "For completeness, here's another route to computing exact quantiles. There are constructions for \"distributed comparison functions\", akin to DPFs, but with an additional control bit and a different invariant at each node. This provides a function secret sharing scheme for $f_\\alpha(x)=\\left\\\\{ { 0, x < \\alpha \\atop 1, x \\ge \\alpha } \\right .$ with compact keys. If each client uses its measurement as $\\alpha$ and generates a pair of DCF keys, then aggregators can evaluate all DCFs at a series of trial values, and determine how many measurements are above and below that point. Thus, with multiple collections, they can do a binary search for any quantile, and the leakage function is a sequence of other quantiles that were not of interest. This would need to be paired with another primitive to verify that the output of each DCF is secret shares of zero or one. Poplar's secure sketching would not be sufficient, because the client provides single-use correlated randomness, and the same DCF needs to be evaluated multiple times. Using a FLPCP as in Doplar and Mastic would likely suffice. The overall computation cost would be $O(n^2 C)$, where $n$ is the bit length of the measured value and $C$ is the number of clients.",
+          "createdAt": "2025-02-25T16:07:34Z",
+          "updatedAt": "2025-02-25T16:07:34Z"
         }
       ]
     },
