@@ -1,7 +1,8 @@
 import json
 import os
 import unittest
-from typing import Any, Generic, Optional, TypedDict, TypeVar, cast
+from typing import (Any, Generic, Literal, NotRequired, Optional, TypedDict,
+                    TypeVar, cast)
 
 from vdaf_poc.common import (gen_rand, next_power_of_2, print_wrapped_line,
                              to_le_bytes)
@@ -69,6 +70,18 @@ class TestVdaf(unittest.TestCase):
         self.assertEqual(agg_result, expected_agg_result)
 
 
+class VdafTestVectorOperationDict(TypedDict):
+    operation: (
+        Literal["shard"] | Literal["prep_init"]
+        | Literal["prep_shares_to_prep"] | Literal["prep_next"]
+        | Literal["aggregate"] | Literal["unshard"]
+    )
+    round: NotRequired[int]
+    aggregator_id: NotRequired[int]
+    report_index: NotRequired[int]
+    success: bool
+
+
 class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
     measurement: Measurement
     nonce: str
@@ -81,6 +94,7 @@ class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
 
 
 class VdafTestVectorDict(Generic[Measurement, AggParam, AggResult], TypedDict):
+    operations: list[VdafTestVectorOperationDict]
     shares: int
     verify_key: str
     agg_param: str
@@ -110,14 +124,16 @@ def gen_test_vec_for_vdaf(
         test_vec_instance: int,
         print_test_vec: bool = True) -> AggResult:
     """
-    Generate test vectors for a VDAF.
+    Generate test vectors for successful evaluation of a VDAF.
     """
 
     nonces = [test_vec_gen_rand(vdaf.NONCE_SIZE)
               for _ in range(len(measurements))]
     verify_key = test_vec_gen_rand(vdaf.VERIFY_KEY_SIZE)
+    operations: list[VdafTestVectorOperationDict] = []
 
     test_vec: VdafTestVectorDict[Measurement, AggParam, AggResult] = {
+        'operations': operations,
         'shares': vdaf.SHARES,
         'verify_key': verify_key.hex(),
         'agg_param': vdaf.encode_agg_param(agg_param).hex(),
@@ -131,13 +147,19 @@ def gen_test_vec_for_vdaf(
     )
 
     out_shares = []
-    for (nonce, measurement) in zip(nonces, measurements):
+    zip_iter = zip(nonces, measurements)
+    for (report_index, (nonce, measurement)) in enumerate(zip_iter):
         assert len(nonce) == vdaf.NONCE_SIZE
 
         # Each Client shards its measurement into input shares.
         rand = test_vec_gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
+        operations.append({
+            'operation': 'shard',
+            'report_index': report_index,
+            'success': True,
+        })
 
         pub_share_hex = vdaf.test_vec_encode_public_share(public_share).hex()
         prep_test_vec: VdafPrepTestVectorDict[Measurement] = {
@@ -165,6 +187,12 @@ def gen_test_vec_for_vdaf(
                                             input_shares[j])
             prep_states.append(state)
             outbound_prep_shares.append(share)
+            operations.append({
+                'operation': 'prep_init',
+                'aggregator_id': j,
+                'report_index': report_index,
+                'success': True,
+            })
 
         for prep_share in outbound_prep_shares:
             prep_test_vec['prep_shares'][0].append(
@@ -177,6 +205,12 @@ def gen_test_vec_for_vdaf(
                                                 outbound_prep_shares)
             prep_test_vec['prep_messages'].append(
                 vdaf.test_vec_encode_prep_msg(prep_msg).hex())
+            operations.append({
+                'operation': 'prep_shares_to_prep',
+                'round': i,
+                'report_index': report_index,
+                'success': True,
+            })
 
             outbound_prep_shares = []
             for j in range(vdaf.SHARES):
@@ -184,11 +218,16 @@ def gen_test_vec_for_vdaf(
                 assert isinstance(out, tuple)
                 (prep_states[j], prep_share) = out
                 outbound_prep_shares.append(prep_share)
-            # REMOVE ME
-            for prep_share in outbound_prep_shares:
                 prep_test_vec['prep_shares'][i+1].append(
                     vdaf.test_vec_encode_prep_share(prep_share).hex()
                 )
+                operations.append({
+                    'operation': 'prep_next',
+                    'round': i,
+                    'aggregator_id': j,
+                    'report_index': report_index,
+                    'success': True,
+                })
 
         # The final outputs of the prepare phase are the output
         # shares.
@@ -197,18 +236,30 @@ def gen_test_vec_for_vdaf(
                                             outbound_prep_shares)
         prep_test_vec['prep_messages'].append(
             vdaf.test_vec_encode_prep_msg(prep_msg).hex())
+        operations.append({
+            'operation': 'prep_shares_to_prep',
+            'round': vdaf.ROUNDS - 1,
+            'report_index': report_index,
+            'success': True,
+        })
 
         outbound_out_shares = []
         for j in range(vdaf.SHARES):
             out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
             outbound_out_shares.append(out_share)
-
-        for out_share in outbound_out_shares:
             prep_test_vec['out_shares'].append([
                 to_le_bytes(x.int(), x.ENCODED_SIZE).hex()
                 for x in out_share
             ])
+            operations.append({
+                'operation': 'prep_next',
+                'round': vdaf.ROUNDS - 1,
+                'aggregator_id': j,
+                'report_index': report_index,
+                'success': True,
+            })
+
         test_vec['prep'].append(prep_test_vec)
 
         out_shares.append(outbound_out_shares)
@@ -223,15 +274,24 @@ def gen_test_vec_for_vdaf(
         for out_share in out_shares_j:
             agg_share_j = vdaf.agg_update(agg_param, agg_share_j, out_share)
         agg_shares.append(agg_share_j)
-        # REMOVE ME
         test_vec['agg_shares'].append(
             vdaf.test_vec_encode_agg_share(agg_share_j).hex())
+        operations.append({
+            'operation': 'aggregate',
+            'aggregator_id': j,
+            'success': True,
+        })
 
     # Collector unshards the aggregate.
     num_measurements = len(measurements)
     agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
     test_vec['agg_result'] = agg_result
+    operations.append({
+        'operation': 'unshard',
+        'success': True,
+    })
+
     if print_test_vec:
         _pretty_print_vdaf_test_vec(vdaf, test_vec, type_params)
 
