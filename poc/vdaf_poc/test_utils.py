@@ -122,7 +122,8 @@ def gen_test_vec_for_vdaf(
         ctx: bytes,
         measurements: list[Measurement],
         test_vec_instance: int,
-        print_test_vec: bool = True) -> AggResult:
+        print_test_vec: bool = True) -> \
+        VdafTestVectorDict[Measurement, AggParam, AggResult]:
     """
     Generate test vectors for successful evaluation of a VDAF.
     """
@@ -305,7 +306,7 @@ def gen_test_vec_for_vdaf(
             json.dump(test_vec, f, indent=4, sort_keys=True)
             f.write('\n')
 
-    return agg_result
+    return test_vec
 
 
 def _pretty_print_vdaf_test_vec(
