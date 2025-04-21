@@ -224,7 +224,7 @@ def gen_test_vec_for_vdaf(
                 )
                 operations.append({
                     'operation': 'prep_next',
-                    'round': i,
+                    'round': i + 1,
                     'aggregator_id': j,
                     'report_index': report_index,
                     'success': True,
@@ -255,7 +255,7 @@ def gen_test_vec_for_vdaf(
             ])
             operations.append({
                 'operation': 'prep_next',
-                'round': vdaf.ROUNDS - 1,
+                'round': vdaf.ROUNDS,
                 'aggregator_id': j,
                 'report_index': report_index,
                 'success': True,

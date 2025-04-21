@@ -34,14 +34,14 @@
             "aggregator_id": 0,
             "operation": "prep_next",
             "report_index": 0,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
             "operation": "prep_next",
             "report_index": 0,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
@@ -71,14 +71,14 @@
             "aggregator_id": 0,
             "operation": "prep_next",
             "report_index": 1,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
             "operation": "prep_next",
             "report_index": 1,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
@@ -108,14 +108,14 @@
             "aggregator_id": 0,
             "operation": "prep_next",
             "report_index": 2,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
             "operation": "prep_next",
             "report_index": 2,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
@@ -145,14 +145,14 @@
             "aggregator_id": 0,
             "operation": "prep_next",
             "report_index": 3,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
             "operation": "prep_next",
             "report_index": 3,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
@@ -182,14 +182,14 @@
             "aggregator_id": 0,
             "operation": "prep_next",
             "report_index": 4,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
             "operation": "prep_next",
             "report_index": 4,
-            "round": 0,
+            "round": 1,
             "success": true
         },
         {
