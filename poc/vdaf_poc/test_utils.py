@@ -294,22 +294,35 @@ def gen_test_vec_for_vdaf(
     })
 
     if print_test_vec:
-        _pretty_print_vdaf_test_vec(vdaf, test_vec, type_params)
-
-        os.system('mkdir -p {}'.format(test_vec_path))
-        filename = '{}/{}_{}.json'.format(
+        pretty_print_vdaf_test_vec(vdaf, test_vec, type_params)
+        write_test_vec(
             test_vec_path,
+            test_vec,
             vdaf.test_vec_name,
-            test_vec_instance,
+            str(test_vec_instance),
         )
-        with open(filename, 'w', encoding="UTF-8") as f:
-            json.dump(test_vec, f, indent=4, sort_keys=True)
-            f.write('\n')
 
     return test_vec
 
 
-def _pretty_print_vdaf_test_vec(
+def write_test_vec(
+        test_vec_path: str,
+        test_vec: VdafTestVectorDict[Measurement, AggParam, AggResult],
+        test_vec_name: str,
+        test_vec_suffix: str) -> None:
+    "Write a test vector to a JSON file"
+    os.system('mkdir -p {}'.format(test_vec_path))
+    filename = '{}/{}_{}.json'.format(
+        test_vec_path,
+        test_vec_name,
+        test_vec_suffix,
+    )
+    with open(filename, 'w', encoding="UTF-8") as f:
+        json.dump(test_vec, f, indent=4, sort_keys=True)
+        f.write('\n')
+
+
+def pretty_print_vdaf_test_vec(
         vdaf: Vdaf[
             Measurement, AggParam, Any, Any, Any, Any, AggResult, Any, Any, Any
         ],
