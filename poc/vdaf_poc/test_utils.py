@@ -1,6 +1,7 @@
 import json
 import os
 import unittest
+from itertools import zip_longest
 from typing import (Any, Generic, Literal, NotRequired, Optional, TypedDict,
                     TypeVar, cast)
 
@@ -330,6 +331,16 @@ def pretty_print_vdaf_test_vec(
         type_params: list[str]) -> None:
     test_vec = cast(dict[str, Any], typed_test_vec)
     print('---------- {} ---------------'.format(vdaf.test_vec_name))
+    for (i, operation) in enumerate(typed_test_vec['operations']):
+        print('operation_{}:'.format(i))
+        print('  operation: "{}"'.format(operation['operation']))
+        if 'round' in operation:
+            print('  round: {}'.format(operation['round']))
+        if 'aggregator_id' in operation:
+            print('  aggregator_id: {}'.format(operation['aggregator_id']))
+        if 'report_index' in operation:
+            print('  report_index: {}'.format(operation['report_index']))
+        print('  success: {}'.format(operation['success']))
     for type_param in type_params:
         print('{}: {}'.format(type_param, test_vec[type_param]))
     print('verify_key: "{}"'.format(test_vec['verify_key']))
@@ -350,14 +361,15 @@ def pretty_print_vdaf_test_vec(
 
         # Prepare
         for (i, (prep_shares, prep_msg)) in enumerate(
-                zip(prep_test_vec['prep_shares'],
-                    prep_test_vec['prep_messages'])):
+                zip_longest(prep_test_vec['prep_shares'],
+                            prep_test_vec['prep_messages'])):
             print('  round_{}:'.format(i))
             for (j, prep_share) in enumerate(prep_shares):
                 print('    prep_share_{}: >-'.format(j))
                 print_wrapped_line(prep_share, tab=6)
-            print('    prep_message: >-')
-            print_wrapped_line(prep_msg, tab=6)
+            if prep_msg is not None:
+                print('    prep_message: >-')
+                print_wrapped_line(prep_msg, tab=6)
 
         for (j, out_shares) in enumerate(prep_test_vec['out_shares']):
             print('  out_share_{}:'.format(j))
