@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 18 August 2025                                             ISRG
+Expires: 24 October 2025                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        14 February 2025
+                                                           22 April 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 August 2025.
+   This Internet-Draft will expire on 24 October 2025.
 
 Copyright Notice
 
@@ -5079,7 +5079,10 @@ Table of Contents
            list[Field],
            verify_rand_xof.next_vec(field, len(prefixes)),
        )
-       sketch_share = [a_share, b_share, c_share]
+       sketch_share = cast(
+           list[Field],
+           [a_share, b_share, c_share],
+       )
        out_share = []
        for (i, r) in enumerate(verify_rand):
            data_share = cast(Field, value[i][0])
@@ -6283,9 +6286,9 @@ Table of Contents
    [TurboSHAKE]
               Viguier, B., Wong, D., Van Assche, G., Dang, Q., and J.
               Daemen, "KangarooTwelve and TurboSHAKE", Work in Progress,
-              Internet-Draft, draft-irtf-cfrg-kangarootwelve-16, 21
-              December 2024, <https://datatracker.ietf.org/doc/html/
-              draft-irtf-cfrg-kangarootwelve-16>.
+              Internet-Draft, draft-irtf-cfrg-kangarootwelve-17, 21
+              February 2025, <https://datatracker.ietf.org/doc/html/
+              draft-irtf-cfrg-kangarootwelve-17>.
 
 11.2.  Informative References
 
