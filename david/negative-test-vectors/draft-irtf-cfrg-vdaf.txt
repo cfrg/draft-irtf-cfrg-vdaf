@@ -5079,7 +5079,10 @@ Table of Contents
            list[Field],
            verify_rand_xof.next_vec(field, len(prefixes)),
        )
-       sketch_share = [a_share, b_share, c_share]
+       sketch_share = cast(
+           list[Field],
+           [a_share, b_share, c_share],
+       )
        out_share = []
        for (i, r) in enumerate(verify_rand):
            data_share = cast(Field, value[i][0])
