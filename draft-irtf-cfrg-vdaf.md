@@ -2936,6 +2936,7 @@ def prep_init(
         assert joint_rand_parts is not None
         joint_rand_part = self.joint_rand_part(
             ctx, agg_id, blind, meas_share, nonce)
+        joint_rand_parts = list(joint_rand_parts)
         joint_rand_parts[agg_id] = joint_rand_part
         corrected_joint_rand_seed = self.joint_rand_seed(
             ctx, joint_rand_parts)
