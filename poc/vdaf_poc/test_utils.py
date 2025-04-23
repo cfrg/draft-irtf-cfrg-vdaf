@@ -72,6 +72,35 @@ class TestVdaf(unittest.TestCase):
 
 
 class VdafTestVectorOperationDict(TypedDict):
+    """
+    A description of one of the operations that should be performed with this
+    test vector.
+
+    Attributes:
+        operation: The type of operation to be performed. This is one of
+            "shard", "prep_init", "prep_shares_to_prep", "prep_next",
+            "aggregate", or "unshard".
+
+            Note that the "aggregate" operation encompasses running
+            `agg_init()` and `agg_update()` to combine all output shares into
+            an aggregate share.
+
+        round: The round number of the operation to be performed. This
+            determines which prepare share, prepare state, and/or prepare
+            message to use.
+
+        aggregator_id: The aggregator ID to use when performing this
+            operation. This determines which messages and which prepare state
+            to use, in addition to the aggregator ID argument itself.
+
+        report_index: The index of the report on which to perform this
+            operation. This is an index into the `prep` array.
+
+        success: If this is true, the operation should succeed, and its output
+            should match the corresponding values in the test vector. If this
+            is false, the operation should fail, terminating preparation of
+            this report.
+    """
     operation: (
         Literal["shard"] | Literal["prep_init"]
         | Literal["prep_shares_to_prep"] | Literal["prep_next"]
@@ -84,17 +113,78 @@ class VdafTestVectorOperationDict(TypedDict):
 
 
 class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
+    """
+    This lists VDAF messages related to one report, from sharding to
+    preparation.
+
+    All VDAF messages are encoded to byte strings, and then hex-encoded.
+
+    Attributes:
+        measurement: The measurement used to produce the report.
+
+        nonce: The report's nonce.
+
+        rand: The randomness consumed by the sharding algorithm.
+
+        public_share: The public share from the report.
+
+        input_shares: The input shares from the report.
+
+        prep_shares: The prepare shares produced during preparation. This is
+            indexed first by round, and then by aggregator ID.
+
+        prep_messages: The prepare messages produced during aggregation. This
+            is indexed by round.
+
+        out_shares: The output shares produced by preparing this report. This
+            is indexed by round.
+    """
     measurement: Measurement
     nonce: str
+    rand: str
+    public_share: str
     input_shares: list[str]
     prep_shares: list[list[str]]
     prep_messages: list[str]
     out_shares: list[list[str]]
-    rand: str
-    public_share: str
 
 
 class VdafTestVectorDict(Generic[Measurement, AggParam, AggResult], TypedDict):
+    """
+    A test vector for evaluation of a VDAF on one or more reports.
+
+    All VDAF messages are encoded to byte strings, and then hex-encoded.
+
+    Attributes:
+        operations: A list of operations that should be executed using
+            messages from this test vector. These operations should be
+            executed in the order they appear.
+
+            The prepare state passed between `prep_init()` and `prep_next()`
+            does not have a standardized encoded form, and thus does not appear
+            in the test vectors. Prepare state values must be separately stored
+            in between operations. Test vectors must list their operations in
+            an order that ensures operations producing prepare states for any
+            given aggregator ID, report index, and round number always appear
+            before operations that consume the same prepare state in the next
+            round.
+
+        shares: The number of aggregators, and thus the number of input shares
+            in a report.
+
+        verify_key: The VDAF verification key.
+
+        agg_param: The aggregation parameter.
+
+        ctx: The context string.
+
+        prep: A list of objects describing messages related to each report,
+            from sharding to preparation.
+
+        agg_shares: The aggregate shares.
+
+        agg_result: The aggregate result.
+    """
     operations: list[VdafTestVectorOperationDict]
     shares: int
     verify_key: str
@@ -311,7 +401,9 @@ def write_test_vec(
         test_vec: VdafTestVectorDict[Measurement, AggParam, AggResult],
         test_vec_name: str,
         test_vec_suffix: str) -> None:
-    "Write a test vector to a JSON file"
+    """
+    Write a test vector to a JSON file.
+    """
     os.system('mkdir -p {}'.format(test_vec_path))
     filename = '{}/{}_{}.json'.format(
         test_vec_path,

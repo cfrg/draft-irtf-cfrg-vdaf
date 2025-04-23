@@ -103,7 +103,9 @@ def gen_test_vec_for_xof(cls: type[Xof]) -> None:
 
 
 def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
-    "Generates various negative test vectors for Prio3"
+    """
+    Generates various negative test vectors for Prio3.
+    """
 
     prio3count = Prio3Count(2)
     nonce = test_vec_gen_rand(prio3count.NONCE_SIZE)
@@ -358,7 +360,9 @@ def _prio3_prep_shares_to_prep_failure(
 
 
 def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
-    "Generates various negative test vectors for Poplar1"
+    """
+    Generates various negative test vectors for Poplar1.
+    """
 
     vdaf = Poplar1(2)
     nonce = test_vec_gen_rand(vdaf.NONCE_SIZE)
