@@ -259,6 +259,84 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         "bad_public_share",
     )
 
+    # Modify joint randomness seed in prepare message.
+    (prep_state_0, prep_share_0) = prio3histogram.prep_init(
+        verify_key,
+        ctx,
+        0,
+        None,
+        nonce,
+        public_share,
+        input_share_0,
+    )
+    bad_prep_msg = bytes([0] * prio3histogram.xof.SEED_SIZE)
+    try:
+        prio3histogram.prep_next(ctx, prep_state_0, bad_prep_msg)
+    except ValueError:
+        pass
+    else:
+        raise Exception("pep_next should fail")
+    test_vec: VdafTestVectorDict = {
+        'operations': [
+            {
+                'operation': 'prep_init',
+                'aggregator_id': 0,
+                'report_index': 0,
+                'success': True,
+            },
+            {
+                'operation': 'prep_next',
+                'aggregator_id': 0,
+                'round': 1,
+                'report_index': 0,
+                'success': False,
+            },
+        ],
+        'shares': 2,
+        'verify_key': verify_key.hex(),
+        'agg_param': '',
+        'ctx': ctx.hex(),
+        'prep': [{
+            'measurement': None,
+            'rand': rand.hex(),
+            'nonce': nonce.hex(),
+            'public_share': prio3histogram.test_vec_encode_public_share(
+                public_share,
+            ).hex(),
+            'input_shares': [
+                prio3histogram.test_vec_encode_input_share(
+                    input_share_0,
+                ).hex(),
+                prio3histogram.test_vec_encode_input_share(
+                    input_share_1,
+                ).hex(),
+            ],
+            'prep_shares': [[
+                prio3histogram.test_vec_encode_prep_share(prep_share_0).hex(),
+            ]],
+            'prep_messages': [
+                bad_prep_msg.hex(),
+            ],
+            'out_shares': [],
+        }],
+        'agg_shares': [],
+        'agg_result': None,
+    }
+    type_params = prio3histogram.test_vec_set_type_param(
+        cast(dict[str, Any], test_vec)
+    )
+    pretty_print_vdaf_test_vec(
+        prio3histogram,
+        test_vec,
+        type_params,
+    )
+    write_test_vec(
+        test_vec_path,
+        test_vec,
+        prio3histogram.test_vec_name,
+        "bad_prep_msg",
+    )
+
 
 def _prio3_prep_shares_to_prep_failure(
         vdaf: Prio3,
