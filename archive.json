@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-01T01:07:35.116185+00:00",
+  "timestamp": "2025-04-24T01:02:19.053550+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -44258,6 +44258,244 @@
           "body": "",
           "createdAt": "2025-02-14T23:01:04Z",
           "updatedAt": "2025-02-14T23:01:04Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 538,
+      "id": "PR_kwDOGKuqOc6TgHqf",
+      "title": "Negative test vectors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/538",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "poc"
+      ],
+      "body": "This extends the test vector file format to support negative test vectors. Each file now includes a list of which operations should be run using its messages, and whether they should succeed or fail. Thus, we can represent a report that could never be produced by the sharding algorithm, skip comparing against the shard implementation, and check what happens in each step of the preparation process with that input. I include eight new negative test vectors to start with. Existing test vectors are modified to add this list of operations. Note that test vector consumers do not necessarily need to reimplement `run_vdaf()` anymore to make use of the all-success test vectors, since the operations list now captures that high-level coordination.\r\n\r\nUp until now, we have not had strong conventions for \"round numbers\" to associate with every message or operation. I'm open to suggestions on whether we should adjust the round numbers used for \"prep_shares_to_prep\" or \"prep_next\" operations.\r\n\r\nI'm working on consuming these negative test vectors in libprio-rs, and thus far I'm getting partial mismatches of Prio3 prepare shares when either the helper's joint randomness blind or the public share is corrupted (but not the leader's joint randomness blind, interestingly). It's possible we have some error in the implementation that cancels out when there's agreement on the joint randomness seed.\r\n\r\nCloses #536.",
+      "createdAt": "2025-04-22T22:26:54Z",
+      "updatedAt": "2025-04-23T20:34:10Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b688ab27cb82c0539429bf61c641cbda6f1f491b",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/negative-test-vectors",
+      "headRefOid": "65814752474a4af72df36e2c3d7dfdf63b39e076",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The mismatch was due to an issue in the proof of concept implementation: `Prio3.prep_init()` was modifying the list passed in as the public share when it 'corrected' joint randomness parts. After fixing that and regenerating test vectors, everything matches with the Rust implementation.",
+          "createdAt": "2025-04-23T15:07:47Z",
+          "updatedAt": "2025-04-23T15:07:47Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Here's my interpretation, taking the public share as an example:\r\n> \r\n> 1. For a positive test, we'd shard and check if the public share matches the test vector: if not, the test fails.\r\n> \r\n> 2. For a negative test, we'd shard, overwrite the public share with the value from the test vector, and continue. (This expresses a non-compliant sharding algorithm.) If preparation succeeds, then the test fails.\r\n\r\nThe negative test vector here that tampers with the public share does not include \"shard\" in its list of operations, thus the intent is that the tests consuming the test vector would skip sharding entirely. If the test still sharded a report, we would need to either supply both the public share that sharding should output and the public share that preparation should use, or indicate that the output of sharding should not be checked against any value from the test vector.\r\n\r\n> 2. What about non-compliance that wouldn't affect preparation, like aggregation and unsharding? Are these expressible? Should they be?\r\n\r\nI think so, you could provide a tampered output share in the `out_shares` list, and only include aggregation and unsharding in the list of operations, for example. This might be less interesting, since aggregation only exercises some form of decoding and field vector addition for our VDAFs, and unsharding is straightforward preprocessing. But you could check what happens if an output share or aggregate share includes an integer larger than the field modulus, or if the message has the wrong length.\r\n\r\n> Do you think this is underspecified in the draft? IIUC the PR currently matches the notion of rounds in the draft, which I think is what we should do.\r\n\r\nI settled on `prep_init()` being in round 0, and `prep_next()` round numbers starting at 1. I wasn't sure whether `prep_shares_to_prep()` should be thought of as the last step in one round, or the first step in the next round.",
+          "createdAt": "2025-04-23T15:39:52Z",
+          "updatedAt": "2025-04-23T15:39:52Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6mJuRt",
+          "commit": {
+            "abbreviatedOid": "2132879"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "The semantics of operations is unclear to me:\r\n\r\n> Each file now includes a list of which operations should be run using its messages, and whether they should succeed or fail.\r\n\r\nWhat does it mean \"to run [the test vector] using its messages\"? Here's my interpretation, taking the public share as an example:\r\n1. For a positive test, we'd shard and check if the public share matches the test vector: if not, the test fails.\r\n2. For a negative test, we'd shard, overwrite the public share with the value from the test vector, and continue. (This expresses a non-compliant sharding algorithm.) If preparation succeeds, then the test fails.\r\n\r\nIs this interpretation correct? If so:\r\n\r\n1. Do we really need a sequence of operations, or is it sufficient to just express \r\n2. What about non-compliance that wouldn't affect preparation, like aggregation and unsharding? Are these expressible? Should they be?\r\n\r\n\r\n> Up until now, we have not had strong conventions for \"round numbers\" to associate with every message or operation. I'm open to suggestions on whether we should adjust the round numbers used for \"prep_shares_to_prep\" or \"prep_next\" operations.\r\n\r\nDo you think this is underspecified in the draft? IIUC the PR currently matches the notion of rounds in the draft, which I think is what we should do.",
+          "createdAt": "2025-04-23T14:30:48Z",
+          "updatedAt": "2025-04-23T15:12:20Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "Let's add documentation defining an \"operation\" and how it's interpreted during test vector generation and validation.",
+              "createdAt": "2025-04-23T14:30:48Z",
+              "updatedAt": "2025-04-23T15:12:20Z"
+            },
+            {
+              "originalPosition": 280,
+              "body": "nit: Should this be\r\n```python\r\n\"\"\"\r\nGenerates various negative test vectors for Poplar1.\r\n\"\"\"\r\n```",
+              "createdAt": "2025-04-23T14:35:11Z",
+              "updatedAt": "2025-04-23T15:12:20Z"
+            },
+            {
+              "originalPosition": 24,
+              "body": "The semantics of `success` is a little unclear, so let's document it.\r\n\r\nI guess `success == True` means the operation was performed as specified, and so we expect processing to be able to continue. `success == False` would then mean the operation was not done in a spec-compliant fashion, and we therefore expect the operation to raise an exception. Do I have that right?",
+              "createdAt": "2025-04-23T14:41:08Z",
+              "updatedAt": "2025-04-23T15:12:20Z"
+            },
+            {
+              "originalPosition": 21,
+              "body": "Is this the VDAF prep round?",
+              "createdAt": "2025-04-23T14:41:18Z",
+              "updatedAt": "2025-04-23T15:12:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6mKnlx",
+          "commit": {
+            "abbreviatedOid": "2132879"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-04-23T15:40:33Z",
+          "updatedAt": "2025-04-23T15:40:33Z",
+          "comments": [
+            {
+              "originalPosition": 280,
+              "body": "I can change it for consistency, but either form is a valid docstring.",
+              "createdAt": "2025-04-23T15:40:33Z",
+              "updatedAt": "2025-04-23T15:40:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6mLl_5",
+          "commit": {
+            "abbreviatedOid": "2132879"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-04-23T16:40:44Z",
+          "updatedAt": "2025-04-23T16:40:45Z",
+          "comments": [
+            {
+              "originalPosition": 280,
+              "body": "No need, thanks for clarifying.",
+              "createdAt": "2025-04-23T16:40:45Z",
+              "updatedAt": "2025-04-23T16:40:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6mMKbv",
+          "commit": {
+            "abbreviatedOid": "1e56ee0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": " > The negative test vector here that tampers with the public share does not include \"shard\" in its list of operations, thus the intent is that the tests consuming the test vector would skip sharding entirely. If the test still sharded a report, we would need to either supply both the public share that sharding should output and the public share that preparation should use, or indicate that the output of sharding should not be checked against any value from the test vector.\r\n\r\nI see! So the operations list is meant to be a recipe for how to consume the test vector. That makes more sense. I think the algorithm is a little unclear, but I'll add some concrete suggestions inline. It might be worth actually implementing the algorithm that consumes test vectors. As a bonus, we could have unit tests that make sure our test vectors actually match the reference code!\r\n \r\nMy primary bit of feedback is that it would be nice for this change to be backwards compatible so that we don't have to specify this algorithm in the draft. WDYT about making \"operations\" optional? If absent, the behavior would be to treat the vector as a positive test.\r\n\r\n1. We should describe how \r\n\r\n> > 2. What about non-compliance that wouldn't affect preparation, like aggregation and unsharding? Are these expressible? Should they be?\r\n> \r\n> I think so, you could provide a tampered output share in the `out_shares` list, and only include aggregation and unsharding in the list of operations, for example. This might be less interesting, since aggregation only exercises some form of decoding and field vector addition for our VDAFs, and unsharding is straightforward preprocessing. But you could check what happens if an output share or aggregate share includes an integer larger than the field modulus, or if the message has the wrong length.\r\n\r\nIt would be nice to be able to express this kind of thing, but not essential for this PR.\r\n\r\n> I settled on `prep_init()` being in round 0, and `prep_next()` round numbers starting at 1. I wasn't sure whether `prep_shares_to_prep()` should be thought of as the last step in one round, or the first step in the next round.\r\n\r\nI see. I could go either way, though the latter seems to correspond to how we illustrate this in the draft: https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-5.2-1.1.1\r\n",
+          "createdAt": "2025-04-23T17:34:40Z",
+          "updatedAt": "2025-04-23T17:54:36Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "\"aggregate\" corresponds to `agg_init()` followed by `agg_update()`, correct? We should spell this out.",
+              "createdAt": "2025-04-23T17:34:40Z",
+              "updatedAt": "2025-04-23T17:54:09Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "What about cases where the operation succeeds but the output is not the same? I'm thinking of \"aggregate\" for instance where a bad implementation of `agg_update()` could result in an incorrect aggregate share",
+              "createdAt": "2025-04-23T17:47:49Z",
+              "updatedAt": "2025-04-23T17:54:10Z"
+            },
+            {
+              "originalPosition": 87,
+              "body": "A couple things we should clarify:\r\n\r\n1. The order of operations: run the commands from `operations[0]` to `operations[-1]`.\r\n2. When an input is needed from a previous operation. For example, to run `prep_next()`, you need to know the aggregator's prep state, which is not included in the test vector. We might resolve this by combining all of the \"prep_*\" commands into a single command \"prep\" like we do for \"aggregate\".\r\n3. Whether there are \"illegal\" programs. For instance, is it valid to have an operation following one that fails to succeed?\r\n\r\norder of operations is unclear\r\nsome \"programs\" are illegal (no operations allowed after failure)",
+              "createdAt": "2025-04-23T17:52:26Z",
+              "updatedAt": "2025-04-23T17:54:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6mNSIU",
+          "commit": {
+            "abbreviatedOid": "1e56ee0"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "> It might be worth actually implementing the algorithm that consumes test vectors. As a bonus, we could have unit tests that make sure our test vectors actually match the reference code!\r\n\r\nI'd like to punt this to a follow-up, because this will require writing decoding routines to mirror our test vector encoding routines.\r\n\r\n> My primary bit of feedback is that it would be nice for this change to be backwards compatible so that we don't have to specify this algorithm in the draft. WDYT about making \"operations\" optional? If absent, the behavior would be to treat the vector as a positive test.\r\n\r\nThe test vectors are backwards compatible in that a consumer that ignores the `operations` list of a positive test vector can still use it as-is with their `run_vdaf()`-style orchestration. You would just need to filter out the negative test vectors by hand.\r\n\r\nFWIW, I spent some time looking through a code coverage report for other interesting conditions to cover, and the only one I found was the \"joint randomness mismatch\" error in Prio3's prep_next(). I spent some time thinking about how to test this a while back, and couldn't come up with a way to craft a report to hit it, short of defining a degenerate circuit that takes in a joint randomness value and never passes it into a gadget. Instead, we could define a separate test vector that only runs the prep_init and prep_next operations on one aggregator, with a crafted prepare message.",
+          "createdAt": "2025-04-23T19:29:13Z",
+          "updatedAt": "2025-04-23T19:39:28Z",
+          "comments": [
+            {
+              "originalPosition": 34,
+              "body": "I think this is covered, by \"and its output should match...\"",
+              "createdAt": "2025-04-23T19:29:13Z",
+              "updatedAt": "2025-04-23T19:39:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6mNlNb",
+          "commit": {
+            "abbreviatedOid": "1e56ee0"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-04-23T20:09:05Z",
+          "updatedAt": "2025-04-23T20:09:05Z",
+          "comments": [
+            {
+              "originalPosition": 87,
+              "body": "I don't think we can combine prep_init, prep_shares_to_prep, and prep_next into one command because we need the flexibility to include or exclude these operations, or specify that any of them fail. For the negative tests thus far, they all fail during prep_shares_to_prep, but this is coincidental, since we've hoisted checks in both Prio3 and Poplar1 to this algorithm, from the subsquent prep_next. Keeping these operations separate is further motivated by the \"joint randomness mismatch\" idea I mentioned elsewhere. Combining agg_init and agg_update into one \"aggregate\" operation is necessary because the exact sequence of agg_update calls is nondeterministic, and we only require that all output shares get combined in any order.\r\n\r\nI think it could make sense to have an operation after a failing operation in the `operations` list order, for example if you had a pair of `prep_next` operations, one with `\"aggregator_id\": 0` and one with `\"aggregator_id\": 1`. I don't think it would make much sense to have an operation that logically follows after a failing operation, i.e. a `prep_shares_to_prep` in this case. At that point, the operations no longer represent a single sequence of events, and you'd be better off splitting them into two separate test vector files.",
+              "createdAt": "2025-04-23T20:09:05Z",
+              "updatedAt": "2025-04-23T20:09:05Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 539,
+      "id": "PR_kwDOGKuqOc6TgJBF",
+      "title": "Fix mypy errors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/539",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "poc"
+      ],
+      "body": "I upgraded mypy from 1.10.0 to 1.15.0, and it found some new type errors. This PR adds another cast to Poplar1 sketching to hop between `Field64 | Field255` to `Field`.",
+      "createdAt": "2025-04-22T22:32:03Z",
+      "updatedAt": "2025-04-22T23:06:11Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "8d7e07de26e33ef24a5c36f64153de1d7c9f0faf",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/mypy-fixes",
+      "headRefOid": "6f724610276747f0ae5602d19d354422545d34c8",
+      "closedAt": "2025-04-22T23:02:21Z",
+      "mergedAt": "2025-04-22T23:02:21Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "b688ab27cb82c0539429bf61c641cbda6f1f491b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6mCEkU",
+          "commit": {
+            "abbreviatedOid": "6f72461"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-22T23:01:18Z",
+          "updatedAt": "2025-04-22T23:01:18Z",
           "comments": []
         }
       ]
