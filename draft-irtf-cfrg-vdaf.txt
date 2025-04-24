@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 24 October 2025                                            ISRG
+Expires: 26 October 2025                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                           22 April 2025
+                                                           24 April 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 October 2025.
+   This Internet-Draft will expire on 26 October 2025.
 
 Copyright Notice
 
@@ -3052,6 +3052,7 @@ Table of Contents
            assert joint_rand_parts is not None
            joint_rand_part = self.joint_rand_part(
                ctx, agg_id, blind, meas_share, nonce)
+           joint_rand_parts = list(joint_rand_parts)
            joint_rand_parts[agg_id] = joint_rand_part
            corrected_joint_rand_seed = self.joint_rand_seed(
                ctx, joint_rand_parts)
