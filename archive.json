@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-24T01:02:19.053550+00:00",
+  "timestamp": "2025-04-27T01:06:08.382565+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6885,15 +6885,15 @@
       "id": "I_kwDOGKuqOc6msNsS",
       "title": "Add test vectors for preparation failures",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/536",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/):\n\nIt should be pretty easy to modify `gen_test_vec.py` to output tweaked test vectors that trigger preparation to fail. For example:\n* Tweak the nonce\n* Tweak the first byte of the public share\n* Tweak the first byte of a random input share\n* Tweak the first byte of a random prep share\n* Tweak the first byte of the prep message",
       "createdAt": "2025-01-18T03:13:51Z",
-      "updatedAt": "2025-01-29T21:51:35Z",
-      "closedAt": null,
+      "updatedAt": "2025-04-24T15:11:55Z",
+      "closedAt": "2025-04-24T15:11:55Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -6910,6 +6910,40 @@
           "updatedAt": "2025-01-29T21:51:34Z"
         }
       ]
+    },
+    {
+      "number": 540,
+      "id": "I_kwDOGKuqOc6z3PFa",
+      "title": "Update draft to reflect new test vectors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/540",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "#538 adds to the test vector schema, and adds some negative test vectors. We need to bump the commit hash referenced by the document, and describe the `operations` array that has been added to the schema.",
+      "createdAt": "2025-04-24T15:06:07Z",
+      "updatedAt": "2025-04-24T15:06:07Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 541,
+      "id": "I_kwDOGKuqOc6z3SX_",
+      "title": "Check proof of concept implementation against test vectors",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/541",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "poc"
+      ],
+      "body": "We should add tests that test each VDAF against all related test vectors. This would make checking whether the test vectors are up to date part of the test suite, rather than requiring us to regenerate them and compare. This would also provide a reference implementation of how to use the test vectors, which may help other consumers. We will need to define a series of decoding routines, parallel to `test_vec_encode_input_share()`, etc., in order to read the files. Note that some of these decoding routines will require auxiliary inputs, such as the aggregator ID or aggregation parameter, in order to handle non-self-describing messages.",
+      "createdAt": "2025-04-24T15:10:54Z",
+      "updatedAt": "2025-04-24T15:10:54Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -44267,7 +44301,7 @@
       "id": "PR_kwDOGKuqOc6TgHqf",
       "title": "Negative test vectors",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/538",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -44276,17 +44310,19 @@
       ],
       "body": "This extends the test vector file format to support negative test vectors. Each file now includes a list of which operations should be run using its messages, and whether they should succeed or fail. Thus, we can represent a report that could never be produced by the sharding algorithm, skip comparing against the shard implementation, and check what happens in each step of the preparation process with that input. I include eight new negative test vectors to start with. Existing test vectors are modified to add this list of operations. Note that test vector consumers do not necessarily need to reimplement `run_vdaf()` anymore to make use of the all-success test vectors, since the operations list now captures that high-level coordination.\r\n\r\nUp until now, we have not had strong conventions for \"round numbers\" to associate with every message or operation. I'm open to suggestions on whether we should adjust the round numbers used for \"prep_shares_to_prep\" or \"prep_next\" operations.\r\n\r\nI'm working on consuming these negative test vectors in libprio-rs, and thus far I'm getting partial mismatches of Prio3 prepare shares when either the helper's joint randomness blind or the public share is corrupted (but not the leader's joint randomness blind, interestingly). It's possible we have some error in the implementation that cancels out when there's agreement on the joint randomness seed.\r\n\r\nCloses #536.",
       "createdAt": "2025-04-22T22:26:54Z",
-      "updatedAt": "2025-04-23T20:34:10Z",
+      "updatedAt": "2025-04-24T15:11:59Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b688ab27cb82c0539429bf61c641cbda6f1f491b",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/negative-test-vectors",
       "headRefOid": "65814752474a4af72df36e2c3d7dfdf63b39e076",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-04-24T15:11:54Z",
+      "mergedAt": "2025-04-24T15:11:54Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "cee4567268a54be13d9d0c1e8a3d2b968959d688"
+      },
       "comments": [
         {
           "author": "divergentdave",
@@ -44301,6 +44337,13 @@
           "body": "> Here's my interpretation, taking the public share as an example:\r\n> \r\n> 1. For a positive test, we'd shard and check if the public share matches the test vector: if not, the test fails.\r\n> \r\n> 2. For a negative test, we'd shard, overwrite the public share with the value from the test vector, and continue. (This expresses a non-compliant sharding algorithm.) If preparation succeeds, then the test fails.\r\n\r\nThe negative test vector here that tampers with the public share does not include \"shard\" in its list of operations, thus the intent is that the tests consuming the test vector would skip sharding entirely. If the test still sharded a report, we would need to either supply both the public share that sharding should output and the public share that preparation should use, or indicate that the output of sharding should not be checked against any value from the test vector.\r\n\r\n> 2. What about non-compliance that wouldn't affect preparation, like aggregation and unsharding? Are these expressible? Should they be?\r\n\r\nI think so, you could provide a tampered output share in the `out_shares` list, and only include aggregation and unsharding in the list of operations, for example. This might be less interesting, since aggregation only exercises some form of decoding and field vector addition for our VDAFs, and unsharding is straightforward preprocessing. But you could check what happens if an output share or aggregate share includes an integer larger than the field modulus, or if the message has the wrong length.\r\n\r\n> Do you think this is underspecified in the draft? IIUC the PR currently matches the notion of rounds in the draft, which I think is what we should do.\r\n\r\nI settled on `prep_init()` being in round 0, and `prep_next()` round numbers starting at 1. I wasn't sure whether `prep_shares_to_prep()` should be thought of as the last step in one round, or the first step in the next round.",
           "createdAt": "2025-04-23T15:39:52Z",
           "updatedAt": "2025-04-23T15:39:52Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Filed #540 and #541 for follow-ups.",
+          "createdAt": "2025-04-24T15:11:24Z",
+          "updatedAt": "2025-04-24T15:11:24Z"
         }
       ],
       "reviews": [
@@ -44453,6 +44496,19 @@
               "updatedAt": "2025-04-23T20:09:05Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6mY0bw",
+          "commit": {
+            "abbreviatedOid": "6581475"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "> > It might be worth actually implementing the algorithm that consumes test vectors. As a bonus, we could have unit tests that make sure our test vectors actually match the reference code!\r\n> \r\n> I'd like to punt this to a follow-up, because this will require writing decoding routines to mirror our test vector encoding routines.\r\n\r\nSGTM. I'm also fine if you don't want to bother doing this.\r\n\r\n> > My primary bit of feedback is that it would be nice for this change to be backwards compatible so that we don't have to specify this algorithm in the draft. WDYT about making \"operations\" optional? If absent, the behavior would be to treat the vector as a positive test.\r\n> \r\n> The test vectors are backwards compatible in that a consumer that ignores the `operations` list of a positive test vector can still use it as-is with their `run_vdaf()`-style orchestration. You would just need to filter out the negative test vectors by hand.\r\n\r\nFair enough, but I think we'll then need to explain how to handle `\"operations\"` in the draft. We'll need to bump the test vector reference in a follow-up PR in any case.",
+          "createdAt": "2025-04-24T14:53:34Z",
+          "updatedAt": "2025-04-24T14:53:34Z",
+          "comments": []
         }
       ]
     },
