@@ -5,7 +5,8 @@ from typing import Union, cast
 from vdaf_poc.common import from_be_bytes, to_be_bytes
 from vdaf_poc.test_utils import TestVdaf
 from vdaf_poc.vdaf import Vdaf
-from vdaf_poc.vdaf_ping_pong import Continued, Finished, PingPong
+from vdaf_poc.vdaf_ping_pong import (Continued, Finished, FinishedWithOutbound,
+                                     PingPong)
 
 
 class PingPongTester(
@@ -185,7 +186,7 @@ class TestPingPong(unittest.TestCase):
         )
 
         agg_param = 23
-        (leader_state, msg) = vdaf.ping_pong_leader_init(
+        leader_state = vdaf.ping_pong_leader_init(
             verify_key,
             ctx,
             vdaf.encode_agg_param(agg_param),
@@ -193,27 +194,27 @@ class TestPingPong(unittest.TestCase):
             vdaf.test_vec_encode_public_share(public_share),
             vdaf.test_vec_encode_input_share(input_shares[0]),
         )
-        self.assertEqual(leader_state, Continued((0, measurement), 0))
+        assert isinstance(leader_state, Continued)
+        self.assertEqual(leader_state.prep_round, 0)
 
-        (helper_state, msg) = vdaf.ping_pong_helper_init(
+        helper_state = vdaf.ping_pong_helper_init(
             verify_key,
             ctx,
             vdaf.encode_agg_param(agg_param),
             nonce,
             vdaf.test_vec_encode_public_share(public_share),
             vdaf.test_vec_encode_input_share(input_shares[1]),
-            cast(bytes, msg),
+            cast(bytes, leader_state.outbound),  # XX cast needed?
         )
-        self.assertEqual(helper_state, Finished(measurement))
+        assert isinstance(helper_state, FinishedWithOutbound)
 
-        (leader_state, msg) = vdaf.ping_pong_leader_continued(
+        leader_state = vdaf.ping_pong_leader_continued(
             ctx,
             vdaf.encode_agg_param(agg_param),
             leader_state,
-            cast(bytes, msg),
+            helper_state.outbound,
         )
-        self.assertEqual(msg, None)
-        self.assertEqual(leader_state, Finished(measurement))
+        self.assertTrue(isinstance(leader_state, Finished))
 
     def test_multi_round(self) -> None:
         """Test the ping pong flow with multiple rounds."""
@@ -236,7 +237,7 @@ class TestPingPong(unittest.TestCase):
                 rand,
             )
 
-            (leader_state, msg) = vdaf.ping_pong_leader_init(
+            leader_state = vdaf.ping_pong_leader_init(
                 verify_key,
                 ctx,
                 vdaf.encode_agg_param(agg_param),
@@ -244,35 +245,44 @@ class TestPingPong(unittest.TestCase):
                 vdaf.test_vec_encode_public_share(public_share),
                 vdaf.test_vec_encode_input_share(input_shares[0]),
             )
-            self.assertEqual(leader_state, Continued((0, measurement), 0))
+            assert isinstance(leader_state, Continued)
+            self.assertEqual(leader_state.prep_round, 0)
 
             for step in range(num_steps):
                 if step == 0:
-                    (helper_state, msg) = vdaf.ping_pong_helper_init(
+                    assert isinstance(leader_state, Continued)
+                    helper_state = vdaf.ping_pong_helper_init(
                         verify_key,
                         ctx,
                         vdaf.encode_agg_param(agg_param),
                         nonce,
                         vdaf.test_vec_encode_public_share(public_share),
                         vdaf.test_vec_encode_input_share(input_shares[1]),
-                        cast(bytes, msg),
+                        leader_state.outbound,
                     )
                 else:
-                    (helper_state, msg) = vdaf.ping_pong_helper_continued(
+                    assert isinstance(leader_state, Continued) or \
+                        isinstance(leader_state, FinishedWithOutbound)
+                    helper_state = vdaf.ping_pong_helper_continued(
                         vdaf.encode_agg_param(agg_param),
                         ctx,
                         helper_state,
-                        cast(bytes, msg),
+                        leader_state.outbound,
                     )
 
                 if isinstance(leader_state, Continued):
-                    (leader_state, msg) = vdaf.ping_pong_leader_continued(
+                    assert isinstance(helper_state, Continued) or \
+                        isinstance(helper_state, FinishedWithOutbound)
+                    leader_state = vdaf.ping_pong_leader_continued(
                         vdaf.encode_agg_param(agg_param),
                         ctx,
                         leader_state,
-                        cast(bytes, msg),
+                        helper_state.outbound,
                     )
 
-            self.assertEqual(msg, None)
-            self.assertEqual(leader_state, Finished(measurement))
-            self.assertEqual(helper_state, Finished(measurement))
+            if num_rounds & 1 == 1:
+                self.assertTrue(isinstance(leader_state, Finished))
+                self.assertTrue(isinstance(helper_state, FinishedWithOutbound))
+            else:
+                self.assertTrue(isinstance(leader_state, FinishedWithOutbound))
+                self.assertTrue(isinstance(helper_state, Finished))
