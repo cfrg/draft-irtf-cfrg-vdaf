@@ -3788,7 +3788,8 @@ def ping_pong_transition(
 </div>
 <p id="section-5.7.1-14">The output is the <code>State</code> to which the Helper has transitioned. If the Helper's
 state is <code>Finished</code> or <code>Rejected</code>, then processing halts. Otherwise, if the
-state is <code>Continued</code> or <code>FinishedWithOutbound</code>, then processing continues.<a href="#section-5.7.1-14" class="pilcrow">¶</a></p>
+state is <code>Continued</code> or <code>FinishedWithOutbound</code>, then the state include an
+outbound message and processing continues.<a href="#section-5.7.1-14" class="pilcrow">¶</a></p>
 <p id="section-5.7.1-15">To continue processing, the Helper sends the outbound message to the Leader.
 The Leader computes its next state transition using the following method on
 class <code>Vdaf</code>:<a href="#section-5.7.1-15" class="pilcrow">¶</a></p>
@@ -3866,16 +3867,16 @@ Leader sends the outbound message to the Helper. The Helper computes its next
 state transition using the following method on class <code>Vdaf</code>:<a href="#section-5.7.1-17" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-18">
 <pre>
-    def ping_pong_helper_continued(
-        self,
-        ctx: bytes,
-        agg_param: bytes,
-        state: State,
-        inbound: bytes,
-    ) -&gt; State:
-        """Called by the Helper to continue ping-ponging."""
-        return self.ping_pong_continued(
-            False, ctx, agg_param, state, inbound)
+def ping_pong_helper_continued(
+    self,
+    ctx: bytes,
+    agg_param: bytes,
+    state: State,
+    inbound: bytes,
+) -&gt; State:
+    """Called by the Helper to continue ping-ponging."""
+    return self.ping_pong_continued(
+        False, ctx, agg_param, state, inbound)
 </pre><a href="#section-5.7.1-18" class="pilcrow">¶</a>
 </div>
 <p id="section-5.7.1-19">They continue in this way until processing halts. Note that, depending on the

@@ -1853,7 +1853,7 @@ Table of Contents
    The output is the State to which the Helper has transitioned.  If the
    Helper's state is Finished or Rejected, then processing halts.
    Otherwise, if the state is Continued or FinishedWithOutbound, then
-   processing continues.
+   the state include an outbound message and processing continues.
 
    To continue processing, the Helper sends the outbound message to the
    Leader.  The Leader computes its next state transition using the
@@ -1930,16 +1930,16 @@ Table of Contents
    Helper.  The Helper computes its next state transition using the
    following method on class Vdaf:
 
-       def ping_pong_helper_continued(
-           self,
-           ctx: bytes,
-           agg_param: bytes,
-           state: State,
-           inbound: bytes,
-       ) -> State:
-           """Called by the Helper to continue ping-ponging."""
-           return self.ping_pong_continued(
-               False, ctx, agg_param, state, inbound)
+   def ping_pong_helper_continued(
+       self,
+       ctx: bytes,
+       agg_param: bytes,
+       state: State,
+       inbound: bytes,
+   ) -> State:
+       """Called by the Helper to continue ping-ponging."""
+       return self.ping_pong_continued(
+           False, ctx, agg_param, state, inbound)
 
    They continue in this way until processing halts.  Note that,
    depending on the number of rounds of preparation that are required,
