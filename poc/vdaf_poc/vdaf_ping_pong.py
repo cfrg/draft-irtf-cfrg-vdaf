@@ -1,7 +1,7 @@
 """Ping-pong topology for VDAFs."""
 
 from abc import ABCMeta, abstractmethod
-from typing import Generic, Optional, TypeVar, cast
+from typing import Generic, TypeVar, cast
 
 from vdaf_poc.common import byte, from_be_bytes, front, to_be_bytes
 from vdaf_poc.vdaf import Vdaf
@@ -17,7 +17,7 @@ PrepState = TypeVar("PrepState")
 PrepShare = TypeVar("PrepShare")
 PrepMessage = TypeVar("PrepMessage")
 
-# NOTE: Classes State, Start, Continued, Finished, and Rejected are exerpted in
+# NOTE: Classes State, Start, Continued, Finished, and Rejected are excerpted in
 # the document. Their width should be limited to 69 columns to avoid warnings
 # from xml2rfc.
 # ===================================================================
@@ -32,14 +32,19 @@ class Start(State):
 
 
 class Continued(State, Generic[PrepState]):
-    def __init__(self, prep_state: PrepState, prep_round: int):
+    def __init__(self,
+                 prep_state: PrepState,
+                 prep_round: int,
+                 outbound: bytes):
         self.prep_state = prep_state
         self.prep_round = prep_round
+        self.outbound = outbound
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Continued) and \
             self.prep_state == other.prep_state and \
-            self.prep_round == other.prep_round
+            self.prep_round == other.prep_round and \
+            self.outbound == other.outbound
 
 
 class Finished(State, Generic[OutShare]):
@@ -49,6 +54,17 @@ class Finished(State, Generic[OutShare]):
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Finished) and \
             self.out_share == other.out_share
+
+
+class FinishedWithOutbound(State, Generic[OutShare]):
+    def __init__(self, out_share: OutShare, outbound: bytes):
+        self.out_share = out_share
+        self.outbound = outbound
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, FinishedWithOutbound) and \
+            self.out_share == other.out_share and \
+            self.outbound == other.outbound
 
 
 class Rejected(State):
@@ -112,7 +128,7 @@ class PingPong(
             agg_param: bytes,
             nonce: bytes,
             public_share: bytes,
-            input_share: bytes) -> tuple[State, Optional[bytes]]:
+            input_share: bytes) -> Continued | Rejected:
         """Called by the Leader to initialize ping-ponging."""
         try:
             (prep_state, prep_share) = self.prep_init(
@@ -124,27 +140,30 @@ class PingPong(
                 self.decode_public_share(public_share),
                 self.decode_input_share(0, input_share),
             )
+
             encoded_prep_share = self.encode_prep_share(prep_share)
-            return (
-                Continued(prep_state, 0),
+            return Continued(
+                prep_state, 0,
                 encode(0, encoded_prep_share),  # initialize
             )
         except:
-            return (Rejected(), None)
+            return Rejected()
 
     def ping_pong_helper_init(
-            self,
-            vdaf_verify_key: bytes,
-            ctx: bytes,
-            agg_param: bytes,
-            nonce: bytes,
-            public_share: bytes,
-            input_share: bytes,
-            inbound: bytes) -> tuple[State, Optional[bytes]]:
+        self,
+        vdaf_verify_key: bytes,
+        ctx: bytes,
+        agg_param: bytes,
+        nonce: bytes,
+        public_share: bytes,
+        input_share: bytes,
+        inbound: bytes,  # encoded ping pong Message
+    ) -> Continued | FinishedWithOutbound | Rejected:
         """
         Called by the Helper in response to the Leader's initial
         message.
         """
+
         try:
             (prep_state, prep_share) = self.prep_init(
                 vdaf_verify_key,
@@ -158,7 +177,7 @@ class PingPong(
 
             (inbound_type, inbound_items) = decode(inbound)
             if inbound_type != 0:  # initialize
-                return (Rejected(), None)
+                return Rejected()
 
             encoded_prep_share = inbound_items[0]
             prep_shares = [
@@ -173,7 +192,7 @@ class PingPong(
                 0,
             )
         except:
-            return (Rejected(), None)
+            return Rejected()
 
     def ping_pong_transition(
             self,
@@ -181,22 +200,22 @@ class PingPong(
             agg_param: AggParam,
             prep_shares: list[PrepShare],
             prep_state: PrepState,
-            prep_round: int) -> tuple[State, bytes]:
+            prep_round: int) -> Continued | FinishedWithOutbound:
         prep_msg = self.prep_shares_to_prep(ctx,
                                             agg_param,
                                             prep_shares)
         encoded_prep_msg = self.encode_prep_msg(prep_msg)
         out = self.prep_next(ctx, prep_state, prep_msg)
         if prep_round+1 == self.ROUNDS:
-            return (
-                Finished(out),
+            return FinishedWithOutbound(
+                out,
                 encode(2, encoded_prep_msg),  # finalize
             )
         (prep_state, prep_share) = cast(
             tuple[PrepState, PrepShare], out)
         encoded_prep_share = self.encode_prep_share(prep_share)
-        return (
-            Continued(prep_state, prep_round+1),
+        return Continued(
+            prep_state, prep_round+1,
             encode(1, encoded_prep_msg, encoded_prep_share)  # continue
         )
 
@@ -204,9 +223,9 @@ class PingPong(
         self,
         ctx: bytes,
         agg_param: bytes,
-        state: State,
-        inbound: bytes,
-    ) -> tuple[State, Optional[bytes]]:
+        state: Continued,
+        inbound: bytes,  # encoded ping pong Message
+    ) -> State:
         """
         Called by the Leader to start the next step of ping-ponging.
         """
@@ -218,17 +237,15 @@ class PingPong(
         is_leader: bool,
         ctx: bytes,
         agg_param: bytes,
-        state: State,
-        inbound: bytes,
-    ) -> tuple[State, Optional[bytes]]:
+        state: Continued,
+        inbound: bytes,  # encoded ping pong Message
+    ) -> State:
         try:
-            if not isinstance(state, Continued):
-                return (Rejected(), None)
             prep_round = state.prep_round
 
             (inbound_type, inbound_items) = decode(inbound)
             if inbound_type == 0:  # initialize
-                return (Rejected(), None)
+                return Rejected()
 
             encoded_prep_msg = inbound_items[0]
             prep_msg = self.decode_prep_msg(
@@ -259,19 +276,19 @@ class PingPong(
                 )
             elif prep_round+1 == self.ROUNDS and \
                     inbound_type == 2:  # finish
-                return (Finished(out), None)
+                return Finished(out)
             else:
-                return (Rejected(), None)
+                return Rejected()
         except:
-            return (Rejected(), None)
+            return Rejected()
 
     def ping_pong_helper_continued(
         self,
         ctx: bytes,
         agg_param: bytes,
-        state: State,
-        inbound: bytes,
-    ) -> tuple[State, Optional[bytes]]:
+        state: Continued,
+        inbound: bytes,  # encoded ping pong Message
+    ) -> State:
         """Called by the Helper to continue ping-ponging."""
         return self.ping_pong_continued(
             False, ctx, agg_param, state, inbound)
