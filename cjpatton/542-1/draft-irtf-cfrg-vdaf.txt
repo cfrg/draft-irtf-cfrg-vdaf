@@ -1641,13 +1641,18 @@ Table of Contents
 
    The state machine of each Aggregator is shown below.
 
-                     +----------------+      +----> Finished(out_share)
-                     |                |      |
-                     v                |      |
-   Start ----> Continued(prep_state, prep_round)
-    |                |                       |
-    |                |                       v
-    +--> Rejected <--+                  FinishedWithOutbound(out_share)
+                     +----------------+
+                     |                |
+                     |                |
+                     |                |
+                     |                |
+                     v                |
+   Start ----> Continued(prep_state, prep_round, outbound)
+    |                |         |                      |
+    |                |         |                      v
+    |                |         |                    Finished(out_share)
+    |                |         v
+    +--> Rejected <--+        FinishedWithOutbound(out_share, outbound)
 
                 Figure 7: State machine of VDAF preparation.
 
