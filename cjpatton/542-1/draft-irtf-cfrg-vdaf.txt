@@ -1641,13 +1641,13 @@ Table of Contents
 
    The state machine of each Aggregator is shown below.
 
-                     +----------------+
-                     |                |
-                     v                |
-   Start ----> Continued(prep_state, prep_round) --> Finished(out_share)
-    |                |
-    |                |
-    +--> Rejected <--+
+                     +----------------+      +----> Finished(out_share)
+                     |                |      |
+                     v                |      |
+   Start ----> Continued(prep_state, prep_round)
+    |                |                       |
+    |                |                       v
+    +--> Rejected <--+                  FinishedWithOutbound(out_share)
 
                 Figure 7: State machine of VDAF preparation.
 
@@ -1656,8 +1656,10 @@ Table of Contents
    The initial state is Start.  The terminal states are: Rejected,
    indicating that the report cannot be processed any further; and
    Finished(out_share), indicating that the Aggregator has recovered an
-   output share out_share.  For completeness, we define these states in
-   Appendix B.
+   output share out_share; and FinishedWithOutbound(out_share),
+   indicating that the Aggregator has recovered an output share, has one
+   more outbound message to send.  For completeness, we define these
+   states in Appendix B.
 
    The methods described in this section are defined in terms of opaque
    byte strings.  A compatible Vdaf MUST specify methods for encoding
@@ -1738,7 +1740,7 @@ Table of Contents
            agg_param: bytes,
            nonce: bytes,
            public_share: bytes,
-           input_share: bytes) -> tuple[State, Optional[bytes]]:
+           input_share: bytes) -> State:
        """Called by the Leader to initialize ping-ponging."""
        try:
            (prep_state, prep_share) = self.prep_init(
@@ -1751,19 +1753,19 @@ Table of Contents
                self.decode_input_share(0, input_share),
            )
            encoded_prep_share = self.encode_prep_share(prep_share)
-           return (
-               Continued(prep_state, 0),
+           return Continued(
+               prep_state, 0,
                encode(0, encoded_prep_share),  # initialize
            )
        except:
-           return (Rejected(), None)
+           return Rejected()
 
-   The output is the State to which the Leader has transitioned and an
-   encoded Message.  If the Leader's state is Rejected, then processing
-   halts.  Otherwise, if the state is Continued, then processing
-   continues.  The function encode is used to encode the outbound
-   message, which has the message type of initialize (identified by the
-   number 0).
+   The output is the State to which the Leader has transitioned.  If the
+   Leader's state is Rejected, then processing halts.  Otherwise, if the
+   state is Continued, then processing continues.  In this case, the
+   state also includes the Leader's outbound message.  The function
+   encode is used to encode the outbound message, which has the message
+   type of initialize (identified by the number 0).
 
    To continue processing the report, the Leader sends the outbound
    message to the Helper.  The Helper's initial transition is computed
@@ -1777,7 +1779,7 @@ Table of Contents
            nonce: bytes,
            public_share: bytes,
            input_share: bytes,
-           inbound: bytes) -> tuple[State, Optional[bytes]]:
+           inbound: bytes) -> State:
        """
        Called by the Helper in response to the Leader's initial
        message.
@@ -1795,7 +1797,7 @@ Table of Contents
 
            (inbound_type, inbound_items) = decode(inbound)
            if inbound_type != 0:  # initialize
-               return (Rejected(), None)
+               return Rejected()
 
            encoded_prep_share = inbound_items[0]
            prep_shares = [
@@ -1810,7 +1812,7 @@ Table of Contents
                0,
            )
        except:
-           return (Rejected(), None)
+           return Rejected()
 
    The procedure decode() decodes the inbound message and returns the
    MessageType variant (initialize, continue, or finish) and the fields
@@ -1824,28 +1826,28 @@ Table of Contents
            agg_param: AggParam,
            prep_shares: list[PrepShare],
            prep_state: PrepState,
-           prep_round: int) -> tuple[State, bytes]:
+           prep_round: int) -> State:
        prep_msg = self.prep_shares_to_prep(ctx,
                                            agg_param,
                                            prep_shares)
        encoded_prep_msg = self.encode_prep_msg(prep_msg)
        out = self.prep_next(ctx, prep_state, prep_msg)
        if prep_round+1 == self.ROUNDS:
-           return (
-               Finished(out),
+           return FinishedWithOutbound(
+               out,
                encode(2, encoded_prep_msg),  # finalize
            )
        (prep_state, prep_share) = cast(
            tuple[PrepState, PrepShare], out)
        encoded_prep_share = self.encode_prep_share(prep_share)
-       return (
-           Continued(prep_state, prep_round+1),
+       return Continued(
+           prep_state, prep_round+1,
            encode(1, encoded_prep_msg, encoded_prep_share)  # continue
        )
 
-   The output is the State to which the Helper has transitioned and an
-   encoded Message.  If the Helper's state is Finished or Rejected, then
-   processing halts.  Otherwise, if the state is Continued, then
+   The output is the State to which the Helper has transitioned.  If the
+   Helper's state is Finished or Rejected, then processing halts.
+   Otherwise, if the state is Continued or FinishedWithOutbound, then
    processing continues.
 
    To continue processing, the Helper sends the outbound message to the
@@ -1858,7 +1860,7 @@ Table of Contents
        agg_param: bytes,
        state: State,
        inbound: bytes,
-   ) -> tuple[State, Optional[bytes]]:
+   ) -> State:
        """
        Called by the Leader to start the next step of ping-ponging.
        """
@@ -1872,15 +1874,15 @@ Table of Contents
        agg_param: bytes,
        state: State,
        inbound: bytes,
-   ) -> tuple[State, Optional[bytes]]:
+   ) -> State:
        try:
            if not isinstance(state, Continued):
-               return (Rejected(), None)
+               return Rejected()
            prep_round = state.prep_round
 
            (inbound_type, inbound_items) = decode(inbound)
            if inbound_type == 0:  # initialize
-               return (Rejected(), None)
+               return Rejected()
 
            encoded_prep_msg = inbound_items[0]
            prep_msg = self.decode_prep_msg(
@@ -1911,27 +1913,28 @@ Table of Contents
                )
            elif prep_round+1 == self.ROUNDS and \
                    inbound_type == 2:  # finish
-               return (Finished(out), None)
+               return Finished(out)
            else:
-               return (Rejected(), None)
+               return Rejected()
        except:
-           return (Rejected(), None)
+           return Rejected()
 
    If the Leader's state is Finished or Rejected, then processing halts.
-   Otherwise, the Leader sends the outbound message to the Helper.  The
-   Helper computes its next state transition using the following method
-   on class Vdaf:
+   Otherwise, if the Leader's state is Continued or
+   FinishedWithOutbound, the Leader sends the outbound message to the
+   Helper.  The Helper computes its next state transition using the
+   following method on class Vdaf:
 
-   def ping_pong_helper_continued(
-       self,
-       ctx: bytes,
-       agg_param: bytes,
-       state: State,
-       inbound: bytes,
-   ) -> tuple[State, Optional[bytes]]:
-       """Called by the Helper to continue ping-ponging."""
-       return self.ping_pong_continued(
-           False, ctx, agg_param, state, inbound)
+       def ping_pong_helper_continued(
+           self,
+           ctx: bytes,
+           agg_param: bytes,
+           state: State,
+           inbound: bytes,
+       ) -> State:
+           """Called by the Helper to continue ping-ponging."""
+           return self.ping_pong_continued(
+               False, ctx, agg_param, state, inbound)
 
    They continue in this way until processing halts.  Note that,
    depending on the number of rounds of preparation that are required,
@@ -6656,6 +6659,16 @@ Appendix B.  VDAF Preparation State
        def __eq__(self, other: object) -> bool:
            return isinstance(other, Finished) and \
                self.out_share == other.out_share
+
+   class FinishedWithOutbound(State, Generic[OutShare]):
+       def __init__(self, out_share: OutShare, outbound: bytes):
+           self.out_share = out_share
+           self.outbound = outbound
+
+       def __eq__(self, other: object) -> bool:
+           return isinstance(other, FinishedWithOutbound) and \
+               self.out_share == other.out_share and \
+               self.outbound == other.outbound
 
    class Rejected(State):
        pass
