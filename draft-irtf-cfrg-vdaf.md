@@ -1614,18 +1614,13 @@ channel.
 The state machine of each Aggregator is shown below.
 
 ~~~ aasvg
-                  +----------------+
-                  |                |
-                  |                |
-                  |                |
-                  |                |
-                  v                |
+ +--> Rejected <--+   +----------------+   Finished(out_share)
+ |                |   |                |           ^
+ |                |   |                v           |
 Start ----> Continued(prep_state, prep_round, outbound)
- |                |         |                      |
- |                |         |                      v
- |                |         |                    Finished(out_share)
- |                |         v
- +--> Rejected <--+        FinishedWithOutbound(out_share, outbound)
+ |                                                 |
+ |                                                 v
+ +-----------------> FinishedWithOutbound(out_share, outbound)
 ~~~
 {: #vdaf-prep-state-machine title="State machine of VDAF preparation."}
 
