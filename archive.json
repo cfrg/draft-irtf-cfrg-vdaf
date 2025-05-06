@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-27T01:06:08.382565+00:00",
+  "timestamp": "2025-05-06T01:03:24.136815+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6923,7 +6923,7 @@
       "labels": [],
       "body": "#538 adds to the test vector schema, and adds some negative test vectors. We need to bump the commit hash referenced by the document, and describe the `operations` array that has been added to the schema.",
       "createdAt": "2025-04-24T15:06:07Z",
-      "updatedAt": "2025-04-24T15:06:07Z",
+      "updatedAt": "2025-05-05T21:34:12Z",
       "closedAt": null,
       "comments": []
     },
@@ -6944,6 +6944,34 @@
       "updatedAt": "2025-04-24T15:10:54Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 542,
+      "id": "I_kwDOGKuqOc61OVEJ",
+      "title": "Type safety for return values",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/542",
+      "state": "OPEN",
+      "author": "ekr",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "editorial"
+      ],
+      "body": "I see that, for instance `ping_pong_leader_continued` returns:\n\n```\n           tuple[State, Optional[bytes]]:\n```\n\nBut this allows, for instance, this function to return `(Rejected(), [stuff])` (although the body of the function doesn't seem to do so) and assuming I understand the situation, is actually not a valid situation. Moreover, it makes the rules for how to process the response are confusing. For instance, here is some text from DAP  S 4.6.2.1 on how to handle this function\n\n```\n       If outbound != None, then the Leader stores state and outbound\n       and proceeds to Section 4.6.3.1.  If outbound == None, then the\n       preparation process is complete: either state == Rejected(), in\n```\n\nSo if `outbound != None` I'm not even supposed to look at `state` at this point. Is that really right?\n\nI would suggest that instead we should adopt some sort of type safety mechanism. My Python type hinting is a little rusty but Gemini seems to think what  we want is something like:\n\n```\nclass ContinuingData(NamedTuple):\n    state: bytes\n    output: bytes\n\nclass Finished(NamedTuple):\n    output: bytes,\n   \n\nState = Literal[\"Rejected\"] | Finished | ContinuingData\n```\n\nThis will make it impossible to have invalid states.\n",
+      "createdAt": "2025-05-05T18:13:44Z",
+      "updatedAt": "2025-05-05T18:48:52Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "You're correct that there are some combinations of outputs that should not be expressible. I think tightening the API so that they're not is a good idea. \n\n",
+          "createdAt": "2025-05-05T18:47:16Z",
+          "updatedAt": "2025-05-05T18:47:16Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -44555,6 +44583,40 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 543,
+      "id": "PR_kwDOGKuqOc6VAE2h",
+      "title": "topo: Merge outbound into state",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/543",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #542.\r\n\r\nMerge the outbound message into the Aggregator's ping pong state:\r\n\r\n1. Remove outbound message from each API call\r\n\r\n2. Add outbound message to `Continued`\r\n\r\n3. Define a new state, `FinishedWithOutbound` that is like `Finished` except it include an outbound message\r\n\r\nThis reduces the number of cases the caller has to handle to only cases that are valid. In particular, the following cases are invalid:\r\n\r\n* `state == Rejected() and outbound != None`\r\n* `state == Continued(...) and outbound == None`",
+      "createdAt": "2025-05-05T21:17:27Z",
+      "updatedAt": "2025-05-05T21:26:51Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "cee4567268a54be13d9d0c1e8a3d2b968959d688",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/542-1",
+      "headRefOid": "058d8f332b7c4eae8cd7e0ef746a7ddc75bd3485",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @ekr",
+          "createdAt": "2025-05-05T21:26:50Z",
+          "updatedAt": "2025-05-05T21:26:50Z"
+        }
+      ],
+      "reviews": []
     }
   ]
 }
