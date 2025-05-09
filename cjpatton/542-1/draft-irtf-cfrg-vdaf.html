@@ -9829,14 +9829,19 @@ class Start(State):
     pass
 
 class Continued(State, Generic[PrepState]):
-    def __init__(self, prep_state: PrepState, prep_round: int):
+    def __init__(self,
+                 prep_state: PrepState,
+                 prep_round: int,
+                 outbound: bytes):
         self.prep_state = prep_state
         self.prep_round = prep_round
+        self.outbound = outbound
 
     def __eq__(self, other: object) -&gt; bool:
         return isinstance(other, Continued) and \
             self.prep_state == other.prep_state and \
-            self.prep_round == other.prep_round
+            self.prep_round == other.prep_round and \
+            self.outbound == other.outbound
 
 class Finished(State, Generic[OutShare]):
     def __init__(self, out_share: OutShare):
