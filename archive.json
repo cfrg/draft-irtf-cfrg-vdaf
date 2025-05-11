@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-08T01:04:13.697344+00:00",
+  "timestamp": "2025-05-11T01:08:14.908927+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -44596,13 +44596,13 @@
       "labels": [],
       "body": "Closes #542.\r\n\r\nMerge the outbound message into the Aggregator's ping pong state:\r\n\r\n1. Remove outbound message from each API call\r\n\r\n2. Add outbound message to `Continued`\r\n\r\n3. Define a new state, `FinishedWithOutbound` that is like `Finished` except it include an outbound message\r\n\r\nThis reduces the number of cases the caller has to handle to only cases that are valid. In particular, the following cases are invalid:\r\n\r\n* `state == Rejected() and outbound != None`\r\n* `state == Continued(...) and outbound == None`",
       "createdAt": "2025-05-05T21:17:27Z",
-      "updatedAt": "2025-05-06T14:44:53Z",
+      "updatedAt": "2025-05-09T14:22:58Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cee4567268a54be13d9d0c1e8a3d2b968959d688",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/542-1",
-      "headRefOid": "80dd549a144fd5562401ea1b7fc8047752fcb272",
+      "headRefOid": "3f932a2a89faa832a1afc599118473db4b7c162f",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -44616,7 +44616,54 @@
           "updatedAt": "2025-05-05T21:26:50Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6ob5_e",
+          "commit": {
+            "abbreviatedOid": "80dd549"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-08T17:35:54Z",
+          "updatedAt": "2025-05-08T22:07:10Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "```suggestion\r\n`FinishedWithOutbound(out_share, outbound)`, indicating that the Aggregator has\r\n```",
+              "createdAt": "2025-05-08T17:35:54Z",
+              "updatedAt": "2025-05-08T22:07:10Z"
+            },
+            {
+              "originalPosition": 202,
+              "body": "Don't you need to fix the declaration of `class Continue` on L6269?",
+              "createdAt": "2025-05-08T17:55:38Z",
+              "updatedAt": "2025-05-08T22:07:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6omDWw",
+          "commit": {
+            "abbreviatedOid": "74ba24b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-09T14:22:49Z",
+          "updatedAt": "2025-05-09T14:22:54Z",
+          "comments": [
+            {
+              "originalPosition": 202,
+              "body": "Done.",
+              "createdAt": "2025-05-09T14:22:49Z",
+              "updatedAt": "2025-05-09T14:22:54Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
