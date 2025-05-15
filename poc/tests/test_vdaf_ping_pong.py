@@ -19,7 +19,7 @@ class PingPongTester(
             int,  # AggShare
             int,  # AggResult
             tuple[int, int],  # PrepState
-            str,  # PrepShhare
+            str,  # PrepShare
             str,  # PrepMessage
         ]):
     """
@@ -83,7 +83,7 @@ class PingPongTester(
                   prep_msg: str) -> Union[tuple[tuple[int, int], str], int]:
         (current_round, out_share) = prep_state
         if prep_msg != "prep round {}".format(current_round):
-            raise ValueError("unexpted prep message")
+            raise ValueError(f"unexpected prep message {prep_msg}")
         if current_round+1 == self.ROUNDS:
             return out_share
         return (
@@ -204,7 +204,7 @@ class TestPingPong(unittest.TestCase):
             nonce,
             vdaf.test_vec_encode_public_share(public_share),
             vdaf.test_vec_encode_input_share(input_shares[1]),
-            cast(bytes, leader_state.outbound),  # XX cast needed?
+            leader_state.outbound,
         )
         assert isinstance(helper_state, FinishedWithOutbound)
 

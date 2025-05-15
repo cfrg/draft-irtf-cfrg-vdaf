@@ -17,7 +17,7 @@ PrepState = TypeVar("PrepState")
 PrepShare = TypeVar("PrepShare")
 PrepMessage = TypeVar("PrepMessage")
 
-# NOTE: Classes State, Start, Continued, Finished, and Rejected are exerpted in
+# NOTE: Classes State, Start, Continued, Finished, and Rejected are excerpted in
 # the document. Their width should be limited to 69 columns to avoid warnings
 # from xml2rfc.
 # ===================================================================
@@ -128,7 +128,7 @@ class PingPong(
             agg_param: bytes,
             nonce: bytes,
             public_share: bytes,
-            input_share: bytes) -> State:
+            input_share: bytes) -> Continued | Rejected:
         """Called by the Leader to initialize ping-ponging."""
         try:
             (prep_state, prep_share) = self.prep_init(
@@ -140,6 +140,7 @@ class PingPong(
                 self.decode_public_share(public_share),
                 self.decode_input_share(0, input_share),
             )
+
             encoded_prep_share = self.encode_prep_share(prep_share)
             return Continued(
                 prep_state, 0,
@@ -156,11 +157,13 @@ class PingPong(
             nonce: bytes,
             public_share: bytes,
             input_share: bytes,
-            inbound: bytes) -> State:
+            inbound: bytes, # encoded ping pong Message
+        ) -> Continued | FinishedWithOutbound | Rejected:
         """
         Called by the Helper in response to the Leader's initial
         message.
         """
+
         try:
             (prep_state, prep_share) = self.prep_init(
                 vdaf_verify_key,
@@ -220,7 +223,7 @@ class PingPong(
         self,
         ctx: bytes,
         agg_param: bytes,
-        state: State,
+        state: Continued,
         inbound: bytes,
     ) -> State:
         """
@@ -234,12 +237,10 @@ class PingPong(
         is_leader: bool,
         ctx: bytes,
         agg_param: bytes,
-        state: State,
-        inbound: bytes,
+        state: Continued,
+        inbound: bytes, # encoded ping pong Message
     ) -> State:
         try:
-            if not isinstance(state, Continued):
-                return Rejected()
             prep_round = state.prep_round
 
             (inbound_type, inbound_items) = decode(inbound)
@@ -285,8 +286,8 @@ class PingPong(
         self,
         ctx: bytes,
         agg_param: bytes,
-        state: State,
-        inbound: bytes,
+        state: Continued,
+        inbound: bytes, # encoded ping pong Message
     ) -> State:
         """Called by the Helper to continue ping-ponging."""
         return self.ping_pong_continued(
