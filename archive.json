@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-11T01:08:14.908927+00:00",
+  "timestamp": "2025-05-15T01:01:16.493203+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6972,6 +6972,24 @@
           "updatedAt": "2025-05-05T18:47:16Z"
         }
       ]
+    },
+    {
+      "number": 544,
+      "id": "I_kwDOGKuqOc62egcn",
+      "title": "tls-presentation: Tighten lower bounds on variable length fields",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/544",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial"
+      ],
+      "body": "To match https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/687",
+      "createdAt": "2025-05-13T23:42:50Z",
+      "updatedAt": "2025-05-13T23:42:59Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -44596,7 +44614,7 @@
       "labels": [],
       "body": "Closes #542.\r\n\r\nMerge the outbound message into the Aggregator's ping pong state:\r\n\r\n1. Remove outbound message from each API call\r\n\r\n2. Add outbound message to `Continued`\r\n\r\n3. Define a new state, `FinishedWithOutbound` that is like `Finished` except it include an outbound message\r\n\r\nThis reduces the number of cases the caller has to handle to only cases that are valid. In particular, the following cases are invalid:\r\n\r\n* `state == Rejected() and outbound != None`\r\n* `state == Continued(...) and outbound == None`",
       "createdAt": "2025-05-05T21:17:27Z",
-      "updatedAt": "2025-05-09T14:22:58Z",
+      "updatedAt": "2025-05-14T00:02:21Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cee4567268a54be13d9d0c1e8a3d2b968959d688",
@@ -44662,6 +44680,19 @@
               "updatedAt": "2025-05-09T14:22:54Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6pLf2j",
+          "commit": {
+            "abbreviatedOid": "3f932a2"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "The intention of this change is to _make illegal states impossible to represent_, and I think that's a sound idea. However, I think we can do better. In particular, putting a `Message` inside `State` is an unfortunate complication for `ping_pong_leader_init`.\r\n\r\nPreviously, that function returned `tuple[State, Optional[bytes]]` (the second value is an encoded `Message`). `State` can be one of `Continued` or `Rejected`, but never `Finished`. In `libprio-rs`, I represented this as `Result<(PingPongState, PingPongMessage), Error>`. The `State::Rejected` variant from the reference Python is represented by `Result(Err)`. As a result, it's quite natural for code using the `ping_pong` module to get at the state and message. See for example the [current test](https://github.com/divviup/libprio-rs/blob/5a96c1f18c49b1409aeded54b41f8e70e80375f9/src/topology/ping_pong.rs#L699C8-L709C23)\r\n\r\n```rust\r\n// Leader inits into round 0\r\nlet (leader_state, leader_message) = leader\r\n    .leader_initialized(\r\n        &verify_key,\r\n        CTX_STR,\r\n        &aggregation_param,\r\n        &nonce,\r\n        &public_share,\r\n        &input_share,\r\n    )\r\n    .unwrap();\r\n// leader_state gets stored, leader_message is transmitted to helper\r\n```\r\n\r\nBut now, `leader_message` is inside `leader_state` -- but only if it's `PingPongState::Continued`. It's now a little more awkward to fish out the message ([ref](https://github.com/divviup/libprio-rs/blob/37d895d79022f65827570e99377994847ef96f75/src/topology/ping_pong.rs#L818)):\r\n\r\n```rust\r\n// Leader inits into round 0\r\nlet leader_state = leader\r\n    .leader_initialized(\r\n        &verify_key,\r\n        CTX_STR,\r\n        &aggregation_param,\r\n        &nonce,\r\n        &public_share,\r\n        &input_share,\r\n    )\r\n    .unwrap();\r\n\r\nlet leader_message = assert_matches!(leader_state, PingPongState::Continued(_, ref m) => m);\r\n\r\n// leader_state gets stored, leader_message is transmitted to helper\r\n```\r\n\r\nSo now, the implementation has to worry about the case where `leader_state` is something besides `PingPongState::Continued`, despite that being impossible. In fact, the implementation shouldn't care about which variant of `PingPongState` it is at all, because all it will ever do is pass that value back into `leader_continued`.\r\n\r\nSimilarly, `ping_pong_helper_init` will always produce a message to send to the leader, so allowing it to return variants that don't include a message isn't right.\r\n\r\nI think we can resolve this by not insisting that all of `ping_pong_leader_init`, `ping_pong_helper_init`, `ping_pong_leader_continue` and `ping_pong_helper_continue` return the same type. I think the `_continue` functions want to return something very much like the `State` enum this PR creates, while `ping_pong_leader_init` should just unconditionally return prep_state + a ping pong message. I'm still chewing on the fine details of it, and seeing if I can put together something I like on the Rust side and then translate that back into Python and protocol text. I'm hoping to have something more coherent tomorrow but I ran out of time today.",
+          "createdAt": "2025-05-14T00:02:21Z",
+          "updatedAt": "2025-05-14T00:02:21Z",
+          "comments": []
         }
       ]
     }
