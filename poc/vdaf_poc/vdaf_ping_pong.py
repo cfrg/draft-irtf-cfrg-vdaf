@@ -150,15 +150,15 @@ class PingPong(
             return Rejected()
 
     def ping_pong_helper_init(
-            self,
-            vdaf_verify_key: bytes,
-            ctx: bytes,
-            agg_param: bytes,
-            nonce: bytes,
-            public_share: bytes,
-            input_share: bytes,
-            inbound: bytes, # encoded ping pong Message
-        ) -> Continued | FinishedWithOutbound | Rejected:
+        self,
+        vdaf_verify_key: bytes,
+        ctx: bytes,
+        agg_param: bytes,
+        nonce: bytes,
+        public_share: bytes,
+        input_share: bytes,
+        inbound: bytes,  # encoded ping pong Message
+    ) -> Continued | FinishedWithOutbound | Rejected:
         """
         Called by the Helper in response to the Leader's initial
         message.
@@ -224,7 +224,7 @@ class PingPong(
         ctx: bytes,
         agg_param: bytes,
         state: Continued,
-        inbound: bytes,
+        inbound: bytes,  # encoded ping pong Message
     ) -> State:
         """
         Called by the Leader to start the next step of ping-ponging.
@@ -238,7 +238,7 @@ class PingPong(
         ctx: bytes,
         agg_param: bytes,
         state: Continued,
-        inbound: bytes, # encoded ping pong Message
+        inbound: bytes,  # encoded ping pong Message
     ) -> State:
         try:
             prep_round = state.prep_round
@@ -287,7 +287,7 @@ class PingPong(
         ctx: bytes,
         agg_param: bytes,
         state: Continued,
-        inbound: bytes, # encoded ping pong Message
+        inbound: bytes,  # encoded ping pong Message
     ) -> State:
         """Called by the Helper to continue ping-ponging."""
         return self.ping_pong_continued(
