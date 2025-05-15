@@ -6,7 +6,7 @@ from vdaf_poc.common import from_be_bytes, to_be_bytes
 from vdaf_poc.test_utils import TestVdaf
 from vdaf_poc.vdaf import Vdaf
 from vdaf_poc.vdaf_ping_pong import (Continued, Finished, FinishedWithOutbound,
-                                     PingPong)
+                                     PingPong, State)
 
 
 class PingPongTester(
@@ -186,7 +186,7 @@ class TestPingPong(unittest.TestCase):
         )
 
         agg_param = 23
-        leader_state = vdaf.ping_pong_leader_init(
+        leader_init_state = vdaf.ping_pong_leader_init(
             verify_key,
             ctx,
             vdaf.encode_agg_param(agg_param),
@@ -194,8 +194,8 @@ class TestPingPong(unittest.TestCase):
             vdaf.test_vec_encode_public_share(public_share),
             vdaf.test_vec_encode_input_share(input_shares[0]),
         )
-        assert isinstance(leader_state, Continued)
-        self.assertEqual(leader_state.prep_round, 0)
+        assert isinstance(leader_init_state, Continued)
+        self.assertEqual(leader_init_state.prep_round, 0)
 
         helper_state = vdaf.ping_pong_helper_init(
             verify_key,
@@ -204,14 +204,14 @@ class TestPingPong(unittest.TestCase):
             nonce,
             vdaf.test_vec_encode_public_share(public_share),
             vdaf.test_vec_encode_input_share(input_shares[1]),
-            leader_state.outbound,
+            leader_init_state.outbound,
         )
         assert isinstance(helper_state, FinishedWithOutbound)
 
         leader_state = vdaf.ping_pong_leader_continued(
             ctx,
             vdaf.encode_agg_param(agg_param),
-            leader_state,
+            leader_init_state,
             helper_state.outbound,
         )
         self.assertTrue(isinstance(leader_state, Finished))
@@ -237,7 +237,7 @@ class TestPingPong(unittest.TestCase):
                 rand,
             )
 
-            leader_state = vdaf.ping_pong_leader_init(
+            leader_init_state = vdaf.ping_pong_leader_init(
                 verify_key,
                 ctx,
                 vdaf.encode_agg_param(agg_param),
@@ -245,13 +245,16 @@ class TestPingPong(unittest.TestCase):
                 vdaf.test_vec_encode_public_share(public_share),
                 vdaf.test_vec_encode_input_share(input_shares[0]),
             )
+            # Upcast to State so we can assign to this from leader_continued
+            # later
+            leader_state = cast(State, leader_init_state)
             assert isinstance(leader_state, Continued)
             self.assertEqual(leader_state.prep_round, 0)
 
             for step in range(num_steps):
                 if step == 0:
                     assert isinstance(leader_state, Continued)
-                    helper_state = vdaf.ping_pong_helper_init(
+                    helper_init_state = vdaf.ping_pong_helper_init(
                         verify_key,
                         ctx,
                         vdaf.encode_agg_param(agg_param),
@@ -260,13 +263,16 @@ class TestPingPong(unittest.TestCase):
                         vdaf.test_vec_encode_input_share(input_shares[1]),
                         leader_state.outbound,
                     )
+                    # Upcast to State so we can assign to this from
+                    # helper_continued later
+                    helper_state = cast(State, helper_init_state)
                 else:
                     assert isinstance(leader_state, Continued) or \
                         isinstance(leader_state, FinishedWithOutbound)
                     helper_state = vdaf.ping_pong_helper_continued(
                         vdaf.encode_agg_param(agg_param),
                         ctx,
-                        helper_state,
+                        cast(Continued, helper_state),
                         leader_state.outbound,
                     )
 
@@ -276,7 +282,7 @@ class TestPingPong(unittest.TestCase):
                     leader_state = vdaf.ping_pong_leader_continued(
                         vdaf.encode_agg_param(agg_param),
                         ctx,
-                        leader_state,
+                        cast(Continued, leader_state),
                         helper_state.outbound,
                     )
 

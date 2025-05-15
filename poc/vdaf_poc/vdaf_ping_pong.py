@@ -200,7 +200,7 @@ class PingPong(
             agg_param: AggParam,
             prep_shares: list[PrepShare],
             prep_state: PrepState,
-            prep_round: int) -> State:
+            prep_round: int) -> Continued | FinishedWithOutbound:
         prep_msg = self.prep_shares_to_prep(ctx,
                                             agg_param,
                                             prep_shares)
