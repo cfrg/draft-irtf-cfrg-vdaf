@@ -1740,7 +1740,7 @@ Table of Contents
            agg_param: bytes,
            nonce: bytes,
            public_share: bytes,
-           input_share: bytes) -> State:
+           input_share: bytes) -> Continued | Rejected:
        """Called by the Leader to initialize ping-ponging."""
        try:
            (prep_state, prep_share) = self.prep_init(
@@ -1752,6 +1752,7 @@ Table of Contents
                self.decode_public_share(public_share),
                self.decode_input_share(0, input_share),
            )
+
            encoded_prep_share = self.encode_prep_share(prep_share)
            return Continued(
                prep_state, 0,
@@ -1772,18 +1773,20 @@ Table of Contents
    using the following procedure:
 
    def ping_pong_helper_init(
-           self,
-           vdaf_verify_key: bytes,
-           ctx: bytes,
-           agg_param: bytes,
-           nonce: bytes,
-           public_share: bytes,
-           input_share: bytes,
-           inbound: bytes) -> State:
+       self,
+       vdaf_verify_key: bytes,
+       ctx: bytes,
+       agg_param: bytes,
+       nonce: bytes,
+       public_share: bytes,
+       input_share: bytes,
+       inbound: bytes,  # encoded ping pong Message
+   ) -> Continued | FinishedWithOutbound | Rejected:
        """
        Called by the Helper in response to the Leader's initial
        message.
        """
+
        try:
            (prep_state, prep_share) = self.prep_init(
                vdaf_verify_key,
@@ -1826,7 +1829,7 @@ Table of Contents
            agg_param: AggParam,
            prep_shares: list[PrepShare],
            prep_state: PrepState,
-           prep_round: int) -> State:
+           prep_round: int) -> Continued | FinishedWithOutbound:
        prep_msg = self.prep_shares_to_prep(ctx,
                                            agg_param,
                                            prep_shares)
@@ -1858,8 +1861,8 @@ Table of Contents
        self,
        ctx: bytes,
        agg_param: bytes,
-       state: State,
-       inbound: bytes,
+       state: Continued,
+       inbound: bytes,  # encoded ping pong Message
    ) -> State:
        """
        Called by the Leader to start the next step of ping-ponging.
@@ -1872,12 +1875,10 @@ Table of Contents
        is_leader: bool,
        ctx: bytes,
        agg_param: bytes,
-       state: State,
-       inbound: bytes,
+       state: Continued,
+       inbound: bytes,  # encoded ping pong Message
    ) -> State:
        try:
-           if not isinstance(state, Continued):
-               return Rejected()
            prep_round = state.prep_round
 
            (inbound_type, inbound_items) = decode(inbound)
@@ -1929,8 +1930,8 @@ Table of Contents
        self,
        ctx: bytes,
        agg_param: bytes,
-       state: State,
-       inbound: bytes,
+       state: Continued,
+       inbound: bytes,  # encoded ping pong Message
    ) -> State:
        """Called by the Helper to continue ping-ponging."""
        return self.ping_pong_continued(
