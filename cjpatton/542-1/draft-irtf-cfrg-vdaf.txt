@@ -1654,12 +1654,12 @@ Table of Contents
    State transitions are made when the state is acted upon by the
    Aggregator's local inputs and/or messages sent by its co-Aggregators.
    The initial state is Start.  The terminal states are: Rejected,
-   indicating that the report cannot be processed any further; and
+   indicating that the report cannot be processed any further;
    Finished(out_share), indicating that the Aggregator has recovered an
    output share out_share; and FinishedWithOutbound(out_share,
    outbound), indicating that the Aggregator has recovered an output
-   share, has one more outbound message to send.  For completeness, we
-   define these states in Appendix B.
+   share, and has one more outbound message to send.  For completeness,
+   we define these states in Appendix B.
 
    The methods described in this section are defined in terms of opaque
    byte strings.  A compatible Vdaf MUST specify methods for encoding

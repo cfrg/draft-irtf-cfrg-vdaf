@@ -3595,10 +3595,10 @@ channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 <p id="section-5.7-5">State transitions are made when the state is acted upon by the Aggregator's
 local inputs and/or messages sent by its co-Aggregators. The initial state is
 <code>Start</code>. The terminal states are: <code>Rejected</code>, indicating that the report cannot
-be processed any further; and <code>Finished(out_share)</code>, indicating that the
+be processed any further; <code>Finished(out_share)</code>, indicating that the
 Aggregator has recovered an output share <code>out_share</code>; and
 <code>FinishedWithOutbound(out_share, outbound)</code>, indicating that the Aggregator has
-recovered an output share, has one more outbound message to send. For
+recovered an output share, and has one more outbound message to send. For
 completeness, we define these states in <a href="#topo-states" class="auto internal xref">Appendix B</a>.<a href="#section-5.7-5" class="pilcrow">¶</a></p>
 <p id="section-5.7-6">The methods described in this section are defined in terms of opaque byte
 strings. A compatible <code>Vdaf</code> <span class="bcp14">MUST</span> specify methods for encoding public shares,
