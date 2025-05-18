@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-15T01:01:16.493203+00:00",
+  "timestamp": "2025-05-18T01:08:55.557706+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -107,6 +107,11 @@
       "name": "draft-14",
       "description": "",
       "color": "0EC5A3"
+    },
+    {
+      "name": "draft-15",
+      "description": "",
+      "color": "FBBA7B"
     }
   ],
   "issues": [
@@ -44301,10 +44306,12 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-15"
+      ],
       "body": "This adds some configuration to the front matter to silence the SVG warning we're getting, and cleans up the shell script we were using to filter these out previously. See https://mailarchive.ietf.org/arch/msg/rfc-markdown/reUEfraLI_-XH7fO0wKe2ErFxno/.\r\n\r\nThis works locally, but I think we'll need to wait for a new Docker image to be built that includes kramdown-rfc 1.7.22 before it'll work in CI.",
       "createdAt": "2025-01-24T16:44:10Z",
-      "updatedAt": "2025-02-14T23:02:01Z",
+      "updatedAt": "2025-05-16T15:32:13Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "d43de995ae83e40050c0d42e853644e0a34db022",
@@ -44352,11 +44359,12 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "poc"
+        "poc",
+        "draft-15"
       ],
       "body": "This extends the test vector file format to support negative test vectors. Each file now includes a list of which operations should be run using its messages, and whether they should succeed or fail. Thus, we can represent a report that could never be produced by the sharding algorithm, skip comparing against the shard implementation, and check what happens in each step of the preparation process with that input. I include eight new negative test vectors to start with. Existing test vectors are modified to add this list of operations. Note that test vector consumers do not necessarily need to reimplement `run_vdaf()` anymore to make use of the all-success test vectors, since the operations list now captures that high-level coordination.\r\n\r\nUp until now, we have not had strong conventions for \"round numbers\" to associate with every message or operation. I'm open to suggestions on whether we should adjust the round numbers used for \"prep_shares_to_prep\" or \"prep_next\" operations.\r\n\r\nI'm working on consuming these negative test vectors in libprio-rs, and thus far I'm getting partial mismatches of Prio3 prepare shares when either the helper's joint randomness blind or the public share is corrupted (but not the leader's joint randomness blind, interestingly). It's possible we have some error in the implementation that cancels out when there's agreement on the joint randomness seed.\r\n\r\nCloses #536.",
       "createdAt": "2025-04-22T22:26:54Z",
-      "updatedAt": "2025-04-24T15:11:59Z",
+      "updatedAt": "2025-05-16T15:32:14Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b688ab27cb82c0539429bf61c641cbda6f1f491b",
@@ -44568,11 +44576,12 @@
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [
-        "poc"
+        "poc",
+        "draft-15"
       ],
       "body": "I upgraded mypy from 1.10.0 to 1.15.0, and it found some new type errors. This PR adds another cast to Poplar1 sketching to hop between `Field64 | Field255` to `Field`.",
       "createdAt": "2025-04-22T22:32:03Z",
-      "updatedAt": "2025-04-22T23:06:11Z",
+      "updatedAt": "2025-05-16T15:32:14Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "8d7e07de26e33ef24a5c36f64153de1d7c9f0faf",
@@ -44611,16 +44620,18 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-15"
+      ],
       "body": "Closes #542.\r\n\r\nMerge the outbound message into the Aggregator's ping pong state:\r\n\r\n1. Remove outbound message from each API call\r\n\r\n2. Add outbound message to `Continued`\r\n\r\n3. Define a new state, `FinishedWithOutbound` that is like `Finished` except it include an outbound message\r\n\r\nThis reduces the number of cases the caller has to handle to only cases that are valid. In particular, the following cases are invalid:\r\n\r\n* `state == Rejected() and outbound != None`\r\n* `state == Continued(...) and outbound == None`",
       "createdAt": "2025-05-05T21:17:27Z",
-      "updatedAt": "2025-05-14T00:02:21Z",
+      "updatedAt": "2025-05-16T15:31:14Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cee4567268a54be13d9d0c1e8a3d2b968959d688",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/542-1",
-      "headRefOid": "3f932a2a89faa832a1afc599118473db4b7c162f",
+      "headRefOid": "c54d1d7176797845a94924d7eab051799e96e0c2",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -44632,6 +44643,27 @@
           "body": "cc @ekr",
           "createdAt": "2025-05-05T21:26:50Z",
           "updatedAt": "2025-05-05T21:26:50Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "\r\nAs promised, I've worked up a couple different alternatives here, and have some Python and Rust implementations to help support discussion.\r\n\r\nFirst, we have the spec change in this PR (#543). This same PR implements it in Python, and I've implemented it in Rust [here](https://github.com/divviup/libprio-rs/pull/1256). To recap my earlier comments, my major gripe here is that various illegal states are still representable under this API, and as a result, both the ping pong implementation and its users have to do more error checking and structure unpacking. For example, `leader_initialized` can only ever return `PingPongState::Initialize`, but because it returns `PingPongState`, users have to check that the struct is of the desired variant and pull out the `A::PrepareState`.\r\n\r\nAdditionally, if we look at `helper_initialize`, it takes a `PingPongMessage`, but fails if it's anything but `PingPongMessage::Initialize`. So it could just take `A::PrepareState` and save everyone some error handling. Similarly, `helper_continue` takes `PingPongState`, but barfs if the state is anything other than `PingPongState::Continue`. So we might as well just pass in `(A::PrepareState, PingPongMessage)` (which is what's inside a `PingPongState::Continue`).\r\n\r\nI made a PR (#545) which I think is just a bit better. Take a look at that change for some detailed discussion, but basically it's a minor tweak to narrow what `PingPongState` variants are returned or taken by various functions. I've implemented it in Rust in https://github.com/divviup/libprio-rs/pull/1259. Several functions now either take or return a `Self::PrepareState` instead of `PingPongState`, which means the compiler can enforce that values of the right type are getting passed around.\r\n\r\nThis try retains the `Initialize` variant of the ping pong message, because @cjpatton observed that ideally, we'd do this in a way that doesn't break the wire format. But I think we can do better still if we're willing to delete that message variant. I've implemented that in Rust in https://github.com/divviup/libprio-rs/pull/1258. I don't have a Python implementation for it, because it's a little more awkward to do (because the Python implementation needs an explicit round counter to decide if preparation is finished, and if you're not passing a `Continued` around, there's no obvious place to stick that integer). But the Rust side shows that we get to delete even more error cases, because for instance it's no longer possible to pass `PingPongMessage::Continued` to `helper_initialized`.\r\n\r\nTo summarize:\r\n\r\n| | Wire message break? | Python implementation | Rust implementation |\r\n|-|-|-|-|\r\n| put ping pong message inside ping pong state | No | #543 | https://github.com/divviup/libprio-rs/pull/1256 |\r\n| put ping pong message inside ping pong state, making illegal states impossible to represent | No | #545 | https://github.com/divviup/libprio-rs/pull/1259 |\r\n| put ping pong message inside ping pong state, making illegal states impossible to represent, AND removing `PingPongMessage::Initialize` | Yes | none yet | https://github.com/divviup/libprio-rs/pull/1258 |\r\n\r\nMy vote is to go with the last option, which admittedly is more disruptive to implementations, but I think all the known implementations have work left to do in order to implement the latest DAP anyway.",
+          "createdAt": "2025-05-15T21:16:31Z",
+          "updatedAt": "2025-05-15T21:16:31Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Chris and I chatted offline and agreed that the second row of my table is the way forward: it better expresses what is and isn't legal without breaking the wire format for messages, which the VDAF editors are reluctant to do at this stage. The further safety and expressiveness changes I sketched out can still be achieved in an implementation like libprio-rs while still conforming to the specification, so that's good enough for me.",
+          "createdAt": "2025-05-15T23:24:25Z",
+          "updatedAt": "2025-05-15T23:24:25Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Squashed. I'll hold off on merging until we're done reviewing https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/pull/705.",
+          "createdAt": "2025-05-16T15:30:19Z",
+          "updatedAt": "2025-05-16T15:30:19Z"
         }
       ],
       "reviews": [
@@ -44692,6 +44724,259 @@
           "body": "The intention of this change is to _make illegal states impossible to represent_, and I think that's a sound idea. However, I think we can do better. In particular, putting a `Message` inside `State` is an unfortunate complication for `ping_pong_leader_init`.\r\n\r\nPreviously, that function returned `tuple[State, Optional[bytes]]` (the second value is an encoded `Message`). `State` can be one of `Continued` or `Rejected`, but never `Finished`. In `libprio-rs`, I represented this as `Result<(PingPongState, PingPongMessage), Error>`. The `State::Rejected` variant from the reference Python is represented by `Result(Err)`. As a result, it's quite natural for code using the `ping_pong` module to get at the state and message. See for example the [current test](https://github.com/divviup/libprio-rs/blob/5a96c1f18c49b1409aeded54b41f8e70e80375f9/src/topology/ping_pong.rs#L699C8-L709C23)\r\n\r\n```rust\r\n// Leader inits into round 0\r\nlet (leader_state, leader_message) = leader\r\n    .leader_initialized(\r\n        &verify_key,\r\n        CTX_STR,\r\n        &aggregation_param,\r\n        &nonce,\r\n        &public_share,\r\n        &input_share,\r\n    )\r\n    .unwrap();\r\n// leader_state gets stored, leader_message is transmitted to helper\r\n```\r\n\r\nBut now, `leader_message` is inside `leader_state` -- but only if it's `PingPongState::Continued`. It's now a little more awkward to fish out the message ([ref](https://github.com/divviup/libprio-rs/blob/37d895d79022f65827570e99377994847ef96f75/src/topology/ping_pong.rs#L818)):\r\n\r\n```rust\r\n// Leader inits into round 0\r\nlet leader_state = leader\r\n    .leader_initialized(\r\n        &verify_key,\r\n        CTX_STR,\r\n        &aggregation_param,\r\n        &nonce,\r\n        &public_share,\r\n        &input_share,\r\n    )\r\n    .unwrap();\r\n\r\nlet leader_message = assert_matches!(leader_state, PingPongState::Continued(_, ref m) => m);\r\n\r\n// leader_state gets stored, leader_message is transmitted to helper\r\n```\r\n\r\nSo now, the implementation has to worry about the case where `leader_state` is something besides `PingPongState::Continued`, despite that being impossible. In fact, the implementation shouldn't care about which variant of `PingPongState` it is at all, because all it will ever do is pass that value back into `leader_continued`.\r\n\r\nSimilarly, `ping_pong_helper_init` will always produce a message to send to the leader, so allowing it to return variants that don't include a message isn't right.\r\n\r\nI think we can resolve this by not insisting that all of `ping_pong_leader_init`, `ping_pong_helper_init`, `ping_pong_leader_continue` and `ping_pong_helper_continue` return the same type. I think the `_continue` functions want to return something very much like the `State` enum this PR creates, while `ping_pong_leader_init` should just unconditionally return prep_state + a ping pong message. I'm still chewing on the fine details of it, and seeing if I can put together something I like on the Rust side and then translate that back into Python and protocol text. I'm hoping to have something more coherent tomorrow but I ran out of time today.",
           "createdAt": "2025-05-14T00:02:21Z",
           "updatedAt": "2025-05-14T00:02:21Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6pkyUw",
+          "commit": {
+            "abbreviatedOid": "3f932a2"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Some editorial comments:",
+          "createdAt": "2025-05-15T21:18:07Z",
+          "updatedAt": "2025-05-15T22:30:03Z",
+          "comments": [
+            {
+              "originalPosition": 24,
+              "body": "nit: run-on sentence\r\n```suggestion\r\nbe processed any further; `Finished(out_share)`, indicating that the\r\n```",
+              "createdAt": "2025-05-15T21:18:08Z",
+              "updatedAt": "2025-05-15T22:30:03Z"
+            },
+            {
+              "originalPosition": 29,
+              "body": "nit: grammar\r\n```suggestion\r\nrecovered an output share, and has one more outbound message to send. For\r\n```",
+              "createdAt": "2025-05-15T21:18:32Z",
+              "updatedAt": "2025-05-15T22:30:03Z"
+            },
+            {
+              "originalPosition": 36,
+              "body": "This indeed doesn't need a cast anymore, since we narrow `leader_state` to `Continued` above, and it is apparent from the constructor that the `outbound` attribute is of type `bytes`.",
+              "createdAt": "2025-05-15T22:19:14Z",
+              "updatedAt": "2025-05-15T22:30:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6plXfA",
+          "commit": {
+            "abbreviatedOid": "95c886a"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-15T22:57:40Z",
+          "updatedAt": "2025-05-15T22:57:40Z",
+          "comments": [
+            {
+              "originalPosition": 79,
+              "body": "By declaring this variable to be of a broader type, we can skip using a separate variable name, and get rid of the cast below. (same for the helper state)\r\n```suggestion\r\n            leader_state: State = vdaf.ping_pong_leader_init(\r\n```",
+              "createdAt": "2025-05-15T22:57:40Z",
+              "updatedAt": "2025-05-15T22:58:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6plWrd",
+          "commit": {
+            "abbreviatedOid": "95c886a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-15T22:54:46Z",
+          "updatedAt": "2025-05-15T23:01:03Z",
+          "comments": [
+            {
+              "originalPosition": 144,
+              "body": "@tgeoghegan what about making the return type here more specific?",
+              "createdAt": "2025-05-15T22:54:47Z",
+              "updatedAt": "2025-05-15T23:01:03Z"
+            },
+            {
+              "originalPosition": 153,
+              "body": "and here",
+              "createdAt": "2025-05-15T22:54:52Z",
+              "updatedAt": "2025-05-15T23:01:03Z"
+            },
+            {
+              "originalPosition": 195,
+              "body": "And here",
+              "createdAt": "2025-05-15T22:55:02Z",
+              "updatedAt": "2025-05-15T23:01:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6plbfR",
+          "commit": {
+            "abbreviatedOid": "74550f8"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-15T23:11:55Z",
+          "updatedAt": "2025-05-15T23:11:55Z",
+          "comments": [
+            {
+              "originalPosition": 144,
+              "body": "`ping_pong_leader` continued can return any of `Continued | Finished | FinishedWithOutbound | Rejected`. That does exclude `Start`, so enumerating the other four would be more specific. However, the `Start` state is never instantiated anywhere (both leader and helper are in state `Continued` after their respective `init` calls) so we could also just remove that class altogether.",
+              "createdAt": "2025-05-15T23:11:55Z",
+              "updatedAt": "2025-05-15T23:11:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6plcI1",
+          "commit": {
+            "abbreviatedOid": "95c886a"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-15T23:14:25Z",
+          "updatedAt": "2025-05-15T23:14:25Z",
+          "comments": [
+            {
+              "originalPosition": 79,
+              "body": "Excellent tip, thank you!",
+              "createdAt": "2025-05-15T23:14:25Z",
+              "updatedAt": "2025-05-15T23:14:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6pldhS",
+          "commit": {
+            "abbreviatedOid": "95c886a"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-15T23:18:57Z",
+          "updatedAt": "2025-05-15T23:18:57Z",
+          "comments": [
+            {
+              "originalPosition": 79,
+              "body": "Done.",
+              "createdAt": "2025-05-15T23:18:57Z",
+              "updatedAt": "2025-05-15T23:18:57Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6pleqB",
+          "commit": {
+            "abbreviatedOid": "4c72de9"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Looks cromulent to me (not that anyone asked, I am not a VDAF editor!)",
+          "createdAt": "2025-05-15T23:22:47Z",
+          "updatedAt": "2025-05-15T23:22:47Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6pr2lk",
+          "commit": {
+            "abbreviatedOid": "4c72de9"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-05-16T14:38:29Z",
+          "updatedAt": "2025-05-16T14:39:30Z",
+          "comments": [
+            {
+              "originalPosition": 127,
+              "body": "This cast can be removed, because the enclosing `if` narrows the inferred type here.\r\n```suggestion\r\n                        leader_state,\r\n```",
+              "createdAt": "2025-05-16T14:38:30Z",
+              "updatedAt": "2025-05-16T14:39:30Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 545,
+      "id": "PR_kwDOGKuqOc6WYtbb",
+      "title": "Ping pong topo",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/545",
+      "state": "MERGED",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "draft-15"
+      ],
+      "body": "This adds one more commit on top of the changes in #543 that I think make the API easier to use, in particular by making illegal states impossible to represent, which I believe is the overall goal here. I've left remarks throughout the diff to highlight important changes and the motivation.\r\n\r\nI also haven't yet reflected this proposed change in the actual protocol text. It's only in the Python `poc` for now, so we can discuss whether we like it. Based on the consensus we reach, I can fix up the protocol text accordingly.",
+      "createdAt": "2025-05-15T20:31:15Z",
+      "updatedAt": "2025-05-16T15:32:15Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/542-1",
+      "baseRefOid": "3f932a2a89faa832a1afc599118473db4b7c162f",
+      "headRepository": "tgeoghegan/vdaf",
+      "headRefName": "ping-pong-topo",
+      "headRefOid": "b08f7ddefac4df42d795c88724fed91ce0db8a78",
+      "closedAt": "2025-05-15T22:42:12Z",
+      "mergedAt": "2025-05-15T22:42:12Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "47b5baea6d038cafe0e78a696711b4f1487cd78b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6pkh7a",
+          "commit": {
+            "abbreviatedOid": "b7d6831"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-05-15T20:41:19Z",
+          "updatedAt": "2025-05-15T21:05:45Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "`ping_pong_leader_init` can only ever go to the continued state or reject, so returning a `State` which could also be `Finished` or `FinishedWithOutput` is unnecessary. Actually, what I wanted to do here was:\r\n\r\n```\r\ndef ping_pong_leader_init(...) -> tuple[PrepState, bytes] | Rejected:\r\n```\r\n\r\nWhere the `bytes` is the encoded `PingPongMessage`. But unfortunately in Python it's awkward to check at runtime which variant of a Union was returned from a function. In particular, you can't do something like `isinstance(value, tuple[int, int])`, because the generics don't exist at runtime. Even worse, you can't do `isinstance(value[0], PrepShare)`, because `PrepShare` is not a real type, it's just a `typing.TypeVar` and that's ... not the same thing.\r\n\r\nLong story short, it's easier to narrow the returned type from `State` down to just `Continued | Rejected`, which still expresses what values can possibly be returned.",
+              "createdAt": "2025-05-15T20:41:19Z",
+              "updatedAt": "2025-05-15T21:40:10Z"
+            },
+            {
+              "originalPosition": 32,
+              "body": "As above with `ping_pong_leader_init`, we express the exact types that can possibly be returned here. And once again, I'd prefer to avoid the `State` subclasses and do\r\n\r\n```\r\ndef ping_pong_helper_init(...) -> tuple[PrepState, bytes] | tuple[OutShare, bytes] | Rejected;\r\n#                                 ^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^\r\n#                                 Instead of Continued  Instead of FinishedWithOutShare\r\n```\r\n\r\nBut then it would be hard to distinguish between `tuple[PrepState, bytes]` and `tuple[OutShare, bytes]` at runtime.",
+              "createdAt": "2025-05-15T20:43:08Z",
+              "updatedAt": "2025-05-15T21:44:01Z"
+            },
+            {
+              "originalPosition": 61,
+              "body": "Because the function now takes `Continued` instead of `State`, which was the only legal value anyway, we can remove a failure mode.",
+              "createdAt": "2025-05-15T20:43:37Z",
+              "updatedAt": "2025-05-15T21:05:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6plRW4",
+          "commit": {
+            "abbreviatedOid": "b08f7dd"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "This is strictly better, so happy to take this!",
+          "createdAt": "2025-05-15T22:42:05Z",
+          "updatedAt": "2025-05-15T22:42:05Z",
           "comments": []
         }
       ]
