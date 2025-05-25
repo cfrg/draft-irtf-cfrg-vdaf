@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-18T01:08:55.557706+00:00",
+  "timestamp": "2025-05-25T01:10:29.838384+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6955,7 +6955,7 @@
       "id": "I_kwDOGKuqOc61OVEJ",
       "title": "Type safety for return values",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/542",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "ekr",
       "authorAssociation": "NONE",
       "assignees": [
@@ -6966,8 +6966,8 @@
       ],
       "body": "I see that, for instance `ping_pong_leader_continued` returns:\n\n```\n           tuple[State, Optional[bytes]]:\n```\n\nBut this allows, for instance, this function to return `(Rejected(), [stuff])` (although the body of the function doesn't seem to do so) and assuming I understand the situation, is actually not a valid situation. Moreover, it makes the rules for how to process the response are confusing. For instance, here is some text from DAP  S 4.6.2.1 on how to handle this function\n\n```\n       If outbound != None, then the Leader stores state and outbound\n       and proceeds to Section 4.6.3.1.  If outbound == None, then the\n       preparation process is complete: either state == Rejected(), in\n```\n\nSo if `outbound != None` I'm not even supposed to look at `state` at this point. Is that really right?\n\nI would suggest that instead we should adopt some sort of type safety mechanism. My Python type hinting is a little rusty but Gemini seems to think what  we want is something like:\n\n```\nclass ContinuingData(NamedTuple):\n    state: bytes\n    output: bytes\n\nclass Finished(NamedTuple):\n    output: bytes,\n   \n\nState = Literal[\"Rejected\"] | Finished | ContinuingData\n```\n\nThis will make it impossible to have invalid states.\n",
       "createdAt": "2025-05-05T18:13:44Z",
-      "updatedAt": "2025-05-05T18:48:52Z",
-      "closedAt": null,
+      "updatedAt": "2025-05-22T23:43:15Z",
+      "closedAt": "2025-05-22T23:43:15Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -44616,7 +44616,7 @@
       "id": "PR_kwDOGKuqOc6VAE2h",
       "title": "topo: Merge outbound into state",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/543",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -44625,17 +44625,19 @@
       ],
       "body": "Closes #542.\r\n\r\nMerge the outbound message into the Aggregator's ping pong state:\r\n\r\n1. Remove outbound message from each API call\r\n\r\n2. Add outbound message to `Continued`\r\n\r\n3. Define a new state, `FinishedWithOutbound` that is like `Finished` except it include an outbound message\r\n\r\nThis reduces the number of cases the caller has to handle to only cases that are valid. In particular, the following cases are invalid:\r\n\r\n* `state == Rejected() and outbound != None`\r\n* `state == Continued(...) and outbound == None`",
       "createdAt": "2025-05-05T21:17:27Z",
-      "updatedAt": "2025-05-16T15:31:14Z",
+      "updatedAt": "2025-05-22T23:43:15Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cee4567268a54be13d9d0c1e8a3d2b968959d688",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/542-1",
       "headRefOid": "c54d1d7176797845a94924d7eab051799e96e0c2",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-05-22T23:43:15Z",
+      "mergedAt": "2025-05-22T23:43:15Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "6054556f3dfe4d0dfe65f1c0e09fbf65ca675323"
+      },
       "comments": [
         {
           "author": "cjpatton",
