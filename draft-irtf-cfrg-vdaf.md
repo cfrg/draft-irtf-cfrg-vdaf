@@ -2428,8 +2428,8 @@ its prep share. The validity decision is then made by the
 `prep_shares_to_prep()` algorithm ({{sec-vdaf-prepare}}).
 
 As usual, we describe the interface implemented by a concrete FLP in terms of
-an abstract base class, denoted `Flp`, that specifies the set of methods and
-parameters a concrete FLP must provide.
+an object `flp` of type `Flp` that specifies the set of methods and parameters
+a concrete FLP must provide.
 
 The parameters provided by a concrete FLP are listed in {{flp-param}}. A
 concrete FLP specifies the following algorithms for generating and verifying
