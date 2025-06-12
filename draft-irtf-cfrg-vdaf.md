@@ -436,6 +436,16 @@ particular.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+15:
+
+* Simplify the ping-pong API for 2-party preparation by merging the outbound
+  message into the state object. This reduces the number of cases the caller
+  has to handle.
+
+* Update the test vector format. First, enrich the test vector schema to
+  express negative test cases. Second, change the encoding of output shares to
+  match the aggregate shares.
+
 14:
 
 * Poplar1: When decoding an aggregation parameter, require the padding bits
