@@ -252,7 +252,7 @@ informative:
   TestVectors:
     title: "Test vectors for Prio3 and Poplar1"
     target: "https://github.com/cfrg/draft-irtf-cfrg-vdaf"
-    refcontent: "commit hash c0e76dc"
+    refcontent: "commit hash cee4567"
     date: December 2024
 
 v3xml2rfc:
@@ -435,6 +435,14 @@ particular.
 (RFC EDITOR: remove this section.)
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
+
+15:
+
+* Simplify the ping-pong API for 2-party preparation by merging the outbound
+  message into the state object. This reduces the number of cases the caller
+  has to handle.
+
+* Enrich the test vector schema to express negative test cases.
 
 14:
 
@@ -786,13 +794,20 @@ In Python, array indexing starts with `0`, e.g., `x[0]` is the first element
 and `x[len(x)-1]` is the last of `x`. We can also index from the end of the
 list, e.g., `x[-1]` is the last element of `x`.
 
+Python uses the symbols `+`, `-`, `*`, and `/` as binary operators. When the
+operands are integers, these have the usual meaning, except:
+
+* Division results in a floating point number. Python includes a similar
+  operator, `x // y`, which is short for `floor(x / y)`.
+
+* When `x` and `y` are byte strings, `x + y` denotes their concatenation, i.e.,
+  `concat(x, y)` as defined below.
+
+Note that we overload these operators when defining finite fields; see
+{{field}}.
+
 Exponentiation is denoted by `x ** y` in Python. We also sometimes use more
 conventional notation for exponentiation, namely `x^y`.
-
-Division of `x` by `y` is denoted by `x / y`. Python includes a similar
-operator, `x // y`, which is short for `floor(x / y)`.
-
-Type hints are used to define input and output types:
 
 * The type variable `F` is used in signatures to signify any type that is a
   subclass of `Field` ({{field}}).
@@ -2428,8 +2443,8 @@ its prep share. The validity decision is then made by the
 `prep_shares_to_prep()` algorithm ({{sec-vdaf-prepare}}).
 
 As usual, we describe the interface implemented by a concrete FLP in terms of
-an abstract base class, denoted `Flp`, that specifies the set of methods and
-parameters a concrete FLP must provide.
+an object `flp` of type `Flp` that specifies the set of methods and parameters
+a concrete FLP must provide.
 
 The parameters provided by a concrete FLP are listed in {{flp-param}}. A
 concrete FLP specifies the following algorithms for generating and verifying
@@ -6359,8 +6374,38 @@ defined below.
 `agg_result`:
 : The expected aggregate result of type `AggResult` defined by the VDAF.
 
-The schema also includes whatever parameters are required to instantiate the
-VDAF. These are listed in the subsections below.
+`operations`:
+:  A list of operations used to construct the test case. They are executed
+   using messages from this test vector and should be executed in the order
+   they appear.
+
+Each operation in the `operations` list has the following schema:
+
+`operation`:
+: The type of operation to be performed. This is one of "shard", "prep_init",
+  "prep_shares_to_prep", "prep_next", "aggregate", or "unshard".
+
+`round`:
+: For any preparation operation, the round number of the operation to be
+  performed. This determines which prepare share, prepare state, and/or prepare
+  message to use.
+
+`aggregator_id`:
+: The aggregator ID to use when performing this operation. This determines
+  which messages and which prepare state to use, in addition to the aggregator ID
+  argument itself.
+
+`report_index`:
+: The index of the report on which to perform this operation. This is an index
+  into the `prep` array.
+
+`success`:
+: If this is `True`, the operation should succeed, and its output should match
+  the corresponding values in the test vector. If this is `False`, the operation
+  should fail, terminating preparation of this report.
+
+The test vector schema also includes whatever parameters are required to
+instantiate the VDAF. These are listed in the subsections below.
 
 ### Prio3Count
 
