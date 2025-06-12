@@ -29,12 +29,12 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
-    lxml 5.3.0
-    platformdirs 4.3.7
+    lxml 5.3.1
+    platformdirs 4.3.8
     pycountry 24.6.1
     PyYAML 6.0.2
     requests 2.32.3
-    setuptools 70.3.0
+    setuptools 80.9.0
     wcwidth 0.2.13
 -->
 <link href="draft-irtf-cfrg-vdaf.xml" rel="alternate" type="application/rfc+xml">
@@ -1054,11 +1054,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">VDAF</td>
-<td class="right">April 2025</td>
+<td class="right">June 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 24 October 2025</td>
+<td class="center">Expires 14 December 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-04-22" class="published">22 April 2025</time>
+<time datetime="2025-06-12" class="published">12 June 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-10-24">24 October 2025</time></dd>
+<dd class="expires"><time datetime="2025-12-14">14 December 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 24 October 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 14 December 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3555,27 +3555,35 @@ channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 <figure id="figure-7">
           <div id="section-5.7-4.1">
             <div class="alignLeft art-svg artwork" id="section-5.7-4.1.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="560" viewBox="0 0 560 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="504" viewBox="0 0 504 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 16,32 L 16,64" fill="none" stroke="black"></path>
                 <path d="M 16,96 L 16,128" fill="none" stroke="black"></path>
                 <path d="M 152,32 L 152,64" fill="none" stroke="black"></path>
-                <path d="M 152,96 L 152,128" fill="none" stroke="black"></path>
-                <path d="M 288,32 L 288,64" fill="none" stroke="black"></path>
-                <path d="M 152,32 L 288,32" fill="none" stroke="black"></path>
+                <path d="M 184,32 L 184,64" fill="none" stroke="black"></path>
+                <path d="M 320,32 L 320,64" fill="none" stroke="black"></path>
+                <path d="M 416,40 L 416,64" fill="none" stroke="black"></path>
+                <path d="M 416,96 L 416,120" fill="none" stroke="black"></path>
+                <path d="M 16,32 L 40,32" fill="none" stroke="black"></path>
+                <path d="M 128,32 L 152,32" fill="none" stroke="black"></path>
+                <path d="M 184,32 L 320,32" fill="none" stroke="black"></path>
                 <path d="M 56,80 L 88,80" fill="none" stroke="black"></path>
-                <path d="M 376,80 L 392,80" fill="none" stroke="black"></path>
-                <path d="M 16,128 L 40,128" fill="none" stroke="black"></path>
-                <path d="M 128,128 L 152,128" fill="none" stroke="black"></path>
-                <polygon class="arrowhead" points="400,80 388,74.4 388,85.6" fill="black" transform="rotate(0,392,80)"></polygon>
-                <polygon class="arrowhead" points="160,64 148,58.4 148,69.6" fill="black" transform="rotate(90,152,64)"></polygon>
-                <polygon class="arrowhead" points="136,128 124,122.4 124,133.6" fill="black" transform="rotate(180,128,128)"></polygon>
+                <path d="M 16,128 L 160,128" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="424,120 412,114.4 412,125.6" fill="black" transform="rotate(90,416,120)"></polygon>
+                <polygon class="arrowhead" points="424,40 412,34.4 412,45.6" fill="black" transform="rotate(270,416,40)"></polygon>
+                <polygon class="arrowhead" points="328,64 316,58.4 316,69.6" fill="black" transform="rotate(90,320,64)"></polygon>
+                <polygon class="arrowhead" points="168,128 156,122.4 156,133.6" fill="black" transform="rotate(0,160,128)"></polygon>
+                <polygon class="arrowhead" points="136,32 124,26.4 124,37.6" fill="black" transform="rotate(180,128,32)"></polygon>
                 <polygon class="arrowhead" points="96,80 84,74.4 84,85.6" fill="black" transform="rotate(0,88,80)"></polygon>
-                <polygon class="arrowhead" points="48,128 36,122.4 36,133.6" fill="black" transform="rotate(0,40,128)"></polygon>
+                <polygon class="arrowhead" points="48,32 36,26.4 36,37.6" fill="black" transform="rotate(0,40,32)"></polygon>
                 <g class="text">
+                  <text x="84" y="36">Rejected</text>
+                  <text x="424" y="36">Finished(out_share)</text>
                   <text x="24" y="84">Start</text>
                   <text x="184" y="84">Continued(prep_state,</text>
-                  <text x="320" y="84">prep_round)</text>
-                  <text x="480" y="84">Finished(out_share)</text>
-                  <text x="84" y="132">Rejected</text>
+                  <text x="320" y="84">prep_round,</text>
+                  <text x="408" y="84">outbound)</text>
+                  <text x="296" y="132">FinishedWithOutbound(out_share,</text>
+                  <text x="464" y="132">outbound)</text>
                 </g>
               </svg><a href="#section-5.7-4.1.1" class="pilcrow">¶</a>
 </div>
@@ -3587,9 +3595,11 @@ channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 <p id="section-5.7-5">State transitions are made when the state is acted upon by the Aggregator's
 local inputs and/or messages sent by its co-Aggregators. The initial state is
 <code>Start</code>. The terminal states are: <code>Rejected</code>, indicating that the report cannot
-be processed any further; and <code>Finished(out_share)</code>, indicating that the
-Aggregator has recovered an output share <code>out_share</code>. For completeness, we
-define these states in <a href="#topo-states" class="auto internal xref">Appendix B</a>.<a href="#section-5.7-5" class="pilcrow">¶</a></p>
+be processed any further; <code>Finished(out_share)</code>, indicating that the
+Aggregator has recovered an output share <code>out_share</code>; and
+<code>FinishedWithOutbound(out_share, outbound)</code>, indicating that the Aggregator has
+recovered an output share, and has one more outbound message to send. For
+completeness, we define these states in <a href="#topo-states" class="auto internal xref">Appendix B</a>.<a href="#section-5.7-5" class="pilcrow">¶</a></p>
 <p id="section-5.7-6">The methods described in this section are defined in terms of opaque byte
 strings. A compatible <code>Vdaf</code> <span class="bcp14">MUST</span> specify methods for encoding public shares,
 input shares, prep shares, prep messages, and aggregation parameters.<a href="#section-5.7-6" class="pilcrow">¶</a></p>
@@ -3670,7 +3680,7 @@ def ping_pong_leader_init(
         agg_param: bytes,
         nonce: bytes,
         public_share: bytes,
-        input_share: bytes) -&gt; tuple[State, Optional[bytes]]:
+        input_share: bytes) -&gt; Continued | Rejected:
     """Called by the Leader to initialize ping-ponging."""
     try:
         (prep_state, prep_share) = self.prep_init(
@@ -3682,38 +3692,42 @@ def ping_pong_leader_init(
             self.decode_public_share(public_share),
             self.decode_input_share(0, input_share),
         )
+
         encoded_prep_share = self.encode_prep_share(prep_share)
-        return (
-            Continued(prep_state, 0),
+        return Continued(
+            prep_state, 0,
             encode(0, encoded_prep_share),  # initialize
         )
     except:
-        return (Rejected(), None)
+        return Rejected()
 </pre><a href="#section-5.7.1-8" class="pilcrow">¶</a>
 </div>
-<p id="section-5.7.1-9">The output is the <code>State</code> to which the Leader has transitioned and an encoded
-<code>Message</code>. If the Leader's state is <code>Rejected</code>, then processing halts.
-Otherwise, if the state is <code>Continued</code>, then processing continues. The function
-<code>encode</code>  is used to encode the outbound message, which has the message type of
-<code>initialize</code> (identified by the number <code>0</code>).<a href="#section-5.7.1-9" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-9">The output is the <code>State</code> to which the Leader has transitioned. If the Leader's
+state is <code>Rejected</code>, then processing halts. Otherwise, if the state is
+<code>Continued</code>, then processing continues. In this case, the state also includes
+the Leader's outbound message. The function <code>encode</code> is used to encode the
+outbound message, which has the message type of <code>initialize</code> (identified by the
+number <code>0</code>).<a href="#section-5.7.1-9" class="pilcrow">¶</a></p>
 <p id="section-5.7.1-10">To continue processing the report, the Leader sends the outbound message to the
 Helper. The Helper's initial transition is computed using the following
 procedure:<a href="#section-5.7.1-10" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-11">
 <pre>
 def ping_pong_helper_init(
-        self,
-        vdaf_verify_key: bytes,
-        ctx: bytes,
-        agg_param: bytes,
-        nonce: bytes,
-        public_share: bytes,
-        input_share: bytes,
-        inbound: bytes) -&gt; tuple[State, Optional[bytes]]:
+    self,
+    vdaf_verify_key: bytes,
+    ctx: bytes,
+    agg_param: bytes,
+    nonce: bytes,
+    public_share: bytes,
+    input_share: bytes,
+    inbound: bytes,  # encoded ping pong Message
+) -&gt; Continued | FinishedWithOutbound | Rejected:
     """
     Called by the Helper in response to the Leader's initial
     message.
     """
+
     try:
         (prep_state, prep_share) = self.prep_init(
             vdaf_verify_key,
@@ -3727,7 +3741,7 @@ def ping_pong_helper_init(
 
         (inbound_type, inbound_items) = decode(inbound)
         if inbound_type != 0:  # initialize
-            return (Rejected(), None)
+            return Rejected()
 
         encoded_prep_share = inbound_items[0]
         prep_shares = [
@@ -3742,7 +3756,7 @@ def ping_pong_helper_init(
             0,
         )
     except:
-        return (Rejected(), None)
+        return Rejected()
 </pre><a href="#section-5.7.1-11" class="pilcrow">¶</a>
 </div>
 <p id="section-5.7.1-12">The procedure <code>decode()</code> decodes the inbound message and returns the
@@ -3758,29 +3772,30 @@ def ping_pong_transition(
         agg_param: AggParam,
         prep_shares: list[PrepShare],
         prep_state: PrepState,
-        prep_round: int) -&gt; tuple[State, bytes]:
+        prep_round: int) -&gt; Continued | FinishedWithOutbound:
     prep_msg = self.prep_shares_to_prep(ctx,
                                         agg_param,
                                         prep_shares)
     encoded_prep_msg = self.encode_prep_msg(prep_msg)
     out = self.prep_next(ctx, prep_state, prep_msg)
     if prep_round+1 == self.ROUNDS:
-        return (
-            Finished(out),
+        return FinishedWithOutbound(
+            out,
             encode(2, encoded_prep_msg),  # finalize
         )
     (prep_state, prep_share) = cast(
         tuple[PrepState, PrepShare], out)
     encoded_prep_share = self.encode_prep_share(prep_share)
-    return (
-        Continued(prep_state, prep_round+1),
+    return Continued(
+        prep_state, prep_round+1,
         encode(1, encoded_prep_msg, encoded_prep_share)  # continue
     )
 </pre><a href="#section-5.7.1-13" class="pilcrow">¶</a>
 </div>
-<p id="section-5.7.1-14">The output is the <code>State</code> to which the Helper has transitioned and an encoded
-<code>Message</code>. If the Helper's state is <code>Finished</code> or <code>Rejected</code>, then processing
-halts. Otherwise, if the state is <code>Continued</code>, then processing continues.<a href="#section-5.7.1-14" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-14">The output is the <code>State</code> to which the Helper has transitioned. If the Helper's
+state is <code>Finished</code> or <code>Rejected</code>, then processing halts. Otherwise, if the
+state is <code>Continued</code> or <code>FinishedWithOutbound</code>, then the state include an
+outbound message and processing continues.<a href="#section-5.7.1-14" class="pilcrow">¶</a></p>
 <p id="section-5.7.1-15">To continue processing, the Helper sends the outbound message to the Leader.
 The Leader computes its next state transition using the following method on
 class <code>Vdaf</code>:<a href="#section-5.7.1-15" class="pilcrow">¶</a></p>
@@ -3790,9 +3805,9 @@ def ping_pong_leader_continued(
     self,
     ctx: bytes,
     agg_param: bytes,
-    state: State,
-    inbound: bytes,
-) -&gt; tuple[State, Optional[bytes]]:
+    state: Continued,
+    inbound: bytes,  # encoded ping pong Message
+) -&gt; State:
     """
     Called by the Leader to start the next step of ping-ponging.
     """
@@ -3804,17 +3819,15 @@ def ping_pong_continued(
     is_leader: bool,
     ctx: bytes,
     agg_param: bytes,
-    state: State,
-    inbound: bytes,
-) -&gt; tuple[State, Optional[bytes]]:
+    state: Continued,
+    inbound: bytes,  # encoded ping pong Message
+) -&gt; State:
     try:
-        if not isinstance(state, Continued):
-            return (Rejected(), None)
         prep_round = state.prep_round
 
         (inbound_type, inbound_items) = decode(inbound)
         if inbound_type == 0:  # initialize
-            return (Rejected(), None)
+            return Rejected()
 
         encoded_prep_msg = inbound_items[0]
         prep_msg = self.decode_prep_msg(
@@ -3845,25 +3858,26 @@ def ping_pong_continued(
             )
         elif prep_round+1 == self.ROUNDS and \
                 inbound_type == 2:  # finish
-            return (Finished(out), None)
+            return Finished(out)
         else:
-            return (Rejected(), None)
+            return Rejected()
     except:
-        return (Rejected(), None)
+        return Rejected()
 </pre><a href="#section-5.7.1-16" class="pilcrow">¶</a>
 </div>
 <p id="section-5.7.1-17">If the Leader's state is <code>Finished</code> or <code>Rejected</code>, then processing halts.
-Otherwise, the Leader sends the outbound message to the Helper. The Helper
-computes its next state transition using the following method on class <code>Vdaf</code>:<a href="#section-5.7.1-17" class="pilcrow">¶</a></p>
+Otherwise, if the Leader's state is <code>Continued</code> or <code>FinishedWithOutbound</code>, the
+Leader sends the outbound message to the Helper. The Helper computes its next
+state transition using the following method on class <code>Vdaf</code>:<a href="#section-5.7.1-17" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-18">
 <pre>
 def ping_pong_helper_continued(
     self,
     ctx: bytes,
     agg_param: bytes,
-    state: State,
-    inbound: bytes,
-) -&gt; tuple[State, Optional[bytes]]:
+    state: Continued,
+    inbound: bytes,  # encoded ping pong Message
+) -&gt; State:
     """Called by the Helper to continue ping-ponging."""
     return self.ping_pong_continued(
         False, ctx, agg_param, state, inbound)
@@ -4508,8 +4522,8 @@ on its measurement share and proof share locally, then broadcasts the result in
 its prep share. The validity decision is then made by the
 <code>prep_shares_to_prep()</code> algorithm (<a href="#sec-vdaf-prepare" class="auto internal xref">Section 5.2</a>).<a href="#section-7.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.1-2">As usual, we describe the interface implemented by a concrete FLP in terms of
-an abstract base class, denoted <code>Flp</code>, that specifies the set of methods and
-parameters a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+an object <code>flp</code> of type <code>Flp</code> that specifies the set of methods and parameters
+a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
 <p id="section-7.1-3">The parameters provided by a concrete FLP are listed in <a href="#flp-param" class="auto internal xref">Table 4</a>. A
 concrete FLP specifies the following algorithms for generating and verifying
 proofs of validity (encoding is described below in <a href="#flp-encode" class="auto internal xref">Section 7.1.1</a>):<a href="#section-7.1-3" class="pilcrow">¶</a></p>
@@ -5323,6 +5337,7 @@ def prep_init(
         assert joint_rand_parts is not None
         joint_rand_part = self.joint_rand_part(
             ctx, agg_id, blind, meas_share, nonce)
+        joint_rand_parts = list(joint_rand_parts)
         joint_rand_parts[agg_id] = joint_rand_part
         corrected_joint_rand_seed = self.joint_rand_seed(
             ctx, joint_rand_parts)
@@ -9482,7 +9497,7 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
 <dd class="break"></dd>
 <dt id="DAP">[DAP]</dt>
         <dd>
-<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Pitman, B.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-14</span>, <time datetime="2025-02-03" class="refDate">3 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-14">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-14</a>&gt;</span>. </dd>
+<span class="refAuthor">Geoghegan, T.</span>, <span class="refAuthor">Patton, C.</span>, <span class="refAuthor">Pitman, B.</span>, <span class="refAuthor">Rescorla, E.</span>, and <span class="refAuthor">C. A. Wood</span>, <span class="refTitle">"Distributed Aggregation Protocol for Privacy Preserving Measurement"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-ppm-dap-15</span>, <time datetime="2025-04-29" class="refDate">29 April 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-15">https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-15</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="Dou02">[Dou02]</dt>
         <dd>
@@ -9815,14 +9830,19 @@ class Start(State):
     pass
 
 class Continued(State, Generic[PrepState]):
-    def __init__(self, prep_state: PrepState, prep_round: int):
+    def __init__(self,
+                 prep_state: PrepState,
+                 prep_round: int,
+                 outbound: bytes):
         self.prep_state = prep_state
         self.prep_round = prep_round
+        self.outbound = outbound
 
     def __eq__(self, other: object) -&gt; bool:
         return isinstance(other, Continued) and \
             self.prep_state == other.prep_state and \
-            self.prep_round == other.prep_round
+            self.prep_round == other.prep_round and \
+            self.outbound == other.outbound
 
 class Finished(State, Generic[OutShare]):
     def __init__(self, out_share: OutShare):
@@ -9831,6 +9851,16 @@ class Finished(State, Generic[OutShare]):
     def __eq__(self, other: object) -&gt; bool:
         return isinstance(other, Finished) and \
             self.out_share == other.out_share
+
+class FinishedWithOutbound(State, Generic[OutShare]):
+    def __init__(self, out_share: OutShare, outbound: bytes):
+        self.out_share = out_share
+        self.outbound = outbound
+
+    def __eq__(self, other: object) -&gt; bool:
+        return isinstance(other, FinishedWithOutbound) and \
+            self.out_share == other.out_share and \
+            self.outbound == other.outbound
 
 class Rejected(State):
     pass
