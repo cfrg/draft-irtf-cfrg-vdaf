@@ -2148,143 +2148,154 @@ function parameters) is usually handled by raising an exception.<a href="#sectio
 <p id="section-2-3">In Python, array indexing starts with <code>0</code>, e.g., <code>x[0]</code> is the first element
 and <code>x[len(x)-1]</code> is the last of <code>x</code>. We can also index from the end of the
 list, e.g., <code>x[-1]</code> is the last element of <code>x</code>.<a href="#section-2-3" class="pilcrow">¶</a></p>
-<p id="section-2-4">Exponentiation is denoted by <code>x ** y</code> in Python. We also sometimes use more
-conventional notation for exponentiation, namely <code>x^y</code>.<a href="#section-2-4" class="pilcrow">¶</a></p>
-<p id="section-2-5">Division of <code>x</code> by <code>y</code> is denoted by <code>x / y</code>. Python includes a similar
-operator, <code>x // y</code>, which is short for <code>floor(x / y)</code>.<a href="#section-2-5" class="pilcrow">¶</a></p>
-<p id="section-2-6">Type hints are used to define input and output types:<a href="#section-2-6" class="pilcrow">¶</a></p>
+<p id="section-2-4">Python uses the symbols <code>+</code>, <code>-</code>, <code>*</code>, and <code>/</code> as binary operators. When the
+operands are integers, these have the usual meaning, except:<a href="#section-2-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2-7.1">
-          <p id="section-2-7.1.1">The type variable <code>F</code> is used in signatures to signify any type that is a
-subclass of <code>Field</code> (<a href="#field" class="auto internal xref">Section 6.1</a>).<a href="#section-2-7.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-2-5.1">
+          <p id="section-2-5.1.1">Division results in a floating point number. Python includes a similar
+operator, <code>x // y</code>, which is short for <code>floor(x / y)</code>.<a href="#section-2-5.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-7.2">
-          <p id="section-2-7.2.1"><code>bytes</code> is a byte string.<a href="#section-2-7.2.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-7.3">
-          <p id="section-2-7.3.1"><code>int</code> is an integer.<a href="#section-2-7.3.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-7.4">
-          <p id="section-2-7.4.1"><code>Generic</code> is used in class definitions to explicitly declare type variables
-of generic classes.<a href="#section-2-7.4.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-7.5">
-          <p id="section-2-7.5.1"><code>Any</code> is the universal supertype, which admits values of any type.<a href="#section-2-7.5.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-7.6">
-          <p id="section-2-7.6.1"><code>Optional[T]</code> is shorthand for <code>T | None</code>. Its value may be <code>None</code> or have
-type <code>T</code>.<a href="#section-2-7.6.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-7.7">
-          <p id="section-2-7.7.1"><code>Self</code> represents the containing class of the method definition in which it
-appears.<a href="#section-2-7.7.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-7.8">
-          <p id="section-2-7.8.1"><code>Sequence[T]</code> is either a list or tuple of values of type <code>T</code>.<a href="#section-2-7.8.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-5.2">
+          <p id="section-2-5.2.1">When <code>x</code> and <code>y</code> are byte strings, <code>x + y</code> denotes their concatenation, i.e.,
+<code>concat(x, y)</code> as defined below.<a href="#section-2-5.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-2-8">This document defines several byte-string constants. When comprised of printable
+<p id="section-2-6">Note that we overload these operators when defining finite fields; see
+<a href="#field" class="auto internal xref">Section 6.1</a>.<a href="#section-2-6" class="pilcrow">¶</a></p>
+<p id="section-2-7">Exponentiation is denoted by <code>x ** y</code> in Python. We also sometimes use more
+conventional notation for exponentiation, namely <code>x^y</code>.<a href="#section-2-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-8.1">
+          <p id="section-2-8.1.1">The type variable <code>F</code> is used in signatures to signify any type that is a
+subclass of <code>Field</code> (<a href="#field" class="auto internal xref">Section 6.1</a>).<a href="#section-2-8.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.2">
+          <p id="section-2-8.2.1"><code>bytes</code> is a byte string.<a href="#section-2-8.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.3">
+          <p id="section-2-8.3.1"><code>int</code> is an integer.<a href="#section-2-8.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.4">
+          <p id="section-2-8.4.1"><code>Generic</code> is used in class definitions to explicitly declare type variables
+of generic classes.<a href="#section-2-8.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.5">
+          <p id="section-2-8.5.1"><code>Any</code> is the universal supertype, which admits values of any type.<a href="#section-2-8.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.6">
+          <p id="section-2-8.6.1"><code>Optional[T]</code> is shorthand for <code>T | None</code>. Its value may be <code>None</code> or have
+type <code>T</code>.<a href="#section-2-8.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.7">
+          <p id="section-2-8.7.1"><code>Self</code> represents the containing class of the method definition in which it
+appears.<a href="#section-2-8.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-8.8">
+          <p id="section-2-8.8.1"><code>Sequence[T]</code> is either a list or tuple of values of type <code>T</code>.<a href="#section-2-8.8.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="section-2-9">This document defines several byte-string constants. When comprised of printable
 ASCII characters, they are written as Python 3 byte-string literals (e.g.,
-<code>b'some constant string'</code>).<a href="#section-2-8" class="pilcrow">¶</a></p>
-<p id="section-2-9">A global constant <code>VERSION</code> of type <code>int</code> is defined, which algorithms are free
-to use as desired. Its value <span class="bcp14">SHALL</span> be <code>12</code>.<a href="#section-2-9" class="pilcrow">¶</a></p>
-<p id="section-2-10">This document describes algorithms for multi-party computations in which the
+<code>b'some constant string'</code>).<a href="#section-2-9" class="pilcrow">¶</a></p>
+<p id="section-2-10">A global constant <code>VERSION</code> of type <code>int</code> is defined, which algorithms are free
+to use as desired. Its value <span class="bcp14">SHALL</span> be <code>12</code>.<a href="#section-2-10" class="pilcrow">¶</a></p>
+<p id="section-2-11">This document describes algorithms for multi-party computations in which the
 parties typically communicate over a network. Wherever a quantity is defined
 that must be transmitted from one party to another, this document prescribes
-a particular encoding of that quantity as a byte string.<a href="#section-2-10" class="pilcrow">¶</a></p>
-<p id="section-2-11">Some common functionalities:<a href="#section-2-11" class="pilcrow">¶</a></p>
+a particular encoding of that quantity as a byte string.<a href="#section-2-11" class="pilcrow">¶</a></p>
+<p id="section-2-12">Some common functionalities:<a href="#section-2-12" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2-12.1">
-          <p id="section-2-12.1.1"><code>additive_secret_share(x: list[F], num_shares: int, field: type[F]) -&gt;
+<li class="normal" id="section-2-13.1">
+          <p id="section-2-13.1.1"><code>additive_secret_share(x: list[F], num_shares: int, field: type[F]) -&gt;
 list[list[F]]</code> takes a vector <code>x</code> of field elements and returns <code>num_shares</code>
 vectors of length <code>len(x)</code> such that they all add up to the input vector.
-Note that this function is not used normatively in this document.<a href="#section-2-12.1.1" class="pilcrow">¶</a></p>
+Note that this function is not used normatively in this document.<a href="#section-2-13.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.2">
-          <p id="section-2-12.2.1"><code>byte(x: int) -&gt; bytes</code> returns the representation of the integer <code>x</code> in the
-range <code>[0, 256)</code> as a single-byte byte string.<a href="#section-2-12.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-13.2">
+          <p id="section-2-13.2.1"><code>byte(x: int) -&gt; bytes</code> returns the representation of the integer <code>x</code> in the
+range <code>[0, 256)</code> as a single-byte byte string.<a href="#section-2-13.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.3">
-          <p id="section-2-12.3.1"><code>cast(typ: type[T], x: object) -&gt; T</code> returns the input value unchanged.
+        <li class="normal" id="section-2-13.3">
+          <p id="section-2-13.3.1"><code>cast(typ: type[T], x: object) -&gt; T</code> returns the input value unchanged.
 This is only present to assist with static analysis of the Python code.
 Type checkers will ignore the inferred type of the input value, and assume
-the output value has the given type.<a href="#section-2-12.3.1" class="pilcrow">¶</a></p>
+the output value has the given type.<a href="#section-2-13.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.4">
-          <p id="section-2-12.4.1"><code>concat(parts: list[bytes]) -&gt; bytes</code> returns the concatenation of the input
-byte strings, i.e., <code>parts[0] + ... + parts[len(parts)-1]</code>.<a href="#section-2-12.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-13.4">
+          <p id="section-2-13.4.1"><code>concat(parts: list[bytes]) -&gt; bytes</code> returns the concatenation of the input
+byte strings, i.e., <code>parts[0] + ... + parts[len(parts)-1]</code>.<a href="#section-2-13.4.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.5">
-          <p id="section-2-12.5.1"><code>from_be_bytes(encoded: bytes) -&gt; int</code> decodes a big-endian byte string,
+        <li class="normal" id="section-2-13.5">
+          <p id="section-2-13.5.1"><code>from_be_bytes(encoded: bytes) -&gt; int</code> decodes a big-endian byte string,
 i.e., returns the integer <code>x</code> for which <code>to_be_bytes(x, len(encoded)) ==
-encoded</code>.<a href="#section-2-12.5.1" class="pilcrow">¶</a></p>
+encoded</code>.<a href="#section-2-13.5.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.6">
-          <p id="section-2-12.6.1"><code>from_le_bytes(encoded: bytes) -&gt; int</code> decodes a little-endian byte string,
+        <li class="normal" id="section-2-13.6">
+          <p id="section-2-13.6.1"><code>from_le_bytes(encoded: bytes) -&gt; int</code> decodes a little-endian byte string,
 i.e., returns the integer <code>x</code> for which <code>to_le_bytes(x, len(encoded)) ==
-encoded</code>.<a href="#section-2-12.6.1" class="pilcrow">¶</a></p>
+encoded</code>.<a href="#section-2-13.6.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.7">
-          <p id="section-2-12.7.1"><code>front(len: int, x: list[Any]) -&gt; tuple[list[Any], list[Any]]</code> splits <code>x</code>
+        <li class="normal" id="section-2-13.7">
+          <p id="section-2-13.7.1"><code>front(len: int, x: list[Any]) -&gt; tuple[list[Any], list[Any]]</code> splits <code>x</code>
 into two vectors, where the first vector is made up of the first <code>len</code>
 elements of <code>x</code> and the second is made up of the remaining elements. This
-function is equivalent to <code>(x[:len], x[len:])</code>.<a href="#section-2-12.7.1" class="pilcrow">¶</a></p>
+function is equivalent to <code>(x[:len], x[len:])</code>.<a href="#section-2-13.7.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.8">
-          <p id="section-2-12.8.1"><code>gen_rand(len: int) -&gt; bytes</code> returns a byte array of the requested length
+        <li class="normal" id="section-2-13.8">
+          <p id="section-2-13.8.1"><code>gen_rand(len: int) -&gt; bytes</code> returns a byte array of the requested length
 (<code>len</code>) generated by a cryptographically secure pseudorandom number generator
-(CSPRNG).<a href="#section-2-12.8.1" class="pilcrow">¶</a></p>
+(CSPRNG).<a href="#section-2-13.8.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.9">
-          <p id="section-2-12.9.1"><code>next_power_of_2(x: int) -&gt; int</code> returns the smallest integer
-greater than or equal to <code>x</code> that is also a power of two.<a href="#section-2-12.9.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-13.9">
+          <p id="section-2-13.9.1"><code>next_power_of_2(x: int) -&gt; int</code> returns the smallest integer
+greater than or equal to <code>x</code> that is also a power of two.<a href="#section-2-13.9.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.10">
-          <p id="section-2-12.10.1"><code>range(stop: int)</code> or <code>range(start: int, stop: int[, step: int])</code> is the range
+        <li class="normal" id="section-2-13.10">
+          <p id="section-2-13.10.1"><code>range(stop: int)</code> or <code>range(start: int, stop: int[, step: int])</code> is the range
 function from the Python standard library. The one-argument form returns the
 integers from zero (inclusive) to <code>stop</code> (exclusive). The two- and
 three-argument forms allow overriding the start of the range and overriding
-the step between successive output values.<a href="#section-2-12.10.1" class="pilcrow">¶</a></p>
+the step between successive output values.<a href="#section-2-13.10.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.11">
-          <p id="section-2-12.11.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
-is in the range <code>[0, 2^(8*len))</code> to a big-endian byte string of length <code>len</code>.<a href="#section-2-12.11.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-13.11">
+          <p id="section-2-13.11.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+is in the range <code>[0, 2^(8*len))</code> to a big-endian byte string of length <code>len</code>.<a href="#section-2-13.11.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.12">
-          <p id="section-2-12.12.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+        <li class="normal" id="section-2-13.12">
+          <p id="section-2-13.12.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
 is in the range <code>[0, 2^(8*len))</code> to a little-endian byte string of length
-<code>len</code>.<a href="#section-2-12.12.1" class="pilcrow">¶</a></p>
+<code>len</code>.<a href="#section-2-13.12.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.13">
-          <p id="section-2-12.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
+        <li class="normal" id="section-2-13.13">
+          <p id="section-2-13.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
 evaluating the polynomial, <code>p(x)</code>. The coefficients of polynomials are stored
 in lists in ascending order of degree, starting with the constant
 coefficient. The <code>field</code> parameter is the class object for <code>F</code> and is used by
-the implementation to construct field elements. (See <a href="#field" class="auto internal xref">Section 6.1</a>.)<a href="#section-2-12.13.1" class="pilcrow">¶</a></p>
+the implementation to construct field elements. (See <a href="#field" class="auto internal xref">Section 6.1</a>.)<a href="#section-2-13.13.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.14">
-          <p id="section-2-12.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
+        <li class="normal" id="section-2-13.14">
+          <p id="section-2-13.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
 returns the coefficients of the lowest degree polynomial <code>p</code> for which
 <code>p(inputs[k]) == outputs[k]</code> for all <code>k</code>. Normally this will be computed
-using the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-12.14.1" class="pilcrow">¶</a></p>
+using the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-13.14.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.15">
-          <p id="section-2-12.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
-the product of two polynomials.<a href="#section-2-12.15.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-13.15">
+          <p id="section-2-13.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
+the product of two polynomials.<a href="#section-2-13.15.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.16">
-          <p id="section-2-12.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
+        <li class="normal" id="section-2-13.16">
+          <p id="section-2-13.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
 end of the input polynomial's list of coefficients. That is, it returns
 <code>p[:i]</code> where <code>i</code> is the index of the highest-degree non-zero coefficient of
-<code>p</code>.<a href="#section-2-12.16.1" class="pilcrow">¶</a></p>
+<code>p</code>.<a href="#section-2-13.16.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.17">
-          <p id="section-2-12.17.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
-and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-12.17.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-13.17">
+          <p id="section-2-13.17.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
+and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-13.17.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-12.18">
-          <p id="section-2-12.18.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of bytes of the requested
-length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-12.18.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-13.18">
+          <p id="section-2-13.18.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of bytes of the requested
+length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-13.18.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>

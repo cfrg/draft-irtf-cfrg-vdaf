@@ -727,13 +727,20 @@ Table of Contents
    element and x[len(x)-1] is the last of x.  We can also index from the
    end of the list, e.g., x[-1] is the last element of x.
 
+   Python uses the symbols +, -, *, and / as binary operators.  When the
+   operands are integers, these have the usual meaning, except:
+
+   *  Division results in a floating point number.  Python includes a
+      similar operator, x // y, which is short for floor(x / y).
+
+   *  When x and y are byte strings, x + y denotes their concatenation,
+      i.e., concat(x, y) as defined below.
+
+   Note that we overload these operators when defining finite fields;
+   see Section 6.1.
+
    Exponentiation is denoted by x ** y in Python.  We also sometimes use
    more conventional notation for exponentiation, namely x^y.
-
-   Division of x by y is denoted by x / y.  Python includes a similar
-   operator, x // y, which is short for floor(x / y).
-
-   Type hints are used to define input and output types:
 
    *  The type variable F is used in signatures to signify any type that
       is a subclass of Field (Section 6.1).
