@@ -6732,8 +6732,34 @@ C.1.  Schema
    agg_result:  The expected aggregate result of type AggResult defined
       by the VDAF.
 
-   The schema also includes whatever parameters are required to
-   instantiate the VDAF.  These are listed in the subsections below.
+   operations:  A list of operations used to construct the test case.
+      They are executed using messages from this test vector and should
+      be executed in the order they appear.
+
+   Each operation in the operations list has the following schema:
+
+   operation:  The type of operation to be performed.  This is one of
+      "shard", "prep_init", "prep_shares_to_prep", "prep_next",
+      "aggregate", or "unshard".
+
+   round:  For any preparation operation, the round number of the
+      operation to be performed.  This determines which prepare share,
+      prepare state, and/or prepare message to use.
+
+   aggregator_id:  The aggregator ID to use when performing this
+      operation.  This determines which messages and which prepare state
+      to use, in addition to the aggregator ID argument itself.
+
+   report_index:  The index of the report on which to perform this
+      operation.  This is an index into the prep array.
+
+   success:  If this is True, the operation should succeed, and its
+      output should match the corresponding values in the test vector.
+      If this is False, the operation should fail, terminating
+      preparation of this report.
+
+   The test vector schema also includes whatever parameters are required
+   to instantiate the VDAF.  These are listed in the subsections below.
 
 C.1.1.  Prio3Count
 

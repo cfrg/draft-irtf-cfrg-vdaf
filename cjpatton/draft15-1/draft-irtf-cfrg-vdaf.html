@@ -9983,10 +9983,59 @@ in hexadecimal.<a href="#appendix-C.1-1.8.2.14.1" class="pilcrow">¶</a></p>
           <dd style="margin-left: 1.5em" id="appendix-C.1-1.12">
             <p id="appendix-C.1-1.12.1">The expected aggregate result of type <code>AggResult</code> defined by the VDAF.<a href="#appendix-C.1-1.12.1" class="pilcrow">¶</a></p>
 </dd>
+          <dd class="break"></dd>
+<dt id="appendix-C.1-1.13">
+<code>operations</code>:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-C.1-1.14">
+            <p id="appendix-C.1-1.14.1">A list of operations used to construct the test case. They are executed
+using messages from this test vector and should be executed in the order
+they appear.<a href="#appendix-C.1-1.14.1" class="pilcrow">¶</a></p>
+</dd>
         <dd class="break"></dd>
 </dl>
-<p id="appendix-C.1-2">The schema also includes whatever parameters are required to instantiate the
-VDAF. These are listed in the subsections below.<a href="#appendix-C.1-2" class="pilcrow">¶</a></p>
+<p id="appendix-C.1-2">Each operation in the <code>operations</code> list has the following schema:<a href="#appendix-C.1-2" class="pilcrow">¶</a></p>
+<span class="break"></span><dl class="dlParallel" id="appendix-C.1-3">
+          <dt id="appendix-C.1-3.1">
+<code>operation</code>:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-C.1-3.2">
+            <p id="appendix-C.1-3.2.1">The type of operation to be performed. This is one of "shard", "prep_init",
+"prep_shares_to_prep", "prep_next", "aggregate", or "unshard".<a href="#appendix-C.1-3.2.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-C.1-3.3">
+<code>round</code>:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-C.1-3.4">
+            <p id="appendix-C.1-3.4.1">For any preparation operation, the round number of the operation to be
+performed. This determines which prepare share, prepare state, and/or prepare
+message to use.<a href="#appendix-C.1-3.4.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-C.1-3.5">
+<code>aggregator_id</code>:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-C.1-3.6">
+            <p id="appendix-C.1-3.6.1">The aggregator ID to use when performing this operation. This determines
+which messages and which prepare state to use, in addition to the aggregator ID
+argument itself.<a href="#appendix-C.1-3.6.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-C.1-3.7">
+<code>report_index</code>:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-C.1-3.8">
+            <p id="appendix-C.1-3.8.1">The index of the report on which to perform this operation. This is an index
+into the <code>prep</code> array.<a href="#appendix-C.1-3.8.1" class="pilcrow">¶</a></p>
+</dd>
+          <dd class="break"></dd>
+<dt id="appendix-C.1-3.9">
+<code>success</code>:</dt>
+          <dd style="margin-left: 1.5em" id="appendix-C.1-3.10">
+            <p id="appendix-C.1-3.10.1">If this is <code>True</code>, the operation should succeed, and its output should match
+the corresponding values in the test vector. If this is <code>False</code>, the operation
+should fail, terminating preparation of this report.<a href="#appendix-C.1-3.10.1" class="pilcrow">¶</a></p>
+</dd>
+        <dd class="break"></dd>
+</dl>
+<p id="appendix-C.1-4">The test vector schema also includes whatever parameters are required to
+instantiate the VDAF. These are listed in the subsections below.<a href="#appendix-C.1-4" class="pilcrow">¶</a></p>
 <div id="prio3count-1">
 <section id="appendix-C.1.1">
           <h4 id="name-prio3count-2">
