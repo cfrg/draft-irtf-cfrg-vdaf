@@ -6416,7 +6416,7 @@ Table of Contents
               <https://eprint.iacr.org/2024/585>.
 
    [TestVectors]
-              "Test vectors for Prio3 and Poplar1", commit hash c0e76dc,
+              "Test vectors for Prio3 and Poplar1", commit hash cee4567,
               December 2024,
               <https://github.com/cfrg/draft-irtf-cfrg-vdaf>.
 
