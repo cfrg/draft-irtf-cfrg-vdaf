@@ -348,6 +348,14 @@ Table of Contents
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
 
+   15:
+
+   *  Simplify the ping-pong API for 2-party preparation by merging the
+      outbound message into the state object.  This reduces the number
+      of cases the caller has to handle.
+
+   *  Enrich the test vector schema to express negative test cases.
+
    14:
 
    *  Poplar1: When decoding an aggregation parameter, require the
