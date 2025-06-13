@@ -69,12 +69,8 @@
             "measurement": 100,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "21d79fba22fcea2e"
-                ],
-                [
-                    "44296045dc0315d1"
-                ]
+                "21d79fba22fcea2e",
+                "44296045dc0315d1"
             ],
             "prep_messages": [
                 ""

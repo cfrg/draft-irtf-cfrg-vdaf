@@ -99,18 +99,8 @@
             ],
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "9f264e896625e15d",
-                    "f3e34b825d37c92a",
-                    "a8dd47f5f1fd55ce",
-                    "c5c8bd00c5eb2640"
-                ],
-                [
-                    "62d9b17698da1ea2",
-                    "0e1cb47da1c836d5",
-                    "5922b80a0d02aa31",
-                    "3d3742ff3914d9bf"
-                ]
+                "9f264e896625e15df3e34b825d37c92aa8dd47f5f1fd55cec5c8bd00c5eb2640",
+                "62d9b17698da1ea20e1cb47da1c836d55922b80a0d02aa313d3742ff3914d9bf"
             ],
             "prep_messages": [
                 "c2575a57cd9c93a22b1b6cd869226045d99a016b369b8834",
