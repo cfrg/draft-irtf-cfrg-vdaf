@@ -1523,7 +1523,7 @@ def run_vdaf(
             AggParam,
             PublicShare,
             InputShare,
-            list[F],  # OutShare
+            OutShare,
             AggShare,
             AggResult,
             PrepState,

@@ -47,7 +47,7 @@ class TestVdaf(unittest.TestCase):
                 AggParam,
                 PublicShare,
                 InputShare,
-                list[Any],  # OutShare
+                OutShare,
                 AggShare,
                 AggResult,
                 PrepState,
@@ -201,7 +201,7 @@ def gen_test_vec_for_vdaf(
             AggParam,
             PublicShare,
             InputShare,
-            list[Any],  # OutShare
+            OutShare,
             AggShare,
             AggResult,
             PrepState,
