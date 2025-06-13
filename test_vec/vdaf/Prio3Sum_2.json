@@ -328,12 +328,8 @@
             "measurement": 0,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "4a3136daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "4a3136daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""
@@ -355,12 +351,8 @@
             "measurement": 1,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "4b3136daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "4b3136daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""
@@ -382,12 +374,8 @@
             "measurement": 1337,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "833636daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "833636daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""
@@ -409,12 +397,8 @@
             "measurement": 99,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "ad3136daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "ad3136daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""
@@ -436,12 +420,8 @@
             "measurement": 42,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "743136daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "743136daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""
@@ -463,12 +443,8 @@
             "measurement": 0,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "4a3136daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "4a3136daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""
@@ -490,12 +466,8 @@
             "measurement": 0,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "4a3136daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "4a3136daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""
@@ -517,12 +489,8 @@
             "measurement": 42,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "743136daf279c290"
-                ],
-                [
-                    "b7cec9250c863d6f"
-                ]
+                "743136daf279c290",
+                "b7cec9250c863d6f"
             ],
             "prep_messages": [
                 ""

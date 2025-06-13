@@ -126,6 +126,9 @@ class PingPongTester(
     def test_vec_encode_prep_msg(self, prep_msg: str) -> bytes:
         return self.encode_prep_msg(prep_msg)
 
+    def test_vec_encode_out_share(self, out_share: int) -> bytes:
+        return to_be_bytes(out_share, 8)
+
     # `PingPong`
 
     def decode_public_share(self, encoded: bytes) -> str:

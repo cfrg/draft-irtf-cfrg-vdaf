@@ -243,6 +243,10 @@ class Vdaf(
     def test_vec_encode_prep_msg(self, prep_message: PrepMessage) -> bytes:
         pass
 
+    @abstractmethod
+    def test_vec_encode_out_share(self, out_share: OutShare) -> bytes:
+        pass
+
 
 # NOTE: This function is excerpted in the document, as the figure
 # {{run-vdaf}}. Its width should be limited to 69 columns to avoid
