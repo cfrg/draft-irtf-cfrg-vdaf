@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-25T01:10:29.838384+00:00",
+  "timestamp": "2025-06-15T01:13:33.924722+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6834,13 +6834,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/):\n\n> ... the + (plus) operator is used for both concatenation of lists, concatenation of bytes, and for addition of numbers (or field elements). This may be confusing for people not familiar with Python.\n\n",
       "createdAt": "2025-01-18T02:38:42Z",
-      "updatedAt": "2025-01-19T17:56:07Z",
+      "updatedAt": "2025-06-12T22:43:29Z",
       "closedAt": null,
       "comments": [
         {
@@ -6867,13 +6869,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/)\n\n> Another [confusing part of the spec for readers not familiar with Python] is the use of abstract classes, which is not explicitly indicated in the main document, one has to rely on the actual Python code to understand what is the logic of Valid circuits. I can only recommend to hint the reader about this programming feature.",
       "createdAt": "2025-01-18T02:39:54Z",
-      "updatedAt": "2025-01-19T17:56:19Z",
+      "updatedAt": "2025-06-12T22:43:01Z",
       "closedAt": null,
       "comments": [
         {
@@ -6924,11 +6928,13 @@
       "state": "OPEN",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [],
       "body": "#538 adds to the test vector schema, and adds some negative test vectors. We need to bump the commit hash referenced by the document, and describe the `operations` array that has been added to the schema.",
       "createdAt": "2025-04-24T15:06:07Z",
-      "updatedAt": "2025-05-05T21:34:12Z",
+      "updatedAt": "2025-06-12T23:28:48Z",
       "closedAt": null,
       "comments": []
     },
@@ -6983,18 +6989,28 @@
       "id": "I_kwDOGKuqOc62egcn",
       "title": "tls-presentation: Tighten lower bounds on variable length fields",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/544",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial"
       ],
       "body": "To match https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/687",
       "createdAt": "2025-05-13T23:42:50Z",
-      "updatedAt": "2025-05-13T23:42:59Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-06-12T22:40:46Z",
+      "closedAt": "2025-06-12T22:40:46Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There's only one spot in the draft where we have length prefixes:\n```\nstruct {\n  MessageType type;\n  select (Message.type) {\n    case initialize:\n      opaque prep_share<0..2^32-1>;\n    case continue:\n      opaque prep_msg<0..2^32-1>;\n      opaque prep_share<0..2^32-1>;\n    case finish:\n      opaque prep_msg<0..2^32-1>;\n  };\n} Message;\n```\n\nHere I actually think `0` is an appropriate minimum length. `prep_msg` in particular is often empty. While `prep_share` is never really empty, there's no proof that it _can't_ be empty.",
+          "createdAt": "2025-06-12T22:40:46Z",
+          "updatedAt": "2025-06-12T22:40:46Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -44979,6 +44995,159 @@
           "body": "This is strictly better, so happy to take this!",
           "createdAt": "2025-05-15T22:42:05Z",
           "updatedAt": "2025-05-15T22:42:05Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 546,
+      "id": "PR_kwDOGKuqOc6aTCyT",
+      "title": "Various changes for draft 15",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/546",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-15"
+      ],
+      "body": "Closes #534.\r\nCloses #535.\r\nCloses #540.",
+      "createdAt": "2025-06-12T23:21:43Z",
+      "updatedAt": "2025-06-14T14:50:11Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6054556f3dfe4d0dfe65f1c0e09fbf65ca675323",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft15-1",
+      "headRefOid": "52de5cca31fe216c531d4fb664f76f30c66b18f1",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @armfazh ",
+          "createdAt": "2025-06-12T23:23:48Z",
+          "updatedAt": "2025-06-12T23:23:48Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "looks ok, it adds more clarification on the operators. ",
+          "createdAt": "2025-06-12T23:59:14Z",
+          "updatedAt": "2025-06-12T23:59:14Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6uN5p4",
+          "commit": {
+            "abbreviatedOid": "52de5cc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-12T23:23:02Z",
+          "updatedAt": "2025-06-12T23:23:03Z",
+          "comments": [
+            {
+              "originalPosition": 68,
+              "body": "@divergentdave I guess we also need to define what it means to \"execute\" an operation. Any suggestions?",
+              "createdAt": "2025-06-12T23:23:03Z",
+              "updatedAt": "2025-06-12T23:23:03Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6uarUu",
+          "commit": {
+            "abbreviatedOid": "52de5cc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-06-13T19:58:48Z",
+          "updatedAt": "2025-06-13T20:19:22Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "I think we should probably keep this line below the exponentiation paragraph",
+              "createdAt": "2025-06-13T19:58:49Z",
+              "updatedAt": "2025-06-13T20:19:23Z"
+            },
+            {
+              "originalPosition": 68,
+              "body": "I think talking about which operations were used to construct the test vector may be misleading. If we're just testing a preparation failure, we could exclude the \"shard\" operation, even though we may have run it to prepare the relevant messages. Here's my suggestion:\r\n\r\n> This lists the VDAF operations that should be executed as part of known answer tests, using messages from this test vector as input. Operations should be executed in the order they appear, to ensure that prepare state values are computed before they are consumed. Prepare state values are not included in test vectors because this document does not specify their representation or encoding.",
+              "createdAt": "2025-06-13T20:18:38Z",
+              "updatedAt": "2025-06-13T20:19:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6ujBl2",
+          "commit": {
+            "abbreviatedOid": "52de5cc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-14T14:50:02Z",
+          "updatedAt": "2025-06-14T14:50:11Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "Update after merging #547.",
+              "createdAt": "2025-06-14T14:50:02Z",
+              "updatedAt": "2025-06-14T14:50:11Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 547,
+      "id": "PR_kwDOGKuqOc6adQF9",
+      "title": "Change test vector output share encoding",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/547",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "poc",
+        "draft-15"
+      ],
+      "body": "This changes the format of output shares in test vectors to be one hex-encoded string, instead of a list of hex-encoded strings, one per field element. This improves consistency in the test vector format.\r\n\r\nNote that this will require another test vector commit hash bump, after landing.",
+      "createdAt": "2025-06-13T21:09:01Z",
+      "updatedAt": "2025-06-14T14:49:39Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6054556f3dfe4d0dfe65f1c0e09fbf65ca675323",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/test-vector-output-share-encoding",
+      "headRefOid": "235bba5001fd105380cb92bedd58e29f2e51fec6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6ujBVs",
+          "commit": {
+            "abbreviatedOid": "235bba5"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Once we merge, I'll update #546 to the new commit.",
+          "createdAt": "2025-06-14T14:49:06Z",
+          "updatedAt": "2025-06-14T14:49:06Z",
           "comments": []
         }
       ]
