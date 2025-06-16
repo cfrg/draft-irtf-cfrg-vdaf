@@ -104,14 +104,8 @@
             ],
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                [
-                    "f8145f10fdc8bca6",
-                    "2df57afdc4066a8c"
-                ],
-                [
-                    "09eba0ef01374359",
-                    "d50a85023af99573"
-                ]
+                "f8145f10fdc8bca62df57afdc4066a8c",
+                "09eba0ef01374359d50a85023af99573"
             ],
             "prep_messages": [
                 "1be0415318fa71a0025509fdb4559fced849a418e0819d4c",

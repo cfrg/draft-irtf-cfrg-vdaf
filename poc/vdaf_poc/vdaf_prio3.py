@@ -556,6 +556,9 @@ class Prio3(
             encoded += joint_rand_seed
         return encoded
 
+    def test_vec_encode_out_share(self, out_share: list[F]) -> bytes:
+        return self.flp.field.encode_vec(out_share)
+
 
 ##
 # INSTANTIATIONS

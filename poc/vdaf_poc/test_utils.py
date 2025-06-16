@@ -5,8 +5,7 @@ from itertools import zip_longest
 from typing import (Any, Generic, Literal, NotRequired, Optional, TypedDict,
                     TypeVar, cast)
 
-from vdaf_poc.common import (gen_rand, next_power_of_2, print_wrapped_line,
-                             to_le_bytes)
+from vdaf_poc.common import gen_rand, next_power_of_2, print_wrapped_line
 from vdaf_poc.field import NttField, poly_eval
 from vdaf_poc.flp import Flp, run_flp
 from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19, Gadget
@@ -48,7 +47,7 @@ class TestVdaf(unittest.TestCase):
                 AggParam,
                 PublicShare,
                 InputShare,
-                list[Any],  # OutShare
+                OutShare,
                 AggShare,
                 AggResult,
                 PrepState,
@@ -146,7 +145,7 @@ class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
     input_shares: list[str]
     prep_shares: list[list[str]]
     prep_messages: list[str]
-    out_shares: list[list[str]]
+    out_shares: list[str]
 
 
 class VdafTestVectorDict(Generic[Measurement, AggParam, AggResult], TypedDict):
@@ -202,7 +201,7 @@ def gen_test_vec_for_vdaf(
             AggParam,
             PublicShare,
             InputShare,
-            list[Any],  # OutShare
+            OutShare,
             AggShare,
             AggResult,
             PrepState,
@@ -340,10 +339,9 @@ def gen_test_vec_for_vdaf(
             out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
             outbound_out_shares.append(out_share)
-            prep_test_vec['out_shares'].append([
-                to_le_bytes(x.int(), x.ENCODED_SIZE).hex()
-                for x in out_share
-            ])
+            prep_test_vec['out_shares'].append(
+                vdaf.test_vec_encode_out_share(out_share).hex()
+            )
             operations.append({
                 'operation': 'prep_next',
                 'round': vdaf.ROUNDS,
@@ -463,10 +461,8 @@ def pretty_print_vdaf_test_vec(
                 print('    prep_message: >-')
                 print_wrapped_line(prep_msg, tab=6)
 
-        for (j, out_shares) in enumerate(prep_test_vec['out_shares']):
-            print('  out_share_{}:'.format(j))
-            for out_share in out_shares:
-                print('    - {}'.format(out_share))
+        for (j, out_share) in enumerate(prep_test_vec['out_shares']):
+            print('  out_share_{}: {}'.format(j, out_share))
 
     # Aggregate
     for (j, agg_share) in enumerate(test_vec['agg_shares']):

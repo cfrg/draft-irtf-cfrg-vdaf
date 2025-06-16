@@ -513,6 +513,9 @@ class Poplar1(
             return encode_idpf_field_vec(prep_message)
         return b''
 
+    def test_vec_encode_out_share(self, out_share: FieldVec) -> bytes:
+        return encode_idpf_field_vec(out_share)
+
 
 def encode_idpf_field_vec(vec: FieldVec) -> bytes:
     encoded = bytes()
