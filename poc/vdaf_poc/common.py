@@ -136,6 +136,7 @@ def front(
     Split list `vec` in two and return the front and remainder as a tuple. The
     length of the front is `length`.
     """
+    assert length <= len(vec)
     return (vec[:length], vec[length:])
 
 
