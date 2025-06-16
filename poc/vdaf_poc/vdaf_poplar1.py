@@ -8,7 +8,7 @@ from vdaf_poc.common import (byte, from_be_bytes, front, to_be_bytes, vec_add,
 from vdaf_poc.field import Field, Field64, Field255
 from vdaf_poc.idpf_bbcggi21 import CorrectionWord, IdpfBBCGGI21
 from vdaf_poc.vdaf import Vdaf
-from vdaf_poc.xof import Xof, XofTurboShake128
+from vdaf_poc.xof import Xof, XofFixedKeyAes128, XofTurboShake128
 
 USAGE_SHARD_RAND = 1
 USAGE_CORR_INNER = 2
@@ -490,7 +490,7 @@ class Poplar1(
         test_vec['bits'] = int(self.idpf.BITS)
         return ['bits']
 
-    def test_vec_encode_input_share(self, input_share: Poplar1InputShare) -> bytes:
+    def encode_input_share(self, input_share: Poplar1InputShare) -> bytes:
         (key, seed, inner, leaf) = input_share
         encoded = bytes()
         encoded += key
@@ -499,22 +499,64 @@ class Poplar1(
         encoded += self.idpf.field_leaf.encode_vec(leaf)
         return encoded
 
-    def test_vec_encode_public_share(self, public_share: Poplar1PublicShare) -> bytes:
+    def decode_input_share(self, agg_id: int, encoded: bytes) -> Poplar1InputShare:
+        key, encoded = front(XofFixedKeyAes128.SEED_SIZE, encoded)
+        seed, encoded = front(self.xof.SEED_SIZE, encoded)
+        field_inner_bytes, encoded = front(
+            self.idpf.field_inner.ENCODED_SIZE * (self.idpf.BITS - 1) * 2,
+            encoded,
+        )
+        field_inner = self.idpf.field_inner.decode_vec(field_inner_bytes)
+        field_leaf_bytes, encoded = front(
+            self.idpf.field_leaf.ENCODED_SIZE * 2,
+            encoded,
+        )
+        field_leaf = self.idpf.field_leaf.decode_vec(field_leaf_bytes)
+        if len(encoded) != 0:
+            raise ValueError("input share is too long")
+        return (key, seed, field_inner, field_leaf)
+
+    def encode_public_share(self, public_share: Poplar1PublicShare) -> bytes:
         return self.idpf.encode_public_share(public_share)
 
-    def test_vec_encode_agg_share(self, agg_share: FieldVec) -> bytes:
+    def decode_public_share(self, encoded: bytes) -> Poplar1PublicShare:
+        return self.idpf.decode_public_share(encoded)
+
+    def encode_agg_share(self, agg_share: FieldVec) -> bytes:
         return encode_idpf_field_vec(agg_share)
 
-    def test_vec_encode_prep_share(self, prep_share: FieldVec) -> bytes:
+    def decode_agg_share(self, agg_param: Poplar1AggParam, encoded: bytes) -> FieldVec:
+        level, _ = agg_param
+        field = self.idpf.current_field(level)
+        return field.decode_vec(encoded)
+
+    def encode_prep_share(self, prep_share: FieldVec) -> bytes:
         return encode_idpf_field_vec(prep_share)
 
-    def test_vec_encode_prep_msg(self, prep_message: Optional[FieldVec]) -> bytes:
+    def decode_prep_share(self, prep_state: Poplar1PrepState, encoded: bytes) -> FieldVec:
+        _, level, _ = prep_state
+        field = self.idpf.current_field(level)
+        return field.decode_vec(encoded)
+
+    def encode_prep_msg(self, prep_message: Optional[FieldVec]) -> bytes:
         if prep_message is not None:
             return encode_idpf_field_vec(prep_message)
         return b''
 
-    def test_vec_encode_out_share(self, out_share: FieldVec) -> bytes:
+    def decode_prep_msg(self, prep_state: Poplar1PrepState, encoded: bytes) -> Optional[FieldVec]:
+        if len(encoded) == 0:
+            return None
+        _, level, _ = prep_state
+        field = self.idpf.current_field(level)
+        return field.decode_vec(encoded)
+
+    def encode_out_share(self, out_share: FieldVec) -> bytes:
         return encode_idpf_field_vec(out_share)
+
+    def decode_out_share(self, agg_param: Poplar1AggParam, encoded: bytes) -> FieldVec:
+        level, _ = agg_param
+        field = self.idpf.current_field(level)
+        return field.decode_vec(encoded)
 
 
 def encode_idpf_field_vec(vec: FieldVec) -> bytes:

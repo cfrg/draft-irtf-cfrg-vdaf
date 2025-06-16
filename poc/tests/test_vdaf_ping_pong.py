@@ -111,30 +111,22 @@ class PingPongTester(
                 _num_measurements: int) -> int:
         return agg_param * sum(agg_shares) // self.SHARES
 
-    def test_vec_encode_input_share(self, input_share: int) -> bytes:
+    def encode_input_share(self, input_share: int) -> bytes:
         return to_be_bytes(input_share, 8)
 
-    def test_vec_encode_public_share(self, public_share: str) -> bytes:
+    def decode_input_share(self, _agg_id: int, encoded: bytes) -> int:
+        return from_be_bytes(encoded)
+
+    def encode_public_share(self, public_share: str) -> bytes:
         return public_share.encode('utf-8')
-
-    def test_vec_encode_agg_share(self, agg_share: int) -> bytes:
-        return to_be_bytes(agg_share, 8)
-
-    def test_vec_encode_prep_share(self, prep_share: str) -> bytes:
-        return self.encode_prep_share(prep_share)
-
-    def test_vec_encode_prep_msg(self, prep_msg: str) -> bytes:
-        return self.encode_prep_msg(prep_msg)
-
-    def test_vec_encode_out_share(self, out_share: int) -> bytes:
-        return to_be_bytes(out_share, 8)
-
-    # `PingPong`
 
     def decode_public_share(self, encoded: bytes) -> str:
         return encoded.decode('utf-8')
 
-    def decode_input_share(self, _agg_id: int, encoded: bytes) -> int:
+    def encode_agg_share(self, agg_share: int) -> bytes:
+        return to_be_bytes(agg_share, 8)
+
+    def decode_agg_share(self, _agg_param: int, encoded: bytes) -> int:
         return from_be_bytes(encoded)
 
     def encode_prep_share(self, prep_share: str) -> bytes:
@@ -152,6 +144,12 @@ class PingPongTester(
                         _prep_state: tuple[int, int],
                         encoded: bytes) -> str:
         return encoded.decode('utf-8')
+
+    def encode_out_share(self, out_share: int) -> bytes:
+        return to_be_bytes(out_share, 8)
+
+    def decode_out_share(self, _agg_param: int, encoded: bytes) -> int:
+        return from_be_bytes(encoded)
 
     def decode_agg_param(self, encoded: bytes) -> int:
         return from_be_bytes(encoded)
@@ -194,8 +192,8 @@ class TestPingPong(unittest.TestCase):
             ctx,
             vdaf.encode_agg_param(agg_param),
             nonce,
-            vdaf.test_vec_encode_public_share(public_share),
-            vdaf.test_vec_encode_input_share(input_shares[0]),
+            vdaf.encode_public_share(public_share),
+            vdaf.encode_input_share(input_shares[0]),
         )
         assert isinstance(leader_init_state, Continued)
         self.assertEqual(leader_init_state.prep_round, 0)
@@ -205,8 +203,8 @@ class TestPingPong(unittest.TestCase):
             ctx,
             vdaf.encode_agg_param(agg_param),
             nonce,
-            vdaf.test_vec_encode_public_share(public_share),
-            vdaf.test_vec_encode_input_share(input_shares[1]),
+            vdaf.encode_public_share(public_share),
+            vdaf.encode_input_share(input_shares[1]),
             leader_init_state.outbound,
         )
         assert isinstance(helper_state, FinishedWithOutbound)
@@ -245,8 +243,8 @@ class TestPingPong(unittest.TestCase):
                 ctx,
                 vdaf.encode_agg_param(agg_param),
                 nonce,
-                vdaf.test_vec_encode_public_share(public_share),
-                vdaf.test_vec_encode_input_share(input_shares[0]),
+                vdaf.encode_public_share(public_share),
+                vdaf.encode_input_share(input_shares[0]),
             )
             assert isinstance(leader_state, Continued)
             self.assertEqual(leader_state.prep_round, 0)
@@ -259,8 +257,8 @@ class TestPingPong(unittest.TestCase):
                         ctx,
                         vdaf.encode_agg_param(agg_param),
                         nonce,
-                        vdaf.test_vec_encode_public_share(public_share),
-                        vdaf.test_vec_encode_input_share(input_shares[1]),
+                        vdaf.encode_public_share(public_share),
+                        vdaf.encode_input_share(input_shares[1]),
                         leader_state.outbound,
                     )
                 else:

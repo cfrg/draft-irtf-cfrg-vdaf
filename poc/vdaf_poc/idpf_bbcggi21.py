@@ -352,9 +352,6 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             raise ValueError('trailing bytes')
         return list(zip(seeds, ctrl, payloads))
 
-    def test_vec_encode_public_share(self, public_share: list[CorrectionWord]) -> bytes:
-        return self.encode_public_share(public_share)
-
 
 def pack_bits(control_bits: list[bool]) -> bytes:
     packed_len = (len(control_bits) + 7) // 8

@@ -51,7 +51,7 @@ def gen_test_vec_for_idpf(idpf: Idpf,
         'beta_leaf': printable_beta_leaf,
         'ctx': ctx.hex(),
         'nonce': nonce.hex(),
-        'public_share': idpf.test_vec_encode_public_share(public_share).hex(),
+        'public_share': idpf.encode_public_share(public_share).hex(),
         'keys': printable_keys,
     }
 
@@ -300,19 +300,19 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
             'measurement': None,
             'rand': rand.hex(),
             'nonce': nonce.hex(),
-            'public_share': prio3histogram.test_vec_encode_public_share(
+            'public_share': prio3histogram.encode_public_share(
                 public_share,
             ).hex(),
             'input_shares': [
-                prio3histogram.test_vec_encode_input_share(
+                prio3histogram.encode_input_share(
                     input_share_0,
                 ).hex(),
-                prio3histogram.test_vec_encode_input_share(
+                prio3histogram.encode_input_share(
                     input_share_1,
                 ).hex(),
             ],
             'prep_shares': [[
-                prio3histogram.test_vec_encode_prep_share(prep_share_0).hex(),
+                prio3histogram.encode_prep_share(prep_share_0).hex(),
             ]],
             'prep_messages': [
                 bad_prep_msg.hex(),
@@ -406,14 +406,14 @@ def _prio3_prep_shares_to_prep_failure(
             'measurement': None,
             'rand': rand.hex(),
             'nonce': nonce.hex(),
-            'public_share': vdaf.test_vec_encode_public_share(public_share).hex(),
+            'public_share': vdaf.encode_public_share(public_share).hex(),
             'input_shares': [
-                vdaf.test_vec_encode_input_share(input_share_0).hex(),
-                vdaf.test_vec_encode_input_share(input_share_1).hex(),
+                vdaf.encode_input_share(input_share_0).hex(),
+                vdaf.encode_input_share(input_share_1).hex(),
             ],
             'prep_shares': [[
-                vdaf.test_vec_encode_prep_share(prep_share_0).hex(),
-                vdaf.test_vec_encode_prep_share(prep_share_1).hex(),
+                vdaf.encode_prep_share(prep_share_0).hex(),
+                vdaf.encode_prep_share(prep_share_1).hex(),
             ]],
             'prep_messages': [],
             'out_shares': [],
@@ -558,25 +558,25 @@ def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
             'measurement': None,
             'rand': rand.hex(),
             'nonce': nonce.hex(),
-            'public_share': vdaf.test_vec_encode_public_share(public_share).hex(),
+            'public_share': vdaf.encode_public_share(public_share).hex(),
             'input_shares': [
-                vdaf.test_vec_encode_input_share(bad_input_share_0).hex(),
-                vdaf.test_vec_encode_input_share(input_share_1).hex(),
+                vdaf.encode_input_share(bad_input_share_0).hex(),
+                vdaf.encode_input_share(input_share_1).hex(),
             ],
             'prep_shares': [
                 [
-                    vdaf.test_vec_encode_prep_share(prep_share_r0_a0).hex(),
-                    vdaf.test_vec_encode_prep_share(prep_share_r0_a1).hex(),
+                    vdaf.encode_prep_share(prep_share_r0_a0).hex(),
+                    vdaf.encode_prep_share(prep_share_r0_a1).hex(),
                 ],
                 [
-                    vdaf.test_vec_encode_prep_share(
+                    vdaf.encode_prep_share(
                         cast(FieldVec, prep_share_r1_a0)).hex(),
-                    vdaf.test_vec_encode_prep_share(
+                    vdaf.encode_prep_share(
                         cast(FieldVec, prep_share_r1_a1)).hex(),
                 ],
             ],
             'prep_messages': [
-                vdaf.test_vec_encode_prep_msg(prep_msg).hex(),
+                vdaf.encode_prep_msg(prep_msg).hex(),
             ],
             'out_shares': [],
         }],

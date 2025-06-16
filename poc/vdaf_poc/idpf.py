@@ -149,5 +149,5 @@ class Idpf(Generic[FieldInner, FieldLeaf, PublicShare], metaclass=ABCMeta):
         return x == y[:level + 1]
 
     @abstractmethod
-    def test_vec_encode_public_share(self, public_share: PublicShare) -> bytes:
+    def encode_public_share(self, public_share: PublicShare) -> bytes:
         pass

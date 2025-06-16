@@ -513,10 +513,14 @@ class Prio3(
     def encode_agg_param(self, agg_param: None) -> bytes:
         return b""
 
+    def decode_agg_param(self, encoded: bytes) -> None:
+        if encoded != b"":
+            raise ValueError("invalid encoded aggregation parameter")
+
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         return self.flp.test_vec_set_type_param(test_vec)
 
-    def test_vec_encode_input_share(self, input_share: Prio3InputShare[F]) -> bytes:
+    def encode_input_share(self, input_share: Prio3InputShare[F]) -> bytes:
         encoded = bytes()
         if len(input_share) == 3:  # Leader
             (meas_share, proofs_share, blind) = input_share
@@ -530,17 +534,60 @@ class Prio3(
             encoded += blind
         return encoded
 
-    def test_vec_encode_public_share(self, public_share: Optional[list[bytes]]) -> bytes:
+    def decode_input_share(self, agg_id: int, encoded: bytes) -> Prio3InputShare[F]:
+        input_share: Prio3InputShare[F]
+        if agg_id == 0:
+            meas_bytes, encoded = front(
+                self.flp.field.ENCODED_SIZE * self.flp.MEAS_LEN,
+                encoded,
+            )
+            proofs_bytes, encoded = front(
+                self.flp.field.ENCODED_SIZE * self.flp.PROOF_LEN * self.PROOFS,
+                encoded,
+            )
+            meas = self.flp.field.decode_vec(meas_bytes)
+            proofs = self.flp.field.decode_vec(proofs_bytes)
+            if self.flp.JOINT_RAND_LEN > 0:
+                blind, encoded = front(self.xof.SEED_SIZE, encoded)
+            else:
+                blind = None
+            input_share = (meas, proofs, blind)
+        else:
+            share, encoded = front(self.xof.SEED_SIZE, encoded)
+            if self.flp.JOINT_RAND_LEN > 0:
+                blind, encoded = front(self.xof.SEED_SIZE, encoded)
+            else:
+                blind = None
+            input_share = (share, blind)
+        if len(encoded) != 0:
+            raise ValueError("input share is too long")
+        return input_share
+
+    def encode_public_share(self, public_share: Optional[list[bytes]]) -> bytes:
         joint_rand_parts = public_share
         encoded = bytes()
         if joint_rand_parts is not None:  # joint randomness used
             encoded += concat(joint_rand_parts)
         return encoded
 
-    def test_vec_encode_agg_share(self, agg_share: list[F]) -> bytes:
+    def decode_public_share(self, encoded: bytes) -> Optional[list[bytes]]:
+        if self.flp.JOINT_RAND_LEN == 0:
+            return None
+        joint_rand_parts = []
+        for _ in range(self.SHARES):
+            joint_rand_part, encoded = front(self.xof.SEED_SIZE, encoded)
+            joint_rand_parts.append(joint_rand_part)
+        if len(encoded) != 0:
+            raise ValueError("public share is too long")
+        return joint_rand_parts
+
+    def encode_agg_share(self, agg_share: list[F]) -> bytes:
         return self.flp.field.encode_vec(agg_share)
 
-    def test_vec_encode_prep_share(self, prep_share: Prio3PrepShare[F]) -> bytes:
+    def decode_agg_share(self, _agg_param: None, encoded: bytes) -> list[F]:
+        return self.flp.field.decode_vec(encoded)
+
+    def encode_prep_share(self, prep_share: Prio3PrepShare[F]) -> bytes:
         (verifiers_share, joint_rand_part) = prep_share
         encoded = bytes()
         assert len(verifiers_share) == self.flp.VERIFIER_LEN * self.PROOFS
@@ -549,15 +596,37 @@ class Prio3(
             encoded += joint_rand_part
         return encoded
 
-    def test_vec_encode_prep_msg(self, prep_message: Optional[bytes]) -> bytes:
+    def decode_prep_share(self, prep_state: Prio3PrepState[F], encoded: bytes) -> Prio3PrepShare[F]:
+        verifiers_share_bytes, encoded = front(
+            self.flp.field.ENCODED_SIZE * self.flp.VERIFIER_LEN * self.PROOFS,
+            encoded,
+        )
+        verifiers_share = self.flp.field.decode_vec(verifiers_share_bytes)
+        if self.flp.JOINT_RAND_LEN > 0:
+            joint_rand_part, encoded = front(self.xof.SEED_SIZE, encoded)
+        else:
+            joint_rand_part = None
+        if len(encoded) != 0:
+            raise ValueError("prepare share is too long")
+        return (verifiers_share, joint_rand_part)
+
+    def encode_prep_msg(self, prep_message: Optional[bytes]) -> bytes:
         joint_rand_seed = prep_message
         encoded = bytes()
         if joint_rand_seed is not None:  # joint randomness used
             encoded += joint_rand_seed
         return encoded
 
-    def test_vec_encode_out_share(self, out_share: list[F]) -> bytes:
+    def decode_prep_msg(self, _prep_state: Prio3PrepState[F], encoded: bytes) -> Optional[bytes]:
+        if len(encoded) == 0:
+            return None
+        return encoded
+
+    def encode_out_share(self, out_share: list[F]) -> bytes:
         return self.flp.field.encode_vec(out_share)
+
+    def decode_out_share(self, _agg_param: None, encoded: bytes) -> list[F]:
+        return self.flp.field.decode_vec(encoded)
 
 
 ##
