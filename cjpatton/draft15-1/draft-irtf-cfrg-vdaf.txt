@@ -752,6 +752,8 @@ Table of Contents
    Exponentiation is denoted by x ** y in Python.  We also sometimes use
    more conventional notation for exponentiation, namely x^y.
 
+   Type hints are used to define input and output types:
+
    *  The type variable F is used in signatures to signify any type that
       is a subclass of Field (Section 6.1).
 
@@ -6742,9 +6744,13 @@ C.1.  Schema
    agg_result:  The expected aggregate result of type AggResult defined
       by the VDAF.
 
-   operations:  A list of operations used to construct the test case.
-      They are executed using messages from this test vector and should
-      be executed in the order they appear.
+   operations:  This lists the VDAF operations that should be executed
+      as part of known answer tests, using messages from this test
+      vector as input.  Operations should be executed in the order they
+      appear, to ensure that prepare state values are computed before
+      they are consumed.  Prepare state values are not included in test
+      vectors because this document does not specify their
+      representation or encoding.
 
    Each operation in the operations list has the following schema:
 
