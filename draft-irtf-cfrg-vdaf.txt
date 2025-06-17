@@ -1777,7 +1777,7 @@ Table of Contents
                prep_state, 0,
                encode(0, encoded_prep_share),  # initialize
            )
-       except:
+       except Exception:
            return Rejected()
 
    The output is the State to which the Leader has transitioned.  If the
@@ -1833,7 +1833,7 @@ Table of Contents
                prep_state,
                0,
            )
-       except:
+       except Exception:
            return Rejected()
 
    The procedure decode() decodes the inbound message and returns the
@@ -1936,7 +1936,7 @@ Table of Contents
                return Finished(out)
            else:
                return Rejected()
-       except:
+       except Exception:
            return Rejected()
 
    If the Leader's state is Finished or Rejected, then processing halts.

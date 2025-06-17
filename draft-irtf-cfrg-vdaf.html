@@ -3723,7 +3723,7 @@ def ping_pong_leader_init(
             prep_state, 0,
             encode(0, encoded_prep_share),  # initialize
         )
-    except:
+    except Exception:
         return Rejected()
 </pre><a href="#section-5.7.1-8" class="pilcrow">¶</a>
 </div>
@@ -3780,7 +3780,7 @@ def ping_pong_helper_init(
             prep_state,
             0,
         )
-    except:
+    except Exception:
         return Rejected()
 </pre><a href="#section-5.7.1-11" class="pilcrow">¶</a>
 </div>
@@ -3886,7 +3886,7 @@ def ping_pong_continued(
             return Finished(out)
         else:
             return Rejected()
-    except:
+    except Exception:
         return Rejected()
 </pre><a href="#section-5.7.1-16" class="pilcrow">¶</a>
 </div>
