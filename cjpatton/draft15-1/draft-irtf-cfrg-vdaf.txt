@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 14 December 2025                                           ISRG
+Expires: 19 December 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            12 June 2025
+                                                            17 June 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 December 2025.
+   This Internet-Draft will expire on 19 December 2025.
 
 Copyright Notice
 
@@ -354,7 +354,9 @@ Table of Contents
       outbound message into the state object.  This reduces the number
       of cases the caller has to handle.
 
-   *  Enrich the test vector schema to express negative test cases.
+   *  Update the test vector format.  First, enrich the test vector
+      schema to express negative test cases.  Second, change the
+      encoding of output shares to match the aggregate shares.
 
    14:
 
@@ -1565,7 +1567,7 @@ Table of Contents
                AggParam,
                PublicShare,
                InputShare,
-               list[F],  # OutShare
+               OutShare,
                AggShare,
                AggResult,
                PrepState,
@@ -6424,7 +6426,7 @@ Table of Contents
               <https://eprint.iacr.org/2024/585>.
 
    [TestVectors]
-              "Test vectors for Prio3 and Poplar1", commit hash cee4567,
+              "Test vectors for Prio3 and Poplar1", commit hash 5b7df1d,
               December 2024,
               <https://github.com/cfrg/draft-irtf-cfrg-vdaf>.
 
