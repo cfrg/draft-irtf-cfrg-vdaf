@@ -1,6 +1,6 @@
 """Ping-pong topology for VDAFs."""
 
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from typing import Generic, TypeVar, cast
 
 from vdaf_poc.common import byte, from_be_bytes, front, to_be_bytes
@@ -85,35 +85,6 @@ class PingPong(
             PrepMessage,
         ],
         metaclass=ABCMeta):
-
-    @abstractmethod
-    def decode_public_share(self, encoded: bytes) -> PublicShare:
-        pass
-
-    @abstractmethod
-    def decode_input_share(self, agg_id: int, encoded: bytes) -> InputShare:
-        pass
-
-    @abstractmethod
-    def encode_prep_share(self, prep_share: PrepShare) -> bytes:
-        pass
-
-    @abstractmethod
-    def decode_prep_share(self, prep_state: PrepState, encoded: bytes) -> PrepShare:
-        pass
-
-    @abstractmethod
-    def encode_prep_msg(self, prep_msg: PrepMessage) -> bytes:
-        pass
-
-    @abstractmethod
-    def decode_prep_msg(self, prep_state: PrepState, encoded: bytes) -> PrepMessage:
-        pass
-
-    @abstractmethod
-    def decode_agg_param(self, encoded: bytes) -> AggParam:
-        pass
-
     # NOTE: Methods ping_pong_leader_init(), ping_pong_helper_init(),
     # ping_pong_transition(), ping_pong_leader_continued(),
     # ping_pong_continued(), and ping_pong_helper_continued() are excerpted in
@@ -146,7 +117,7 @@ class PingPong(
                 prep_state, 0,
                 encode(0, encoded_prep_share),  # initialize
             )
-        except:
+        except Exception:
             return Rejected()
 
     def ping_pong_helper_init(
@@ -191,7 +162,7 @@ class PingPong(
                 prep_state,
                 0,
             )
-        except:
+        except Exception:
             return Rejected()
 
     def ping_pong_transition(
@@ -279,7 +250,7 @@ class PingPong(
                 return Finished(out)
             else:
                 return Rejected()
-        except:
+        except Exception:
             return Rejected()
 
     def ping_pong_helper_continued(

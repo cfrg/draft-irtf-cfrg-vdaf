@@ -1748,7 +1748,7 @@ def ping_pong_leader_init(
             prep_state, 0,
             encode(0, encoded_prep_share),  # initialize
         )
-    except:
+    except Exception:
         return Rejected()
 ~~~
 
@@ -1806,7 +1806,7 @@ def ping_pong_helper_init(
             prep_state,
             0,
         )
-    except:
+    except Exception:
         return Rejected()
 ~~~
 
@@ -1913,7 +1913,7 @@ def ping_pong_continued(
             return Finished(out)
         else:
             return Rejected()
-    except:
+    except Exception:
         return Rejected()
 ~~~
 

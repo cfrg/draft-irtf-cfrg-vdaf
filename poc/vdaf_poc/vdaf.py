@@ -214,6 +214,58 @@ class Vdaf(
     def encode_agg_param(self, agg_param: AggParam) -> bytes:
         pass
 
+    @abstractmethod
+    def decode_agg_param(self, encoded: bytes) -> AggParam:
+        pass
+
+    @abstractmethod
+    def encode_input_share(self, input_share: InputShare) -> bytes:
+        pass
+
+    @abstractmethod
+    def decode_input_share(self, agg_id: int, encoded: bytes) -> InputShare:
+        pass
+
+    @abstractmethod
+    def encode_public_share(self, public_share: PublicShare) -> bytes:
+        pass
+
+    @abstractmethod
+    def decode_public_share(self, encoded: bytes) -> PublicShare:
+        pass
+
+    @abstractmethod
+    def encode_agg_share(self, agg_share: AggShare) -> bytes:
+        pass
+
+    @abstractmethod
+    def decode_agg_share(self, agg_param: AggParam, encoded: bytes) -> AggShare:
+        pass
+
+    @abstractmethod
+    def encode_prep_share(self, prep_share: PrepShare) -> bytes:
+        pass
+
+    @abstractmethod
+    def decode_prep_share(self, prep_state: PrepState, encoded: bytes) -> PrepShare:
+        pass
+
+    @abstractmethod
+    def encode_prep_msg(self, prep_message: PrepMessage) -> bytes:
+        pass
+
+    @abstractmethod
+    def decode_prep_msg(self, prep_state: PrepState, encoded: bytes) -> PrepMessage:
+        pass
+
+    @abstractmethod
+    def encode_out_share(self, out_share: OutShare) -> bytes:
+        pass
+
+    @abstractmethod
+    def decode_out_share(self, agg_param: AggParam, encoded: bytes) -> OutShare:
+        pass
+
     # Methods for generating test vectors
 
     def test_vec_set_type_param(self, _test_vec: dict[str, Any]) -> list[str]:
@@ -222,30 +274,6 @@ class Vdaf(
         class. Returns the keys that were set.
         """
         return []
-
-    @abstractmethod
-    def test_vec_encode_input_share(self, input_share: InputShare) -> bytes:
-        pass
-
-    @abstractmethod
-    def test_vec_encode_public_share(self, public_share: PublicShare) -> bytes:
-        pass
-
-    @abstractmethod
-    def test_vec_encode_agg_share(self, agg_share: AggShare) -> bytes:
-        pass
-
-    @abstractmethod
-    def test_vec_encode_prep_share(self, prep_share: PrepShare) -> bytes:
-        pass
-
-    @abstractmethod
-    def test_vec_encode_prep_msg(self, prep_message: PrepMessage) -> bytes:
-        pass
-
-    @abstractmethod
-    def test_vec_encode_out_share(self, out_share: OutShare) -> bytes:
-        pass
 
 
 # NOTE: This function is excerpted in the document, as the figure
