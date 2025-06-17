@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 18 December 2025                                           ISRG
+Expires: 19 December 2025                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            16 June 2025
+                                                            17 June 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 18 December 2025.
+   This Internet-Draft will expire on 19 December 2025.
 
 Copyright Notice
 
@@ -347,6 +347,16 @@ Table of Contents
 
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
+
+   15:
+
+   *  Simplify the ping-pong API for 2-party preparation by merging the
+      outbound message into the state object.  This reduces the number
+      of cases the caller has to handle.
+
+   *  Update the test vector format.  First, enrich the test vector
+      schema to express negative test cases.  Second, change the
+      encoding of output shares to match the aggregate shares.
 
    14:
 
@@ -727,11 +737,20 @@ Table of Contents
    element and x[len(x)-1] is the last of x.  We can also index from the
    end of the list, e.g., x[-1] is the last element of x.
 
+   Python uses the symbols +, -, *, and / as binary operators.  When the
+   operands are integers, these have the usual meaning, except:
+
+   *  Division results in a floating point number.  Python includes a
+      similar operator, x // y, which is short for floor(x / y).
+
+   *  When x and y are byte strings, x + y denotes their concatenation,
+      i.e., concat(x, y) as defined below.
+
+   Note that we overload these operators when defining finite fields;
+   see Section 6.1.
+
    Exponentiation is denoted by x ** y in Python.  We also sometimes use
    more conventional notation for exponentiation, namely x^y.
-
-   Division of x by y is denoted by x / y.  Python includes a similar
-   operator, x // y, which is short for floor(x / y).
 
    Type hints are used to define input and output types:
 
@@ -2464,8 +2483,8 @@ Table of Contents
    prep_shares_to_prep() algorithm (Section 5.2).
 
    As usual, we describe the interface implemented by a concrete FLP in
-   terms of an abstract base class, denoted Flp, that specifies the set
-   of methods and parameters a concrete FLP must provide.
+   terms of an object flp of type Flp that specifies the set of methods
+   and parameters a concrete FLP must provide.
 
    The parameters provided by a concrete FLP are listed in Table 4.  A
    concrete FLP specifies the following algorithms for generating and
@@ -6409,7 +6428,7 @@ Table of Contents
               <https://eprint.iacr.org/2024/585>.
 
    [TestVectors]
-              "Test vectors for Prio3 and Poplar1", commit hash c0e76dc,
+              "Test vectors for Prio3 and Poplar1", commit hash 5b7df1d,
               December 2024,
               <https://github.com/cfrg/draft-irtf-cfrg-vdaf>.
 
@@ -6725,8 +6744,38 @@ C.1.  Schema
    agg_result:  The expected aggregate result of type AggResult defined
       by the VDAF.
 
-   The schema also includes whatever parameters are required to
-   instantiate the VDAF.  These are listed in the subsections below.
+   operations:  This lists the VDAF operations that should be executed
+      as part of known answer tests, using messages from this test
+      vector as input.  Operations should be executed in the order they
+      appear, to ensure that prepare state values are computed before
+      they are consumed.  Prepare state values are not included in test
+      vectors because this document does not specify their
+      representation or encoding.
+
+   Each operation in the operations list has the following schema:
+
+   operation:  The type of operation to be performed.  This is one of
+      "shard", "prep_init", "prep_shares_to_prep", "prep_next",
+      "aggregate", or "unshard".
+
+   round:  For any preparation operation, the round number of the
+      operation to be performed.  This determines which prepare share,
+      prepare state, and/or prepare message to use.
+
+   aggregator_id:  The aggregator ID to use when performing this
+      operation.  This determines which messages and which prepare state
+      to use, in addition to the aggregator ID argument itself.
+
+   report_index:  The index of the report on which to perform this
+      operation.  This is an index into the prep array.
+
+   success:  If this is True, the operation should succeed, and its
+      output should match the corresponding values in the test vector.
+      If this is False, the operation should fail, terminating
+      preparation of this report.
+
+   The test vector schema also includes whatever parameters are required
+   to instantiate the VDAF.  These are listed in the subsections below.
 
 C.1.1.  Prio3Count
 
