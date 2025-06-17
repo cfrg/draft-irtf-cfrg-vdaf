@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-15T01:13:33.924722+00:00",
+  "timestamp": "2025-06-17T01:06:23.444704+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -45013,7 +45013,7 @@
       ],
       "body": "Closes #534.\r\nCloses #535.\r\nCloses #540.",
       "createdAt": "2025-06-12T23:21:43Z",
-      "updatedAt": "2025-06-14T14:50:11Z",
+      "updatedAt": "2025-06-16T22:32:33Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6054556f3dfe4d0dfe65f1c0e09fbf65ca675323",
@@ -45106,6 +45106,46 @@
               "updatedAt": "2025-06-14T14:50:11Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6uzbGp",
+          "commit": {
+            "abbreviatedOid": "52de5cc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T16:03:52Z",
+          "updatedAt": "2025-06-16T16:03:52Z",
+          "comments": [
+            {
+              "originalPosition": 20,
+              "body": "Add \"update test vector format\"",
+              "createdAt": "2025-06-16T16:03:52Z",
+              "updatedAt": "2025-06-16T16:03:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6u3GAx",
+          "commit": {
+            "abbreviatedOid": "52de5cc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T22:32:33Z",
+          "updatedAt": "2025-06-16T22:32:33Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "5b7df1de62adfd5c1757e574ea85e2ed80eaedd1 will do",
+              "createdAt": "2025-06-16T22:32:33Z",
+              "updatedAt": "2025-06-16T22:32:33Z"
+            }
+          ]
         }
       ]
     },
@@ -45114,7 +45154,7 @@
       "id": "PR_kwDOGKuqOc6adQF9",
       "title": "Change test vector output share encoding",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/547",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -45124,17 +45164,19 @@
       ],
       "body": "This changes the format of output shares in test vectors to be one hex-encoded string, instead of a list of hex-encoded strings, one per field element. This improves consistency in the test vector format.\r\n\r\nNote that this will require another test vector commit hash bump, after landing.",
       "createdAt": "2025-06-13T21:09:01Z",
-      "updatedAt": "2025-06-14T14:49:39Z",
+      "updatedAt": "2025-06-16T22:22:21Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6054556f3dfe4d0dfe65f1c0e09fbf65ca675323",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/test-vector-output-share-encoding",
       "headRefOid": "235bba5001fd105380cb92bedd58e29f2e51fec6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-06-16T22:17:38Z",
+      "mergedAt": "2025-06-16T22:17:38Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "5b7df1de62adfd5c1757e574ea85e2ed80eaedd1"
+      },
       "comments": [],
       "reviews": [
         {
@@ -45151,6 +45193,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 548,
+      "id": "PR_kwDOGKuqOc6azCJB",
+      "title": "Add test vector tests",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/548",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This fixes #541. I defined a suite of methods to decode various VDAF messages, and removed the `test_vec_` prefix in some cases from those methods that encoded messages. Each test vector file now has its own unit test, which runs all operations in sequence and compares against the expected results.",
+      "createdAt": "2025-06-16T22:31:36Z",
+      "updatedAt": "2025-06-16T22:31:37Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "5b7df1de62adfd5c1757e574ea85e2ed80eaedd1",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/test-vector-test",
+      "headRefOid": "37608484fa0c49a791058b6ca57ff368bdaf5392",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
