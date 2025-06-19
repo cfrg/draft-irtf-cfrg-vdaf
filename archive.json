@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-17T01:06:23.444704+00:00",
+  "timestamp": "2025-06-19T01:06:36.739764+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6831,7 +6831,7 @@
       "id": "I_kwDOGKuqOc6msKmf",
       "title": "Disambiguate the \"+\" operator",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/534",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6842,8 +6842,8 @@
       ],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/):\n\n> ... the + (plus) operator is used for both concatenation of lists, concatenation of bytes, and for addition of numbers (or field elements). This may be confusing for people not familiar with Python.\n\n",
       "createdAt": "2025-01-18T02:38:42Z",
-      "updatedAt": "2025-06-12T22:43:29Z",
-      "closedAt": null,
+      "updatedAt": "2025-06-17T13:19:59Z",
+      "closedAt": "2025-06-17T13:19:59Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -6866,7 +6866,7 @@
       "id": "I_kwDOGKuqOc6msKsM",
       "title": "Explain abstract base classes",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/535",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6877,8 +6877,8 @@
       ],
       "body": "[list feedback](https://mailarchive.ietf.org/arch/msg/cfrg/YY8LvTfVwZUHiypnWKV467ITtaw/)\n\n> Another [confusing part of the spec for readers not familiar with Python] is the use of abstract classes, which is not explicitly indicated in the main document, one has to rely on the actual Python code to understand what is the logic of Valid circuits. I can only recommend to hint the reader about this programming feature.",
       "createdAt": "2025-01-18T02:39:54Z",
-      "updatedAt": "2025-06-12T22:43:01Z",
-      "closedAt": null,
+      "updatedAt": "2025-06-17T13:19:59Z",
+      "closedAt": "2025-06-17T13:19:59Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -6925,7 +6925,7 @@
       "id": "I_kwDOGKuqOc6z3PFa",
       "title": "Update draft to reflect new test vectors",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/540",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -6934,8 +6934,8 @@
       "labels": [],
       "body": "#538 adds to the test vector schema, and adds some negative test vectors. We need to bump the commit hash referenced by the document, and describe the `operations` array that has been added to the schema.",
       "createdAt": "2025-04-24T15:06:07Z",
-      "updatedAt": "2025-06-12T23:28:48Z",
-      "closedAt": null,
+      "updatedAt": "2025-06-17T13:19:59Z",
+      "closedAt": "2025-06-17T13:19:59Z",
       "comments": []
     },
     {
@@ -6943,7 +6943,7 @@
       "id": "I_kwDOGKuqOc6z3SX_",
       "title": "Check proof of concept implementation against test vectors",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/541",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -6952,8 +6952,8 @@
       ],
       "body": "We should add tests that test each VDAF against all related test vectors. This would make checking whether the test vectors are up to date part of the test suite, rather than requiring us to regenerate them and compare. This would also provide a reference implementation of how to use the test vectors, which may help other consumers. We will need to define a series of decoding routines, parallel to `test_vec_encode_input_share()`, etc., in order to read the files. Note that some of these decoding routines will require auxiliary inputs, such as the aggregator ID or aggregation parameter, in order to handle non-self-describing messages.",
       "createdAt": "2025-04-24T15:10:54Z",
-      "updatedAt": "2025-04-24T15:10:54Z",
-      "closedAt": null,
+      "updatedAt": "2025-06-17T13:27:34Z",
+      "closedAt": "2025-06-17T13:27:34Z",
       "comments": []
     },
     {
@@ -45004,7 +45004,7 @@
       "id": "PR_kwDOGKuqOc6aTCyT",
       "title": "Various changes for draft 15",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/546",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -45013,17 +45013,19 @@
       ],
       "body": "Closes #534.\r\nCloses #535.\r\nCloses #540.",
       "createdAt": "2025-06-12T23:21:43Z",
-      "updatedAt": "2025-06-16T22:32:33Z",
+      "updatedAt": "2025-06-17T13:19:58Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "6054556f3dfe4d0dfe65f1c0e09fbf65ca675323",
+      "baseRefOid": "5b7df1de62adfd5c1757e574ea85e2ed80eaedd1",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/draft15-1",
-      "headRefOid": "52de5cca31fe216c531d4fb664f76f30c66b18f1",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "ba8862c6d809de776c75290323633097ff946d7e",
+      "closedAt": "2025-06-17T13:19:58Z",
+      "mergedAt": "2025-06-17T13:19:58Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "9fa0640c2734541c2da4752b3397f7da09ffa673"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -45146,6 +45148,26 @@
               "updatedAt": "2025-06-16T22:32:33Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6u-iTQ",
+          "commit": {
+            "abbreviatedOid": "43b0fab"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-17T13:13:48Z",
+          "updatedAt": "2025-06-17T13:17:12Z",
+          "comments": [
+            {
+              "originalPosition": 17,
+              "body": "Whoops, good catch.",
+              "createdAt": "2025-06-17T13:13:48Z",
+              "updatedAt": "2025-06-17T13:17:12Z"
+            }
+          ]
         }
       ]
     },
@@ -45199,26 +45221,44 @@
       "id": "PR_kwDOGKuqOc6azCJB",
       "title": "Add test vector tests",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/548",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-15"
+      ],
       "body": "This fixes #541. I defined a suite of methods to decode various VDAF messages, and removed the `test_vec_` prefix in some cases from those methods that encoded messages. Each test vector file now has its own unit test, which runs all operations in sequence and compares against the expected results.",
       "createdAt": "2025-06-16T22:31:36Z",
-      "updatedAt": "2025-06-16T22:31:37Z",
+      "updatedAt": "2025-06-17T13:27:33Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "5b7df1de62adfd5c1757e574ea85e2ed80eaedd1",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/test-vector-test",
       "headRefOid": "37608484fa0c49a791058b6ca57ff368bdaf5392",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-06-17T13:27:33Z",
+      "mergedAt": "2025-06-17T13:27:33Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "ff01f774df99092f903b46e9a0981592dcb37707"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6u-u2z",
+          "commit": {
+            "abbreviatedOid": "3760848"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-06-17T13:26:31Z",
+          "updatedAt": "2025-06-17T13:26:31Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
