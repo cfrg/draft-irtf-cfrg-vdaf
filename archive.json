@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-19T01:06:36.739764+00:00",
+  "timestamp": "2025-07-13T01:15:59.962484+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7009,6 +7009,32 @@
           "body": "There's only one spot in the draft where we have length prefixes:\n```\nstruct {\n  MessageType type;\n  select (Message.type) {\n    case initialize:\n      opaque prep_share<0..2^32-1>;\n    case continue:\n      opaque prep_msg<0..2^32-1>;\n      opaque prep_share<0..2^32-1>;\n    case finish:\n      opaque prep_msg<0..2^32-1>;\n  };\n} Message;\n```\n\nHere I actually think `0` is an appropriate minimum length. `prep_msg` in particular is often empty. While `prep_share` is never really empty, there's no proof that it _can't_ be empty.",
           "createdAt": "2025-06-12T22:40:46Z",
           "updatedAt": "2025-06-12T22:40:46Z"
+        }
+      ]
+    },
+    {
+      "number": 549,
+      "id": "I_kwDOGKuqOc6_-pAJ",
+      "title": "prio: Improve range proof in Sum",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/549",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "wire change"
+      ],
+      "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
+      "createdAt": "2025-07-10T22:25:05Z",
+      "updatedAt": "2025-07-11T12:28:12Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks for flagging. This draft is already in the crypto panel review queue, so I don't think we should make this change right now. We can bring it up once we get the feedback.\n\nAlso, I believe this improvement also applies to MultihotCountVec.",
+          "createdAt": "2025-07-11T12:27:28Z",
+          "updatedAt": "2025-07-11T12:28:12Z"
         }
       ]
     }
