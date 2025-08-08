@@ -7,8 +7,10 @@ draft-irtf-cfrg-vdaf.xml
 Gemfile.lock
 /.gems/
 *.html
+/.idea/
 /lib
 lib
+/.*.mk
 /node_modules/
 package-lock.json
 *.pdf
