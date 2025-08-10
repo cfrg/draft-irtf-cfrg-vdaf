@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-13T01:15:59.962484+00:00",
+  "timestamp": "2025-08-10T01:16:39.719829+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7026,7 +7026,7 @@
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-07-11T12:28:12Z",
+      "updatedAt": "2025-08-07T19:24:52Z",
       "closedAt": null,
       "comments": [
         {
@@ -7035,6 +7035,13 @@
           "body": "Thanks for flagging. This draft is already in the crypto panel review queue, so I don't think we should make this change right now. We can bring it up once we get the feedback.\n\nAlso, I believe this improvement also applies to MultihotCountVec.",
           "createdAt": "2025-07-11T12:27:28Z",
           "updatedAt": "2025-07-11T12:28:12Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I'm interested in making this change. We can also apply it to Prio3SumVec, and replace the \"bits\" parameter with an upper limit value.",
+          "createdAt": "2025-08-07T19:24:52Z",
+          "updatedAt": "2025-08-07T19:24:52Z"
         }
       ]
     }
@@ -45285,6 +45292,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 550,
+      "id": "PR_kwDOGKuqOc6iyNcw",
+      "title": "Update template files",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/550",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This updates a couple template files to the latest version. The key new feature is support for `ID_TEMPLATE_HOME`, see https://github.com/martinthomson/i-d-template/blob/main/doc/TIPS.md#save-space.",
+      "createdAt": "2025-08-08T15:12:31Z",
+      "updatedAt": "2025-08-08T15:12:32Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "ff01f774df99092f903b46e9a0981592dcb37707",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/update-template-files",
+      "headRefOid": "725ebd0ad54c908ae47316bed78bbc6b31eb4c56",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
