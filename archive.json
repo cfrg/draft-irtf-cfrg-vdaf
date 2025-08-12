@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-10T01:16:39.719829+00:00",
+  "timestamp": "2025-08-12T01:05:56.256707+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -112,6 +112,11 @@
       "name": "draft-15",
       "description": "",
       "color": "FBBA7B"
+    },
+    {
+      "name": "draft-16",
+      "description": "",
+      "color": "388929"
     }
   ],
   "issues": [
@@ -7044,6 +7049,147 @@
           "updatedAt": "2025-08-07T19:24:52Z"
         }
       ]
+    },
+    {
+      "number": 551,
+      "id": "I_kwDOGKuqOc7FUtHq",
+      "title": "Crypto panel: robustness => verifiability",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/551",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "> - Section 1 explains the V=verifiability property of VDAFs and then says\n> that it is referred to as \"robustness\". Why not call it verifiability,\n> i.e., why having two different names for the same thing?\n\nThe term \"robustness\" was borrowed from the original Prio paper and it just kind of stuck. Having one name instead of two is a good idea.\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
+      "createdAt": "2025-08-11T15:24:12Z",
+      "updatedAt": "2025-08-11T15:24:12Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 552,
+      "id": "I_kwDOGKuqOc7FUw0f",
+      "title": "Crypto panel: overview: output shares versus aggregate shares",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/552",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": ">  - Section 3: Figure 1 shows only \"aggregate shares\" while the text also\n> talks about \"output shares\". I find the terminology confusing because\n> the \"output shares\" seem to be an intermediate computation step and are\n> not an output of the aggregator. Also, Figure 1 could be augmented to\n> show all the objects mentioned in the text, such as output shares and\n> public shares.\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/\n",
+      "createdAt": "2025-08-11T15:28:38Z",
+      "updatedAt": "2025-08-11T16:29:45Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The diagram requested here sounds a bit like the one we did in [draft-ietf-ppm dap section 2.4](https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-15#section-2.4), though of course that one deals with DAP-level objects as well as VDAF-level ones. But perhaps it could be adapted to VDAF's needs here?",
+          "createdAt": "2025-08-11T16:29:45Z",
+          "updatedAt": "2025-08-11T16:29:45Z"
+        }
+      ]
+    },
+    {
+      "number": 553,
+      "id": "I_kwDOGKuqOc7FWGwt",
+      "title": "Crypto panel: Section 5.6: \"insecure network\" versus \"secure channel\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/553",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "> - I am not familiar with the terminology of \"simulating a procedure over\n> an insecure network\", but if RFC readers usually are, this is fine. For\n> me, it was confusing to read this instruction in Section 5.6 while also\n> demanding the application to instantiate secure channels (end of 5.6).\n\nThe point of `run_vdaf()` is to describe the sequence of computations that are carried out by the parties. What we're trying to say here is that, in practice, this sequence of computations is executed in the presence of an adversary as defined in Section 9. \n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
+      "createdAt": "2025-08-11T17:06:45Z",
+      "updatedAt": "2025-08-11T17:10:02Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 554,
+      "id": "I_kwDOGKuqOc7FWLDE",
+      "title": "Crypto panel: minor editorial",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/554",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "> - A DAF computes a function over many client reports. Hence in Table 1\n> it should be \"a report\" or \"each report\", and not \"the report\" in the\n> NONCE_SIZE row.\n> \n> - Replace all occurrences of \"we\" (e.g., we obtain, we compute, the\n> inputs we used) by prover/verifier/client/aggregator/etc., except for\n> the ones that actually refer to the authors of the draft ;)\n> \n> - Section 8: the Aggregators run VDAF - should be \"run the Poplar1 VDAF\"\n> or just Poplar1\n> \n> - Section 9: \"a subset of Clients and Aggregators\" should be \"a subset\n> of Clients and a subset of Aggregators\", as otherwise, controlling e.g.\n> all clients would be allowed.\n> \n> - Section 9.1: rewrite to potentially many aggregators, or restrict to\n> the case of Poplar1\n\n> - Section 4, \"For example, the aggregation parameter is used to\n> represent the candidate prefixes in the Poplar1 VDAF\" - at this point,\n> where a reader might not be familiar with Poplar1 at all, so terms like\n> candidate prefix are not known yet. Maybe replace by something more\n> illustrative?\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
+      "createdAt": "2025-08-11T17:12:07Z",
+      "updatedAt": "2025-08-11T17:14:08Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 555,
+      "id": "I_kwDOGKuqOc7FWNHk",
+      "title": "Crypto panel: Poplar versus Poplar1",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/555",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "> - Section 1: explain in 1-2 sentences how Poplar1 if different from\n> Poplar. Additionally, it should be briefly discussed in Section 9 how\n> the changes affect the security analysis that was conducted for Poplar.\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
+      "createdAt": "2025-08-11T17:15:03Z",
+      "updatedAt": "2025-08-11T17:15:12Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 556,
+      "id": "I_kwDOGKuqOc7FWvmn",
+      "title": "Crypto panel: misleading claim about the need for interactivity",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/556",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "> - \"Achieving robustness without sacrificing privacy requires the servers\n> to interact with one another over a number of rounds of communication\" -\n> is this obvious or backed up by a result from the literature?\n\nThis is not backed by evidence and may be wrong. We should either remove this text or qualify it as a applying to the techniques used in the draft (FLPs and arithmetic sketching).\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
+      "createdAt": "2025-08-11T17:57:30Z",
+      "updatedAt": "2025-08-11T18:01:23Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 557,
+      "id": "I_kwDOGKuqOc7FYkn4",
+      "title": "Crypto panel: say in prose how prove randomness is used",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/557",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "> - Section 7.3.3 explains that the prove randomness is used to construct\n> gadget polynomials, but that polynomial is also said to be the lowest\n> degree polynomial that evaluates to a sequence of fixed points. That\n> seems to be a unique polynomial, so where do we need randomness for this\n> step?\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
+      "createdAt": "2025-08-11T20:21:20Z",
+      "updatedAt": "2025-08-11T21:18:55Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -45298,26 +45444,42 @@
       "id": "PR_kwDOGKuqOc6iyNcw",
       "title": "Update template files",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/550",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This updates a couple template files to the latest version. The key new feature is support for `ID_TEMPLATE_HOME`, see https://github.com/martinthomson/i-d-template/blob/main/doc/TIPS.md#save-space.",
       "createdAt": "2025-08-08T15:12:31Z",
-      "updatedAt": "2025-08-08T15:12:32Z",
+      "updatedAt": "2025-08-11T14:56:44Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "ff01f774df99092f903b46e9a0981592dcb37707",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/update-template-files",
       "headRefOid": "725ebd0ad54c908ae47316bed78bbc6b31eb4c56",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-08-11T14:56:32Z",
+      "mergedAt": "2025-08-11T14:56:32Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "dc217221dad2cb0d86e6801b4e0f191264eae7be"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc65Jcpw",
+          "commit": {
+            "abbreviatedOid": "725ebd0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-11T14:48:20Z",
+          "updatedAt": "2025-08-11T14:48:20Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
