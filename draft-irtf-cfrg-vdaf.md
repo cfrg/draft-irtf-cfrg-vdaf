@@ -371,14 +371,16 @@ number larger than 10. This means that DAFs are vulnerable to attacks from
 malicious clients attempting to disrupt the computation by submitting invalid
 measurements. VDAFs are designed to allow the servers to detect and remove
 these measurements prior to aggregation. We refer to this property as
-robustness.
+verifiability. (This is also called robustness in prior work {{CGB17}},
+{{DPRS23}}.)
 
-Achieving robustness without sacrificing privacy requires the servers to
+Achieving verifiability without sacrificing privacy requires the servers to
 interact with one another over a number of rounds of communication. DAFs on the
 other hand are non-interactive, making them easier to deploy; but they do not
-provide robustness on their own. This may be tolerable in some applications.
-For instance, if the client's software is executed in a trusted execution
-environment, it may be reasonable to assume that no client is malicious.
+on their own allow for verifying the validity of the measurements. This may be
+tolerable in some applications. For instance, if the client's software is
+executed in a trusted execution environment, it may be reasonable to assume
+that no client is malicious.
 
 The DAF and VDAF abstractions encompass a variety of MPC techniques in the
 literature. These protocols vary in their operational and security
@@ -2550,10 +2552,10 @@ small. The soundness of the FLP depends on a variety of parameters, like the
 length of the input and the size of the field. See {{flp-bbcggi19}} for
 details.
 
-Note that soundness of an FLP system is not the same as robustness for the VDAF
-that uses it. In particular, soundness of the FLP is necessary, but
-insufficient for robustness of Prio3 ({{prio3}}). See {{security-multiproof}}
-for details.
+Note that soundness of an FLP system is not the same as verifiability for the
+VDAF that uses it. In particular, soundness of the FLP is necessary, but
+insufficient for verifiability of Prio3 ({{prio3}}). See
+{{security-multiproof}} for details.
 
 We remark that {{BBCGGI19}} defines a larger class of fully linear proof
 systems than we consider here. In particular, what is called an "FLP" here is
@@ -2702,8 +2704,9 @@ The sharding algorithm involves the following steps:
 4. Generate the proof using the derived joint randomness
 5. Shard the proof into a sequence of proof shares
 
-As described in {{multiproofs}}, robustness of Prio3 can be amplified by
-generating and verifying multiple proofs. To support this:
+As described in {{multiproofs}}, the probability of an invalid measurement
+being deemed invalid can be decreased by generating and verifying multiple
+proofs. To support this:
 
 * In step 3, derive as much joint randomness as required by `PROOFS` proofs
 * Repeat step 4 `PROOFS` times, each time with a unique joint randomness
@@ -2824,10 +2827,10 @@ involves the following steps:
 
 This three-step process is designed to ensure that the joint randomness does
 not leak the measurement to the Aggregators while preventing a malicious Client
-from tampering with the joint randomness in a way that allows it to break
-robustness. To save a round of communication between the Aggregators later, the
-Client encodes the joint randomness parts in the public share. (See
-{{prio3-preparation}} for details.)
+from tampering with the joint randomness in a way that causes the Aggregators
+to accept an invalid measurement. To save a round of communication between the
+Aggregators later, the Client encodes the joint randomness parts in the public
+share. (See {{prio3-preparation}} for details.)
 
 All functions used in the following listing are defined in {{prio3-auxiliary}}:
 
@@ -5668,17 +5671,18 @@ VDAFs ({{vdaf}}) have two essential security goals:
    honest Aggregators. In particular, it cannot forge or prevent transmission
    of messages on these channels.
 
-1. Robustness: an attacker that controls a subset of Clients cannot cause the
-   Collector to compute anything other than the aggregate of the measurements
-   of honest Clients, plus valid measurements from some of the
+1. Verifiability: an attacker that controls a subset of Clients cannot cause
+   the Collector to compute anything other than the aggregate of the
+   measurements of honest Clients, plus valid measurements from some of the
    attacker-controlled Clients. We assume the attacker eavesdrops on the
    network but does not control transmission of messages between honest
    parties.
 
-Formal definitions of privacy and robustness can be found in {{DPRS23}}. A VDAF
-is the core cryptographic primitive of a protocol that achieves the above
-privacy and robustness goals. It is not sufficient on its own, however. The
-application will need to assure a few security properties, for example:
+Formal definitions of privacy and verifiability (i.e., robustness) can be found
+in {{DPRS23}}. A VDAF is the core cryptographic primitive of a protocol that
+achieves the above privacy and verifiability goals. It is not sufficient on its
+own, however. The application will need to assure a few security properties,
+for example:
 
 * Securely distributing the long-lived parameters, in particular the
   verification key.
@@ -5715,7 +5719,7 @@ On their own, VDAFs do not provide:
    amount of information about an individual measurement or the person that
    generated it.
 
-1. Robustness in the presence of a malicious Aggregator. An Aggregator can,
+1. Verifiability in the presence of a malicious Aggregator. An Aggregator can,
    without detection, manipulate the aggregate result by modifying its own
    aggregate share.
 
@@ -5729,10 +5733,10 @@ The Aggregators are responsible for exchanging the verification key in advance
 of executing the VDAF. Any procedure is acceptable as long as the following
 conditions are met:
 
-1. To ensure robustness of the computation, the Aggregators MUST NOT reveal the
-   verification key to the Clients. Otherwise, a malicious Client might be able
-   to exploit knowledge of this key to craft an invalid report that would be
-   accepted by the Aggregators.
+1. To ensure the computation is verifiably correct, the Aggregators MUST NOT
+   reveal the verification key to the Clients. Otherwise, a malicious Client
+   might be able to exploit knowledge of this key to craft an invalid report
+   that would be accepted by the Aggregators.
 
 1. To ensure privacy of the measurements, the Aggregators MUST commit to the
    verification key prior to processing reports generated by Clients.
@@ -5820,11 +5824,11 @@ RECOMMENDED to use differential privacy for any heavy-hitter type application.
 The arithmetic sketch described in {{poplar1}} is used by the Aggregators to check
 that the shares of the vector obtained by evaluating a Client's IDPF at a
 sequence of candidate prefixes has at most one non-zero value, and that the
-non-zero value is `1`. Depending on how the values are used, the arithmetic sketch
-on its own may not be sufficient for robustness of the application. In
-particular, a malicious Client may attempt to influence the computation by
-choosing an IDPF that evaluates to `1` at more than one node at a given
-level of the tree.
+non-zero value is `1`. Depending on how the values are used, the arithmetic
+sketch on its own may not be sufficient to verify the correctness of the
+computation. In particular, a malicious Client may attempt to influence the
+computation by choosing an IDPF that evaluates to `1` at more than one node at
+a given level of the tree.
 
 This issue can be mitigated by using an IDPF that is extractable as defined
 in Appendix D of {{BBCGGI21}}. Extractability ensures that, for a particular
@@ -5843,8 +5847,8 @@ This is not an issue for running heavy hitters, since (1) each node in the
 prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
 would detect double voting at every level of the prefix tree, and (3) the IDPF
 is extractable at the last level of the tree. However, the lack of
-extractability at intermediate levels may result in attacks on the robustness
-of certain applications.
+extractability at intermediate levels may result in attacks on the correctness of
+the computation in certain applications.
 
 Thus applications SHOULD NOT use prefix counts for intermediate levels for any
 purpose beyond computing the prefix tree for heavy hitters.
@@ -5876,7 +5880,7 @@ fixed key can be modeled as a random permutation {{GKWY20}}. Additionally, we
 use a different AES key for every client, which in the ideal cipher model leads
 to better concrete security {{GKWWY20}}.
 
-We note that for robustness, the analysis of {{BBCGGI21}} still assumes a
+We note that for verifiability, the analysis of {{BBCGGI21}} still assumes a
 random oracle to make the IDPF extractable. We therefore use XofTurboShake128
 instead for the last level of the tree. It is important that XofTurboShake128
 supports many seed lengths, in particular 16 bytes, as this is the seed size
@@ -5894,7 +5898,7 @@ Prio3 and other systems built from the FLP of {{flp-bbcggi19}} may benefit from
 choosing a field size that is as small as possible. Generally speaking, a
 smaller field results in lower communication and storage costs. Care must be
 taken, however, since a smaller field also results in degraded (or even
-vacuous) robustness.
+vacuous) verifiability.
 
 Different variants of Prio3 ({{prio3}}) use different field sizes: Prio3Count
 and Prio3Sum use Field64; but Prio3SumVec, Prio3Histogram, and
@@ -5907,7 +5911,7 @@ derive joint randomness that causes the circuit to accept. Choosing a large
 enough field ensures this computation is too expensive to be feasible. (See
 {{DPRS23}}, Theorem 1.) Note that privacy is not susceptible to such attacks.
 
-Another way to mitigate this issue (or improve robustness in general) is to
+Another way to mitigate this issue (or improve verifiability in general) is to
 generate and verify multiple, independent proofs. (See {{multiproofs}}.) For
 Prio3, the `PROOFS` parameter controls the number of proofs (at least one) that
 are generated and verified. In general the soundness error of the FLP is given
@@ -5960,7 +5964,7 @@ For example:
    of Prio3 would compute different measurement shares.
 
 1. Weak parameters: Prio3 variants that require joint randomness are subject to
-   offline attacks against robustness. These attacks are feasible if the field
+   offline attacks against verifiability. These attacks are feasible if the field
    size or number of proofs is sufficiently small. (See
    {{security-multiproof}}.) The joint randomness derivation is bound to both
    the field (via the algorithm ID) and the number of proofs, thereby ensuring
@@ -5984,7 +5988,7 @@ attacks. For side-channel attacks against the privacy security goal, the
 relevant threat model includes an attacker that may control the Collector, a
 subset of Clients, and a subset of Aggregators, and monitor side-channel
 signals from the honest Clients and Aggregators. Side-channel attacks by third
-parties may indirectly target robustness by trying to leak the Aggregators'
+parties may indirectly target verifiability by trying to leak the Aggregators'
 verification key. Thus, implementations of Clients and Aggregators should treat
 measurements, input shares, output shares, and the verification key as secret,
 and avoid leaking those secret values or any intermediate computations that
