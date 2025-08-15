@@ -1613,9 +1613,10 @@ verifiability. (This is also called robustness in prior work <span>[<a href="#CG
 <p id="section-1-15">Achieving verifiability without sacrificing privacy requires the servers to
 interact with one another over a number of rounds of communication. DAFs on the
 other hand are non-interactive, making them easier to deploy; but they do not
-provide verifiability on their own. This may be tolerable in some applications.
-For instance, if the client's software is executed in a trusted execution
-environment, it may be reasonable to assume that no client is malicious.<a href="#section-1-15" class="pilcrow">¶</a></p>
+on their own allow for verifying the validity of the measurements. This may be
+tolerable in some applications. For instance, if the client's software is
+executed in a trusted execution environment, it may be reasonable to assume
+that no client is malicious.<a href="#section-1-15" class="pilcrow">¶</a></p>
 <p id="section-1-16">The DAF and VDAF abstractions encompass a variety of MPC techniques in the
 literature. These protocols vary in their operational and security
 requirements, sometimes in subtle but consequential ways. This document
@@ -5223,10 +5224,10 @@ randomness seed<a href="#section-7.2.1.2-2.3.1" class="pilcrow">¶</a></p>
             </ol>
 <p id="section-7.2.1.2-3">This three-step process is designed to ensure that the joint randomness does
 not leak the measurement to the Aggregators while preventing a malicious Client
-from tampering with the joint randomness in a way that allows it to break
-verifiability. To save a round of communication between the Aggregators later,
-the Client encodes the joint randomness parts in the public share. (See
-<a href="#prio3-preparation" class="auto internal xref">Section 7.2.2</a> for details.)<a href="#section-7.2.1.2-3" class="pilcrow">¶</a></p>
+from tampering with the joint randomness in a way that causes the Aggregators
+to accept an invalid measurement. To save a round of communication between the
+Aggregators later, the Client encodes the joint randomness parts in the public
+share. (See <a href="#prio3-preparation" class="auto internal xref">Section 7.2.2</a> for details.)<a href="#section-7.2.1.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.2.1.2-4">All functions used in the following listing are defined in <a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>:<a href="#section-7.2.1.2-4" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-7.2.1.2-5">
 <pre>
@@ -9015,10 +9016,10 @@ of executing the VDAF. Any procedure is acceptable as long as the following
 conditions are met:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9.1-2">
 <li id="section-9.1-2.1">
-            <p id="section-9.1-2.1.1">To ensure correctness of the computation, the Aggregators <span class="bcp14">MUST NOT</span> reveal the
-verification key to the Clients. Otherwise, a malicious Client might be able
-to exploit knowledge of this key to craft an invalid report that would be
-accepted by the Aggregators.<a href="#section-9.1-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-9.1-2.1.1">To ensure the computation is verifiably correct, the Aggregators <span class="bcp14">MUST NOT</span>
+reveal the verification key to the Clients. Otherwise, a malicious Client
+might be able to exploit knowledge of this key to craft an invalid report
+that would be accepted by the Aggregators.<a href="#section-9.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-9.1-2.2">
             <p id="section-9.1-2.2.1">To ensure privacy of the measurements, the Aggregators <span class="bcp14">MUST</span> commit to the
@@ -9118,11 +9119,11 @@ compose Poplar1 with some mechanism for differential privacy. It is therefore
 <p id="section-9.5-1">The arithmetic sketch described in <a href="#poplar1" class="auto internal xref">Section 8</a> is used by the Aggregators to check
 that the shares of the vector obtained by evaluating a Client's IDPF at a
 sequence of candidate prefixes has at most one non-zero value, and that the
-non-zero value is <code>1</code>. Depending on how the values are used, the arithmetic sketch
-on its own may not be sufficient for verifiability of the application. In
-particular, a malicious Client may attempt to influence the computation by
-choosing an IDPF that evaluates to <code>1</code> at more than one node at a given
-level of the tree.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+non-zero value is <code>1</code>. Depending on how the values are used, the arithmetic
+sketch on its own may not be sufficient for to verify the correctness of the
+computation. In particular, a malicious Client may attempt to influence the
+computation by choosing an IDPF that evaluates to <code>1</code> at more than one node at
+a given level of the tree.<a href="#section-9.5-1" class="pilcrow">¶</a></p>
 <p id="section-9.5-2">This issue can be mitigated by using an IDPF that is extractable as defined
 in Appendix D of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>. Extractability ensures that, for a particular
 level of the tree, it is infeasible for an attacker to control values of the
@@ -9138,8 +9139,8 @@ client to produce IDPF shares with two controlled non-zero nodes.<a href="#secti
 prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
 would detect double voting at every level of the prefix tree, and (3) the IDPF
 is extractable at the last level of the tree. However, the lack of
-extractability at intermediate levels may result in attacks on the verifiability
-of certain applications.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
+extractability at intermediate levels may result in attacks the correctness of
+the computation in certain applications.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
 <p id="section-9.5-5">Thus applications <span class="bcp14">SHOULD NOT</span> use prefix counts for intermediate levels for any
 purpose beyond computing the prefix tree for heavy hitters.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
 </section>

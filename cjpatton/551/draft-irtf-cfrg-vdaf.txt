@@ -282,10 +282,11 @@ Table of Contents
    Achieving verifiability without sacrificing privacy requires the
    servers to interact with one another over a number of rounds of
    communication.  DAFs on the other hand are non-interactive, making
-   them easier to deploy; but they do not provide verifiability on their
-   own.  This may be tolerable in some applications.  For instance, if
-   the client's software is executed in a trusted execution environment,
-   it may be reasonable to assume that no client is malicious.
+   them easier to deploy; but they do not on their own allow for
+   verifying the validity of the measurements.  This may be tolerable in
+   some applications.  For instance, if the client's software is
+   executed in a trusted execution environment, it may be reasonable to
+   assume that no client is malicious.
 
    The DAF and VDAF abstractions encompass a variety of MPC techniques
    in the literature.  These protocols vary in their operational and
@@ -2938,10 +2939,10 @@ Table of Contents
    This three-step process is designed to ensure that the joint
    randomness does not leak the measurement to the Aggregators while
    preventing a malicious Client from tampering with the joint
-   randomness in a way that allows it to break verifiability.  To save a
-   round of communication between the Aggregators later, the Client
-   encodes the joint randomness parts in the public share.  (See
-   Section 7.2.2 for details.)
+   randomness in a way that causes the Aggregators to accept an invalid
+   measurement.  To save a round of communication between the
+   Aggregators later, the Client encodes the joint randomness parts in
+   the public share.  (See Section 7.2.2 for details.)
 
    All functions used in the following listing are defined in
    Section 7.2.6:
@@ -5922,9 +5923,9 @@ Table of Contents
    in advance of executing the VDAF.  Any procedure is acceptable as
    long as the following conditions are met:
 
-   1.  To ensure correctness of the computation, the Aggregators MUST
-       NOT reveal the verification key to the Clients.  Otherwise, a
-       malicious Client might be able to exploit knowledge of this key
+   1.  To ensure the computation is verifiably correct, the Aggregators
+       MUST NOT reveal the verification key to the Clients.  Otherwise,
+       a malicious Client might be able to exploit knowledge of this key
        to craft an invalid report that would be accepted by the
        Aggregators.
 
@@ -6023,10 +6024,10 @@ Table of Contents
    evaluating a Client's IDPF at a sequence of candidate prefixes has at
    most one non-zero value, and that the non-zero value is 1.  Depending
    on how the values are used, the arithmetic sketch on its own may not
-   be sufficient for verifiability of the application.  In particular, a
-   malicious Client may attempt to influence the computation by choosing
-   an IDPF that evaluates to 1 at more than one node at a given level of
-   the tree.
+   be sufficient for to verify the correctness of the computation.  In
+   particular, a malicious Client may attempt to influence the
+   computation by choosing an IDPF that evaluates to 1 at more than one
+   node at a given level of the tree.
 
    This issue can be mitigated by using an IDPF that is extractable as
    defined in Appendix D of [BBCGGI21].  Extractability ensures that,
@@ -6047,7 +6048,8 @@ Table of Contents
    arithmetic sketch would detect double voting at every level of the
    prefix tree, and (3) the IDPF is extractable at the last level of the
    tree.  However, the lack of extractability at intermediate levels may
-   result in attacks on the verifiability of certain applications.
+   result in attacks the correctness of the computation in certain
+   applications.
 
    Thus applications SHOULD NOT use prefix counts for intermediate
    levels for any purpose beyond computing the prefix tree for heavy
