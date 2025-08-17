@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-12T01:05:56.256707+00:00",
+  "timestamp": "2025-08-17T01:12:44.514018+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7058,14 +7058,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-16"
       ],
       "body": "> - Section 1 explains the V=verifiability property of VDAFs and then says\n> that it is referred to as \"robustness\". Why not call it verifiability,\n> i.e., why having two different names for the same thing?\n\nThe term \"robustness\" was borrowed from the original Prio paper and it just kind of stuck. Having one name instead of two is a good idea.\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T15:24:12Z",
-      "updatedAt": "2025-08-11T15:24:12Z",
+      "updatedAt": "2025-08-15T23:19:27Z",
       "closedAt": null,
       "comments": []
     },
@@ -7161,14 +7163,16 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-16"
       ],
       "body": "> - \"Achieving robustness without sacrificing privacy requires the servers\n> to interact with one another over a number of rounds of communication\" -\n> is this obvious or backed up by a result from the literature?\n\nThis is not backed by evidence and may be wrong. We should either remove this text or qualify it as a applying to the techniques used in the draft (FLPs and arithmetic sketching).\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T17:57:30Z",
-      "updatedAt": "2025-08-11T18:01:23Z",
+      "updatedAt": "2025-08-15T23:48:09Z",
       "closedAt": null,
       "comments": []
     },
@@ -45480,6 +45484,60 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 558,
+      "id": "PR_kwDOGKuqOc6j6C26",
+      "title": "Rename robustness to verifiability",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/558",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "Closes #551.\r\n\r\nThis avoids using two terms for the same security property.",
+      "createdAt": "2025-08-15T23:37:39Z",
+      "updatedAt": "2025-08-15T23:37:59Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "dc217221dad2cb0d86e6801b4e0f191264eae7be",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/551",
+      "headRefOid": "b6d994bb608c5cd7c7ee1dfeb396b368e0e62ba7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 559,
+      "id": "PR_kwDOGKuqOc6j6GRJ",
+      "title": "Don't claim that verifiability requires interaction",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/559",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #556.\r\n\r\nWe made this claim in the intro, but it's too strong. It's only true for the cryptographic techniques used in the paper (FLPs and arithmetic sketching).",
+      "createdAt": "2025-08-15T23:57:31Z",
+      "updatedAt": "2025-08-15T23:57:32Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "cjpatton/551",
+      "baseRefOid": "b6d994bb608c5cd7c7ee1dfeb396b368e0e62ba7",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/556",
+      "headRefOid": "5fe2f75a35aa5c759c79329d09d63f8c862cdf22",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
