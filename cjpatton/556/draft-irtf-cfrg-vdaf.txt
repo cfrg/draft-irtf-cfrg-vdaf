@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 16 February 2026                                           ISRG
+Expires: 19 February 2026                                           ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          15 August 2025
+                                                          18 August 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 February 2026.
+   This Internet-Draft will expire on 19 February 2026.
 
 Copyright Notice
 
@@ -2808,9 +2808,9 @@ Table of Contents
 
    5.  Shard the proof into a sequence of proof shares
 
-   As described in Section 7.1.2, verifiability of Prio3 can be
-   amplified by generating and verifying multiple proofs.  To support
-   this:
+   As described in Section 7.1.2, the probability of an invalid
+   measurement being deemed invalid can be decreased by generating and
+   verifying multiple proofs.  To support this:
 
    *  In step 3, derive as much joint randomness as required by PROOFS
       proofs
@@ -6024,7 +6024,7 @@ Table of Contents
    evaluating a Client's IDPF at a sequence of candidate prefixes has at
    most one non-zero value, and that the non-zero value is 1.  Depending
    on how the values are used, the arithmetic sketch on its own may not
-   be sufficient for to verify the correctness of the computation.  In
+   be sufficient to verify the correctness of the computation.  In
    particular, a malicious Client may attempt to influence the
    computation by choosing an IDPF that evaluates to 1 at more than one
    node at a given level of the tree.
@@ -6048,7 +6048,7 @@ Table of Contents
    arithmetic sketch would detect double voting at every level of the
    prefix tree, and (3) the IDPF is extractable at the last level of the
    tree.  However, the lack of extractability at intermediate levels may
-   result in attacks the correctness of the computation in certain
+   result in attacks on the correctness of the computation in certain
    applications.
 
    Thus applications SHOULD NOT use prefix counts for intermediate
