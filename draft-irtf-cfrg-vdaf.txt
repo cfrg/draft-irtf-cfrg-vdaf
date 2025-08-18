@@ -274,19 +274,19 @@ Table of Contents
    of an invalid measurement, e.g., a number larger than 10.  This means
    that DAFs are vulnerable to attacks from malicious clients attempting
    to disrupt the computation by submitting invalid measurements.  VDAFs
-   are designed to allow the servers to detect and remove these
-   measurements prior to aggregation. We refer to this property as
-   verifiability.  (This is also called robustness in prior work
-   [CGB17], [DPRS23].)
+   are designed to allow the servers to interact with one another in
+   order to detect and remove these measurements prior to
+   aggregation. We refer to this property as verifiability.  (This is
+   also called robustness in prior work [CGB17], [DPRS23].)
 
-   Achieving verifiability without sacrificing privacy requires the
-   servers to interact with one another over a number of rounds of
-   communication.  DAFs on the other hand are non-interactive, making
-   them easier to deploy; but they do not on their own allow for
-   verifying the validity of the measurements.  This may be tolerable in
-   some applications.  For instance, if the client's software is
-   executed in a trusted execution environment, it may be reasonable to
-   assume that no client is malicious.
+   Achieving verifiability using the cryptographic techniques described
+   in this document requires a significant amount of interaction between
+   the servers.  DAFs on the other hand are non-interactive, making them
+   easier to deploy; but they do not on their own allow for verifying
+   the validity of the measurements.  This may be tolerable in some
+   applications.  For instance, if the client's software is executed in
+   a trusted execution environment, it may be reasonable to assume that
+   no client is malicious.
 
    The DAF and VDAF abstractions encompass a variety of MPC techniques
    in the literature.  These protocols vary in their operational and
