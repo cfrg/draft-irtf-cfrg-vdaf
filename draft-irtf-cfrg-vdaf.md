@@ -2705,7 +2705,7 @@ The sharding algorithm involves the following steps:
 5. Shard the proof into a sequence of proof shares
 
 As described in {{multiproofs}}, the probability of an invalid measurement
-being deemed invalid can be decreased by generating and verifying multiple
+being deemed valid can be decreased by generating and verifying multiple
 proofs. To support this:
 
 * In step 3, derive as much joint randomness as required by `PROOFS` proofs
