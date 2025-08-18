@@ -5080,8 +5080,9 @@ Section 6.2.3 of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</spa
               <p id="section-7.2.1-3.5.1">Shard the proof into a sequence of proof shares<a href="#section-7.2.1-3.5.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
-<p id="section-7.2.1-4">As described in <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>, verifiability of Prio3 can be amplified by
-generating and verifying multiple proofs. To support this:<a href="#section-7.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.2.1-4">As described in <a href="#multiproofs" class="auto internal xref">Section 7.1.2</a>, the probability of an invalid measurement
+being deemed invalid can be decreased by generating and verifying multiple
+proofs. To support this:<a href="#section-7.2.1-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-7.2.1-5.1">
               <p id="section-7.2.1-5.1.1">In step 3, derive as much joint randomness as required by <code>PROOFS</code> proofs<a href="#section-7.2.1-5.1.1" class="pilcrow">¶</a></p>
@@ -9140,7 +9141,7 @@ client to produce IDPF shares with two controlled non-zero nodes.<a href="#secti
 prefix tree is a child of a previously traversed node, (2) the arithmetic sketch
 would detect double voting at every level of the prefix tree, and (3) the IDPF
 is extractable at the last level of the tree. However, the lack of
-extractability at intermediate levels may result in attacks the correctness of
+extractability at intermediate levels may result in attacks on the correctness of
 the computation in certain applications.<a href="#section-9.5-4" class="pilcrow">¶</a></p>
 <p id="section-9.5-5">Thus applications <span class="bcp14">SHOULD NOT</span> use prefix counts for intermediate levels for any
 purpose beyond computing the prefix tree for heavy hitters.<a href="#section-9.5-5" class="pilcrow">¶</a></p>
