@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-17T01:12:44.514018+00:00",
+  "timestamp": "2025-08-19T01:04:45.111948+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7055,7 +7055,7 @@
       "id": "I_kwDOGKuqOc7FUtHq",
       "title": "Crypto panel: robustness => verifiability",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/551",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7067,8 +7067,8 @@
       ],
       "body": "> - Section 1 explains the V=verifiability property of VDAFs and then says\n> that it is referred to as \"robustness\". Why not call it verifiability,\n> i.e., why having two different names for the same thing?\n\nThe term \"robustness\" was borrowed from the original Prio paper and it just kind of stuck. Having one name instead of two is a good idea.\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T15:24:12Z",
-      "updatedAt": "2025-08-15T23:19:27Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-18T20:22:40Z",
+      "closedAt": "2025-08-18T20:22:40Z",
       "comments": []
     },
     {
@@ -7160,7 +7160,7 @@
       "id": "I_kwDOGKuqOc7FWvmn",
       "title": "Crypto panel: misleading claim about the need for interactivity",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/556",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7172,8 +7172,8 @@
       ],
       "body": "> - \"Achieving robustness without sacrificing privacy requires the servers\n> to interact with one another over a number of rounds of communication\" -\n> is this obvious or backed up by a result from the literature?\n\nThis is not backed by evidence and may be wrong. We should either remove this text or qualify it as a applying to the techniques used in the draft (FLPs and arithmetic sketching).\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T17:57:30Z",
-      "updatedAt": "2025-08-15T23:48:09Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-18T20:24:54Z",
+      "closedAt": "2025-08-18T20:24:54Z",
       "comments": []
     },
     {
@@ -41184,7 +41184,7 @@
       ],
       "body": "",
       "createdAt": "2024-10-09T15:06:08Z",
-      "updatedAt": "2024-10-18T21:50:45Z",
+      "updatedAt": "2025-08-18T20:27:00Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "294c5abd2dc6e55d5a9a94eb23b87ea66e0876e9",
@@ -43625,7 +43625,7 @@
       ],
       "body": "",
       "createdAt": "2024-10-22T21:51:16Z",
-      "updatedAt": "2024-10-22T21:53:02Z",
+      "updatedAt": "2025-08-18T20:27:01Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "bd983637a87a7fa8353db5771c184585b2550271",
@@ -43714,7 +43714,7 @@
       ],
       "body": "Closes #518 \r\n\r\ncc @armfazh ",
       "createdAt": "2024-10-30T15:13:33Z",
-      "updatedAt": "2024-10-30T18:29:52Z",
+      "updatedAt": "2025-08-18T20:26:56Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "913f584b65d4b8d4430993bf2b17f8f416af2fc3",
@@ -43769,7 +43769,7 @@
       "labels": [],
       "body": "A demonstration of the composition of FLP with Shamir's secret sharing.\r\nThis could be the basis of a Prio3 variant that tolerates drop out of an\r\nAggregator.\r\n\r\nImagine a DAP setup [1] where a Leader wants to be able to run the\r\nprotocol with one of two Helpers so that if the first Helper goes\r\noffline, it can continue the computation with the other.\r\n\r\nFor this to work, the Client still needs to know the identities of the\r\ntwo Helpers prior to generating its report.\r\n\r\n[1] https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/22",
       "createdAt": "2024-10-31T20:37:45Z",
-      "updatedAt": "2024-11-18T18:28:21Z",
+      "updatedAt": "2025-08-18T20:26:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9aabdd421b68d97ef7599fe54fd455f9cda35aa4",
@@ -44102,7 +44102,7 @@
       ],
       "body": "Closes #529.",
       "createdAt": "2025-01-07T22:30:29Z",
-      "updatedAt": "2025-01-08T22:41:19Z",
+      "updatedAt": "2025-08-18T20:26:52Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b4752681f97fa9114ce974298a949acd43ba355d",
@@ -44186,7 +44186,7 @@
       ],
       "body": "Closes #527.",
       "createdAt": "2025-01-07T22:35:07Z",
-      "updatedAt": "2025-01-08T17:19:47Z",
+      "updatedAt": "2025-08-18T20:26:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c0e76dcf8f78d7d36332582f060ab791e5bb1115",
@@ -44230,7 +44230,7 @@
       ],
       "body": "Closes #477.",
       "createdAt": "2025-01-07T23:39:43Z",
-      "updatedAt": "2025-01-10T21:15:33Z",
+      "updatedAt": "2025-08-18T20:26:50Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "b4752681f97fa9114ce974298a949acd43ba355d",
@@ -44459,7 +44459,7 @@
       ],
       "body": "",
       "createdAt": "2025-01-07T23:44:39Z",
-      "updatedAt": "2025-01-10T21:19:06Z",
+      "updatedAt": "2025-08-18T20:26:50Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c0e76dcf8f78d7d36332582f060ab791e5bb1115",
@@ -44824,7 +44824,7 @@
       ],
       "body": "Closes #542.\r\n\r\nMerge the outbound message into the Aggregator's ping pong state:\r\n\r\n1. Remove outbound message from each API call\r\n\r\n2. Add outbound message to `Continued`\r\n\r\n3. Define a new state, `FinishedWithOutbound` that is like `Finished` except it include an outbound message\r\n\r\nThis reduces the number of cases the caller has to handle to only cases that are valid. In particular, the following cases are invalid:\r\n\r\n* `state == Rejected() and outbound != None`\r\n* `state == Continued(...) and outbound == None`",
       "createdAt": "2025-05-05T21:17:27Z",
-      "updatedAt": "2025-05-22T23:43:15Z",
+      "updatedAt": "2025-08-18T20:26:49Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cee4567268a54be13d9d0c1e8a3d2b968959d688",
@@ -45196,7 +45196,7 @@
       ],
       "body": "Closes #534.\r\nCloses #535.\r\nCloses #540.",
       "createdAt": "2025-06-12T23:21:43Z",
-      "updatedAt": "2025-06-17T13:19:58Z",
+      "updatedAt": "2025-08-18T20:26:47Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "5b7df1de62adfd5c1757e574ea85e2ed80eaedd1",
@@ -45490,7 +45490,7 @@
       "id": "PR_kwDOGKuqOc6j6C26",
       "title": "Rename robustness to verifiability",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/558",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -45499,45 +45499,189 @@
       ],
       "body": "Closes #551.\r\n\r\nThis avoids using two terms for the same security property.",
       "createdAt": "2025-08-15T23:37:39Z",
-      "updatedAt": "2025-08-15T23:37:59Z",
+      "updatedAt": "2025-08-18T20:26:47Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "dc217221dad2cb0d86e6801b4e0f191264eae7be",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/551",
-      "headRefOid": "b6d994bb608c5cd7c7ee1dfeb396b368e0e62ba7",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "8fb8a7fd3b4153662268b08856edcd106cb34c3f",
+      "closedAt": "2025-08-18T20:22:39Z",
+      "mergedAt": "2025-08-18T20:22:39Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "4b831a8c7c94392d042d1dd3cd996c06e9b3f279"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc66WE75",
+          "commit": {
+            "abbreviatedOid": "b6d994b"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "Looks sound to me! I filed https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/724 to make a corresponding change in DAP.",
+          "createdAt": "2025-08-17T13:51:45Z",
+          "updatedAt": "2025-08-17T13:51:45Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc66hwEF",
+          "commit": {
+            "abbreviatedOid": "b6d994b"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-18T18:12:57Z",
+          "updatedAt": "2025-08-18T18:20:59Z",
+          "comments": [
+            {
+              "originalPosition": 42,
+              "body": "Talking about amplifying verifiability seems confusing. Maybe we should instead say that the false negative rate of Prio3's verifiability can be reduced.",
+              "createdAt": "2025-08-18T18:12:58Z",
+              "updatedAt": "2025-08-18T18:20:59Z"
+            },
+            {
+              "originalPosition": 121,
+              "body": "nit: grammar\r\n```suggestion\r\nsketch on its own may not be sufficient to verify the correctness of the\r\n```",
+              "createdAt": "2025-08-18T18:18:18Z",
+              "updatedAt": "2025-08-18T18:20:59Z"
+            },
+            {
+              "originalPosition": 134,
+              "body": "nit: grammar\r\n```suggestion\r\nextractability at intermediate levels may result in attacks on the correctness of\r\n```",
+              "createdAt": "2025-08-18T18:20:32Z",
+              "updatedAt": "2025-08-18T18:20:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc66jMgh",
+          "commit": {
+            "abbreviatedOid": "b6d994b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-08-18T20:20:08Z",
+          "updatedAt": "2025-08-18T20:20:08Z",
+          "comments": [
+            {
+              "originalPosition": 42,
+              "body": "Changed to \"the probability of an invalid measurement being deemed invalid can be decreased\"",
+              "createdAt": "2025-08-18T20:20:08Z",
+              "updatedAt": "2025-08-18T20:20:08Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 559,
       "id": "PR_kwDOGKuqOc6j6GRJ",
       "title": "Don't claim that verifiability requires interaction",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/559",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-16"
+      ],
       "body": "Closes #556.\r\n\r\nWe made this claim in the intro, but it's too strong. It's only true for the cryptographic techniques used in the paper (FLPs and arithmetic sketching).",
       "createdAt": "2025-08-15T23:57:31Z",
-      "updatedAt": "2025-08-15T23:57:32Z",
+      "updatedAt": "2025-08-18T20:26:46Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "cjpatton/551",
-      "baseRefOid": "b6d994bb608c5cd7c7ee1dfeb396b368e0e62ba7",
+      "baseRefName": "main",
+      "baseRefOid": "4b831a8c7c94392d042d1dd3cd996c06e9b3f279",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/556",
-      "headRefOid": "5fe2f75a35aa5c759c79329d09d63f8c862cdf22",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "e178f27db1eec670552bd7c9656d06eccf515eac",
+      "closedAt": "2025-08-18T20:24:54Z",
+      "mergedAt": "2025-08-18T20:24:54Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "e6c79e1ac3e6faee357659c2a5aa23a631206622"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc66WE-z",
+          "commit": {
+            "abbreviatedOid": "5fe2f75"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-17T13:52:20Z",
+          "updatedAt": "2025-08-17T13:52:20Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc66h2Ns",
+          "commit": {
+            "abbreviatedOid": "5fe2f75"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-18T18:23:14Z",
+          "updatedAt": "2025-08-18T18:23:14Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 560,
+      "id": "PR_kwDOGKuqOc6kLVsf",
+      "title": "Fix typo in Prio3 section",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/560",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "This is a quick follow-up to #558.",
+      "createdAt": "2025-08-18T20:28:54Z",
+      "updatedAt": "2025-08-18T20:50:37Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "e6c79e1ac3e6faee357659c2a5aa23a631206622",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/fixup",
+      "headRefOid": "80add0ccf782f7ad99a8c659751f53f339e0793c",
+      "closedAt": "2025-08-18T20:50:37Z",
+      "mergedAt": "2025-08-18T20:50:37Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "aa252924f2c6f7a321376a39ab1e5d0aac623d95"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc66jinb",
+          "commit": {
+            "abbreviatedOid": "80add0c"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "\ud83d\ude2e\u200d\ud83d\udca8 ",
+          "createdAt": "2025-08-18T20:50:17Z",
+          "updatedAt": "2025-08-18T20:50:17Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
