@@ -298,9 +298,9 @@ def run_vdaf(
         ctx: bytes,
         measurements: list[Measurement]) -> AggResult:
     """
-    Pre-conditions:
-
-        - `len(verify_key) == vdaf.VERIFY_KEY_SIZE`
+    Execute the VDAF for the given measurements, aggregation
+    parameter (`agg_param`), application context (`ctx`), and
+    verification key (`verify_key`).
     """
     # REMOVE ME
     if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
@@ -309,13 +309,17 @@ def run_vdaf(
     agg_shares = [vdaf.agg_init(agg_param)
                   for _ in range(vdaf.SHARES)]
     for measurement in measurements:
-        # Sharding
+        # Sharding: The Client shards its measurement into a report
+        # consisting of a public share and a sequence of input
+        # shares.
         nonce = gen_rand(vdaf.NONCE_SIZE)
         rand = gen_rand(vdaf.RAND_SIZE)
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
 
-        # Initialize preparation
+        # Initialize preparation: Each Aggregator receives its report
+        # share (the public share and its input share) from the
+        # Client and initializes preparation.
         prep_states = []
         outbound_prep_shares = []
         for j in range(vdaf.SHARES):
@@ -327,7 +331,11 @@ def run_vdaf(
             prep_states.append(state)
             outbound_prep_shares.append(share)
 
-        # Complete preparation
+        # Complete preparation: The Aggregators execute each round of
+        # preparation until each computes an output share. A round
+        # begins by gathering the prep shares and combining them into
+        # the prep message. The round ends when each uses the prep
+        # message to transition to the next state.
         for i in range(vdaf.ROUNDS - 1):
             prep_msg = vdaf.prep_shares_to_prep(ctx,
                                                 agg_param,
@@ -344,7 +352,8 @@ def run_vdaf(
                                             agg_param,
                                             outbound_prep_shares)
 
-        # Aggregation
+        # Aggregation: Each Aggregator updates its aggregate share
+        # with its output share.
         for j in range(vdaf.SHARES):
             out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
             assert not isinstance(out_share, tuple)
@@ -352,7 +361,8 @@ def run_vdaf(
                                             agg_shares[j],
                                             out_share)
 
-    # Unsharding
+    # Unsharding: The Collector receives the aggregate shares from
+    # the Aggregators and combines them into the aggregate result.
     num_measurements = len(measurements)
     agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
