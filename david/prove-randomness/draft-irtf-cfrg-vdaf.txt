@@ -3773,7 +3773,7 @@ Table of Contents
    turn invokes the gadgets defined by the circuit.  The prover records
    the values on input wires of gadget instances during circuit
    evaluation, and constructs gadget polynomials that the verifier will
-   use to compute the outputs of each gadget.  Additionally, the prove
+   use to compute the outputs of each gadget.  Additionally, prove
    randomness is used as a blinding factor when constructing gadget
    polynomials.
 
