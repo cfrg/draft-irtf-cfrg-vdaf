@@ -3652,9 +3652,11 @@ def verifier_len(self) -> int:
 
 The proof generation algorithm invokes the validity circuit on the encoded
 measurement and joint randomness. The validity circuit in turn invokes the
-gadgets defined by the circuit. The prove randomness is used to construct the
-gadget polynomials that the verifier will use to compute the outputs of each
-gadget.
+gadgets defined by the circuit. The prover records the values on input wires of
+gadget instances during circuit evaluation, and constructs gadget polynomials
+that the verifier will use to compute the outputs of each gadget. Additionally,
+the prove randomness is used as a blinding factor when constructing gadget
+polynomials.
 
 To generate the gadget polynomials, the prover evaluates the validity circuit,
 and records the values on each input wire of each call to each gadget. This is
@@ -3662,10 +3664,12 @@ accomplished by "wrapping" each gadget in a class `ProveGadget` that records
 the wire inputs. We list this class in {{gadget-wrappers}}. We denote the value
 of the `j`-th wire for the `k`-th invocation of gadget `g` as `g.wires[j][k]`.
 
-Next, we compute each of the "wire polynomials" for each gadget. The `j`-th
-wire polynomial is the lowest degree polynomial that evaluates to
-`g.wire[j][k]` at a sequence of fixed points. We obtain the gadget polynomial by
-evaluating the gadget on the wire polynomials.
+Next, we compute each of the "wire polynomials" for each gadget. For each wire
+polynomial, we take one prove randomness value and designate it the "wire seed"
+for that polynomial. The `j`-th wire polynomial is the lowest degree polynomial
+that evaluates to the "wire seed" at one point and `g.wires[j][k]` at a sequence
+of other points. We obtain the gadget polynomial by evaluating the gadget on the
+wire polynomials.
 
 ~~~ python
 def prove(self,
