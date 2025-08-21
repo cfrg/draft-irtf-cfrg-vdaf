@@ -6299,7 +6299,7 @@ measurement and joint randomness. The validity circuit in turn invokes the
 gadgets defined by the circuit. The prover records the values on input wires of
 gadget instances during circuit evaluation, and constructs gadget polynomials
 that the verifier will use to compute the outputs of each gadget. Additionally,
-prove randomness is used as a blinding factor when constructing gadget
+the prove randomness is used as a blinding factor when constructing gadget
 polynomials.<a href="#section-7.3.3-2" class="pilcrow">¶</a></p>
 <p id="section-7.3.3-3">To generate the gadget polynomials, the prover evaluates the validity circuit,
 and records the values on each input wire of each call to each gadget. This is
@@ -6310,7 +6310,7 @@ of the <code>j</code>-th wire for the <code>k</code>-th invocation of gadget <co
 polynomial, we take one prove randomness value and designate it the "wire seed"
 for that polynomial. The <code>j</code>-th wire polynomial is the lowest degree polynomial
 that evaluates to the "wire seed" at one point and <code>g.wires[j][k]</code> at a sequence
-of fixed points. We obtain the gadget polynomial by evaluating the gadget on the
+of other points. We obtain the gadget polynomial by evaluating the gadget on the
 wire polynomials.<a href="#section-7.3.3-4" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-7.3.3-5">
 <pre>
