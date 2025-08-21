@@ -1649,7 +1649,7 @@ Table of Contents
                                  num_measurements)
        return agg_result
 
-   Depending on the VDAF, prpearation and aggregation may be carried out
+   Depending on the VDAF, preparation and aggregation may be carried out
    multiple times on the same sequence of reports.
 
    In practice, VDAF execution is distributed across Clients,
