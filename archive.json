@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-19T01:04:45.111948+00:00",
+  "timestamp": "2025-08-24T01:09:47.122699+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7103,18 +7103,20 @@
       "id": "I_kwDOGKuqOc7FWGwt",
       "title": "Crypto panel: Section 5.6: \"insecure network\" versus \"secure channel\"",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/553",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-16"
       ],
       "body": "> - I am not familiar with the terminology of \"simulating a procedure over\n> an insecure network\", but if RFC readers usually are, this is fine. For\n> me, it was confusing to read this instruction in Section 5.6 while also\n> demanding the application to instantiate secure channels (end of 5.6).\n\nThe point of `run_vdaf()` is to describe the sequence of computations that are carried out by the parties. What we're trying to say here is that, in practice, this sequence of computations is executed in the presence of an adversary as defined in Section 9. \n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T17:06:45Z",
-      "updatedAt": "2025-08-11T17:10:02Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-21T18:29:49Z",
+      "closedAt": "2025-08-21T18:29:49Z",
       "comments": []
     },
     {
@@ -45680,6 +45682,106 @@
           "createdAt": "2025-08-18T20:50:17Z",
           "updatedAt": "2025-08-18T20:50:17Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 561,
+      "id": "PR_kwDOGKuqOc6ku8od",
+      "title": "Clarify what we mean by \"secure\" VDAF execution",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/561",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "\"Simulate [some procedure] over an insecure network\" is a confusing concept that we don't unpack very well. All we mean is that `run_vdaf()` shows ideally how the computation is carried out, but in reality messages are exchanged over a network the attacker has control of. It's therefore up to the application to do the stuff described in security considerations.\r\n\r\nWhile at it, make `run_vdaf()` more readable.\r\n\r\nCloses #553.",
+      "createdAt": "2025-08-21T17:29:09Z",
+      "updatedAt": "2025-08-21T18:29:48Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "aa252924f2c6f7a321376a39ab1e5d0aac623d95",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/553",
+      "headRefOid": "6ce67b2ecf86f90586acf930b483e8686213aeeb",
+      "closedAt": "2025-08-21T18:29:48Z",
+      "mergedAt": "2025-08-21T18:29:48Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "51d9f6f68da3b5974dc29fbd8f8bc497799d6ed5"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc67QnWl",
+          "commit": {
+            "abbreviatedOid": "ab6b94d"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-21T17:33:14Z",
+          "updatedAt": "2025-08-21T17:34:13Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "nit: typo\r\n```suggestion\r\nDepending on the VDAF, preparation and aggregation may be carried out multiple\r\n```",
+              "createdAt": "2025-08-21T17:33:14Z",
+              "updatedAt": "2025-08-21T17:34:13Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 562,
+      "id": "PR_kwDOGKuqOc6kvHAO",
+      "title": "Improve description of proof generation, wire seed",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/562",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "This adds more detail to a couple of paragraphs to address #557.",
+      "createdAt": "2025-08-21T17:47:58Z",
+      "updatedAt": "2025-08-21T18:32:07Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "51d9f6f68da3b5974dc29fbd8f8bc497799d6ed5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/prove-randomness",
+      "headRefOid": "6be6c91e346dc0849e97849de6f215ed172a2af7",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc67RM__",
+          "commit": {
+            "abbreviatedOid": "b408241"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-21T18:29:23Z",
+          "updatedAt": "2025-08-21T18:29:27Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "The wire seed is also the output at a \"fixed\" point. Maybe rephrase this way:\r\n```suggestion\r\nthat evaluates to the \"wire seed\" at one point and `g.wires[j][k]` at a sequence\r\nof other points. We obtain the gadget polynomial by evaluating the gadget on the\r\n```",
+              "createdAt": "2025-08-21T18:29:23Z",
+              "updatedAt": "2025-08-21T18:29:27Z"
+            }
+          ]
         }
       ]
     }
