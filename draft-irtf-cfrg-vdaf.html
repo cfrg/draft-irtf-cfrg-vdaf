@@ -1667,7 +1667,8 @@ least <code>T</code> times for some threshold <code>T</code>. The core primitive
 is a secret sharing of a point function <span>[<a href="#GI14" class="cite xref">GI14</a>]</span> (denoted <code>G</code> above) that
 allows the servers to privately count how many of the clients' strings begin
 with a given prefix (<code>agg_param</code> in the notation above). In <a href="#poplar1" class="auto internal xref">Section 8</a> we
-specify a VDAF called Poplar1 that implements this functionality.<a href="#section-1-19.2.1" class="pilcrow">¶</a></p>
+specify a VDAF called Poplar1 that implements this prefix counting
+functionality and describe how it is used in the heavy hitters protocol.<a href="#section-1-19.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-1-20">The remainder of this document is organized as follows: <a href="#conventions" class="auto internal xref">Section 2</a> lists
@@ -7355,38 +7356,42 @@ the Collector adds <code>p || 0</code> and <code>p || 1</code> to the next gener
 candidate prefixes and repeats Step 2.<a href="#section-8-3.4.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-8-4">Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)",
+<p id="section-8-4">While Poplar1 is intended to be used to compute heavy hitters in the above
+protocol, it may be possible to use it for other applications as well. However,
+care must be taken to ensure such usage is secure. See <a href="#agg-param-security" class="auto internal xref">Section 9.4</a>
+and <a href="#idpf-extract" class="auto internal xref">Section 9.5</a> for details.<a href="#section-8-4" class="pilcrow">¶</a></p>
+<p id="section-8-5">Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)",
 a primitive described by <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> that generalizes the notion of a
 Distributed Point Function (DPF) <span>[<a href="#GI14" class="cite xref">GI14</a>]</span>. Briefly, a DPF is used to distribute
 the computation of a "point function", a function that evaluates to zero on
 every input except at a programmable "point". The computation is distributed in
-such a way that no one party knows either the point or what it evaluates to.<a href="#section-8-4" class="pilcrow">¶</a></p>
-<p id="section-8-5">An IDPF generalizes this "point" to a path on a full binary tree from the root
+such a way that no one party knows either the point or what it evaluates to.<a href="#section-8-5" class="pilcrow">¶</a></p>
+<p id="section-8-6">An IDPF generalizes this "point" to a path on a full binary tree from the root
 to one of the leaves. It is evaluated on an "index" representing a unique node
 of the tree. If the node is on the programmed path, then the function evaluates
 to a non-zero value; otherwise it evaluates to zero. This structure allows an
 IDPF to provide the functionality required for the above protocol: to compute
 the hit count for an index, just evaluate each set of IDPF shares at that index
-and add up the results.<a href="#section-8-5" class="pilcrow">¶</a></p>
-<p id="section-8-6">Consider the sub-tree constructed from a set of input strings and a target
+and add up the results.<a href="#section-8-6" class="pilcrow">¶</a></p>
+<p id="section-8-7">Consider the sub-tree constructed from a set of input strings and a target
 threshold <code>T</code> by including all indices with hit count at least <code>T</code>. We shall
 refer to this structure as the "prefix tree" for the batch of measurements and
 target threshold. To compute the <code>T</code>-heavy-hitters for the batch, the
 Aggregators and Collector first compute the prefix tree, then extract the heavy
 hitters from the leaves of this tree. Note that the prefix tree leaks more
 information about the set than the heavy hitters themselves; see
-<a href="#agg-param-security" class="auto internal xref">Section 9.4</a> for more discussion.<a href="#section-8-6" class="pilcrow">¶</a></p>
-<p id="section-8-7">Poplar1 composes an IDPF with the arithmetic sketch of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Section
+<a href="#agg-param-security" class="auto internal xref">Section 9.4</a> for more discussion.<a href="#section-8-7" class="pilcrow">¶</a></p>
+<p id="section-8-8">Poplar1 composes an IDPF with the arithmetic sketch of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Section
 4.2. (The paper calls this a "secure sketch", but the underlying technique was
 later generalized in <span>[<a href="#BBCGGI23" class="cite xref">BBCGGI23</a>]</span>, where it is called "arithmetic sketching".)
 The sketch ensures that evaluating a set of input shares on a set of unique
 candidate prefixes results in shares of a zero vector or a "one-hot" vector,
 i.e., a vector that is zero everywhere except for in at most one position.
-Moreover, the value at that position should be one.<a href="#section-8-7" class="pilcrow">¶</a></p>
-<p id="section-8-8">The remainder of this section is structured as follows. The syntax of IDPFs is
+Moreover, the value at that position should be one.<a href="#section-8-8" class="pilcrow">¶</a></p>
+<p id="section-8-9">The remainder of this section is structured as follows. The syntax of IDPFs is
 defined in <a href="#idpf" class="auto internal xref">Section 8.1</a>. The Poplar1 VDAF is defined in <a href="#poplar1-construction" class="auto internal xref">Section 8.2</a> in
 terms of a generic IDPF. A specification of the IDPF of <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span> is given in
-<a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. Test vectors for Poplar1 can be found in <a href="#test-vectors" class="auto internal xref">Appendix C</a>.<a href="#section-8-8" class="pilcrow">¶</a></p>
+<a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a>. Test vectors for Poplar1 can be found in <a href="#test-vectors" class="auto internal xref">Appendix C</a>.<a href="#section-8-9" class="pilcrow">¶</a></p>
 <div id="idpf">
 <section id="section-8.1">
         <h3 id="name-incremental-distributed-poi">
