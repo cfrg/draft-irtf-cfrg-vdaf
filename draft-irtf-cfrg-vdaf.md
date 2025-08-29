@@ -420,7 +420,8 @@ from the literature.
   is a secret sharing of a point function {{GI14}} (denoted `G` above) that
   allows the servers to privately count how many of the clients' strings begin
   with a given prefix (`agg_param` in the notation above). In {{poplar1}} we
-  specify a VDAF called Poplar1 that implements this functionality.
+  specify a VDAF called Poplar1 that implements this prefix counting
+  functionality and describe how it is used in the heavy hitters protocol.
 
 The remainder of this document is organized as follows: {{conventions}} lists
 definitions and conventions used in the remainder of the document; {{overview}}
@@ -4474,6 +4475,11 @@ by at least `T` Clients for some threshold `T`. It invokes Poplar1 as follows:
    for each candidate prefix. For each prefix `p` with hit count at least `T`,
    the Collector adds `p || 0` and `p || 1` to the next generation of
    candidate prefixes and repeats Step 2.
+
+While Poplar1 is intended to be used to compute heavy hitters in the above
+protocol, it may be possible to use it for other applications as well. However,
+care must be taken to ensure such usage is secure. See {{agg-param-security}}
+and {{idpf-extract}} for details.
 
 Poplar1 is constructed from an "Incremental Distributed Point Function (IDPF)",
 a primitive described by {{BBCGGI21}} that generalizes the notion of a
