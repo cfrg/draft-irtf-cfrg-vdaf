@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-24T01:09:47.122699+00:00",
+  "timestamp": "2025-08-31T01:05:17.779165+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7143,18 +7143,20 @@
       "id": "I_kwDOGKuqOc7FWNHk",
       "title": "Crypto panel: Poplar versus Poplar1",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/555",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-16"
       ],
       "body": "> - Section 1: explain in 1-2 sentences how Poplar1 if different from\n> Poplar. Additionally, it should be briefly discussed in Section 9 how\n> the changes affect the security analysis that was conducted for Poplar.\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T17:15:03Z",
-      "updatedAt": "2025-08-11T17:15:12Z",
-      "closedAt": null,
+      "updatedAt": "2025-08-29T15:13:04Z",
+      "closedAt": "2025-08-29T15:13:04Z",
       "comments": []
     },
     {
@@ -7183,19 +7185,29 @@
       "id": "I_kwDOGKuqOc7FYkn4",
       "title": "Crypto panel: say in prose how prove randomness is used",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/557",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "divergentdave"
+      ],
       "labels": [
         "editorial",
         "draft-16"
       ],
       "body": "> - Section 7.3.3 explains that the prove randomness is used to construct\n> gadget polynomials, but that polynomial is also said to be the lowest\n> degree polynomial that evaluates to a sequence of fixed points. That\n> seems to be a unique polynomial, so where do we need randomness for this\n> step?\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T20:21:20Z",
-      "updatedAt": "2025-08-11T21:18:55Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-08-29T15:13:30Z",
+      "closedAt": "2025-08-29T15:13:30Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closed by #562.",
+          "createdAt": "2025-08-29T15:13:30Z",
+          "updatedAt": "2025-08-29T15:13:30Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -44782,7 +44794,7 @@
       ],
       "body": "I upgraded mypy from 1.10.0 to 1.15.0, and it found some new type errors. This PR adds another cast to Poplar1 sketching to hop between `Field64 | Field255` to `Field`.",
       "createdAt": "2025-04-22T22:32:03Z",
-      "updatedAt": "2025-05-16T15:32:14Z",
+      "updatedAt": "2025-08-29T21:00:17Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "8d7e07de26e33ef24a5c36f64153de1d7c9f0faf",
@@ -45415,7 +45427,7 @@
       ],
       "body": "This fixes #541. I defined a suite of methods to decode various VDAF messages, and removed the `test_vec_` prefix in some cases from those methods that encoded messages. Each test vector file now has its own unit test, which runs all operations in sequence and compares against the expected results.",
       "createdAt": "2025-06-16T22:31:36Z",
-      "updatedAt": "2025-06-17T13:27:33Z",
+      "updatedAt": "2025-08-29T21:00:02Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "5b7df1de62adfd5c1757e574ea85e2ed80eaedd1",
@@ -45655,7 +45667,7 @@
       ],
       "body": "This is a quick follow-up to #558.",
       "createdAt": "2025-08-18T20:28:54Z",
-      "updatedAt": "2025-08-18T20:50:37Z",
+      "updatedAt": "2025-08-29T20:59:56Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "e6c79e1ac3e6faee357659c2a5aa23a631206622",
@@ -45741,7 +45753,7 @@
       "id": "PR_kwDOGKuqOc6kvHAO",
       "title": "Improve description of proof generation, wire seed",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/562",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -45750,17 +45762,19 @@
       ],
       "body": "This adds more detail to a couple of paragraphs to address #557.",
       "createdAt": "2025-08-21T17:47:58Z",
-      "updatedAt": "2025-08-21T18:32:07Z",
+      "updatedAt": "2025-08-29T20:59:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "51d9f6f68da3b5974dc29fbd8f8bc497799d6ed5",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/prove-randomness",
       "headRefOid": "6be6c91e346dc0849e97849de6f215ed172a2af7",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-08-29T01:25:37Z",
+      "mergedAt": "2025-08-29T01:25:37Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "efe6da666d8e09f82c21023c005c58922c634ca8"
+      },
       "comments": [],
       "reviews": [
         {
@@ -45782,6 +45796,50 @@
               "updatedAt": "2025-08-21T18:29:27Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 563,
+      "id": "PR_kwDOGKuqOc6l5r9J",
+      "title": "Say more explicitly that Poplar1 and is a sub-routine of Poplar",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/563",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "Closes #555.\r\n\r\nLikewise, warn users to be careful about using Poplar1 for other things.",
+      "createdAt": "2025-08-29T01:24:36Z",
+      "updatedAt": "2025-08-29T15:13:03Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "51d9f6f68da3b5974dc29fbd8f8bc497799d6ed5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/555",
+      "headRefOid": "d138e6c9918a4b97fb93879ac90f2e07507d2656",
+      "closedAt": "2025-08-29T15:13:03Z",
+      "mergedAt": "2025-08-29T15:13:03Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "43e7b4a12cdf0c7cab4c071c46b1639362539d87"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc684-Zv",
+          "commit": {
+            "abbreviatedOid": "d138e6c"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-08-29T14:50:55Z",
+          "updatedAt": "2025-08-29T14:50:55Z",
+          "comments": []
         }
       ]
     }
