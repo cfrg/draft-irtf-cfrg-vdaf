@@ -1037,19 +1037,19 @@ these stages. The interface, denoted `Daf`, is defined in the remainder of this
 section. In addition, a concrete DAF defines the associated constants and types
 enumerated in the following table.
 
-| Parameter         | Description                                                    |
-|:------------------|:---------------------------------------------------------------|
-| `ID: int`         | Algorithm identifier for this DAF, in the range `[0, 2^32)`.   |
-| `SHARES: int`     | Number of input shares into which each measurement is sharded. |
-| `NONCE_SIZE: int` | Size of the nonce associated with the report.                  |
-| `RAND_SIZE: int`  | Size of the random byte string consumed by the sharding algorithm. |
-| `Measurement`     | Type of each measurement.                                      |
-| `PublicShare`     | Type of each public share.                                     |
-| `InputShare`      | Type of each input share.                                      |
-| `AggParam`        | Type of the aggregation parameter.                             |
-| `OutShare`        | Type of each output share.                                     |
-| `AggShare`        | Type of the aggregate share.                                   |
-| `AggResult`       | Type of the aggregate result.                                  |
+| Parameter         | Description                                                         |
+|:------------------|:--------------------------------------------------------------------|
+| `ID: int`         | Algorithm identifier for this DAF, in the range `[0, 2^32)`.        |
+| `SHARES: int`     | Number of input shares into which each measurement is sharded.      |
+| `NONCE_SIZE: int` | Size of the nonce associated with each report.                      |
+| `RAND_SIZE: int`  | Size of each random byte string consumed by the sharding algorithm. |
+| `Measurement`     | Type of each measurement.                                           |
+| `PublicShare`     | Type of each public share.                                          |
+| `InputShare`      | Type of each input share.                                           |
+| `AggParam`        | Type of the aggregation parameter.                                  |
+| `OutShare`        | Type of each output share.                                          |
+| `AggShare`        | Type of each aggregate share.                                       |
+| `AggResult`       | Type of the aggregate result.                                       |
 {: #daf-param title="Constants and types defined by each concrete DAF."}
 
 The types in this table define the inputs and outputs of DAF methods at various
@@ -1348,17 +1348,17 @@ VDAF.
 | `ID: int`              | Algorithm identifier for this VDAF, in the range `[0, 2^32)`.  |
 | `SHARES: int`          | Number of input shares into which each measurement is sharded. |
 | `ROUNDS: int`          | Number of rounds of communication during preparation.          |
-| `NONCE_SIZE: int`      | Size of the report nonce.                                      |
-| `RAND_SIZE: int`       | Size of the random byte string consumed during sharding.       |
+| `NONCE_SIZE: int`      | Size of each report nonce.                                     |
+| `RAND_SIZE: int`       | Size of each random byte string consumed during sharding.      |
 | `VERIFY_KEY_SIZE: int` | Size of the verification key used during preparation.          |
 | `Measurement`          | Type of each measurement.                                      |
 | `PublicShare`          | Type of each public share.                                     |
 | `InputShare`           | Type of each input share.                                      |
 | `AggParam`             | Type of the aggregation parameter.                             |
 | `OutShare`             | Type of each output share.                                     |
-| `AggShare`             | Type of the aggregate share.                                   |
+| `AggShare`             | Type of each aggregate share.                                  |
 | `AggResult`            | Type of the aggregate result.                                  |
-| `PrepState`            | Type of the prep state.                                        |
+| `PrepState`            | Type of each prep state.                                       |
 | `PrepShare`            | Type of each prep share.                                       |
 | `PrepMessage`          | Type of each prep message.                                     |
 {: #vdaf-param title="Constants and types defined by each concrete VDAF."}
