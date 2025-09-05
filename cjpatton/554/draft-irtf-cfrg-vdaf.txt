@@ -967,8 +967,8 @@ Table of Contents
    this parameter is specific to the aggregation function, but in
    general it is used to represent the set of "queries" that can be made
    by the Collector on the batch of measurements.  For example, the
-   aggregation parameter is used to represent the candidate prefixes in
-   the Poplar1 VDAF (Section 8).
+   aggregation parameter is used to represent the prefixes in the
+   prefix-counting functionality of of Poplar1 discussed in Section 1.
 
    Execution of a DAF has four distinct stages:
 
@@ -4618,8 +4618,8 @@ Table of Contents
    2.  The Collector picks an initial set of candidate prefixes, say 0
        and 1, and sends them to the Aggregators.
 
-   3.  The Aggregators run VDAF preparation and aggregation on each of
-       the reports and send their aggregate shares to the Collector.
+   3.  The Aggregators run Poplar1 preparation and aggregation on each
+       of the reports and send their aggregate shares to the Collector.
 
    4.  The Collector unshards the aggregate result, which consists of
        the hit count for each candidate prefix.  For each prefix p with
@@ -5873,11 +5873,11 @@ Table of Contents
    VDAFs (Section 5) have two essential security goals:
 
    1.  Privacy: an attacker that controls the Collector and a subset of
-       Clients and Aggregators learns nothing about the measurements of
-       honest Clients beyond what it can deduce from the aggregate
-       result.  It is assumed that the attacker controls the entire
-       network except for channels between honest Clients and honest
-       Aggregators.  In particular, it cannot forge or prevent
+       Clients and a subset of Aggregators learns nothing about the
+       measurements of honest Clients beyond what it can deduce from the
+       aggregate result.  It is assumed that the attacker controls the
+       entire network except for channels between honest Clients and
+       honest Aggregators.  In particular, it cannot forge or prevent
        transmission of messages on these channels.
 
    2.  Verifiability: an attacker that controls a subset of Clients

@@ -2473,8 +2473,8 @@ Collector might select an "aggregation parameter" and disseminate it to the
 Aggregators. The semantics of this parameter is specific to the aggregation
 function, but in general it is used to represent the set of "queries" that can
 be made by the Collector on the batch of measurements. For example, the
-aggregation parameter is used to represent the candidate prefixes in the
-Poplar1 VDAF (<a href="#poplar1" class="auto internal xref">Section 8</a>).<a href="#section-4-2" class="pilcrow">¶</a></p>
+aggregation parameter is used to represent the prefixes in the prefix-counting
+functionality of of Poplar1 discussed in <a href="#introduction" class="auto internal xref">Section 1</a>.<a href="#section-4-2" class="pilcrow">¶</a></p>
 <p id="section-4-3">Execution of a DAF has four distinct stages:<a href="#section-4-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4-4.1">
@@ -7347,8 +7347,8 @@ each of the Aggregators.<a href="#section-8-3.1.1" class="pilcrow">¶</a></p>
 and sends them to the Aggregators.<a href="#section-8-3.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-8-3.3">
-          <p id="section-8-3.3.1">The Aggregators run VDAF preparation and aggregation on each of the reports
-and send their aggregate shares to the Collector.<a href="#section-8-3.3.1" class="pilcrow">¶</a></p>
+          <p id="section-8-3.3.1">The Aggregators run Poplar1 preparation and aggregation on each of the
+reports and send their aggregate shares to the Collector.<a href="#section-8-3.3.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-8-3.4">
           <p id="section-8-3.4.1">The Collector unshards the aggregate result, which consists of the hit count
@@ -8955,11 +8955,11 @@ def current_xof(self,
 <ol start="1" type="1" class="normal type-1" id="section-9-2">
 <li id="section-9-2.1">
           <p id="section-9-2.1.1">Privacy: an attacker that controls the Collector and a subset of Clients and
-Aggregators learns nothing about the measurements of honest Clients beyond
-what it can deduce from the aggregate result. It is assumed that the
-attacker controls the entire network except for channels between honest
-Clients and honest Aggregators. In particular, it cannot forge or prevent
-transmission of messages on these channels.<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
+a subset of Aggregators learns nothing about the measurements of honest
+Clients beyond what it can deduce from the aggregate result. It is assumed
+that the attacker controls the entire network except for channels between
+honest Clients and honest Aggregators. In particular, it cannot forge or
+prevent transmission of messages on these channels.<a href="#section-9-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-9-2.2">
           <p id="section-9-2.2.1">Verifiability: an attacker that controls a subset of Clients cannot cause
