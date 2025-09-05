@@ -1011,8 +1011,8 @@ Collector might select an "aggregation parameter" and disseminate it to the
 Aggregators. The semantics of this parameter is specific to the aggregation
 function, but in general it is used to represent the set of "queries" that can
 be made by the Collector on the batch of measurements. For example, the
-aggregation parameter is used to represent the candidate prefixes in the
-Poplar1 VDAF ({{poplar1}}).
+aggregation parameter is used to represent the prefixes in the prefix-counting
+functionality of of Poplar1 discussed in {{introduction}}.
 
 Execution of a DAF has four distinct stages:
 
@@ -4472,8 +4472,8 @@ by at least `T` Clients for some threshold `T`. It invokes Poplar1 as follows:
 1. The Collector picks an initial set of candidate prefixes, say `0` and `1`,
    and sends them to the Aggregators.
 
-1. The Aggregators run VDAF preparation and aggregation on each of the reports
-   and send their aggregate shares to the Collector.
+1. The Aggregators run Poplar1 preparation and aggregation on each of the
+   reports and send their aggregate shares to the Collector.
 
 1. The Collector unshards the aggregate result, which consists of the hit count
    for each candidate prefix. For each prefix `p` with hit count at least `T`,
@@ -5689,11 +5689,11 @@ def current_xof(self,
 VDAFs ({{vdaf}}) have two essential security goals:
 
 1. Privacy: an attacker that controls the Collector and a subset of Clients and
-   Aggregators learns nothing about the measurements of honest Clients beyond
-   what it can deduce from the aggregate result. It is assumed that the
-   attacker controls the entire network except for channels between honest
-   Clients and honest Aggregators. In particular, it cannot forge or prevent
-   transmission of messages on these channels.
+   a subset of Aggregators learns nothing about the measurements of honest
+   Clients beyond what it can deduce from the aggregate result. It is assumed
+   that the attacker controls the entire network except for channels between
+   honest Clients and honest Aggregators. In particular, it cannot forge or
+   prevent transmission of messages on these channels.
 
 1. Verifiability: an attacker that controls a subset of Clients cannot cause
    the Collector to compute anything other than the aggregate of the
