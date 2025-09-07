@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-08-31T01:05:17.779165+00:00",
+  "timestamp": "2025-09-07T01:04:18.348194+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7127,16 +7127,33 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-16"
       ],
       "body": "> - A DAF computes a function over many client reports. Hence in Table 1\n> it should be \"a report\" or \"each report\", and not \"the report\" in the\n> NONCE_SIZE row.\n> \n> - Replace all occurrences of \"we\" (e.g., we obtain, we compute, the\n> inputs we used) by prover/verifier/client/aggregator/etc., except for\n> the ones that actually refer to the authors of the draft ;)\n> \n> - Section 8: the Aggregators run VDAF - should be \"run the Poplar1 VDAF\"\n> or just Poplar1\n> \n> - Section 9: \"a subset of Clients and Aggregators\" should be \"a subset\n> of Clients and a subset of Aggregators\", as otherwise, controlling e.g.\n> all clients would be allowed.\n> \n> - Section 9.1: rewrite to potentially many aggregators, or restrict to\n> the case of Poplar1\n\n> - Section 4, \"For example, the aggregation parameter is used to\n> represent the candidate prefixes in the Poplar1 VDAF\" - at this point,\n> where a reader might not be familiar with Poplar1 at all, so terms like\n> candidate prefix are not known yet. Maybe replace by something more\n> illustrative?\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T17:12:07Z",
-      "updatedAt": "2025-08-11T17:14:08Z",
+      "updatedAt": "2025-09-05T23:53:45Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "also \"our\"",
+          "createdAt": "2025-09-05T23:21:05Z",
+          "updatedAt": "2025-09-05T23:21:05Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Section 9.1: rewrite to potentially many aggregators, or restrict to\nthe case of Poplar1\n\nI don't see anything in this section that implies two Aggregators, so I'm ignoring this one.",
+          "createdAt": "2025-09-05T23:49:02Z",
+          "updatedAt": "2025-09-05T23:49:02Z"
+        }
+      ]
     },
     {
       "number": 555,
@@ -45842,6 +45859,34 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 564,
+      "id": "PR_kwDOGKuqOc6nIFMd",
+      "title": "Various editorial things from crypto panel",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/564",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "\ufeffCloses #554.",
+      "createdAt": "2025-09-05T23:53:26Z",
+      "updatedAt": "2025-09-05T23:54:00Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "43e7b4a12cdf0c7cab4c071c46b1639362539d87",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/554",
+      "headRefOid": "f04a7a1263ee4f4d3b321e458a6753591c3ec1f9",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
