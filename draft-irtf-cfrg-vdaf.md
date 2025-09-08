@@ -1682,10 +1682,10 @@ For VDAFs with precisely two Aggregators (i.e., `vdaf.SHARES == 2`), the
 following "ping pong" communication pattern can be used. It is compatible with
 any request/response transport protocol, such as HTTP.
 
-Let us call the initiating Aggregator the "Leader" and the responding
-Aggregator the "Helper". The high-level idea is that the Leader and Helper will
-take turns running the computation locally until input from their peer is
-required:
+In this section, the initiating Aggregator is called the Leader and the
+responding Aggregator is called the Helper. The high-level idea is that the
+Leader and Helper will take turns running the computation locally until input
+from their peer is required:
 
 * For a 1-round VDAF (e.g., Prio3 in {{prio3}}), the Leader sends its prep share
   to the Helper, who computes the prep message locally, computes its output
