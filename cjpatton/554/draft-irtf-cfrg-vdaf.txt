@@ -5457,7 +5457,7 @@ Table of Contents
    The second-round prep message is the empty string.  This is because
    the sketch shares are expected to sum to a particular value if the
    output shares are valid; a successful preparation is represented with
-   the empty string and otherwise return an error.
+   the empty string, otherwise the procedure returns an error.
 
 8.2.6.5.  Aggregate Share
 
