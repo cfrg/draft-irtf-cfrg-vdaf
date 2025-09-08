@@ -2610,7 +2610,7 @@ Table of Contents
    See Section 9.7 for details.
 
    In addition, note that [BBCGGI19] defines a larger class of fully
-   linear proof systems than considered here.  In particular, what is
+   linear proof systems than is considered here.  In particular, what is
    called an "FLP" here is called a 1.5-round, public-coin, interactive
    oracle proof system in their paper.
 
