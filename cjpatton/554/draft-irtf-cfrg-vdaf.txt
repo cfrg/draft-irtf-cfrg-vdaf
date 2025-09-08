@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 9 March 2026                                               ISRG
+Expires: 12 March 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        5 September 2025
+                                                        8 September 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 9 March 2026.
+   This Internet-Draft will expire on 12 March 2026.
 
 Copyright Notice
 
@@ -344,7 +344,7 @@ Table of Contents
    are common to the constructions defined in this document; Section 7
    specifies Prio3; Section 8 specifies Poplar1; and Section 9
    enumerates security considerations for DAFs and VDAFs in general and
-   the constructions in particular.
+   the Prio3 and Poplar1 constructions in particular.
 
 1.1.  Change Log
 
@@ -1986,7 +1986,7 @@ Table of Contents
    described in this section can be used instead.
 
    Again, one Aggregator initiates the computation.  This Aggregator is
-   called as Leader and all other Aggregators are called Helpers.
+   called the Leader and all other Aggregators are called Helpers.
 
    At the start of each round, the Leader requests from each Helper its
    prep share.  After gathering each of the prep shares, the Leader
