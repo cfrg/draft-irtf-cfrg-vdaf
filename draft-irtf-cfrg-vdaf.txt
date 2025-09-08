@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 2 March 2026                                               ISRG
+Expires: 12 March 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                          29 August 2025
+                                                        8 September 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 March 2026.
+   This Internet-Draft will expire on 12 March 2026.
 
 Copyright Notice
 
@@ -235,15 +235,15 @@ Table of Contents
    In a Distributed Aggregation Function (DAF, Section 4), each client
    splits its measurement into multiple secret shares, one for each
    aggregation server.  DAFs require two properties of the secret
-   sharing scheme.  First, we can reconstruct the underlying measurement
-   by simply adding up all of the shares.  (Typically the shares are
-   vectors over some finite field.)  Second, given all but one of the
-   shares, it is impossible to learn anything about the underlying
-   measurement.  These properties give rise to a simple strategy for
-   privately aggregating the measurements: each aggregation server adds
-   up its measurement shares locally before revealing their sum to the
-   data collector; then all the data collector has to do is add up these
-   sums to get the aggregate result.
+   sharing scheme.  First, one can reconstruct the underlying
+   measurement by simply adding up all of the shares.  (Typically the
+   shares are vectors over some finite field.)  Second, given all but
+   one of the shares, it is impossible to learn anything about the
+   underlying measurement.  These properties give rise to a simple
+   strategy for privately aggregating the measurements: each aggregation
+   server adds up its measurement shares locally before revealing their
+   sum to the data collector; then all the data collector has to do is
+   add up these sums to get the aggregate result.
 
    This strategy is compatible with any aggregation function that can be
    represented as the sum of some encoding of the measurements.
@@ -253,8 +253,8 @@ Table of Contents
    However, not all functions fit into this rubric, as it is constrained
    to linear computations over the encoded measurements.
 
-   In fact, our framework admits DAFs with slightly more functionality,
-   computing aggregation functions of the form
+   In fact, this document's framework admits DAFs with slightly more
+   functionality, computing aggregation functions of the form
 
    F(agg_param, meas_1, ..., meas_M) =
        G(agg_param, meas_1) + ... + G(agg_param, meas_M)
@@ -276,8 +276,8 @@ Table of Contents
    to disrupt the computation by submitting invalid measurements.  VDAFs
    are designed to allow the servers to interact with one another in
    order to detect and remove these measurements prior to
-   aggregation. We refer to this property as verifiability.  (This is
-   also called robustness in prior work [CGB17], [DPRS23].)
+   aggregation. This document refers to this property as verifiability.
+   (This is also called robustness in prior work [CGB17], [DPRS23].)
 
    Achieving verifiability using the cryptographic techniques described
    in this document requires a significant amount of interaction between
@@ -318,10 +318,10 @@ Table of Contents
    *  The Prio system [CGB17] allows for the privacy-preserving
       computation of a variety of aggregate statistics, combining
       additive secret sharing as described above with a mechanism for
-      checking the validity of each measurement.  In Section 7 we
-      specify Prio3, a VDAF that follows the same overall framework as
-      the original Prio protocol, but incorporates techniques introduced
-      in [BBCGGI19] that result in significant performance gains.
+      checking the validity of each measurement.  Section 7 specifies
+      Prio3, a VDAF that follows the same overall framework as the
+      original Prio protocol, but incorporates techniques introduced in
+      [BBCGGI19] that result in significant performance gains.
 
    *  The Poplar protocol [BBCGGI21] solves a problem known as private
       heavy-hitters.  In this problem, each client holds a bit-string,
@@ -330,10 +330,10 @@ Table of Contents
       core primitive in their protocol is a secret sharing of a point
       function [GI14] (denoted G above) that allows the servers to
       privately count how many of the clients' strings begin with a
-      given prefix (agg_param in the notation above).  In Section 8 we
-      specify a VDAF called Poplar1 that implements this prefix counting
-      functionality and describe how it is used in the heavy hitters
-      protocol.
+      given prefix (agg_param in the notation above).  Section 8
+      specifies a VDAF called Poplar1 that implements this prefix
+      counting functionality and describe how it is used in the heavy
+      hitters protocol.
 
    The remainder of this document is organized as follows: Section 2
    lists definitions and conventions used in the remainder of the
@@ -341,9 +341,10 @@ Table of Contents
    parties involved in the computation, and the requirements for non-
    collusion; Section 4 defines the syntax for DAFs; Section 5 defines
    the syntax for VDAFs; Section 6 defines various functionalities that
-   are common to our constructions; Section 7 specifies Prio3; Section 8
-   specifies Poplar1; and Section 9 enumerates security considerations
-   for DAFs and VDAFs in general and our constructions in particular.
+   are common to the constructions defined in this document; Section 7
+   specifies Prio3; Section 8 specifies Poplar1; and Section 9
+   enumerates security considerations for DAFs and VDAFs in general and
+   the Prio3 and Poplar1 constructions in particular.
 
 1.1.  Change Log
 
@@ -738,8 +739,8 @@ Table of Contents
    an exception.
 
    In Python, array indexing starts with 0, e.g., x[0] is the first
-   element and x[len(x)-1] is the last of x.  We can also index from the
-   end of the list, e.g., x[-1] is the last element of x.
+   element and x[len(x)-1] is the last of x.  It is also possible to
+   index from the end of the list, e.g., x[-1] is the last element of x.
 
    Python uses the symbols +, -, *, and / as binary operators.  When the
    operands are integers, these have the usual meaning, except:
@@ -750,11 +751,10 @@ Table of Contents
    *  When x and y are byte strings, x + y denotes their concatenation,
       i.e., concat(x, y) as defined below.
 
-   Note that we overload these operators when defining finite fields;
-   see Section 6.1.
+   Finite field arithmetic overloads these operators; see Section 6.1.
 
-   Exponentiation is denoted by x ** y in Python.  We also sometimes use
-   more conventional notation for exponentiation, namely x^y.
+   Exponentiation is denoted by x ** y in Python, and also sometimes as
+   the more conventional x^y notation for exponentiation.
 
    Type hints are used to define input and output types:
 
@@ -899,15 +899,14 @@ Table of Contents
 
                   Figure 1: Overall data flow of a (V)DAF.
 
-   In a DAF- or VDAF-based private measurement system, we distinguish
-   between three types of actors: Clients, Aggregators, and the
-   Collector.  The overall flow of the measurement process is as
-   follows:
+   There are three types of actors in a DAF- or VDAF-based private
+   measurement system: Clients, Aggregators, and the Collector.  The
+   overall flow of the measurement process is as follows:
 
    *  To submit an individual measurement, the Client shards the
       measurement into "input shares" and sends one input share to each
-      Aggregator.  We sometimes refer to this sequence of input shares
-      collectively as the Client's "report".
+      Aggregator.  This document sometimes refers to this sequence of
+      input shares collectively as the Client's "report".
 
    *  The Aggregators refine their input shares into "output shares":
 
@@ -944,13 +943,12 @@ Table of Contents
    effectively using the other Aggregator(s) to augment a basic client-
    server protocol.
 
-   In this document, we describe the computations performed by the
-   actors in this system.  It is up to the higher-level protocol making
-   use of the (V)DAF to arrange for the required information to be
-   delivered to the proper actors in the proper sequence.  In general,
-   we assume that all communications are confidential and mutually
-   authenticated, with the exception that Clients submitting
-   measurements may be anonymous.
+   This document describes the computations performed by the actors in
+   this system.  It is up to the higher-level protocol making use of the
+   (V)DAF to arrange for the required information to be delivered to the
+   proper actors in the proper sequence.  In general, it is assumed that
+   all communications are confidential and mutually authenticated, with
+   the exception that Clients submitting measurements may be anonymous.
 
 4.  Definition of DAFs
 
@@ -969,8 +967,8 @@ Table of Contents
    this parameter is specific to the aggregation function, but in
    general it is used to represent the set of "queries" that can be made
    by the Collector on the batch of measurements.  For example, the
-   aggregation parameter is used to represent the candidate prefixes in
-   the Poplar1 VDAF (Section 8).
+   aggregation parameter is used to represent the prefixes in the
+   prefix-counting functionality of of Poplar1 discussed in Section 1.
 
    Execution of a DAF has four distinct stages:
 
@@ -1010,9 +1008,9 @@ Table of Contents
            |             | each measurement is sharded.        |
            +-------------+-------------------------------------+
            | NONCE_SIZE: | Size of the nonce associated with   |
-           | int         | the report.                         |
+           | int         | each report.                        |
            +-------------+-------------------------------------+
-           | RAND_SIZE:  | Size of the random byte string      |
+           | RAND_SIZE:  | Size of each random byte string     |
            | int         | consumed by the sharding algorithm. |
            +-------------+-------------------------------------+
            | Measurement | Type of each measurement.           |
@@ -1025,7 +1023,7 @@ Table of Contents
            +-------------+-------------------------------------+
            | OutShare    | Type of each output share.          |
            +-------------+-------------------------------------+
-           | AggShare    | Type of the aggregate share.        |
+           | AggShare    | Type of each aggregate share.       |
            +-------------+-------------------------------------+
            | AggResult   | Type of the aggregate result.       |
            +-------------+-------------------------------------+
@@ -1331,9 +1329,9 @@ Table of Contents
    and not attempt to aggregate it.  Otherwise, a malicious Client can
    cause the Collector to compute a malformed aggregate result.
 
-   The remainder of this section defines the VDAF interface, which we
-   denote by Vdaf.  The attributes listed in Table 2 are defined by each
-   concrete VDAF.
+   The remainder of this section defines the VDAF interface, denoted by
+   Vdaf.  The attributes listed in Table 2 are defined by each concrete
+   VDAF.
 
          +==================+===================================+
          | Parameter        | Description                       |
@@ -1347,9 +1345,9 @@ Table of Contents
          | ROUNDS: int      | Number of rounds of communication |
          |                  | during preparation.               |
          +------------------+-----------------------------------+
-         | NONCE_SIZE: int  | Size of the report nonce.         |
+         | NONCE_SIZE: int  | Size of each report nonce.        |
          +------------------+-----------------------------------+
-         | RAND_SIZE: int   | Size of the random byte string    |
+         | RAND_SIZE: int   | Size of each random byte string   |
          |                  | consumed during sharding.         |
          +------------------+-----------------------------------+
          | VERIFY_KEY_SIZE: | Size of the verification key used |
@@ -1366,11 +1364,11 @@ Table of Contents
          +------------------+-----------------------------------+
          | OutShare         | Type of each output share.        |
          +------------------+-----------------------------------+
-         | AggShare         | Type of the aggregate share.      |
+         | AggShare         | Type of each aggregate share.     |
          +------------------+-----------------------------------+
          | AggResult        | Type of the aggregate result.     |
          +------------------+-----------------------------------+
-         | PrepState        | Type of the prep state.           |
+         | PrepState        | Type of each prep state.          |
          +------------------+-----------------------------------+
          | PrepShare        | Type of each prep share.          |
          +------------------+-----------------------------------+
@@ -1401,7 +1399,7 @@ Table of Contents
        """
        return format_dst(0, self.ID, usage) + ctx
 
-   The output, called the "domain separation tag", is used in our
+   The output, called the "domain separation tag", is used in the
    constructions for domain separation.  Function format_dst() is
    defined in Section 6.2.3.
 
@@ -1673,7 +1671,7 @@ Table of Contents
    In each round of preparation, each Aggregator writes a prep share to
    some broadcast channel, which is then processed into the prep message
    using the public prep_shares_to_prep() algorithm and broadcast to the
-   Aggregators to start the next round.  Our goal in this section is to
+   Aggregators to start the next round.  The goal of this section is to
    realize this broadcast channel.
 
    The state machine of each Aggregator is shown below.
@@ -1696,7 +1694,7 @@ Table of Contents
    output share out_share; and FinishedWithOutbound(out_share,
    outbound), indicating that the Aggregator has recovered an output
    share, and has one more outbound message to send.  For completeness,
-   we define these states in Appendix B.
+   these states are defined in Appendix B.
 
    The methods described in this section are defined in terms of opaque
    byte strings.  A compatible Vdaf MUST specify methods for encoding
@@ -1742,8 +1740,8 @@ Table of Contents
    rejected) or preparation is completed.  All told there are
    ceil((vdaf.ROUNDS+1)/2) requests sent.
 
-   We specify protocol messages in the presentation language of TLS; see
-   Section 3 of [RFC8446].  Each message is structured as follows:
+   Protocol messages are specified in the presentation language of TLS;
+   see Section 3 of [RFC8446].  Each message is structured as follows:
 
    enum {
      initialize(0),
@@ -1987,9 +1985,8 @@ Table of Contents
    applications with more than two Aggregators, the star topology
    described in this section can be used instead.
 
-   We again designate an Aggregator to initiate the computation.  We
-   refer to this Aggregator as the Leader and to all other Aggregators
-   as Helpers.
+   Again, one Aggregator initiates the computation.  This Aggregator is
+   called the Leader and all other Aggregators are called Helpers.
 
    At the start of each round, the Leader requests from each Helper its
    prep share.  After gathering each of the prep shares, the Leader
@@ -2042,9 +2039,9 @@ Table of Contents
    subtraction, multiplication, division, negation, and inversion are
    denoted, respectively, x + y, x - y, x * y, x / y, -x, and x.inv().
 
-   We sometimes need to convert a field element to an int, which we
-   denote by x.int().  Likewise, each concrete Field implements a
-   constructor for converting an integer into a field element:
+   Conversion of a field element to an int is denoted by x.int().
+   Likewise, each concrete Field implements a constructor for converting
+   an integer into a field element:
 
    *  Field(integer: int) returns integer represented as a field
       element.  The value of integer MUST be in the range
@@ -2196,7 +2193,7 @@ Table of Contents
    VDAFs in this specification use eXtendable Output Functions (XOFs)
    for two purposes:
 
-   1.  Extracting short, pseudorandom strings we call "seeds" from high
+   1.  Extracting short, pseudorandom strings called "seeds" from high
        entropy inputs
 
    2.  Expanding seeds into long, pseudorandom outputs
@@ -2442,8 +2439,8 @@ Table of Contents
        ])
 
    It is also sometimes necessary to bind the output to some ephemeral
-   value that multiple parties need to agree on.  We call this input the
-   "binder string".
+   value that multiple parties need to agree on.  This input is called
+   the "binder string".
 
 7.  Prio3
 
@@ -2457,8 +2454,8 @@ Table of Contents
 
    *  Measurement validity is determined by an "arithmetic circuit"
       evaluated over the encoded measurement.  An arithmetic circuit is
-      a function comprised of arithmetic operations in the field.  (We
-      specify these in full detail in Section 7.3.2.)
+      a function comprised of arithmetic operations in the field.
+      (These are specified in full detail in Section 7.3.2.)
 
    *  The aggregate result is obtained by summing up the encoded
       measurements and computing some function of the sum.
@@ -2500,7 +2497,7 @@ Table of Contents
    in its prep share.  The validity decision is then made by the
    prep_shares_to_prep() algorithm (Section 5.2).
 
-   As usual, we describe the interface implemented by a concrete FLP in
+   As usual, the interface implemented by a concrete FLP is described in
    terms of an object flp of type Flp that specifies the set of methods
    and parameters a concrete FLP must provide.
 
@@ -2531,7 +2528,7 @@ Table of Contents
       verifier message and outputs a boolean indicating if the
       measurement from which it was generated is valid.
 
-   Our application requires that the FLP is "fully linear" in the sense
+   This application requires that the FLP is "fully linear" in the sense
    defined in [BBCGGI19].  As a practical matter, what this property
    implies is that, when run on a share of the measurement and proof,
    the query algorithm outputs a share of the verifier message
@@ -2612,10 +2609,10 @@ Table of Contents
    necessary, but insufficient for verifiability of Prio3 (Section 7).
    See Section 9.7 for details.
 
-   We remark that [BBCGGI19] defines a larger class of fully linear
-   proof systems than we consider here.  In particular, what is called
-   an "FLP" here is called a 1.5-round, public-coin, interactive oracle
-   proof system in their paper.
+   In addition, note that [BBCGGI19] defines a larger class of fully
+   linear proof systems than is considered here.  In particular, what is
+   called an "FLP" here is called a 1.5-round, public-coin, interactive
+   oracle proof system in their paper.
 
       +=================+==========================================+
       | Parameter       | Description                              |
@@ -2704,9 +2701,8 @@ Table of Contents
       -  num_measurements MUST equal the number of measurements that
          were aggregated.
 
-   We remark that, taken together, these three functionalities
-   correspond to the notion of "Affine-aggregatable encodings (AFEs)"
-   from [CGB17].
+   Taken together, these three functionalities correspond to the notion
+   of "Affine-aggregatable encodings (AFEs)" from [CGB17].
 
 7.1.2.  Multiple Proofs
 
@@ -3327,8 +3323,8 @@ Table of Contents
    over the network while executing Prio3.  Messages are defined in the
    presentation language of TLS as defined in Section 3 of [RFC8446].
 
-   Let prio3 denote an instance of Prio3.  In the remainder we use S as
-   an alias for prio3.xof.SEED_SIZE and F as an alias for
+   Let prio3 denote an instance of Prio3.  In the remainder, let S be an
+   alias for prio3.xof.SEED_SIZE and F as an alias for
    prio3.field.ENCODED_SIZE.  XOF seeds are represented as follows:
 
    opaque Prio3Seed[S];
@@ -3362,8 +3358,8 @@ Table of Contents
    the input share includes the full measurement share and proofs(s)
    share(s).  Otherwise, if the aggregator ID is greater than 0, then
    the measurement and shares of proof(s) are represented by an XOF
-   seed.  We shall call the former the "Leader" and the latter the
-   "Helpers".
+   seed.  Just as in Section 5.7.2, the former is called the Leader and
+   the latter the Helpers.
 
    In total there are four variants of the input share.  When joint
    randomness is not used, the Leader's share is structured as follows:
@@ -3439,12 +3435,12 @@ Table of Contents
    The types and parameters required by this interface are listed in the
    table below.
 
-   We begin in Section 7.3.1 with an overview of the proof system and
-   some extensions to it.  Section 7.3.2 defines validity circuits, the
-   core component of the proof system that determines measurement
-   validity and how measurements are aggregated.  The proof-generation
-   algorithm, query algorithm, and decision algorithm are defined in
-   Section 7.3.3, Section 7.3.4, and Section 7.3.5 respectively.
+   Section 7.3.1 provides an overview of the proof system and some
+   extensions to it.  Section 7.3.2 defines validity circuits, the core
+   component of the proof system that determines measurement validity
+   and how measurements are aggregated.  The proof-generation algorithm,
+   query algorithm, and decision algorithm are defined in Section 7.3.3,
+   Section 7.3.4, and Section 7.3.5 respectively.
 
         +================+=======================================+
         | Parameter      | Value                                 |
@@ -3485,7 +3481,7 @@ Table of Contents
    *  The verifier who holds an encryption of, or commitment to, the
       measurement and checks the proof
 
-   Our proof system is much the same, except the verifier is split
+   The proof system here is much the same, except the verifier is split
    across multiple Aggregators, each of which has a secret share of the
    measurement rather than a commitment to it.
 
@@ -3523,7 +3519,7 @@ Table of Contents
    (Note that, for this equality to hold, it is necessary to scale any
    addition of a constant in the circuit by 1/SHARES.)  However, this is
    not the case if C contains multiplication gates with two non-constant
-   inputs.  Thus our goal is to transform these multiplication gates
+   inputs.  Thus the goal is to transform these multiplication gates
    into computations on secret shared data that each Aggregator can
    perform locally.
 
@@ -3547,7 +3543,7 @@ Table of Contents
    2.  Each Aggregator locally computes and broadcasts its share of
        p(1), which is equal to its share of C(x).
 
-   In fact, our FLP is slightly more general than this.  We can replace
+   In fact, the FLP is slightly more general than this.  One can replace
    the multiplication gate with any non-affine sub-circuit and apply the
    same idea.  For example, in Section 7.4.2, the validity circuit uses
    the following sub-circuit multiple times:
@@ -3555,11 +3551,11 @@ Table of Contents
    Range2(x) = x * (x-1) = x^2 - x
 
    (This is the same functionality computed by the example circuit C
-   above.)  Here again we can interpolate the lowest degree polynomial p
-   for which p(j) is the value of the j-th call to Range2 in the
+   above.)  Here again one can interpolate the lowest degree polynomial
+   p for which p(j) is the value of the j-th call to Range2 in the
    validity circuit.  Each validity circuit defines a sub-circuit that
-   encapsulates its non-affine arithmetic operations.  We refer to this
-   sub-circuit as the "gadget".
+   encapsulates its non-affine arithmetic operations.  This sub-circuit
+   is called the "gadget".
 
    Finally, the proof system has one more important component.  It is
    possible for a malicious Client to produce a gadget polynomial p that
@@ -3575,7 +3571,7 @@ Table of Contents
    The FLP described in Section 7.3 extends the proof system of
    [BBCGGI19], Section 4.2 in a few ways.
 
-   First, the validity circuit in our construction includes an
+   First, the validity circuit in the construction includes an
    additional, random input (this is the "joint randomness" derived from
    the measurement shares in Prio3; see Section 7.2).  This allows for
    circuit optimizations that trade a small soundness error for a
@@ -3597,7 +3593,7 @@ Table of Contents
    regardless of the value of r; but if some x[j] is not in the range
    [0, 2), then the output will be non-zero with high probability.
 
-   The second extension implemented by our FLP allows the validity
+   The second extension implemented by the FLP allows the validity
    circuit to contain multiple gadget types.  (This generalization was
    suggested in [BBCGGI19], Remark 4.5.)  This provides additional
    flexibility for designing circuits by allowing multiple, non-affine
@@ -3613,16 +3609,16 @@ Table of Contents
    longer.
 
    Third, rather than interpolate the gadget polynomial at inputs 1, 2,
-   ..., j, ..., where j is the j-th invocation of the gadget, we use
-   roots of unity for the field.  This allows us to construct each
-   gadget polynomial via the number theoretic transform [SML24], which
-   is far more efficient than generic formulas.  Note that the roots of
-   unity are powers of the generator for the NTT-friendly field (see
+   ..., j, ..., where j is the j-th invocation of the gadget, roots of
+   unity for the field are used.  This allows constructing each gadget
+   polynomial via the number theoretic transform [SML24], which is far
+   more efficient than generic formulas.  Note that the roots of unity
+   are powers of the generator for the NTT-friendly field (see
    Section 6.1.2).
 
-   Finally, the validity circuit in our FLP may have any number of
+   Finally, the validity circuit in the FLP may have any number of
    outputs (at least one).  The input is said to be valid if each of the
-   outputs is zero.  To save bandwidth, we take a random linear
+   outputs is zero.  To save bandwidth, the FLP takes a random linear
    combination of the outputs.  If each of the outputs is zero, then the
    reduced output will be zero; but if one of the outputs is non-zero,
    then the reduced output will be non-zero with high probability.
@@ -3796,17 +3792,17 @@ Table of Contents
    To generate the gadget polynomials, the prover evaluates the validity
    circuit, and records the values on each input wire of each call to
    each gadget.  This is accomplished by "wrapping" each gadget in a
-   class ProveGadget that records the wire inputs.  We list this class
-   in Appendix A.4.  We denote the value of the j-th wire for the k-th
+   class ProveGadget that records the wire inputs.  This class is listed
+   in Appendix A.4.  Denote the value of the j-th wire for the k-th
    invocation of gadget g as g.wires[j][k].
 
-   Next, we compute each of the "wire polynomials" for each gadget.  For
-   each wire polynomial, we take one prove randomness value and
-   designate it the "wire seed" for that polynomial.  The j-th wire
+   Next, the prover computes each of the "wire polynomials" for each
+   gadget.  For each wire polynomial, take one prove randomness value
+   and designate it the "wire seed" for that polynomial.  The j-th wire
    polynomial is the lowest degree polynomial that evaluates to the
    "wire seed" at one point and g.wires[j][k] at a sequence of other
-   points.  We obtain the gadget polynomial by evaluating the gadget on
-   the wire polynomials.
+   points.  The gadget polynomial is obtained by evaluating the gadget
+   on the wire polynomials.
 
    def prove(self,
              meas: list[F],
@@ -3878,25 +3874,24 @@ Table of Contents
    gadget tests consume the query randomness.
 
    The goal of each gadget test is to ensure the inputs used by the
-   prover to generate the gadget polynomial match the inputs we used to
-   evaluate it.  We do this by partially reconstructing the gadget
-   polynomial and evaluating it at a random point: when we evaluate the
-   gadget polynomial at the same point, we expect to get the same
-   result.
+   prover to generate the gadget polynomial match the inputs used to
+   evaluate it.  This is done by partially reconstructing the gadget
+   polynomial and evaluating it at a random point: when the gadget
+   polynomial is evaluated at the same point, the result should be the
+   same.
 
-   To start a gadget test, we first construct the (shares of the) wire
-   polynomials just as the prover did.  First, we record the input
-   (share) of the j-th wire of the k-th invocation of the gadget as
-   g.wires[j][k].  Again, this is accomplished by a wrapper gadget,
-   QueryGadget, listed in Appendix A.4.  This gadget also evaluates the
-   gadget polynomial for each gadget invocation in order to produce the
-   gadget's output.  Then we compute the wire polynomials from the
-   recorded values.
+   To start a gadget test, first construct the (shares of the) wire
+   polynomials just as the prover did.  Then record the input (share) of
+   the j-th wire of the k-th invocation of the gadget as g.wires[j][k].
+   Again, this is accomplished by a wrapper gadget, QueryGadget, listed
+   in Appendix A.4.  This gadget also evaluates the gadget polynomial
+   for each gadget invocation in order to produce the gadget's output.
+   Then compute the wire polynomials from the recorded values.
 
-   Next, we choose a random point t (parsed from the query randomness),
+   Next, choose a random point t (parsed from the query randomness),
    evaluate each wire polynomial at t, and evaluate the gadget
    polynomial at t.  The results are recorded in the verifier message
-   passed to the decision algorithm, where we finish the test.
+   passed to the decision algorithm, where the test is finished.
 
    The random point t MUST NOT be one of the fixed evaluation points
    used to interpolate the wire polynomials.  Otherwise, the verifier
@@ -3974,12 +3969,12 @@ Table of Contents
    the previous step.)  The verifier message consists of the reduced
    circuit output and the gadget tests.
 
-   To finish each gadget test, we evaluate the gadget on the wire
-   checks: if the encoded measurement and joint randomness used to
-   generate the proof are the same as the measurement (share) and joint
-   randomness used to verify the proof, then the output of the gadget
-   will be equal to the gadget check; otherwise, the output will not
-   equal the gadget check with high probability.
+   To finish each gadget test, evaluate the gadget on the wire checks:
+   if the encoded measurement and joint randomness used to generate the
+   proof are the same as the measurement (share) and joint randomness
+   used to verify the proof, then the output of the gadget will be equal
+   to the gadget check; otherwise, the output will not equal the gadget
+   check with high probability.
 
    def decide(self, verifier: list[F]) -> bool:
        # Check the output of the validity circuit.
@@ -4018,7 +4013,7 @@ Table of Contents
 
                     Table 9: Parameters for Prio3Count.
 
-   Our first variant of Prio3 is for a simple counter: each measurement
+   The first variant of Prio3 is for a simple counter: each measurement
    is either one or zero and the aggregate result is the sum of the
    measurements.  Its validity circuit uses the multiplication gadget
    Mul specified in Appendix A.1, which takes two inputs and multiplies
@@ -4608,9 +4603,9 @@ Table of Contents
 
    This section specifies Poplar1, a VDAF for the following task.  Each
    Client holds a bit-string of length BITS and the Collector chooses a
-   sequence of L-bit strings, where L <= BITS.  We will refer to the
-   latter as the "candidate prefixes".  The goal is to count how many of
-   the Clients' inputs begin with each candidate prefix.
+   sequence of L-bit strings, where L <= BITS.  The latter is referred
+   to as the "candidate prefixes".  The goal is to count how many of the
+   Clients' inputs begin with each candidate prefix.
 
    This functionality is the core component of the heavy hitters
    protocol of [BBCGGI21].  The goal of this protocol is to compute the
@@ -4623,8 +4618,8 @@ Table of Contents
    2.  The Collector picks an initial set of candidate prefixes, say 0
        and 1, and sends them to the Aggregators.
 
-   3.  The Aggregators run VDAF preparation and aggregation on each of
-       the reports and send their aggregate shares to the Collector.
+   3.  The Aggregators run Poplar1 preparation and aggregation on each
+       of the reports and send their aggregate shares to the Collector.
 
    4.  The Collector unshards the aggregate result, which consists of
        the hit count for each candidate prefix.  For each prefix p with
@@ -4655,13 +4650,12 @@ Table of Contents
 
    Consider the sub-tree constructed from a set of input strings and a
    target threshold T by including all indices with hit count at least
-   T.  We shall refer to this structure as the "prefix tree" for the
-   batch of measurements and target threshold.  To compute the T-heavy-
-   hitters for the batch, the Aggregators and Collector first compute
-   the prefix tree, then extract the heavy hitters from the leaves of
-   this tree.  Note that the prefix tree leaks more information about
-   the set than the heavy hitters themselves; see Section 9.4 for more
-   discussion.
+   T.  This structure is called the "prefix tree" of the batch of
+   measurements and target threshold.  To compute the T-heavy-hitters
+   for the batch, the Aggregators and Collector first compute the prefix
+   tree, then extract the heavy hitters from the leaves of this tree.
+   Note that the prefix tree leaks more information about the set than
+   the heavy hitters themselves; see Section 9.4 for more discussion.
 
    Poplar1 composes an IDPF with the arithmetic sketch of [BBCGGI21],
    Section 4.2.  (The paper calls this a "secure sketch", but the
@@ -4691,15 +4685,15 @@ Table of Contents
    shares of zero otherwise.
 
    Each of the programmed points beta is a vector of elements of some
-   finite field.  We distinguish two types of fields: one for inner
-   nodes (denoted FieldInner), and one for leaf nodes (FieldLeaf).  (Our
+   finite field.  There are two types of fields: one for inner nodes
+   (denoted FieldInner), and one for leaf nodes (FieldLeaf).  (The
    instantiation of Poplar1 (Section 8.2) will use a much larger field
    for leaf nodes than for inner nodes.  This is to ensure the IDPF is
    "extractable" as defined in [BBCGGI21], Definition 1.  See
    Section 9.5 for details.)
 
    A concrete IDPF defines the types and parameters enumerated in
-   Table 14.  In the remainder we write Output as shorthand for the type
+   Table 14.  In the remainder, Output is used as shorthand for the type
    list[list[FieldInner]] | list[list[FieldLeaf]].  (This type denotes
    either a vector of inner node field elements or leaf node field
    elements.)  The scheme is comprised of the following algorithms:
@@ -5329,9 +5323,9 @@ Table of Contents
    the presentation language of TLS as defined in Section 3 of
    [RFC8446].
 
-   Let poplar1 be an instance of Poplar1.  In the remainder we use Fi as
-   an alias for poplar1.idpf.field_inner.ENCODED_SIZE, Fl as an alias
-   for poplar1.idpf.field_leaf.ENCODED_SIZE, and B as an alias for
+   Let poplar1 be an instance of Poplar1.  In the remainder let Fi be an
+   alias for poplar1.idpf.field_inner.ENCODED_SIZE, Fl as an alias for
+   poplar1.idpf.field_leaf.ENCODED_SIZE, and B as an alias for
    poplar1.idpf.BITS.
 
    Elements of the inner field are encoded in little-endian byte order
@@ -5462,8 +5456,8 @@ Table of Contents
 
    The second-round prep message is the empty string.  This is because
    the sketch shares are expected to sum to a particular value if the
-   output shares are valid; we represent a successful preparation with
-   the empty string and otherwise return an error.
+   output shares are valid; a successful preparation is represented with
+   the empty string, otherwise the procedure returns an error.
 
 8.2.6.5.  Aggregate Share
 
@@ -5545,13 +5539,13 @@ Table of Contents
 
 8.3.  IDPF Specification
 
-   In this section we specify a concrete IDPF suitable for instantiating
+   This section specifies a concrete IDPF suitable for instantiating
    Poplar1.  The constant and type definitions required by the Idpf
    interface are given in Table 17.
 
-   Our IDPF requires an XOF for deriving the output shares, as well as a
+   The IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
-   we instantiate this object using XofFixedKeyAes128 (Section 6.2.2)
+   this object is instantiated using XofFixedKeyAes128 (Section 6.2.2)
    wherever possible.  See Section 9.6 for security considerations.
 
             +============+===================================+
@@ -5573,7 +5567,7 @@ Table of Contents
             +------------+-----------------------------------+
 
                Table 17: Constants and type definitions for
-                            our concrete IDPF.
+                            the concrete IDPF.
 
 8.3.1.  Overview
 
@@ -5596,10 +5590,10 @@ Table of Contents
 
    The basic observation is that if both evaluators have the same seed s
    of length KEY_SIZE, then expanding s using a XOF will also result in
-   the same expansion.  If we set the length of the XOF expansion to
+   the same expansion.  If the length of the XOF expansion is set to
    2*KEY_SIZE, it can then be split again into two seeds s_l, s_r, that
-   can again serve as XOF seeds.  Now if we view seeds as XOR-shares of
-   integers, and if evaluators have the same seed at the root of the
+   can again serve as XOF seeds.  Now, viewing the seeds as XOR-shares
+   of integers, if evaluators have the same seed at the root of the
    tree, then their expanded trees will form a secret-shared tree of
    zeros.  The actual construction will additionally use a convert()
    function before each expansion, which maps seeds into the appropriate
@@ -5624,8 +5618,8 @@ Table of Contents
    when added with the pseudorandom shares at the ith node on the path
    to alpha, they add up to shares of beta_i.
 
-   In the following two sections we describe the algorithms for key
-   generation in full detail.
+   The following two sections describe the algorithms for key generation
+   in full detail.
 
 8.3.2.  Key Generation
 
@@ -5879,18 +5873,18 @@ Table of Contents
    VDAFs (Section 5) have two essential security goals:
 
    1.  Privacy: an attacker that controls the Collector and a subset of
-       Clients and Aggregators learns nothing about the measurements of
-       honest Clients beyond what it can deduce from the aggregate
-       result.  We assume the attacker controls the entire network
-       except for channels between honest Clients and honest
-       Aggregators.  In particular, it cannot forge or prevent
+       Clients and a subset of Aggregators learns nothing about the
+       measurements of honest Clients beyond what it can deduce from the
+       aggregate result.  It is assumed that the attacker controls the
+       entire network except for channels between honest Clients and
+       honest Aggregators.  In particular, it cannot forge or prevent
        transmission of messages on these channels.
 
    2.  Verifiability: an attacker that controls a subset of Clients
        cannot cause the Collector to compute anything other than the
        aggregate of the measurements of honest Clients, plus valid
-       measurements from some of the attacker-controlled Clients.  We
-       assume the attacker eavesdrops on the network but does not
+       measurements from some of the attacker-controlled Clients.  It is
+       assumed that the attacker eavesdrops on the network but does not
        control transmission of messages between honest parties.
 
    Formal definitions of privacy and verifiability (i.e., robustness)
@@ -6007,8 +6001,8 @@ Table of Contents
    VDAFs may impose restrictions on the re-use of reports.  For Prio3,
    reports should only be aggregated once; for Poplar1, reports may be
    aggregated multiple times, but never twice at the same level of the
-   tree.  Otherwise, we risk re-using correlated randomness, which might
-   compromise confidentiality of the Client's measurement.
+   tree.  Otherwise, one risks re-using correlated randomness, which
+   might compromise confidentiality of the Client's measurement.
 
    Higher level applications that use DAFs or VDAFs MUST enforce
    aggregation parameter validity.  In particular, prior to beginning
@@ -6033,11 +6027,11 @@ Table of Contents
 
    A malicious adversary controlling the Collector and one of the
    Aggregators can further turn arbitrary non-heavy prefixes into heavy
-   ones by tampering with the IDPF output at any position.  While our
+   ones by tampering with the IDPF output at any position.  While the
    construction ensures that the nodes evaluated at one level are
    children of the nodes evaluated at the previous level, this still may
-   allow an adversary to discover individual non-heavy strings.  We call
-   this a "steering attack".
+   allow an adversary to discover individual non-heavy strings.  This is
+   called a "steering attack".
 
    The only practical, general-purpose defense against steering attacks
    is to compose Poplar1 with some mechanism for differential privacy.
@@ -6084,7 +6078,7 @@ Table of Contents
 
 9.6.  Safe Usage of XOFs
 
-   In the security analyses of our protocols, XOFs (Section 6.2) are
+   In the security analyses of these protocols, XOFs (Section 6.2) are
    usually modeled as random oracles.  XofTurboShake128 is designed to
    be indifferentiable from a random oracle [MRH04], making it a
    suitable choice for most situations.
@@ -6106,20 +6100,20 @@ Table of Contents
    XofFixedKeyAes128 in Section 6.2.2 implements a correlation-robust
    hash function using fixed-key AES.  For security, it assumes that AES
    with a fixed key can be modeled as a random permutation [GKWY20].
-   Additionally, we use a different AES key for every client, which in
+   Additionally, a different AES key is used for every report, which in
    the ideal cipher model leads to better concrete security [GKWWY20].
 
-   We note that for verifiability, the analysis of [BBCGGI21] still
-   assumes a random oracle to make the IDPF extractable.  We therefore
-   use XofTurboShake128 instead for the last level of the tree.  It is
-   important that XofTurboShake128 supports many seed lengths, in
-   particular 16 bytes, as this is the seed size for the inner levels.
+   Note that for verifiability, the analysis of [BBCGGI21] still assumes
+   a random oracle to make the IDPF extractable.  Thus XofTurboShake128
+   is used instead for the last level of the tree.  It is important that
+   XofTurboShake128 supports many seed lengths, in particular 16 bytes,
+   as this is the seed size for the inner levels.
 
    While XofFixedKeyAes128 has been shown to be differentiable from a
    random oracle [GKWWY20], there are no known attacks exploiting this
-   difference.  We also stress that even if the IDPF is not extractable,
-   Poplar1 guarantees that every client can contribute to at most one
-   prefix among the ones being evaluated by the helpers.
+   difference.  And even if the IDPF is not extractable, Poplar1
+   guarantees that every client can contribute to at most one prefix
+   among the ones being evaluated by the helpers.
 
 9.7.  Choosing FLP Parameters
 
@@ -6158,21 +6152,21 @@ Table of Contents
    *  flp_soundness is the base soundness of the proof system
       ([BBCGGI19], Theorem 4.3)
 
-   For circuits involving joint randomness, we aim for the soundness
-   error to be close to 2^-128 in order to mitigate offline attacks.
-   Such circuits MUST use Field128 with at least one proof or Field64
-   with at least three proofs.  Depending on the circuit, Field64 with
-   two proofs might have significantly lower soundness than Field128
-   with one proof.
+   For circuits involving joint randomness, one should aim for the
+   soundness error to be close to 2^-128 in order to mitigate offline
+   attacks.  Such circuits MUST use Field128 with at least one proof or
+   Field64 with at least three proofs.  Depending on the circuit,
+   Field64 with two proofs might have significantly lower soundness than
+   Field128 with one proof.
 
-   We stress that weak parameters (too small a field, too few proofs, or
-   both) can be exploited to attack any aggregation task using those
-   parameters.  To mitigate offline attacks, it is necessary to disable
-   all tasks that use the weak parameters.
+   Weak parameters (too small a field, too few proofs, or both) can be
+   exploited to attack any aggregation task using those parameters.  To
+   mitigate offline attacks, it is necessary to disable all tasks that
+   use the weak parameters.
 
 9.8.  Choosing the Number of Aggregators
 
-   Two Aggregators are required for privacy in our threat model, but
+   Two Aggregators are required for privacy in the threat model, but
    some (V)DAFs, including Prio3 (Section 7), allow for any number of
    Aggregators, only one of which needs to be trusted in order for the
    computation to be private.  To hedge against corruptions that happen
@@ -6381,9 +6375,9 @@ Table of Contents
    [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
               C. A. Wood, "Distributed Aggregation Protocol for Privacy
               Preserving Measurement", Work in Progress, Internet-Draft,
-              draft-ietf-ppm-dap-15, 29 April 2025,
+              draft-ietf-ppm-dap-16, 2 September 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              15>.
+              16>.
 
    [Dou02]    Douceur, J. R., "The Sybil Attack", International Workshop
               on Peer-to-Peer Systems (IPTPS), 2002,
