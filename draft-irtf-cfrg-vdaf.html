@@ -3654,10 +3654,10 @@ input shares, prep shares, prep messages, and aggregation parameters.<a href="#s
 <p id="section-5.7.1-1">For VDAFs with precisely two Aggregators (i.e., <code>vdaf.SHARES == 2</code>), the
 following "ping pong" communication pattern can be used. It is compatible with
 any request/response transport protocol, such as HTTP.<a href="#section-5.7.1-1" class="pilcrow">¶</a></p>
-<p id="section-5.7.1-2">Let us call the initiating Aggregator the "Leader" and the responding
-Aggregator the "Helper". The high-level idea is that the Leader and Helper will
-take turns running the computation locally until input from their peer is
-required:<a href="#section-5.7.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.7.1-2">In this section, the initiating Aggregator is called the Leader and the
+responding Aggregator is called the Helper. The high-level idea is that the
+Leader and Helper will take turns running the computation locally until input
+from their peer is required:<a href="#section-5.7.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-5.7.1-3.1">
               <p id="section-5.7.1-3.1.1">For a 1-round VDAF (e.g., Prio3 in <a href="#prio3" class="auto internal xref">Section 7</a>), the Leader sends its prep share
