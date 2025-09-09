@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 12 March 2026                                              ISRG
+Expires: 13 March 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        8 September 2025
+                                                        9 September 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 March 2026.
+   This Internet-Draft will expire on 13 March 2026.
 
 Copyright Notice
 
@@ -3608,13 +3608,12 @@ Table of Contents
    gadget, namely multiplication, but the resulting proof would be
    longer.
 
-   Third, rather than interpolate the gadget polynomial at inputs 1, 2,
-   ..., j, ..., where j is the j-th invocation of the gadget, roots of
-   unity for the field are used.  This allows constructing each gadget
-   polynomial via the number theoretic transform [SML24], which is far
-   more efficient than generic formulas.  Note that the roots of unity
-   are powers of the generator for the NTT-friendly field (see
-   Section 6.1.2).
+   Third, rather than interpolate polynomials at inputs 1, 2, ..., j,
+   where j is the j-th invocation of the gadget, roots of unity for the
+   field are used.  This allows constructing each polynomial via the
+   number theoretic transform [SML24], which is far more efficient than
+   generic formulas.  Note that the roots of unity are powers of the
+   generator for the NTT-friendly field (see Section 6.1.2).
 
    Finally, the validity circuit in the FLP may have any number of
    outputs (at least one).  The input is said to be valid if each of the
