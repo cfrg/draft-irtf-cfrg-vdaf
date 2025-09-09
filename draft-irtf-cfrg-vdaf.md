@@ -3512,9 +3512,9 @@ inputs are in the range `[0, 2)` and the last `N-L` inputs are in the range
 `[0, 3)`. The same circuit can be expressed using a simpler gadget, namely
 multiplication, but the resulting proof would be longer.
 
-Third, rather than interpolate the gadget polynomial at inputs `1`, `2`, ...,
-`j`, ..., where `j` is the `j`-th invocation of the gadget, roots of unity for
-the field are used. This allows constructing each gadget polynomial via the
+Third, rather than interpolate polynomials at inputs `1`, `2`, ..., `j`,
+where `j` is the `j`-th invocation of the gadget, roots of unity for
+the field are used. This allows constructing each polynomial via the
 number theoretic transform {{SML24}}, which is far more efficient than generic
 formulas. Note that the roots of unity are powers of the generator for the
 NTT-friendly field (see {{field-ntt-friendly}}).
