@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-07T01:04:18.348194+00:00",
+  "timestamp": "2025-09-09T01:00:42.387018+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7124,7 +7124,7 @@
       "id": "I_kwDOGKuqOc7FWLDE",
       "title": "Crypto panel: minor editorial",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/554",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7136,8 +7136,8 @@
       ],
       "body": "> - A DAF computes a function over many client reports. Hence in Table 1\n> it should be \"a report\" or \"each report\", and not \"the report\" in the\n> NONCE_SIZE row.\n> \n> - Replace all occurrences of \"we\" (e.g., we obtain, we compute, the\n> inputs we used) by prover/verifier/client/aggregator/etc., except for\n> the ones that actually refer to the authors of the draft ;)\n> \n> - Section 8: the Aggregators run VDAF - should be \"run the Poplar1 VDAF\"\n> or just Poplar1\n> \n> - Section 9: \"a subset of Clients and Aggregators\" should be \"a subset\n> of Clients and a subset of Aggregators\", as otherwise, controlling e.g.\n> all clients would be allowed.\n> \n> - Section 9.1: rewrite to potentially many aggregators, or restrict to\n> the case of Poplar1\n\n> - Section 4, \"For example, the aggregation parameter is used to\n> represent the candidate prefixes in the Poplar1 VDAF\" - at this point,\n> where a reader might not be familiar with Poplar1 at all, so terms like\n> candidate prefix are not known yet. Maybe replace by something more\n> illustrative?\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/",
       "createdAt": "2025-08-11T17:12:07Z",
-      "updatedAt": "2025-09-05T23:53:45Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-08T18:56:47Z",
+      "closedAt": "2025-09-08T18:56:47Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -7225,6 +7225,63 @@
           "updatedAt": "2025-08-29T15:13:30Z"
         }
       ]
+    },
+    {
+      "number": 565,
+      "id": "I_kwDOGKuqOc7KW2KY",
+      "title": "Make mathematical notation more clear",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/565",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "The VDAF draft is mentioned in https://mailarchive.ietf.org/arch/msg/cfrg/1AwdnL40ZcrOA2-A-s06f0EB2Es/, in the context of guidance for mathematical notation in I-Ds. We should try to follow these guidelines better, to improve clarity.",
+      "createdAt": "2025-09-08T17:06:56Z",
+      "updatedAt": "2025-09-08T20:04:26Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Agreed. I think it's odd that we allow `^` for exponentiation when everything else is Python. To address @grittygrease's comment I think it would be sufficient to just remove it.\n\ncc @armfazh  ... I think we added this per your suggestion?",
+          "createdAt": "2025-09-08T18:02:55Z",
+          "updatedAt": "2025-09-08T18:02:55Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I consider that using either `**` or `^` for exponentiation works ok, but stick to one of it.\n\nThe issue was when `^`  stands for both exponentiation and XOR. \nThe same applies to `+` used for string concatenation and arithmetic addition.\n\nI skimmed the draft, I see that defining the `xor` function allows to use the `^` operator only for exponentiation.\nfor example: `sigma_block = concat([hi, xor(hi, lo)])` <- looks good\n\nRelated, there is no division in fields. After a quick check, it's not used. OTOH, the `inv()` function is the one used.\n\n",
+          "createdAt": "2025-09-08T20:04:26Z",
+          "updatedAt": "2025-09-08T20:04:26Z"
+        }
+      ]
+    },
+    {
+      "number": 566,
+      "id": "I_kwDOGKuqOc7KX9Ef",
+      "title": "Say wire polynomials are constructed interpolating at roots of unity rather than gadgets",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/566",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "Unrelated: I think this whole paragraph should probably be talking about wire polynomials instead of gadget polynomials, since it is the wire polynomials that are directly constructed by polynomial interpolation.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/564#discussion_r2330888634_\r\n            ",
+      "createdAt": "2025-09-08T18:43:24Z",
+      "updatedAt": "2025-09-08T19:37:11Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -45865,7 +45922,7 @@
       "id": "PR_kwDOGKuqOc6nIFMd",
       "title": "Various editorial things from crypto panel",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/564",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -45874,19 +45931,225 @@
       ],
       "body": "\ufeffCloses #554.",
       "createdAt": "2025-09-05T23:53:26Z",
-      "updatedAt": "2025-09-05T23:54:00Z",
+      "updatedAt": "2025-09-08T19:01:27Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "43e7b4a12cdf0c7cab4c071c46b1639362539d87",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/554",
-      "headRefOid": "f04a7a1263ee4f4d3b321e458a6753591c3ec1f9",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "ade43caef3a1b7642433e0ae9a318cadd42b7f28",
+      "closedAt": "2025-09-08T18:56:46Z",
+      "mergedAt": "2025-09-08T18:56:46Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "63c97ed47ae2837f383d5ac559ab4cdf815555e6"
+      },
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Squashed.",
+          "createdAt": "2025-09-08T18:45:06Z",
+          "updatedAt": "2025-09-08T18:45:06Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6-lAnT",
+          "commit": {
+            "abbreviatedOid": "f04a7a1"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-08T17:02:31Z",
+          "updatedAt": "2025-09-08T17:36:02Z",
+          "comments": [
+            {
+              "originalPosition": 83,
+              "body": "This might be a bit clearer than \"the constructions\". I don't want to repeat \"the constructions defined in this document\", since we've already said it once this sentence, but it's also separated by enough clauses that \"the constructions\" may be jarring.\r\n```suggestion\r\nPrio3 and Poplar1 constructions in particular.\r\n```",
+              "createdAt": "2025-09-08T17:02:31Z",
+              "updatedAt": "2025-09-08T17:36:02Z"
+            },
+            {
+              "originalPosition": 272,
+              "body": "```suggestion\r\nAgain, one Aggregator initiates the computation. This Aggregator is called the\r\n```",
+              "createdAt": "2025-09-08T17:22:01Z",
+              "updatedAt": "2025-09-08T17:36:02Z"
+            },
+            {
+              "originalPosition": 344,
+              "body": "This might be more grammatically correct?\r\n```suggestion\r\nproof systems than is considered here. In particular, what is called an \"FLP\"\r\n```",
+              "createdAt": "2025-09-08T17:23:38Z",
+              "updatedAt": "2025-09-08T17:36:02Z"
+            },
+            {
+              "originalPosition": 463,
+              "body": "We should change this and other uses of \"us\" as well.",
+              "createdAt": "2025-09-08T17:27:41Z",
+              "updatedAt": "2025-09-08T17:36:02Z"
+            },
+            {
+              "originalPosition": 459,
+              "body": "Unrelated: I think this whole paragraph should probably be talking about wire polynomials instead of gadget polynomials, since it is the wire polynomials that are directly constructed by polynomial interpolation.",
+              "createdAt": "2025-09-08T17:28:20Z",
+              "updatedAt": "2025-09-08T17:36:02Z"
+            },
+            {
+              "originalPosition": 634,
+              "body": "This is mixing active and passive voice in a strange way now.\r\n```suggestion\r\nvalid; a successful preparation is represented with the empty string,\r\notherwise the procedure returns an error.\r\n```",
+              "createdAt": "2025-09-08T17:33:04Z",
+              "updatedAt": "2025-09-08T17:36:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6-lvkO",
+          "commit": {
+            "abbreviatedOid": "f04a7a1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-08T18:07:39Z",
+          "updatedAt": "2025-09-08T18:07:39Z",
+          "comments": [
+            {
+              "originalPosition": 344,
+              "body": "Not sure it's more correct, I think I've seen both?",
+              "createdAt": "2025-09-08T18:07:39Z",
+              "updatedAt": "2025-09-08T18:07:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6-lwFJ",
+          "commit": {
+            "abbreviatedOid": "f04a7a1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-08T18:08:30Z",
+          "updatedAt": "2025-09-08T18:08:30Z",
+          "comments": [
+            {
+              "originalPosition": 634,
+              "body": "Whoops, good catch!",
+              "createdAt": "2025-09-08T18:08:30Z",
+              "updatedAt": "2025-09-08T18:08:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6-mSgx",
+          "commit": {
+            "abbreviatedOid": "f04a7a1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-08T18:40:51Z",
+          "updatedAt": "2025-09-08T18:40:51Z",
+          "comments": [
+            {
+              "originalPosition": 463,
+              "body": "Fixed here (\"This allows constructing ...\"). Will follow up with a PR to get rid of \"us\"",
+              "createdAt": "2025-09-08T18:40:51Z",
+              "updatedAt": "2025-09-08T18:40:51Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6-mU2T",
+          "commit": {
+            "abbreviatedOid": "f04a7a1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-08T18:43:48Z",
+          "updatedAt": "2025-09-08T18:43:48Z",
+          "comments": [
+            {
+              "originalPosition": 459,
+              "body": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/566",
+              "createdAt": "2025-09-08T18:43:48Z",
+              "updatedAt": "2025-09-08T18:43:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6-mjMI",
+          "commit": {
+            "abbreviatedOid": "f04a7a1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-08T19:01:27Z",
+          "updatedAt": "2025-09-08T19:01:27Z",
+          "comments": [
+            {
+              "originalPosition": 463,
+              "body": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/567",
+              "createdAt": "2025-09-08T19:01:27Z",
+              "updatedAt": "2025-09-08T19:01:27Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 567,
+      "id": "PR_kwDOGKuqOc6ncbZB",
+      "title": "Remove one more instance of \"us\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/567",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-16"
+      ],
+      "body": "Follow up for #554 to avoid \"we\", \"our\", and \"us\".",
+      "createdAt": "2025-09-08T19:01:05Z",
+      "updatedAt": "2025-09-08T19:36:54Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "63c97ed47ae2837f383d5ac559ab4cdf815555e6",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/554-us",
+      "headRefOid": "bc2a42a30ba6dbc807427866eba9193b69d8858d",
+      "closedAt": "2025-09-08T19:36:54Z",
+      "mergedAt": "2025-09-08T19:36:54Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "67eecac776327cfd38d604cea11337ec4391cc94"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6-mkTY",
+          "commit": {
+            "abbreviatedOid": "bc2a42a"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-08T19:02:42Z",
+          "updatedAt": "2025-09-08T19:02:42Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
