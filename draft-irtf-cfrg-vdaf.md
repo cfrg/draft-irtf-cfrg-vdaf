@@ -938,7 +938,7 @@ Some common functionalities:
            | |   +--------------+  | |
 +--------+-+ |           ^         | +->+-----------+
 | Client +---+           |         +--->| Collector +--> aggregate
-+--------+-+                         +->+-----------+
++--------+-+                         +->+-----------+    result
            |            ...          |
            |                         |
            |             |           |
@@ -951,28 +951,56 @@ Some common functionalities:
 
 There are three types of actors in a DAF- or VDAF-based private measurement
 system: Clients, Aggregators, and the Collector. The overall flow of the
-measurement process is as follows:
+measurement process is illustrated in {{overall-flow}}. The steps are as
+follows:
 
-* To submit an individual measurement, the Client shards the measurement into
-  "input shares" and sends one input share to each Aggregator. This document
-  sometimes refers to this sequence of input shares collectively as the
-  Client's "report".
+1. To submit an individual measurement, a Client shards its measurement into
+   "input shares" and sends one input share to each Aggregator. This document
+   sometimes refers to this sequence of input shares collectively as the
+   Client's "report". (The report contains a few more items needed to process
+   the measurement; these are described in {{daf}}.)
 
-* The Aggregators refine their input shares into "output shares":
+1. Once an Aggregator receives an input share from each Client, it processes
+   the input shares into a value called an "aggregate share" and sends it the
+   Collector. The aggregate share is a secret share of the aggregate
+   representation of the measurements.
 
-    * Output shares are in one-to-one correspondence with the input shares.
+1. Once the Collector has received an aggregate share from each Aggregator, it
+   combines them into the aggregate representation of the measurements, called
+   the "aggregate result".
 
-    * Just as each Aggregator receives one input share of each measurement, if
-      this process succeeds, then each aggregator holds one output share.
+This second step involves a process called "preparation" in which the
+Aggregator refines each input share into an intermediate representation called
+an "output share". The output shares are then combined into the aggregate share
+as shown in {{overall-flow-prep}}.
 
-    * In VDAFs, Aggregators will need to exchange information among themselves
-      as part of the validation process.
+~~~ aasvg
+input_share_0  input_share_1  ... input_share_[M-1]
+  |              |                  |
+  v              v                  v
++------+       +------+           +------+
+| prep |       | prep |           | prep |
++-+----+       +-+----+           +-+----+
+  |              |                  |
+  v              v                  v
+out_share_0    out_share_1    ... out_share_[M-1]
+  |              |                  |
+  v              v                  v
++----------------------------------------+
+| aggregate                              |
++----------------+-----------------------+
+                 |
+                 v
+               agg_share
+~~~
+{: #overall-flow-prep title="Preparation of input shares into output shares and
+aggregation of output shares into an aggregate share. Executed by each
+Aggregator. M denotes the number of measurements being aggregated."}
 
-* As each Aggregator recovers output shares, it accumulates them into an
-  "aggregate share" for the batch of measurements.
-
-* The Aggregators submit their aggregate shares to the Collector, who combines
-  them to obtain the aggregate result over the batch.
+In the case of VDAFs ({{vdaf}}), preparation involves interacting with the
+other Aggregators. This process will fail if the underlying measurement is
+invalid, in which case the report is rejected and not included in the aggregate
+result.
 
 Aggregators are a new class of actor relative to traditional measurement systems
 where Clients submit measurements to a single server.  They are critical for
@@ -1197,7 +1225,7 @@ preparation, each Aggregator MUST validate it using this function.
                          |
                          v
                       +------------+
-                      | agg_update |<--- out_share_M
+                      | agg_update |<--- out_share_[M-1]
                       +--+---------+
                          |
                          v
