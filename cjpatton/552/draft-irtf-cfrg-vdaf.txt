@@ -921,10 +921,10 @@ Table of Contents
        Aggregator, it combines them into the aggregate representation of
        the measurements, called the "aggregate result".
 
-   In the second step of this process, each Aggregators "prepares" each
-   input share into an intermediate representation called an "output
-   share".  The output shares are then combined into the aggregate share
-   as shown in Figure 2.
+   The second step involves a process called "preparation" in which the
+   Aggregator refines each input share into an intermediate
+   representation called an "output share".  The output shares are then
+   combined into the aggregate share as shown in Figure 2.
 
    input_share_0  input_share_1  ... input_share_[M-1]
      |              |                  |
@@ -934,27 +934,24 @@ Table of Contents
    +-+----+       +-+----+           +-+----+
      |              |                  |
      v              v                  v
-   out_share_0    out_share_1        out_share_[M-1]
+   out_share_0    out_share_1    ... out_share_[M-1]
      |              |                  |
      v              v                  v
    +----------------------------------------+
-   |                agg                     |
-   +----------------+------------------------+
+   | agg                                    |
+   +----------------+-----------------------+
                     |
                     v
-                   agg_share
+                  agg_share
 
-      Figure 2: Preparation of an input share into an output share by
-         an Aggregator.  M denotes the number of measurements being
-                                aggregated.
+        Figure 2: Preparation of input shares into output shares and
+      aggregation of output shares into an aggregate share.  M denotes
+                the number of measurements being aggregated.
 
-   Output shares are in one-to-one correspondence with the input shares:
-   for each input share, an Aggregator produces one output share.  In
-   the case of VDAFs (Section 5), the process of refining an input
-   share into an output share involves interacting with the other
-   Aggregators.  This process will fail if the underlying measurement is
-   invalid, in which case the report is rejected and not included in the
-   aggregate result.
+   In the case of VDAFs (Section 5), preparation involves interacting
+   with the other Aggregators.  This process will fail if the underlying
+   measurement is invalid, in which case the report is rejected and not
+   included in the aggregate result.
 
    Aggregators are a new class of actor relative to traditional
    measurement systems where Clients submit measurements to a single

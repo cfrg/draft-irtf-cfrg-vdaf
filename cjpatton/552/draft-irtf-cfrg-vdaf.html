@@ -2425,10 +2425,11 @@ combines them into the aggregate representation of the measurements, called
 the "aggregate result".<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-3-4">In the second step of this process, each Aggregators "prepares" each input share
-into an intermediate representation called an "output share". The output shares
-are then combined into the aggregate share as shown in <a href="#overall-flow-prep" class="auto internal xref">Figure 2</a>.<a href="#section-3-4" class="pilcrow">¶</a></p>
-<span id="name-preparation-of-an-input-sha"></span><div id="overall-flow-prep">
+<p id="section-3-4">The second step involves a process called "preparation" in which the Aggregator
+refines each input share into an intermediate representation called an "output
+share". The output shares are then combined into the aggregate share as shown
+in <a href="#overall-flow-prep" class="auto internal xref">Figure 2</a>.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<span id="name-preparation-of-input-shares"></span><div id="overall-flow-prep">
 <figure id="figure-2">
         <div id="section-3-5.1">
           <div class="alignLeft art-svg artwork" id="section-3-5.1.1">
@@ -2450,7 +2451,7 @@ are then combined into the aggregate share as shown in <a href="#overall-flow-pr
               <path d="M 296,112 L 296,144" fill="none" stroke="black"></path>
               <path d="M 296,168 L 296,200" fill="none" stroke="black"></path>
               <path d="M 336,80 L 336,112" fill="none" stroke="black"></path>
-              <path d="M 336,208 L 336,232" fill="none" stroke="black"></path>
+              <path d="M 336,208 L 336,240" fill="none" stroke="black"></path>
               <path d="M 8,80 L 64,80" fill="none" stroke="black"></path>
               <path d="M 128,80 L 184,80" fill="none" stroke="black"></path>
               <path d="M 280,80 L 336,80" fill="none" stroke="black"></path>
@@ -2458,7 +2459,7 @@ are then combined into the aggregate share as shown in <a href="#overall-flow-pr
               <path d="M 128,112 L 184,112" fill="none" stroke="black"></path>
               <path d="M 280,112 L 336,112" fill="none" stroke="black"></path>
               <path d="M 8,208 L 336,208" fill="none" stroke="black"></path>
-              <path d="M 8,240 L 344,240" fill="none" stroke="black"></path>
+              <path d="M 8,240 L 336,240" fill="none" stroke="black"></path>
               <polygon class="arrowhead" points="304,200 292,194.4 292,205.6" fill="black" transform="rotate(90,296,200)"></polygon>
               <polygon class="arrowhead" points="304,144 292,138.4 292,149.6" fill="black" transform="rotate(90,296,144)"></polygon>
               <polygon class="arrowhead" points="304,72 292,66.4 292,77.6" fill="black" transform="rotate(90,296,72)"></polygon>
@@ -2479,23 +2480,22 @@ are then combined into the aggregate share as shown in <a href="#overall-flow-pr
                 <text x="308" y="100">prep</text>
                 <text x="48" y="164">out_share_0</text>
                 <text x="168" y="164">out_share_1</text>
+                <text x="256" y="164">...</text>
                 <text x="336" y="164">out_share_[M-1]</text>
-                <text x="152" y="228">agg</text>
-                <text x="168" y="292">agg_share</text>
+                <text x="32" y="228">agg</text>
+                <text x="160" y="292">agg_share</text>
               </g>
             </svg><a href="#section-3-5.1.1" class="pilcrow">¶</a>
 </div>
 </div>
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
-<a href="#name-preparation-of-an-input-sha" class="selfRef">Preparation of an input share into an output share by an Aggregator. M denotes the number of measurements being aggregated.</a>
+<a href="#name-preparation-of-input-shares" class="selfRef">Preparation of input shares into output shares and aggregation of output shares into an aggregate share. M denotes the number of measurements being aggregated.</a>
         </figcaption></figure>
 </div>
-<p id="section-3-6">Output shares are in one-to-one correspondence with the input shares: for each
-input share, an Aggregator produces one output share. In the case of VDAFs
-(<a href="#vdaf" class="auto internal xref">Section 5</a>), the process of refining an input share into an output share
-involves interacting with the other Aggregators. This process will fail if the
-underlying measurement is invalid, in which case the report is rejected and not
-included in the aggregate result.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-6">In the case of VDAFs (<a href="#vdaf" class="auto internal xref">Section 5</a>), preparation involves interacting with the
+other Aggregators. This process will fail if the underlying measurement is
+invalid, in which case the report is rejected and not included in the aggregate
+result.<a href="#section-3-6" class="pilcrow">¶</a></p>
 <p id="section-3-7">Aggregators are a new class of actor relative to traditional measurement systems
 where Clients submit measurements to a single server.  They are critical for
 both the privacy properties of the system and, in the case of VDAFs, the
