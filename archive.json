@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-09T01:00:42.387018+00:00",
+  "timestamp": "2025-09-11T01:00:00.050436+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7267,7 +7267,7 @@
       "id": "I_kwDOGKuqOc7KX9Ef",
       "title": "Say wire polynomials are constructed interpolating at roots of unity rather than gadgets",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/566",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7279,8 +7279,8 @@
       ],
       "body": "Unrelated: I think this whole paragraph should probably be talking about wire polynomials instead of gadget polynomials, since it is the wire polynomials that are directly constructed by polynomial interpolation.\r\n\r\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/564#discussion_r2330888634_\r\n            ",
       "createdAt": "2025-09-08T18:43:24Z",
-      "updatedAt": "2025-09-08T19:37:11Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-09T14:02:47Z",
+      "closedAt": "2025-09-09T14:02:47Z",
       "comments": []
     }
   ],
@@ -46147,6 +46147,50 @@
           "body": "",
           "createdAt": "2025-09-08T19:02:42Z",
           "updatedAt": "2025-09-08T19:02:42Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 568,
+      "id": "PR_kwDOGKuqOc6nnSRj",
+      "title": "Fix incorrect reference to gadget polynomials",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/568",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "This closes #566. Wire polynomials have not yet been introduced at this point (that comes two sections later), so I just changed this paragraph to talk about polynomial interpolation more generally.",
+      "createdAt": "2025-09-09T13:43:34Z",
+      "updatedAt": "2025-09-09T14:02:49Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "67eecac776327cfd38d604cea11337ec4391cc94",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/wire-poly-editorial",
+      "headRefOid": "5a26997e796a0d3cae4769cc52fbcf0e9bc421e3",
+      "closedAt": "2025-09-09T14:02:46Z",
+      "mergedAt": "2025-09-09T14:02:46Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "4570e6bd02074fd0af5b8db249ce6858ae8992e9"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6-13-9",
+          "commit": {
+            "abbreviatedOid": "5a26997"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Perfect, exactly the way I would have fixed this.",
+          "createdAt": "2025-09-09T14:01:23Z",
+          "updatedAt": "2025-09-09T14:01:23Z",
           "comments": []
         }
       ]
