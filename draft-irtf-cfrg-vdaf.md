@@ -811,13 +811,9 @@ operands are integers, these have the usual meaning, except:
 
 Finite field arithmetic overloads these operators; see {{field}}.
 
-Exponentiation is denoted by `x ** y` in Python. Note that the more
-conventional `x^y` notation is used in mathematical notation and in the TLS
-presentation language.
+Exponentiation is denoted by `x ** y` in Python.
 
-Bitwise exclusive or is denoted by `x ^ y` in Python. Note that this document
-only uses exclusive or operations in Python code or pseudocode, and not in
-mathematical notation.
+Bitwise exclusive or is denoted by `x ^ y` in Python.
 
 Type hints are used to define input and output types:
 
@@ -898,10 +894,10 @@ Some common functionalities:
   the step between successive output values.
 
 * `to_be_bytes(x: int, len: int) -> bytes` converts an integer `x` whose value
-  is in the range `[0, 2^(8*len))` to a big-endian byte string of length `len`.
+  is in the range `[0, 2**(8*len))` to a big-endian byte string of length `len`.
 
 * `to_le_bytes(x: int, len: int) -> bytes` converts an integer `x` whose value
-  is in the range `[0, 2^(8*len))` to a little-endian byte string of length
+  is in the range `[0, 2**(8*len))` to a little-endian byte string of length
   `len`.
 
 * `poly_eval(field: type[F], p: list[F], x: F) -> F` returns the result of
@@ -1045,7 +1041,7 @@ enumerated in the following table.
 
 | Parameter         | Description                                                         |
 |:------------------|:--------------------------------------------------------------------|
-| `ID: int`         | Algorithm identifier for this DAF, in the range `[0, 2^32)`.        |
+| `ID: int`         | Algorithm identifier for this DAF, in the range `[0, 2**32)`.       |
 | `SHARES: int`     | Number of input shares into which each measurement is sharded.      |
 | `NONCE_SIZE: int` | Size of the nonce associated with each report.                      |
 | `RAND_SIZE: int`  | Size of each random byte string consumed by the sharding algorithm. |
@@ -1350,7 +1346,7 @@ The attributes listed in {{vdaf-param}} are defined by each concrete VDAF.
 
 | Parameter              | Description                                                    |
 |:-----------------------|:---------------------------------------------------------------|
-| `ID: int`              | Algorithm identifier for this VDAF, in the range `[0, 2^32)`.  |
+| `ID: int`              | Algorithm identifier for this VDAF, in the range `[0, 2**32)`. |
 | `SHARES: int`          | Number of input shares into which each measurement is sharded. |
 | `ROUNDS: int`          | Number of rounds of communication during preparation.          |
 | `NONCE_SIZE: int`      | Size of each report nonce.                                     |
@@ -1386,7 +1382,7 @@ def domain_separation_tag(self, usage: int, ctx: bytes) -> bytes:
 
     Pre-conditions:
 
-        - `usage` in the range `[0, 2^16)`
+        - `usage` in the range `[0, 2**16)`
     """
     return format_dst(0, self.ID, usage) + ctx
 ~~~
@@ -1729,12 +1725,12 @@ struct {
   MessageType type;
   select (Message.type) {
     case initialize:
-      opaque prep_share<0..2^32-1>;
+      opaque prep_share<0..2**32-1>;
     case continue:
-      opaque prep_msg<0..2^32-1>;
-      opaque prep_share<0..2^32-1>;
+      opaque prep_msg<0..2**32-1>;
+      opaque prep_share<0..2**32-1>;
     case finish:
-      opaque prep_msg<0..2^32-1>;
+      opaque prep_msg<0..2**32-1>;
   };
 } Message;
 ~~~
@@ -2152,18 +2148,18 @@ provides the following interface:
   `Field.gen() ** Field.GEN_ORDER == Field(1)`.
 
 The size of the subgroup dictates how large interpolated polynomials can be. It
-is RECOMMENDED that a generator is chosen with order at least `2^20`.
+is RECOMMENDED that a generator is chosen with order at least `2**20`.
 
 ### Parameters
 
 {{fields}} defines finite fields used in the remainder of this document.
 
-| Parameter    | Field64               | Field128                       | Field255   |
-|:-------------|:----------------------|:-------------------------------|:-----------|
-| MODULUS      | 2^32 * 4294967295 + 1 | 2^66 * 4611686018427387897 + 1 | 2^255 - 19 |
-| ENCODED_SIZE | 8                     | 16                             | 32         |
-| Generator    | 7^4294967295          | 7^4611686018427387897          | n/a        |
-| GEN_ORDER    | 2^32                  | 2^66                           | n/a        |
+| Parameter    | Field64                | Field128                        | Field255    |
+|:-------------|:-----------------------|:--------------------------------|:------------|
+| MODULUS      | 2**32 * 4294967295 + 1 | 2**66 * 4611686018427387897 + 1 | 2**255 - 19 |
+| ENCODED_SIZE | 8                      | 16                              | 32          |
+| Generator    | 7**4294967295          | 7**4611686018427387897          | n/a         |
+| GEN_ORDER    | 2**32                  | 2**66                           | n/a         |
 {: #fields title="Parameters for the finite fields used in this document."}
 
 ## Extendable Output Functions (XOFs) {#xof}
@@ -2403,9 +2399,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in the range `[0, 2^8)`
-        - `algo` in the range `[0, 2^32)`
-        - `usage` in the range `[0, 2^16)`
+        - `algo_class` in the range `[0, 2**8)`
+        - `algo` in the range `[0, 2**32)`
+        - `usage` in the range `[0, 2**16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),
@@ -3456,7 +3452,7 @@ For example, in {{prio3sum}}, the validity circuit uses the following
 sub-circuit multiple times:
 
 ~~~
-Range2(x) = x * (x-1) = x^2 - x
+Range2(x) = x * (x-1) = x**2 - x
 ~~~
 
 (This is the same functionality computed by the example circuit `C` above.)
@@ -3490,13 +3486,13 @@ details). A much shorter proof can be constructed for the following randomized
 circuit:
 
 ~~~
-C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
+C(x, r) = r * Range2(x[0]) + ... + r**N * Range2(x[N-1])
 ~~~
 
 (Note that this is a special case of {{BBCGGI19}}, Theorem 5.2.) Here `x` is
 the length-`N` input and `r` is a random field element. The gadget circuit
 `Range2` is the "range-check" polynomial described above, i.e., `Range2(x) =
-x^2 - x`. The idea is that, if `x` is valid, i.e., each `x[j]` is in
+x**2 - x`. The idea is that, if `x` is valid, i.e., each `x[j]` is in
 the range `[0, 2)`, then the circuit will evaluate to zero regardless of the
 value of `r`; but if some `x[j]` is not in the range `[0, 2)`, then the output
 will be non-zero with high probability.
@@ -3508,11 +3504,11 @@ circuits by allowing multiple, non-affine sub-circuits. For example, the
 following circuit is allowed:
 
 ~~~
-C(x, r) = r * Range2(x[0]) + ... + r^L * Range2(x[L-1]) + \
-            r^(L+1) * Range3(x[L]) + ... + r^N * Range3(x[N-1])
+C(x, r) = r * Range2(x[0]) + ... + r**L * Range2(x[L-1]) + \
+            r**(L+1) * Range3(x[L]) + ... + r**N * Range3(x[N-1])
 ~~~
 
-where `Range3(x) = x^3 - 3x^2 + 2x`. This circuit checks that the first `L`
+where `Range3(x) = x**3 - 3x**2 + 2x`. This circuit checks that the first `L`
 inputs are in the range `[0, 2)` and the last `N-L` inputs are in the range
 `[0, 3)`. The same circuit can be expressed using a simpler gadget, namely
 multiplication, but the resulting proof would be longer.
@@ -3709,7 +3705,7 @@ def prove(self,
 
         # Compute the wire polynomials for this gadget. For each `j`,
         # find the lowest degree polynomial `wire_poly` for which
-        # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
+        # `wire_poly(alpha**k) = g.wires[j][k]` for all `k`. Note that
         # each `g.wires[j][0]` is set to the seed of wire `j`, which
         # is included in the prove randomness.
         #
@@ -3725,7 +3721,7 @@ def prove(self,
 
         # Compute the gadget polynomial by evaluating the gadget on
         # the wire polynomials. By construction we have that
-        # `gadget_poly(alpha^k)` is the `k`-th output.
+        # `gadget_poly(alpha**k)` is the `k`-th output.
         gadget_poly = g.eval_poly(self.field, wire_polys)
 
         for j in range(g.ARITY):
@@ -3962,21 +3958,21 @@ two encoded integers are consistent. Let
 * `offset = 2 ** bits - 1 - max_measurement`
 
 The first bit-encoded integer is the measurement itself. Note that only
-measurements between `0` and `2^bits - 1` can be encoded this way with as many
+measurements between `0` and `2**bits - 1` can be encoded this way with as many
 bits. The second bit-encoded integer is the sum of the measurement and
 `offset`. Observe that this sum can only be encoded this way if it is between
-`0` and `2^bits - 1`, which implies that the measurement is between `-offset`
+`0` and `2**bits - 1`, which implies that the measurement is between `-offset`
 and `max_measurement`.
 
 The circuit first checks that each entry of both bit vectors is a one or a
 zero. It then decodes both the measurement and the offset measurement, and
 subtracts the offset from the latter. It then checks if these two values are
 equal. Since both the measurement and the measurement plus `offset` are in the
-same range of `[0, 2^bits)`, this means that the measurement itself is between
+same range of `[0, 2**bits)`, this means that the measurement itself is between
 `0` and `max_measurement`.
 
 The circuit uses the polynomial-evaluation gadget `PolyEval` specified in
-{{gadget-poly-eval}}. The polynomial is `p(x) = x^2 - x`, which is equal to `0`
+{{gadget-poly-eval}}. The polynomial is `p(x) = x**2 - x`, which is equal to `0`
 if and only if `x` is in the range `[0, 2)`. The complete circuit is specified
 below:
 
@@ -4050,7 +4046,7 @@ class Sum(Valid[int, int, F]):
 This instance of Prio3 supports summing vectors of integers. It has three
 parameters: `length`, `bits`, and `chunk_length`. Each measurement is a vector
 of positive integers with length equal to the `length` parameter. Each element
-of the measurement is an integer in the range `[0, 2^bits)`. It is RECOMMENDED
+of the measurement is an integer in the range `[0, 2**bits)`. It is RECOMMENDED
 to set `chunk_length` to an integer near the square root of `length * bits`
 (see {{parallel-sum-chunk-length}}).
 
@@ -4100,7 +4096,7 @@ class SumVec(Valid[list[int], list[int], F]):
                  chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with
-        `length` elements, each in the range `[0, 2^bits)`.
+        `length` elements, each in the range `[0, 2**bits)`.
         """
         self.field = field
         self.length = length
@@ -4529,7 +4525,7 @@ terms of a generic IDPF. A specification of the IDPF of {{BBCGGI21}} is given in
 
 ## Incremental Distributed Point Functions (IDPFs) {#idpf}
 
-An IDPF is defined over a domain of size `2^BITS`, where `BITS` is a constant.
+An IDPF is defined over a domain of size `2**BITS`, where `BITS` is a constant.
 Indices into the IDPF tree are bit strings. (In Poplar1, each Client's bit
 string is an index; see {{poplar1-idpf-index-encoding}} for details.) The Client
 specifies an index `alpha` and a vector of values `beta`, one for each "level"
@@ -4723,7 +4719,7 @@ tree, the Client generates random elements `a`, `b`, and `c` and computes
 
 ~~~
     A = -2*a + k
-    B = a^2 + b - k*a + c
+    B = a**2 + b - k*a + c
 ~~~
 
 and sends additive shares of `a`, `b`, `c`, `A` and `B` to each of the
@@ -5398,8 +5394,8 @@ nodes having value `0`.
 
 The IDPF construction now boils down to secret-sharing the values at each node
 of that tree in an efficient way. Note that explicitly representing the tree
-requires `O(2^BITS)` space, so the generator cannot just compute additive shares
-of it and send them to the two evaluators. Instead, the evaluators will
+requires `O(2**BITS)` space, so the generator cannot just compute additive
+shares of it and send them to the two evaluators. Instead, the evaluators will
 re-generate shares of values at selected nodes of the tree using a XOF
 ({{xof}}).
 
@@ -5946,7 +5942,7 @@ are generated and verified. In general the soundness error of the FLP is given
 by the following formula:
 
 ~~~
-(circuit_soundness + flp_soundness)^PROOFS
+(circuit_soundness + flp_soundness)**PROOFS
 ~~~
 
 where:
@@ -5957,7 +5953,7 @@ where:
   Theorem 4.3)
 
 For circuits involving joint randomness, one should aim for the soundness error
-to be close to `2^-128` in order to mitigate offline attacks. Such circuits
+to be close to `2**-128` in order to mitigate offline attacks. Such circuits
 MUST use Field128 with at least one proof or Field64 with at least three
 proofs. Depending on the circuit, Field64 with two proofs might have
 significantly lower soundness than Field128 with one proof.
@@ -6472,7 +6468,7 @@ instantiate the VDAF. These are listed in the subsections below.
 
 `bits`:
 : the bit length of each element of the vector, an integer. Each element is in
-  the range `[0, 2^bits)`.
+  the range `[0, 2**bits)`.
 
 ### Prio3Histogram
 

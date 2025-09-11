@@ -352,7 +352,7 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
             # Compute the wire polynomials for this gadget. For each `j`,
             # find the lowest degree polynomial `wire_poly` for which
-            # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
+            # `wire_poly(alpha**k) = g.wires[j][k]` for all `k`. Note that
             # each `g.wires[j][0]` is set to the seed of wire `j`, which
             # is included in the prove randomness.
             #
@@ -369,7 +369,7 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
             # Compute the gadget polynomial by evaluating the gadget on
             # the wire polynomials. By construction we have that
-            # `gadget_poly(alpha^k)` is the `k`-th output.
+            # `gadget_poly(alpha**k)` is the `k`-th output.
             gadget_poly = g.eval_poly(self.field, wire_polys)
 
             for j in range(g.ARITY):
@@ -912,7 +912,7 @@ class SumVec(Valid[list[int], list[int], F]):
                  chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with
-        `length` elements, each in the range `[0, 2^bits)`.
+        `length` elements, each in the range `[0, 2**bits)`.
         """
         # REMOVE ME
         if 2 ** bits >= field.MODULUS:
