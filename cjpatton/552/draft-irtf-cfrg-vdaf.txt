@@ -938,15 +938,16 @@ Table of Contents
      |              |                  |
      v              v                  v
    +----------------------------------------+
-   | agg                                    |
+   | aggregate                              |
    +----------------+-----------------------+
                     |
                     v
                   agg_share
 
         Figure 2: Preparation of input shares into output shares and
-      aggregation of output shares into an aggregate share.  M denotes
-                the number of measurements being aggregated.
+      aggregation of output shares into an aggregate share.  Executed
+      by each Aggregator.  M denotes the number of measurements being
+                                aggregated.
 
    In the case of VDAFs (Section 5), preparation involves interacting
    with the other Aggregators.  This process will fail if the underlying
