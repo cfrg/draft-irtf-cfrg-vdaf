@@ -1058,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 15 March 2026</td>
+<td class="center">Expires 16 March 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-11" class="published">11 September 2025</time>
+<time datetime="2025-09-12" class="published">12 September 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-03-15">15 March 2026</time></dd>
+<dd class="expires"><time datetime="2026-03-16">16 March 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 15 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 16 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1175,7 +1175,12 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions" class="internal xref">Conventions</a></p>
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions" class="internal xref">Conventions</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-mathematical-notation" class="internal xref">Mathematical Notation</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-overview" class="internal xref">Overview</a></p>
@@ -2315,6 +2320,56 @@ and <code>right</code>. An exception is raised if the inputs are not the same le
 length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-15.18.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
+<div id="mathematical-notation">
+<section id="section-2.1">
+        <h3 id="name-mathematical-notation">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-mathematical-notation" class="section-name selfRef">Mathematical Notation</a>
+        </h3>
+<p id="section-2.1-1">The following symbols are used in mathematical notation.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<span id="name-mathematical-operators-and-"></span><div id="mathematical-operators-and-symbols">
+<table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-mathematical-operators-and-" class="selfRef">Mathematical Operators and Symbols</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">ASCII glyph(s)</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+              <th class="text-left" rowspan="1" colspan="1">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">+, -</td>
+              <td class="text-left" rowspan="1" colspan="1">Addition / subtraction</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for addition and subtraction of field elements as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">*</td>
+              <td class="text-left" rowspan="1" colspan="1">Addition / subtraction</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for multiplication of field elements as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">**</td>
+              <td class="text-left" rowspan="1" colspan="1">Exponentiation</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for exponentiation of field elements as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">/</td>
+              <td class="text-left" rowspan="1" colspan="1">Division</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for division of field elements (i.e. multiplication by inverse) as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">||</td>
+              <td class="text-left" rowspan="1" colspan="1">Concatenation</td>
+              <td class="text-left" rowspan="1" colspan="1">Used for concatenation of byte strings and bit strings.</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="overview">
@@ -2506,9 +2561,9 @@ these stages. The interface, denoted <code>Daf</code>, is defined in the remaind
 section. In addition, a concrete DAF defines the associated constants and types
 enumerated in the following table.<a href="#section-4-6" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined"></span><div id="daf-param">
-<table class="center" id="table-1">
+<table class="center" id="table-2">
         <caption>
-<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#table-2" class="selfRef">Table 2</a>:
 <a href="#name-constants-and-types-defined" class="selfRef">Constants and types defined by each concrete DAF.</a>
         </caption>
 <thead>
@@ -3073,11 +3128,11 @@ this section. If an exception is raised during preparation, the Aggregators
 Otherwise, a malicious Client can cause the Collector to compute a malformed
 aggregate result.<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3">The remainder of this section defines the VDAF interface, denoted by <code>Vdaf</code>.
-The attributes listed in <a href="#vdaf-param" class="auto internal xref">Table 2</a> are defined by each concrete VDAF.<a href="#section-5-3" class="pilcrow">¶</a></p>
+The attributes listed in <a href="#vdaf-param" class="auto internal xref">Table 3</a> are defined by each concrete VDAF.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-"></span><div id="vdaf-param">
-<table class="center" id="table-2">
+<table class="center" id="table-3">
         <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#table-3" class="selfRef">Table 3</a>:
 <a href="#name-constants-and-types-defined-" class="selfRef">Constants and types defined by each concrete VDAF.</a>
         </caption>
 <thead>
@@ -3192,7 +3247,7 @@ instantiations of the <code>Vdaf</code> interface specify a method of encoding t
 <code>PublicShare</code>, <code>InputShare</code>, <code>AggParam</code>, <code>AggShare</code>, <code>PrepShare</code>, and
 <code>PrepMessage</code> types.<a href="#section-5-5" class="pilcrow">¶</a></p>
 <p id="section-5-6">Each VDAF is identified by a unique 32-bit integer, denoted <code>ID</code>. Identifiers
-for each VDAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 18</a>. The
+for each VDAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 19</a>. The
 following method is used by both Prio3 and Poplar1:<a href="#section-5-6" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5-7">
 <pre>
@@ -4163,11 +4218,11 @@ is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order 
           <h4 id="name-parameters">
 <a href="#section-6.1.3" class="section-number selfRef">6.1.3. </a><a href="#name-parameters" class="section-name selfRef">Parameters</a>
           </h4>
-<p id="section-6.1.3-1"><a href="#fields" class="auto internal xref">Table 3</a> defines finite fields used in the remainder of this document.<a href="#section-6.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.3-1"><a href="#fields" class="auto internal xref">Table 4</a> defines finite fields used in the remainder of this document.<a href="#section-6.1.3-1" class="pilcrow">¶</a></p>
 <span id="name-parameters-for-the-finite-f"></span><div id="fields">
-<table class="center" id="table-3">
+<table class="center" id="table-4">
             <caption>
-<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#table-4" class="selfRef">Table 4</a>:
 <a href="#name-parameters-for-the-finite-f" class="selfRef">Parameters for the finite fields used in this document.</a>
             </caption>
 <thead>
@@ -4566,7 +4621,7 @@ its prep share. The validity decision is then made by the
 <p id="section-7.1-2">As usual, the interface implemented by a concrete FLP is described in terms of
 an object <code>flp</code> of type <code>Flp</code> that specifies the set of methods and parameters
 a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
-<p id="section-7.1-3">The parameters provided by a concrete FLP are listed in <a href="#flp-param" class="auto internal xref">Table 4</a>. A
+<p id="section-7.1-3">The parameters provided by a concrete FLP are listed in <a href="#flp-param" class="auto internal xref">Table 5</a>. A
 concrete FLP specifies the following algorithms for generating and verifying
 proofs of validity (encoding is described below in <a href="#flp-encode" class="auto internal xref">Section 7.1.1</a>):<a href="#section-7.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -4676,9 +4731,9 @@ proof systems than is considered here. In particular, what is called an "FLP"
 here is called a 1.5-round, public-coin, interactive oracle proof system in
 their paper.<a href="#section-7.1-11" class="pilcrow">¶</a></p>
 <span id="name-flp-parameters"></span><div id="flp-param">
-<table class="center" id="table-4">
+<table class="center" id="table-5">
           <caption>
-<a href="#table-4" class="selfRef">Table 4</a>:
+<a href="#table-5" class="selfRef">Table 5</a>:
 <a href="#name-flp-parameters" class="selfRef">FLP parameters.</a>
           </caption>
 <thead>
@@ -4856,13 +4911,13 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-7.2-1">This section specifies <code>Prio3</code>, an implementation of the <code>Vdaf</code> interface
 defined in <a href="#vdaf" class="auto internal xref">Section 5</a>. The parameters and types required by the <code>Vdaf</code> interface
-are defined in <a href="#prio3-param" class="auto internal xref">Table 5</a>. The methods required for sharding, preparation,
+are defined in <a href="#prio3-param" class="auto internal xref">Table 6</a>. The methods required for sharding, preparation,
 aggregation, and unsharding are described in the remaining subsections. These
-methods refer to constants enumerated in <a href="#prio3-const" class="auto internal xref">Table 6</a>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+methods refer to constants enumerated in <a href="#prio3-const" class="auto internal xref">Table 7</a>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <span id="name-parameters-for-prio3"></span><div id="prio3-param">
-<table class="center" id="table-5">
+<table class="center" id="table-6">
           <caption>
-<a href="#table-5" class="selfRef">Table 5</a>:
+<a href="#table-6" class="selfRef">Table 6</a>:
 <a href="#name-parameters-for-prio3" class="selfRef">Parameters for Prio3.</a>
           </caption>
 <thead>
@@ -5009,9 +5064,9 @@ methods refer to constants enumerated in <a href="#prio3-const" class="auto inte
         </table>
 </div>
 <span id="name-constants-used-by-prio3"></span><div id="prio3-const">
-<table class="center" id="table-6">
+<table class="center" id="table-7">
           <caption>
-<a href="#table-6" class="selfRef">Table 6</a>:
+<a href="#table-7" class="selfRef">Table 7</a>:
 <a href="#name-constants-used-by-prio3" class="selfRef">Constants used by Prio3.</a>
           </caption>
 <thead>
@@ -5813,9 +5868,9 @@ and decision algorithm are defined in <a href="#flp-bbcggi19-construction-prove"
 <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.4</a>, and <a href="#flp-bbcggi19-construction-decide" class="auto internal xref">Section 7.3.5</a>
 respectively.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
 <span id="name-flp-parameters-for-a-validi"></span><div id="flp-bbcggi19-param">
-<table class="center" id="table-7">
+<table class="center" id="table-8">
           <caption>
-<a href="#table-7" class="selfRef">Table 7</a>:
+<a href="#table-8" class="selfRef">Table 8</a>:
 <a href="#name-flp-parameters-for-a-validi" class="selfRef">FLP parameters for a validity circuit.</a>
           </caption>
 <thead>
@@ -6073,9 +6128,9 @@ probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
 <p id="section-7.3.2-1">An instance of the proof system is defined in terms of a validity circuit that
 implements the <code>Valid</code> interface specified in this section. The parameters are
 listed in the table below.<a href="#section-7.3.2-1" class="pilcrow">¶</a></p>
-<span id="name-validity-circuit-parameters"></span><table class="center" id="table-8">
+<span id="name-validity-circuit-parameters"></span><table class="center" id="table-9">
             <caption>
-<a href="#table-8" class="selfRef">Table 8</a>:
+<a href="#table-9" class="selfRef">Table 9</a>:
 <a href="#name-validity-circuit-parameters" class="selfRef">Validity circuit parameters.</a>
             </caption>
 <thead>
@@ -6587,9 +6642,9 @@ gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix A</
           <h4 id="name-prio3count">
 <a href="#section-7.4.1" class="section-number selfRef">7.4.1. </a><a href="#name-prio3count" class="section-name selfRef">Prio3Count</a>
           </h4>
-<span id="name-parameters-for-prio3count"></span><table class="center" id="table-9">
+<span id="name-parameters-for-prio3count"></span><table class="center" id="table-10">
             <caption>
-<a href="#table-9" class="selfRef">Table 9</a>:
+<a href="#table-10" class="selfRef">Table 10</a>:
 <a href="#name-parameters-for-prio3count" class="selfRef">Parameters for Prio3Count.</a>
             </caption>
 <thead>
@@ -6604,7 +6659,7 @@ gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix A</
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6670,9 +6725,9 @@ class Count(Valid[int, int, F]):
           <h4 id="name-prio3sum">
 <a href="#section-7.4.2" class="section-number selfRef">7.4.2. </a><a href="#name-prio3sum" class="section-name selfRef">Prio3Sum</a>
           </h4>
-<span id="name-parameters-for-prio3sum"></span><table class="center" id="table-10">
+<span id="name-parameters-for-prio3sum"></span><table class="center" id="table-11">
             <caption>
-<a href="#table-10" class="selfRef">Table 10</a>:
+<a href="#table-11" class="selfRef">Table 11</a>:
 <a href="#name-parameters-for-prio3sum" class="selfRef">Parameters for Prio3Sum.</a>
             </caption>
 <thead>
@@ -6687,7 +6742,7 @@ class Count(Valid[int, int, F]):
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6802,9 +6857,9 @@ class Sum(Valid[int, int, F]):
           <h4 id="name-prio3sumvec">
 <a href="#section-7.4.3" class="section-number selfRef">7.4.3. </a><a href="#name-prio3sumvec" class="section-name selfRef">Prio3SumVec</a>
           </h4>
-<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-11">
+<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-12">
             <caption>
-<a href="#table-11" class="selfRef">Table 11</a>:
+<a href="#table-12" class="selfRef">Table 12</a>:
 <a href="#name-parameters-for-prio3sumvec" class="selfRef">Parameters for Prio3SumVec.</a>
             </caption>
 <thead>
@@ -6819,7 +6874,7 @@ class Sum(Valid[int, int, F]):
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6987,9 +7042,9 @@ proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-3"
           <h4 id="name-prio3histogram">
 <a href="#section-7.4.4" class="section-number selfRef">7.4.4. </a><a href="#name-prio3histogram" class="section-name selfRef">Prio3Histogram</a>
           </h4>
-<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-12">
+<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-13">
             <caption>
-<a href="#table-12" class="selfRef">Table 12</a>:
+<a href="#table-13" class="selfRef">Table 13</a>:
 <a href="#name-parameters-for-prio3histogr" class="selfRef">Parameters for Prio3Histogram.</a>
             </caption>
 <thead>
@@ -7004,7 +7059,7 @@ proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-3"
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -7135,9 +7190,9 @@ class Histogram(Valid[int, list[int], F]):
           <h4 id="name-prio3multihotcountvec">
 <a href="#section-7.4.5" class="section-number selfRef">7.4.5. </a><a href="#name-prio3multihotcountvec" class="section-name selfRef">Prio3MultihotCountVec</a>
           </h4>
-<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-13">
+<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-14">
             <caption>
-<a href="#table-13" class="selfRef">Table 13</a>:
+<a href="#table-14" class="selfRef">Table 14</a>:
 <a href="#name-parameters-for-prio3multiho" class="selfRef">Parameters for Prio3MultihotCountVec.</a>
             </caption>
 <thead>
@@ -7152,7 +7207,7 @@ class Histogram(Valid[int, list[int], F]):
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -7412,7 +7467,7 @@ field. There are two types of fields: one for inner nodes (denoted
 Poplar1 (<a href="#poplar1-construction" class="auto internal xref">Section 8.2</a>) will use a much larger field for leaf nodes
 than for inner nodes. This is to ensure the IDPF is "extractable" as defined in
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Definition 1. See <a href="#idpf-extract" class="auto internal xref">Section 9.5</a> for details.)<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.1-3">A concrete IDPF defines the types and parameters enumerated in <a href="#idpf-param" class="auto internal xref">Table 14</a>.
+<p id="section-8.1-3">A concrete IDPF defines the types and parameters enumerated in <a href="#idpf-param" class="auto internal xref">Table 15</a>.
 In the remainder, <code>Output</code> is used as shorthand for the type
 <code>list[list[FieldInner]] | list[list[FieldLeaf]]</code>. (This type denotes either a
 vector of inner node field elements or leaf node field elements.) The scheme is
@@ -7522,9 +7577,9 @@ not include shared state across VDAF evaluations. In practice, of course, it
 will often be beneficial to expose a stateful API for IDPFs and carry the state
 across evaluations. See <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> for details.<a href="#section-8.1-7" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-b"></span><div id="idpf-param">
-<table class="center" id="table-14">
+<table class="center" id="table-15">
           <caption>
-<a href="#table-14" class="selfRef">Table 14</a>:
+<a href="#table-15" class="selfRef">Table 15</a>:
 <a href="#name-constants-and-types-defined-b" class="selfRef">Constants and types defined by a concrete IDPF.</a>
           </caption>
 <thead>
@@ -7649,13 +7704,13 @@ as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> with <code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and
 <code>XofTurboShake128</code> as specified in <a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>. The associated
 constants and types required by the <code>Vdaf</code> interface are defined in
-<a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding, preparation, aggregation,
+<a href="#poplar1-param" class="auto internal xref">Table 16</a>. The methods required for sharding, preparation, aggregation,
 and unsharding are described in the remaining subsections. These methods make
-use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 17</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-poplar1"></span><div id="poplar1-param">
-<table class="center" id="table-15">
+<table class="center" id="table-16">
           <caption>
-<a href="#table-15" class="selfRef">Table 15</a>:
+<a href="#table-16" class="selfRef">Table 16</a>:
 <a href="#name-vdaf-parameters-for-poplar1" class="selfRef">VDAF parameters for Poplar1.</a>
           </caption>
 <thead>
@@ -7800,9 +7855,9 @@ use of constants defined in <a href="#poplar1-const" class="auto internal xref">
         </table>
 </div>
 <span id="name-constants-used-by-poplar1"></span><div id="poplar1-const">
-<table class="center" id="table-16">
+<table class="center" id="table-17">
           <caption>
-<a href="#table-16" class="selfRef">Table 16</a>:
+<a href="#table-17" class="selfRef">Table 17</a>:
 <a href="#name-constants-used-by-poplar1" class="selfRef">Constants used by Poplar1.</a>
           </caption>
 <thead>
@@ -8553,15 +8608,15 @@ next. This would help reduce communication overhead.<a href="#section-8.2.6.6-7"
         </h3>
 <p id="section-8.3-1">This section specifies a concrete IDPF suitable for instantiating Poplar1. The
 constant and type definitions required by the <code>Idpf</code> interface are given in
-<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 17</a>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 18</a>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <p id="section-8.3-2">The IDPF requires an XOF for deriving the output shares, as well as a variety
 of other artifacts used internally. For performance reasons, this object is
 instantiated using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>) wherever
 possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.6</a> for security considerations.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-bbcggi21-param">
-<table class="center" id="table-17">
+<table class="center" id="table-18">
           <caption>
-<a href="#table-17" class="selfRef">Table 17</a>:
+<a href="#table-18" class="selfRef">Table 18</a>:
 <a href="#name-constants-and-type-definiti" class="selfRef">Constants and type definitions for the concrete IDPF.</a>
           </caption>
 <thead>
@@ -8611,14 +8666,14 @@ possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.6</a> fo
                 <code>FieldInner</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>FieldLeaf</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Field255</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                <code>Field255</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
             </tr>
           </tbody>
         </table>
@@ -9379,9 +9434,9 @@ Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pi
       </ul>
 <p id="section-10-7">The initial contents of the registry are as follows:<a href="#section-10-7" class="pilcrow">¶</a></p>
 <span id="name-verifiable-distributed-aggr"></span><div id="codepoints">
-<table class="center" id="table-18">
+<table class="center" id="table-19">
         <caption>
-<a href="#table-18" class="selfRef">Table 18</a>:
+<a href="#table-19" class="selfRef">Table 19</a>:
 <a href="#name-verifiable-distributed-aggr" class="selfRef">Verifiable Distributed Aggregation Function Identifiers Registry</a>
         </caption>
 <thead>
