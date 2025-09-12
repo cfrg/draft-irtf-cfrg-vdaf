@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 15 March 2026                                              ISRG
+Expires: 16 March 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                       11 September 2025
+                                                       12 September 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 March 2026.
+   This Internet-Draft will expire on 16 March 2026.
 
 Copyright Notice
 
@@ -904,7 +904,7 @@ Table of Contents
    overall flow of the measurement process is illustrated in Figure 1.
    The steps are as follows:
 
-   1.  To submit an individual measurement, a Client shards the
+   1.  To submit an individual measurement, a Client shards its
        measurement into "input shares" and sends one input share to each
        Aggregator.  This document sometimes refers to this sequence of
        input shares collectively as the Client's "report".  (The report
