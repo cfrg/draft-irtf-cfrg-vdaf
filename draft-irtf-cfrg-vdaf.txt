@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 13 March 2026                                              ISRG
+Expires: 16 March 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        9 September 2025
+                                                       12 September 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 March 2026.
+   This Internet-Draft will expire on 16 March 2026.
 
 Copyright Notice
 
@@ -888,7 +888,7 @@ Table of Contents
               | |   +--------------+  | |
    +--------+-+ |           ^         | +->+-----------+
    | Client +---+           |         +--->| Collector +--> aggregate
-   +--------+-+                         +->+-----------+
+   +--------+-+                         +->+-----------+    result
               |            ...          |
               |                         |
               |             |           |
@@ -901,30 +901,57 @@ Table of Contents
 
    There are three types of actors in a DAF- or VDAF-based private
    measurement system: Clients, Aggregators, and the Collector.  The
-   overall flow of the measurement process is as follows:
+   overall flow of the measurement process is illustrated in Figure 1.
+   The steps are as follows:
 
-   *  To submit an individual measurement, the Client shards the
-      measurement into "input shares" and sends one input share to each
-      Aggregator.  This document sometimes refers to this sequence of
-      input shares collectively as the Client's "report".
+   1.  To submit an individual measurement, a Client shards its
+       measurement into "input shares" and sends one input share to each
+       Aggregator.  This document sometimes refers to this sequence of
+       input shares collectively as the Client's "report".  (The report
+       contains a few more items needed to process the measurement;
+       these are described in Section 4.)
 
-   *  The Aggregators refine their input shares into "output shares":
+   2.  Once an Aggregator receives an input share from each Client, it
+       processes the input shares into a value called an "aggregate
+       share" and sends it the Collector.  The aggregate share is a
+       secret share of the aggregate representation of the measurements.
 
-      -  Output shares are in one-to-one correspondence with the input
-         shares.
+   3.  Once the Collector has received an aggregate share from each
+       Aggregator, it combines them into the aggregate representation of
+       the measurements, called the "aggregate result".
 
-      -  Just as each Aggregator receives one input share of each
-         measurement, if this process succeeds, then each aggregator
-         holds one output share.
+   This second step involves a process called "preparation" in which the
+   Aggregator refines each input share into an intermediate
+   representation called an "output share".  The output shares are then
+   combined into the aggregate share as shown in Figure 2.
 
-      -  In VDAFs, Aggregators will need to exchange information among
-         themselves as part of the validation process.
+   input_share_0  input_share_1  ... input_share_[M-1]
+     |              |                  |
+     v              v                  v
+   +------+       +------+           +------+
+   | prep |       | prep |           | prep |
+   +-+----+       +-+----+           +-+----+
+     |              |                  |
+     v              v                  v
+   out_share_0    out_share_1    ... out_share_[M-1]
+     |              |                  |
+     v              v                  v
+   +----------------------------------------+
+   | aggregate                              |
+   +----------------+-----------------------+
+                    |
+                    v
+                  agg_share
 
-   *  As each Aggregator recovers output shares, it accumulates them
-      into an "aggregate share" for the batch of measurements.
+        Figure 2: Preparation of input shares into output shares and
+      aggregation of output shares into an aggregate share.  Executed
+      by each Aggregator.  M denotes the number of measurements being
+                                aggregated.
 
-   *  The Aggregators submit their aggregate shares to the Collector,
-      who combines them to obtain the aggregate result over the batch.
+   In the case of VDAFs (Section 5), preparation involves interacting
+   with the other Aggregators.  This process will fail if the underlying
+   measurement is invalid, in which case the report is rejected and not
+   included in the aggregate result.
 
    Aggregators are a new class of actor relative to traditional
    measurement systems where Clients submit measurements to a single
@@ -1062,7 +1089,7 @@ Table of Contents
          v    v         v     v        v     v
        Aggregator 0   Aggregator 1    Aggregator SHARES-1
 
-             Figure 2: Illustration of the sharding algorithm.
+             Figure 3: Illustration of the sharding algorithm.
 
    The sharding algorithm run by each Client is defined as follows:
 
@@ -1118,7 +1145,7 @@ Table of Contents
          v              v                      v
        out_share_0    out_share_1            out_share_[SHARES-1]
 
-                   Figure 3: Illustration of preparation.
+                   Figure 4: Illustration of preparation.
 
    Once an Aggregator has received the public share and its input share,
    the next step is to prepare the input share for aggregation.  This is
@@ -1181,13 +1208,13 @@ Table of Contents
                             |
                             v
                          +------------+
-                         | agg_update |<--- out_share_M
+                         | agg_update |<--- out_share_[M-1]
                          +--+---------+
                             |
                             v
                           agg_share_j
 
-           Figure 4: Illustration of aggregation.  The number of
+           Figure 5: Illustration of aggregation.  The number of
                  measurements in the batch is denoted by M.
 
    Once an Aggregator holds an output share, it adds it into its
@@ -1243,7 +1270,7 @@ Table of Contents
        Collector
        =========
 
-                   Figure 5: Illustration of unsharding.
+                   Figure 6: Illustration of unsharding.
 
    After the Aggregators have aggregated all measurements in the batch,
    each sends its aggregate share to the Collector, who runs the
@@ -1450,7 +1477,7 @@ Table of Contents
          v              v                      v
        out_share_0    out_share_1         out_share_[SHARES-1]
 
-          Figure 6: Illustration of interactive VDAF preparation.
+          Figure 7: Illustration of interactive VDAF preparation.
 
    Preparation is organized into a number of rounds.  The number of
    rounds depends on the VDAF: Prio3 (Section 7) has one round and
@@ -1684,7 +1711,7 @@ Table of Contents
     |                                                 v
     +-----------------> FinishedWithOutbound(out_share, outbound)
 
-                Figure 7: State machine of VDAF preparation.
+                Figure 8: State machine of VDAF preparation.
 
    State transitions are made when the state is acted upon by the
    Aggregator's local inputs and/or messages sent by its co-Aggregators.
@@ -1764,7 +1791,7 @@ Table of Contents
    } Message;
 
    These messages trigger all transitions in the state machine in
-   Figure 7, except for the Leader's initial transition.  The Leader's
+   Figure 8, except for the Leader's initial transition.  The Leader's
    state is initialized using its local inputs with the following method
    on class Vdaf:
 
@@ -3777,7 +3804,7 @@ Table of Contents
      |
      v proof
 
-          Figure 8: Components of the proof generation algorithm.
+          Figure 9: Components of the proof generation algorithm.
 
    The proof generation algorithm invokes the validity circuit on the
    encoded measurement and joint randomness.  The validity circuit in
@@ -3863,7 +3890,7 @@ Table of Contents
      |
      v verifier (share)
 
-                Figure 9: Components of the query algorithm.
+               Figure 10: Components of the query algorithm.
 
    The query algorithm invokes the validity circuit on the encoded
    measurement and joint randomness.  It evaluates the gadget
@@ -3961,7 +3988,7 @@ Table of Contents
      |
      v is_valid
 
-              Figure 10: Components of the decision algorithm.
+              Figure 11: Components of the decision algorithm.
 
    The decision algorithm consumes the verifier message.  (Each of the
    Aggregators computes an additive share of the verifier message after

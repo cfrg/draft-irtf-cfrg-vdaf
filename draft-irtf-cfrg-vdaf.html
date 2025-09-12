@@ -1058,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 13 March 2026</td>
+<td class="center">Expires 16 March 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-09" class="published">9 September 2025</time>
+<time datetime="2025-09-12" class="published">12 September 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-03-13">13 March 2026</time></dd>
+<dd class="expires"><time datetime="2026-03-16">16 March 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 13 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 16 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2388,6 +2388,7 @@ length (<code>len</code>). Each element of the array is set to zero.<a href="#se
                 <text x="44" y="196">Client</text>
                 <text x="376" y="196">Collector</text>
                 <text x="496" y="196">aggregate</text>
+                <text x="484" y="212">result</text>
                 <text x="208" y="228">...</text>
                 <text x="208" y="260">|</text>
                 <text x="188" y="308">Aggregator</text>
@@ -2402,40 +2403,100 @@ length (<code>len</code>). Each element of the array is set to zero.<a href="#se
 </div>
 <p id="section-3-2">There are three types of actors in a DAF- or VDAF-based private measurement
 system: Clients, Aggregators, and the Collector. The overall flow of the
-measurement process is as follows:<a href="#section-3-2" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-3-3.1">
-          <p id="section-3-3.1.1">To submit an individual measurement, the Client shards the measurement into
+measurement process is illustrated in <a href="#overall-flow" class="auto internal xref">Figure 1</a>. The steps are as
+follows:<a href="#section-3-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-3-3">
+<li id="section-3-3.1">
+          <p id="section-3-3.1.1">To submit an individual measurement, a Client shards its measurement into
 "input shares" and sends one input share to each Aggregator. This document
 sometimes refers to this sequence of input shares collectively as the
-Client's "report".<a href="#section-3-3.1.1" class="pilcrow">¶</a></p>
+Client's "report". (The report contains a few more items needed to process
+the measurement; these are described in <a href="#daf" class="auto internal xref">Section 4</a>.)<a href="#section-3-3.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-3-3.2">
-          <p id="section-3-3.2.1">The Aggregators refine their input shares into "output shares":<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-3-3.2.2.1">
-              <p id="section-3-3.2.2.1.1">Output shares are in one-to-one correspondence with the input shares.<a href="#section-3-3.2.2.1.1" class="pilcrow">¶</a></p>
+        <li id="section-3-3.2">
+          <p id="section-3-3.2.1">Once an Aggregator receives an input share from each Client, it processes
+the input shares into a value called an "aggregate share" and sends it the
+Collector. The aggregate share is a secret share of the aggregate
+representation of the measurements.<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-3-3.2.2.2">
-              <p id="section-3-3.2.2.2.1">Just as each Aggregator receives one input share of each measurement, if
-this process succeeds, then each aggregator holds one output share.<a href="#section-3-3.2.2.2.1" class="pilcrow">¶</a></p>
+        <li id="section-3-3.3">
+          <p id="section-3-3.3.1">Once the Collector has received an aggregate share from each Aggregator, it
+combines them into the aggregate representation of the measurements, called
+the "aggregate result".<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-3-3.2.2.3">
-              <p id="section-3-3.2.2.3.1">In VDAFs, Aggregators will need to exchange information among themselves
-as part of the validation process.<a href="#section-3-3.2.2.3.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-</li>
-        <li class="normal" id="section-3-3.3">
-          <p id="section-3-3.3.1">As each Aggregator recovers output shares, it accumulates them into an
-"aggregate share" for the batch of measurements.<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-3-3.4">
-          <p id="section-3-3.4.1">The Aggregators submit their aggregate shares to the Collector, who combines
-them to obtain the aggregate result over the batch.<a href="#section-3-3.4.1" class="pilcrow">¶</a></p>
-</li>
-      </ul>
-<p id="section-3-4">Aggregators are a new class of actor relative to traditional measurement systems
+      </ol>
+<p id="section-3-4">This second step involves a process called "preparation" in which the
+Aggregator refines each input share into an intermediate representation called
+an "output share". The output shares are then combined into the aggregate share
+as shown in <a href="#overall-flow-prep" class="auto internal xref">Figure 2</a>.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<span id="name-preparation-of-input-shares"></span><div id="overall-flow-prep">
+<figure id="figure-2">
+        <div id="section-3-5.1">
+          <div class="alignLeft art-svg artwork" id="section-3-5.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="304" width="416" viewBox="0 0 416 304" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+              <path d="M 8,80 L 8,112" fill="none" stroke="black"></path>
+              <path d="M 8,208 L 8,240" fill="none" stroke="black"></path>
+              <path d="M 24,48 L 24,72" fill="none" stroke="black"></path>
+              <path d="M 24,112 L 24,144" fill="none" stroke="black"></path>
+              <path d="M 24,168 L 24,200" fill="none" stroke="black"></path>
+              <path d="M 64,80 L 64,112" fill="none" stroke="black"></path>
+              <path d="M 128,80 L 128,112" fill="none" stroke="black"></path>
+              <path d="M 144,48 L 144,72" fill="none" stroke="black"></path>
+              <path d="M 144,112 L 144,144" fill="none" stroke="black"></path>
+              <path d="M 144,168 L 144,200" fill="none" stroke="black"></path>
+              <path d="M 144,240 L 144,272" fill="none" stroke="black"></path>
+              <path d="M 184,80 L 184,112" fill="none" stroke="black"></path>
+              <path d="M 280,80 L 280,112" fill="none" stroke="black"></path>
+              <path d="M 296,48 L 296,72" fill="none" stroke="black"></path>
+              <path d="M 296,112 L 296,144" fill="none" stroke="black"></path>
+              <path d="M 296,168 L 296,200" fill="none" stroke="black"></path>
+              <path d="M 336,80 L 336,112" fill="none" stroke="black"></path>
+              <path d="M 336,208 L 336,240" fill="none" stroke="black"></path>
+              <path d="M 8,80 L 64,80" fill="none" stroke="black"></path>
+              <path d="M 128,80 L 184,80" fill="none" stroke="black"></path>
+              <path d="M 280,80 L 336,80" fill="none" stroke="black"></path>
+              <path d="M 8,112 L 64,112" fill="none" stroke="black"></path>
+              <path d="M 128,112 L 184,112" fill="none" stroke="black"></path>
+              <path d="M 280,112 L 336,112" fill="none" stroke="black"></path>
+              <path d="M 8,208 L 336,208" fill="none" stroke="black"></path>
+              <path d="M 8,240 L 336,240" fill="none" stroke="black"></path>
+              <polygon class="arrowhead" points="304,200 292,194.4 292,205.6" fill="black" transform="rotate(90,296,200)"></polygon>
+              <polygon class="arrowhead" points="304,144 292,138.4 292,149.6" fill="black" transform="rotate(90,296,144)"></polygon>
+              <polygon class="arrowhead" points="304,72 292,66.4 292,77.6" fill="black" transform="rotate(90,296,72)"></polygon>
+              <polygon class="arrowhead" points="152,272 140,266.4 140,277.6" fill="black" transform="rotate(90,144,272)"></polygon>
+              <polygon class="arrowhead" points="152,200 140,194.4 140,205.6" fill="black" transform="rotate(90,144,200)"></polygon>
+              <polygon class="arrowhead" points="152,144 140,138.4 140,149.6" fill="black" transform="rotate(90,144,144)"></polygon>
+              <polygon class="arrowhead" points="152,72 140,66.4 140,77.6" fill="black" transform="rotate(90,144,72)"></polygon>
+              <polygon class="arrowhead" points="32,200 20,194.4 20,205.6" fill="black" transform="rotate(90,24,200)"></polygon>
+              <polygon class="arrowhead" points="32,144 20,138.4 20,149.6" fill="black" transform="rotate(90,24,144)"></polygon>
+              <polygon class="arrowhead" points="32,72 20,66.4 20,77.6" fill="black" transform="rotate(90,24,72)"></polygon>
+              <g class="text">
+                <text x="56" y="36">input_share_0</text>
+                <text x="176" y="36">input_share_1</text>
+                <text x="256" y="36">...</text>
+                <text x="344" y="36">input_share_[M-1]</text>
+                <text x="36" y="100">prep</text>
+                <text x="156" y="100">prep</text>
+                <text x="308" y="100">prep</text>
+                <text x="48" y="164">out_share_0</text>
+                <text x="168" y="164">out_share_1</text>
+                <text x="256" y="164">...</text>
+                <text x="336" y="164">out_share_[M-1]</text>
+                <text x="56" y="228">aggregate</text>
+                <text x="160" y="292">agg_share</text>
+              </g>
+            </svg><a href="#section-3-5.1.1" class="pilcrow">¶</a>
+</div>
+</div>
+<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<a href="#name-preparation-of-input-shares" class="selfRef">Preparation of input shares into output shares and aggregation of output shares into an aggregate share. Executed by each Aggregator. M denotes the number of measurements being aggregated.</a>
+        </figcaption></figure>
+</div>
+<p id="section-3-6">In the case of VDAFs (<a href="#vdaf" class="auto internal xref">Section 5</a>), preparation involves interacting with the
+other Aggregators. This process will fail if the underlying measurement is
+invalid, in which case the report is rejected and not included in the aggregate
+result.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7">Aggregators are a new class of actor relative to traditional measurement systems
 where Clients submit measurements to a single server.  They are critical for
 both the privacy properties of the system and, in the case of VDAFs, the
 validity of the aggregate results obtained.  The privacy properties of the
@@ -2443,17 +2504,17 @@ system are assured by non-collusion among Aggregators, and Aggregators are the
 entities that perform validation of Client measurements.  Thus Clients trust
 Aggregators not to collude (typically it is required that at least one
 Aggregator is honest; see <a href="#num-aggregators" class="auto internal xref">Section 9.8</a>), and Collectors trust
-Aggregators to correctly run the protocol.<a href="#section-3-4" class="pilcrow">¶</a></p>
-<p id="section-3-5">Within the bounds of the non-collusion requirements of a given (V)DAF instance,
+Aggregators to correctly run the protocol.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8">Within the bounds of the non-collusion requirements of a given (V)DAF instance,
 it is possible for the same entity to play more than one role.  For example, the
 Collector could also act as an Aggregator, effectively using the other
-Aggregator(s) to augment a basic client-server protocol.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6">This document describes the computations performed by the actors in this
+Aggregator(s) to augment a basic client-server protocol.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9">This document describes the computations performed by the actors in this
 system. It is up to the higher-level protocol making use of the (V)DAF to
 arrange for the required information to be delivered to the proper actors in
 the proper sequence. In general, it is assumed that all communications are
 confidential and mutually authenticated, with the exception that Clients
-submitting measurements may be anonymous.<a href="#section-3-6" class="pilcrow">¶</a></p>
+submitting measurements may be anonymous.<a href="#section-3-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="daf">
@@ -2598,7 +2659,7 @@ for the <code>PublicShare</code>, <code>InputShare</code>, <code>AggParam</code>
 <a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-sharding" class="section-name selfRef">Sharding</a>
         </h3>
 <span id="name-illustration-of-the-shardin"></span><div id="shard-flow">
-<figure id="figure-2">
+<figure id="figure-3">
           <div id="section-4.1-1.1">
             <div class="alignLeft art-svg artwork" id="section-4.1-1.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="384" width="432" viewBox="0 0 432 384" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -2655,7 +2716,7 @@ for the <code>PublicShare</code>, <code>InputShare</code>, <code>AggParam</code>
               </svg><a href="#section-4.1-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
 <a href="#name-illustration-of-the-shardin" class="selfRef">Illustration of the sharding algorithm.</a>
           </figcaption></figure>
 </div>
@@ -2710,7 +2771,7 @@ derive per-report randomness for verification of the computation. See
 <a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-preparation" class="section-name selfRef">Preparation</a>
         </h3>
 <span id="name-illustration-of-preparation"></span><div id="daf-prep-flow">
-<figure id="figure-3">
+<figure id="figure-4">
           <div id="section-4.2-1.1">
             <div class="alignLeft art-svg artwork" id="section-4.2-1.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="240" width="488" viewBox="0 0 488 240" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -2766,7 +2827,7 @@ derive per-report randomness for verification of the computation. See
               </svg><a href="#section-4.2-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
 <a href="#name-illustration-of-preparation" class="selfRef">Illustration of preparation.</a>
           </figcaption></figure>
 </div>
@@ -2824,10 +2885,10 @@ preparation, each Aggregator <span class="bcp14">MUST</span> validate it using t
 <a href="#section-4.4" class="section-number selfRef">4.4. </a><a href="#name-aggregation" class="section-name selfRef">Aggregation</a>
         </h3>
 <span id="name-illustration-of-aggregation"></span><div id="aggregate-flow">
-<figure id="figure-4">
+<figure id="figure-5">
           <div id="section-4.4-1.1">
             <div class="alignLeft art-svg artwork" id="section-4.4-1.1.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="432" width="392" viewBox="0 0 392 432" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="432" width="424" viewBox="0 0 424 432" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
                 <path d="M 8,80 L 8,112" fill="none" stroke="black"></path>
                 <path d="M 112,80 L 112,112" fill="none" stroke="black"></path>
                 <path d="M 152,80 L 152,112" fill="none" stroke="black"></path>
@@ -2872,13 +2933,13 @@ preparation, each Aggregator <span class="bcp14">MUST</span> validate it using t
                   <text x="344" y="180">out_share_1</text>
                   <text x="176" y="260">...</text>
                   <text x="204" y="340">agg_update</text>
-                  <text x="344" y="340">out_share_M</text>
+                  <text x="360" y="340">out_share_[M-1]</text>
                   <text x="200" y="404">agg_share_j</text>
                 </g>
               </svg><a href="#section-4.4-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
+<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
 <a href="#name-illustration-of-aggregation" class="selfRef">Illustration of aggregation. The number of measurements in the batch is denoted by M.</a>
           </figcaption></figure>
 </div>
@@ -2929,7 +2990,7 @@ requires each Aggregator to aggregate output shares in the same order.<a href="#
 <a href="#section-4.5" class="section-number selfRef">4.5. </a><a href="#name-unsharding" class="section-name selfRef">Unsharding</a>
         </h3>
 <span id="name-illustration-of-unsharding"></span><div id="unshard-flow">
-<figure id="figure-5">
+<figure id="figure-6">
           <div id="section-4.5-1.1">
             <div class="alignLeft art-svg artwork" id="section-4.5-1.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="288" width="456" viewBox="0 0 456 288" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -2970,7 +3031,7 @@ requires each Aggregator to aggregate output shares in the same order.<a href="#
               </svg><a href="#section-4.5-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
+<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
 <a href="#name-illustration-of-unsharding" class="selfRef">Illustration of unsharding.</a>
           </figcaption></figure>
 </div>
@@ -3234,7 +3295,7 @@ cross protocol attacks; see <a href="#deep" class="auto internal xref">Section 9
 <a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-preparation-2" class="section-name selfRef">Preparation</a>
         </h3>
 <span id="name-illustration-of-interactive"></span><div id="prep-flow">
-<figure id="figure-6">
+<figure id="figure-7">
           <div id="section-5.2-1.1">
             <div class="alignLeft art-svg artwork" id="section-5.2-1.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="496" width="528" viewBox="0 0 528 496" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -3357,7 +3418,7 @@ cross protocol attacks; see <a href="#deep" class="auto internal xref">Section 9
               </svg><a href="#section-5.2-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
+<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
 <a href="#name-illustration-of-interactive" class="selfRef">Illustration of interactive VDAF preparation.</a>
           </figcaption></figure>
 </div>
@@ -3593,7 +3654,7 @@ start the next round. The goal of this section is to realize this broadcast
 channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 <p id="section-5.7-3">The state machine of each Aggregator is shown below.<a href="#section-5.7-3" class="pilcrow">¶</a></p>
 <span id="name-state-machine-of-vdaf-prepa"></span><div id="vdaf-prep-state-machine">
-<figure id="figure-7">
+<figure id="figure-8">
           <div id="section-5.7-4.1">
             <div class="alignLeft art-svg artwork" id="section-5.7-4.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="504" viewBox="0 0 504 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -3629,7 +3690,7 @@ channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
               </svg><a href="#section-5.7-4.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
+<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
 <a href="#name-state-machine-of-vdaf-prepa" class="selfRef">State machine of VDAF preparation.</a>
           </figcaption></figure>
 </div>
@@ -3710,7 +3771,7 @@ struct {
 </pre><a href="#section-5.7.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-5.7.1-7">These messages trigger all transitions in the state machine in
-<a href="#vdaf-prep-state-machine" class="auto internal xref">Figure 7</a>, except for the Leader's initial transition. The
+<a href="#vdaf-prep-state-machine" class="auto internal xref">Figure 8</a>, except for the Leader's initial transition. The
 Leader's state is initialized using its local inputs with the following method
 on class <code>Vdaf</code>:<a href="#section-5.7.1-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-8">
@@ -6267,7 +6328,7 @@ def verifier_len(self) -&gt; int:
           <h4 id="name-generating-the-proof">
 <a href="#section-7.3.3" class="section-number selfRef">7.3.3. </a><a href="#name-generating-the-proof" class="section-name selfRef">Generating the Proof</a>
           </h4>
-<span id="name-components-of-the-proof-gen"></span><figure id="figure-8">
+<span id="name-components-of-the-proof-gen"></span><figure id="figure-9">
             <div id="section-7.3.3-1.1">
               <div class="alignLeft art-svg artwork" id="section-7.3.3-1.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="240" width="296" viewBox="0 0 296 240" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -6306,7 +6367,7 @@ def verifier_len(self) -&gt; int:
                 </svg><a href="#section-7.3.3-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
+<figcaption><a href="#figure-9" class="selfRef">Figure 9</a>:
 <a href="#name-components-of-the-proof-gen" class="selfRef">Components of the proof generation algorithm.</a>
             </figcaption></figure>
 <p id="section-7.3.3-2">The proof generation algorithm invokes the validity circuit on the encoded
@@ -6379,7 +6440,7 @@ def prove(self,
           <h4 id="name-querying-the-proof">
 <a href="#section-7.3.4" class="section-number selfRef">7.3.4. </a><a href="#name-querying-the-proof" class="section-name selfRef">Querying the Proof</a>
           </h4>
-<span id="name-components-of-the-query-alg"></span><figure id="figure-9">
+<span id="name-components-of-the-query-alg"></span><figure id="figure-10">
             <div id="section-7.3.4-1.1">
               <div class="alignLeft art-svg artwork" id="section-7.3.4-1.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="272" width="312" viewBox="0 0 312 272" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -6427,7 +6488,7 @@ def prove(self,
                 </svg><a href="#section-7.3.4-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-9" class="selfRef">Figure 9</a>:
+<figcaption><a href="#figure-10" class="selfRef">Figure 10</a>:
 <a href="#name-components-of-the-query-alg" class="selfRef">Components of the query algorithm.</a>
             </figcaption></figure>
 <p id="section-7.3.4-2">The query algorithm invokes the validity circuit on the encoded measurement and
@@ -6519,7 +6580,7 @@ def query(self,
           <h4 id="name-deciding-validity">
 <a href="#section-7.3.5" class="section-number selfRef">7.3.5. </a><a href="#name-deciding-validity" class="section-name selfRef">Deciding Validity</a>
           </h4>
-<span id="name-components-of-the-decision-"></span><figure id="figure-10">
+<span id="name-components-of-the-decision-"></span><figure id="figure-11">
             <div id="section-7.3.5-1.1">
               <div class="alignLeft art-svg artwork" id="section-7.3.5-1.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="168" viewBox="0 0 168 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -6539,7 +6600,7 @@ def query(self,
                 </svg><a href="#section-7.3.5-1.1.1" class="pilcrow">¶</a>
 </div>
 </div>
-<figcaption><a href="#figure-10" class="selfRef">Figure 10</a>:
+<figcaption><a href="#figure-11" class="selfRef">Figure 11</a>:
 <a href="#name-components-of-the-decision-" class="selfRef">Components of the decision algorithm.</a>
             </figcaption></figure>
 <p id="section-7.3.5-2">The decision algorithm consumes the verifier message. (Each of the Aggregators
