@@ -2410,13 +2410,13 @@ follows:<a href="#section-3-2" class="pilcrow">¶</a></p>
           <p id="section-3-3.1.1">To submit an individual measurement, a Client shards its measurement into
 "input shares" and sends one input share to each Aggregator. This document
 sometimes refers to this sequence of input shares collectively as the
-Client's "report". (The report contains a few more items needed processing
+Client's "report". (The report contains a few more items needed to process
 the measurement; these are described in <a href="#daf" class="auto internal xref">Section 4</a>.)<a href="#section-3-3.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-3.2">
           <p id="section-3-3.2.1">Once an Aggregator receives an input share from each Client, it processes
 the input shares into a value called an "aggregate share" and sends it the
-Collector. The aggregate share is a secret share of some aggregate
+Collector. The aggregate share is a secret share of the aggregate
 representation of the measurements.<a href="#section-3-3.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="section-3-3.3">
@@ -2425,10 +2425,10 @@ combines them into the aggregate representation of the measurements, called
 the "aggregate result".<a href="#section-3-3.3.1" class="pilcrow">¶</a></p>
 </li>
       </ol>
-<p id="section-3-4">The second step involves a process called "preparation" in which the Aggregator
-refines each input share into an intermediate representation called an "output
-share". The output shares are then combined into the aggregate share as shown
-in <a href="#overall-flow-prep" class="auto internal xref">Figure 2</a>.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-4">This second step involves a process called "preparation" in which the
+Aggregator refines each input share into an intermediate representation called
+an "output share". The output shares are then combined into the aggregate share
+as shown in <a href="#overall-flow-prep" class="auto internal xref">Figure 2</a>.<a href="#section-3-4" class="pilcrow">¶</a></p>
 <span id="name-preparation-of-input-shares"></span><div id="overall-flow-prep">
 <figure id="figure-2">
         <div id="section-3-5.1">

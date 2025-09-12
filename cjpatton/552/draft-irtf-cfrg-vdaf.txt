@@ -908,20 +908,19 @@ Table of Contents
        measurement into "input shares" and sends one input share to each
        Aggregator.  This document sometimes refers to this sequence of
        input shares collectively as the Client's "report".  (The report
-       contains a few more items needed processing the measurement;
+       contains a few more items needed to process the measurement;
        these are described in Section 4.)
 
    2.  Once an Aggregator receives an input share from each Client, it
        processes the input shares into a value called an "aggregate
        share" and sends it the Collector.  The aggregate share is a
-       secret share of some aggregate representation of the
-       measurements.
+       secret share of the aggregate representation of the measurements.
 
    3.  Once the Collector has received an aggregate share from each
        Aggregator, it combines them into the aggregate representation of
        the measurements, called the "aggregate result".
 
-   The second step involves a process called "preparation" in which the
+   This second step involves a process called "preparation" in which the
    Aggregator refines each input share into an intermediate
    representation called an "output share".  The output shares are then
    combined into the aggregate share as shown in Figure 2.
