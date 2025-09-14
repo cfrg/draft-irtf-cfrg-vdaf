@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-11T01:00:00.050436+00:00",
+  "timestamp": "2025-09-14T01:03:38.881753+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7076,18 +7076,20 @@
       "id": "I_kwDOGKuqOc7FUw0f",
       "title": "Crypto panel: overview: output shares versus aggregate shares",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/552",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "editorial",
         "draft-16"
       ],
       "body": ">  - Section 3: Figure 1 shows only \"aggregate shares\" while the text also\n> talks about \"output shares\". I find the terminology confusing because\n> the \"output shares\" seem to be an intermediate computation step and are\n> not an output of the aggregator. Also, Figure 1 could be augmented to\n> show all the objects mentioned in the text, such as output shares and\n> public shares.\n\nhttps://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/\n",
       "createdAt": "2025-08-11T15:28:38Z",
-      "updatedAt": "2025-08-11T16:29:45Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-12T23:50:40Z",
+      "closedAt": "2025-09-12T23:50:40Z",
       "comments": [
         {
           "author": "tgeoghegan",
@@ -46192,6 +46194,150 @@
           "createdAt": "2025-09-09T14:01:23Z",
           "updatedAt": "2025-09-09T14:01:23Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 569,
+      "id": "PR_kwDOGKuqOc6oHvqS",
+      "title": "Improve mathematical notation",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/569",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Fixes #565. I ultimately decided to use `**` throughout for exponentiation.",
+      "createdAt": "2025-09-11T21:45:11Z",
+      "updatedAt": "2025-09-12T22:53:37Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "4570e6bd02074fd0af5b8db249ce6858ae8992e9",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/mathematical-notation",
+      "headRefOid": "306cbe0e41fdc9ac37b012b329b306ba805cd99f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6_2xRx",
+          "commit": {
+            "abbreviatedOid": "306cbe0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-12T20:59:46Z",
+          "updatedAt": "2025-09-12T20:59:47Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "Might we remove some of the prose now that we have this nice table?",
+              "createdAt": "2025-09-12T20:59:46Z",
+              "updatedAt": "2025-09-12T20:59:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6_2zDY",
+          "commit": {
+            "abbreviatedOid": "306cbe0"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-12T21:02:48Z",
+          "updatedAt": "2025-09-12T21:02:49Z",
+          "comments": [
+            {
+              "originalPosition": 4,
+              "body": "I view the preceding section as defining Python operators we use, while this subsection covers non-pseudocode formulas and the like.",
+              "createdAt": "2025-09-12T21:02:48Z",
+              "updatedAt": "2025-09-12T21:02:49Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 570,
+      "id": "PR_kwDOGKuqOc6oIhwM",
+      "title": "Overview: Disambiguate out shares from agg shares",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/570",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "Closes #552.\r\n\r\nComment from Crypto Panel:\r\n\r\n> Section 3: Figure 1 shows only \"aggregate shares\" while the text also\r\n> talks about \"output shares\". I find the terminology confusing because\r\n> the \"output shares\" seem to be an intermediate computation step and are\r\n> not an output of the aggregator. Also, Figure 1 could be augmented to\r\n> show all the objects mentioned in the text, such as output shares and\r\n> public shares.\r\n\r\nFigure 1 doesn't mention output shares on purpose. There we just want to show the high level flow of data that is actually transmitted between parties. Output share aren't transmitted and so aren't included.\r\n\r\nI think the confusion is that we don't clearly define \"output share\", and it's easy to conflate this with \"aggregate share\". (\"Output\" sounds like the output of the aggregation function.) To resolve this, I added a paragraph below the input shares -> aggregate shares -> aggregate result flow that is about preparation.\r\n\r\nI also that we have some awkward text that tries to explain the relationship between input, output, and aggregate shares. Replace this with a figure, which I think ought to directly address the comment.",
+      "createdAt": "2025-09-11T23:45:59Z",
+      "updatedAt": "2025-09-12T23:51:14Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "4570e6bd02074fd0af5b8db249ce6858ae8992e9",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/552",
+      "headRefOid": "d0dde3850d34ff440258279795779812a857bec2",
+      "closedAt": "2025-09-12T23:50:39Z",
+      "mergedAt": "2025-09-12T23:50:39Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "6d8eebc3fa6a0ab5b47e26dd367addac8147297b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc6_k_He",
+          "commit": {
+            "abbreviatedOid": "1d38756"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "This kind of thing is why I did that whole section in DAP about arity, so many it clear which objects get transformed into which others and where it's 1:1 or many:1.\r\n\r\nAnyway, I think the prose changes here are OK, but unfortunately I can't step into the shoes of a new reader and tell you whether or not it's confusing. I'm too used to VDAF by now.",
+          "createdAt": "2025-09-12T00:57:19Z",
+          "updatedAt": "2025-09-12T01:01:33Z",
+          "comments": [
+            {
+              "originalPosition": 71,
+              "body": "Perhaps clarify here that this \"overall flow\" is executed by each aggregator.",
+              "createdAt": "2025-09-12T00:57:19Z",
+              "updatedAt": "2025-09-12T01:01:33Z"
+            },
+            {
+              "originalPosition": 63,
+              "body": "`agg` seems unnecessarily terse since you have quite a lot of vertical space here. You could just say \"aggregate\".",
+              "createdAt": "2025-09-12T00:59:09Z",
+              "updatedAt": "2025-09-12T01:01:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc6_wGyP",
+          "commit": {
+            "abbreviatedOid": "1d38756"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-12T14:46:14Z",
+          "updatedAt": "2025-09-12T15:02:42Z",
+          "comments": [
+            {
+              "originalPosition": 23,
+              "body": "Since we are changing from \"the Client\" to \"a Client\":\r\n```suggestion\r\n1. To submit an individual measurement, a Client shards its measurement into\r\n```",
+              "createdAt": "2025-09-12T14:46:15Z",
+              "updatedAt": "2025-09-12T15:02:42Z"
+            }
+          ]
         }
       ]
     }
