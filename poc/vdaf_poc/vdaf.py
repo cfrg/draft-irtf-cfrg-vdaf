@@ -49,7 +49,7 @@ class Vdaf(
     """
 
     # Algorithm identifier for this VDAF, a 32-bit integer.
-    ID: int  # `[0, 2^32)`
+    ID: int  # `[0, 2**32)`
 
     # Length of the verification key shared by the Aggregators.
     VERIFY_KEY_SIZE: int
@@ -206,7 +206,7 @@ class Vdaf(
 
         Pre-conditions:
 
-            - `usage` in the range `[0, 2^16)`
+            - `usage` in the range `[0, 2**16)`
         """
         return format_dst(0, self.ID, usage) + ctx
 

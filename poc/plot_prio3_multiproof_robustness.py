@@ -48,7 +48,7 @@ def robustness(
 def sum_vec(field: type[NttField], num_proofs: int, length: int) -> float:
     '''
     Maximum probability of at least 1 in 1 billion attacks on Prio3SumVec
-    robustness succeeding after doing 2^80 random oracle queries.
+    robustness succeeding after doing 2**80 random oracle queries.
     '''
     bits = 1
     chunk_length = max(1, length**(1/2))
