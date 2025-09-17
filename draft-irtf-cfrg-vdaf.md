@@ -1738,12 +1738,12 @@ struct {
   MessageType type;
   select (Message.type) {
     case initialize:
-      opaque prep_share<0..2**32-1>;
+      opaque prep_share<0..4294967295>;
     case continue:
-      opaque prep_msg<0..2**32-1>;
-      opaque prep_share<0..2**32-1>;
+      opaque prep_msg<0..4294967295>;
+      opaque prep_share<0..4294967295>;
     case finish:
-      opaque prep_msg<0..2**32-1>;
+      opaque prep_msg<0..4294967295>;
   };
 } Message;
 ~~~
