@@ -1746,6 +1746,8 @@ struct {
       opaque prep_msg<0..4294967295>;
   };
 } Message;
+
+/* note that 4294967295 is 2 ** 32 - 1 */
 ~~~
 
 These messages trigger all transitions in the state machine in
