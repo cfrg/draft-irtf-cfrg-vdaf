@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-14T01:03:38.881753+00:00",
+  "timestamp": "2025-09-18T00:58:31.102525+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -46206,16 +46206,18 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-16"
+      ],
       "body": "Fixes #565. I ultimately decided to use `**` throughout for exponentiation.",
       "createdAt": "2025-09-11T21:45:11Z",
-      "updatedAt": "2025-09-12T22:53:37Z",
+      "updatedAt": "2025-09-17T22:29:10Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "4570e6bd02074fd0af5b8db249ce6858ae8992e9",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/mathematical-notation",
-      "headRefOid": "306cbe0e41fdc9ac37b012b329b306ba805cd99f",
+      "headRefOid": "2967797f2f30b242642d21105571758f488a5f39",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -46259,6 +46261,66 @@
               "body": "I view the preceding section as defining Python operators we use, while this subsection covers non-pseudocode formulas and the like.",
               "createdAt": "2025-09-12T21:02:48Z",
               "updatedAt": "2025-09-12T21:02:49Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7A2ah1",
+          "commit": {
+            "abbreviatedOid": "306cbe0"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-17T17:22:28Z",
+          "updatedAt": "2025-09-17T17:24:34Z",
+          "comments": [
+            {
+              "originalPosition": 85,
+              "body": "Argh, this arguably breaks with tls-presentation language. I lean towards not breaking convention here, since it might throw readers.\r\n\r\nOne way to resolve the ambiguity would be to just write `2^32 - 1` as `4294967295`. It's ugly, but at least we only need to do it here.",
+              "createdAt": "2025-09-17T17:22:29Z",
+              "updatedAt": "2025-09-17T17:24:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7A28_f",
+          "commit": {
+            "abbreviatedOid": "306cbe0"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-09-17T18:01:47Z",
+          "updatedAt": "2025-09-17T18:01:48Z",
+          "comments": [
+            {
+              "originalPosition": 85,
+              "body": "Yeah, I was thinking I might be able to get away with `2 ** 32 - 1` since the language definition doesn't define how the numbers are represented. Maybe that's not so great, given that the later examples are consistent about `^`. I can make that change.",
+              "createdAt": "2025-09-17T18:01:48Z",
+              "updatedAt": "2025-09-17T18:01:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7A3GY6",
+          "commit": {
+            "abbreviatedOid": "5930a22"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Maybe just add a parenthtical ",
+          "createdAt": "2025-09-17T18:14:07Z",
+          "updatedAt": "2025-09-17T18:14:11Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "Maybe add a paranthetical here telling the reader that `2 * 32 - 1 == 4294967295`.",
+              "createdAt": "2025-09-17T18:14:07Z",
+              "updatedAt": "2025-09-17T18:14:11Z"
             }
           ]
         }
