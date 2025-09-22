@@ -168,7 +168,7 @@ class NttField(Field):
 
 
 class Field64(NttField):
-    """The finite field GF(2^32 * 4294967295 + 1)."""
+    """The finite field GF(2**32 * 4294967295 + 1)."""
 
     MODULUS = 2**32 * 4294967295 + 1
     GEN_ORDER = 2**32
@@ -180,7 +180,7 @@ class Field64(NttField):
 
 
 class Field96(NttField):
-    """The finite field GF(2^64 * 4294966555 + 1)."""
+    """The finite field GF(2**64 * 4294966555 + 1)."""
 
     MODULUS = 2**64 * 4294966555 + 1
     GEN_ORDER = 2**64
@@ -192,7 +192,7 @@ class Field96(NttField):
 
 
 class Field128(NttField):
-    """The finite field GF(2^66 * 4611686018427387897 + 1)."""
+    """The finite field GF(2**66 * 4611686018427387897 + 1)."""
 
     MODULUS = 2**66 * 4611686018427387897 + 1
     GEN_ORDER = 2**66
@@ -204,7 +204,7 @@ class Field128(NttField):
 
 
 class Field255(Field):
-    """The finite field GF(2^255 - 19)."""
+    """The finite field GF(2**255 - 19)."""
 
     MODULUS = 2**255 - 19
     ENCODED_SIZE = 32

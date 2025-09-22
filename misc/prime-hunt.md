@@ -1,4 +1,4 @@
-We're looking for primes `p` for which `(p-1)` has a factor of `2^k` for `k` of
+We're looking for primes `p` for which `(p-1)` has a factor of `2**k` for `k` of
 at least `20`.
 
 Here's a sage script for finding them:

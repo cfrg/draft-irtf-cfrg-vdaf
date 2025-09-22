@@ -32,7 +32,7 @@ def shamir_shard(field: type[F],
     shares needed to unshard.
     '''
     # NOTE It would be more efficient to do "packed" Shamir by letting f(x) =
-    # meas + rand_1 * x + rand_2 * x^2 + ..., and so on and letting the shares
+    # meas + rand_1 * x + rand_2 * x**2 + ..., and so on and letting the shares
     # be f(0), f(1), ..., and so on. That is:
     #
     # coeffs = [meas]
