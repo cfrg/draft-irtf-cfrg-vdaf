@@ -239,6 +239,13 @@ informative:
     date: 2020
     target: https://web.archive.org/web/20221025174046/https://firefox-source-docs.mozilla.org/toolkit/components/telemetry/collection/origin.html
 
+  PANEL-FEEDBACK:
+    title: "Review of draft-irtf-cfrg-vdaf-15"
+    author:
+      - name: Julia Hesse
+    date: 2025
+    target: https://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/
+
   SML24:
     title: "A Complete Beginner Guide to the Number Theoretic Transform (NTT)"
     author:
@@ -439,6 +446,13 @@ Prio3 and Poplar1 constructions in particular.
 (RFC EDITOR: remove this section.)
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
+
+16:
+
+* Align document with guidelines for ASCII-safe mathematical notation from
+  {{Section 3.3.1.6 of ?I-D.draft-irtf-cfrg-cryptography-specification-02}}.
+
+* Address feedback from Crypto Review Panel {{PANEL-FEEDBACK}}.
 
 15:
 
@@ -6563,6 +6577,9 @@ provide the same level of generality as the original construction.
 The security considerations in {{security}} are based largely on the security
 analysis of {{DPRS23}}. Thanks to Hannah Davis and Mike Rosulek, who lent their
 time to developing definitions and security proofs.
+
+Thanks to Julia Hesse who provided feedback on behalf of the Crypto Review
+Panel.
 
 Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
