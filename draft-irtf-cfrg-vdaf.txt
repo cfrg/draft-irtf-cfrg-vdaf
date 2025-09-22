@@ -354,6 +354,14 @@ Table of Contents
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
 
+   16:
+
+   *  Align document with guidelines for ASCII-safe mathematical
+      notation from Section 3.3.1.6 of
+      [I-D.draft-irtf-cfrg-cryptography-specification-02].
+
+   *  Address feedback from Crypto Review Panel [PANEL-FEEDBACK].
+
    15:
 
    *  Simplify the ping-pong API for 2-party preparation by merging the
@@ -6486,6 +6494,13 @@ Table of Contents
               <https://link.springer.com/
               chapter/10.1007/978-3-030-56880-1_22>.
 
+   [I-D.draft-irtf-cfrg-cryptography-specification-02]
+              Sullivan, N. and C. A. Wood, "Guidelines for Writing
+              Cryptography Specifications", Work in Progress, Internet-
+              Draft, draft-irtf-cfrg-cryptography-specification-02, 7
+              July 2025, <https://datatracker.ietf.org/doc/html/draft-
+              irtf-cfrg-cryptography-specification-02>.
+
    [MPDST25]  Mouris, D., Patton, C., Davis, H., Sarkar, P., and N. G.
               Tsoutsos, "Mastic: Private Weighted Heavy-Hitters and
               Attribute-Based Metrics", Privacy Enhancing Technologies
@@ -6509,6 +6524,11 @@ Table of Contents
               https://firefox-source-
               docs.mozilla.org/toolkit/components/telemetry/collection/
               origin.html>.
+
+   [PANEL-FEEDBACK]
+              Hesse, J., "Review of draft-irtf-cfrg-vdaf-15", 2025,
+              <https://mailarchive.ietf.org/arch/msg/cfrg/
+              Omdhr4rO1pla_nlju2l7OJEGWPM/>.
 
    [SML24]    Satriawan, A., Mareta, R., and H. Lee, "A Complete
               Beginner Guide to the Number Theoretic Transform (NTT)",
@@ -6931,6 +6951,9 @@ Acknowledgments
    security analysis of [DPRS23].  Thanks to Hannah Davis and Mike
    Rosulek, who lent their time to developing definitions and security
    proofs.
+
+   Thanks to Julia Hesse who provided feedback on behalf of the Crypto
+   Review Panel.
 
    Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
    Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
