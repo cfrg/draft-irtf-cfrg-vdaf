@@ -359,7 +359,7 @@ Table of Contents
       notation from Section 3.3.1.6 of
       [I-D.draft-irtf-cfrg-cryptography-specification-02].
 
-   *  Address feedback from Crypto Review Panel [PANEL-FEEDBACK]
+   *  Address feedback from Crypto Review Panel [PANEL-FEEDBACK].
 
    15:
 
