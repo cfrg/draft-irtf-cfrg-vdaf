@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 16 March 2026                                              ISRG
+Expires: 26 March 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                       12 September 2025
+                                                       22 September 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 March 2026.
+   This Internet-Draft will expire on 26 March 2026.
 
 Copyright Notice
 
@@ -72,6 +72,7 @@ Table of Contents
    1.  Introduction
      1.1.  Change Log
    2.  Conventions
+     2.1.  Mathematical Notation
    3.  Overview
    4.  Definition of DAFs
      4.1.  Sharding
@@ -753,8 +754,9 @@ Table of Contents
 
    Finite field arithmetic overloads these operators; see Section 6.1.
 
-   Exponentiation is denoted by x ** y in Python, and also sometimes as
-   the more conventional x^y notation for exponentiation.
+   Exponentiation is denoted by x ** y in Python.
+
+   Bitwise exclusive or is denoted by x ^ y in Python.
 
    Type hints are used to define input and output types:
 
@@ -840,11 +842,11 @@ Table of Contents
       output values.
 
    *  to_be_bytes(x: int, len: int) -> bytes converts an integer x whose
-      value is in the range [0, 2^(8*len)) to a big-endian byte string
+      value is in the range [0, 2**(8*len)) to a big-endian byte string
       of length len.
 
    *  to_le_bytes(x: int, len: int) -> bytes converts an integer x whose
-      value is in the range [0, 2^(8*len)) to a little-endian byte
+      value is in the range [0, 2**(8*len)) to a little-endian byte
       string of length len.
 
    *  poly_eval(field: type[F], p: list[F], x: F) -> F returns the
@@ -874,6 +876,37 @@ Table of Contents
 
    *  zeros(len: int) -> bytes returns an array of bytes of the
       requested length (len).  Each element of the array is set to zero.
+
+2.1.  Mathematical Notation
+
+   The following symbols are used in mathematical notation.
+
+    +==========+================+====================================+
+    | ASCII    | Description    | Comment                            |
+    | glyph(s) |                |                                    |
+    +==========+================+====================================+
+    | +, -     | Addition /     | Needs to be constant time.  Used   |
+    |          | subtraction    | for addition and subtraction of    |
+    |          |                | field elements as well as numbers. |
+    +----------+----------------+------------------------------------+
+    | *        | Addition /     | Needs to be constant time.  Used   |
+    |          | subtraction    | for multiplication of field        |
+    |          |                | elements as well as numbers.       |
+    +----------+----------------+------------------------------------+
+    | **       | Exponentiation | Needs to be constant time.  Used   |
+    |          |                | for exponentiation of field        |
+    |          |                | elements as well as numbers.       |
+    +----------+----------------+------------------------------------+
+    | /        | Division       | Needs to be constant time.  Used   |
+    |          |                | for division of field elements     |
+    |          |                | (i.e. multiplication by inverse)   |
+    |          |                | as well as numbers.                |
+    +----------+----------------+------------------------------------+
+    | ||       | Concatenation  | Used for concatenation of byte     |
+    |          |                | strings and bit strings.           |
+    +----------+----------------+------------------------------------+
+
+               Table 1: Mathematical Operators and Symbols
 
 3.  Overview
 
@@ -1029,7 +1062,7 @@ Table of Contents
            | Parameter   | Description                         |
            +=============+=====================================+
            | ID: int     | Algorithm identifier for this DAF,  |
-           |             | in the range [0, 2^32).             |
+           |             | in the range [0, 2**32).            |
            +-------------+-------------------------------------+
            | SHARES: int | Number of input shares into which   |
            |             | each measurement is sharded.        |
@@ -1055,7 +1088,7 @@ Table of Contents
            | AggResult   | Type of the aggregate result.       |
            +-------------+-------------------------------------+
 
-                Table 1: Constants and types defined by each
+                Table 2: Constants and types defined by each
                                concrete DAF.
 
    The types in this table define the inputs and outputs of DAF methods
@@ -1357,14 +1390,14 @@ Table of Contents
    cause the Collector to compute a malformed aggregate result.
 
    The remainder of this section defines the VDAF interface, denoted by
-   Vdaf.  The attributes listed in Table 2 are defined by each concrete
+   Vdaf.  The attributes listed in Table 3 are defined by each concrete
    VDAF.
 
          +==================+===================================+
          | Parameter        | Description                       |
          +==================+===================================+
          | ID: int          | Algorithm identifier for this     |
-         |                  | VDAF, in the range [0, 2^32).     |
+         |                  | VDAF, in the range [0, 2**32).    |
          +------------------+-----------------------------------+
          | SHARES: int      | Number of input shares into which |
          |                  | each measurement is sharded.      |
@@ -1402,7 +1435,7 @@ Table of Contents
          | PrepMessage      | Type of each prep message.        |
          +------------------+-----------------------------------+
 
-               Table 2: Constants and types defined by each
+               Table 3: Constants and types defined by each
                               concrete VDAF.
 
    Some of the types in the table above need to be written to the
@@ -1413,7 +1446,7 @@ Table of Contents
 
    Each VDAF is identified by a unique 32-bit integer, denoted ID.
    Identifiers for each VDAF specified in this document are defined in
-   Table 18.  The following method is used by both Prio3 and Poplar1:
+   Table 19.  The following method is used by both Prio3 and Poplar1:
 
    def domain_separation_tag(self, usage: int, ctx: bytes) -> bytes:
        """
@@ -1422,7 +1455,7 @@ Table of Contents
 
        Pre-conditions:
 
-           - `usage` in the range `[0, 2^16)`
+           - `usage` in the range `[0, 2**16)`
        """
        return format_dst(0, self.ID, usage) + ctx
 
@@ -1781,14 +1814,16 @@ Table of Contents
      MessageType type;
      select (Message.type) {
        case initialize:
-         opaque prep_share<0..2^32-1>;
+         opaque prep_share<0..4294967295>;
        case continue:
-         opaque prep_msg<0..2^32-1>;
-         opaque prep_share<0..2^32-1>;
+         opaque prep_msg<0..4294967295>;
+         opaque prep_share<0..4294967295>;
        case finish:
-         opaque prep_msg<0..2^32-1>;
+         opaque prep_msg<0..4294967295>;
      };
    } Message;
+
+   /* note that 4294967295 is 2 ** 32 - 1 */
 
    These messages trigger all transitions in the state machine in
    Figure 8, except for the Leader's initial transition.  The Leader's
@@ -2189,31 +2224,31 @@ Table of Contents
 
    *  GEN_ORDER: int is the order of the multiplicative subgroup
       generated by Field.gen().  This is the smallest positive integer
-      for which Field.gen()**Field.GEN_ORDER == Field(1).
+      for which Field.gen() ** Field.GEN_ORDER == Field(1).
 
    The size of the subgroup dictates how large interpolated polynomials
    can be.  It is RECOMMENDED that a generator is chosen with order at
-   least 2^20.
+   least 2**20.
 
 6.1.3.  Parameters
 
-   Table 3 defines finite fields used in the remainder of this document.
+   Table 4 defines finite fields used in the remainder of this document.
 
-   +==============+================+=======================+==========+
-   | Parameter    | Field64        | Field128              | Field255 |
-   +==============+================+=======================+==========+
-   | MODULUS      | 2^32 *         | 2^66 *                | 2^255 -  |
-   |              | 4294967295 + 1 | 4611686018427387897 + | 19       |
-   |              |                | 1                     |          |
-   +--------------+----------------+-----------------------+----------+
-   | ENCODED_SIZE | 8              | 16                    | 32       |
-   +--------------+----------------+-----------------------+----------+
-   | Generator    | 7^4294967295   | 7^4611686018427387897 | n/a      |
-   +--------------+----------------+-----------------------+----------+
-   | GEN_ORDER    | 2^32           | 2^66                  | n/a      |
-   +--------------+----------------+-----------------------+----------+
+   +==============+================+========================+==========+
+   | Parameter    | Field64        | Field128               | Field255 |
+   +==============+================+========================+==========+
+   | MODULUS      | 2**32 *        | 2**66 *                | 2**255 - |
+   |              | 4294967295 +   | 4611686018427387897 +  | 19       |
+   |              | 1              | 1                      |          |
+   +--------------+----------------+------------------------+----------+
+   | ENCODED_SIZE | 8              | 16                     | 32       |
+   +--------------+----------------+------------------------+----------+
+   | Generator    | 7**4294967295  | 7**4611686018427387897 | n/a      |
+   +--------------+----------------+------------------------+----------+
+   | GEN_ORDER    | 2**32          | 2**66                  | n/a      |
+   +--------------+----------------+------------------------+----------+
 
-     Table 3: Parameters for the finite fields used in this document.
+      Table 4: Parameters for the finite fields used in this document.
 
 6.2.  Extendable Output Functions (XOFs)
 
@@ -2454,9 +2489,9 @@ Table of Contents
 
        Pre-conditions:
 
-           - `algo_class` in the range `[0, 2^8)`
-           - `algo` in the range `[0, 2^32)`
-           - `usage` in the range `[0, 2^16)`
+           - `algo_class` in the range `[0, 2**8)`
+           - `algo` in the range `[0, 2**32)`
+           - `usage` in the range `[0, 2**16)`
        """
        return concat([
            to_be_bytes(VERSION, 1),
@@ -2528,7 +2563,7 @@ Table of Contents
    terms of an object flp of type Flp that specifies the set of methods
    and parameters a concrete FLP must provide.
 
-   The parameters provided by a concrete FLP are listed in Table 4.  A
+   The parameters provided by a concrete FLP are listed in Table 5.  A
    concrete FLP specifies the following algorithms for generating and
    verifying proofs of validity (encoding is described below in
    Section 7.1.1):
@@ -2675,7 +2710,7 @@ Table of Contents
       |                 | (Section 6.1).                           |
       +-----------------+------------------------------------------+
 
-                         Table 4: FLP parameters.
+                         Table 5: FLP parameters.
 
 7.1.1.  Encoding the Input
 
@@ -2756,10 +2791,10 @@ Table of Contents
 
    This section specifies Prio3, an implementation of the Vdaf interface
    defined in Section 5.  The parameters and types required by the Vdaf
-   interface are defined in Table 5.  The methods required for sharding,
+   interface are defined in Table 6.  The methods required for sharding,
    preparation, aggregation, and unsharding are described in the
    remaining subsections.  These methods refer to constants enumerated
-   in Table 6.
+   in Table 7.
 
     +=================+==============================================+
     | Parameter       | Value                                        |
@@ -2803,7 +2838,7 @@ Table of Contents
     | PrepMessage     | Optional[bytes]                              |
     +-----------------+----------------------------------------------+
 
-                      Table 5: Parameters for Prio3.
+                      Table 6: Parameters for Prio3.
 
                   +=============================+=======+
                   | Variable                    | Value |
@@ -2823,7 +2858,7 @@ Table of Contents
                   | USAGE_JOINT_RAND_PART: int  | 7     |
                   +-----------------------------+-------+
 
-                     Table 6: Constants used by Prio3.
+                     Table 7: Constants used by Prio3.
 
 7.2.1.  Sharding
 
@@ -3495,7 +3530,7 @@ Table of Contents
         | AggResult      | As defined by valid.                  |
         +----------------+---------------------------------------+
 
-             Table 7: FLP parameters for a validity circuit.
+             Table 8: FLP parameters for a validity circuit.
 
 7.3.1.  Overview
 
@@ -3575,7 +3610,7 @@ Table of Contents
    same idea.  For example, in Section 7.4.2, the validity circuit uses
    the following sub-circuit multiple times:
 
-   Range2(x) = x * (x-1) = x^2 - x
+   Range2(x) = x * (x-1) = x**2 - x
 
    (This is the same functionality computed by the example circuit C
    above.)  Here again one can interpolate the lowest degree polynomial
@@ -3610,12 +3645,12 @@ Table of Contents
    details).  A much shorter proof can be constructed for the following
    randomized circuit:
 
-   C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
+   C(x, r) = r * Range2(x[0]) + ... + r**N * Range2(x[N-1])
 
    (Note that this is a special case of [BBCGGI19], Theorem 5.2.)  Here
    x is the length-N input and r is a random field element.  The gadget
    circuit Range2 is the "range-check" polynomial described above, i.e.,
-   Range2(x) = x^2 - x.  The idea is that, if x is valid, i.e., each
+   Range2(x) = x**2 - x.  The idea is that, if x is valid, i.e., each
    x[j] is in the range [0, 2), then the circuit will evaluate to zero
    regardless of the value of r; but if some x[j] is not in the range
    [0, 2), then the output will be non-zero with high probability.
@@ -3626,10 +3661,10 @@ Table of Contents
    flexibility for designing circuits by allowing multiple, non-affine
    sub-circuits.  For example, the following circuit is allowed:
 
-   C(x, r) = r * Range2(x[0]) + ... + r^L * Range2(x[L-1]) + \
-               r^(L+1) * Range3(x[L]) + ... + r^N * Range3(x[N-1])
+   C(x, r) = r * Range2(x[0]) + ... + r**L * Range2(x[L-1]) + \
+               r**(L+1) * Range3(x[L]) + ... + r**N * Range3(x[N-1])
 
-   where Range3(x) = x^3 - 3x^2 + 2x.  This circuit checks that the
+   where Range3(x) = x**3 - 3x**2 + 2x.  This circuit checks that the
    first L inputs are in the range [0, 2) and the last N-L inputs are in
    the range [0, 3).  The same circuit can be expressed using a simpler
    gadget, namely multiplication, but the resulting proof would be
@@ -3678,7 +3713,7 @@ Table of Contents
    |                         | (Section 6.1.2)                        |
    +-------------------------+----------------------------------------+
 
-                  Table 8: Validity circuit parameters.
+                  Table 9: Validity circuit parameters.
 
    The circuit is invoked with the following method:
 
@@ -3847,7 +3882,7 @@ Table of Contents
 
            # Compute the wire polynomials for this gadget. For each `j`,
            # find the lowest degree polynomial `wire_poly` for which
-           # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
+           # `wire_poly(alpha**k) = g.wires[j][k]` for all `k`. Note that
            # each `g.wires[j][0]` is set to the seed of wire `j`, which
            # is included in the prove randomness.
            #
@@ -3863,7 +3898,7 @@ Table of Contents
 
            # Compute the gadget polynomial by evaluating the gadget on
            # the wire polynomials. By construction we have that
-           # `gadget_poly(alpha^k)` is the `k`-th output.
+           # `gadget_poly(alpha**k)` is the `k`-th output.
            gadget_poly = g.eval_poly(self.field, wire_polys)
 
            for j in range(g.ARITY):
@@ -4030,14 +4065,14 @@ Table of Contents
                 +===========+=============================+
                 | Parameter | Value                       |
                 +===========+=============================+
-                | field     | Field64 (Table 3)           |
+                | field     | Field64 (Table 4)           |
                 +-----------+-----------------------------+
                 | Valid     | Count(field) (this section) |
                 +-----------+-----------------------------+
                 | PROOFS    | 1                           |
                 +-----------+-----------------------------+
 
-                    Table 9: Parameters for Prio3Count.
+                    Table 10: Parameters for Prio3Count.
 
    The first variant of Prio3 is for a simple counter: each measurement
    is either one or zero and the aggregate result is the sum of the
@@ -4082,14 +4117,14 @@ Table of Contents
         +===========+============================================+
         | Parameter | Value                                      |
         +===========+============================================+
-        | field     | Field64 (Table 3)                          |
+        | field     | Field64 (Table 4)                          |
         +-----------+--------------------------------------------+
         | Valid     | Sum(field, max_measurement) (this section) |
         +-----------+--------------------------------------------+
         | PROOFS    | 1                                          |
         +-----------+--------------------------------------------+
 
-                    Table 10: Parameters for Prio3Sum.
+                    Table 11: Parameters for Prio3Sum.
 
    The next variant of Prio3 supports summing of integers in a pre-
    determined range.  Each measurement is an integer in the range [0,
@@ -4103,27 +4138,27 @@ Table of Contents
    *  bits = max_measurement.bit_length(), the number of bits needed to
       encode the largest valid measurement
 
-   *  offset = 2^bits - 1 - max_measurement
+   *  offset = 2 ** bits - 1 - max_measurement
 
    The first bit-encoded integer is the measurement itself.  Note that
-   only measurements between 0 and 2^bits - 1 can be encoded this way
+   only measurements between 0 and 2**bits - 1 can be encoded this way
    with as many bits.  The second bit-encoded integer is the sum of the
    measurement and offset.  Observe that this sum can only be encoded
-   this way if it is between 0 and 2^bits - 1, which implies that the
+   this way if it is between 0 and 2**bits - 1, which implies that the
    measurement is between -offset and max_measurement.
 
    The circuit first checks that each entry of both bit vectors is a one
    or a zero.  It then decodes both the measurement and the offset
    measurement, and subtracts the offset from the latter.  It then
    checks if these two values are equal.  Since both the measurement and
-   the measurement plus offset are in the same range of [0, 2^bits),
+   the measurement plus offset are in the same range of [0, 2**bits),
    this means that the measurement itself is between 0 and
    max_measurement.
 
    The circuit uses the polynomial-evaluation gadget PolyEval specified
-   in Appendix A.2.  The polynomial is p(x) = x^2 - x, which is equal to
-   0 if and only if x is in the range [0, 2).  The complete circuit is
-   specified below:
+   in Appendix A.2.  The polynomial is p(x) = x**2 - x, which is equal
+   to 0 if and only if x is in the range [0, 2).  The complete circuit
+   is specified below:
 
    Note that decoding a sequence of bits into an integer is a linear
    operation, specifically, a linear combination with a sequence of
@@ -4186,7 +4221,7 @@ Table of Contents
                +===========+==============================+
                | Parameter | Value                        |
                +===========+==============================+
-               | field     | Field128 (Table 3)           |
+               | field     | Field128 (Table 4)           |
                +-----------+------------------------------+
                | Valid     | SumVec(field, length, bits,  |
                |           | chunk_length) (this section) |
@@ -4194,13 +4229,13 @@ Table of Contents
                | PROOFS    | 1                            |
                +-----------+------------------------------+
 
-                  Table 11: Parameters for Prio3SumVec.
+                  Table 12: Parameters for Prio3SumVec.
 
    This instance of Prio3 supports summing vectors of integers.  It has
    three parameters: length, bits, and chunk_length.  Each measurement
    is a vector of positive integers with length equal to the length
    parameter.  Each element of the measurement is an integer in the
-   range [0, 2^bits).  It is RECOMMENDED to set chunk_length to an
+   range [0, 2**bits).  It is RECOMMENDED to set chunk_length to an
    integer near the square root of length * bits (see Section 7.4.3.1).
 
    The circuit is denoted SumVec.  Each measurement is encoded as a
@@ -4251,7 +4286,7 @@ Table of Contents
                     chunk_length: int):
            """
            Instantiate the `SumVec` circuit for measurements with
-           `length` elements, each in the range `[0, 2^bits)`.
+           `length` elements, each in the range `[0, 2**bits)`.
            """
            self.field = field
            self.length = length
@@ -4344,7 +4379,7 @@ Table of Contents
    +===========+=======================================================+
    | Parameter | Value                                                 |
    +===========+=======================================================+
-   | field     | Field128 (Table 3)                                    |
+   | field     | Field128 (Table 4)                                    |
    +-----------+-------------------------------------------------------+
    | Valid     | Histogram(field, length,                              |
    |           | chunk_length) (this section)                          |
@@ -4352,7 +4387,7 @@ Table of Contents
    | PROOFS    | 1                                                     |
    +-----------+-------------------------------------------------------+
 
-                  Table 12: Parameters for Prio3Histogram.
+                  Table 13: Parameters for Prio3Histogram.
 
    This variant of Prio3 allows for estimating the distribution of some
    quantity by computing a simple histogram.  Each measurement
@@ -4468,7 +4503,7 @@ Table of Contents
          +===========+==========================================+
          | Parameter | Value                                    |
          +===========+==========================================+
-         | field     | Field128 (Table 3)                       |
+         | field     | Field128 (Table 4)                       |
          +-----------+------------------------------------------+
          | Valid     | MultihotCountVec(field, length,          |
          |           | max_weight, chunk_length) (this section) |
@@ -4476,7 +4511,7 @@ Table of Contents
          | PROOFS    | 1                                        |
          +-----------+------------------------------------------+
 
-             Table 13: Parameters for Prio3MultihotCountVec.
+             Table 14: Parameters for Prio3MultihotCountVec.
 
    For this instance of Prio3, each measurement is a vector of Boolean
    values, where the number of True values is bounded.  This provides a
@@ -4497,7 +4532,7 @@ Table of Contents
 
    *  bits_for_weight = max_weight.bit_length()
 
-   *  offset = 2^bits_for_weight - 1 - max_weight
+   *  offset = 2 ** bits_for_weight - 1 - max_weight
 
    The Client reports the weight of the count vector by adding offset to
    it and bit-encoding the result.  Observe that only a weight of at
@@ -4700,7 +4735,7 @@ Table of Contents
 
 8.1.  Incremental Distributed Point Functions (IDPFs)
 
-   An IDPF is defined over a domain of size 2^BITS, where BITS is a
+   An IDPF is defined over a domain of size 2**BITS, where BITS is a
    constant.  Indices into the IDPF tree are bit strings.  (In Poplar1,
    each Client's bit string is an index; see Section 8.1.1 for details.)
    The Client specifies an index alpha and a vector of values beta, one
@@ -4719,7 +4754,7 @@ Table of Contents
    Section 9.5 for details.)
 
    A concrete IDPF defines the types and parameters enumerated in
-   Table 14.  In the remainder, Output is used as shorthand for the type
+   Table 15.  In the remainder, Output is used as shorthand for the type
    list[list[FieldInner]] | list[list[FieldLeaf]].  (This type denotes
    either a vector of inner node field elements or leaf node field
    elements.)  The scheme is comprised of the following algorithms:
@@ -4838,7 +4873,7 @@ Table of Contents
     | FieldVec    | Alias of list[FieldInner] | list[FieldLeaf].      |
     +-------------+---------------------------------------------------+
 
-         Table 14: Constants and types defined by a concrete IDPF.
+         Table 15: Constants and types defined by a concrete IDPF.
 
 8.1.1.  Encoding Inputs as Indices
 
@@ -4874,10 +4909,10 @@ Table of Contents
    implementation of Section 8.3 with SHARES == 2 and VALUE_LEN == 2 and
    XofTurboShake128 as specified in Section 6.2.1.  The associated
    constants and types required by the Vdaf interface are defined in
-   Table 15.  The methods required for sharding, preparation,
+   Table 16.  The methods required for sharding, preparation,
    aggregation, and unsharding are described in the remaining
    subsections.  These methods make use of constants defined in
-   Table 16.
+   Table 17.
 
        +=================+========================================+
        | Parameter       | Value                                  |
@@ -4918,7 +4953,7 @@ Table of Contents
        | PrepMessage     | Optional[FieldVec]                     |
        +-----------------+----------------------------------------+
 
-                  Table 15: VDAF parameters for Poplar1.
+                  Table 16: VDAF parameters for Poplar1.
 
                     +========================+=======+
                     | Variable               | Value |
@@ -4932,7 +4967,7 @@ Table of Contents
                     | USAGE_VERIFY_RAND: int | 4     |
                     +------------------------+-------+
 
-                       Table 16: Constants used by
+                       Table 17: Constants used by
                                  Poplar1.
 
 8.2.1.  Sharding
@@ -4954,7 +4989,7 @@ Table of Contents
    computes
 
        A = -2*a + k
-       B = a^2 + b - k*a + c
+       B = a**2 + b - k*a + c
 
    and sends additive shares of a, b, c, A and B to each of the
    Aggregators.  These help the Aggregators evaluate the sketch during
@@ -5539,7 +5574,7 @@ Table of Contents
    leftover_bits = (level + 1) % 8
    if leftover_bits > 0:
        for bit_index in range(8 - leftover_bits, 8):
-           last_byte_mask |= 1 << bit_index;
+           last_byte_mask |= 1 << bit_index
        last_byte_mask ^= 255
 
    bytes_per_prefix = ((level + 1) + 7) // 8
@@ -5567,7 +5602,7 @@ Table of Contents
 
    This section specifies a concrete IDPF suitable for instantiating
    Poplar1.  The constant and type definitions required by the Idpf
-   interface are given in Table 17.
+   interface are given in Table 18.
 
    The IDPF requires an XOF for deriving the output shares, as well as a
    variety of other artifacts used internally.  For performance reasons,
@@ -5587,12 +5622,12 @@ Table of Contents
             +------------+-----------------------------------+
             | KEY_SIZE   | xof.SEED_SIZE                     |
             +------------+-----------------------------------+
-            | FieldInner | Field64 (Table 3)                 |
+            | FieldInner | Field64 (Table 4)                 |
             +------------+-----------------------------------+
-            | FieldLeaf  | Field255 (Table 3)                |
+            | FieldLeaf  | Field255 (Table 4)                |
             +------------+-----------------------------------+
 
-               Table 17: Constants and type definitions for
+               Table 18: Constants and type definitions for
                             the concrete IDPF.
 
 8.3.1.  Overview
@@ -5609,7 +5644,7 @@ Table of Contents
 
    The IDPF construction now boils down to secret-sharing the values at
    each node of that tree in an efficient way.  Note that explicitly
-   representing the tree requires O(2^BITS) space, so the generator
+   representing the tree requires O(2**BITS) space, so the generator
    cannot just compute additive shares of it and send them to the two
    evaluators.  Instead, the evaluators will re-generate shares of
    values at selected nodes of the tree using a XOF (Section 6.2).
@@ -6168,7 +6203,7 @@ Table of Contents
    general the soundness error of the FLP is given by the following
    formula:
 
-   (circuit_soundness + flp_soundness)^PROOFS
+   (circuit_soundness + flp_soundness)**PROOFS
 
    where:
 
@@ -6179,7 +6214,7 @@ Table of Contents
       ([BBCGGI19], Theorem 4.3)
 
    For circuits involving joint randomness, one should aim for the
-   soundness error to be close to 2^-128 in order to mitigate offline
+   soundness error to be close to 2**-128 in order to mitigate offline
    attacks.  Such circuits MUST use Field128 with at least one proof or
    Field64 with at least three proofs.  Depending on the circuit,
    Field64 with two proofs might have significantly lower soundness than
@@ -6316,7 +6351,7 @@ Table of Contents
      | 0xFFFFFFFF    | Use                   |      |               |
      +---------------+-----------------------+------+---------------+
 
-          Table 18: Verifiable Distributed Aggregation Function
+          Table 19: Verifiable Distributed Aggregation Function
                            Identifiers Registry
 
    (RFC EDITOR: Please replace "RFC XXXX" above with the RFC number
@@ -6850,7 +6885,7 @@ C.1.3.  Prio3SumVec
    chunk_length:  a parameter of the ParallelSum gadget, an integer.
 
    bits:  the bit length of each element of the vector, an integer.
-      Each element is in the range [0, 2^bits).
+      Each element is in the range [0, 2**bits).
 
 C.1.4.  Prio3Histogram
 

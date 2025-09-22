@@ -19,11 +19,11 @@ servers to detect if a malicious or misconfigured client submitted an invalid
 measurement. Two concrete VDAFs are specified, one for general-purpose
 aggregation (Prio3) and another for heavy hitters (Poplar1). 
     " name="description">
-<meta content="xml2rfc 3.30.1" name="generator">
+<meta content="xml2rfc 3.30.2" name="generator">
 <meta content="Internet-Draft" name="keyword">
 <meta content="draft-irtf-cfrg-vdaf-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.30.1
+  xml2rfc 3.30.2
     Python 3.12.11
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
@@ -1058,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 16 March 2026</td>
+<td class="center">Expires 26 March 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-12" class="published">12 September 2025</time>
+<time datetime="2025-09-22" class="published">22 September 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-03-16">16 March 2026</time></dd>
+<dd class="expires"><time datetime="2026-03-26">26 March 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 16 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 26 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1175,7 +1175,12 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
-            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions" class="internal xref">Conventions</a></p>
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions" class="internal xref">Conventions</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1" class="keepWithNext"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-mathematical-notation" class="internal xref">Mathematical Notation</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
             <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-overview" class="internal xref">Overview</a></p>
@@ -2178,143 +2183,193 @@ operator, <code>x // y</code>, which is short for <code>floor(x / y)</code>.<a h
 </li>
       </ul>
 <p id="section-2-6">Finite field arithmetic overloads these operators; see <a href="#field" class="auto internal xref">Section 6.1</a>.<a href="#section-2-6" class="pilcrow">¶</a></p>
-<p id="section-2-7">Exponentiation is denoted by <code>x ** y</code> in Python, and also sometimes as the more
-conventional <code>x^y</code> notation for exponentiation.<a href="#section-2-7" class="pilcrow">¶</a></p>
-<p id="section-2-8">Type hints are used to define input and output types:<a href="#section-2-8" class="pilcrow">¶</a></p>
+<p id="section-2-7">Exponentiation is denoted by <code>x ** y</code> in Python.<a href="#section-2-7" class="pilcrow">¶</a></p>
+<p id="section-2-8">Bitwise exclusive or is denoted by <code>x ^ y</code> in Python.<a href="#section-2-8" class="pilcrow">¶</a></p>
+<p id="section-2-9">Type hints are used to define input and output types:<a href="#section-2-9" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2-9.1">
-          <p id="section-2-9.1.1">The type variable <code>F</code> is used in signatures to signify any type that is a
-subclass of <code>Field</code> (<a href="#field" class="auto internal xref">Section 6.1</a>).<a href="#section-2-9.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-2-10.1">
+          <p id="section-2-10.1.1">The type variable <code>F</code> is used in signatures to signify any type that is a
+subclass of <code>Field</code> (<a href="#field" class="auto internal xref">Section 6.1</a>).<a href="#section-2-10.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-9.2">
-          <p id="section-2-9.2.1"><code>bytes</code> is a byte string.<a href="#section-2-9.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-10.2">
+          <p id="section-2-10.2.1"><code>bytes</code> is a byte string.<a href="#section-2-10.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-9.3">
-          <p id="section-2-9.3.1"><code>int</code> is an integer.<a href="#section-2-9.3.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-10.3">
+          <p id="section-2-10.3.1"><code>int</code> is an integer.<a href="#section-2-10.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-9.4">
-          <p id="section-2-9.4.1"><code>Generic</code> is used in class definitions to explicitly declare type variables
-of generic classes.<a href="#section-2-9.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-10.4">
+          <p id="section-2-10.4.1"><code>Generic</code> is used in class definitions to explicitly declare type variables
+of generic classes.<a href="#section-2-10.4.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-9.5">
-          <p id="section-2-9.5.1"><code>Any</code> is the universal supertype, which admits values of any type.<a href="#section-2-9.5.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-10.5">
+          <p id="section-2-10.5.1"><code>Any</code> is the universal supertype, which admits values of any type.<a href="#section-2-10.5.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-9.6">
-          <p id="section-2-9.6.1"><code>Optional[T]</code> is shorthand for <code>T | None</code>. Its value may be <code>None</code> or have
-type <code>T</code>.<a href="#section-2-9.6.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-10.6">
+          <p id="section-2-10.6.1"><code>Optional[T]</code> is shorthand for <code>T | None</code>. Its value may be <code>None</code> or have
+type <code>T</code>.<a href="#section-2-10.6.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-9.7">
-          <p id="section-2-9.7.1"><code>Self</code> represents the containing class of the method definition in which it
-appears.<a href="#section-2-9.7.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-10.7">
+          <p id="section-2-10.7.1"><code>Self</code> represents the containing class of the method definition in which it
+appears.<a href="#section-2-10.7.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-9.8">
-          <p id="section-2-9.8.1"><code>Sequence[T]</code> is either a list or tuple of values of type <code>T</code>.<a href="#section-2-9.8.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-10.8">
+          <p id="section-2-10.8.1"><code>Sequence[T]</code> is either a list or tuple of values of type <code>T</code>.<a href="#section-2-10.8.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-2-10">This document defines several byte-string constants. When comprised of printable
+<p id="section-2-11">This document defines several byte-string constants. When comprised of printable
 ASCII characters, they are written as Python 3 byte-string literals (e.g.,
-<code>b'some constant string'</code>).<a href="#section-2-10" class="pilcrow">¶</a></p>
-<p id="section-2-11">A global constant <code>VERSION</code> of type <code>int</code> is defined, which algorithms are free
-to use as desired. Its value <span class="bcp14">SHALL</span> be <code>12</code>.<a href="#section-2-11" class="pilcrow">¶</a></p>
-<p id="section-2-12">This document describes algorithms for multi-party computations in which the
+<code>b'some constant string'</code>).<a href="#section-2-11" class="pilcrow">¶</a></p>
+<p id="section-2-12">A global constant <code>VERSION</code> of type <code>int</code> is defined, which algorithms are free
+to use as desired. Its value <span class="bcp14">SHALL</span> be <code>12</code>.<a href="#section-2-12" class="pilcrow">¶</a></p>
+<p id="section-2-13">This document describes algorithms for multi-party computations in which the
 parties typically communicate over a network. Wherever a quantity is defined
 that must be transmitted from one party to another, this document prescribes
-a particular encoding of that quantity as a byte string.<a href="#section-2-12" class="pilcrow">¶</a></p>
-<p id="section-2-13">Some common functionalities:<a href="#section-2-13" class="pilcrow">¶</a></p>
+a particular encoding of that quantity as a byte string.<a href="#section-2-13" class="pilcrow">¶</a></p>
+<p id="section-2-14">Some common functionalities:<a href="#section-2-14" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2-14.1">
-          <p id="section-2-14.1.1"><code>additive_secret_share(x: list[F], num_shares: int, field: type[F]) -&gt;
+<li class="normal" id="section-2-15.1">
+          <p id="section-2-15.1.1"><code>additive_secret_share(x: list[F], num_shares: int, field: type[F]) -&gt;
 list[list[F]]</code> takes a vector <code>x</code> of field elements and returns <code>num_shares</code>
 vectors of length <code>len(x)</code> such that they all add up to the input vector.
-Note that this function is not used normatively in this document.<a href="#section-2-14.1.1" class="pilcrow">¶</a></p>
+Note that this function is not used normatively in this document.<a href="#section-2-15.1.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.2">
-          <p id="section-2-14.2.1"><code>byte(x: int) -&gt; bytes</code> returns the representation of the integer <code>x</code> in the
-range <code>[0, 256)</code> as a single-byte byte string.<a href="#section-2-14.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.2">
+          <p id="section-2-15.2.1"><code>byte(x: int) -&gt; bytes</code> returns the representation of the integer <code>x</code> in the
+range <code>[0, 256)</code> as a single-byte byte string.<a href="#section-2-15.2.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.3">
-          <p id="section-2-14.3.1"><code>cast(typ: type[T], x: object) -&gt; T</code> returns the input value unchanged.
+        <li class="normal" id="section-2-15.3">
+          <p id="section-2-15.3.1"><code>cast(typ: type[T], x: object) -&gt; T</code> returns the input value unchanged.
 This is only present to assist with static analysis of the Python code.
 Type checkers will ignore the inferred type of the input value, and assume
-the output value has the given type.<a href="#section-2-14.3.1" class="pilcrow">¶</a></p>
+the output value has the given type.<a href="#section-2-15.3.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.4">
-          <p id="section-2-14.4.1"><code>concat(parts: list[bytes]) -&gt; bytes</code> returns the concatenation of the input
-byte strings, i.e., <code>parts[0] + ... + parts[len(parts)-1]</code>.<a href="#section-2-14.4.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.4">
+          <p id="section-2-15.4.1"><code>concat(parts: list[bytes]) -&gt; bytes</code> returns the concatenation of the input
+byte strings, i.e., <code>parts[0] + ... + parts[len(parts)-1]</code>.<a href="#section-2-15.4.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.5">
-          <p id="section-2-14.5.1"><code>from_be_bytes(encoded: bytes) -&gt; int</code> decodes a big-endian byte string,
+        <li class="normal" id="section-2-15.5">
+          <p id="section-2-15.5.1"><code>from_be_bytes(encoded: bytes) -&gt; int</code> decodes a big-endian byte string,
 i.e., returns the integer <code>x</code> for which <code>to_be_bytes(x, len(encoded)) ==
-encoded</code>.<a href="#section-2-14.5.1" class="pilcrow">¶</a></p>
+encoded</code>.<a href="#section-2-15.5.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.6">
-          <p id="section-2-14.6.1"><code>from_le_bytes(encoded: bytes) -&gt; int</code> decodes a little-endian byte string,
+        <li class="normal" id="section-2-15.6">
+          <p id="section-2-15.6.1"><code>from_le_bytes(encoded: bytes) -&gt; int</code> decodes a little-endian byte string,
 i.e., returns the integer <code>x</code> for which <code>to_le_bytes(x, len(encoded)) ==
-encoded</code>.<a href="#section-2-14.6.1" class="pilcrow">¶</a></p>
+encoded</code>.<a href="#section-2-15.6.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.7">
-          <p id="section-2-14.7.1"><code>front(len: int, x: list[Any]) -&gt; tuple[list[Any], list[Any]]</code> splits <code>x</code>
+        <li class="normal" id="section-2-15.7">
+          <p id="section-2-15.7.1"><code>front(len: int, x: list[Any]) -&gt; tuple[list[Any], list[Any]]</code> splits <code>x</code>
 into two vectors, where the first vector is made up of the first <code>len</code>
 elements of <code>x</code> and the second is made up of the remaining elements. This
-function is equivalent to <code>(x[:len], x[len:])</code>.<a href="#section-2-14.7.1" class="pilcrow">¶</a></p>
+function is equivalent to <code>(x[:len], x[len:])</code>.<a href="#section-2-15.7.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.8">
-          <p id="section-2-14.8.1"><code>gen_rand(len: int) -&gt; bytes</code> returns a byte array of the requested length
+        <li class="normal" id="section-2-15.8">
+          <p id="section-2-15.8.1"><code>gen_rand(len: int) -&gt; bytes</code> returns a byte array of the requested length
 (<code>len</code>) generated by a cryptographically secure pseudorandom number generator
-(CSPRNG).<a href="#section-2-14.8.1" class="pilcrow">¶</a></p>
+(CSPRNG).<a href="#section-2-15.8.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.9">
-          <p id="section-2-14.9.1"><code>next_power_of_2(x: int) -&gt; int</code> returns the smallest integer
-greater than or equal to <code>x</code> that is also a power of two.<a href="#section-2-14.9.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.9">
+          <p id="section-2-15.9.1"><code>next_power_of_2(x: int) -&gt; int</code> returns the smallest integer
+greater than or equal to <code>x</code> that is also a power of two.<a href="#section-2-15.9.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.10">
-          <p id="section-2-14.10.1"><code>range(stop: int)</code> or <code>range(start: int, stop: int[, step: int])</code> is the range
+        <li class="normal" id="section-2-15.10">
+          <p id="section-2-15.10.1"><code>range(stop: int)</code> or <code>range(start: int, stop: int[, step: int])</code> is the range
 function from the Python standard library. The one-argument form returns the
 integers from zero (inclusive) to <code>stop</code> (exclusive). The two- and
 three-argument forms allow overriding the start of the range and overriding
-the step between successive output values.<a href="#section-2-14.10.1" class="pilcrow">¶</a></p>
+the step between successive output values.<a href="#section-2-15.10.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.11">
-          <p id="section-2-14.11.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
-is in the range <code>[0, 2^(8*len))</code> to a big-endian byte string of length <code>len</code>.<a href="#section-2-14.11.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.11">
+          <p id="section-2-15.11.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+is in the range <code>[0, 2**(8*len))</code> to a big-endian byte string of length <code>len</code>.<a href="#section-2-15.11.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.12">
-          <p id="section-2-14.12.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
-is in the range <code>[0, 2^(8*len))</code> to a little-endian byte string of length
-<code>len</code>.<a href="#section-2-14.12.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.12">
+          <p id="section-2-15.12.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+is in the range <code>[0, 2**(8*len))</code> to a little-endian byte string of length
+<code>len</code>.<a href="#section-2-15.12.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.13">
-          <p id="section-2-14.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
+        <li class="normal" id="section-2-15.13">
+          <p id="section-2-15.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
 evaluating the polynomial, <code>p(x)</code>. The coefficients of polynomials are stored
 in lists in ascending order of degree, starting with the constant
 coefficient. The <code>field</code> parameter is the class object for <code>F</code> and is used by
-the implementation to construct field elements. (See <a href="#field" class="auto internal xref">Section 6.1</a>.)<a href="#section-2-14.13.1" class="pilcrow">¶</a></p>
+the implementation to construct field elements. (See <a href="#field" class="auto internal xref">Section 6.1</a>.)<a href="#section-2-15.13.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.14">
-          <p id="section-2-14.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
+        <li class="normal" id="section-2-15.14">
+          <p id="section-2-15.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
 returns the coefficients of the lowest degree polynomial <code>p</code> for which
 <code>p(inputs[k]) == outputs[k]</code> for all <code>k</code>. Normally this will be computed
-using the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-14.14.1" class="pilcrow">¶</a></p>
+using the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-15.14.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.15">
-          <p id="section-2-14.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
-the product of two polynomials.<a href="#section-2-14.15.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.15">
+          <p id="section-2-15.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
+the product of two polynomials.<a href="#section-2-15.15.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.16">
-          <p id="section-2-14.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
+        <li class="normal" id="section-2-15.16">
+          <p id="section-2-15.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
 end of the input polynomial's list of coefficients. That is, it returns
 <code>p[:i]</code> where <code>i</code> is the index of the highest-degree non-zero coefficient of
-<code>p</code>.<a href="#section-2-14.16.1" class="pilcrow">¶</a></p>
+<code>p</code>.<a href="#section-2-15.16.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.17">
-          <p id="section-2-14.17.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
-and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-14.17.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.17">
+          <p id="section-2-15.17.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
+and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-15.17.1" class="pilcrow">¶</a></p>
 </li>
-        <li class="normal" id="section-2-14.18">
-          <p id="section-2-14.18.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of bytes of the requested
-length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-14.18.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-2-15.18">
+          <p id="section-2-15.18.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of bytes of the requested
+length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-15.18.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
+<div id="mathematical-notation">
+<section id="section-2.1">
+        <h3 id="name-mathematical-notation">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-mathematical-notation" class="section-name selfRef">Mathematical Notation</a>
+        </h3>
+<p id="section-2.1-1">The following symbols are used in mathematical notation.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<span id="name-mathematical-operators-and-"></span><div id="mathematical-operators-and-symbols">
+<table class="center" id="table-1">
+          <caption>
+<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#name-mathematical-operators-and-" class="selfRef">Mathematical Operators and Symbols</a>
+          </caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">ASCII glyph(s)</th>
+              <th class="text-left" rowspan="1" colspan="1">Description</th>
+              <th class="text-left" rowspan="1" colspan="1">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">+, -</td>
+              <td class="text-left" rowspan="1" colspan="1">Addition / subtraction</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for addition and subtraction of field elements as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">*</td>
+              <td class="text-left" rowspan="1" colspan="1">Addition / subtraction</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for multiplication of field elements as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">**</td>
+              <td class="text-left" rowspan="1" colspan="1">Exponentiation</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for exponentiation of field elements as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">/</td>
+              <td class="text-left" rowspan="1" colspan="1">Division</td>
+              <td class="text-left" rowspan="1" colspan="1">Needs to be constant time. Used for division of field elements (i.e. multiplication by inverse) as well as numbers.</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">||</td>
+              <td class="text-left" rowspan="1" colspan="1">Concatenation</td>
+              <td class="text-left" rowspan="1" colspan="1">Used for concatenation of byte strings and bit strings.</td>
+            </tr>
+          </tbody>
+        </table>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="overview">
@@ -2567,9 +2622,9 @@ these stages. The interface, denoted <code>Daf</code>, is defined in the remaind
 section. In addition, a concrete DAF defines the associated constants and types
 enumerated in the following table.<a href="#section-4-6" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined"></span><div id="daf-param">
-<table class="center" id="table-1">
+<table class="center" id="table-2">
         <caption>
-<a href="#table-1" class="selfRef">Table 1</a>:
+<a href="#table-2" class="selfRef">Table 2</a>:
 <a href="#name-constants-and-types-defined" class="selfRef">Constants and types defined by each concrete DAF.</a>
         </caption>
 <thead>
@@ -2583,7 +2638,7 @@ enumerated in the following table.<a href="#section-4-6" class="pilcrow">¶</a><
             <td class="text-left" rowspan="1" colspan="1">
               <code>ID: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this DAF, in the range <code>[0, 2^32)</code>.</td>
+            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this DAF, in the range <code>[0, 2**32)</code>.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
@@ -3134,11 +3189,11 @@ this section. If an exception is raised during preparation, the Aggregators
 Otherwise, a malicious Client can cause the Collector to compute a malformed
 aggregate result.<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3">The remainder of this section defines the VDAF interface, denoted by <code>Vdaf</code>.
-The attributes listed in <a href="#vdaf-param" class="auto internal xref">Table 2</a> are defined by each concrete VDAF.<a href="#section-5-3" class="pilcrow">¶</a></p>
+The attributes listed in <a href="#vdaf-param" class="auto internal xref">Table 3</a> are defined by each concrete VDAF.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-"></span><div id="vdaf-param">
-<table class="center" id="table-2">
+<table class="center" id="table-3">
         <caption>
-<a href="#table-2" class="selfRef">Table 2</a>:
+<a href="#table-3" class="selfRef">Table 3</a>:
 <a href="#name-constants-and-types-defined-" class="selfRef">Constants and types defined by each concrete VDAF.</a>
         </caption>
 <thead>
@@ -3152,7 +3207,7 @@ The attributes listed in <a href="#vdaf-param" class="auto internal xref">Table 
             <td class="text-left" rowspan="1" colspan="1">
               <code>ID: int</code>
 </td>
-            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this VDAF, in the range <code>[0, 2^32)</code>.</td>
+            <td class="text-left" rowspan="1" colspan="1">Algorithm identifier for this VDAF, in the range <code>[0, 2**32)</code>.</td>
           </tr>
           <tr>
             <td class="text-left" rowspan="1" colspan="1">
@@ -3253,7 +3308,7 @@ instantiations of the <code>Vdaf</code> interface specify a method of encoding t
 <code>PublicShare</code>, <code>InputShare</code>, <code>AggParam</code>, <code>AggShare</code>, <code>PrepShare</code>, and
 <code>PrepMessage</code> types.<a href="#section-5-5" class="pilcrow">¶</a></p>
 <p id="section-5-6">Each VDAF is identified by a unique 32-bit integer, denoted <code>ID</code>. Identifiers
-for each VDAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 18</a>. The
+for each VDAF specified in this document are defined in <a href="#codepoints" class="auto internal xref">Table 19</a>. The
 following method is used by both Prio3 and Poplar1:<a href="#section-5-6" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5-7">
 <pre>
@@ -3264,7 +3319,7 @@ def domain_separation_tag(self, usage: int, ctx: bytes) -&gt; bytes:
 
     Pre-conditions:
 
-        - `usage` in the range `[0, 2^16)`
+        - `usage` in the range `[0, 2**16)`
     """
     return format_dst(0, self.ID, usage) + ctx
 </pre><a href="#section-5-7" class="pilcrow">¶</a>
@@ -3760,14 +3815,16 @@ struct {
   MessageType type;
   select (Message.type) {
     case initialize:
-      opaque prep_share&lt;0..2^32-1&gt;;
+      opaque prep_share&lt;0..4294967295&gt;;
     case continue:
-      opaque prep_msg&lt;0..2^32-1&gt;;
-      opaque prep_share&lt;0..2^32-1&gt;;
+      opaque prep_msg&lt;0..4294967295&gt;;
+      opaque prep_share&lt;0..4294967295&gt;;
     case finish:
-      opaque prep_msg&lt;0..2^32-1&gt;;
+      opaque prep_msg&lt;0..4294967295&gt;;
   };
 } Message;
+
+/* note that 4294967295 is 2 ** 32 - 1 */
 </pre><a href="#section-5.7.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-5.7.1-7">These messages trigger all transitions in the state machine in
@@ -4212,11 +4269,11 @@ subgroup <span class="bcp14">MUST</span> be a power of 2.<a href="#section-6.1.2
             <li class="normal" id="section-6.1.2-2.2">
               <p id="section-6.1.2-2.2.1"><code>GEN_ORDER: int</code> is the order of the multiplicative subgroup generated by
 <code>Field.gen()</code>. This is the smallest positive integer for which
-<code>Field.gen()**Field.GEN_ORDER == Field(1)</code>.<a href="#section-6.1.2-2.2.1" class="pilcrow">¶</a></p>
+<code>Field.gen() ** Field.GEN_ORDER == Field(1)</code>.<a href="#section-6.1.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-6.1.2-3">The size of the subgroup dictates how large interpolated polynomials can be. It
-is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order at least <code>2^20</code>.<a href="#section-6.1.2-3" class="pilcrow">¶</a></p>
+is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order at least <code>2**20</code>.<a href="#section-6.1.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="parameters">
@@ -4224,11 +4281,11 @@ is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order 
           <h4 id="name-parameters">
 <a href="#section-6.1.3" class="section-number selfRef">6.1.3. </a><a href="#name-parameters" class="section-name selfRef">Parameters</a>
           </h4>
-<p id="section-6.1.3-1"><a href="#fields" class="auto internal xref">Table 3</a> defines finite fields used in the remainder of this document.<a href="#section-6.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.3-1"><a href="#fields" class="auto internal xref">Table 4</a> defines finite fields used in the remainder of this document.<a href="#section-6.1.3-1" class="pilcrow">¶</a></p>
 <span id="name-parameters-for-the-finite-f"></span><div id="fields">
-<table class="center" id="table-3">
+<table class="center" id="table-4">
             <caption>
-<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#table-4" class="selfRef">Table 4</a>:
 <a href="#name-parameters-for-the-finite-f" class="selfRef">Parameters for the finite fields used in this document.</a>
             </caption>
 <thead>
@@ -4242,9 +4299,9 @@ is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order 
             <tbody>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">MODULUS</td>
-                <td class="text-left" rowspan="1" colspan="1">2^32 * 4294967295 + 1</td>
-                <td class="text-left" rowspan="1" colspan="1">2^66 * 4611686018427387897 + 1</td>
-                <td class="text-left" rowspan="1" colspan="1">2^255 - 19</td>
+                <td class="text-left" rowspan="1" colspan="1">2**32 * 4294967295 + 1</td>
+                <td class="text-left" rowspan="1" colspan="1">2**66 * 4611686018427387897 + 1</td>
+                <td class="text-left" rowspan="1" colspan="1">2**255 - 19</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">ENCODED_SIZE</td>
@@ -4254,14 +4311,14 @@ is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order 
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">Generator</td>
-                <td class="text-left" rowspan="1" colspan="1">7^4294967295</td>
-                <td class="text-left" rowspan="1" colspan="1">7^4611686018427387897</td>
+                <td class="text-left" rowspan="1" colspan="1">7**4294967295</td>
+                <td class="text-left" rowspan="1" colspan="1">7**4611686018427387897</td>
                 <td class="text-left" rowspan="1" colspan="1">n/a</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">GEN_ORDER</td>
-                <td class="text-left" rowspan="1" colspan="1">2^32</td>
-                <td class="text-left" rowspan="1" colspan="1">2^66</td>
+                <td class="text-left" rowspan="1" colspan="1">2**32</td>
+                <td class="text-left" rowspan="1" colspan="1">2**66</td>
                 <td class="text-left" rowspan="1" colspan="1">n/a</td>
               </tr>
             </tbody>
@@ -4546,9 +4603,9 @@ def format_dst(algo_class: int,
 
     Pre-conditions:
 
-        - `algo_class` in the range `[0, 2^8)`
-        - `algo` in the range `[0, 2^32)`
-        - `usage` in the range `[0, 2^16)`
+        - `algo_class` in the range `[0, 2**8)`
+        - `algo` in the range `[0, 2**32)`
+        - `usage` in the range `[0, 2**16)`
     """
     return concat([
         to_be_bytes(VERSION, 1),
@@ -4627,7 +4684,7 @@ its prep share. The validity decision is then made by the
 <p id="section-7.1-2">As usual, the interface implemented by a concrete FLP is described in terms of
 an object <code>flp</code> of type <code>Flp</code> that specifies the set of methods and parameters
 a concrete FLP must provide.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
-<p id="section-7.1-3">The parameters provided by a concrete FLP are listed in <a href="#flp-param" class="auto internal xref">Table 4</a>. A
+<p id="section-7.1-3">The parameters provided by a concrete FLP are listed in <a href="#flp-param" class="auto internal xref">Table 5</a>. A
 concrete FLP specifies the following algorithms for generating and verifying
 proofs of validity (encoding is described below in <a href="#flp-encode" class="auto internal xref">Section 7.1.1</a>):<a href="#section-7.1-3" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -4737,9 +4794,9 @@ proof systems than is considered here. In particular, what is called an "FLP"
 here is called a 1.5-round, public-coin, interactive oracle proof system in
 their paper.<a href="#section-7.1-11" class="pilcrow">¶</a></p>
 <span id="name-flp-parameters"></span><div id="flp-param">
-<table class="center" id="table-4">
+<table class="center" id="table-5">
           <caption>
-<a href="#table-4" class="selfRef">Table 4</a>:
+<a href="#table-5" class="selfRef">Table 5</a>:
 <a href="#name-flp-parameters" class="selfRef">FLP parameters.</a>
           </caption>
 <thead>
@@ -4917,13 +4974,13 @@ of proofs.<a href="#section-7.1.2-3" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-7.2-1">This section specifies <code>Prio3</code>, an implementation of the <code>Vdaf</code> interface
 defined in <a href="#vdaf" class="auto internal xref">Section 5</a>. The parameters and types required by the <code>Vdaf</code> interface
-are defined in <a href="#prio3-param" class="auto internal xref">Table 5</a>. The methods required for sharding, preparation,
+are defined in <a href="#prio3-param" class="auto internal xref">Table 6</a>. The methods required for sharding, preparation,
 aggregation, and unsharding are described in the remaining subsections. These
-methods refer to constants enumerated in <a href="#prio3-const" class="auto internal xref">Table 6</a>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+methods refer to constants enumerated in <a href="#prio3-const" class="auto internal xref">Table 7</a>.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <span id="name-parameters-for-prio3"></span><div id="prio3-param">
-<table class="center" id="table-5">
+<table class="center" id="table-6">
           <caption>
-<a href="#table-5" class="selfRef">Table 5</a>:
+<a href="#table-6" class="selfRef">Table 6</a>:
 <a href="#name-parameters-for-prio3" class="selfRef">Parameters for Prio3.</a>
           </caption>
 <thead>
@@ -5070,9 +5127,9 @@ methods refer to constants enumerated in <a href="#prio3-const" class="auto inte
         </table>
 </div>
 <span id="name-constants-used-by-prio3"></span><div id="prio3-const">
-<table class="center" id="table-6">
+<table class="center" id="table-7">
           <caption>
-<a href="#table-6" class="selfRef">Table 6</a>:
+<a href="#table-7" class="selfRef">Table 7</a>:
 <a href="#name-constants-used-by-prio3" class="selfRef">Constants used by Prio3.</a>
           </caption>
 <thead>
@@ -5874,9 +5931,9 @@ and decision algorithm are defined in <a href="#flp-bbcggi19-construction-prove"
 <a href="#flp-bbcggi19-construction-query" class="auto internal xref">Section 7.3.4</a>, and <a href="#flp-bbcggi19-construction-decide" class="auto internal xref">Section 7.3.5</a>
 respectively.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
 <span id="name-flp-parameters-for-a-validi"></span><div id="flp-bbcggi19-param">
-<table class="center" id="table-7">
+<table class="center" id="table-8">
           <caption>
-<a href="#table-7" class="selfRef">Table 7</a>:
+<a href="#table-8" class="selfRef">Table 8</a>:
 <a href="#name-flp-parameters-for-a-validi" class="selfRef">FLP parameters for a validity circuit.</a>
           </caption>
 <thead>
@@ -6051,7 +6108,7 @@ For example, in <a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>
 sub-circuit multiple times:<a href="#section-7.3.1-15" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1-16">
 <pre>
-Range2(x) = x * (x-1) = x^2 - x
+Range2(x) = x * (x-1) = x**2 - x
 </pre><a href="#section-7.3.1-16" class="pilcrow">¶</a>
 </div>
 <p id="section-7.3.1-17">(This is the same functionality computed by the example circuit <code>C</code> above.)
@@ -6085,13 +6142,13 @@ details). A much shorter proof can be constructed for the following randomized
 circuit:<a href="#section-7.3.1.1-2" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1.1-3">
 <pre>
-C(x, r) = r * Range2(x[0]) + ... + r^N * Range2(x[N-1])
+C(x, r) = r * Range2(x[0]) + ... + r**N * Range2(x[N-1])
 </pre><a href="#section-7.3.1.1-3" class="pilcrow">¶</a>
 </div>
 <p id="section-7.3.1.1-4">(Note that this is a special case of <span>[<a href="#BBCGGI19" class="cite xref">BBCGGI19</a>]</span>, Theorem 5.2.) Here <code>x</code> is
 the length-<code>N</code> input and <code>r</code> is a random field element. The gadget circuit
 <code>Range2</code> is the "range-check" polynomial described above, i.e., <code>Range2(x) =
-x^2 - x</code>. The idea is that, if <code>x</code> is valid, i.e., each <code>x[j]</code> is in
+x**2 - x</code>. The idea is that, if <code>x</code> is valid, i.e., each <code>x[j]</code> is in
 the range <code>[0, 2)</code>, then the circuit will evaluate to zero regardless of the
 value of <code>r</code>; but if some <code>x[j]</code> is not in the range <code>[0, 2)</code>, then the output
 will be non-zero with high probability.<a href="#section-7.3.1.1-4" class="pilcrow">¶</a></p>
@@ -6102,11 +6159,11 @@ circuits by allowing multiple, non-affine sub-circuits. For example, the
 following circuit is allowed:<a href="#section-7.3.1.1-5" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-7.3.1.1-6">
 <pre>
-C(x, r) = r * Range2(x[0]) + ... + r^L * Range2(x[L-1]) + \
-            r^(L+1) * Range3(x[L]) + ... + r^N * Range3(x[N-1])
+C(x, r) = r * Range2(x[0]) + ... + r**L * Range2(x[L-1]) + \
+            r**(L+1) * Range3(x[L]) + ... + r**N * Range3(x[N-1])
 </pre><a href="#section-7.3.1.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-7.3.1.1-7">where <code>Range3(x) = x^3 - 3x^2 + 2x</code>. This circuit checks that the first <code>L</code>
+<p id="section-7.3.1.1-7">where <code>Range3(x) = x**3 - 3x**2 + 2x</code>. This circuit checks that the first <code>L</code>
 inputs are in the range <code>[0, 2)</code> and the last <code>N-L</code> inputs are in the range
 <code>[0, 3)</code>. The same circuit can be expressed using a simpler gadget, namely
 multiplication, but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
@@ -6134,9 +6191,9 @@ probability.<a href="#section-7.3.1.1-9" class="pilcrow">¶</a></p>
 <p id="section-7.3.2-1">An instance of the proof system is defined in terms of a validity circuit that
 implements the <code>Valid</code> interface specified in this section. The parameters are
 listed in the table below.<a href="#section-7.3.2-1" class="pilcrow">¶</a></p>
-<span id="name-validity-circuit-parameters"></span><table class="center" id="table-8">
+<span id="name-validity-circuit-parameters"></span><table class="center" id="table-9">
             <caption>
-<a href="#table-8" class="selfRef">Table 8</a>:
+<a href="#table-9" class="selfRef">Table 9</a>:
 <a href="#name-validity-circuit-parameters" class="selfRef">Validity circuit parameters.</a>
             </caption>
 <thead>
@@ -6407,7 +6464,7 @@ def prove(self,
 
         # Compute the wire polynomials for this gadget. For each `j`,
         # find the lowest degree polynomial `wire_poly` for which
-        # `wire_poly(alpha^k) = g.wires[j][k]` for all `k`. Note that
+        # `wire_poly(alpha**k) = g.wires[j][k]` for all `k`. Note that
         # each `g.wires[j][0]` is set to the seed of wire `j`, which
         # is included in the prove randomness.
         #
@@ -6423,7 +6480,7 @@ def prove(self,
 
         # Compute the gadget polynomial by evaluating the gadget on
         # the wire polynomials. By construction we have that
-        # `gadget_poly(alpha^k)` is the `k`-th output.
+        # `gadget_poly(alpha**k)` is the `k`-th output.
         gadget_poly = g.eval_poly(self.field, wire_polys)
 
         for j in range(g.ARITY):
@@ -6648,9 +6705,9 @@ gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix A</
           <h4 id="name-prio3count">
 <a href="#section-7.4.1" class="section-number selfRef">7.4.1. </a><a href="#name-prio3count" class="section-name selfRef">Prio3Count</a>
           </h4>
-<span id="name-parameters-for-prio3count"></span><table class="center" id="table-9">
+<span id="name-parameters-for-prio3count"></span><table class="center" id="table-10">
             <caption>
-<a href="#table-9" class="selfRef">Table 9</a>:
+<a href="#table-10" class="selfRef">Table 10</a>:
 <a href="#name-parameters-for-prio3count" class="selfRef">Parameters for Prio3Count.</a>
             </caption>
 <thead>
@@ -6665,7 +6722,7 @@ gadgets are listed in <a href="#gadgets" class="auto internal xref">Appendix A</
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6731,9 +6788,9 @@ class Count(Valid[int, int, F]):
           <h4 id="name-prio3sum">
 <a href="#section-7.4.2" class="section-number selfRef">7.4.2. </a><a href="#name-prio3sum" class="section-name selfRef">Prio3Sum</a>
           </h4>
-<span id="name-parameters-for-prio3sum"></span><table class="center" id="table-10">
+<span id="name-parameters-for-prio3sum"></span><table class="center" id="table-11">
             <caption>
-<a href="#table-10" class="selfRef">Table 10</a>:
+<a href="#table-11" class="selfRef">Table 11</a>:
 <a href="#name-parameters-for-prio3sum" class="selfRef">Parameters for Prio3Sum.</a>
             </caption>
 <thead>
@@ -6748,7 +6805,7 @@ class Count(Valid[int, int, F]):
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6779,23 +6836,23 @@ two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcro
 the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.4.2-4.2">
-              <p id="section-7.4.2-4.2.1"><code>offset = 2^bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
+              <p id="section-7.4.2-4.2.1"><code>offset = 2 ** bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
-measurements between <code>0</code> and <code>2^bits - 1</code> can be encoded this way with as many
+measurements between <code>0</code> and <code>2**bits - 1</code> can be encoded this way with as many
 bits. The second bit-encoded integer is the sum of the measurement and
 <code>offset</code>. Observe that this sum can only be encoded this way if it is between
-<code>0</code> and <code>2^bits - 1</code>, which implies that the measurement is between <code>-offset</code>
+<code>0</code> and <code>2**bits - 1</code>, which implies that the measurement is between <code>-offset</code>
 and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-6">The circuit first checks that each entry of both bit vectors is a one or a
 zero. It then decodes both the measurement and the offset measurement, and
 subtracts the offset from the latter. It then checks if these two values are
 equal. Since both the measurement and the measurement plus <code>offset</code> are in the
-same range of <code>[0, 2^bits)</code>, this means that the measurement itself is between
+same range of <code>[0, 2**bits)</code>, this means that the measurement itself is between
 <code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-7">The circuit uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
-<a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x^2 - x</code>, which is equal to <code>0</code>
+<a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x**2 - x</code>, which is equal to <code>0</code>
 if and only if <code>x</code> is in the range <code>[0, 2)</code>. The complete circuit is specified
 below:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-8">Note that decoding a sequence of bits into an integer is a linear operation,
@@ -6863,9 +6920,9 @@ class Sum(Valid[int, int, F]):
           <h4 id="name-prio3sumvec">
 <a href="#section-7.4.3" class="section-number selfRef">7.4.3. </a><a href="#name-prio3sumvec" class="section-name selfRef">Prio3SumVec</a>
           </h4>
-<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-11">
+<span id="name-parameters-for-prio3sumvec"></span><table class="center" id="table-12">
             <caption>
-<a href="#table-11" class="selfRef">Table 11</a>:
+<a href="#table-12" class="selfRef">Table 12</a>:
 <a href="#name-parameters-for-prio3sumvec" class="selfRef">Parameters for Prio3SumVec.</a>
             </caption>
 <thead>
@@ -6880,7 +6937,7 @@ class Sum(Valid[int, int, F]):
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6902,7 +6959,7 @@ class Sum(Valid[int, int, F]):
 <p id="section-7.4.3-2">This instance of Prio3 supports summing vectors of integers. It has three
 parameters: <code>length</code>, <code>bits</code>, and <code>chunk_length</code>. Each measurement is a vector
 of positive integers with length equal to the <code>length</code> parameter. Each element
-of the measurement is an integer in the range <code>[0, 2^bits)</code>. It is <span class="bcp14">RECOMMENDED</span>
+of the measurement is an integer in the range <code>[0, 2**bits)</code>. It is <span class="bcp14">RECOMMENDED</span>
 to set <code>chunk_length</code> to an integer near the square root of <code>length * bits</code>
 (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-3">The circuit is denoted <code>SumVec</code>. Each measurement is encoded as a vector of
@@ -6947,7 +7004,7 @@ class SumVec(Valid[list[int], list[int], F]):
                  chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with
-        `length` elements, each in the range `[0, 2^bits)`.
+        `length` elements, each in the range `[0, 2**bits)`.
         """
         self.field = field
         self.length = length
@@ -7048,9 +7105,9 @@ proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-3"
           <h4 id="name-prio3histogram">
 <a href="#section-7.4.4" class="section-number selfRef">7.4.4. </a><a href="#name-prio3histogram" class="section-name selfRef">Prio3Histogram</a>
           </h4>
-<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-12">
+<span id="name-parameters-for-prio3histogr"></span><table class="center" id="table-13">
             <caption>
-<a href="#table-12" class="selfRef">Table 12</a>:
+<a href="#table-13" class="selfRef">Table 13</a>:
 <a href="#name-parameters-for-prio3histogr" class="selfRef">Parameters for Prio3Histogram.</a>
             </caption>
 <thead>
@@ -7065,7 +7122,7 @@ proofs up to 50% larger than the optimal proof size.<a href="#section-7.4.3.1-3"
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -7196,9 +7253,9 @@ class Histogram(Valid[int, list[int], F]):
           <h4 id="name-prio3multihotcountvec">
 <a href="#section-7.4.5" class="section-number selfRef">7.4.5. </a><a href="#name-prio3multihotcountvec" class="section-name selfRef">Prio3MultihotCountVec</a>
           </h4>
-<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-13">
+<span id="name-parameters-for-prio3multiho"></span><table class="center" id="table-14">
             <caption>
-<a href="#table-13" class="selfRef">Table 13</a>:
+<a href="#table-14" class="selfRef">Table 14</a>:
 <a href="#name-parameters-for-prio3multiho" class="selfRef">Parameters for Prio3MultihotCountVec.</a>
             </caption>
 <thead>
@@ -7213,7 +7270,7 @@ class Histogram(Valid[int, list[int], F]):
                   <code>field</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                  <code>Field128</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -7249,7 +7306,7 @@ number of <code>True</code> entries (i.e., the weight must be at most <code>max_
               <p id="section-7.4.5-5.1.1"><code>bits_for_weight = max_weight.bit_length()</code><a href="#section-7.4.5-5.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-7.4.5-5.2">
-              <p id="section-7.4.5-5.2.1"><code>offset = 2^bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-5.2.1" class="pilcrow">¶</a></p>
+              <p id="section-7.4.5-5.2.1"><code>offset = 2 ** bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-5.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-7.4.5-6">The Client reports the weight of the count vector by adding <code>offset</code> to it and
@@ -7459,7 +7516,7 @@ terms of a generic IDPF. A specification of the IDPF of <span>[<a href="#BBCGGI2
         <h3 id="name-incremental-distributed-poi">
 <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-incremental-distributed-poi" class="section-name selfRef">Incremental Distributed Point Functions (IDPFs)</a>
         </h3>
-<p id="section-8.1-1">An IDPF is defined over a domain of size <code>2^BITS</code>, where <code>BITS</code> is a constant.
+<p id="section-8.1-1">An IDPF is defined over a domain of size <code>2**BITS</code>, where <code>BITS</code> is a constant.
 Indices into the IDPF tree are bit strings. (In Poplar1, each Client's bit
 string is an index; see <a href="#poplar1-idpf-index-encoding" class="auto internal xref">Section 8.1.1</a> for details.) The Client
 specifies an index <code>alpha</code> and a vector of values <code>beta</code>, one for each "level"
@@ -7473,7 +7530,7 @@ field. There are two types of fields: one for inner nodes (denoted
 Poplar1 (<a href="#poplar1-construction" class="auto internal xref">Section 8.2</a>) will use a much larger field for leaf nodes
 than for inner nodes. This is to ensure the IDPF is "extractable" as defined in
 <span>[<a href="#BBCGGI21" class="cite xref">BBCGGI21</a>]</span>, Definition 1. See <a href="#idpf-extract" class="auto internal xref">Section 9.5</a> for details.)<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.1-3">A concrete IDPF defines the types and parameters enumerated in <a href="#idpf-param" class="auto internal xref">Table 14</a>.
+<p id="section-8.1-3">A concrete IDPF defines the types and parameters enumerated in <a href="#idpf-param" class="auto internal xref">Table 15</a>.
 In the remainder, <code>Output</code> is used as shorthand for the type
 <code>list[list[FieldInner]] | list[list[FieldLeaf]]</code>. (This type denotes either a
 vector of inner node field elements or leaf node field elements.) The scheme is
@@ -7583,9 +7640,9 @@ not include shared state across VDAF evaluations. In practice, of course, it
 will often be beneficial to expose a stateful API for IDPFs and carry the state
 across evaluations. See <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> for details.<a href="#section-8.1-7" class="pilcrow">¶</a></p>
 <span id="name-constants-and-types-defined-b"></span><div id="idpf-param">
-<table class="center" id="table-14">
+<table class="center" id="table-15">
           <caption>
-<a href="#table-14" class="selfRef">Table 14</a>:
+<a href="#table-15" class="selfRef">Table 15</a>:
 <a href="#name-constants-and-types-defined-b" class="selfRef">Constants and types defined by a concrete IDPF.</a>
           </caption>
 <thead>
@@ -7710,13 +7767,13 @@ as needed.<a href="#section-8.1.1-6" class="pilcrow">¶</a></p>
 <a href="#idpf-bbcggi21" class="auto internal xref">Section 8.3</a> with <code>SHARES == 2</code> and <code>VALUE_LEN == 2</code> and
 <code>XofTurboShake128</code> as specified in <a href="#xof-turboshake128" class="auto internal xref">Section 6.2.1</a>. The associated
 constants and types required by the <code>Vdaf</code> interface are defined in
-<a href="#poplar1-param" class="auto internal xref">Table 15</a>. The methods required for sharding, preparation, aggregation,
+<a href="#poplar1-param" class="auto internal xref">Table 16</a>. The methods required for sharding, preparation, aggregation,
 and unsharding are described in the remaining subsections. These methods make
-use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 16</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+use of constants defined in <a href="#poplar1-const" class="auto internal xref">Table 17</a>.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <span id="name-vdaf-parameters-for-poplar1"></span><div id="poplar1-param">
-<table class="center" id="table-15">
+<table class="center" id="table-16">
           <caption>
-<a href="#table-15" class="selfRef">Table 15</a>:
+<a href="#table-16" class="selfRef">Table 16</a>:
 <a href="#name-vdaf-parameters-for-poplar1" class="selfRef">VDAF parameters for Poplar1.</a>
           </caption>
 <thead>
@@ -7861,9 +7918,9 @@ use of constants defined in <a href="#poplar1-const" class="auto internal xref">
         </table>
 </div>
 <span id="name-constants-used-by-poplar1"></span><div id="poplar1-const">
-<table class="center" id="table-16">
+<table class="center" id="table-17">
           <caption>
-<a href="#table-16" class="selfRef">Table 16</a>:
+<a href="#table-17" class="selfRef">Table 17</a>:
 <a href="#name-constants-used-by-poplar1" class="selfRef">Constants used by Poplar1.</a>
           </caption>
 <thead>
@@ -7911,7 +7968,7 @@ tree, the Client generates random elements <code>a</code>, <code>b</code>, and <
 <div class="alignLeft art-text artwork" id="section-8.2.1-4">
 <pre>
     A = -2*a + k
-    B = a^2 + b - k*a + c
+    B = a**2 + b - k*a + c
 </pre><a href="#section-8.2.1-4" class="pilcrow">¶</a>
 </div>
 <p id="section-8.2.1-5">and sends additive shares of <code>a</code>, <code>b</code>, <code>c</code>, <code>A</code> and <code>B</code> to each of the
@@ -8578,7 +8635,7 @@ last_byte_mask = 0
 leftover_bits = (level + 1) % 8
 if leftover_bits &gt; 0:
     for bit_index in range(8 - leftover_bits, 8):
-        last_byte_mask |= 1 &lt;&lt; bit_index;
+        last_byte_mask |= 1 &lt;&lt; bit_index
     last_byte_mask ^= 255
 
 bytes_per_prefix = ((level + 1) + 7) // 8
@@ -8614,15 +8671,15 @@ next. This would help reduce communication overhead.<a href="#section-8.2.6.6-7"
         </h3>
 <p id="section-8.3-1">This section specifies a concrete IDPF suitable for instantiating Poplar1. The
 constant and type definitions required by the <code>Idpf</code> interface are given in
-<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 17</a>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<a href="#idpf-bbcggi21-param" class="auto internal xref">Table 18</a>.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <p id="section-8.3-2">The IDPF requires an XOF for deriving the output shares, as well as a variety
 of other artifacts used internally. For performance reasons, this object is
 instantiated using XofFixedKeyAes128 (<a href="#xof-fixed-key-aes128" class="auto internal xref">Section 6.2.2</a>) wherever
 possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.6</a> for security considerations.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 <span id="name-constants-and-type-definiti"></span><div id="idpf-bbcggi21-param">
-<table class="center" id="table-17">
+<table class="center" id="table-18">
           <caption>
-<a href="#table-17" class="selfRef">Table 17</a>:
+<a href="#table-18" class="selfRef">Table 18</a>:
 <a href="#name-constants-and-type-definiti" class="selfRef">Constants and type definitions for the concrete IDPF.</a>
           </caption>
 <thead>
@@ -8672,14 +8729,14 @@ possible. See <a href="#xof-vs-ro" class="auto internal xref">Section 9.6</a> fo
                 <code>FieldInner</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                <code>Field64</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">
                 <code>FieldLeaf</code>
 </td>
               <td class="text-left" rowspan="1" colspan="1">
-                <code>Field255</code> (<a href="#fields" class="auto internal xref">Table 3</a>)</td>
+                <code>Field255</code> (<a href="#fields" class="auto internal xref">Table 4</a>)</td>
             </tr>
           </tbody>
         </table>
@@ -8699,8 +8756,8 @@ from the root to <code>alpha</code> having values <code>beta_1, ..., beta_BITS</
 nodes having value <code>0</code>.<a href="#section-8.3.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.3.1-2">The IDPF construction now boils down to secret-sharing the values at each node
 of that tree in an efficient way. Note that explicitly representing the tree
-requires <code>O(2^BITS)</code> space, so the generator cannot just compute additive shares
-of it and send them to the two evaluators. Instead, the evaluators will
+requires <code>O(2**BITS)</code> space, so the generator cannot just compute additive
+shares of it and send them to the two evaluators. Instead, the evaluators will
 re-generate shares of values at selected nodes of the tree using a XOF
 (<a href="#xof" class="auto internal xref">Section 6.2</a>).<a href="#section-8.3.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.3.1-3">The basic observation is that if both evaluators have the same seed <code>s</code> of
@@ -9296,7 +9353,7 @@ are generated and verified. In general the soundness error of the FLP is given
 by the following formula:<a href="#section-9.7-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.7-4">
 <pre>
-(circuit_soundness + flp_soundness)^PROOFS
+(circuit_soundness + flp_soundness)**PROOFS
 </pre><a href="#section-9.7-4" class="pilcrow">¶</a>
 </div>
 <p id="section-9.7-5">where:<a href="#section-9.7-5" class="pilcrow">¶</a></p>
@@ -9311,7 +9368,7 @@ Theorem 4.3)<a href="#section-9.7-6.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-9.7-7">For circuits involving joint randomness, one should aim for the soundness error
-to be close to <code>2^-128</code> in order to mitigate offline attacks. Such circuits
+to be close to <code>2**-128</code> in order to mitigate offline attacks. Such circuits
 <span class="bcp14">MUST</span> use Field128 with at least one proof or Field64 with at least three
 proofs. Depending on the circuit, Field64 with two proofs might have
 significantly lower soundness than Field128 with one proof.<a href="#section-9.7-7" class="pilcrow">¶</a></p>
@@ -9440,9 +9497,9 @@ Verifiable Distributed Aggregation Function<a href="#section-10-6.3.1" class="pi
       </ul>
 <p id="section-10-7">The initial contents of the registry are as follows:<a href="#section-10-7" class="pilcrow">¶</a></p>
 <span id="name-verifiable-distributed-aggr"></span><div id="codepoints">
-<table class="center" id="table-18">
+<table class="center" id="table-19">
         <caption>
-<a href="#table-18" class="selfRef">Table 18</a>:
+<a href="#table-19" class="selfRef">Table 19</a>:
 <a href="#name-verifiable-distributed-aggr" class="selfRef">Verifiable Distributed Aggregation Function Identifiers Registry</a>
         </caption>
 <thead>
@@ -10204,7 +10261,7 @@ instantiate the VDAF. These are listed in the subsections below.<a href="#append
 <code>bits</code>:</dt>
             <dd style="margin-left: 1.5em" id="appendix-C.1.3-1.8">
               <p id="appendix-C.1.3-1.8.1">the bit length of each element of the vector, an integer. Each element is in
-the range <code>[0, 2^bits)</code>.<a href="#appendix-C.1.3-1.8.1" class="pilcrow">¶</a></p>
+the range <code>[0, 2**bits)</code>.<a href="#appendix-C.1.3-1.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>
