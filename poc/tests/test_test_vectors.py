@@ -18,9 +18,9 @@ InputShare = TypeVar("InputShare")
 OutShare = TypeVar("OutShare")
 AggShare = TypeVar("AggShare")
 AggResult = TypeVar("AggResult")
-PrepState = TypeVar("PrepState")
-PrepShare = TypeVar("PrepShare")
-PrepMessage = TypeVar("PrepMessage")
+VerifyState = TypeVar("VerifyState")
+VerifierShare = TypeVar("VerifierShare")
+VerifierMessage = TypeVar("VerifierMessage")
 F = TypeVar("F", bound=NttField)
 
 
@@ -35,149 +35,149 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             test_vector: VdafTestVectorDict[Measurement, AggResult]) -> None:
-        # Prepare states are indexed by the report index, aggregator ID, and
+        # Verifyare states are indexed by the report index, aggregator ID, and
         # round.
-        prep_states: list[list[dict[int, PrepState]]] = [
+        ver_states: list[list[dict[int, VerifyState]]] = [
             [{} for _ in range(vdaf.SHARES)]
-            for _ in test_vector["prep"]
+            for _ in test_vector["verify"]
         ]
 
         for operation in test_vector["operations"]:
             if operation["operation"] == "shard":
                 report_index = operation["report_index"]
-                prep = test_vector["prep"][report_index]
+                verify = test_vector["verify"][report_index]
                 if operation["success"]:
                     self.check_shard_success(
                         vdaf,
                         bytes.fromhex(test_vector["ctx"]),
-                        prep["measurement"],
-                        bytes.fromhex(prep["nonce"]),
-                        bytes.fromhex(prep["rand"]),
-                        bytes.fromhex(prep["public_share"]),
+                        verify["measurement"],
+                        bytes.fromhex(verify["nonce"]),
+                        bytes.fromhex(verify["rand"]),
+                        bytes.fromhex(verify["public_share"]),
                         [
                             bytes.fromhex(input_share)
-                            for input_share in prep["input_shares"]
+                            for input_share in verify["input_shares"]
                         ],
                     )
                 else:
                     self.check_shard_failure(
                         vdaf,
                         bytes.fromhex(test_vector["ctx"]),
-                        prep["measurement"],
-                        bytes.fromhex(prep["nonce"]),
-                        bytes.fromhex(prep["rand"]),
+                        verify["measurement"],
+                        bytes.fromhex(verify["nonce"]),
+                        bytes.fromhex(verify["rand"]),
                     )
-            elif operation["operation"] == "prep_init":
+            elif operation["operation"] == "verify_init":
                 report_index = operation["report_index"]
-                prep = test_vector["prep"][report_index]
+                verify = test_vector["verify"][report_index]
                 aggregator_id = operation["aggregator_id"]
                 if operation["success"]:
-                    new_prep_state = self.check_prep_init_success(
+                    new_ver_state = self.check_verify_init_success(
                         vdaf,
                         bytes.fromhex(test_vector["verify_key"]),
                         bytes.fromhex(test_vector["ctx"]),
                         aggregator_id,
                         bytes.fromhex(test_vector["agg_param"]),
-                        bytes.fromhex(prep["nonce"]),
-                        bytes.fromhex(prep["public_share"]),
-                        bytes.fromhex(prep["input_shares"][aggregator_id]),
-                        bytes.fromhex(prep["prep_shares"][0][aggregator_id]),
+                        bytes.fromhex(verify["nonce"]),
+                        bytes.fromhex(verify["public_share"]),
+                        bytes.fromhex(verify["input_shares"][aggregator_id]),
+                        bytes.fromhex(verify["ver_shares"][0][aggregator_id]),
                     )
-                    prep_states[report_index][aggregator_id][0] = cast(
-                        PrepState,
-                        new_prep_state,
+                    ver_states[report_index][aggregator_id][0] = cast(
+                        VerifyState,
+                        new_ver_state,
                     )
                 else:
-                    self.check_prep_init_failure(
+                    self.check_verify_init_failure(
                         vdaf,
                         bytes.fromhex(test_vector["verify_key"]),
                         bytes.fromhex(test_vector["ctx"]),
                         aggregator_id,
                         bytes.fromhex(test_vector["agg_param"]),
-                        bytes.fromhex(prep["nonce"]),
-                        bytes.fromhex(prep["public_share"]),
-                        bytes.fromhex(prep["input_shares"][aggregator_id]),
+                        bytes.fromhex(verify["nonce"]),
+                        bytes.fromhex(verify["public_share"]),
+                        bytes.fromhex(verify["input_shares"][aggregator_id]),
                     )
-            elif operation["operation"] == "prep_shares_to_prep":
+            elif operation["operation"] == "ver_shares_to_msg":
                 report_index = operation["report_index"]
-                prep = test_vector["prep"][report_index]
+                verify = test_vector["verify"][report_index]
                 round = operation["round"]
                 if operation["success"]:
-                    self.check_prep_shares_to_prep_success(
+                    self.check_ver_shares_to_msg_success(
                         vdaf,
                         bytes.fromhex(test_vector["ctx"]),
                         bytes.fromhex(test_vector["agg_param"]),
                         [
-                            prep_states[report_index][i][round]
+                            ver_states[report_index][i][round]
                             for i in range(vdaf.SHARES)
                         ],
                         [
-                            bytes.fromhex(prep_share)
-                            for prep_share in prep["prep_shares"][round]
+                            bytes.fromhex(ver_share)
+                            for ver_share in verify["ver_shares"][round]
                         ],
-                        bytes.fromhex(prep["prep_messages"][round]),
+                        bytes.fromhex(verify["ver_msgs"][round]),
                     )
                 else:
-                    self.check_prep_shares_to_prep_failure(
+                    self.check_ver_shares_to_msg_failure(
                         vdaf,
                         bytes.fromhex(test_vector["ctx"]),
                         bytes.fromhex(test_vector["agg_param"]),
                         [
-                            prep_states[report_index][i][round]
+                            ver_states[report_index][i][round]
                             for i in range(vdaf.SHARES)
                         ],
                         [
-                            bytes.fromhex(prep_share)
-                            for prep_share in prep["prep_shares"][round]
+                            bytes.fromhex(ver_share)
+                            for ver_share in verify["ver_shares"][round]
                         ],
                     )
-            elif operation["operation"] == "prep_next":
+            elif operation["operation"] == "verify_next":
                 report_index = operation["report_index"]
-                prep = test_vector["prep"][report_index]
+                verify = test_vector["verify"][report_index]
                 aggregator_id = operation["aggregator_id"]
                 round = operation["round"]
                 ctx = bytes.fromhex(test_vector["ctx"])
-                prep_state = prep_states[report_index][aggregator_id][round - 1]
-                prep_msg = bytes.fromhex(prep["prep_messages"][round - 1])
+                ver_state = ver_states[report_index][aggregator_id][round - 1]
+                ver_msg = bytes.fromhex(verify["ver_msgs"][round - 1])
                 if operation["success"]:
                     if round < vdaf.ROUNDS:
-                        result = self.check_prep_next_success(
+                        result = self.check_verify_next_success(
                             vdaf,
                             ctx,
                             round,
-                            prep_state,
-                            prep_msg,
+                            ver_state,
+                            ver_msg,
                             bytes.fromhex(
-                                prep["prep_shares"][round][aggregator_id],
+                                verify["ver_shares"][round][aggregator_id],
                             ),
                             b"",
                         )
-                        prep_states[report_index][aggregator_id][round] = cast(
-                            PrepState,
+                        ver_states[report_index][aggregator_id][round] = cast(
+                            VerifyState,
                             result,
                         )
                     else:
-                        self.check_prep_next_success(
+                        self.check_verify_next_success(
                             vdaf,
                             ctx,
                             round,
-                            prep_state,
-                            prep_msg,
+                            ver_state,
+                            ver_msg,
                             b"",
-                            bytes.fromhex(prep["out_shares"][aggregator_id]),
+                            bytes.fromhex(verify["out_shares"][aggregator_id]),
                         )
                 else:
-                    self.check_prep_next_failure(
+                    self.check_verify_next_failure(
                         vdaf,
                         ctx,
                         round,
-                        prep_state,
-                        prep_msg,
+                        ver_state,
+                        ver_msg,
                     )
             elif operation["operation"] == "aggregate":
                 aggregator_id = operation["aggregator_id"]
@@ -187,9 +187,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                         bytes.fromhex(test_vector["agg_param"]),
                         [
                             bytes.fromhex(
-                                prep["out_shares"][aggregator_id],
+                                verify["out_shares"][aggregator_id],
                             )
-                            for prep in test_vector["prep"]
+                            for verify in test_vector["verify"]
                         ],
                         bytes.fromhex(
                             test_vector["agg_shares"][aggregator_id],
@@ -201,9 +201,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                         bytes.fromhex(test_vector["agg_param"]),
                         [
                             bytes.fromhex(
-                                prep["out_shares"][aggregator_id],
+                                verify["out_shares"][aggregator_id],
                             )
-                            for prep in test_vector["prep"]
+                            for verify in test_vector["verify"]
                         ],
                     )
             elif operation["operation"] == "unshard":
@@ -215,7 +215,7 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                             bytes.fromhex(agg_share)
                             for agg_share in test_vector["agg_shares"]
                         ],
-                        len(test_vector["prep"]),
+                        len(test_vector["verify"]),
                         cast(AggResult, test_vector["agg_result"]),
                     )
                 else:
@@ -226,7 +226,7 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                             bytes.fromhex(agg_share)
                             for agg_share in test_vector["agg_shares"]
                         ],
-                        len(test_vector["prep"]),
+                        len(test_vector["verify"]),
                     )
             else:
                 raise Exception(
@@ -243,9 +243,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             ctx: bytes,
             measurement: Measurement,
@@ -281,9 +281,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             ctx: bytes,
             measurement: Measurement,
@@ -294,7 +294,7 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
             lambda: vdaf.shard(ctx, measurement, nonce, rand),
         )
 
-    def check_prep_init_success(
+    def check_verify_init_success(
             self,
             vdaf: Vdaf[
                 Measurement,
@@ -304,9 +304,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             verify_key: bytes,
             ctx: bytes,
@@ -315,14 +315,14 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
             nonce: bytes,
             public_share_bytes: bytes,
             input_share_bytes: bytes,
-            expected_prep_share: bytes) -> PrepState:
+            expected_ver_share: bytes) -> VerifyState:
         agg_param = vdaf.decode_agg_param(agg_param_bytes)
         public_share = vdaf.decode_public_share(public_share_bytes)
         input_share = vdaf.decode_input_share(
             aggregator_id,
             input_share_bytes,
         )
-        prep_state, prep_share = vdaf.prep_init(
+        ver_state, ver_share = vdaf.verify_init(
             verify_key,
             ctx,
             aggregator_id,
@@ -331,11 +331,11 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
             public_share,
             input_share,
         )
-        encoded_prep_share = vdaf.encode_prep_share(prep_share)
-        self.assertEqual(encoded_prep_share, expected_prep_share)
-        return prep_state
+        encoded_ver_share = vdaf.encode_ver_share(ver_share)
+        self.assertEqual(encoded_ver_share, expected_ver_share)
+        return ver_state
 
-    def check_prep_init_failure(
+    def check_verify_init_failure(
             self,
             vdaf: Vdaf[
                 Measurement,
@@ -345,9 +345,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             verify_key: bytes,
             ctx: bytes,
@@ -364,7 +364,7 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
         )
         self.assertRaises(
             Exception,
-            lambda: vdaf.prep_init(
+            lambda: vdaf.verify_init(
                 verify_key,
                 ctx,
                 aggregator_id,
@@ -375,7 +375,7 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
             ),
         )
 
-    def check_prep_shares_to_prep_success(
+    def check_ver_shares_to_msg_success(
             self,
             vdaf: Vdaf[
                 Measurement,
@@ -385,32 +385,32 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             ctx: bytes,
             agg_param_bytes: bytes,
-            prep_states: list[PrepState],
-            prep_shares_bytes: list[bytes],
-            expected_prep_msg: bytes) -> None:
+            ver_states: list[VerifyState],
+            ver_shares_bytes: list[bytes],
+            expected_ver_msg: bytes) -> None:
         agg_param = vdaf.decode_agg_param(agg_param_bytes)
-        prep_shares = [
-            vdaf.decode_prep_share(prep_state, prep_share_bytes)
-            for prep_state, prep_share_bytes in zip(
-                prep_states,
-                prep_shares_bytes,
+        ver_shares = [
+            vdaf.decode_ver_share(ver_state, ver_share_bytes)
+            for ver_state, ver_share_bytes in zip(
+                ver_states,
+                ver_shares_bytes,
             )
         ]
-        prep_msg = vdaf.prep_shares_to_prep(
+        ver_msg = vdaf.ver_shares_to_msg(
             ctx,
             agg_param,
-            prep_shares,
+            ver_shares,
         )
-        encoded_prep_msg = vdaf.encode_prep_msg(prep_msg)
-        self.assertEqual(encoded_prep_msg, expected_prep_msg)
+        encoded_ver_msg = vdaf.encode_ver_msg(ver_msg)
+        self.assertEqual(encoded_ver_msg, expected_ver_msg)
 
-    def check_prep_shares_to_prep_failure(
+    def check_ver_shares_to_msg_failure(
             self,
             vdaf: Vdaf[
                 Measurement,
@@ -420,32 +420,32 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             ctx: bytes,
             agg_param_bytes: bytes,
-            prep_states: list[PrepState],
-            prep_shares_bytes: list[bytes]) -> None:
+            ver_states: list[VerifyState],
+            ver_shares_bytes: list[bytes]) -> None:
         agg_param = vdaf.decode_agg_param(agg_param_bytes)
-        prep_shares = [
-            vdaf.decode_prep_share(prep_state, prep_share_bytes)
-            for prep_state, prep_share_bytes in zip(
-                prep_states,
-                prep_shares_bytes,
+        ver_shares = [
+            vdaf.decode_ver_share(ver_state, ver_share_bytes)
+            for ver_state, ver_share_bytes in zip(
+                ver_states,
+                ver_shares_bytes,
             )
         ]
         self.assertRaises(
             Exception,
-            lambda: vdaf.prep_shares_to_prep(
+            lambda: vdaf.ver_shares_to_msg(
                 ctx,
                 agg_param,
-                prep_shares,
+                ver_shares,
             ),
         )
 
-    def check_prep_next_success(
+    def check_verify_next_success(
             self,
             vdaf: Vdaf[
                 Measurement,
@@ -455,37 +455,37 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             ctx: bytes,
             round: int,
-            prep_state: PrepState,
-            prep_msg_bytes: bytes,
-            expected_prep_share: bytes,
-            expected_out_share: bytes) -> Optional[PrepState]:
-        prep_msg = vdaf.decode_prep_msg(prep_state, prep_msg_bytes)
-        result = vdaf.prep_next(
+            ver_state: VerifyState,
+            ver_msg_bytes: bytes,
+            expected_ver_share: bytes,
+            expected_out_share: bytes) -> Optional[VerifyState]:
+        ver_msg = vdaf.decode_ver_msg(ver_state, ver_msg_bytes)
+        result = vdaf.verify_next(
             ctx,
-            prep_state,
-            prep_msg,
+            ver_state,
+            ver_msg,
         )
         if round < vdaf.ROUNDS:
             assert isinstance(result, tuple)
-            next_prep_state, prep_share = result
-            encoded_prep_share = vdaf.encode_prep_share(
-                prep_share,
+            next_ver_state, ver_share = result
+            encoded_ver_share = vdaf.encode_ver_share(
+                ver_share,
             )
-            self.assertEqual(encoded_prep_share, expected_prep_share)
-            return next_prep_state
+            self.assertEqual(encoded_ver_share, expected_ver_share)
+            return next_ver_state
         else:
             out_share = cast(OutShare, result)
             encoded_out_share = vdaf.encode_out_share(out_share)
             self.assertEqual(encoded_out_share, expected_out_share)
             return None
 
-    def check_prep_next_failure(
+    def check_verify_next_failure(
             self,
             vdaf: Vdaf[
                 Measurement,
@@ -495,21 +495,21 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             ctx: bytes,
             round: int,
-            prep_state: PrepState,
-            prep_msg_bytes: bytes) -> None:
-        prep_msg = vdaf.decode_prep_msg(prep_state, prep_msg_bytes)
+            ver_state: VerifyState,
+            ver_msg_bytes: bytes) -> None:
+        ver_msg = vdaf.decode_ver_msg(ver_state, ver_msg_bytes)
         self.assertRaises(
             Exception,
-            lambda: vdaf.prep_next(
+            lambda: vdaf.verify_next(
                 ctx,
-                prep_state,
-                prep_msg,
+                ver_state,
+                ver_msg,
             )
         )
 
@@ -523,9 +523,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             agg_param_bytes: bytes,
             out_shares_bytes: list[bytes],
@@ -551,9 +551,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             agg_param_bytes: bytes,
             out_shares_bytes: list[bytes]) -> None:
@@ -581,9 +581,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             agg_param_bytes: bytes,
             agg_shares_bytes: list[bytes],
@@ -607,9 +607,9 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             agg_param_bytes: bytes,
             agg_shares_bytes: list[bytes],
@@ -633,7 +633,7 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
         assert "verify_key" in doc
         assert "agg_param" in doc
         assert "ctx" in doc
-        assert "prep" in doc
+        assert "verify" in doc
         assert "agg_shares" in doc
         assert "agg_result" in doc
         return doc
@@ -752,8 +752,8 @@ class TestPrio3HistogramTestVector(TestVdafTestVector[int, list[int]]):
     def test_bad_helper_jr_blind(self) -> None:
         self.run_test("Prio3Histogram_bad_helper_jr_blind.json")
 
-    def test_bad_prep_msg(self) -> None:
-        self.run_test("Prio3Histogram_bad_prep_msg.json")
+    def test_bad_ver_msg(self) -> None:
+        self.run_test("Prio3Histogram_bad_ver_msg.json")
 
 
 class TestPrio3MultihotCountVecTestVector(TestVdafTestVector[list[bool], list[int]]):
