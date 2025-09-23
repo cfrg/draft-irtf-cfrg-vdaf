@@ -15,32 +15,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 0,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 0,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 0,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 0,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 0,
             "round": 1,
             "success": true
@@ -52,32 +52,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 1,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 1,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 1,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 1,
             "round": 1,
             "success": true
@@ -89,32 +89,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 2,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 2,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 2,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 2,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 2,
             "round": 1,
             "success": true
@@ -126,32 +126,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 3,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 3,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 3,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 3,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 3,
             "round": 1,
             "success": true
@@ -163,32 +163,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 4,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 4,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 4,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 4,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 4,
             "round": 1,
             "success": true
@@ -200,32 +200,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 5,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 5,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 5,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 5,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 5,
             "round": 1,
             "success": true
@@ -237,32 +237,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 6,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 6,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 6,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 6,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 6,
             "round": 1,
             "success": true
@@ -274,32 +274,32 @@
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 7,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_init",
+            "operation": "verify_init",
             "report_index": 7,
             "success": true
         },
         {
-            "operation": "prep_shares_to_prep",
+            "operation": "verifier_shares_to_message",
             "report_index": 7,
             "round": 0,
             "success": true
         },
         {
             "aggregator_id": 0,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 7,
             "round": 1,
             "success": true
         },
         {
             "aggregator_id": 1,
-            "operation": "prep_next",
+            "operation": "verify_next",
             "report_index": 7,
             "round": 1,
             "success": true
@@ -319,7 +319,7 @@
             "success": true
         }
     ],
-    "prep": [
+    "reports": [
         {
             "input_shares": [
                 "43126178225dca30c56c892f4cef3ca6f527cae360f77d4b2994ee7fbe779a5892f97897b3c5ff28ea1156127a87cb71fdca3aa67f3f66472914077ef4bb37488245444045a2293f2c51f6d5d497646aa1ab3bdc62c1db973fabd7f72169d6d5dce73437837c1c0662bb24addf7e07e6ad56db956b47ccc755b7c35912f67fb18ef8f9f52712c3080f914b74f00382004b165013481acf8be8175a22a882aa0eb80e78e0de28541108838a52471413dfb50659e637f1034e1f16577d02c362b788f2ba75655f48c3de2deca86d4c16dcb7ad16ee9be9abefb92edfc5ff3f936fb870dfe8d010e933b3d757755f70869463b12f0fee4391df94d8c3eaea71cb9eb448cebdcf1a9389aaffdf0add9c1ba4a3395ee3552988f68f846abd0d4c21d80797b31b3c093280a6dab8f6eb620cc224271c24a8e837b46c41d7448f92e8544b91b9258da94f10f9cc0c289acc1ca98e4921970f4645da92de8c4f01ceed91f67287a63c48f0efe31870630655eb8e771eae674a07d9208c92248153875c1a173ec6d0dbac7277d81f7d42fe00695163970bd22113a1fe897d45d0ae3ecd9232fc2f27cfe06c208fc152c37ff03f7daed0f49ac90d908eec2c33ecde71954dab2f085aff8226bc2d45c429c64678b147529367ef72e8e9ceac003b71c2dc01c96492eade00fc99ef01c7474f412e2526c2c5d54317487a37438dea9bd856781e92e0e296508b7e1d5f87e9e7df53669767fb7e72e5ae3ed7a009d3ee17a95cff7177086562e030875d1a518d2907983566800da114a280ee272902bcec631ed13e4e77f9aec2650667549603727f3fdd4dbb2476ec096b6b51ef2a4629889d8b8ad8018e594ce34bb030c6b68ccc6fc9db02c3a12a608eb01a1fbfbd64b152636ef87af0fb310d8ef8aae46ccbb794c59dd711cdda905e679f47c5fbad52209d211213c7f4111b38aa9f97c5f0c700",
@@ -331,17 +331,17 @@
                 "4a3136daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2151811ef413c956ff342b7195eb58731e",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         },
         {
             "input_shares": [
@@ -354,17 +354,17 @@
                 "4b3136daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb211eb662209e58e2405d1a1b206c9f3fc5",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         },
         {
             "input_shares": [
@@ -377,17 +377,17 @@
                 "833636daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb21d1a2b4da13818ff19ae1da2daa52e440",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         },
         {
             "input_shares": [
@@ -400,17 +400,17 @@
                 "ad3136daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb21738306b80716f2e4c51acbcc0158dd8a",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         },
         {
             "input_shares": [
@@ -423,17 +423,17 @@
                 "743136daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2167e02e21452d6637328672ffd0423630",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         },
         {
             "input_shares": [
@@ -446,17 +446,17 @@
                 "4a3136daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2151811ef413c956ff342b7195eb58731e",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         },
         {
             "input_shares": [
@@ -469,17 +469,17 @@
                 "4a3136daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2151811ef413c956ff342b7195eb58731e",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         },
         {
             "input_shares": [
@@ -492,17 +492,17 @@
                 "743136daf279c290",
                 "b7cec9250c863d6f"
             ],
-            "prep_messages": [
+            "public_share": "",
+            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+            "verifier_messages": [
                 ""
             ],
-            "prep_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2167e02e21452d6637328672ffd0423630",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
                 ]
-            ],
-            "public_share": "",
-            "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+            ]
         }
     ],
     "shares": 2,

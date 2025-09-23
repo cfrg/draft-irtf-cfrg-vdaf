@@ -144,7 +144,7 @@ class IdpfBBCGGI21(Idpf[Field64, Field255, list[CorrectionWord]]):
             public_share.append((seed_cw, ctrl_cw, w_cw))
         return (public_share, key)
 
-    # NOTE: The eval() and eval_next(), and prep_shares_to_prep() methods
+    # NOTE: The eval() and eval_next() methods
     # are excerpted in the document, de-indented, as figure
     # {{idpf-poplar-eval}}. Their width should be limited to 69 columns
     # after de-indenting, or 73 columns before de-indenting, to avoid

@@ -18,9 +18,9 @@ InputShare = TypeVar("InputShare")
 OutShare = TypeVar("OutShare")
 AggShare = TypeVar("AggShare")
 AggResult = TypeVar("AggResult")
-PrepState = TypeVar("PrepState")
-PrepShare = TypeVar("PrepShare")
-PrepMessage = TypeVar("PrepMessage")
+VerifyState = TypeVar("VerifyState")
+VerifierShare = TypeVar("VerifierShare")
+VerifierMessage = TypeVar("VerifierMessage")
 F = TypeVar("F", bound=NttField)
 
 
@@ -50,9 +50,9 @@ class TestVdaf(unittest.TestCase):
                 OutShare,
                 AggShare,
                 AggResult,
-                PrepState,
-                PrepShare,
-                PrepMessage,
+                VerifyState,
+                VerifierShare,
+                VerifierMessage,
             ],
             agg_param: AggParam,
             measurements: list[Measurement],
@@ -77,7 +77,7 @@ class VdafTestVectorOperationDict(TypedDict):
 
     Attributes:
         operation: The type of operation to be performed. This is one of
-            "shard", "prep_init", "prep_shares_to_prep", "prep_next",
+            "shard", "verify_init", "verifier_shares_to_message", "verify_next",
             "aggregate", or "unshard".
 
             Note that the "aggregate" operation encompasses running
@@ -85,24 +85,24 @@ class VdafTestVectorOperationDict(TypedDict):
             an aggregate share.
 
         round: The round number of the operation to be performed. This
-            determines which prepare share, prepare state, and/or prepare
-            message to use.
+            determines which verifier share or message and which verification
+            state to use.
 
         aggregator_id: The aggregator ID to use when performing this
-            operation. This determines which messages and which prepare state
-            to use, in addition to the aggregator ID argument itself.
+            operation. This determines which messages and which verification
+            state to use, in addition to the aggregator ID argument itself.
 
         report_index: The index of the report on which to perform this
-            operation. This is an index into the `prep` array.
+            operation. This is an index into the `reports` array.
 
         success: If this is true, the operation should succeed, and its output
             should match the corresponding values in the test vector. If this
-            is false, the operation should fail, terminating preparation of
+            is false, the operation should fail, terminating verification of
             this report.
     """
     operation: (
-        Literal["shard"] | Literal["prep_init"]
-        | Literal["prep_shares_to_prep"] | Literal["prep_next"]
+        Literal["shard"] | Literal["verify_init"]
+        | Literal["verifier_shares_to_message"] | Literal["verify_next"]
         | Literal["aggregate"] | Literal["unshard"]
     )
     round: NotRequired[int]
@@ -111,10 +111,10 @@ class VdafTestVectorOperationDict(TypedDict):
     success: bool
 
 
-class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
+class VdafReportTestVectorDict(Generic[Measurement], TypedDict):
     """
     This lists VDAF messages related to one report, from sharding to
-    preparation.
+    verification.
 
     All VDAF messages are encoded to byte strings, and then hex-encoded.
 
@@ -129,13 +129,13 @@ class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
 
         input_shares: The input shares from the report.
 
-        prep_shares: The prepare shares produced during preparation. This is
-            indexed first by round, and then by aggregator ID.
+        verifier_shares: The verifier shares produced during verification. This is
+        indexed first by round, and then by aggregator ID.
 
-        prep_messages: The prepare messages produced during aggregation. This
+        verifier_messages: The verifier messages produced during verification. This
             is indexed by round.
 
-        out_shares: The output shares produced by preparing this report. This
+        out_shares: The output shares produced by verifying this report. This
             is indexed by round.
     """
     measurement: Measurement
@@ -143,8 +143,8 @@ class VdafPrepTestVectorDict(Generic[Measurement], TypedDict):
     rand: str
     public_share: str
     input_shares: list[str]
-    prep_shares: list[list[str]]
-    prep_messages: list[str]
+    verifier_shares: list[list[str]]
+    verifier_messages: list[str]
     out_shares: list[str]
 
 
@@ -159,14 +159,14 @@ class VdafTestVectorDict(Generic[Measurement, AggResult], TypedDict):
             messages from this test vector. These operations should be
             executed in the order they appear.
 
-            The prepare state passed between `prep_init()` and `prep_next()`
-            does not have a standardized encoded form, and thus does not appear
-            in the test vectors. Prepare state values must be separately stored
-            in between operations. Test vectors must list their operations in
-            an order that ensures operations producing prepare states for any
-            given aggregator ID, report index, and round number always appear
-            before operations that consume the same prepare state in the next
-            round.
+            The verification state passed between `verify_init()` and
+            `verify_next()` does not have a standardized encoded form, and thus
+            does not appear in the test vectors. Verification state values must
+            be separately stored in between operations. Test vectors must list
+            their operations in an order that ensures operations producing
+            verification states for any given aggregator ID, report index, and
+            round number always appear before operations that consume the same
+            verification state in the next round.
 
         shares: The number of aggregators, and thus the number of input shares
             in a report.
@@ -177,8 +177,8 @@ class VdafTestVectorDict(Generic[Measurement, AggResult], TypedDict):
 
         ctx: The context string.
 
-        prep: A list of objects describing messages related to each report,
-            from sharding to preparation.
+        reports: A list of objects describing messages related to each report,
+            from sharding to verification.
 
         agg_shares: The aggregate shares.
 
@@ -189,7 +189,7 @@ class VdafTestVectorDict(Generic[Measurement, AggResult], TypedDict):
     verify_key: str
     agg_param: str
     ctx: str
-    prep: list[VdafPrepTestVectorDict[Measurement]]
+    reports: list[VdafReportTestVectorDict[Measurement]]
     agg_shares: list[str]
     agg_result: Optional[AggResult]
 
@@ -204,9 +204,9 @@ def gen_test_vec_for_vdaf(
             OutShare,
             AggShare,
             AggResult,
-            PrepState,
-            PrepShare,
-            PrepMessage,
+            VerifyState,
+            VerifierShare,
+            VerifierMessage,
         ],
         agg_param: AggParam,
         ctx: bytes,
@@ -229,7 +229,7 @@ def gen_test_vec_for_vdaf(
         'verify_key': verify_key.hex(),
         'agg_param': vdaf.encode_agg_param(agg_param).hex(),
         'ctx': ctx.hex(),
-        'prep': [],
+        'reports': [],
         'agg_shares': [],
         'agg_result': None,  # set below
     }
@@ -253,82 +253,81 @@ def gen_test_vec_for_vdaf(
         })
 
         pub_share_hex = vdaf.encode_public_share(public_share).hex()
-        prep_test_vec: VdafPrepTestVectorDict[Measurement] = {
+        report_test_vec: VdafReportTestVectorDict[Measurement] = {
             'measurement': measurement,
             'nonce': nonce.hex(),
             'rand': rand.hex(),
             'public_share': pub_share_hex,
             'input_shares': [],
-            'prep_shares': [[] for _ in range(vdaf.ROUNDS)],
-            'prep_messages': [],
+            'verifier_shares': [[] for _ in range(vdaf.ROUNDS)],
+            'verifier_messages': [],
             'out_shares': [],
         }
         for input_share in input_shares:
-            prep_test_vec['input_shares'].append(
+            report_test_vec['input_shares'].append(
                 vdaf.encode_input_share(input_share).hex())
 
-        # Each Aggregator initializes its preparation state.
-        prep_states = []
-        outbound_prep_shares = []
+        # Each Aggregator initializes its verification state.
+        verify_states = []
+        outbound_verifier_shares = []
         for j in range(vdaf.SHARES):
-            (state, share) = vdaf.prep_init(verify_key, ctx, j,
-                                            agg_param,
-                                            nonce,
-                                            public_share,
-                                            input_shares[j])
-            prep_states.append(state)
-            outbound_prep_shares.append(share)
+            (state, share) = vdaf.verify_init(verify_key, ctx, j,
+                                              agg_param,
+                                              nonce,
+                                              public_share,
+                                              input_shares[j])
+            verify_states.append(state)
+            outbound_verifier_shares.append(share)
             operations.append({
-                'operation': 'prep_init',
+                'operation': 'verify_init',
                 'aggregator_id': j,
                 'report_index': report_index,
                 'success': True,
             })
 
-        for prep_share in outbound_prep_shares:
-            prep_test_vec['prep_shares'][0].append(
-                vdaf.encode_prep_share(prep_share).hex())
+        for verifier_share in outbound_verifier_shares:
+            report_test_vec['verifier_shares'][0].append(
+                vdaf.encode_verifier_share(verifier_share).hex())
 
         # Aggregators recover their output shares.
         for i in range(vdaf.ROUNDS - 1):
-            prep_msg = vdaf.prep_shares_to_prep(ctx,
-                                                agg_param,
-                                                outbound_prep_shares)
-            prep_test_vec['prep_messages'].append(
-                vdaf.encode_prep_msg(prep_msg).hex())
+            verifier_message = vdaf.verifier_shares_to_message(ctx,
+                                                               agg_param,
+                                                               outbound_verifier_shares)
+            report_test_vec['verifier_messages'].append(
+                vdaf.encode_verifier_message(verifier_message).hex())
             operations.append({
-                'operation': 'prep_shares_to_prep',
+                'operation': 'verifier_shares_to_message',
                 'round': i,
                 'report_index': report_index,
                 'success': True,
             })
 
-            outbound_prep_shares = []
+            outbound_verifier_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.prep_next(ctx, prep_states[j], prep_msg)
+                out = vdaf.verify_next(ctx, verify_states[j], verifier_message)
                 assert isinstance(out, tuple)
-                (prep_states[j], prep_share) = out
-                outbound_prep_shares.append(prep_share)
-                prep_test_vec['prep_shares'][i+1].append(
-                    vdaf.encode_prep_share(prep_share).hex()
+                (verify_states[j], verifier_share) = out
+                outbound_verifier_shares.append(verifier_share)
+                report_test_vec['verifier_shares'][i+1].append(
+                    vdaf.encode_verifier_share(verifier_share).hex()
                 )
                 operations.append({
-                    'operation': 'prep_next',
+                    'operation': 'verify_next',
                     'round': i + 1,
                     'aggregator_id': j,
                     'report_index': report_index,
                     'success': True,
                 })
 
-        # The final outputs of the prepare phase are the output
-        # shares.
-        prep_msg = vdaf.prep_shares_to_prep(ctx,
-                                            agg_param,
-                                            outbound_prep_shares)
-        prep_test_vec['prep_messages'].append(
-            vdaf.encode_prep_msg(prep_msg).hex())
+        # The final outputs after verification are the output shares.
+        verifier_message = vdaf.verifier_shares_to_message(ctx,
+                                                           agg_param,
+                                                           outbound_verifier_shares)
+        report_test_vec['verifier_messages'].append(
+            vdaf.encode_verifier_message(verifier_message).hex())
         operations.append({
-            'operation': 'prep_shares_to_prep',
+            'operation': 'verifier_shares_to_message',
             'round': vdaf.ROUNDS - 1,
             'report_index': report_index,
             'success': True,
@@ -336,21 +335,22 @@ def gen_test_vec_for_vdaf(
 
         outbound_out_shares = []
         for j in range(vdaf.SHARES):
-            out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
+            out_share = vdaf.verify_next(
+                ctx, verify_states[j], verifier_message)
             assert not isinstance(out_share, tuple)
             outbound_out_shares.append(out_share)
-            prep_test_vec['out_shares'].append(
+            report_test_vec['out_shares'].append(
                 vdaf.encode_out_share(out_share).hex()
             )
             operations.append({
-                'operation': 'prep_next',
+                'operation': 'verify_next',
                 'round': vdaf.ROUNDS,
                 'aggregator_id': j,
                 'report_index': report_index,
                 'success': True,
             })
 
-        test_vec['prep'].append(prep_test_vec)
+        test_vec['reports'].append(report_test_vec)
 
         out_shares.append(outbound_out_shares)
 
@@ -437,31 +437,31 @@ def pretty_print_vdaf_test_vec(
     if test_vec['agg_param'] is not None:
         print('agg_param: {}'.format(test_vec['agg_param']))
 
-    for (n, prep_test_vec) in enumerate(test_vec['prep']):
+    for (n, report_test_vec) in enumerate(test_vec['reports']):
         print('upload_{}:'.format(n))
-        print('  measurement: {}'.format(prep_test_vec['measurement']))
-        print('  nonce: "{}"'.format(prep_test_vec['nonce']))
+        print('  measurement: {}'.format(report_test_vec['measurement']))
+        print('  nonce: "{}"'.format(report_test_vec['nonce']))
         print('  public_share: >-')
-        print_wrapped_line(prep_test_vec['public_share'], tab=4)
+        print_wrapped_line(report_test_vec['public_share'], tab=4)
 
         # Shard
-        for (i, input_share) in enumerate(prep_test_vec['input_shares']):
+        for (i, input_share) in enumerate(report_test_vec['input_shares']):
             print('  input_share_{}: >-'.format(i))
             print_wrapped_line(input_share, tab=4)
 
-        # Prepare
-        for (i, (prep_shares, prep_msg)) in enumerate(
-                zip_longest(prep_test_vec['prep_shares'],
-                            prep_test_vec['prep_messages'])):
+        # Verify
+        for (i, (verifier_shares, verifier_message)) in enumerate(
+                zip_longest(report_test_vec['verifier_shares'],
+                            report_test_vec['verifier_messages'])):
             print('  round_{}:'.format(i))
-            for (j, prep_share) in enumerate(prep_shares):
-                print('    prep_share_{}: >-'.format(j))
-                print_wrapped_line(prep_share, tab=6)
-            if prep_msg is not None:
-                print('    prep_message: >-')
-                print_wrapped_line(prep_msg, tab=6)
+            for (j, verifier_share) in enumerate(verifier_shares):
+                print('    verifier_share_{}: >-'.format(j))
+                print_wrapped_line(verifier_share, tab=6)
+            if verifier_message is not None:
+                print('    verifier_message: >-')
+                print_wrapped_line(verifier_message, tab=6)
 
-        for (j, out_share) in enumerate(prep_test_vec['out_shares']):
+        for (j, out_share) in enumerate(report_test_vec['out_shares']):
             print('  out_share_{}: {}'.format(j, out_share))
 
     # Aggregate
