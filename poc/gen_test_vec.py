@@ -127,7 +127,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     bad_input_share_0_temp[0] = modified_measurement_share
     bad_input_share_0: tuple[list[Field64], list[Field64], None] = tuple(
         bad_input_share_0_temp)
-    _prio3_prep_shares_to_prep_failure(
+    _prio3_verifier_shares_to_message_failure(
         prio3count,
         verify_key,
         nonce,
@@ -146,7 +146,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     modified_proof_share[0] += Field64(1)
     bad_input_share_0_temp[1] = modified_proof_share
     bad_input_share_0 = tuple(bad_input_share_0_temp)
-    _prio3_prep_shares_to_prep_failure(
+    _prio3_verifier_shares_to_message_failure(
         prio3count,
         verify_key,
         nonce,
@@ -166,7 +166,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     modified_proof_share[-1] += Field64(1)
     bad_input_share_0_temp[1] = modified_proof_share
     bad_input_share_0 = tuple(bad_input_share_0_temp)
-    _prio3_prep_shares_to_prep_failure(
+    _prio3_verifier_shares_to_message_failure(
         prio3count,
         verify_key,
         nonce,
@@ -184,7 +184,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     modified_helper_seed[0] ^= 1
     bad_input_share_1_temp[0] = modified_helper_seed
     bad_input_share_1 = tuple(bad_input_share_1_temp)
-    _prio3_prep_shares_to_prep_failure(
+    _prio3_verifier_shares_to_message_failure(
         prio3count,
         verify_key,
         nonce,
@@ -211,7 +211,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     modified_leader_blind[0] ^= 1
     bad_input_share_0_temp[2] = modified_leader_blind
     bad_input_share_0 = tuple(bad_input_share_0_temp)
-    _prio3_prep_shares_to_prep_failure(
+    _prio3_verifier_shares_to_message_failure(
         prio3histogram,
         verify_key,
         nonce,
@@ -229,7 +229,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     modified_helper_blind[0] ^= 1
     bad_input_share_1_temp[1] = modified_helper_blind
     bad_input_share_1 = tuple(bad_input_share_1_temp)
-    _prio3_prep_shares_to_prep_failure(
+    _prio3_verifier_shares_to_message_failure(
         prio3histogram,
         verify_key,
         nonce,
@@ -247,7 +247,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     modified_joint_rand_part = bytearray(bad_public_share[0])
     modified_joint_rand_part[0] ^= 1
     bad_public_share[0] = bytes(modified_joint_rand_part)
-    _prio3_prep_shares_to_prep_failure(
+    _prio3_verifier_shares_to_message_failure(
         prio3histogram,
         verify_key,
         nonce,
@@ -259,8 +259,8 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         "bad_public_share",
     )
 
-    # Modify joint randomness seed in prepare message.
-    (prep_state_0, prep_share_0) = prio3histogram.prep_init(
+    # Modify joint randomness seed in the verifier message.
+    (verify_state_0, verifier_share_0) = prio3histogram.verify_init(
         verify_key,
         ctx,
         0,
@@ -269,9 +269,9 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         public_share,
         input_share_0,
     )
-    bad_prep_msg = bytes([0] * prio3histogram.xof.SEED_SIZE)
+    bad_verifier_message = bytes([0] * prio3histogram.xof.SEED_SIZE)
     try:
-        prio3histogram.prep_next(ctx, prep_state_0, bad_prep_msg)
+        prio3histogram.verify_next(ctx, verify_state_0, bad_verifier_message)
     except ValueError:
         pass
     else:
@@ -279,13 +279,13 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
     test_vec: VdafTestVectorDict = {
         'operations': [
             {
-                'operation': 'prep_init',
+                'operation': 'verify_init',
                 'aggregator_id': 0,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_next',
+                'operation': 'verify_next',
                 'aggregator_id': 0,
                 'round': 1,
                 'report_index': 0,
@@ -296,7 +296,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         'verify_key': verify_key.hex(),
         'agg_param': '',
         'ctx': ctx.hex(),
-        'prep': [{
+        'reports': [{
             'measurement': None,
             'rand': rand.hex(),
             'nonce': nonce.hex(),
@@ -311,11 +311,11 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
                     input_share_1,
                 ).hex(),
             ],
-            'prep_shares': [[
-                prio3histogram.encode_prep_share(prep_share_0).hex(),
+            'verifier_shares': [[
+                prio3histogram.encode_verifier_share(verifier_share_0).hex(),
             ]],
-            'prep_messages': [
-                bad_prep_msg.hex(),
+            'verifier_messages': [
+                bad_verifier_message.hex(),
             ],
             'out_shares': [],
         }],
@@ -334,11 +334,11 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         test_vec_path,
         test_vec,
         prio3histogram.test_vec_name,
-        "bad_prep_msg",
+        "bad_verifier_message",
     )
 
 
-def _prio3_prep_shares_to_prep_failure(
+def _prio3_verifier_shares_to_message_failure(
         vdaf: Prio3,
         verify_key: bytes,
         nonce: bytes,
@@ -349,11 +349,11 @@ def _prio3_prep_shares_to_prep_failure(
         test_vec_path: str,
         filename_suffix: str) -> None:
     """
-    Takes in a corrupt report that will fail preparation during
-    prep_shares_to_prep, runs the preparation algorithms, and outputs a test
+    Takes in a corrupt report that will fail verification during
+    verifier_shares_to_message, runs the verification algorithms, and outputs a test
     vector.
     """
-    (_prep_state_0, prep_share_0) = vdaf.prep_init(
+    (_verify_state_0, verifier_share_0) = vdaf.verify_init(
         verify_key,
         ctx,
         0,
@@ -362,7 +362,7 @@ def _prio3_prep_shares_to_prep_failure(
         public_share,
         input_share_0,
     )
-    (_prep_state_1, prep_share_1) = vdaf.prep_init(
+    (_verify_state_1, verifier_share_1) = vdaf.verify_init(
         verify_key,
         ctx,
         1,
@@ -372,27 +372,28 @@ def _prio3_prep_shares_to_prep_failure(
         input_share_1,
     )
     try:
-        vdaf.prep_shares_to_prep(ctx, None, [prep_share_0, prep_share_1])
+        vdaf.verifier_shares_to_message(
+            ctx, None, [verifier_share_0, verifier_share_1])
     except ValueError:
         pass
     else:
-        raise Exception("prep_shares_to_prep should fail")
+        raise Exception("verifier_shares_to_message should fail")
     test_vec: VdafTestVectorDict = {
         'operations': [
             {
-                'operation': 'prep_init',
+                'operation': 'verify_init',
                 'aggregator_id': 0,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_init',
+                'operation': 'verify_init',
                 'aggregator_id': 1,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_shares_to_prep',
+                'operation': 'verifier_shares_to_message',
                 'round': 0,
                 'report_index': 0,
                 'success': False,
@@ -402,7 +403,7 @@ def _prio3_prep_shares_to_prep_failure(
         'verify_key': verify_key.hex(),
         'agg_param': '',
         'ctx': ctx.hex(),
-        'prep': [{
+        'reports': [{
             'measurement': None,
             'rand': rand.hex(),
             'nonce': nonce.hex(),
@@ -411,11 +412,11 @@ def _prio3_prep_shares_to_prep_failure(
                 vdaf.encode_input_share(input_share_0).hex(),
                 vdaf.encode_input_share(input_share_1).hex(),
             ],
-            'prep_shares': [[
-                vdaf.encode_prep_share(prep_share_0).hex(),
-                vdaf.encode_prep_share(prep_share_1).hex(),
+            'verifier_shares': [[
+                vdaf.encode_verifier_share(verifier_share_0).hex(),
+                vdaf.encode_verifier_share(verifier_share_1).hex(),
             ]],
-            'prep_messages': [],
+            'verifier_messages': [],
             'out_shares': [],
         }],
         'agg_shares': [],
@@ -463,7 +464,7 @@ def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
     bad_input_share_0_temp[2] = modified_correlated_randomness
     bad_input_share_0 = cast(Poplar1InputShare,
                              tuple(bad_input_share_0_temp))
-    (prep_state_r0_a0, prep_share_r0_a0) = vdaf.prep_init(
+    (verify_state_r0_a0, verifier_share_r0_a0) = vdaf.verify_init(
         verify_key,
         ctx,
         0,
@@ -472,7 +473,7 @@ def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
         public_share,
         bad_input_share_0,
     )
-    (prep_state_r0_a1, prep_share_r0_a1) = vdaf.prep_init(
+    (verify_state_r0_a1, verifier_share_r0_a1) = vdaf.verify_init(
         verify_key,
         ctx,
         1,
@@ -481,70 +482,70 @@ def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
         public_share,
         input_share_1,
     )
-    prep_msg = vdaf.prep_shares_to_prep(
+    verifier_message = vdaf.verifier_shares_to_message(
         ctx,
         agg_param,
-        [prep_share_r0_a0, prep_share_r0_a1],
+        [verifier_share_r0_a0, verifier_share_r0_a1],
     )
-    (prep_state_r1_a0, prep_share_r1_a0) = vdaf.prep_next(
+    (verify_state_r1_a0, verifier_share_r1_a0) = vdaf.verify_next(
         ctx,
-        prep_state_r0_a0,
-        prep_msg,
+        verify_state_r0_a0,
+        verifier_message,
     )
-    (prep_state_r1_a1, prep_share_r1_a1) = vdaf.prep_next(
+    (verify_state_r1_a1, verifier_share_r1_a1) = vdaf.verify_next(
         ctx,
-        prep_state_r0_a1,
-        prep_msg,
+        verify_state_r0_a1,
+        verifier_message,
     )
     try:
-        vdaf.prep_shares_to_prep(
+        vdaf.verifier_shares_to_message(
             ctx,
             agg_param,
             [
-                cast(FieldVec, prep_share_r1_a0),
-                cast(FieldVec, prep_share_r1_a1),
+                cast(FieldVec, verifier_share_r1_a0),
+                cast(FieldVec, verifier_share_r1_a1),
             ],
         )
     except ValueError:
         pass
     else:
-        raise Exception("prep_shares_to_prep should fail")
+        raise Exception("verifier_shares_to_message should fail")
     test_vec: VdafTestVectorDict = {
         'operations': [
             {
-                'operation': 'prep_init',
+                'operation': 'verify_init',
                 'aggregator_id': 0,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_init',
+                'operation': 'verify_init',
                 'aggregator_id': 1,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_shares_to_prep',
+                'operation': 'verifier_shares_to_message',
                 'round': 0,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_next',
+                'operation': 'verify_next',
                 'round': 1,
                 'aggregator_id': 0,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_next',
+                'operation': 'verify_next',
                 'round': 1,
                 'aggregator_id': 1,
                 'report_index': 0,
                 'success': True,
             },
             {
-                'operation': 'prep_shares_to_prep',
+                'operation': 'verifier_shares_to_message',
                 'round': 1,
                 'report_index': 0,
                 'success': False,
@@ -554,7 +555,7 @@ def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
         'verify_key': verify_key.hex(),
         'agg_param': vdaf.encode_agg_param(agg_param).hex(),
         'ctx': ctx.hex(),
-        'prep': [{
+        'reports': [{
             'measurement': None,
             'rand': rand.hex(),
             'nonce': nonce.hex(),
@@ -563,20 +564,20 @@ def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
                 vdaf.encode_input_share(bad_input_share_0).hex(),
                 vdaf.encode_input_share(input_share_1).hex(),
             ],
-            'prep_shares': [
+            'verifier_shares': [
                 [
-                    vdaf.encode_prep_share(prep_share_r0_a0).hex(),
-                    vdaf.encode_prep_share(prep_share_r0_a1).hex(),
+                    vdaf.encode_verifier_share(verifier_share_r0_a0).hex(),
+                    vdaf.encode_verifier_share(verifier_share_r0_a1).hex(),
                 ],
                 [
-                    vdaf.encode_prep_share(
-                        cast(FieldVec, prep_share_r1_a0)).hex(),
-                    vdaf.encode_prep_share(
-                        cast(FieldVec, prep_share_r1_a1)).hex(),
+                    vdaf.encode_verifier_share(
+                        cast(FieldVec, verifier_share_r1_a0)).hex(),
+                    vdaf.encode_verifier_share(
+                        cast(FieldVec, verifier_share_r1_a1)).hex(),
                 ],
             ],
-            'prep_messages': [
-                vdaf.encode_prep_msg(prep_msg).hex(),
+            'verifier_messages': [
+                vdaf.encode_verifier_message(verifier_message).hex(),
             ],
             'out_shares': [],
         }],

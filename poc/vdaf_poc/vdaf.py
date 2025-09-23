@@ -14,16 +14,16 @@ InputShare = TypeVar("InputShare")
 OutShare = TypeVar("OutShare")
 AggShare = TypeVar("AggShare")
 AggResult = TypeVar("AggResult")
-PrepState = TypeVar("PrepState")
-PrepShare = TypeVar("PrepShare")
-PrepMessage = TypeVar("PrepMessage")
+VerifyState = TypeVar("VerifyState")
+VerifierShare = TypeVar("VerifierShare")
+VerifierMessage = TypeVar("VerifierMessage")
 F = TypeVar("F", bound=Field)
 
 
 class Vdaf(
         Generic[
             Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
-            AggResult, PrepState, PrepShare, PrepMessage
+            AggResult, VerifyState, VerifierShare, VerifierMessage
         ],
         DistributedAggregation[
             Measurement, AggParam, PublicShare, InputShare, OutShare, AggShare,
@@ -63,7 +63,7 @@ class Vdaf(
     # The number of Aggregators.
     SHARES: int
 
-    # The number of rounds of communication during the Prepare phase.
+    # The number of rounds of communication during verification.
     ROUNDS: int
 
     # Name of the VDAF, for use in test vector filenames.
@@ -99,21 +99,22 @@ class Vdaf(
         pass
 
     @abstractmethod
-    def prep_init(self,
-                  verify_key: bytes,
-                  ctx: bytes,
-                  agg_id: int,
-                  agg_param: AggParam,
-                  nonce: bytes,
-                  public_share: PublicShare,
-                  input_share: InputShare) -> tuple[PrepState, PrepShare]:
+    def verify_init(self,
+                    verify_key: bytes,
+                    ctx: bytes,
+                    agg_id: int,
+                    agg_param: AggParam,
+                    nonce: bytes,
+                    public_share: PublicShare,
+                    input_share: InputShare,
+                    ) -> tuple[VerifyState, VerifierShare]:
         """
-        Initialize the prep state for the given input share and return the
-        initial prep share. This method is run by an Aggregator. Along with the
-        public share and its input share, the inputs include the verification
-        key shared by all of the Aggregators, the Aggregator's ID, and the
-        aggregation parameter, application context, and nonce agreed upon by
-        all of the Aggregators.
+        Initialize the verification state for the given input share and return
+        the first verifier share. This method is run by an Aggregator. Along
+        with the public share and its input share, the inputs include the
+        verification key shared by all of the Aggregators, the Aggregator's ID,
+        and the aggregation parameter, application context, and nonce agreed
+        upon by all of the Aggregators.
 
         Pre-conditions:
 
@@ -124,11 +125,11 @@ class Vdaf(
         pass
 
     @abstractmethod
-    def prep_next(self,
-                  ctx: bytes,
-                  prep_state: PrepState,
-                  prep_msg: PrepMessage,
-                  ) -> tuple[PrepState, PrepShare] | OutShare:
+    def verify_next(self,
+                    ctx: bytes,
+                    verify_state: VerifyState,
+                    verifier_message: VerifierMessage,
+                    ) -> tuple[VerifyState, VerifierShare] | OutShare:
         """
         Consume the inbound message from the previous round and return the
         Aggregator's share of the next round (or the aggregator's output share
@@ -137,14 +138,14 @@ class Vdaf(
         pass
 
     @abstractmethod
-    def prep_shares_to_prep(self,
-                            ctx: bytes,
-                            agg_param: AggParam,
-                            prep_shares: list[PrepShare]) -> PrepMessage:
+    def verifier_shares_to_message(self,
+                                   ctx: bytes,
+                                   agg_param: AggParam,
+                                   verifier_shares: list[VerifierShare]) -> VerifierMessage:
         """
-        Unshard the prep shares from the previous round of preparation. This is
-        called by an Aggregator after receiving all of the message shares from
-        the previous round.
+        Unshard the verifier shares from the previous round of verification.
+        This is called by an Aggregator after receiving all of the message
+        shares from the previous round.
         """
         pass
 
@@ -243,19 +244,19 @@ class Vdaf(
         pass
 
     @abstractmethod
-    def encode_prep_share(self, prep_share: PrepShare) -> bytes:
+    def encode_verifier_share(self, verifier_share: VerifierShare) -> bytes:
         pass
 
     @abstractmethod
-    def decode_prep_share(self, prep_state: PrepState, encoded: bytes) -> PrepShare:
+    def decode_verifier_share(self, verify_state: VerifyState, encoded: bytes) -> VerifierShare:
         pass
 
     @abstractmethod
-    def encode_prep_msg(self, prep_message: PrepMessage) -> bytes:
+    def encode_verifier_message(self, verifier_message: VerifierMessage) -> bytes:
         pass
 
     @abstractmethod
-    def decode_prep_msg(self, prep_state: PrepState, encoded: bytes) -> PrepMessage:
+    def decode_verifier_message(self, verify_state: VerifyState, encoded: bytes) -> VerifierMessage:
         pass
 
     @abstractmethod
@@ -289,9 +290,9 @@ def run_vdaf(
             OutShare,
             AggShare,
             AggResult,
-            PrepState,
-            PrepShare,
-            PrepMessage,
+            VerifyState,
+            VerifierShare,
+            VerifierMessage,
         ],
         verify_key: bytes,
         agg_param: AggParam,
@@ -317,45 +318,46 @@ def run_vdaf(
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
 
-        # Initialize preparation: Each Aggregator receives its report
-        # share (the public share and its input share) from the
-        # Client and initializes preparation.
-        prep_states = []
-        outbound_prep_shares = []
+        # Initialize verification: Each Aggregator receives its
+        # report share (the public share and its input share) from
+        # the Client and initializes verification.
+        verify_states = []
+        outbound_verifier_shares = []
         for j in range(vdaf.SHARES):
-            (state, share) = vdaf.prep_init(verify_key, ctx, j,
-                                            agg_param,
-                                            nonce,
-                                            public_share,
-                                            input_shares[j])
-            prep_states.append(state)
-            outbound_prep_shares.append(share)
+            (state, share) = vdaf.verify_init(verify_key, ctx, j,
+                                              agg_param,
+                                              nonce,
+                                              public_share,
+                                              input_shares[j])
+            verify_states.append(state)
+            outbound_verifier_shares.append(share)
 
-        # Complete preparation: The Aggregators execute each round of
-        # preparation until each computes an output share. A round
-        # begins by gathering the prep shares and combining them into
-        # the prep message. The round ends when each uses the prep
-        # message to transition to the next state.
+        # Complete verification: The Aggregators execute each round
+        # of verification until each computes an output share. A
+        # round begins by gathering the verifier shares and combining
+        # them into the verifier message. The round ends when each
+        # uses the verifier message to transition to the next state.
         for i in range(vdaf.ROUNDS - 1):
-            prep_msg = vdaf.prep_shares_to_prep(ctx,
-                                                agg_param,
-                                                outbound_prep_shares)
+            verifier_message = vdaf.verifier_shares_to_message(
+                ctx, agg_param, outbound_verifier_shares)
 
-            outbound_prep_shares = []
+            outbound_verifier_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.prep_next(ctx, prep_states[j], prep_msg)
+                out = vdaf.verify_next(ctx,
+                                       verify_states[j],
+                                       verifier_message)
                 assert isinstance(out, tuple)
-                (prep_states[j], prep_share) = out
-                outbound_prep_shares.append(prep_share)
+                (verify_states[j], verifier_share) = out
+                outbound_verifier_shares.append(verifier_share)
 
-        prep_msg = vdaf.prep_shares_to_prep(ctx,
-                                            agg_param,
-                                            outbound_prep_shares)
+        verifier_message = vdaf.verifier_shares_to_message(
+            ctx, agg_param, outbound_verifier_shares)
 
         # Aggregation: Each Aggregator updates its aggregate share
         # with its output share.
         for j in range(vdaf.SHARES):
-            out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
+            out_share = vdaf.verify_next(
+                ctx, verify_states[j], verifier_message)
             assert not isinstance(out_share, tuple)
             agg_shares[j] = vdaf.agg_update(agg_param,
                                             agg_shares[j],

@@ -26,7 +26,7 @@ def base_soundness(flp: FlpBBCGGI19[Measurement, AggResult, F]) -> float:
 def robustness(
         soundness: float,
         ro_queries: int,
-        prep_queries: int,
+        verify_queries: int,
         num_proofs: int) -> float:
     '''
     ia.cr/2023/130, Theorem 1, assuming the bound can be modified by raising
@@ -38,11 +38,11 @@ def robustness(
     ro_queries - random oracle queries, a proxy for the amount of
                  precomputation done by the adversary
 
-    prep_queries - number of online attempts, a proxy for the batch size
+    verify_queries - number of online attempts, a proxy for the batch size
 
     num_proofs - number of FLPs
     '''
-    return (ro_queries + prep_queries) * soundness**num_proofs
+    return (ro_queries + verify_queries) * soundness**num_proofs
 
 
 def sum_vec(field: type[NttField], num_proofs: int, length: int) -> float:
@@ -61,7 +61,7 @@ def sum_vec(field: type[NttField], num_proofs: int, length: int) -> float:
     return robustness(
         soundness,
         2**80,          # ro queries
-        1_000_000_000,  # prep queries
+        1_000_000_000,  # verify queries
         num_proofs,
     )
 
