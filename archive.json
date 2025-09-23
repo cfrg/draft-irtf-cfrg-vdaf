@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-18T00:58:31.102525+00:00",
+  "timestamp": "2025-09-23T00:58:47.172150+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -117,6 +117,11 @@
       "name": "draft-16",
       "description": "",
       "color": "388929"
+    },
+    {
+      "name": "draft-17",
+      "description": "",
+      "color": "34db56"
     }
   ],
   "issues": [
@@ -7027,11 +7032,12 @@
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [
-        "wire change"
+        "wire change",
+        "draft-17"
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-08-07T19:24:52Z",
+      "updatedAt": "2025-09-22T16:23:56Z",
       "closedAt": null,
       "comments": [
         {
@@ -7233,7 +7239,7 @@
       "id": "I_kwDOGKuqOc7KW2KY",
       "title": "Make mathematical notation more clear",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/565",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7245,8 +7251,8 @@
       ],
       "body": "The VDAF draft is mentioned in https://mailarchive.ietf.org/arch/msg/cfrg/1AwdnL40ZcrOA2-A-s06f0EB2Es/, in the context of guidance for mathematical notation in I-Ds. We should try to follow these guidelines better, to improve clarity.",
       "createdAt": "2025-09-08T17:06:56Z",
-      "updatedAt": "2025-09-08T20:04:26Z",
-      "closedAt": null,
+      "updatedAt": "2025-09-22T15:29:18Z",
+      "closedAt": "2025-09-22T15:29:17Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -7284,6 +7290,32 @@
       "updatedAt": "2025-09-09T14:02:47Z",
       "closedAt": "2025-09-09T14:02:47Z",
       "comments": []
+    },
+    {
+      "number": 572,
+      "id": "I_kwDOGKuqOc7NLdlG",
+      "title": "Consider renaming \"prepare\" to \"verify\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/572",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-17"
+      ],
+      "body": "As discussed in https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/729#issue-3439227075.\n\n\"Verify\" is a natural term for VDAFs that use FLPs or arithmetic sketching to validate the output shares. It's not quite as good a fit for other MPC techniques we might want to fit into our framework, such as boolean-to-arithmetic sketching (as in Prio+). However, these remain hypothetical. In the meantime, \"prepare\" has caused us a ton of grief.",
+      "createdAt": "2025-09-22T19:05:56Z",
+      "updatedAt": "2025-09-22T19:06:39Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "cc @martinthomson",
+          "createdAt": "2025-09-22T19:06:39Z",
+          "updatedAt": "2025-09-22T19:06:39Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -46202,7 +46234,7 @@
       "id": "PR_kwDOGKuqOc6oHvqS",
       "title": "Improve mathematical notation",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/569",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -46211,17 +46243,19 @@
       ],
       "body": "Fixes #565. I ultimately decided to use `**` throughout for exponentiation.",
       "createdAt": "2025-09-11T21:45:11Z",
-      "updatedAt": "2025-09-17T22:29:10Z",
+      "updatedAt": "2025-09-22T15:29:21Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "4570e6bd02074fd0af5b8db249ce6858ae8992e9",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/mathematical-notation",
       "headRefOid": "2967797f2f30b242642d21105571758f488a5f39",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-09-22T15:29:16Z",
+      "mergedAt": "2025-09-22T15:29:16Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "f329cd803631b4e2580c4a54623839128835620d"
+      },
       "comments": [],
       "reviews": [
         {
@@ -46400,6 +46434,50 @@
               "updatedAt": "2025-09-12T15:02:42Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 571,
+      "id": "PR_kwDOGKuqOc6p3_sy",
+      "title": "Add change log update for next draft",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/571",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-16"
+      ],
+      "body": "",
+      "createdAt": "2025-09-22T15:31:44Z",
+      "updatedAt": "2025-09-22T15:41:50Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "f329cd803631b4e2580c4a54623839128835620d",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-16-cl",
+      "headRefOid": "8df70d86fc97961735e315435f378792b8df6f30",
+      "closedAt": "2025-09-22T15:41:50Z",
+      "mergedAt": "2025-09-22T15:41:50Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "1e59aac33f73349327d06b726e22bd4e63b52135"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7B7l3H",
+          "commit": {
+            "abbreviatedOid": "8df70d8"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-09-22T15:39:53Z",
+          "updatedAt": "2025-09-22T15:39:53Z",
+          "comments": []
         }
       ]
     }
