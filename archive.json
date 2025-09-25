@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-23T00:58:47.172150+00:00",
+  "timestamp": "2025-09-25T00:59:53.766224+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7299,13 +7299,15 @@
       "state": "OPEN",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "draft-17"
       ],
       "body": "As discussed in https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/729#issue-3439227075.\n\n\"Verify\" is a natural term for VDAFs that use FLPs or arithmetic sketching to validate the output shares. It's not quite as good a fit for other MPC techniques we might want to fit into our framework, such as boolean-to-arithmetic sketching (as in Prio+). However, these remain hypothetical. In the meantime, \"prepare\" has caused us a ton of grief.",
       "createdAt": "2025-09-22T19:05:56Z",
-      "updatedAt": "2025-09-22T19:06:39Z",
+      "updatedAt": "2025-09-23T14:39:12Z",
       "closedAt": null,
       "comments": [
         {
@@ -7314,6 +7316,89 @@
           "body": "cc @martinthomson",
           "createdAt": "2025-09-22T19:06:39Z",
           "updatedAt": "2025-09-22T19:06:39Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Per slack discussion (2025/9/23): We'll rename `prep_next` -> `prep_init` and so on but leave the DAF `prep` API where it is.",
+          "createdAt": "2025-09-23T14:26:30Z",
+          "updatedAt": "2025-09-23T14:39:12Z"
+        }
+      ]
+    },
+    {
+      "number": 573,
+      "id": "I_kwDOGKuqOc7NZv8U",
+      "title": "Using faster polynomial evaluation from rhizomes paper (ia.cr/2025/1727)",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/573",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Use of faster polynomial evaluation in the Lagrange basis from the rhizomes paper.\n- It is applied to FLP.Query algorithm to evaluate several polynomials at a random value.\n- In the paper, Algorithm 6 evaluates a single polynomial, while Alg. 7 is its batched version that is implemented.\n\nA verbose example of the changes needed for libprio-rs is here: https://github.com/armfazh/rhizomes/pull/1 \nThe actual PR is here: https://github.com/divviup/libprio-rs/pull/1340\n\n\nReference: \n[LINK](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\nNo breaking changes",
+      "createdAt": "2025-09-23T17:16:31Z",
+      "updatedAt": "2025-09-23T21:22:30Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks @armfazh, this is awesome :) \n\nI think we could resolve this one by adding an implementation note to [Section 7.3](https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-7.3), as well as an informative reference to your paper.\n\nMy vote would be to take this change in the next draft, regardless of what we do with #574. What do you think, @divergentdave?",
+          "createdAt": "2025-09-23T21:21:27Z",
+          "updatedAt": "2025-09-23T21:21:27Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Speaking of: when you benchmarked this, did you notice whether there was an improvement across the board, for all Prio3 variants? Or does it only make a difference for larger circuits?",
+          "createdAt": "2025-09-23T21:22:30Z",
+          "updatedAt": "2025-09-23T21:22:30Z"
+        }
+      ]
+    },
+    {
+      "number": 574,
+      "id": "I_kwDOGKuqOc7NZv-5",
+      "title": "prio: Mantain polynomial always in the Lagrange basis.",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/574",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
+      "createdAt": "2025-09-23T17:16:36Z",
+      "updatedAt": "2025-09-23T21:32:17Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> In the spec: indicate that all polynomial operations must be performed in Lagrange basis.\n\nDoes the spec actually have to say this as a must? If an implementation doesn't perform operations in the Lagrange basis, it'll be slower, but it'll still interoperate successfully with an implementation that does use the Lagrange basis, right?",
+          "createdAt": "2025-09-23T17:27:46Z",
+          "updatedAt": "2025-09-23T17:27:46Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Regarding interoperability, the spec currently enforces that messages be encoded in the monomial basis. This is an implicit restriction on message encoding that ultimately gets reflected in unnecesary conversions.\n\nA possible change is to let implementations to encode polynomials in any compatible basis.\nHowever, how this can be managed with test vectors?",
+          "createdAt": "2025-09-23T17:34:42Z",
+          "updatedAt": "2025-09-23T17:34:42Z"
+        },
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I understand now how this is a breaking change. Thanks.",
+          "createdAt": "2025-09-23T17:53:35Z",
+          "updatedAt": "2025-09-23T17:53:35Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@armfazh are there any new security considerations we need to be aware of if we took this change?",
+          "createdAt": "2025-09-23T21:32:17Z",
+          "updatedAt": "2025-09-23T21:32:17Z"
         }
       ]
     }
@@ -46480,6 +46565,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 575,
+      "id": "PR_kwDOGKuqOc6qJPpq",
+      "title": "Rename \"prep\" to \"verify\"",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/575",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Closes #572.",
+      "createdAt": "2025-09-23T21:07:21Z",
+      "updatedAt": "2025-09-23T21:09:08Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "1e59aac33f73349327d06b726e22bd4e63b52135",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/572",
+      "headRefOid": "55da58a8b10f44bfe48ceb0254e7f4ddb4d77826",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
