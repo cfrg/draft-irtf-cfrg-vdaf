@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-25T00:59:53.766224+00:00",
+  "timestamp": "2025-09-28T01:06:04.883202+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7334,11 +7334,16 @@
       "state": "OPEN",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
-      "labels": [],
+      "assignees": [
+        "armfazh"
+      ],
+      "labels": [
+        "editorial",
+        "draft-17"
+      ],
       "body": "Use of faster polynomial evaluation in the Lagrange basis from the rhizomes paper.\n- It is applied to FLP.Query algorithm to evaluate several polynomials at a random value.\n- In the paper, Algorithm 6 evaluates a single polynomial, while Alg. 7 is its batched version that is implemented.\n\nA verbose example of the changes needed for libprio-rs is here: https://github.com/armfazh/rhizomes/pull/1 \nThe actual PR is here: https://github.com/divviup/libprio-rs/pull/1340\n\n\nReference: \n[LINK](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\nNo breaking changes",
       "createdAt": "2025-09-23T17:16:31Z",
-      "updatedAt": "2025-09-23T21:22:30Z",
+      "updatedAt": "2025-09-25T19:57:13Z",
       "closedAt": null,
       "comments": [
         {
@@ -7354,6 +7359,20 @@
           "body": "Speaking of: when you benchmarked this, did you notice whether there was an improvement across the board, for all Prio3 variants? Or does it only make a difference for larger circuits?",
           "createdAt": "2025-09-23T21:22:30Z",
           "updatedAt": "2025-09-23T21:22:30Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> Speaking of: when you benchmarked this, did you notice whether there was an improvement across the board, for all Prio3 variants? Or does it only make a difference for larger circuits?\n\nIn the benchmark [plot](https://private-user-images.githubusercontent.com/10335519/492946130-915a0c92-315a-408b-8332-ff3d8e1c5736.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTg4MTA1NDksIm5iZiI6MTc1ODgxMDI0OSwicGF0aCI6Ii8xMDMzNTUxOS80OTI5NDYxMzAtOTE1YTBjOTItMzE1YS00MDhiLTgzMzItZmYzZDhlMWM1NzM2LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA5MjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwOTI1VDE0MjQwOVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWZiZGJjZjM5N2IyOTdiMTg0YjU1MzRmYWQ5NDAzOWM4ZWM0YzBiNTQwNzE3YWE4OGQxMDAxZDI0MWFlYWVkZWEmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.BNIE0WaF5PU0VlXSlKRa1zhpKUviTNGxvhiDhPtdlJs), there are improvements even for variants where N is as small as 10.\n\nThis also applies even for the Count VDAF that uses small degree polynomials. ",
+          "createdAt": "2025-09-25T14:27:50Z",
+          "updatedAt": "2025-09-25T14:27:50Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@armfazh please send a PR when convenient!",
+          "createdAt": "2025-09-25T19:57:12Z",
+          "updatedAt": "2025-09-25T19:57:12Z"
         }
       ]
     },
@@ -7366,10 +7385,12 @@
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "wire change"
+      ],
       "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
       "createdAt": "2025-09-23T17:16:36Z",
-      "updatedAt": "2025-09-23T21:32:17Z",
+      "updatedAt": "2025-09-25T23:29:54Z",
       "closedAt": null,
       "comments": [
         {
@@ -7399,6 +7420,27 @@
           "body": "@armfazh are there any new security considerations we need to be aware of if we took this change?",
           "createdAt": "2025-09-23T21:32:17Z",
           "updatedAt": "2025-09-23T21:32:17Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> are there any new security considerations we need to be aware of if we took this change?\n\nI think the previous considerations still apply, but not new ones.\nMost of the changes are about the way polynomial arithmetic is computed. Nothing changed in the design of the protocol, just the representation of polynomials.\nIn fact, the protocol constructs the polynomials in the values (Lagrange) representation, and the spirit of the proposal is to stick to such a representation while improving performance. \n",
+          "createdAt": "2025-09-25T14:35:08Z",
+          "updatedAt": "2025-09-25T14:36:26Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Let's prepare to discuss this change at IETF 124. Since the paper is so new and we're so close to done, we might decide that we don't want to block RGLC on this. Still, the potential performance benefits are too enticing to ignore.\n\n@armfazh would you mind preparing a PR for this, just to give us a sense of how complex this change will be? No need to propagate it through the draft in the initial PR. My suggestion would be to just update the PoC.\n\nAlternatively, @divergentdave if you wanted to take a crack at this, in order to learn how the new math works, I say go for it.",
+          "createdAt": "2025-09-25T20:07:40Z",
+          "updatedAt": "2025-09-25T20:40:46Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "The PR for libprio-rs (https://github.com/armfazh/rhizomes/pull/2) is meant to give ideas about the changes needed.\n\nIt would be useful if someone (other than me) replicated the results in the Python implementation. Please comment if you prefer I work on the changes for the Python code. I'm ok with either option.\n\n",
+          "createdAt": "2025-09-25T23:29:54Z",
+          "updatedAt": "2025-09-25T23:29:54Z"
         }
       ]
     }
