@@ -997,7 +997,7 @@ follows:
    combines them into the aggregate representation of the measurements, called
    the "aggregate result".
 
-This second step involves a process called "preparation" in which the
+For DAFs, this second step involves a process called "preparation" in which the
 Aggregator refines each input share into an intermediate representation called
 an "output share". The output shares are then combined into the aggregate share
 as shown in {{overall-flow-prep}}.
@@ -1021,14 +1021,14 @@ out_share_0    out_share_1    ... out_share_[M-1]
                  v
                agg_share
 ~~~
-{: #overall-flow-prep title="Preparation of input shares into output shares and
-aggregation of output shares into an aggregate share. Executed by each
+{: #overall-flow-prep title="DAF preparation of input shares into output shares
+and aggregation of output shares into an aggregate share. Executed by each
 Aggregator. M denotes the number of measurements being aggregated."}
 
-In the case of VDAFs ({{vdaf}}), preparation involves interacting with the
-other Aggregators. This process will fail if the underlying measurement is
-invalid, in which case the report is rejected and not included in the aggregate
-result.
+In the case of VDAFs ({{vdaf}}), this process is instead called "veriication"
+and involves interacting with the other Aggregators. It will fail if the
+underlying measurement is invalid, in which case the report is rejected and not
+included in the aggregate result.
 
 Aggregators are a new class of actor relative to traditional measurement systems
 where Clients submit measurements to a single server.  They are critical for
@@ -1194,7 +1194,7 @@ derive per-report randomness for verification of the computation. See
       v              v                      v
     out_share_0    out_share_1            out_share_[SHARES-1]
 ~~~
-{: #daf-prep-flow title="Illustration of preparation."}
+{: #daf-verify-flow title="Illustration of preparation."}
 
 Once an Aggregator has received the public share and its input share, the next
 step is to prepare the input share for aggregation. This is accomplished using
@@ -1385,13 +1385,13 @@ environments and what properties the wrapper protocol needs to provide in each.
 
 # Definition of VDAFs {#vdaf}
 
-VDAFs are identical to DAFs except that preparation is an interactive process
-carried out by the Aggregators. If successful, this process results in each
-Aggregator computing an output share. The process will fail if, for example,
-the underlying measurement is invalid.
+VDAFs are identical to DAFs except that the non-interactive preparation process
+is replaced by an interactive process called "verification" in which, in
+addition to refining their input shares into output shares, the Aggregators
+also verify that they hold valid output shares.
 
 Failure manifests as an exception raised by one of the algorithms defined in
-this section. If an exception is raised during preparation, the Aggregators
+this section. If an exception is raised during verification, the Aggregators
 MUST remove the report from the batch and not attempt to aggregate it.
 Otherwise, a malicious Client can cause the Collector to compute a malformed
 aggregate result.
@@ -1403,10 +1403,10 @@ The attributes listed in {{vdaf-param}} are defined by each concrete VDAF.
 |:-----------------------|:---------------------------------------------------------------|
 | `ID: int`              | Algorithm identifier for this VDAF, in the range `[0, 2**32)`. |
 | `SHARES: int`          | Number of input shares into which each measurement is sharded. |
-| `ROUNDS: int`          | Number of rounds of communication during preparation.          |
+| `ROUNDS: int`          | Number of rounds of communication during verification.         |
 | `NONCE_SIZE: int`      | Size of each report nonce.                                     |
 | `RAND_SIZE: int`       | Size of each random byte string consumed during sharding.      |
-| `VERIFY_KEY_SIZE: int` | Size of the verification key used during preparation.          |
+| `VERIFY_KEY_SIZE: int` | Size of the verification key used during verification.         |
 | `Measurement`          | Type of each measurement.                                      |
 | `PublicShare`          | Type of each public share.                                     |
 | `InputShare`           | Type of each input share.                                      |
@@ -1414,16 +1414,16 @@ The attributes listed in {{vdaf-param}} are defined by each concrete VDAF.
 | `OutShare`             | Type of each output share.                                     |
 | `AggShare`             | Type of each aggregate share.                                  |
 | `AggResult`            | Type of the aggregate result.                                  |
-| `PrepState`            | Type of each prep state.                                       |
-| `PrepShare`            | Type of each prep share.                                       |
-| `PrepMessage`          | Type of each prep message.                                     |
+| `VerifyState`          | Type of each verification state.                               |
+| `VerifierShare`        | Type of each verifier share.                                   |
+| `VerifierMessage`      | Type of each verifier message.                                 |
 {: #vdaf-param title="Constants and types defined by each concrete VDAF."}
 
 Some of the types in the table above need to be written to the network in
 order to carry out the computation. It is RECOMMENDED that concrete
 instantiations of the `Vdaf` interface specify a method of encoding the
-`PublicShare`, `InputShare`, `AggParam`, `AggShare`, `PrepShare`, and
-`PrepMessage` types.
+`PublicShare`, `InputShare`, `AggParam`, `AggShare`, `VerifierShare`, and
+`VerifierMessage` types.
 
 Each VDAF is identified by a unique 32-bit integer, denoted `ID`. Identifiers
 for each VDAF specified in this document are defined in {{codepoints}}. The
@@ -1448,89 +1448,92 @@ for domain separation. Function `format_dst()` is defined in {{dst-binder}}.
 ## Sharding {#sec-vdaf-shard}
 
 Sharding is as described for DAFs in {{sec-daf-shard}}. The public share and
-input shares encode additional information used during preparation to validate
+input shares encode additional information used during verification to validate
 the output shares before they are aggregated (e.g., the "proof shares" in
 {{prio3}}).
 
 Like DAFs, sharding is bound to the application context via the application
 context string. Again, this is intended to ensure that aggregation succeeds
 only if the Clients and Aggregators agree on the application context. Unlike
-DAFs, however, disagreement on the context should manifest as a preparation
+DAFs, however, disagreement on the context should manifest as a verification
 failure, causing the report to be rejected without garbling the aggregate
 result. The application context also provides some defense-in-depth against
 cross protocol attacks; see {{deep}}.
 
-## Preparation {#sec-vdaf-prepare}
+## Verification {#sec-vdaf-verify}
 
 ~~~~ aasvg
     Aggregator 0   Aggregator 1           Aggregator SHARES-1
     ============   ============           ===================
 
-    input_share_0  input_share_1          input_share_[SHARES-1]
-      |              |                 ...  |
-      v              v                      v
-    +-----------+  +-----------+          +-----------+
-    | prep_init |  | prep_init |          | prep_init |
-    +-+-------+-+  +-+-------+-+          +-+-------+-+
-      |       |      |       |         ...  |       |
-      v       |      v       |              v       |
-    +---------|--------------|----------------------|--+ -.
-    |         |              |  prep_shares_to_prep |  |   |
-    +-+-------|------+-------|--------------+-------|--+   |
-      |       |      |       |         ...  |       |      |
-      v       v      v       v              v       v      | x ROUNDS
-    +-----------+  +-----------+          +-----------+    |
-    | prep_next |  | prep_next |          | prep_next |    |
-    +-+-------+-+  +-+-------+-+          +-+-------+-+    |
-      |       |      |       |         ...  |       |      |
-      v       v      v       v              v       v    -'
+    input_share_0    input_share_1         input_share_[SHARES-1]
+      |                |                 ...  |
+      v                v                      v
+    +-------------+  +-------------+        +-------------+
+    | verify_init |  | verify_init |        | verify_init |
+    +-+---------+-+  +-+---------+-+        +-+---------+-+
+      |         |      |         |       ...  |         |
+      v         |      v         |            v         |
+    +-----------|----------------|----------------------|--+ -.
+    |           |                | ver_shares_to_msg    |  |   |
+    +-+---------|------+---------|------------+---------|--+   |   R
+      |         |      |         |       ...  |         |      |   O
+      v         v      v         v            v         v      | x U
+    +-------------+  +-------------+        +-------------+    |   N
+    | verify_next |  | verify_next |        | verify_next |    |   D
+    +-+---------+-+  +-+---------+-+        +-+---------+-+    |   S
+      |         |      |         |       ...  |         |      |
+      v         v      v         v            v         v    -'
 
-     ...            ...                    ...
+     ...            ...                  ...
 
-      |              |                 ...  |
-      |              |                      |
-      v              v                      v
-    out_share_0    out_share_1         out_share_[SHARES-1]
+      |                |                 ...  |
+      |                |                      |
+      v                v                      v
+    out_share_0      out_share_1           out_share_[SHARES-1]
 ~~~~
-{: #prep-flow title="Illustration of interactive VDAF preparation."}
+{: #verify-flow title="Illustration of interactive VDAF verification."}
 
-Preparation is organized into a number of rounds. The number of rounds depends
+Verification is organized into a number of rounds. The number of rounds depends
 on the VDAF: Prio3 ({{prio3}}) has one round and Poplar1 ({{poplar1}}) has two.
 
-Aggregators retain some local state between successive rounds of preparation.
-This is referred to as "preparation state" or "prep state" for short.
+Aggregators retain some local state between successive rounds of verification.
+This is referred to as "verification state", usually written as `ver_state` for
+short.
 
-During each round, each Aggregator broadcasts a message called a
-"preparation share", or "prep share" for short. The prep shares are then
-combined into a single message called the "preparation message", or "prep
-message". The prep message MAY be computed by any one of the Aggregators.
+During each round, each Aggregator broadcasts a message called a "verifier
+share", usually written `ver_share`. The verifier shares are then combined into
+a single message called the "verifier message", or `ver_msg`. The verifier
+message is computed from public information and therefore MAY be computed by
+any one of the Aggregators.
 
-The prep message is disseminated to each of the Aggregators to begin the next
-round. An Aggregator begins the first round with its input share and it begins
-each subsequent round with the current prep state and the previous prep
-message. Its output in the last round is its output share and its output in
-each of the preceding rounds is a prep share.
+The verifier message is disseminated to each of the Aggregators to begin the
+next round. An Aggregator begins the first round with its input share and it
+begins each subsequent round with the current verification state and the
+previous verifier message. Its output in the last round is its output share and
+its output in each of the preceding rounds is a verifier share.
 
-Just as for DAFs ({{sec-daf-prepare}}), preparation involves an aggregation
-parameter. The aggregation parameter is consumed by each Aggregator before the
-first round of communication.
+Just as for DAF preparation involves an aggregation parameter
+({{sec-daf-prepare}}), so does VDAF verification. The aggregation parameter is
+consumed by each Aggregator before the first round of communication.
 
-Unlike DAFs, VDAF preparation involves a secret "verification key" held by each
-of the Aggregators. This key is used to verify validity of the output shares
-they compute. It is up to the high level protocol in which the VDAF is used to
-arrange for the distribution of the verification key prior to generating and
-processing reports. See {{security}} for details.
+In addition, VDAF verification involves a secret "verification key" held by
+each of the Aggregators. This key is used to verify validity of the output
+shares they compute. It is up to the high level protocol in which the VDAF is
+used to arrange for the distribution of the verification key prior to
+generating and processing reports. See {{security}} for details.
 
-Preparation is implemented by the following set of algorithms:
+Verification is implemented by the following set of algorithms:
 
-* `vdaf.prep_init(verify_key: bytes, ctx: bytes, agg_id: int, agg_param:
+* `vdaf.verify_init(verify_key: bytes, ctx: bytes, agg_id: int, agg_param:
   AggParam, nonce: bytes, public_share: PublicShare, input_share: InputShare)
-  -> tuple[PrepState, PrepShare]` is the deterministic preparation state
+  -> tuple[VerifyState, VerifierShare]` is the deterministic verification state
   initialization algorithm run by each Aggregator. It consumes the shared
   verification key, the application context, the Aggregator's unique
   identifier, the aggregation parameter chosen by the Collector, the report
   nonce, the public share, and one of the input shares generated by the Client.
-  It produces the Aggregator's initial prep state and prep share.
+  It produces the Aggregator's initial verification state and output verifier
+  share.
 
   Protocols MUST ensure that public share consumed by each of the Aggregators is
   identical. This is security critical for VDAFs such as Poplar1.
@@ -1543,23 +1546,23 @@ Preparation is implemented by the following set of algorithms:
       Client.
     * `nonce` MUST have length `vdaf.NONCE_SIZE`.
 
-* `vdaf.prep_shares_to_prep(ctx: bytes, agg_param: AggParam, prep_shares:
-  list[PrepShare]) -> PrepMessage` is the deterministic preparation message
-  pre-processing algorithm. It combines the prep shares produced by the
-  Aggregators in the previous round into the prep message consumed by each
-  Aggregator to start the next round.
+* `vdaf.ver_shares_to_msg(ctx: bytes, agg_param: AggParam, ver_shares:
+  list[VerifierShare]) -> VerifierMessage` is the deterministic verification
+  message pre-processing algorithm. It combines the verifier shares produced by
+  the Aggregators in the previous round into the verifier message consumed by
+  each Aggregator to start the next round.
 
-* `vdaf.prep_next(ctx: bytes, prep_state: PrepState, prep_msg: PrepMessage) ->
-  tuple[PrepState, PrepShare] | OutShare` is the deterministic
-  preparation state update algorithm run by each Aggregator. It updates the
-  Aggregator's prep state (`prep_state`) and returns either its next prep state
-  and prep share for the next round or, if this is the last round, its output
-  share.
+* `vdaf.verify_next(ctx: bytes, ver_state: VerifyState, ver_msg: VerifierMessage) ->
+  tuple[VerifyState, VerifierShare] | OutShare` is the deterministic
+  verification state update algorithm run by each Aggregator. It updates the
+  Aggregator's verification state (`ver_state`) and returns either its next
+  verification state and verifier share for the next round or, if this is the
+  last round, its output share.
 
 An exception may be raised by one of these algorithms, in which case the report
 MUST be deemed invalid and not processed any further.
 
-Implementation note: The preparation process accomplishes two tasks: recovery
+Implementation note: The verification process accomplishes two tasks: recovery
 of output shares from the input shares and ensuring that the recovered output
 shares are valid. The abstraction boundary is drawn so that an Aggregator only
 recovers an output share if the underlying data is deemed valid (at least,
@@ -1575,7 +1578,7 @@ at all.
 
 Aggregation parameter validation is as described for DAFs in
 {{sec-daf-validity-scopes}}. Again, each Aggregator MUST validate each
-aggregation parameter received from the Collector before beginning preparation
+aggregation parameter received from the Collector before beginning verification
 with that parameter.
 
 ## Aggregation {#sec-vdaf-aggregate}
@@ -1684,41 +1687,41 @@ def run_vdaf(
     return agg_result
 ~~~
 
-Depending on the VDAF, preparation and aggregation may be carried out multiple
-times on the same sequence of reports.
+Depending on the VDAF, verification, aggregation, and collection may be carried
+out multiple times on the same sequence of reports.
 
 In practice, VDAF execution is distributed across Clients, Aggregators, and
-Collectors that exchange messages (i.e., report shares, prep shares, and
+Collectors that exchange messages (i.e., report shares, verifier shares, and
 aggregate shares) over an insecure network. The application must therefore take
 some additional steps in order to securely execute the VDAF in this
 environment. See {{security}} for details.
 
-## Communication Patterns for Preparation {#vdaf-prep-comm}
+## Communication Patterns for Verification {#vdaf-verify-comm}
 
-The only stage of VDAF execution that requires interaction is preparation
-({{sec-vdaf-prepare}}). There are a number of ways to coordinate this
+The only stage of VDAF execution that requires interaction is verification
+({{sec-vdaf-verify}}). There are a number of ways to coordinate this
 interaction; the best strategy depends largely on the number of Aggregators
 (i.e., `vdaf.SHARES`). This section describes two strategies, one specialized
 for two Aggregators and another that is suitable for any number of Aggregators.
 
-In each round of preparation, each Aggregator writes a prep share to some
-broadcast channel, which is then processed into the prep message using the
-public `prep_shares_to_prep()` algorithm and broadcast to the Aggregators to
+In each round of verification, each Aggregator writes a verifier share to some
+broadcast channel, which is then processed into the verifier message using the
+public `ver_shares_to_msg()` algorithm and broadcast to the Aggregators to
 start the next round. The goal of this section is to realize this broadcast
 channel.
 
 The state machine of each Aggregator is shown below.
 
 ~~~ aasvg
- +--> Rejected <--+   +----------------+   Finished(out_share)
- |                |   |                |           ^
- |                |   |                v           |
-Start ----> Continued(prep_state, prep_round, outbound)
- |                                                 |
- |                                                 v
- +-----------------> FinishedWithOutbound(out_share, outbound)
+ +--> Rejected <--+   +--------------+   Finished(out_share)
+ |                |   |              |           ^
+ |                |   |              v           |
+Start ----> Continued(ver_state, ver_round, outbound)
+ |                                               |
+ |                                               v
+ +---------------> FinishedWithOutbound(out_share, outbound)
 ~~~
-{: #vdaf-prep-state-machine title="State machine of VDAF preparation."}
+{: #vdaf-ver-state-machine title="State machine of VDAF verification."}
 
 State transitions are made when the state is acted upon by the Aggregator's
 local inputs and/or messages sent by its co-Aggregators. The initial state is
@@ -1731,7 +1734,7 @@ completeness, these states are defined in {{topo-states}}.
 
 The methods described in this section are defined in terms of opaque byte
 strings. A compatible `Vdaf` MUST specify methods for encoding public shares,
-input shares, prep shares, prep messages, and aggregation parameters.
+input shares, verifier shares, verifier messages, and aggregation parameters.
 
 Implementations of Prio3 and Poplar1 MUST use the encoding schemes specified in
 {{prio3-encode}} and {{poplar1-encode}} respectively.
@@ -1747,26 +1750,26 @@ responding Aggregator is called the Helper. The high-level idea is that the
 Leader and Helper will take turns running the computation locally until input
 from their peer is required:
 
-* For a 1-round VDAF (e.g., Prio3 in {{prio3}}), the Leader sends its prep share
-  to the Helper, who computes the prep message locally, computes its output
-  share, then sends the prep message to the Leader. Preparation requires just
-  one round trip between the Leader and the Helper.
+* For a 1-round VDAF (e.g., Prio3 in {{prio3}}), the Leader sends its verifier
+  share to the Helper, who computes the verifier message locally, computes its
+  output share, then sends the verifier message to the Leader. Verification
+  requires just one round trip between the Leader and the Helper.
 
 * For a 2-round VDAF (e.g., Poplar1 in {{poplar1}}), the Leader sends its
-  first-round prep share to the Helper, who replies with the first-round prep
-  message and its second-round prep share. In the next request, the Leader
-  computes its second-round prep share locally, computes its output share, and
-  sends the second-round prep message to the Helper. Finally, the Helper
-  computes its own output share.
+  first-round verifier share to the Helper, who replies with the first-round
+  verifier message and its second-round verifier share. In the next request,
+  the Leader computes its second-round verifier share locally, computes its
+  output share, and sends the second-round verifier message to the Helper.
+  Finally, the Helper computes its own output share.
 
-* In general, each request includes the Leader's prep share for the previous
-  round and/or the prep message for the current round; correspondingly, each
-  response consists of the prep message for the current round and the Helper's
-  prep share for the next round.
+* In general, each request includes the Leader's verifier share for the
+  previous round and/or the verifier message for the current round;
+  correspondingly, each response consists of the verifier message for the
+  current round and the Helper's verifier share for the next round.
 
 The Aggregators proceed in this ping-ponging fashion until a step of the
 computation fails (indicating the report is invalid and should be rejected) or
-preparation is completed. All told there are `ceil((vdaf.ROUNDS+1)/2)`
+verification is completed. All told there are `ceil((vdaf.ROUNDS+1)/2)`
 requests sent.
 
 Protocol messages are specified in the presentation language of TLS; see
@@ -1784,12 +1787,12 @@ struct {
   MessageType type;
   select (Message.type) {
     case initialize:
-      opaque prep_share<0..4294967295>;
+      opaque ver_share<0..4294967295>;
     case continue:
-      opaque prep_msg<0..4294967295>;
-      opaque prep_share<0..4294967295>;
+      opaque ver_msg<0..4294967295>;
+      opaque ver_share<0..4294967295>;
     case finish:
-      opaque prep_msg<0..4294967295>;
+      opaque ver_msg<0..4294967295>;
   };
 } Message;
 
@@ -1797,7 +1800,7 @@ struct {
 ~~~
 
 These messages trigger all transitions in the state machine in
-{{vdaf-prep-state-machine}}, except for the Leader's initial transition. The
+{{vdaf-ver-state-machine}}, except for the Leader's initial transition. The
 Leader's state is initialized using its local inputs with the following method
 on class `Vdaf`:
 
@@ -1891,9 +1894,9 @@ def ping_pong_helper_init(
 
 The procedure `decode()` decodes the inbound message and returns the
 MessageType variant (`initialize`, `continue`, or `finish`) and the fields of
-the message. The procedure `ping_pong_transition()` takes in the prep shares,
-combines them into the prep message, and computes the next prep state of the
-caller:
+the message. The procedure `ping_pong_transition()` takes in the verifier
+shares, combines them into the verifier message, and computes the next
+verification state of the caller:
 
 ~~~ python
 def ping_pong_transition(
@@ -2015,7 +2018,7 @@ def ping_pong_helper_continued(
 ~~~
 
 They continue in this way until processing halts. Note that, depending on the
-number of rounds of preparation that are required, when one party reaches the
+number of rounds of verification that are required, when one party reaches the
 `Finished` state, there may be one more message to send before the peer can
 also finish processing (i.e., the outbound message is not `None`).
 
@@ -2029,13 +2032,13 @@ be used instead.
 Again, one Aggregator initiates the computation. This Aggregator is called the
 Leader and all other Aggregators are called Helpers.
 
-At the start of each round, the Leader requests from each Helper its prep
-share. After gathering each of the prep shares, the Leader computes the next
-prep message (via `vdaf.prep_shares_to_prep()`) and broadcasts it to the
-Helpers. At this point, each Aggregator runs `vdaf.prep_next()` locally to
-either recover an output share or, if more rounds of preparation are required,
-compute its updated state and prep share. If another round is required, then
-the Helper responds to the broadcast message with its next prep share.
+At the start of each round, the Leader requests from each Helper its verifier
+share. After gathering each of the verifier shares, the Leader computes the
+next verifier message (via `vdaf.ver_shares_to_msg()`) and broadcasts it to the
+Helpers. At this point, each Aggregator runs `vdaf.verify_next()` locally to
+either recover an output share or, if more rounds of verification are required,
+compute its updated state and verifier share. If another round is required,
+then the Helper responds to the broadcast message with its next verifier share.
 
 The Aggregators proceed in this way until each recovers an output share or some
 step of the computation fails.
@@ -2520,10 +2523,10 @@ from the prover via linear queries. In actual use in Prio3, however, the
 prover's computation is carried out by the Client, and the verifier's
 computation is distributed among the Aggregators. The Client generates a
 "proof" of its measurement's validity and distributes shares of the proof to
-the Aggregators. During preparation, each Aggregator performs some computation
+the Aggregators. During verification, each Aggregator performs some computation
 on its measurement share and proof share locally, then broadcasts the result in
-its prep share. The validity decision is then made by the
-`prep_shares_to_prep()` algorithm ({{sec-vdaf-prepare}}).
+its verifier share. The validity decision is then made by the
+`ver_shares_to_msg()` algorithm ({{sec-vdaf-verify}}).
 
 As usual, the interface implemented by a concrete FLP is described in terms of
 an object `flp` of type `Flp` that specifies the set of methods and parameters
@@ -2727,9 +2730,9 @@ of proofs.
 
 This section specifies `Prio3`, an implementation of the `Vdaf` interface
 defined in {{vdaf}}. The parameters and types required by the `Vdaf` interface
-are defined in {{prio3-param}}. The methods required for sharding, preparation,
-aggregation, and unsharding are described in the remaining subsections. These
-methods refer to constants enumerated in {{prio3-const}}.
+are defined in {{prio3-param}}. The methods required for sharding,
+verification, aggregation, and unsharding are described in the remaining
+subsections. These methods refer to constants enumerated in {{prio3-const}}.
 
 | Parameter         | Value                                           |
 |:------------------|:------------------------------------------------|
@@ -2748,9 +2751,9 @@ methods refer to constants enumerated in {{prio3-const}}.
 | `OutShare`        | `list[F]`                                       |
 | `AggShare`        | `list[F]`                                       |
 | `AggResult`       | As defined by `flp`.                            |
-| `PrepState`       | `tuple[list[F], Optional[bytes]]`               |
-| `PrepShare`       | `tuple[list[F], Optional[bytes]]`               |
-| `PrepMessage`     | `Optional[bytes]`                               |
+| `VerifyState`     | `tuple[list[F], Optional[bytes]]`               |
+| `VerifierShare`   | `tuple[list[F], Optional[bytes]]`               |
+| `VerifierMessage` | `Optional[bytes]`                               |
 {: #prio3-param title="Parameters for Prio3."}
 
 | Variable                      | Value |
@@ -2907,7 +2910,7 @@ not leak the measurement to the Aggregators while preventing a malicious Client
 from tampering with the joint randomness in a way that causes the Aggregators
 to accept an invalid measurement. To save a round of communication between the
 Aggregators later, the Client encodes the joint randomness parts in the public
-share. (See {{prio3-preparation}} for details.)
+share. (See {{prio3-verification}} for details.)
 
 All functions used in the following listing are defined in {{prio3-auxiliary}}:
 
@@ -2988,13 +2991,13 @@ def shard_with_joint_rand(
     return (joint_rand_parts, input_shares)
 ~~~
 
-### Preparation {#prio3-preparation}
+### Verification {#prio3-verification}
 
 This section describes the process of recovering output shares from the input
 shares. The high-level idea is that each Aggregator first queries its
 measurement share and proof(s) share(s) locally, then broadcasts its verifier
-share(s) in its prep share. The shares of verifier(s) are then combined into
-the verifier message(s) used to decide whether to accept.
+share(s). The shares of verifier(s) are then combined into the verifier
+message(s) used to decide whether to accept.
 
 In addition, the Aggregators must recompute the same joint randomness used by
 the Client to generate the proof(s). In order to avoid an extra round of
@@ -3006,9 +3009,9 @@ that they have all computed the same joint randomness seed before accepting
 their output shares. To do so, they exchange their parts of the joint
 randomness along with their shares of verifier(s).
 
-Implementation note: the prep state for Prio3 includes the output share that
-will be released once preparation is complete. In some situations, it may be
-necessary for the Aggregator to encode this state as bytes and store it for
+Implementation note: the verification state for Prio3 includes the output share
+that will be released once verification is complete. In some situations, it may
+be necessary for the Aggregator to encode this state as bytes and store it for
 retrieval later on. For all but the first Aggregator, it is possible to save
 storage by storing the measurement share rather than output share itself. It is
 relatively inexpensive to expand this seed into the measurement share, then
@@ -3364,37 +3367,37 @@ struct {
 } Prio3HelperShareWithJointRand;
 ~~~
 
-#### Prep Share
+#### Verifier Share
 
-When joint randomness is not used, the prep share is structured as follows:
+When joint randomness is not used, the verifier share is structured as follows:
 
 ~~~ tls-presentation
 struct {
     Prio3Field verifiers_share[F * V];
-} Prio3PrepShare;
+} Prio3VerifierShare;
 ~~~
 
 where `V = prio3.flp.VERIFIER_LEN * prio3.PROOFS`. When joint randomness is
-used, the prep share includes the Aggregator's joint randomness part and is
+used, the verifier share includes the Aggregator's joint randomness part and is
 structured as follows:
 
 ~~~ tls-presentation
 struct {
     Prio3Field verifiers_share[F * V];
     Prio3Seed joint_rand_part;
-} Prio3PrepShareWithJointRand;
+} Prio3VerifierhareWithJointRand;
 ~~~
 
-#### Prep Message
+#### Verifier Message
 
-When joint randomness is not used, the prep message is the empty string.
-Otherwise the prep message consists of the joint randomness seed computed by
-the Aggregators:
+When joint randomness is not used, the verifier message is the empty string.
+Otherwise the verifier message consists of the joint randomness seed computed
+by the Aggregators:
 
 ~~~ tls-presentation
 struct {
     Prio3Seed joint_rand;
-} Prio3PrepMessageWithJointRand;
+} Prio3VerifierMessageWithJointRand;
 ~~~
 
 #### Aggregation
@@ -4534,7 +4537,7 @@ by at least `T` Clients for some threshold `T`. It invokes Poplar1 as follows:
 1. The Collector picks an initial set of candidate prefixes, say `0` and `1`,
    and sends them to the Aggregators.
 
-1. The Aggregators run Poplar1 preparation and aggregation on each of the
+1. The Aggregators run Poplar1 verification and aggregation on each of the
    reports and send their aggregate shares to the Collector.
 
 1. The Collector unshards the aggregate result, which consists of the hit count
@@ -4729,9 +4732,9 @@ This section specifies `Poplar1`, an implementation of the `Vdaf` interface
 {{idpf-bbcggi21}} with `SHARES == 2` and `VALUE_LEN == 2` and
 `XofTurboShake128` as specified in {{xof-turboshake128}}. The associated
 constants and types required by the `Vdaf` interface are defined in
-{{poplar1-param}}. The methods required for sharding, preparation, aggregation,
-and unsharding are described in the remaining subsections. These methods make
-use of constants defined in {{poplar1-const}}.
+{{poplar1-param}}. The methods required for sharding, verification,
+aggregation, and unsharding are described in the remaining subsections. These
+methods make use of constants defined in {{poplar1-const}}.
 
 | Parameter         | Value                                      |
 |:------------------|:-------------------------------------------|
@@ -4749,9 +4752,9 @@ use of constants defined in {{poplar1-const}}.
 | `OutShare`        | `FieldVec`                                 |
 | `AggShare`        | `FieldVec`                                 |
 | `AggResult`       | `list[int]`                                |
-| `PrepState`       | `tuple[bytes, int, FieldVec]`              |
-| `PrepShare`       | `FieldVec`                                 |
-| `PrepMessage`     | `Optional[FieldVec]`                       |
+| `VerifyState`     | `tuple[bytes, int, FieldVec]`              |
+| `VerifierShare`   | `FieldVec`                                 |
+| `VerifierMessage` | `Optional[FieldVec]`                       |
 {: #poplar1-param title="VDAF parameters for Poplar1."}
 
 | Variable               | Value |
@@ -4784,7 +4787,8 @@ tree, the Client generates random elements `a`, `b`, and `c` and computes
 ~~~
 
 and sends additive shares of `a`, `b`, `c`, `A` and `B` to each of the
-Aggregators. These help the Aggregators evaluate the sketch during preparation.
+Aggregators. These help the Aggregators evaluate the sketch during
+verification.
 
 Putting everything together, the sharding algorithm is defined as
 follows.
@@ -4822,8 +4826,8 @@ def shard(
     # Construct the IDPF values for each level of the IDPF tree.
     # Each "data" value is 1; in addition, the Client generates
     # a random "authenticator" value used by the Aggregators to
-    # evaluate the sketch during preparation. This sketch is used
-    # to verify the one-hotness of their output shares.
+    # evaluate the sketch during verification. This sketch is
+    # used to verify the one-hotness of their output shares.
     beta_inner = [
         [self.idpf.field_inner(1), k]
         for k in xof.next_vec(self.idpf.field_inner,
@@ -4907,7 +4911,7 @@ def shard(
     return (public_share, input_shares)
 ~~~
 
-### Preparation {#poplar1-prep}
+### Verification {#poplar1-verification}
 
 The aggregation parameter encodes a sequence of candidate prefixes. When an
 Aggregator receives an input share from the Client, it begins by evaluating its
@@ -5078,11 +5082,11 @@ def ver_shares_to_msg(
 
 Aggregation parameters are valid for a given input share if no aggregation
 parameter with the same level has been used with the same input share before.
-The whole preparation phase MUST NOT be run more than once for a given
-combination of input share and level. This function checks that candidate
-prefixes are unique and lexicographically sorted, checks that levels are
-increasing between calls, and also enforces that the prefixes at each level are
-suffixes of the previous level's prefixes.
+The verification phase MUST NOT be run more than once for a given combination
+of input share and level. This function checks that candidate prefixes are
+unique and lexicographically sorted, checks that levels are increasing between
+calls, and also enforces that the prefixes at each level are suffixes of the
+previous level's prefixes.
 
 ~~~ python
 def is_valid(
@@ -5268,9 +5272,9 @@ struct {
 } Poplar1InputShare;
 ~~~
 
-#### Prep Share
+#### Verifier Share
 
-Encoding of the prep share depends on the round of sketching: if the first
+Encoding of the verifier share depends on the round of sketching: if the first
 round, then each sketch share has three field elements; if the second round,
 then each sketch share has one field element. The field that is used depends on
 the level of the IDPF tree specified by the aggregation parameter, either the
@@ -5281,7 +5285,7 @@ For the first round and inner field:
 ~~~ tls-presentation
 struct {
     Poplar1FieldInner sketch_share[Fi * 3];
-} Poplar1PrepShareRoundOneInner;
+} Poplar1VerifierShareRoundOneInner;
 ~~~
 
 For the first round and leaf field:
@@ -5289,7 +5293,7 @@ For the first round and leaf field:
 ~~~ tls-presentation
 struct {
     Poplar1FieldLeaf sketch_share[Fl * 3];
-} Poplar1PrepShareRoundOneLeaf;
+} Poplar1VerifierShareRoundOneLeaf;
 ~~~
 
 For the second round and inner field:
@@ -5297,7 +5301,7 @@ For the second round and inner field:
 ~~~ tls-presentation
 struct {
     Poplar1FieldInner sketch_share;
-} Poplar1PrepShareRoundTwoInner;
+} Poplar1VerifierShareRoundTwoInner;
 ~~~
 
 For the second round and leaf field:
@@ -5305,18 +5309,18 @@ For the second round and leaf field:
 ~~~ tls-presentation
 struct {
     Poplar1FieldLeaf sketch_share;
-} Poplar1PrepShareRoundTwoLeaf;
+} Poplar1VerifierShareRoundTwoLeaf;
 ~~~
 
-#### Prep Message
+#### Verifier Message
 
-Likewise, the structure of the prep message for Poplar1 depends on the
+Likewise, the structure of the verifier message for Poplar1 depends on the
 sketching round and field. For the first round and inner field:
 
 ~~~ tls-presentation
 struct {
     Poplar1FieldInner[Fi * 3];
-} Poplar1PrepMessageRoundOneInner;
+} Poplar1VerifierMessageRoundOneInner;
 ~~~
 
 For the first round and leaf field:
@@ -5324,15 +5328,15 @@ For the first round and leaf field:
 ~~~ tls-presentation
 struct {
     Poplar1FieldLeaf sketch[Fl * 3];
-} Poplar1PrepMessageRoundOneLeaf;
+} Poplar1VerifierMessageRoundOneLeaf;
 ~~~
 
-Note that these messages have the same structures as the prep shares for the
-first round.
+Note that these messages have the same structures as the verifier shares for
+the first round.
 
-The second-round prep message is the empty string. This is because the sketch
-shares are expected to sum to a particular value if the output shares are
-valid; a successful preparation is represented with the empty string,
+The second-round verifier message is the empty string. This is because the
+sketch shares are expected to sum to a particular value if the output shares
+are valid; successful verification is represented with the empty string,
 otherwise the procedure returns an error.
 
 #### Aggregate Share
@@ -5828,7 +5832,7 @@ conditions are met:
    verification key prior to processing reports generated by Clients.
    Otherwise, the attacker may be able to craft a verification key that, for a
    given report, causes an honest Aggregator to leak information about the
-   measurement during preparation.
+   measurement during verification.
 
 Meeting these requirements is relatively straightforward. For example, the
 Aggregators may designate one of their peers to generate the verification key
@@ -5844,7 +5848,7 @@ scheme would not allow key rotation over the lifetime of a task.
 
 ## The Nonce {#nonce-requirements}
 
-The sharding and preparation steps of VDAF execution depend on a nonce
+The sharding and verification phases of VDAF execution depend on a nonce
 associated with the Client's report. To ensure privacy of the underlying
 measurement, the Client MUST generate this nonce using a CSPRNG. This is
 required in order to leverage security analysis for the privacy definition of
@@ -5875,10 +5879,10 @@ Otherwise, one risks re-using correlated randomness, which might compromise
 confidentiality of the Client's measurement.
 
 Higher level applications that use DAFs or VDAFs MUST enforce aggregation
-parameter validity. In particular, prior to beginning preparation with an
-aggregation parameter provided by the Collector, they MUST invoke `is_valid()`
-to decide if the parameter is valid given the sequence of previously accepted
-parameters.
+parameter validity. In particular, prior to beginning DAF preparation or VDAF
+verification with an aggregation parameter provided by the Collector, they MUST
+invoke `is_valid()` to decide if the parameter is valid given the sequence of
+previously accepted parameters.
 
 Note that aggregating a batch of reports multiple times, even with a valid
 sequence of aggregation parameters, can result in information leakage beyond
@@ -6362,10 +6366,10 @@ class QueryGadget(Gadget[F]):
         return wrapped_valid
 ~~~
 
-# VDAF Preparation State {#topo-states}
+# VDAF Verification State {#topo-states}
 
 This section lists the classes used to define each Aggregator's state during
-VDAF preparation ({{vdaf-prep-comm}}).
+VDAF verification ({{vdaf-verify-comm}}).
 
 ~~~ python
 class State:
@@ -6416,7 +6420,7 @@ class Rejected(State):
 Test vectors for Prio3 ({{prio3}}) and Poplar1 ({{poplar1}}) are available at
 {{TestVectors}}. The test vector directory, `test_vec/vdaf`, contains a set of
 JSON files. Each file contains a test vector for an instance of class `Vdaf` as
-defined in {{vdaf}}. A test vector covers sharding, preparation, aggregation,
+defined in {{vdaf}}. A test vector covers sharding, verification, aggregation,
 and unsharding of a batch of several measurements. The test vector schema is
 defined below.
 
@@ -6431,7 +6435,7 @@ defined below.
 `agg_param`:
 : The aggregation parameter encoded in hexadecimal.
 
-`prep`:
+`verify`:
 : A list of objects with the following schema:
 
     `measurement`:
@@ -6449,13 +6453,13 @@ defined below.
     `input_shares`:
     : The expected list of input shares, each encoded in hexadecimal.
 
-    `prep_shares`:
-    : The expected list of prep shares generated by each Aggregator at each
-      round of preparation, encoded in hexadecimal.
+    `ver_shares`:
+    : The expected list of verifier shares generated by each Aggregator at each
+    round of verification, encoded in hexadecimal.
 
-    `prep_messages`:
-    : The expected list of prep messages for each round of preparation, encoded
-      in hexadecimal.
+    `ver_msgs`:
+    : The expected list of verification messages for each round of
+      verification, encoded in hexadecimal.
 
     `out_shares`:
     : The expected list of output shares, encoded in hexadecimal.
@@ -6469,35 +6473,35 @@ defined below.
 `operations`:
 : This lists the VDAF operations that should be executed as part of known
   answer tests, using messages from this test vector as input. Operations
-  should be executed in the order they appear, to ensure that prepare state
-  values are computed before they are consumed. Prepare state values are not
-  included in test vectors because this document does not specify their
+  should be executed in the order they appear, to ensure that verifier state
+  values are computed before they are consumed. Verification state values are
+  not included in test vectors because this document does not specify their
   representation or encoding.
 
 Each operation in the `operations` list has the following schema:
 
 `operation`:
-: The type of operation to be performed. This is one of "shard", "prep_init",
-  "prep_shares_to_prep", "prep_next", "aggregate", or "unshard".
+: The type of operation to be performed. This is one of "shard", "verify_init",
+  "ver_shares_to_msg", "verify_next", "aggregate", or "unshard".
 
 `round`:
-: For any preparation operation, the round number of the operation to be
-  performed. This determines which prepare share, prepare state, and/or prepare
-  message to use.
+: For any verification operation, the round number of the operation to be
+  performed. This determines which verifier share, verification state, and/or
+  verifier message to use.
 
 `aggregator_id`:
 : The aggregator ID to use when performing this operation. This determines
-  which messages and which prepare state to use, in addition to the aggregator ID
-  argument itself.
+  which messages and which verification state to use, in addition to the
+  aggregator ID argument itself.
 
 `report_index`:
 : The index of the report on which to perform this operation. This is an index
-  into the `prep` array.
+  into the `verify` array.
 
 `success`:
 : If this is `True`, the operation should succeed, and its output should match
   the corresponding values in the test vector. If this is `False`, the operation
-  should fail, terminating preparation of this report.
+  should fail, terminating verification of this report.
 
 The test vector schema also includes whatever parameters are required to
 instantiate the VDAF. These are listed in the subsections below.
