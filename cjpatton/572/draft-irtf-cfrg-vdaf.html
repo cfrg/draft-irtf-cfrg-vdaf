@@ -1058,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 27 March 2026</td>
+<td class="center">Expires 2 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-23" class="published">23 September 2025</time>
+<time datetime="2025-09-29" class="published">29 September 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-03-27">27 March 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-02">2 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 27 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 2 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3617,9 +3617,9 @@ def run_vdaf(
             OutShare,
             AggShare,
             AggResult,
-            PrepState,
-            PrepShare,
-            PrepMessage,
+            VerifyState,
+            VerifierShare,
+            VerifierMessage,
         ],
         verify_key: bytes,
         agg_param: AggParam,
@@ -3630,6 +3630,10 @@ def run_vdaf(
     parameter (`agg_param`), application context (`ctx`), and
     verification key (`verify_key`).
     """
+    # REMOVE ME
+    if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
+        raise ValueError("incorrect verify_key size")
+
     agg_shares = [vdaf.agg_init(agg_param)
                   for _ in range(vdaf.SHARES)]
     for measurement in measurements:
@@ -3641,45 +3645,45 @@ def run_vdaf(
         (public_share, input_shares) = \
             vdaf.shard(ctx, measurement, nonce, rand)
 
-        # Initialize preparation: Each Aggregator receives its report
-        # share (the public share and its input share) from the
-        # Client and initializes preparation.
-        prep_states = []
-        outbound_prep_shares = []
+        # Initialize verification: Each Aggregator receives its
+        # report share (the public share and its input share) from
+        # the Client and initializes verification.
+        ver_states = []
+        outbound_ver_shares = []
         for j in range(vdaf.SHARES):
-            (state, share) = vdaf.prep_init(verify_key, ctx, j,
-                                            agg_param,
-                                            nonce,
-                                            public_share,
-                                            input_shares[j])
-            prep_states.append(state)
-            outbound_prep_shares.append(share)
+            (state, share) = vdaf.verify_init(verify_key, ctx, j,
+                                              agg_param,
+                                              nonce,
+                                              public_share,
+                                              input_shares[j])
+            ver_states.append(state)
+            outbound_ver_shares.append(share)
 
-        # Complete preparation: The Aggregators execute each round of
-        # preparation until each computes an output share. A round
-        # begins by gathering the prep shares and combining them into
-        # the prep message. The round ends when each uses the prep
-        # message to transition to the next state.
+        # Complete verification: The Aggregators execute each round
+        # of verification until each computes an output share. A
+        # round begins by gathering the verifier shares and combining
+        # them into the verifier message. The round ends when each
+        # uses the verifier message to transition to the next state.
         for i in range(vdaf.ROUNDS - 1):
-            prep_msg = vdaf.prep_shares_to_prep(ctx,
-                                                agg_param,
-                                                outbound_prep_shares)
+            ver_msg = vdaf.ver_shares_to_msg(ctx,
+                                             agg_param,
+                                             outbound_ver_shares)
 
-            outbound_prep_shares = []
+            outbound_ver_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.prep_next(ctx, prep_states[j], prep_msg)
+                out = vdaf.verify_next(ctx, ver_states[j], ver_msg)
                 assert isinstance(out, tuple)
-                (prep_states[j], prep_share) = out
-                outbound_prep_shares.append(prep_share)
+                (ver_states[j], ver_share) = out
+                outbound_ver_shares.append(ver_share)
 
-        prep_msg = vdaf.prep_shares_to_prep(ctx,
-                                            agg_param,
-                                            outbound_prep_shares)
+        ver_msg = vdaf.ver_shares_to_msg(ctx,
+                                         agg_param,
+                                         outbound_ver_shares)
 
         # Aggregation: Each Aggregator updates its aggregate share
         # with its output share.
         for j in range(vdaf.SHARES):
-            out_share = vdaf.prep_next(ctx, prep_states[j], prep_msg)
+            out_share = vdaf.verify_next(ctx, ver_states[j], ver_msg)
             assert not isinstance(out_share, tuple)
             agg_shares[j] = vdaf.agg_update(agg_param,
                                             agg_shares[j],
@@ -3853,7 +3857,7 @@ def ping_pong_leader_init(
         input_share: bytes) -&gt; Continued | Rejected:
     """Called by the Leader to initialize ping-ponging."""
     try:
-        (prep_state, prep_share) = self.prep_init(
+        (ver_state, ver_share) = self.verify_init(
             vdaf_verify_key,
             ctx,
             0,
@@ -3863,10 +3867,10 @@ def ping_pong_leader_init(
             self.decode_input_share(0, input_share),
         )
 
-        encoded_prep_share = self.encode_prep_share(prep_share)
+        encoded_ver_share = self.encode_ver_share(ver_share)
         return Continued(
-            prep_state, 0,
-            encode(0, encoded_prep_share),  # initialize
+            ver_state, 0,
+            encode(0, encoded_ver_share),  # initialize
         )
     except Exception:
         return Rejected()
@@ -3899,7 +3903,7 @@ def ping_pong_helper_init(
     """
 
     try:
-        (prep_state, prep_share) = self.prep_init(
+        (ver_state, ver_share) = self.verify_init(
             vdaf_verify_key,
             ctx,
             1,
@@ -3913,16 +3917,16 @@ def ping_pong_helper_init(
         if inbound_type != 0:  # initialize
             return Rejected()
 
-        encoded_prep_share = inbound_items[0]
-        prep_shares = [
-            self.decode_prep_share(prep_state, encoded_prep_share),
-            prep_share,
+        encoded_ver_share = inbound_items[0]
+        ver_shares = [
+            self.decode_ver_share(ver_state, encoded_ver_share),
+            ver_share,
         ]
         return self.ping_pong_transition(
             ctx,
             self.decode_agg_param(agg_param),
-            prep_shares,
-            prep_state,
+            ver_shares,
+            ver_state,
             0,
         )
     except Exception:
@@ -3940,25 +3944,25 @@ def ping_pong_transition(
         self,
         ctx: bytes,
         agg_param: AggParam,
-        prep_shares: list[PrepShare],
-        prep_state: PrepState,
-        prep_round: int) -&gt; Continued | FinishedWithOutbound:
-    prep_msg = self.prep_shares_to_prep(ctx,
-                                        agg_param,
-                                        prep_shares)
-    encoded_prep_msg = self.encode_prep_msg(prep_msg)
-    out = self.prep_next(ctx, prep_state, prep_msg)
-    if prep_round+1 == self.ROUNDS:
+        ver_shares: list[VerifierShare],
+        ver_state: VerifyState,
+        ver_round: int) -&gt; Continued | FinishedWithOutbound:
+    ver_msg = self.ver_shares_to_msg(ctx,
+                                     agg_param,
+                                     ver_shares)
+    encoded_ver_msg = self.encode_ver_msg(ver_msg)
+    out = self.verify_next(ctx, ver_state, ver_msg)
+    if ver_round+1 == self.ROUNDS:
         return FinishedWithOutbound(
             out,
-            encode(2, encoded_prep_msg),  # finalize
+            encode(2, encoded_ver_msg),  # finalize
         )
-    (prep_state, prep_share) = cast(
-        tuple[PrepState, PrepShare], out)
-    encoded_prep_share = self.encode_prep_share(prep_share)
+    (ver_state, ver_share) = cast(
+        tuple[VerifyState, VerifierShare], out)
+    encoded_ver_share = self.encode_ver_share(ver_share)
     return Continued(
-        prep_state, prep_round+1,
-        encode(1, encoded_prep_msg, encoded_prep_share)  # continue
+        ver_state, ver_round+1,
+        encode(1, encoded_ver_msg, encoded_ver_share)  # continue
     )
 </pre><a href="#section-5.7.1-13" class="pilcrow">¶</a>
 </div>
@@ -3993,40 +3997,40 @@ def ping_pong_continued(
     inbound: bytes,  # encoded ping pong Message
 ) -&gt; State:
     try:
-        prep_round = state.prep_round
+        ver_round = state.ver_round
 
         (inbound_type, inbound_items) = decode(inbound)
         if inbound_type == 0:  # initialize
             return Rejected()
 
-        encoded_prep_msg = inbound_items[0]
-        prep_msg = self.decode_prep_msg(
-            state.prep_state,
-            encoded_prep_msg,
+        encoded_ver_msg = inbound_items[0]
+        ver_msg = self.decode_ver_msg(
+            state.ver_state,
+            encoded_ver_msg,
         )
-        out = self.prep_next(ctx, state.prep_state, prep_msg)
-        if prep_round+1 &lt; self.ROUNDS and \
+        out = self.verify_next(ctx, state.ver_state, ver_msg)
+        if ver_round+1 &lt; self.ROUNDS and \
                 inbound_type == 1:  # continue
-            (prep_state, prep_share) = cast(
-                tuple[PrepState, PrepShare], out)
-            encoded_prep_share = inbound_items[1]
-            prep_shares = [
-                self.decode_prep_share(
-                    prep_state,
-                    encoded_prep_share,
+            (ver_state, ver_share) = cast(
+                tuple[VerifyState, VerifierShare], out)
+            encoded_ver_share = inbound_items[1]
+            ver_shares = [
+                self.decode_ver_share(
+                    ver_state,
+                    encoded_ver_share,
                 ),
-                prep_share,
+                ver_share,
             ]
             if is_leader:
-                prep_shares.reverse()
+                ver_shares.reverse()
             return self.ping_pong_transition(
                 ctx,
                 self.decode_agg_param(agg_param),
-                prep_shares,
-                prep_state,
-                prep_round+1,
+                ver_shares,
+                ver_state,
+                ver_round+1,
             )
-        elif prep_round+1 == self.ROUNDS and \
+        elif ver_round+1 == self.ROUNDS and \
                 inbound_type == 2:  # finish
             return Finished(out)
         else:
@@ -5484,7 +5488,7 @@ truncate the measurement share to get the output share.<a href="#section-7.2.2-3
 <p id="section-7.2.2-4">All functions used in the following listing are defined in <a href="#prio3-auxiliary" class="auto internal xref">Section 7.2.6</a>:<a href="#section-7.2.2-4" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-7.2.2-5">
 <pre>
-def prep_init(
+def verify_init(
         self,
         verify_key: bytes,
         ctx: bytes,
@@ -5493,8 +5497,8 @@ def prep_init(
         nonce: bytes,
         public_share: Optional[list[bytes]],
         input_share: Prio3InputShare[F]) -&gt; tuple[
-            Prio3PrepState[F],
-            Prio3PrepShare[F]]:
+            Prio3VerifyState[F],
+            Prio3VerifierShare[F]]:
     joint_rand_parts = public_share
     (meas_share, proofs_share, blind) = \
         self.expand_input_share(ctx, agg_id, input_share)
@@ -5534,20 +5538,20 @@ def prep_init(
             self.SHARES,
         )
 
-    prep_state = (out_share, corrected_joint_rand_seed)
-    prep_share = (verifiers_share, joint_rand_part)
-    return (prep_state, prep_share)
+    ver_state = (out_share, corrected_joint_rand_seed)
+    ver_share = (verifiers_share, joint_rand_part)
+    return (ver_state, ver_share)
 
-def prep_shares_to_prep(
+def ver_shares_to_msg(
         self,
         ctx: bytes,
         _agg_param: None,
-        prep_shares: list[Prio3PrepShare[F]]) -&gt; Optional[bytes]:
+        ver_shares: list[Prio3VerifierShare[F]]) -&gt; Optional[bytes]:
     # Unshard each set of verifier shares into each verifier message.
     verifiers = self.flp.field.zeros(
         self.flp.VERIFIER_LEN * self.PROOFS)
     joint_rand_parts = []
-    for (verifiers_share, joint_rand_part) in prep_shares:
+    for (verifiers_share, joint_rand_part) in ver_shares:
         verifiers = vec_add(verifiers, verifiers_share)
         if self.flp.JOINT_RAND_LEN &gt; 0:
             assert joint_rand_part is not None
@@ -5567,14 +5571,14 @@ def prep_shares_to_prep(
         joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
     return joint_rand_seed
 
-def prep_next(
+def verify_next(
     self,
     _ctx: bytes,
-    prep_state: Prio3PrepState[F],
-    prep_msg: Optional[bytes]
-) -&gt; tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
-    joint_rand_seed = prep_msg
-    (out_share, corrected_joint_rand_seed) = prep_state
+    ver_state: Prio3VerifyState[F],
+    ver_msg: Optional[bytes]
+) -&gt; tuple[Prio3VerifyState[F], Prio3VerifierShare[F]] | list[F]:
+    joint_rand_seed = ver_msg
+    (out_share, corrected_joint_rand_seed) = ver_state
 
     # If joint randomness was used, check that the value computed by
     # the Aggregators matches the value indicated by the Client.
@@ -8126,7 +8130,7 @@ that is actually valid. Note that enforcing the order is not strictly necessary,
 but this does allow uniqueness to be determined more efficiently.<a href="#section-8.2.2-2" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-8.2.2-3">
 <pre>
-def prep_init(
+def verify_init(
         self,
         verify_key: bytes,
         ctx: bytes,
@@ -8135,7 +8139,7 @@ def prep_init(
         nonce: bytes,
         public_share: Poplar1PublicShare,
         input_share: Poplar1InputShare) -&gt; tuple[
-            Poplar1PrepState,
+            Poplar1VerifyState,
             FieldVec]:
     (level, prefixes) = agg_param
     (key, corr_seed, corr_inner, corr_leaf) = input_share
@@ -8194,34 +8198,34 @@ def prep_init(
         sketch_share[2] += auth_share * r
         out_share.append(data_share)
 
-    prep_mem = [A_share, B_share, field(agg_id)] + out_share
+    ver_mem = [A_share, B_share, field(agg_id)] + out_share
     return (
         (
             b'evaluate sketch',
             level,
-            cast(FieldVec, prep_mem),
+            cast(FieldVec, ver_mem),
         ),
         cast(FieldVec, sketch_share),
     )
 
-def prep_next(
+def verify_next(
     self,
     _ctx: bytes,
-    prep_state: Poplar1PrepState,
-    prep_msg: Optional[FieldVec]
-) -&gt; tuple[Poplar1PrepState, FieldVec] | FieldVec:
-    prev_sketch = cast(list[Field], prep_msg)
-    (step, level, prep_mem) = prep_state
+    ver_state: Poplar1VerifyState,
+    ver_msg: Optional[FieldVec]
+) -&gt; tuple[Poplar1VerifyState, FieldVec] | FieldVec:
+    prev_sketch = cast(list[Field], ver_msg)
+    (step, level, ver_mem) = ver_state
 
     if step == b'evaluate sketch':
         if prev_sketch is None:
             raise ValueError('expected value, got none')
         elif len(prev_sketch) != 3:
             raise ValueError('incorrect sketch length')
-        A_share = cast(Field, prep_mem[0])
-        B_share = cast(Field, prep_mem[1])
-        agg_id = cast(Field, prep_mem[2])
-        prep_mem = prep_mem[3:]
+        A_share = cast(Field, ver_mem[0])
+        B_share = cast(Field, ver_mem[1])
+        agg_id = cast(Field, ver_mem[2])
+        ver_mem = ver_mem[3:]
         sketch_share = [
             agg_id * (prev_sketch[0] ** 2
                       - prev_sketch[1]
@@ -8230,12 +8234,12 @@ def prep_next(
             + B_share
         ]
         return cast(
-            tuple[Poplar1PrepState, FieldVec],
+            tuple[Poplar1VerifyState, FieldVec],
             (
                 (
                     b'reveal sketch',
                     level,
-                    prep_mem,
+                    ver_mem,
                 ),
                 sketch_share,
             )
@@ -8243,24 +8247,24 @@ def prep_next(
 
     elif step == b'reveal sketch':
         if prev_sketch is None:
-            return prep_mem  # Output shares
+            return ver_mem  # Output shares
         else:
-            raise ValueError('invalid prep message')
+            raise ValueError('invalid verifier message')
 
-    raise ValueError('invalid prep state')
+    raise ValueError('invalid verification state')
 
-def prep_shares_to_prep(
+def ver_shares_to_msg(
         self,
         _ctx: bytes,
         agg_param: Poplar1AggParam,
-        prep_shares: list[FieldVec]) -&gt; Optional[FieldVec]:
-    if len(prep_shares) != 2:
-        raise ValueError('incorrect number of prep shares')
+        ver_shares: list[FieldVec]) -&gt; Optional[FieldVec]:
+    if len(ver_shares) != 2:
+        raise ValueError('incorrect number of verifier shares')
     (level, _) = agg_param
     field = self.idpf.current_field(level)
     sketch = vec_add(
-        cast(list[Field], prep_shares[0]),
-        cast(list[Field], prep_shares[1]),
+        cast(list[Field], ver_shares[0]),
+        cast(list[Field], ver_shares[1]),
     )
     if len(sketch) == 3:
         return cast(FieldVec, sketch)
