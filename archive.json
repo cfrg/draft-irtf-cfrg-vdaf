@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-09-28T01:06:04.883202+00:00",
+  "timestamp": "2025-09-30T01:00:31.576228+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -46617,16 +46617,18 @@
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
-      "body": "Closes #572.",
+      "labels": [
+        "draft-17"
+      ],
+      "body": "Closes #572.\r\n\r\nRename:\r\n* prep to verify\r\n* prep state to verification state (except shorten `VerificationState` to `VerifyState`)\r\n* prep share to verifier share (lines up with Prio3)\r\n* prep message to verifier message\r\n* Use \"ver\" as an abbreviation \"verify\" or \"verification\"\r\n* prep_init -> verify_init\r\n* prep_shares_to_prep -> ver_shares_to_msg (maybe verify_shares_to_msg is a little better?)\r\n* prep_next -> verify_next\r\n\r\nAlso, be more consistent about abbreviations (\"verify\" and \"ver\" are sometimes used interchangeably).\r\n",
       "createdAt": "2025-09-23T21:07:21Z",
-      "updatedAt": "2025-09-23T21:09:08Z",
+      "updatedAt": "2025-09-29T20:00:59Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "1e59aac33f73349327d06b726e22bd4e63b52135",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/572",
-      "headRefOid": "55da58a8b10f44bfe48ceb0254e7f4ddb4d77826",
+      "headRefOid": "d0c6454b9bf6ef12a8c9a7b7a4d851545d556edf",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
