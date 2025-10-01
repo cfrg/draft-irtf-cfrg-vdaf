@@ -139,9 +139,9 @@ class Vdaf(
 
     @abstractmethod
     def verifier_shares_to_message(self,
-                          ctx: bytes,
-                          agg_param: AggParam,
-                          verifier_shares: list[VerifierShare]) -> VerifierMessage:
+                                   ctx: bytes,
+                                   agg_param: AggParam,
+                                   verifier_shares: list[VerifierShare]) -> VerifierMessage:
         """
         Unshard the verifier shares from the previous round of verification.
         This is called by an Aggregator after receiving all of the message
@@ -339,8 +339,8 @@ def run_vdaf(
         # uses the verifier message to transition to the next state.
         for i in range(vdaf.ROUNDS - 1):
             verifier_message = vdaf.verifier_shares_to_message(ctx,
-                                             agg_param,
-                                             outbound_verifier_shares)
+                                                               agg_param,
+                                                               outbound_verifier_shares)
 
             outbound_verifier_shares = []
             for j in range(vdaf.SHARES):
@@ -350,13 +350,14 @@ def run_vdaf(
                 outbound_verifier_shares.append(verifier_share)
 
         verifier_message = vdaf.verifier_shares_to_message(ctx,
-                                         agg_param,
-                                         outbound_verifier_shares)
+                                                           agg_param,
+                                                           outbound_verifier_shares)
 
         # Aggregation: Each Aggregator updates its aggregate share
         # with its output share.
         for j in range(vdaf.SHARES):
-            out_share = vdaf.verify_next(ctx, verify_states[j], verifier_message)
+            out_share = vdaf.verify_next(
+                ctx, verify_states[j], verifier_message)
             assert not isinstance(out_share, tuple)
             agg_shares[j] = vdaf.agg_update(agg_param,
                                             agg_shares[j],

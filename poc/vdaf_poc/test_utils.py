@@ -292,8 +292,8 @@ def gen_test_vec_for_vdaf(
         # Aggregators recover their output shares.
         for i in range(vdaf.ROUNDS - 1):
             verifier_message = vdaf.verifier_shares_to_message(ctx,
-                                             agg_param,
-                                             outbound_verifier_shares)
+                                                               agg_param,
+                                                               outbound_verifier_shares)
             verify_test_vec['verifier_messages'].append(
                 vdaf.encode_verifier_message(verifier_message).hex())
             operations.append({
@@ -322,8 +322,8 @@ def gen_test_vec_for_vdaf(
 
         # The final outputs after verification are the output shares.
         verifier_message = vdaf.verifier_shares_to_message(ctx,
-                                         agg_param,
-                                         outbound_verifier_shares)
+                                                           agg_param,
+                                                           outbound_verifier_shares)
         verify_test_vec['verifier_messages'].append(
             vdaf.encode_verifier_message(verifier_message).hex())
         operations.append({
@@ -335,7 +335,8 @@ def gen_test_vec_for_vdaf(
 
         outbound_out_shares = []
         for j in range(vdaf.SHARES):
-            out_share = vdaf.verify_next(ctx, verify_states[j], verifier_message)
+            out_share = vdaf.verify_next(
+                ctx, verify_states[j], verifier_message)
             assert not isinstance(out_share, tuple)
             outbound_out_shares.append(out_share)
             verify_test_vec['out_shares'].append(

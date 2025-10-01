@@ -152,7 +152,8 @@ class PingPong(
 
             encoded_verifier_share = inbound_items[0]
             verifier_shares = [
-                self.decode_verifier_share(verify_state, encoded_verifier_share),
+                self.decode_verifier_share(
+                    verify_state, encoded_verifier_share),
                 verifier_share,
             ]
             return self.ping_pong_transition(
@@ -173,9 +174,10 @@ class PingPong(
             verify_state: VerifyState,
             verify_round: int) -> Continued | FinishedWithOutbound:
         verifier_message = self.verifier_shares_to_message(ctx,
-                                         agg_param,
-                                         verifier_shares)
-        encoded_verifier_message = self.encode_verifier_message(verifier_message)
+                                                           agg_param,
+                                                           verifier_shares)
+        encoded_verifier_message = self.encode_verifier_message(
+            verifier_message)
         out = self.verify_next(ctx, verify_state, verifier_message)
         if verify_round+1 == self.ROUNDS:
             return FinishedWithOutbound(
@@ -187,7 +189,8 @@ class PingPong(
         encoded_verifier_share = self.encode_verifier_share(verifier_share)
         return Continued(
             verify_state, verify_round+1,
-            encode(1, encoded_verifier_message, encoded_verifier_share)  # continue
+            encode(1, encoded_verifier_message,
+                   encoded_verifier_share)  # continue
         )
 
     def ping_pong_leader_continued(

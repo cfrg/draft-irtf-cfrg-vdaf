@@ -69,9 +69,9 @@ class PingPongTester(
         )
 
     def verifier_shares_to_message(self,
-                          _ctx: bytes,
-                          _agg_param: int,
-                          verifier_shares: list[str]) -> str:
+                                   _ctx: bytes,
+                                   _agg_param: int,
+                                   verifier_shares: list[str]) -> str:
         for verifier_share in verifier_shares[1:]:
             if verifier_share != verifier_shares[0]:
                 raise ValueError('unexpected verifier share')
@@ -133,16 +133,16 @@ class PingPongTester(
         return verifier_share.encode('utf-8')
 
     def decode_verifier_share(self,
-                         _verify_state: tuple[int, int],
-                         encoded: bytes) -> str:
+                              _verify_state: tuple[int, int],
+                              encoded: bytes) -> str:
         return encoded.decode('utf-8')
 
     def encode_verifier_message(self, verifier_message: str) -> bytes:
         return verifier_message.encode('utf-8')
 
     def decode_verifier_message(self,
-                       _verify_state: tuple[int, int],
-                       encoded: bytes) -> str:
+                                _verify_state: tuple[int, int],
+                                encoded: bytes) -> str:
         return encoded.decode('utf-8')
 
     def encode_out_share(self, out_share: int) -> bytes:

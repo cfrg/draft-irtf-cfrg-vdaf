@@ -372,7 +372,8 @@ def _prio3_verifier_shares_to_message_failure(
         input_share_1,
     )
     try:
-        vdaf.verifier_shares_to_message(ctx, None, [verifier_share_0, verifier_share_1])
+        vdaf.verifier_shares_to_message(
+            ctx, None, [verifier_share_0, verifier_share_1])
     except ValueError:
         pass
     else:

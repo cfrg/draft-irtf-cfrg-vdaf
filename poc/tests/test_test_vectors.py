@@ -86,7 +86,8 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                         bytes.fromhex(verify["nonce"]),
                         bytes.fromhex(verify["public_share"]),
                         bytes.fromhex(verify["input_shares"][aggregator_id]),
-                        bytes.fromhex(verify["verifier_shares"][0][aggregator_id]),
+                        bytes.fromhex(
+                            verify["verifier_shares"][0][aggregator_id]),
                     )
                     verify_states[report_index][aggregator_id][0] = cast(
                         VerifyState,
@@ -143,7 +144,8 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
                 round = operation["round"]
                 ctx = bytes.fromhex(test_vector["ctx"])
                 verify_state = verify_states[report_index][aggregator_id][round - 1]
-                verifier_message = bytes.fromhex(verify["verifier_messages"][round - 1])
+                verifier_message = bytes.fromhex(
+                    verify["verifier_messages"][round - 1])
                 if operation["success"]:
                     if round < vdaf.ROUNDS:
                         result = self.check_verify_next_success(
@@ -407,7 +409,8 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
             agg_param,
             verifier_shares,
         )
-        encoded_verifier_message = vdaf.encode_verifier_message(verifier_message)
+        encoded_verifier_message = vdaf.encode_verifier_message(
+            verifier_message)
         self.assertEqual(encoded_verifier_message, expected_verifier_message)
 
     def check_verifier_shares_to_message_failure(
@@ -465,7 +468,8 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
             verifier_message_bytes: bytes,
             expected_verifier_share: bytes,
             expected_out_share: bytes) -> Optional[VerifyState]:
-        verifier_message = vdaf.decode_verifier_message(verify_state, verifier_message_bytes)
+        verifier_message = vdaf.decode_verifier_message(
+            verify_state, verifier_message_bytes)
         result = vdaf.verify_next(
             ctx,
             verify_state,
@@ -503,7 +507,8 @@ class TestVdafTestVector(unittest.TestCase, Generic[Measurement, AggResult]):
             round: int,
             verify_state: VerifyState,
             verifier_message_bytes: bytes) -> None:
-        verifier_message = vdaf.decode_verifier_message(verify_state, verifier_message_bytes)
+        verifier_message = vdaf.decode_verifier_message(
+            verify_state, verifier_message_bytes)
         self.assertRaises(
             Exception,
             lambda: vdaf.verify_next(
