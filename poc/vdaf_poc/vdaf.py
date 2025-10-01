@@ -338,20 +338,20 @@ def run_vdaf(
         # them into the verifier message. The round ends when each
         # uses the verifier message to transition to the next state.
         for i in range(vdaf.ROUNDS - 1):
-            verifier_message = vdaf.verifier_shares_to_message(ctx,
-                                                               agg_param,
-                                                               outbound_verifier_shares)
+            verifier_message = vdaf.verifier_shares_to_message(
+                ctx, agg_param, outbound_verifier_shares)
 
             outbound_verifier_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.verify_next(ctx, verify_states[j], verifier_message)
+                out = vdaf.verify_next(ctx,
+                                       verify_states[j],
+                                       verifier_message)
                 assert isinstance(out, tuple)
                 (verify_states[j], verifier_share) = out
                 outbound_verifier_shares.append(verifier_share)
 
-        verifier_message = vdaf.verifier_shares_to_message(ctx,
-                                                           agg_param,
-                                                           outbound_verifier_shares)
+        verifier_message = vdaf.verifier_shares_to_message(
+            ctx, agg_param, outbound_verifier_shares)
 
         # Aggregation: Each Aggregator updates its aggregate share
         # with its output share.
