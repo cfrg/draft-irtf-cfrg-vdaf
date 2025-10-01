@@ -1620,10 +1620,6 @@ def run_vdaf(
     parameter (`agg_param`), application context (`ctx`), and
     verification key (`verify_key`).
     """
-    # REMOVE ME
-    if len(verify_key) != vdaf.VERIFY_KEY_SIZE:
-        raise ValueError("incorrect verify_key size")
-
     agg_shares = [vdaf.agg_init(agg_param)
                   for _ in range(vdaf.SHARES)]
     for measurement in measurements:
