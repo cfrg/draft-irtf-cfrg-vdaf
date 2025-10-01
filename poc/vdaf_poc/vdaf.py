@@ -127,8 +127,8 @@ class Vdaf(
     @abstractmethod
     def verify_next(self,
                     ctx: bytes,
-                    ver_state: VerifyState,
-                    ver_msg: VerifierMessage,
+                    verify_state: VerifyState,
+                    verifier_message: VerifierMessage,
                     ) -> tuple[VerifyState, VerifierShare] | OutShare:
         """
         Consume the inbound message from the previous round and return the
@@ -138,10 +138,10 @@ class Vdaf(
         pass
 
     @abstractmethod
-    def ver_shares_to_msg(self,
+    def verifier_shares_to_message(self,
                           ctx: bytes,
                           agg_param: AggParam,
-                          ver_shares: list[VerifierShare]) -> VerifierMessage:
+                          verifier_shares: list[VerifierShare]) -> VerifierMessage:
         """
         Unshard the verifier shares from the previous round of verification.
         This is called by an Aggregator after receiving all of the message
@@ -244,19 +244,19 @@ class Vdaf(
         pass
 
     @abstractmethod
-    def encode_ver_share(self, ver_share: VerifierShare) -> bytes:
+    def encode_verifier_share(self, verifier_share: VerifierShare) -> bytes:
         pass
 
     @abstractmethod
-    def decode_ver_share(self, ver_state: VerifyState, encoded: bytes) -> VerifierShare:
+    def decode_verifier_share(self, verify_state: VerifyState, encoded: bytes) -> VerifierShare:
         pass
 
     @abstractmethod
-    def encode_ver_msg(self, ver_msg: VerifierMessage) -> bytes:
+    def encode_verifier_message(self, verifier_message: VerifierMessage) -> bytes:
         pass
 
     @abstractmethod
-    def decode_ver_msg(self, ver_state: VerifyState, encoded: bytes) -> VerifierMessage:
+    def decode_verifier_message(self, verify_state: VerifyState, encoded: bytes) -> VerifierMessage:
         pass
 
     @abstractmethod
@@ -321,16 +321,16 @@ def run_vdaf(
         # Initialize verification: Each Aggregator receives its
         # report share (the public share and its input share) from
         # the Client and initializes verification.
-        ver_states = []
-        outbound_ver_shares = []
+        verify_states = []
+        outbound_verifier_shares = []
         for j in range(vdaf.SHARES):
             (state, share) = vdaf.verify_init(verify_key, ctx, j,
                                               agg_param,
                                               nonce,
                                               public_share,
                                               input_shares[j])
-            ver_states.append(state)
-            outbound_ver_shares.append(share)
+            verify_states.append(state)
+            outbound_verifier_shares.append(share)
 
         # Complete verification: The Aggregators execute each round
         # of verification until each computes an output share. A
@@ -338,25 +338,25 @@ def run_vdaf(
         # them into the verifier message. The round ends when each
         # uses the verifier message to transition to the next state.
         for i in range(vdaf.ROUNDS - 1):
-            ver_msg = vdaf.ver_shares_to_msg(ctx,
+            verifier_message = vdaf.verifier_shares_to_message(ctx,
                                              agg_param,
-                                             outbound_ver_shares)
+                                             outbound_verifier_shares)
 
-            outbound_ver_shares = []
+            outbound_verifier_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.verify_next(ctx, ver_states[j], ver_msg)
+                out = vdaf.verify_next(ctx, verify_states[j], verifier_message)
                 assert isinstance(out, tuple)
-                (ver_states[j], ver_share) = out
-                outbound_ver_shares.append(ver_share)
+                (verify_states[j], verifier_share) = out
+                outbound_verifier_shares.append(verifier_share)
 
-        ver_msg = vdaf.ver_shares_to_msg(ctx,
+        verifier_message = vdaf.verifier_shares_to_message(ctx,
                                          agg_param,
-                                         outbound_ver_shares)
+                                         outbound_verifier_shares)
 
         # Aggregation: Each Aggregator updates its aggregate share
         # with its output share.
         for j in range(vdaf.SHARES):
-            out_share = vdaf.verify_next(ctx, ver_states[j], ver_msg)
+            out_share = vdaf.verify_next(ctx, verify_states[j], verifier_message)
             assert not isinstance(out_share, tuple)
             agg_shares[j] = vdaf.agg_update(agg_param,
                                             agg_shares[j],

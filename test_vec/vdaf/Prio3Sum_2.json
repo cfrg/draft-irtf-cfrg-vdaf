@@ -26,7 +26,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 0,
             "round": 0,
             "success": true
@@ -63,7 +63,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 1,
             "round": 0,
             "success": true
@@ -100,7 +100,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 2,
             "round": 0,
             "success": true
@@ -137,7 +137,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 3,
             "round": 0,
             "success": true
@@ -174,7 +174,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 4,
             "round": 0,
             "success": true
@@ -211,7 +211,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 5,
             "round": 0,
             "success": true
@@ -248,7 +248,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 6,
             "round": 0,
             "success": true
@@ -285,7 +285,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 7,
             "round": 0,
             "success": true
@@ -334,10 +334,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2151811ef413c956ff342b7195eb58731e",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
@@ -357,10 +357,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb211eb662209e58e2405d1a1b206c9f3fc5",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
@@ -380,10 +380,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb21d1a2b4da13818ff19ae1da2daa52e440",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
@@ -403,10 +403,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb21738306b80716f2e4c51acbcc0158dd8a",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
@@ -426,10 +426,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2167e02e21452d6637328672ffd0423630",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
@@ -449,10 +449,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2151811ef413c956ff342b7195eb58731e",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
@@ -472,10 +472,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2151811ef413c956ff342b7195eb58731e",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"
@@ -495,10 +495,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "fc4370f72d35fb2167e02e21452d6637328672ffd0423630",
                     "05bc8f08d1ca04de00af93b17bde18cbad698b7a7dd6d58d"

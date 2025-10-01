@@ -33,7 +33,7 @@
             "success": true
         },
         {
-            "operation": "ver_shares_to_msg",
+            "operation": "verifier_shares_to_message",
             "report_index": 0,
             "round": 0,
             "success": true
@@ -96,10 +96,10 @@
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f",
-            "ver_msgs": [
+            "verifier_messages": [
                 ""
             ],
-            "ver_shares": [
+            "verifier_shares": [
                 [
                     "bc2b0bbf09338766f8abb2e591e5b779587a4647599932a2",
                     "c8cf2cb48a199890ca5a3a856a34c034919f038dd5483648",

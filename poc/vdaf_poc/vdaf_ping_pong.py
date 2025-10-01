@@ -33,17 +33,17 @@ class Start(State):
 
 class Continued(State, Generic[VerifyState]):
     def __init__(self,
-                 ver_state: VerifyState,
-                 ver_round: int,
+                 verify_state: VerifyState,
+                 verify_round: int,
                  outbound: bytes):
-        self.ver_state = ver_state
-        self.ver_round = ver_round
+        self.verify_state = verify_state
+        self.verify_round = verify_round
         self.outbound = outbound
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, Continued) and \
-            self.ver_state == other.ver_state and \
-            self.ver_round == other.ver_round and \
+            self.verify_state == other.verify_state and \
+            self.verify_round == other.verify_round and \
             self.outbound == other.outbound
 
 
@@ -102,7 +102,7 @@ class PingPong(
             input_share: bytes) -> Continued | Rejected:
         """Called by the Leader to initialize ping-ponging."""
         try:
-            (ver_state, ver_share) = self.verify_init(
+            (verify_state, verifier_share) = self.verify_init(
                 vdaf_verify_key,
                 ctx,
                 0,
@@ -112,10 +112,10 @@ class PingPong(
                 self.decode_input_share(0, input_share),
             )
 
-            encoded_ver_share = self.encode_ver_share(ver_share)
+            encoded_verifier_share = self.encode_verifier_share(verifier_share)
             return Continued(
-                ver_state, 0,
-                encode(0, encoded_ver_share),  # initialize
+                verify_state, 0,
+                encode(0, encoded_verifier_share),  # initialize
             )
         except Exception:
             return Rejected()
@@ -136,7 +136,7 @@ class PingPong(
         """
 
         try:
-            (ver_state, ver_share) = self.verify_init(
+            (verify_state, verifier_share) = self.verify_init(
                 vdaf_verify_key,
                 ctx,
                 1,
@@ -150,16 +150,16 @@ class PingPong(
             if inbound_type != 0:  # initialize
                 return Rejected()
 
-            encoded_ver_share = inbound_items[0]
-            ver_shares = [
-                self.decode_ver_share(ver_state, encoded_ver_share),
-                ver_share,
+            encoded_verifier_share = inbound_items[0]
+            verifier_shares = [
+                self.decode_verifier_share(verify_state, encoded_verifier_share),
+                verifier_share,
             ]
             return self.ping_pong_transition(
                 ctx,
                 self.decode_agg_param(agg_param),
-                ver_shares,
-                ver_state,
+                verifier_shares,
+                verify_state,
                 0,
             )
         except Exception:
@@ -169,25 +169,25 @@ class PingPong(
             self,
             ctx: bytes,
             agg_param: AggParam,
-            ver_shares: list[VerifierShare],
-            ver_state: VerifyState,
-            ver_round: int) -> Continued | FinishedWithOutbound:
-        ver_msg = self.ver_shares_to_msg(ctx,
+            verifier_shares: list[VerifierShare],
+            verify_state: VerifyState,
+            verify_round: int) -> Continued | FinishedWithOutbound:
+        verifier_message = self.verifier_shares_to_message(ctx,
                                          agg_param,
-                                         ver_shares)
-        encoded_ver_msg = self.encode_ver_msg(ver_msg)
-        out = self.verify_next(ctx, ver_state, ver_msg)
-        if ver_round+1 == self.ROUNDS:
+                                         verifier_shares)
+        encoded_verifier_message = self.encode_verifier_message(verifier_message)
+        out = self.verify_next(ctx, verify_state, verifier_message)
+        if verify_round+1 == self.ROUNDS:
             return FinishedWithOutbound(
                 out,
-                encode(2, encoded_ver_msg),  # finalize
+                encode(2, encoded_verifier_message),  # finalize
             )
-        (ver_state, ver_share) = cast(
+        (verify_state, verifier_share) = cast(
             tuple[VerifyState, VerifierShare], out)
-        encoded_ver_share = self.encode_ver_share(ver_share)
+        encoded_verifier_share = self.encode_verifier_share(verifier_share)
         return Continued(
-            ver_state, ver_round+1,
-            encode(1, encoded_ver_msg, encoded_ver_share)  # continue
+            verify_state, verify_round+1,
+            encode(1, encoded_verifier_message, encoded_verifier_share)  # continue
         )
 
     def ping_pong_leader_continued(
@@ -212,40 +212,40 @@ class PingPong(
         inbound: bytes,  # encoded ping pong Message
     ) -> State:
         try:
-            ver_round = state.ver_round
+            verify_round = state.verify_round
 
             (inbound_type, inbound_items) = decode(inbound)
             if inbound_type == 0:  # initialize
                 return Rejected()
 
-            encoded_ver_msg = inbound_items[0]
-            ver_msg = self.decode_ver_msg(
-                state.ver_state,
-                encoded_ver_msg,
+            encoded_verifier_message = inbound_items[0]
+            verifier_message = self.decode_verifier_message(
+                state.verify_state,
+                encoded_verifier_message,
             )
-            out = self.verify_next(ctx, state.ver_state, ver_msg)
-            if ver_round+1 < self.ROUNDS and \
+            out = self.verify_next(ctx, state.verify_state, verifier_message)
+            if verify_round+1 < self.ROUNDS and \
                     inbound_type == 1:  # continue
-                (ver_state, ver_share) = cast(
+                (verify_state, verifier_share) = cast(
                     tuple[VerifyState, VerifierShare], out)
-                encoded_ver_share = inbound_items[1]
-                ver_shares = [
-                    self.decode_ver_share(
-                        ver_state,
-                        encoded_ver_share,
+                encoded_verifier_share = inbound_items[1]
+                verifier_shares = [
+                    self.decode_verifier_share(
+                        verify_state,
+                        encoded_verifier_share,
                     ),
-                    ver_share,
+                    verifier_share,
                 ]
                 if is_leader:
-                    ver_shares.reverse()
+                    verifier_shares.reverse()
                 return self.ping_pong_transition(
                     ctx,
                     self.decode_agg_param(agg_param),
-                    ver_shares,
-                    ver_state,
-                    ver_round+1,
+                    verifier_shares,
+                    verify_state,
+                    verify_round+1,
                 )
-            elif ver_round+1 == self.ROUNDS and \
+            elif verify_round+1 == self.ROUNDS and \
                     inbound_type == 2:  # finish
                 return Finished(out)
             else:
@@ -265,9 +265,9 @@ class PingPong(
             False, ctx, agg_param, state, inbound)
 
 
-def encode(msg_type: int, *items: bytes) -> bytes:
+def encode(message_type: int, *items: bytes) -> bytes:
     encoded = bytes()
-    encoded += byte(msg_type)
+    encoded += byte(message_type)
     for item in items:
         encoded += to_be_bytes(len(item), 4)
         encoded += item
@@ -275,15 +275,15 @@ def encode(msg_type: int, *items: bytes) -> bytes:
 
 
 def decode(encoded: bytes) -> tuple[int, list[bytes]]:
-    ([msg_type], encoded) = front(1, encoded)
-    if msg_type == 0:    # initialize
-        num_counts = 1   # ver_share
-    elif msg_type == 1:  # continue
-        num_counts = 2   # ver_msg, ver_share
-    elif msg_type == 2:  # finish
-        num_counts = 1   # ver_msg
+    ([message_type], encoded) = front(1, encoded)
+    if message_type == 0:    # initialize
+        num_counts = 1   # verifier_share
+    elif message_type == 1:  # continue
+        num_counts = 2   # verifier_message, verifier_share
+    elif message_type == 2:  # finish
+        num_counts = 1   # verifier_message
     else:
-        raise ValueError('unexpected message type: {}'.format(msg_type))
+        raise ValueError('unexpected message type: {}'.format(message_type))
     items = []
     for _ in range(num_counts):
         (encoded_item_len, encoded) = front(4, encoded)
@@ -292,4 +292,4 @@ def decode(encoded: bytes) -> tuple[int, list[bytes]]:
         items.append(item)
     if len(encoded) > 0:
         raise ValueError('unexpected message length')
-    return (int(msg_type), items)
+    return (int(message_type), items)

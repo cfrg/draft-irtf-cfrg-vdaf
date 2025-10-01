@@ -77,7 +77,7 @@ class VdafTestVectorOperationDict(TypedDict):
 
     Attributes:
         operation: The type of operation to be performed. This is one of
-            "shard", "verify_init", "ver_shares_to_msg", "verify_next",
+            "shard", "verify_init", "verifier_shares_to_message", "verify_next",
             "aggregate", or "unshard".
 
             Note that the "aggregate" operation encompasses running
@@ -102,7 +102,7 @@ class VdafTestVectorOperationDict(TypedDict):
     """
     operation: (
         Literal["shard"] | Literal["verify_init"]
-        | Literal["ver_shares_to_msg"] | Literal["verify_next"]
+        | Literal["verifier_shares_to_message"] | Literal["verify_next"]
         | Literal["aggregate"] | Literal["unshard"]
     )
     round: NotRequired[int]
@@ -129,10 +129,10 @@ class VdafVerifyTestVectorDict(Generic[Measurement], TypedDict):
 
         input_shares: The input shares from the report.
 
-        ver_shares: The verifier shares produced during verification. This is
+        verifier_shares: The verifier shares produced during verification. This is
         indexed first by round, and then by aggregator ID.
 
-        ver_msgs: The verifier messages produced during verification. This
+        verifier_messages: The verifier messages produced during verification. This
             is indexed by round.
 
         out_shares: The output shares produced by verifying this report. This
@@ -143,8 +143,8 @@ class VdafVerifyTestVectorDict(Generic[Measurement], TypedDict):
     rand: str
     public_share: str
     input_shares: list[str]
-    ver_shares: list[list[str]]
-    ver_msgs: list[str]
+    verifier_shares: list[list[str]]
+    verifier_messages: list[str]
     out_shares: list[str]
 
 
@@ -253,31 +253,31 @@ def gen_test_vec_for_vdaf(
         })
 
         pub_share_hex = vdaf.encode_public_share(public_share).hex()
-        ver_test_vec: VdafVerifyTestVectorDict[Measurement] = {
+        verify_test_vec: VdafVerifyTestVectorDict[Measurement] = {
             'measurement': measurement,
             'nonce': nonce.hex(),
             'rand': rand.hex(),
             'public_share': pub_share_hex,
             'input_shares': [],
-            'ver_shares': [[] for _ in range(vdaf.ROUNDS)],
-            'ver_msgs': [],
+            'verifier_shares': [[] for _ in range(vdaf.ROUNDS)],
+            'verifier_messages': [],
             'out_shares': [],
         }
         for input_share in input_shares:
-            ver_test_vec['input_shares'].append(
+            verify_test_vec['input_shares'].append(
                 vdaf.encode_input_share(input_share).hex())
 
         # Each Aggregator initializes its verification state.
-        ver_states = []
-        outbound_ver_shares = []
+        verify_states = []
+        outbound_verifier_shares = []
         for j in range(vdaf.SHARES):
             (state, share) = vdaf.verify_init(verify_key, ctx, j,
                                               agg_param,
                                               nonce,
                                               public_share,
                                               input_shares[j])
-            ver_states.append(state)
-            outbound_ver_shares.append(share)
+            verify_states.append(state)
+            outbound_verifier_shares.append(share)
             operations.append({
                 'operation': 'verify_init',
                 'aggregator_id': j,
@@ -285,32 +285,32 @@ def gen_test_vec_for_vdaf(
                 'success': True,
             })
 
-        for ver_share in outbound_ver_shares:
-            ver_test_vec['ver_shares'][0].append(
-                vdaf.encode_ver_share(ver_share).hex())
+        for verifier_share in outbound_verifier_shares:
+            verify_test_vec['verifier_shares'][0].append(
+                vdaf.encode_verifier_share(verifier_share).hex())
 
         # Aggregators recover their output shares.
         for i in range(vdaf.ROUNDS - 1):
-            ver_msg = vdaf.ver_shares_to_msg(ctx,
+            verifier_message = vdaf.verifier_shares_to_message(ctx,
                                              agg_param,
-                                             outbound_ver_shares)
-            ver_test_vec['ver_msgs'].append(
-                vdaf.encode_ver_msg(ver_msg).hex())
+                                             outbound_verifier_shares)
+            verify_test_vec['verifier_messages'].append(
+                vdaf.encode_verifier_message(verifier_message).hex())
             operations.append({
-                'operation': 'ver_shares_to_msg',
+                'operation': 'verifier_shares_to_message',
                 'round': i,
                 'report_index': report_index,
                 'success': True,
             })
 
-            outbound_ver_shares = []
+            outbound_verifier_shares = []
             for j in range(vdaf.SHARES):
-                out = vdaf.verify_next(ctx, ver_states[j], ver_msg)
+                out = vdaf.verify_next(ctx, verify_states[j], verifier_message)
                 assert isinstance(out, tuple)
-                (ver_states[j], ver_share) = out
-                outbound_ver_shares.append(ver_share)
-                ver_test_vec['ver_shares'][i+1].append(
-                    vdaf.encode_ver_share(ver_share).hex()
+                (verify_states[j], verifier_share) = out
+                outbound_verifier_shares.append(verifier_share)
+                verify_test_vec['verifier_shares'][i+1].append(
+                    vdaf.encode_verifier_share(verifier_share).hex()
                 )
                 operations.append({
                     'operation': 'verify_next',
@@ -321,13 +321,13 @@ def gen_test_vec_for_vdaf(
                 })
 
         # The final outputs after verification are the output shares.
-        ver_msg = vdaf.ver_shares_to_msg(ctx,
+        verifier_message = vdaf.verifier_shares_to_message(ctx,
                                          agg_param,
-                                         outbound_ver_shares)
-        ver_test_vec['ver_msgs'].append(
-            vdaf.encode_ver_msg(ver_msg).hex())
+                                         outbound_verifier_shares)
+        verify_test_vec['verifier_messages'].append(
+            vdaf.encode_verifier_message(verifier_message).hex())
         operations.append({
-            'operation': 'ver_shares_to_msg',
+            'operation': 'verifier_shares_to_message',
             'round': vdaf.ROUNDS - 1,
             'report_index': report_index,
             'success': True,
@@ -335,10 +335,10 @@ def gen_test_vec_for_vdaf(
 
         outbound_out_shares = []
         for j in range(vdaf.SHARES):
-            out_share = vdaf.verify_next(ctx, ver_states[j], ver_msg)
+            out_share = vdaf.verify_next(ctx, verify_states[j], verifier_message)
             assert not isinstance(out_share, tuple)
             outbound_out_shares.append(out_share)
-            ver_test_vec['out_shares'].append(
+            verify_test_vec['out_shares'].append(
                 vdaf.encode_out_share(out_share).hex()
             )
             operations.append({
@@ -349,7 +349,7 @@ def gen_test_vec_for_vdaf(
                 'success': True,
             })
 
-        test_vec['verify'].append(ver_test_vec)
+        test_vec['verify'].append(verify_test_vec)
 
         out_shares.append(outbound_out_shares)
 
@@ -436,31 +436,31 @@ def pretty_print_vdaf_test_vec(
     if test_vec['agg_param'] is not None:
         print('agg_param: {}'.format(test_vec['agg_param']))
 
-    for (n, ver_test_vec) in enumerate(test_vec['verify']):
+    for (n, verify_test_vec) in enumerate(test_vec['verify']):
         print('upload_{}:'.format(n))
-        print('  measurement: {}'.format(ver_test_vec['measurement']))
-        print('  nonce: "{}"'.format(ver_test_vec['nonce']))
+        print('  measurement: {}'.format(verify_test_vec['measurement']))
+        print('  nonce: "{}"'.format(verify_test_vec['nonce']))
         print('  public_share: >-')
-        print_wrapped_line(ver_test_vec['public_share'], tab=4)
+        print_wrapped_line(verify_test_vec['public_share'], tab=4)
 
         # Shard
-        for (i, input_share) in enumerate(ver_test_vec['input_shares']):
+        for (i, input_share) in enumerate(verify_test_vec['input_shares']):
             print('  input_share_{}: >-'.format(i))
             print_wrapped_line(input_share, tab=4)
 
         # Verifyare
-        for (i, (ver_shares, ver_msg)) in enumerate(
-                zip_longest(ver_test_vec['ver_shares'],
-                            ver_test_vec['ver_msgs'])):
+        for (i, (verifier_shares, verifier_message)) in enumerate(
+                zip_longest(verify_test_vec['verifier_shares'],
+                            verify_test_vec['verifier_messages'])):
             print('  round_{}:'.format(i))
-            for (j, ver_share) in enumerate(ver_shares):
-                print('    ver_share_{}: >-'.format(j))
-                print_wrapped_line(ver_share, tab=6)
-            if ver_msg is not None:
-                print('    ver_msg: >-')
-                print_wrapped_line(ver_msg, tab=6)
+            for (j, verifier_share) in enumerate(verifier_shares):
+                print('    verifier_share_{}: >-'.format(j))
+                print_wrapped_line(verifier_share, tab=6)
+            if verifier_message is not None:
+                print('    verifier_message: >-')
+                print_wrapped_line(verifier_message, tab=6)
 
-        for (j, out_share) in enumerate(ver_test_vec['out_shares']):
+        for (j, out_share) in enumerate(verify_test_vec['out_shares']):
             print('  out_share_{}: {}'.format(j, out_share))
 
     # Aggregate
