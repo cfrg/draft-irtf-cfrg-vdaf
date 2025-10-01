@@ -18,9 +18,9 @@ class PingPongTester(
             int,  # OutShare
             int,  # AggShare
             int,  # AggResult
-            tuple[int, int],  # PrepState
-            str,  # PrepShare
-            str,  # PrepMessage
+            tuple[int, int],  # VerifyState
+            str,  # VerifierShare
+            str,  # VerifierMessage
         ]):
     """
     Computes the aggregation function f(agg_param, m[1], ..., m[N]) = agg_param
@@ -52,43 +52,43 @@ class PingPongTester(
                  previous_agg_params: list[int]) -> bool:
         return len(previous_agg_params) == 0
 
-    def prep_init(self,
-                  _verify_key: bytes,
-                  _ctx: bytes,
-                  _agg_id: int,
-                  _agg_param: int,
-                  _nonce: bytes,
-                  public_share: str,
-                  input_share: int) -> tuple[tuple[int, int], str]:
+    def verify_init(self,
+                    _verify_key: bytes,
+                    _ctx: bytes,
+                    _agg_id: int,
+                    _agg_param: int,
+                    _nonce: bytes,
+                    public_share: str,
+                    input_share: int) -> tuple[tuple[int, int], str]:
         if public_share != 'public share':
             raise ValueError('unexpected public share')
         current_round = 0
         return (
             (current_round, input_share),
-            'prep round {}'.format(current_round),
+            'verify round {}'.format(current_round),
         )
 
-    def prep_shares_to_prep(self,
-                            _ctx: bytes,
-                            _agg_param: int,
-                            prep_shares: list[str]) -> str:
-        for prep_share in prep_shares[1:]:
-            if prep_share != prep_shares[0]:
-                raise ValueError('unexpected prep share')
-        return prep_shares[0]
+    def verifier_shares_to_message(self,
+                                   _ctx: bytes,
+                                   _agg_param: int,
+                                   verifier_shares: list[str]) -> str:
+        for verifier_share in verifier_shares[1:]:
+            if verifier_share != verifier_shares[0]:
+                raise ValueError('unexpected verifier share')
+        return verifier_shares[0]
 
-    def prep_next(self,
-                  _ctx: bytes,
-                  prep_state: tuple[int, int],
-                  prep_msg: str) -> Union[tuple[tuple[int, int], str], int]:
-        (current_round, out_share) = prep_state
-        if prep_msg != "prep round {}".format(current_round):
-            raise ValueError(f"unexpected prep message {prep_msg}")
+    def verify_next(self,
+                    _ctx: bytes,
+                    verify_state: tuple[int, int],
+                    verifier_message: str) -> Union[tuple[tuple[int, int], str], int]:
+        (current_round, out_share) = verify_state
+        if verifier_message != "verify round {}".format(current_round):
+            raise ValueError(f"unexpected verifier message {verifier_message}")
         if current_round+1 == self.ROUNDS:
             return out_share
         return (
             (current_round+1, out_share),
-            "prep round {}".format(current_round+1),
+            "verify round {}".format(current_round+1),
         )
 
     def agg_init(self, _agg_param: int) -> int:
@@ -129,20 +129,20 @@ class PingPongTester(
     def decode_agg_share(self, _agg_param: int, encoded: bytes) -> int:
         return from_be_bytes(encoded)
 
-    def encode_prep_share(self, prep_share: str) -> bytes:
-        return prep_share.encode('utf-8')
+    def encode_verifier_share(self, verifier_share: str) -> bytes:
+        return verifier_share.encode('utf-8')
 
-    def decode_prep_share(self,
-                          _prep_state: tuple[int, int],
-                          encoded: bytes) -> str:
+    def decode_verifier_share(self,
+                              _verify_state: tuple[int, int],
+                              encoded: bytes) -> str:
         return encoded.decode('utf-8')
 
-    def encode_prep_msg(self, prep_msg: str) -> bytes:
-        return prep_msg.encode('utf-8')
+    def encode_verifier_message(self, verifier_message: str) -> bytes:
+        return verifier_message.encode('utf-8')
 
-    def decode_prep_msg(self,
-                        _prep_state: tuple[int, int],
-                        encoded: bytes) -> str:
+    def decode_verifier_message(self,
+                                _verify_state: tuple[int, int],
+                                encoded: bytes) -> str:
         return encoded.decode('utf-8')
 
     def encode_out_share(self, out_share: int) -> bytes:
@@ -196,7 +196,7 @@ class TestPingPong(unittest.TestCase):
             vdaf.encode_input_share(input_shares[0]),
         )
         assert isinstance(leader_init_state, Continued)
-        self.assertEqual(leader_init_state.prep_round, 0)
+        self.assertEqual(leader_init_state.verify_round, 0)
 
         helper_state = vdaf.ping_pong_helper_init(
             verify_key,
@@ -247,7 +247,7 @@ class TestPingPong(unittest.TestCase):
                 vdaf.encode_input_share(input_shares[0]),
             )
             assert isinstance(leader_state, Continued)
-            self.assertEqual(leader_state.prep_round, 0)
+            self.assertEqual(leader_state.verify_round, 0)
 
             for step in range(num_steps):
                 if step == 0:

@@ -27,7 +27,7 @@ Poplar1InputShare: TypeAlias = tuple[
     list[Field64],  # inner node correlated randomness
     list[Field255],  # leaf node correlated randomness
 ]
-Poplar1PrepState: TypeAlias = tuple[
+Poplar1VerifyState: TypeAlias = tuple[
     bytes,  # sketch step (evaluate or reveal)
     int,  # level
     FieldVec,  # output (and sketch) share
@@ -43,9 +43,9 @@ class Poplar1(
             FieldVec,  # OutShare
             FieldVec,  # AggShare
             list[int],  # AggResult
-            Poplar1PrepState,  # PrepState
-            FieldVec,  # PrepShare
-            Optional[FieldVec],  # PrepMessage
+            Poplar1VerifyState,  # VerifyState
+            FieldVec,  # VerifierShare
+            Optional[FieldVec],  # VerifierMessage
         ]):
 
     idpf: IdpfBBCGGI21
@@ -102,8 +102,8 @@ class Poplar1(
         # Construct the IDPF values for each level of the IDPF tree.
         # Each "data" value is 1; in addition, the Client generates
         # a random "authenticator" value used by the Aggregators to
-        # evaluate the sketch during preparation. This sketch is used
-        # to verify the one-hotness of their output shares.
+        # evaluate the sketch during verification. This sketch is
+        # used to verify the one-hotness of their output shares.
         beta_inner = [
             [self.idpf.field_inner(1), k]
             for k in xof.next_vec(self.idpf.field_inner,
@@ -227,13 +227,13 @@ class Poplar1(
                 return False
         return True
 
-    # NOTE: The prep_init(), prep_next(), and prep_shares_to_prep()
+    # NOTE: The verify_init(), verify_next(), and verifier_shares_to_message()
     # methods are excerpted in the document, de-indented, as the figure
     # {{poplar1-prep-state}}. Their width should be limited to 69 columns
     # after de-indenting, or 73 columns before de-indenting, to avoid
     # warnings from xml2rfc.
     # ===================================================================
-    def prep_init(
+    def verify_init(
             self,
             verify_key: bytes,
             ctx: bytes,
@@ -242,7 +242,7 @@ class Poplar1(
             nonce: bytes,
             public_share: Poplar1PublicShare,
             input_share: Poplar1InputShare) -> tuple[
-                Poplar1PrepState,
+                Poplar1VerifyState,
                 FieldVec]:
         (level, prefixes) = agg_param
         (key, corr_seed, corr_inner, corr_leaf) = input_share
@@ -301,34 +301,34 @@ class Poplar1(
             sketch_share[2] += auth_share * r
             out_share.append(data_share)
 
-        prep_mem = [A_share, B_share, field(agg_id)] + out_share
+        verify_mem = [A_share, B_share, field(agg_id)] + out_share
         return (
             (
                 b'evaluate sketch',
                 level,
-                cast(FieldVec, prep_mem),
+                cast(FieldVec, verify_mem),
             ),
             cast(FieldVec, sketch_share),
         )
 
-    def prep_next(
+    def verify_next(
         self,
         _ctx: bytes,
-        prep_state: Poplar1PrepState,
-        prep_msg: Optional[FieldVec]
-    ) -> tuple[Poplar1PrepState, FieldVec] | FieldVec:
-        prev_sketch = cast(list[Field], prep_msg)
-        (step, level, prep_mem) = prep_state
+        verify_state: Poplar1VerifyState,
+        verifier_message: Optional[FieldVec]
+    ) -> tuple[Poplar1VerifyState, FieldVec] | FieldVec:
+        prev_sketch = cast(list[Field], verifier_message)
+        (step, level, verify_mem) = verify_state
 
         if step == b'evaluate sketch':
             if prev_sketch is None:
                 raise ValueError('expected value, got none')
             elif len(prev_sketch) != 3:
                 raise ValueError('incorrect sketch length')
-            A_share = cast(Field, prep_mem[0])
-            B_share = cast(Field, prep_mem[1])
-            agg_id = cast(Field, prep_mem[2])
-            prep_mem = prep_mem[3:]
+            A_share = cast(Field, verify_mem[0])
+            B_share = cast(Field, verify_mem[1])
+            agg_id = cast(Field, verify_mem[2])
+            verify_mem = verify_mem[3:]
             sketch_share = [
                 agg_id * (prev_sketch[0] ** 2
                           - prev_sketch[1]
@@ -337,12 +337,12 @@ class Poplar1(
                 + B_share
             ]
             return cast(
-                tuple[Poplar1PrepState, FieldVec],
+                tuple[Poplar1VerifyState, FieldVec],
                 (
                     (
                         b'reveal sketch',
                         level,
-                        prep_mem,
+                        verify_mem,
                     ),
                     sketch_share,
                 )
@@ -350,24 +350,24 @@ class Poplar1(
 
         elif step == b'reveal sketch':
             if prev_sketch is None:
-                return prep_mem  # Output shares
+                return verify_mem  # Output shares
             else:
-                raise ValueError('invalid prep message')
+                raise ValueError('invalid verifier message')
 
-        raise ValueError('invalid prep state')
+        raise ValueError('invalid verification state')
 
-    def prep_shares_to_prep(
+    def verifier_shares_to_message(
             self,
             _ctx: bytes,
             agg_param: Poplar1AggParam,
-            prep_shares: list[FieldVec]) -> Optional[FieldVec]:
-        if len(prep_shares) != 2:
-            raise ValueError('incorrect number of prep shares')
+            verifier_shares: list[FieldVec]) -> Optional[FieldVec]:
+        if len(verifier_shares) != 2:
+            raise ValueError('incorrect number of verifier shares')
         (level, _) = agg_param
         field = self.idpf.current_field(level)
         sketch = vec_add(
-            cast(list[Field], prep_shares[0]),
-            cast(list[Field], prep_shares[1]),
+            cast(list[Field], verifier_shares[0]),
+            cast(list[Field], verifier_shares[1]),
         )
         if len(sketch) == 3:
             return cast(FieldVec, sketch)
@@ -530,23 +530,23 @@ class Poplar1(
         field = self.idpf.current_field(level)
         return field.decode_vec(encoded)
 
-    def encode_prep_share(self, prep_share: FieldVec) -> bytes:
-        return encode_idpf_field_vec(prep_share)
+    def encode_verifier_share(self, verifier_share: FieldVec) -> bytes:
+        return encode_idpf_field_vec(verifier_share)
 
-    def decode_prep_share(self, prep_state: Poplar1PrepState, encoded: bytes) -> FieldVec:
-        _, level, _ = prep_state
+    def decode_verifier_share(self, verify_state: Poplar1VerifyState, encoded: bytes) -> FieldVec:
+        _, level, _ = verify_state
         field = self.idpf.current_field(level)
         return field.decode_vec(encoded)
 
-    def encode_prep_msg(self, prep_message: Optional[FieldVec]) -> bytes:
-        if prep_message is not None:
-            return encode_idpf_field_vec(prep_message)
+    def encode_verifier_message(self, verifier_message: Optional[FieldVec]) -> bytes:
+        if verifier_message is not None:
+            return encode_idpf_field_vec(verifier_message)
         return b''
 
-    def decode_prep_msg(self, prep_state: Poplar1PrepState, encoded: bytes) -> Optional[FieldVec]:
+    def decode_verifier_message(self, verify_state: Poplar1VerifyState, encoded: bytes) -> Optional[FieldVec]:
         if len(encoded) == 0:
             return None
-        _, level, _ = prep_state
+        _, level, _ = verify_state
         field = self.idpf.current_field(level)
         return field.decode_vec(encoded)
 

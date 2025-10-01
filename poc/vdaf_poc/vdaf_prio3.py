@@ -32,11 +32,11 @@ Prio3InputShare: TypeAlias = \
         bytes,  # measurement and proof share seed
         Optional[bytes],  # joint randomness blind
     ]
-Prio3PrepState: TypeAlias = tuple[
+Prio3VerifyState: TypeAlias = tuple[
     list[F],  # output share
     Optional[bytes],  # corrected joint randomness seed
 ]
-Prio3PrepShare: TypeAlias = tuple[
+Prio3VerifierShare: TypeAlias = tuple[
     list[F],  # verifier share
     Optional[bytes],  # joint randomness part
 ]
@@ -52,9 +52,9 @@ class Prio3(
             list[F],  # OutShare
             list[F],  # AggShare
             AggResult,
-            Prio3PrepState[F],  # PrepState
-            Prio3PrepShare[F],  # PrepShare
-            Optional[bytes],  # PrepMessage, joint randomness seed check
+            Prio3VerifyState[F],  # VerifyState
+            Prio3VerifierShare[F],  # VerifierShare
+            Optional[bytes],  # VerifierMessage, joint randomness seed check
         ]):
     """Base class for VDAFs based on Prio3."""
 
@@ -124,13 +124,13 @@ class Prio3(
             previous_agg_params: list[None]) -> bool:
         return len(previous_agg_params) == 0
 
-    # NOTE: The prep_init(), prep_shares_to_prep(), and prep_next()
+    # NOTE: The verify_init(), verifier_shares_to_message(), and verify_next()
     # methods are excerpted in the document, de-indented, as figure
     # {{prio3-prep-state}}. Their width should be limited to 69 columns
     # after de-indenting, or 73 columns before de-indenting, to avoid
     # warnings from xml2rfc.
     # ===================================================================
-    def prep_init(
+    def verify_init(
             self,
             verify_key: bytes,
             ctx: bytes,
@@ -139,8 +139,8 @@ class Prio3(
             nonce: bytes,
             public_share: Optional[list[bytes]],
             input_share: Prio3InputShare[F]) -> tuple[
-                Prio3PrepState[F],
-                Prio3PrepShare[F]]:
+                Prio3VerifyState[F],
+                Prio3VerifierShare[F]]:
         joint_rand_parts = public_share
         (meas_share, proofs_share, blind) = \
             self.expand_input_share(ctx, agg_id, input_share)
@@ -180,20 +180,21 @@ class Prio3(
                 self.SHARES,
             )
 
-        prep_state = (out_share, corrected_joint_rand_seed)
-        prep_share = (verifiers_share, joint_rand_part)
-        return (prep_state, prep_share)
+        verify_state = (out_share, corrected_joint_rand_seed)
+        verifier_share = (verifiers_share, joint_rand_part)
+        return (verify_state, verifier_share)
 
-    def prep_shares_to_prep(
-            self,
-            ctx: bytes,
-            _agg_param: None,
-            prep_shares: list[Prio3PrepShare[F]]) -> Optional[bytes]:
+    def verifier_shares_to_message(
+        self,
+        ctx: bytes,
+        _agg_param: None,
+        verifier_shares: list[Prio3VerifierShare[F]],
+    ) -> Optional[bytes]:
         # Unshard each set of verifier shares into each verifier message.
         verifiers = self.flp.field.zeros(
             self.flp.VERIFIER_LEN * self.PROOFS)
         joint_rand_parts = []
-        for (verifiers_share, joint_rand_part) in prep_shares:
+        for (verifiers_share, joint_rand_part) in verifier_shares:
             verifiers = vec_add(verifiers, verifiers_share)
             if self.flp.JOINT_RAND_LEN > 0:
                 assert joint_rand_part is not None
@@ -213,14 +214,14 @@ class Prio3(
             joint_rand_seed = self.joint_rand_seed(ctx, joint_rand_parts)
         return joint_rand_seed
 
-    def prep_next(
+    def verify_next(
         self,
         _ctx: bytes,
-        prep_state: Prio3PrepState[F],
-        prep_msg: Optional[bytes]
-    ) -> tuple[Prio3PrepState[F], Prio3PrepShare[F]] | list[F]:
-        joint_rand_seed = prep_msg
-        (out_share, corrected_joint_rand_seed) = prep_state
+        verify_state: Prio3VerifyState[F],
+        verifier_message: Optional[bytes]
+    ) -> tuple[Prio3VerifyState[F], Prio3VerifierShare[F]] | list[F]:
+        joint_rand_seed = verifier_message
+        (out_share, corrected_joint_rand_seed) = verify_state
 
         # If joint randomness was used, check that the value computed by
         # the Aggregators matches the value indicated by the Client.
@@ -587,8 +588,8 @@ class Prio3(
     def decode_agg_share(self, _agg_param: None, encoded: bytes) -> list[F]:
         return self.flp.field.decode_vec(encoded)
 
-    def encode_prep_share(self, prep_share: Prio3PrepShare[F]) -> bytes:
-        (verifiers_share, joint_rand_part) = prep_share
+    def encode_verifier_share(self, verifier_share: Prio3VerifierShare[F]) -> bytes:
+        (verifiers_share, joint_rand_part) = verifier_share
         encoded = bytes()
         assert len(verifiers_share) == self.flp.VERIFIER_LEN * self.PROOFS
         encoded += self.flp.field.encode_vec(verifiers_share)
@@ -596,7 +597,7 @@ class Prio3(
             encoded += joint_rand_part
         return encoded
 
-    def decode_prep_share(self, prep_state: Prio3PrepState[F], encoded: bytes) -> Prio3PrepShare[F]:
+    def decode_verifier_share(self, verify_state: Prio3VerifyState[F], encoded: bytes) -> Prio3VerifierShare[F]:
         verifiers_share_bytes, encoded = front(
             self.flp.field.ENCODED_SIZE * self.flp.VERIFIER_LEN * self.PROOFS,
             encoded,
@@ -607,17 +608,17 @@ class Prio3(
         else:
             joint_rand_part = None
         if len(encoded) != 0:
-            raise ValueError("prepare share is too long")
+            raise ValueError("verifier share is too long")
         return (verifiers_share, joint_rand_part)
 
-    def encode_prep_msg(self, prep_message: Optional[bytes]) -> bytes:
-        joint_rand_seed = prep_message
+    def encode_verifier_message(self, verifier_message: Optional[bytes]) -> bytes:
+        joint_rand_seed = verifier_message
         encoded = bytes()
         if joint_rand_seed is not None:  # joint randomness used
             encoded += joint_rand_seed
         return encoded
 
-    def decode_prep_msg(self, _prep_state: Prio3PrepState[F], encoded: bytes) -> Optional[bytes]:
+    def decode_verifier_message(self, _verify_state: Prio3VerifyState[F], encoded: bytes) -> Optional[bytes]:
         if len(encoded) == 0:
             return None
         return encoded
