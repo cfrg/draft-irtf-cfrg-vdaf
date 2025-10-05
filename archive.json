@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-02T00:58:38.533299+00:00",
+  "timestamp": "2025-10-05T01:05:19.103577+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7032,12 +7032,11 @@
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [
-        "wire change",
-        "draft-17"
+        "wire change"
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-09-22T16:23:56Z",
+      "updatedAt": "2025-10-03T20:41:26Z",
       "closedAt": null,
       "comments": [
         {
@@ -7390,7 +7389,7 @@
       ],
       "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
       "createdAt": "2025-09-23T17:16:36Z",
-      "updatedAt": "2025-09-25T23:29:54Z",
+      "updatedAt": "2025-10-03T20:41:08Z",
       "closedAt": null,
       "comments": [
         {
@@ -7441,6 +7440,13 @@
           "body": "The PR for libprio-rs (https://github.com/armfazh/rhizomes/pull/2) is meant to give ideas about the changes needed.\n\nIt would be useful if someone (other than me) replicated the results in the Python implementation. Please comment if you prefer I work on the changes for the Python code. I'm ok with either option.\n\n",
           "createdAt": "2025-09-25T23:29:54Z",
           "updatedAt": "2025-09-25T23:29:54Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I would say if anyone is enthusiastic about seeing this through, then go ahead and write a PR. ",
+          "createdAt": "2025-10-03T20:41:08Z",
+          "updatedAt": "2025-10-03T20:41:08Z"
         }
       ]
     }
