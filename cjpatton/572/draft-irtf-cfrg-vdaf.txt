@@ -1584,7 +1584,7 @@ Table of Contents
 
    *  vdaf.verifier_shares_to_message(ctx: bytes, agg_param: AggParam,
       verifier_shares: list[VerifierShare]) -> VerifierMessage is the
-      deterministic verification message pre-processing algorithm.  It
+      deterministic verifier message pre-processing algorithm.  It
       combines the verifier shares produced by the Aggregators in the
       previous round into the verifier message consumed by each
       Aggregator to start the next round.
