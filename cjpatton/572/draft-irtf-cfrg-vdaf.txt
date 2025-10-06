@@ -6827,7 +6827,7 @@ C.1.  Schema
 
    agg_param:  The aggregation parameter encoded in hexadecimal.
 
-   verify:  A list of objects with the following schema:
+   reports:  A list of objects with the following schema:
 
       measurement:  The measurement of type Measurement defined by the
          VDAF.
