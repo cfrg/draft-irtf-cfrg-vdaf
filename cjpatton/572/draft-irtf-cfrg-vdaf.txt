@@ -6845,7 +6845,7 @@ C.1.  Schema
          by each Aggregator at each round of verification, encoded in
          hexadecimal.
 
-      verifier_messages:  The expected list of verification messages for
+      verifier_messages:  The expected list of verifier messages for
          each round of verification, encoded in hexadecimal.
 
       out_shares:  The expected list of output shares, encoded in
