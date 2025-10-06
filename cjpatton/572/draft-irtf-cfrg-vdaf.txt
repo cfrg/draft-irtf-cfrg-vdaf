@@ -6879,7 +6879,7 @@ C.1.  Schema
       state to use, in addition to the aggregator ID argument itself.
 
    report_index:  The index of the report on which to perform this
-      operation.  This is an index into the verify array.
+      operation.  This is an index into the reports array.
 
    success:  If this is True, the operation should succeed, and its
       output should match the corresponding values in the test vector.
