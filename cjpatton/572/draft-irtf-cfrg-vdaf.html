@@ -3728,7 +3728,7 @@ public <code>verifier_shares_to_message()</code> algorithm and broadcast to the
 Aggregators to start the next round. The goal of this section is to realize
 this broadcast channel.<a href="#section-5.7-2" class="pilcrow">¶</a></p>
 <p id="section-5.7-3">The state machine of each Aggregator is shown below.<a href="#section-5.7-3" class="pilcrow">¶</a></p>
-<span id="name-state-machine-of-vdaf-verif"></span><div id="vdaf-ver-state-machine">
+<span id="name-state-machine-of-vdaf-verif"></span><div id="vdaf-verification-state-machine">
 <figure id="figure-8">
           <div id="section-5.7-4.1">
             <div class="alignLeft art-svg artwork" id="section-5.7-4.1.1">
@@ -3847,9 +3847,9 @@ struct {
 </pre><a href="#section-5.7.1-6" class="pilcrow">¶</a>
 </div>
 <p id="section-5.7.1-7">These messages trigger all transitions in the state machine in
-<a href="#vdaf-ver-state-machine" class="auto internal xref">Figure 8</a>, except for the Leader's initial transition. The
-Leader's state is initialized using its local inputs with the following method
-on class <code>Vdaf</code>:<a href="#section-5.7.1-7" class="pilcrow">¶</a></p>
+<a href="#vdaf-verification-state-machine" class="auto internal xref">Figure 8</a>, except for the Leader's initial
+transition. The Leader's state is initialized using its local inputs with the
+following method on class <code>Vdaf</code>:<a href="#section-5.7.1-7" class="pilcrow">¶</a></p>
 <div class="lang-python sourcecode" id="section-5.7.1-8">
 <pre>
 def ping_pong_leader_init(
