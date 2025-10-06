@@ -990,7 +990,7 @@ Table of Contents
                                 aggregated.
 
    In the case of VDAFs (Section 5), this process is instead called
-   "veriication" and involves interacting with the other Aggregators.
+   "verification" and involves interacting with the other Aggregators.
    It will fail if the underlying measurement is invalid, in which case
    the report is rejected and not included in the aggregate result.
 
