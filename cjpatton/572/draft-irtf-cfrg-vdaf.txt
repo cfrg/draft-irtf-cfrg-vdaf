@@ -6859,10 +6859,10 @@ C.1.  Schema
    operations:  This lists the VDAF operations that should be executed
       as part of known answer tests, using messages from this test
       vector as input.  Operations should be executed in the order they
-      appear, to ensure that verifier state values are computed before
-      they are consumed.  Verification state values are not included in
-      test vectors because this document does not specify their
-      representation or encoding.
+      appear, to ensure that verification state values are computed
+      before they are consumed.  Verification state values are not
+      included in test vectors because this document does not specify
+      their representation or encoding.
 
    Each operation in the operations list has the following schema:
 
