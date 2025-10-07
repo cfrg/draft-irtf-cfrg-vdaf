@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-05T01:05:19.103577+00:00",
+  "timestamp": "2025-10-07T00:59:33.380904+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7295,7 +7295,7 @@
       "id": "I_kwDOGKuqOc7NLdlG",
       "title": "Consider renaming \"prepare\" to \"verify\"",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/572",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7306,8 +7306,8 @@
       ],
       "body": "As discussed in https://github.com/ietf-wg-ppm/draft-ietf-ppm-dap/issues/729#issue-3439227075.\n\n\"Verify\" is a natural term for VDAFs that use FLPs or arithmetic sketching to validate the output shares. It's not quite as good a fit for other MPC techniques we might want to fit into our framework, such as boolean-to-arithmetic sketching (as in Prio+). However, these remain hypothetical. In the meantime, \"prepare\" has caused us a ton of grief.",
       "createdAt": "2025-09-22T19:05:56Z",
-      "updatedAt": "2025-09-23T14:39:12Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-07T00:04:01Z",
+      "closedAt": "2025-10-07T00:04:01Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -46619,7 +46619,7 @@
       "id": "PR_kwDOGKuqOc6qJPpq",
       "title": "Rename \"prep\" to \"verify\"",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/575",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -46628,17 +46628,19 @@
       ],
       "body": "Closes #572.\r\n\r\nRename:\r\n* prep to verify\r\n* prep state to verification state (except shorten `VerificationState` to `VerifyState`)\r\n* prep share to verifier share (lines up with Prio3)\r\n* prep message to verifier message\r\n* Use \"ver\" as an abbreviation \"verify\" or \"verification\"\r\n* prep_init -> verify_init\r\n* prep_shares_to_prep -> ver_shares_to_msg (maybe verify_shares_to_msg is a little better?)\r\n* prep_next -> verify_next\r\n\r\nAlso, be more consistent about abbreviations (\"verify\" and \"ver\" are sometimes used interchangeably).\r\n",
       "createdAt": "2025-09-23T21:07:21Z",
-      "updatedAt": "2025-10-01T21:52:15Z",
+      "updatedAt": "2025-10-07T00:04:00Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "1e59aac33f73349327d06b726e22bd4e63b52135",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "cjpatton/572",
-      "headRefOid": "81d2f0d1550503b041023cb29022e38aa4139609",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "cdb631b7c709379ebf2067cae53b06c481136b82",
+      "closedAt": "2025-10-07T00:04:00Z",
+      "mergedAt": "2025-10-07T00:04:00Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "6e3c9d0c896894316712caca0d58394b183d6e94"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -46646,9 +46648,227 @@
           "body": "Expanded \"ver\" and \"msg\" abbreviations, as discussed on slack.",
           "createdAt": "2025-10-01T21:49:11Z",
           "updatedAt": "2025-10-01T21:49:11Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Squashed",
+          "createdAt": "2025-10-07T00:01:52Z",
+          "updatedAt": "2025-10-07T00:01:52Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7FDBWJ",
+          "commit": {
+            "abbreviatedOid": "81d2f0d"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks for doing all this legwork!",
+          "createdAt": "2025-10-06T16:36:35Z",
+          "updatedAt": "2025-10-06T20:51:35Z",
+          "comments": [
+            {
+              "originalPosition": 107,
+              "body": "Maybe we should change this test vector key to 'reports' instead, since this array holds all the per-report messages, etc. I think 'prep' was already pushing it a bit, since we also stored sharding input/output there.",
+              "createdAt": "2025-10-06T16:36:35Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "We should update this file as well for consistency/clarity.\r\n```suggestion\r\n        verify_queries: int,\r\n```",
+              "createdAt": "2025-10-06T17:35:31Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "This comment incorrectly listed this method previously.\r\n```suggestion\r\n    # NOTE: The eval() and eval_next() methods\r\n```",
+              "createdAt": "2025-10-06T17:41:37Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 52,
+              "body": "Flagging this as well, in case we change it to `reports`",
+              "createdAt": "2025-10-06T17:52:45Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 124,
+              "body": "nit: typo\r\n```suggestion\r\n            does not appear in the test vectors. Verify state values must be\r\n```",
+              "createdAt": "2025-10-06T18:12:31Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 139,
+              "body": "Flagging this as well\r\n```suggestion\r\n        reports: A list of objects describing messages related to each report,\r\n```",
+              "createdAt": "2025-10-06T18:13:12Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 348,
+              "body": "```suggestion\r\n        # Verify\r\n```",
+              "createdAt": "2025-10-06T18:37:22Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 26,
+              "body": "```suggestion\r\n        # Verify states are indexed by the report index, aggregator ID, and\r\n```",
+              "createdAt": "2025-10-06T19:30:07Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "```suggestion\r\nIn the case of VDAFs ({{vdaf}}), this process is instead called \"verification\"\r\n```",
+              "createdAt": "2025-10-06T19:50:05Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 235,
+              "body": "\"Output\" doesn't seem right here, as the procedure is outputting both the verification state and verifier share, but we're only sending the latter to the other aggregator. Maybe \"outgoing\" or \"outbound\"? Or we could just add another sentence, \"The initial verification state is stored locally until the next round of verification, and the verifier share is sent to the other Aggregator.\"",
+              "createdAt": "2025-10-06T19:55:53Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 264,
+              "body": "For consistency, I think we want to say \"verifier message pre-processing\".\r\n```suggestion\r\n  deterministic verifier message pre-processing algorithm. It combines the\r\n```",
+              "createdAt": "2025-10-06T20:10:50Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 438,
+              "body": "While this is just a slug, it's probably one of the few remaining instances of \"ver\", so we may as well change it.\r\n```suggestion\r\n{: #vdaf-verification-state-machine title=\"State machine of VDAF verification.\"}\r\n```",
+              "createdAt": "2025-10-06T20:24:32Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 1313,
+              "body": "Flagging this as well\r\n```suggestion\r\n`reports`:\r\n```",
+              "createdAt": "2025-10-06T20:47:16Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 1332,
+              "body": "Consistency:\r\n```suggestion\r\n    : The expected list of verifier messages for each round of\r\n```",
+              "createdAt": "2025-10-06T20:48:08Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 1344,
+              "body": "Consistency:\r\n```suggestion\r\n  should be executed in the order they appear, to ensure that verification state\r\n```",
+              "createdAt": "2025-10-06T20:49:39Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            },
+            {
+              "originalPosition": 1375,
+              "body": "Flagging this as well for if we decide to change the test vector schema\r\n```suggestion\r\n  into the `reports` array.\r\n```",
+              "createdAt": "2025-10-06T20:51:08Z",
+              "updatedAt": "2025-10-06T20:51:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7FJXd1",
+          "commit": {
+            "abbreviatedOid": "81d2f0d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-06T21:46:28Z",
+          "updatedAt": "2025-10-06T21:46:28Z",
+          "comments": [
+            {
+              "originalPosition": 107,
+              "body": "Sounds good to me.",
+              "createdAt": "2025-10-06T21:46:28Z",
+              "updatedAt": "2025-10-06T21:46:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7FJcmW",
+          "commit": {
+            "abbreviatedOid": "81d2f0d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-06T21:50:24Z",
+          "updatedAt": "2025-10-06T21:50:24Z",
+          "comments": [
+            {
+              "originalPosition": 124,
+              "body": "Should be \"verification\" actually. Fixed.",
+              "createdAt": "2025-10-06T21:50:24Z",
+              "updatedAt": "2025-10-06T21:50:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7FJeQm",
+          "commit": {
+            "abbreviatedOid": "81d2f0d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-06T21:51:37Z",
+          "updatedAt": "2025-10-06T21:51:38Z",
+          "comments": [
+            {
+              "originalPosition": 26,
+              "body": "-> \"verification\"",
+              "createdAt": "2025-10-06T21:51:38Z",
+              "updatedAt": "2025-10-06T21:51:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7FJyhe",
+          "commit": {
+            "abbreviatedOid": "81d2f0d"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-06T22:13:04Z",
+          "updatedAt": "2025-10-06T22:13:04Z",
+          "comments": [
+            {
+              "originalPosition": 235,
+              "body": "Nice catch. I think \"outbound\" is consistent with the rest of the doc.",
+              "createdAt": "2025-10-06T22:13:04Z",
+              "updatedAt": "2025-10-06T22:13:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7FKMGK",
+          "commit": {
+            "abbreviatedOid": "3123bc9"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-06T22:52:45Z",
+          "updatedAt": "2025-10-06T23:09:20Z",
+          "comments": [
+            {
+              "originalPosition": 28,
+              "body": "nit: one more\r\n```suggestion\r\n        1_000_000_000,  # verify queries\r\n```",
+              "createdAt": "2025-10-06T22:52:45Z",
+              "updatedAt": "2025-10-06T23:09:20Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
