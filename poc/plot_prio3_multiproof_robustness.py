@@ -50,9 +50,9 @@ def sum_vec(field: type[NttField], num_proofs: int, length: int) -> float:
     Maximum probability of at least 1 in 1 billion attacks on Prio3SumVec
     robustness succeeding after doing 2**80 random oracle queries.
     '''
-    bits = 1
+    max_measurement = 1
     chunk_length = max(1, length**(1/2))
-    flp = FlpBBCGGI19(SumVec(field, length, bits, chunk_length))
+    flp = FlpBBCGGI19(SumVec(field, length, max_measurement, chunk_length))
 
     # Assuming we adopt the improvement from
     # https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/427
