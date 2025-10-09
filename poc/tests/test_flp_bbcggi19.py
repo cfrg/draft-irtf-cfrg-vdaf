@@ -179,23 +179,52 @@ class TestSumVec(TestFlpBBCGGI19):
             self,
             measurements: list[list[int]],
             length: int,
-            bits: int,
+            max_measurement: int,
             chunk_length: int) -> None:
         for field in [Field64, Field96, Field128]:
-            sumvec = SumVec[NttField](field, length, bits, chunk_length)
+            sumvec = SumVec[NttField](
+                field,
+                length,
+                max_measurement,
+                chunk_length,
+            )
             self.assertEqual(sumvec.field, field)
             self.assertTrue(isinstance(sumvec, SumVec))
             self.run_encode_truncate_decode_test(
                 FlpBBCGGI19(sumvec), measurements)
 
-    def test(self) -> None:
-        # SumVec with length 2, bits 4, chunk len 1.
+    def test_afe(self) -> None:
+        # SumVec with length 2, max_measurement 15, chunk len 1.
         self.run_encode_truncate_decode_with_ntt_fields_test(
             [[1, 2], [3, 4], [5, 6], [7, 8]],
             2,
-            4,
+            15,
             1,
         )
+
+        # SumVec with length 2, max_measurement 6, chunk len 1.
+        self.run_encode_truncate_decode_with_ntt_fields_test(
+            [[1, 2], [3, 4], [5, 6]],
+            2,
+            6,
+            1,
+        )
+
+        flp = FlpBBCGGI19(SumVec(Field128, 2, 10, 3))
+        self.assertEqual(
+            flp.truncate([flp.field(1)] * 8),
+            [flp.field(10)] * 2
+        )
+
+    def test_flp(self) -> None:
+        flp = FlpBBCGGI19(SumVec(Field128, 2, 10, 3))
+        self.run_flp_test(flp, [
+            (flp.encode([0, 10]), True),
+            (flp.encode([5, 5]), True),
+            (flp.field.zeros(8), True),
+            ([flp.field(1)] * 8, True),
+            ([flp.field(2)] * 8, False),
+        ])
 
 
 class TestMultiGadget(TestFlpBBCGGI19):

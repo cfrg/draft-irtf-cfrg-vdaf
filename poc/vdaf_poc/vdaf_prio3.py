@@ -672,9 +672,14 @@ class Prio3SumVec(Prio3[list[int], list[int], Field128]):
     # Name of the VDAF, for use in test vector filenames.
     test_vec_name = 'Prio3SumVec'
 
-    def __init__(self, shares: int, length: int, bits: int, chunk_length: int):
+    def __init__(self, shares: int, length: int, max_measurement: int, chunk_length: int):
         flp = flp_bbcggi19.FlpBBCGGI19[list[int], list[int], Field128](
-            flp_bbcggi19.SumVec(Field128, length, bits, chunk_length)
+            flp_bbcggi19.SumVec(
+                Field128,
+                length,
+                max_measurement,
+                chunk_length,
+            )
         )
         super().__init__(shares, flp, 1)
 
@@ -710,13 +715,13 @@ class Prio3SumVecWithMultiproof(Prio3[list[int], list[int], F], Generic[F]):
             field: type[F],
             num_proofs: int,
             length: int,
-            bits: int,
+            max_measurement: int,
             chunk_length: int):
         flp = flp_bbcggi19.FlpBBCGGI19[list[int], list[int], F](
             flp_bbcggi19.SumVec(
                 field,
                 length,
-                bits,
+                max_measurement,
                 chunk_length,
             )
         )

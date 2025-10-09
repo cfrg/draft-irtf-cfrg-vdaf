@@ -701,7 +701,7 @@ class TestPrio3SumVecTestVector(TestVdafTestVector[list[int], list[int]]):
         vdaf = Prio3SumVec(
             test_vector["shares"],
             cast(dict, test_vector)["length"],
-            cast(dict, test_vector)["bits"],
+            cast(dict, test_vector)["max_measurement"],
             cast(dict, test_vector)["chunk_length"],
         )
         self.check_test_vector(vdaf, test_vector)
@@ -721,7 +721,7 @@ class TestPrio3SumVecWithMultiproofTestVector(TestVdafTestVector[list[int], list
             Field64,
             3,
             cast(dict, test_vector)["length"],
-            cast(dict, test_vector)["bits"],
+            cast(dict, test_vector)["max_measurement"],
             cast(dict, test_vector)["chunk_length"],
         )
         self.check_test_vector(vdaf, test_vector)

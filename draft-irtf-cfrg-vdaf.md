@@ -4093,24 +4093,26 @@ class Sum(Valid[int, int, F]):
 
 ### Prio3SumVec
 
-| Parameter         | Value                                                     |
-|:------------------|:----------------------------------------------------------|
-| `field`           | `Field128` ({{fields}})                                   |
-| `Valid`           | `SumVec(field, length, bits, chunk_length)` (this section) |
-| `PROOFS`          | `1`                                                       |
+| Parameter         | Value                                                                 |
+|:------------------|:----------------------------------------------------------------------|
+| `field`           | `Field128` ({{fields}})                                               |
+| `Valid`           | `SumVec(field, length, max_measurement, chunk_length)` (this section) |
+| `PROOFS`          | `1`                                                                   |
 {: title="Parameters for Prio3SumVec."}
 
 This instance of Prio3 supports summing vectors of integers. It has three
-parameters: `length`, `bits`, and `chunk_length`. Each measurement is a vector
-of positive integers with length equal to the `length` parameter. Each element
-of the measurement is an integer in the range `[0, 2**bits)`. It is RECOMMENDED
-to set `chunk_length` to an integer near the square root of `length * bits`
-(see {{parallel-sum-chunk-length}}).
+parameters: `length`, `max_measurement`, and `chunk_length`. Each measurement is
+a vector of positive integers with length equal to the `length` parameter. Each
+element of the measurement is an integer in the range `[0, max_measurement]`. It
+is RECOMMENDED to set `chunk_length` to an integer near the square root of
+`length * bits`, where `bits` is the number of bits needed to represent
+`max_measurement` (see {{parallel-sum-chunk-length}}).
 
 The circuit is denoted `SumVec`. Each measurement is encoded as a vector of
 field elements with a length of `length * bits`. The field elements in the
-encoded vector represent all the bits of the measurement vector's elements,
-consecutively, in LSB to MSB order.
+encoded vector represent modified bit decompositions of each of the measurement
+vector's elements, following the `Sum` circuit's encoding procedure,
+concatenated together.
 
 The validity circuit uses the `ParallelSum` gadget in {{gadget-parallel-sum}}.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
@@ -4142,22 +4144,25 @@ The complete circuit is specified below:
 class SumVec(Valid[list[int], list[int], F]):
     EVAL_OUTPUT_LEN = 1
     length: int
-    bits: int
+    max_measurement: int
     chunk_length: int
     field: type[F]
 
     def __init__(self,
                  field: type[F],
                  length: int,
-                 bits: int,
+                 max_measurement: int,
                  chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with
-        `length` elements, each in the range `[0, 2**bits)`.
+        `length` elements, each in the range `[0, max_measurement]`.
         """
         self.field = field
         self.length = length
+        bits = max_measurement.bit_length()
         self.bits = bits
+        self.max_measurement = max_measurement
+        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
@@ -4170,8 +4175,21 @@ class SumVec(Valid[list[int], list[int], F]):
     def encode(self, measurement: list[int]) -> list[F]:
         encoded = []
         for val in measurement:
-            encoded += self.field.encode_into_bit_vec(
-                val, self.bits)
+            # Implementation note: this conditional should be
+            # replaced with constant time operations in practice in
+            # order to reduce leakage via timing side channels.
+            if val <= 2 ** (self.bits - 1) - 1:
+                encoded += self.field.encode_into_bit_vec(
+                    val,
+                    self.bits - 1
+                )
+                encoded += [self.field(0)]
+            else:
+                encoded += self.field.encode_into_bit_vec(
+                    val - self.last_weight,
+                    self.bits - 1
+                )
+                encoded += [self.field(1)]
         return encoded
 
     def eval(
@@ -4208,9 +4226,13 @@ class SumVec(Valid[list[int], list[int], F]):
     def truncate(self, meas: list[F]) -> list[F]:
         truncated = []
         for i in range(self.length):
-            truncated.append(self.field.decode_from_bit_vec(
-                meas[i * self.bits: (i + 1) * self.bits]
-            ))
+            truncated.append(
+                self.field.decode_from_bit_vec(
+                    meas[i * self.bits: (i + 1) * self.bits - 1]
+                )
+                + meas[(i + 1) * self.bits - 1]
+                * self.field(self.last_weight)
+            )
         return truncated
 
     def decode(
@@ -6058,7 +6080,7 @@ There are also some important limitations to be aware of. For example, Prio3
 provides domain separation between families of circuits, but does not provide
 domain separation between instances of a circuit. Concretely, it is possible
 for Aggregators to accept a report for Prio3SumVec from a Client who disagrees
-with them on the value of `bits` and `length` (so long as the encoded
+with them on the value of `max_measurement` and `length` (so long as the encoded
 measurement is the same size). This is because there is no
 binding of the circuit parameters to the computation.
 
@@ -6524,9 +6546,9 @@ instantiate the VDAF. These are listed in the subsections below.
 `chunk_length`:
 : a parameter of the ParallelSum gadget, an integer.
 
-`bits`:
-: the bit length of each element of the vector, an integer. Each element is in
-  the range `[0, 2**bits)`.
+`max_measurement`:
+: The largest allowable value of each element of the vector, an integer. Each
+  element is in the range `[0, max_measurement]`.
 
 ### Prio3Histogram
 

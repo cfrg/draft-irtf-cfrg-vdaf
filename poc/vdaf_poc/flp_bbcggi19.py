@@ -922,24 +922,20 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 class SumVec(Valid[list[int], list[int], F]):
     EVAL_OUTPUT_LEN = 1
     length: int
-    bits: int
+    max_measurement: int
     chunk_length: int
     field: type[F]
 
     def __init__(self,
                  field: type[F],
                  length: int,
-                 bits: int,
+                 max_measurement: int,
                  chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with
-        `length` elements, each in the range `[0, 2**bits)`.
+        `length` elements, each in the range `[0, max_measurement]`.
         """
         # REMOVE ME
-        if 2 ** bits >= field.MODULUS:
-            raise ValueError('bit size exceeds field modulus')
-        if bits <= 0:
-            raise ValueError('invalid bits')
         if length <= 0:
             raise ValueError('invalid length')
         if chunk_length <= 0:
@@ -947,7 +943,10 @@ class SumVec(Valid[list[int], list[int], F]):
 
         self.field = field
         self.length = length
+        bits = max_measurement.bit_length()
         self.bits = bits
+        self.max_measurement = max_measurement
+        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
@@ -957,6 +956,10 @@ class SumVec(Valid[list[int], list[int], F]):
         self.OUTPUT_LEN = length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
+        # REMOVE ME
+        if 2 ** bits >= field.MODULUS:
+            raise ValueError('bound exceeds field modulus')
+
     def encode(self, measurement: list[int]) -> list[F]:
         # REMOVE ME
         if len(measurement) != self.length:
@@ -965,13 +968,26 @@ class SumVec(Valid[list[int], list[int], F]):
         encoded = []
         for val in measurement:
             # REMOVE ME
-            if val not in range(2**self.bits):
+            if val < 0 or val > self.max_measurement:
                 raise ValueError(
                     'entry of measurement vector is out of range'
                 )
 
-            encoded += self.field.encode_into_bit_vec(
-                val, self.bits)
+            # Implementation note: this conditional should be
+            # replaced with constant time operations in practice in
+            # order to reduce leakage via timing side channels.
+            if val <= 2 ** (self.bits - 1) - 1:
+                encoded += self.field.encode_into_bit_vec(
+                    val,
+                    self.bits - 1
+                )
+                encoded += [self.field(0)]
+            else:
+                encoded += self.field.encode_into_bit_vec(
+                    val - self.last_weight,
+                    self.bits - 1
+                )
+                encoded += [self.field(1)]
         return encoded
 
     def eval(
@@ -1010,9 +1026,13 @@ class SumVec(Valid[list[int], list[int], F]):
     def truncate(self, meas: list[F]) -> list[F]:
         truncated = []
         for i in range(self.length):
-            truncated.append(self.field.decode_from_bit_vec(
-                meas[i * self.bits: (i + 1) * self.bits]
-            ))
+            truncated.append(
+                self.field.decode_from_bit_vec(
+                    meas[i * self.bits: (i + 1) * self.bits - 1]
+                )
+                + meas[(i + 1) * self.bits - 1]
+                * self.field(self.last_weight)
+            )
         return truncated
 
     def decode(
@@ -1023,9 +1043,9 @@ class SumVec(Valid[list[int], list[int], F]):
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         test_vec['length'] = self.length
-        test_vec['bits'] = self.bits
+        test_vec['max_measurement'] = self.max_measurement
         test_vec['chunk_length'] = self.chunk_length
-        return ['length', 'bits', 'chunk_length']
+        return ['length', 'max_measurement', 'chunk_length']
 
 
 # NOTE: This class is excerpted in the document. Its
