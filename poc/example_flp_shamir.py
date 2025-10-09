@@ -162,7 +162,7 @@ class TestShamir(TestCase):
         self.assertTrue(flp.decide(verifier))
 
     def test_flp_sum_vec(self) -> None:
-        flp = FlpBBCGGI19(SumVec(Field128, 100, 2, 10))
+        flp = FlpBBCGGI19(SumVec(Field128, 100, 3, 10))
         prove_rand = flp.field.rand_vec(flp.PROVE_RAND_LEN)
         query_rand = flp.field.rand_vec(flp.QUERY_RAND_LEN)
         joint_rand = flp.field.rand_vec(flp.JOINT_RAND_LEN)

@@ -661,7 +661,7 @@ if __name__ == '__main__':
     # Prio3SumVec
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
-        vdaf_prio3.Prio3SumVec(2, 10, 8, 9),
+        vdaf_prio3.Prio3SumVec(2, 10, 255, 9),
         None,
         ctx,
         [
@@ -673,7 +673,7 @@ if __name__ == '__main__':
     )
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
-        vdaf_prio3.Prio3SumVec(3, 3, 16, 7),
+        vdaf_prio3.Prio3SumVec(3, 3, 32000, 7),
         None,
         ctx,
         [
@@ -687,7 +687,7 @@ if __name__ == '__main__':
     # Prio3SumVec with a different field and multiple proofs
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
-        vdaf_prio3.Prio3SumVecWithMultiproof(2, Field64, 3, 10, 8, 9),
+        vdaf_prio3.Prio3SumVecWithMultiproof(2, Field64, 3, 10, 255, 9),
         None,
         ctx,
         [
@@ -700,7 +700,7 @@ if __name__ == '__main__':
 
     gen_test_vec_for_vdaf(
         vdaf_test_vec_path,
-        vdaf_prio3.Prio3SumVecWithMultiproof(3, Field64, 3, 3, 16, 7),
+        vdaf_prio3.Prio3SumVecWithMultiproof(3, Field64, 3, 3, 65535, 7),
         None,
         ctx,
         [
