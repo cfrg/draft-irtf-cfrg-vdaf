@@ -4242,7 +4242,7 @@ Table of Contents
 
    The circuit is denoted SumVec.  Each measurement is encoded as a
    vector of field elements with a length of length * bits.  The field
-   elements in the encoded vector represent a modified bit decomposition
+   elements in the encoded vector represent modified bit decompositions
    of each of the measurement vector's elements, following the Sum
    circuit's encoding procedure, concatenated together.
 
