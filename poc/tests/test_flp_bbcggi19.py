@@ -106,7 +106,8 @@ class TestSum(TestFlpBBCGGI19):
             (flp.encode(1337), True),
             (flp.encode(9999), True),
             (flp.encode(10000), True),
-            (flp.field.zeros(flp.MEAS_LEN), False),
+            (flp.field.zeros(flp.MEAS_LEN), True),
+            ([flp.field(2)] * flp.MEAS_LEN, False),
         ])
 
 
