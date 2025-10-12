@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-07T00:59:33.380904+00:00",
+  "timestamp": "2025-10-12T01:02:37.323147+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7030,13 +7030,15 @@
       "state": "OPEN",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "divergentdave"
+      ],
       "labels": [
         "wire change"
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-10-03T20:41:26Z",
+      "updatedAt": "2025-10-09T14:50:01Z",
       "closedAt": null,
       "comments": [
         {
@@ -46869,6 +46871,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 576,
+      "id": "PR_kwDOGKuqOc6s_PfQ",
+      "title": "Apply improved range proof to Sum and SumVec circuits",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/576",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
+      "createdAt": "2025-10-09T23:39:53Z",
+      "updatedAt": "2025-10-09T23:48:13Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/range-proof-optimization",
+      "headRefOid": "6e82c20a1a4bb47e69b4da0c63fb66be95ecbf42",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
