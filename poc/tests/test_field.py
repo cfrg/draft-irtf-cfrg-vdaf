@@ -2,7 +2,8 @@ import random
 import unittest
 
 from vdaf_poc.field import (Field, Field64, Field96, Field128, Field255,
-                            NttField, poly_eval, poly_interp)
+                            NttField, poly_eval, poly_eval_lagrange,
+                            poly_interp)
 
 
 class TestFields(unittest.TestCase):
@@ -70,4 +71,31 @@ class TestFields(unittest.TestCase):
         for x in xs:
             a = poly_eval(cls, p, x)
             b = poly_eval(cls, q, x)
+            self.assertEqual(a, b)
+
+    def test_poly_eval_lagrange(self) -> None:
+        # Checks that (batched) polynomial evaluation agrees both
+        # on the monomial and the Lagrange basis.
+        cls = Field64
+        N = 16  # must be a power of two.
+        nth_root = cls.gen() ** (cls.GEN_ORDER // N)
+        xs = [nth_root ** i for i in range(N)]
+        polys_mon = []
+        polys_lag = []
+        for _ in range(4):
+            p_mon = cls.rand_vec(N)
+            p_lag = [poly_eval(cls, p_mon, x) for x in xs]
+            polys_mon.append(p_mon)
+            polys_lag.append(p_lag)
+
+        # Evaluating polynomials at the nodes.
+        for x in xs:
+            a = [poly_eval(cls, p_mon, x) for p_mon in polys_mon]
+            b = poly_eval_lagrange(cls, xs, polys_lag, x)
+            self.assertEqual(a, b)
+
+        # Evaluating polynomials at random values.
+        for r in cls.rand_vec(100):
+            a = [poly_eval(cls, p_mon, r) for p_mon in polys_mon]
+            b = poly_eval_lagrange(cls, xs, polys_lag, r)
             self.assertEqual(a, b)

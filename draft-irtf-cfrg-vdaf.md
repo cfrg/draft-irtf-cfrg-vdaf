@@ -159,6 +159,8 @@ informative:
     date: 2021
     target: https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ENPA_White_Paper.pdf
 
+  Faz25: DOI.10.1007/978-3-032-06754-8_16
+
   GI14:
     title: "Distributed Point Functions and Their Applications"
     author:
@@ -3826,9 +3828,13 @@ produce the gadget's output. Then compute the wire polynomials from the
 recorded values.
 
 Next, choose a random point `t` (parsed from the query randomness), evaluate
-each wire polynomial at `t`, and evaluate the gadget polynomial at `t`. The
-results are recorded in the verifier message passed to the decision algorithm,
-where the test is finished.
+each wire polynomial at `t`, and evaluate the gadget polynomial at `t`.
+Note that the wire polynomials are in the value (Lagrange) representation
+by construction. Faster polynomial evaluation in this representation is
+possible by using the algorithm by {{Faz25}} without resorting to
+polynomial interpolation.
+The results are recorded in the verifier message passed to the decision
+algorithm, where the test is finished.
 
 The random point `t` MUST NOT be one of the fixed evaluation points used to
 interpolate the wire polynomials. Otherwise, the verifier message may partially

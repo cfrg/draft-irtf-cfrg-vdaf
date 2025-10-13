@@ -245,7 +245,7 @@ def poly_add(field: type[F], p: list[F], q: list[F]) -> list[F]:
 
 
 def poly_eval(field: type[F], p: list[F], eval_at: F) -> F:
-    """Evaluate a polynomial at a point."""
+    """Evaluate a polynomial in the monomial basis at a point."""
     if len(p) == 0:
         return field(0)
 
@@ -256,6 +256,28 @@ def poly_eval(field: type[F], p: list[F], eval_at: F) -> F:
         result += c
 
     return result
+
+
+def poly_eval_lagrange(field: type[F], roots: list[F], polys: list[list[F]], eval_at: F) -> list[F]:
+    """Evaluate polynomials in the Lagrange basis at a point.
+
+       Faster batched evaluation method. Alg. 7 of the Rhizomes paper.
+       https://ia.cr/2025/1727.
+    """
+    N = len(roots)
+    assert N.bit_count() == 1, "N must be a power of two"
+    Np = field(N).inv()
+    l = field(1)
+    u = [p[0] for p in polys]
+    d = roots[0] - eval_at
+    for i in range(1, N):
+        l = l * d
+        d = roots[i] - eval_at
+        t = l * roots[i]
+        for j, p in enumerate(polys):
+            u[j] = u[j]*d + t*p[i]
+
+    return [-uj * Np for uj in u]
 
 
 def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
