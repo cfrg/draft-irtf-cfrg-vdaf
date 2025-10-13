@@ -1058,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 10 April 2026</td>
+<td class="center">Expires 16 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1071,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-10-07" class="published">7 October 2025</time>
+<time datetime="2025-10-13" class="published">13 October 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-10">10 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-16">16 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1140,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 10 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 16 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -4438,27 +4438,21 @@ def expand_into_vec(cls,
 <a href="#section-6.2.1" class="section-number selfRef">6.2.1. </a><a href="#name-xofturboshake128" class="section-name selfRef">XofTurboShake128</a>
           </h4>
 <p id="section-6.2.1-1">This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
-function specified in <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span>. This
-XOF is <span class="bcp14">RECOMMENDED</span> for all use cases for DAFs and VDAFs.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
-<ul class="normal ulEmpty">
-<li class="normal ulEmpty" id="section-6.2.1-2.1">
-              <p id="section-6.2.1-2.1.1">TODO Update the <span>[<a href="#TurboSHAKE" class="cite xref">TurboSHAKE</a>]</span> reference to point to the RFC instead of the
-draft.<a href="#section-6.2.1-2.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-6.2.1-3">Pre-conditions:<a href="#section-6.2.1-3" class="pilcrow">¶</a></p>
+function specified in <span>[<a href="#RFC9861" class="cite xref">RFC9861</a>]</span>. This XOF is <span class="bcp14">RECOMMENDED</span> for all use cases
+for DAFs and VDAFs.<a href="#section-6.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.2.1-2">Pre-conditions:<a href="#section-6.2.1-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-6.2.1-4.1">
-              <p id="section-6.2.1-4.1.1">The default seed length is <code>32</code>. The seed <span class="bcp14">MAY</span> have a different length, but it
-<span class="bcp14">MUST</span> not exceed 255. Otherwise initialization will raise an exception.<a href="#section-6.2.1-4.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-6.2.1-3.1">
+              <p id="section-6.2.1-3.1.1">The default seed length is <code>32</code>. The seed <span class="bcp14">MAY</span> have a different length, but it
+<span class="bcp14">MUST</span> not exceed 255. Otherwise initialization will raise an exception.<a href="#section-6.2.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
-            <li class="normal" id="section-6.2.1-4.2">
-              <p id="section-6.2.1-4.2.1">The length of the domain separation string <code>dst</code> passed to XofTurboShake128
+            <li class="normal" id="section-6.2.1-3.2">
+              <p id="section-6.2.1-3.2.1">The length of the domain separation string <code>dst</code> passed to XofTurboShake128
 <span class="bcp14">MUST NOT</span> exceed 65535 bytes. Otherwise initialization will raise an
-exception.<a href="#section-6.2.1-4.2.1" class="pilcrow">¶</a></p>
+exception.<a href="#section-6.2.1-3.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<div class="lang-python sourcecode" id="section-6.2.1-5">
+<div class="lang-python sourcecode" id="section-6.2.1-4">
 <pre>
 class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
@@ -4485,7 +4479,7 @@ class XofTurboShake128(Xof):
         # that allows stateful handling of the stream.
         stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
-</pre><a href="#section-6.2.1-5" class="pilcrow">¶</a>
+</pre><a href="#section-6.2.1-4" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -9641,9 +9635,9 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
         <dd>
 <span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"The Transport Layer Security (TLS) Protocol Version 1.3"</span>, <span class="seriesInfo">RFC 8446</span>, <span class="seriesInfo">DOI 10.17487/RFC8446</span>, <time datetime="2018-08" class="refDate">August 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8446">https://www.rfc-editor.org/rfc/rfc8446</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="TurboSHAKE">[TurboSHAKE]</dt>
+<dt id="RFC9861">[RFC9861]</dt>
       <dd>
-<span class="refAuthor">Viguier, B.</span>, <span class="refAuthor">Wong, D.</span>, <span class="refAuthor">Van Assche, G.</span>, <span class="refAuthor">Dang, Q.</span>, and <span class="refAuthor">J. Daemen</span>, <span class="refTitle">"KangarooTwelve and TurboSHAKE"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-irtf-cfrg-kangarootwelve-17</span>, <time datetime="2025-02-21" class="refDate">21 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-17">https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-kangarootwelve-17</a>&gt;</span>. </dd>
+<span class="refAuthor">Viguier, B.</span>, <span class="refAuthor">Wong, D., Ed.</span>, <span class="refAuthor">Van Assche, G., Ed.</span>, <span class="refAuthor">Dang, Q., Ed.</span>, and <span class="refAuthor">J. Daemen, Ed.</span>, <span class="refTitle">"KangarooTwelve and TurboSHAKE"</span>, <span class="seriesInfo">RFC 9861</span>, <span class="seriesInfo">DOI 10.17487/RFC9861</span>, <time datetime="2025-10" class="refDate">October 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9861">https://www.rfc-editor.org/rfc/rfc9861</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
