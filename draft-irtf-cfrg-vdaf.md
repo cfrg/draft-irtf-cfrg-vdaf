@@ -2301,11 +2301,8 @@ def expand_into_vec(cls,
 ### XofTurboShake128 {#xof-turboshake128}
 
 This section describes XofTurboShake128, an XOF based on the TurboSHAKE128
-function specified in {{!TurboSHAKE=I-D.draft-irtf-cfrg-kangarootwelve}}. This
-XOF is RECOMMENDED for all use cases for DAFs and VDAFs.
-
-> TODO Update the {{!TurboSHAKE}} reference to point to the RFC instead of the
-> draft.
+function specified in {{!RFC9861}}. This XOF is RECOMMENDED for all use cases
+for DAFs and VDAFs.
 
 Pre-conditions:
 
