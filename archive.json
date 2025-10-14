@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-12T01:02:37.323147+00:00",
+  "timestamp": "2025-10-14T00:59:50.177459+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -6272,17 +6272,19 @@
       "id": "I_kwDOGKuqOc6ZZB2R",
       "title": "Update TurboSHAKE reference to RFC",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/454",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "divergentdave"
+      ],
       "labels": [
-        "pre-RGLC"
+        "draft-17"
       ],
       "body": "We're currently pointing to the CFRG draft.\r\nWe should also verify that the version we use is wire compatible with the RFC version.",
       "createdAt": "2024-10-08T15:00:11Z",
-      "updatedAt": "2025-01-07T23:47:50Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-13T19:14:49Z",
+      "closedAt": "2025-10-13T19:14:48Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -7034,11 +7036,12 @@
         "divergentdave"
       ],
       "labels": [
-        "wire change"
+        "wire change",
+        "pre-RGLC"
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-10-09T14:50:01Z",
+      "updatedAt": "2025-10-13T19:15:29Z",
       "closedAt": null,
       "comments": [
         {
@@ -7387,11 +7390,12 @@
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [
-        "wire change"
+        "wire change",
+        "pre-RGLC"
       ],
       "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
       "createdAt": "2025-09-23T17:16:36Z",
-      "updatedAt": "2025-10-03T20:41:08Z",
+      "updatedAt": "2025-10-13T19:15:42Z",
       "closedAt": null,
       "comments": [
         {
@@ -46897,6 +46901,111 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 577,
+      "id": "PR_kwDOGKuqOc6tXqPq",
+      "title": "Update TurboSHAKE reference",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/577",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-17"
+      ],
+      "body": "This closes #454.\r\n\r\nI think I'm ahead of the bibxml publication, so the CI might fail for now.",
+      "createdAt": "2025-10-13T02:57:53Z",
+      "updatedAt": "2025-10-13T19:14:48Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/turboshake-rfc",
+      "headRefOid": "fab2a77dc4b41955466f15947975f328d55e661d",
+      "closedAt": "2025-10-13T19:14:48Z",
+      "mergedAt": "2025-10-13T19:14:48Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "fa1e00f9149171af5fe1e241ad04c43698463ce4"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7GnRUI",
+          "commit": {
+            "abbreviatedOid": "fab2a77"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-13T15:57:43Z",
+          "updatedAt": "2025-10-13T15:57:43Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 578,
+      "id": "PR_kwDOGKuqOc6tiZxI",
+      "title": "Faster polynomial evaluation in Lagrange basis from rhizomes paper.",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/578",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "draft-17"
+      ],
+      "body": "Introduces the use of (batched) polynomial evaluation directly in Lagrange basis.\r\nIt avoid conversions to the monomial basis during FLP.Query.\r\n\r\nNo wire changes.\r\n\r\n\r\nCloses #573 \r\n\r\n--\r\nReviewers: \r\nStill needs to add either a reference to the paper or to fully describe the algorithm in the spec. Let me know the prefered choice.\r\n  \r\n",
+      "createdAt": "2025-10-13T20:46:45Z",
+      "updatedAt": "2025-10-13T21:57:49Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "fa1e00f9149171af5fe1e241ad04c43698463ce4",
+      "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
+      "headRefName": "prioEvalFaster",
+      "headRefOid": "2873fe5d1850c8f9bd71a24af5f165a0530471be",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7Gq2rs",
+          "commit": {
+            "abbreviatedOid": "2873fe5"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-13T21:56:07Z",
+          "updatedAt": "2025-10-13T21:57:49Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "In the doc, I don't think we should define a seperate API for this. Rather, we should just say that `query()` can be sped up by internally representing the polynomials in the Lagrange basis and doing batch evaluation.\n\nAlso, don't forget to add an informative reference to your paper.",
+              "createdAt": "2025-10-13T21:56:07Z",
+              "updatedAt": "2025-10-13T21:57:49Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "Likewise, I prefer to not modify the spec and just describe the optimization.",
+              "createdAt": "2025-10-13T21:56:49Z",
+              "updatedAt": "2025-10-13T21:57:49Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "Please add unit tests that verify that the new polynomial evaluation algorithms are functionally equivalent to `poly_eval()`.",
+              "createdAt": "2025-10-13T21:57:41Z",
+              "updatedAt": "2025-10-13T21:57:49Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
