@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 16 April 2026                                              ISRG
+Expires: 20 April 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         13 October 2025
+                                                         17 October 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 April 2026.
+   This Internet-Draft will expire on 20 April 2026.
 
 Copyright Notice
 
@@ -3957,8 +3957,12 @@ Table of Contents
 
    Next, choose a random point t (parsed from the query randomness),
    evaluate each wire polynomial at t, and evaluate the gadget
-   polynomial at t.  The results are recorded in the verifier message
-   passed to the decision algorithm, where the test is finished.
+   polynomial at t.  Note that the wire polynomials are in the value
+   (Lagrange) representation by construction.  Faster polynomial
+   evaluation in this representation is possible by using the algorithm
+   by [Faz25] without resorting to polynomial interpolation.  The
+   results are recorded in the verifier message passed to the decision
+   algorithm, where the test is finished.
 
    The random point t MUST NOT be one of the fixed evaluation points
    used to interpolate the wire polynomials.  Otherwise, the verifier
@@ -6471,6 +6475,13 @@ Table of Contents
               Response", ACM Conference on Computer and Communications
               Security (CCS), 2014,
               <https://dl.acm.org/doi/10.1145/2660267.2660348>.
+
+   [Faz25]    Faz-Hernandez, A., "Rhizomes and the Roots of
+              Efficiency—Improving Prio", Springer Nature Switzerland,
+              Lecture Notes in Computer Science pp. 425-449,
+              DOI 10.1007/978-3-032-06754-8_16, ISBN ["9783032067531",
+              "9783032067548"], October 2025,
+              <https://doi.org/10.1007/978-3-032-06754-8_16>.
 
    [GI14]     Gilboa, N. and Y. Ishai, "Distributed Point Functions and
               Their Applications", Eurocrypt, 2014,
