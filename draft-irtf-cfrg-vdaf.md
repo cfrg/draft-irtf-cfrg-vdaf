@@ -449,6 +449,14 @@ Prio3 and Poplar1 constructions in particular.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+17:
+
+* Rename VDAF preparation to VDAF verification.
+
+* Update the reference for TurboSHAKE128 to {{!RFC9861}}.
+
+* Prio3: Acknowledge an optimization pointed out in {{Faz25}}.
+
 16:
 
 * Align document with guidelines for ASCII-safe mathematical notation from
