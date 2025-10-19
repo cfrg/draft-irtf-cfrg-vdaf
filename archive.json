@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-14T00:59:50.177459+00:00",
+  "timestamp": "2025-10-19T01:08:20.177323+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7335,7 +7335,7 @@
       "id": "I_kwDOGKuqOc7NZv8U",
       "title": "Using faster polynomial evaluation from rhizomes paper (ia.cr/2025/1727)",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/573",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -7347,8 +7347,8 @@
       ],
       "body": "Use of faster polynomial evaluation in the Lagrange basis from the rhizomes paper.\n- It is applied to FLP.Query algorithm to evaluate several polynomials at a random value.\n- In the paper, Algorithm 6 evaluates a single polynomial, while Alg. 7 is its batched version that is implemented.\n\nA verbose example of the changes needed for libprio-rs is here: https://github.com/armfazh/rhizomes/pull/1 \nThe actual PR is here: https://github.com/divviup/libprio-rs/pull/1340\n\n\nReference: \n[LINK](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\nNo breaking changes",
       "createdAt": "2025-09-23T17:16:31Z",
-      "updatedAt": "2025-09-25T19:57:13Z",
-      "closedAt": null,
+      "updatedAt": "2025-10-17T22:43:44Z",
+      "closedAt": "2025-10-17T22:43:44Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -7388,14 +7388,16 @@
       "state": "OPEN",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
-      "assignees": [],
+      "assignees": [
+        "armfazh"
+      ],
       "labels": [
         "wire change",
         "pre-RGLC"
       ],
       "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
       "createdAt": "2025-09-23T17:16:36Z",
-      "updatedAt": "2025-10-13T19:15:42Z",
+      "updatedAt": "2025-10-18T00:08:40Z",
       "closedAt": null,
       "comments": [
         {
@@ -7453,6 +7455,20 @@
           "body": "I would say if anyone is enthusiastic about seeing this through, then go ahead and write a PR. ",
           "createdAt": "2025-10-03T20:41:08Z",
           "updatedAt": "2025-10-03T20:41:08Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Happy to work on this, assign the issue to me.",
+          "createdAt": "2025-10-17T23:56:12Z",
+          "updatedAt": "2025-10-17T23:56:12Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Done, but let's wait for @divergentdave to finish reading the paper. We're still trying to decide if we think it's worth blocking RGLC on this.",
+          "createdAt": "2025-10-18T00:08:40Z",
+          "updatedAt": "2025-10-18T00:08:40Z"
         }
       ]
     }
@@ -46951,7 +46967,7 @@
       "id": "PR_kwDOGKuqOc6tiZxI",
       "title": "Faster polynomial evaluation in Lagrange basis from rhizomes paper.",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/578",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -46960,17 +46976,19 @@
       ],
       "body": "Introduces the use of (batched) polynomial evaluation directly in Lagrange basis.\r\nIt avoid conversions to the monomial basis during FLP.Query.\r\n\r\nNo wire changes.\r\n\r\n\r\nCloses #573 \r\n\r\n--\r\nReviewers: \r\nStill needs to add either a reference to the paper or to fully describe the algorithm in the spec. Let me know the prefered choice.\r\n  \r\n",
       "createdAt": "2025-10-13T20:46:45Z",
-      "updatedAt": "2025-10-13T21:57:49Z",
+      "updatedAt": "2025-10-17T22:43:43Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "fa1e00f9149171af5fe1e241ad04c43698463ce4",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "prioEvalFaster",
-      "headRefOid": "2873fe5d1850c8f9bd71a24af5f165a0530471be",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "471c9e5485ec40c06960b8d1946a6ec1ea077a63",
+      "closedAt": "2025-10-17T22:43:43Z",
+      "mergedAt": "2025-10-17T22:43:43Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "07a79a9af801a2524bd6da544f2ebfcc4aac4938"
+      },
       "comments": [],
       "reviews": [
         {
@@ -47004,6 +47022,163 @@
               "updatedAt": "2025-10-13T21:57:49Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7H0BuM",
+          "commit": {
+            "abbreviatedOid": "2873fe5"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-17T22:32:24Z",
+          "updatedAt": "2025-10-17T22:32:24Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "added now.",
+              "createdAt": "2025-10-17T22:32:24Z",
+              "updatedAt": "2025-10-17T22:32:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7H0Bwy",
+          "commit": {
+            "abbreviatedOid": "2873fe5"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-17T22:32:33Z",
+          "updatedAt": "2025-10-17T22:32:33Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "reverted this change",
+              "createdAt": "2025-10-17T22:32:33Z",
+              "updatedAt": "2025-10-17T22:32:34Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7H0B1-",
+          "commit": {
+            "abbreviatedOid": "2873fe5"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-17T22:32:52Z",
+          "updatedAt": "2025-10-17T22:32:52Z",
+          "comments": [
+            {
+              "originalPosition": 12,
+              "body": "ok, please take a second look.",
+              "createdAt": "2025-10-17T22:32:52Z",
+              "updatedAt": "2025-10-17T22:32:52Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7H0CXK",
+          "commit": {
+            "abbreviatedOid": "9ce1a70"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Nice, just one more change please",
+          "createdAt": "2025-10-17T22:35:09Z",
+          "updatedAt": "2025-10-17T22:38:16Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Please revert this change as well, just so we're sure that the reference code matches the draft.",
+              "createdAt": "2025-10-17T22:35:09Z",
+              "updatedAt": "2025-10-17T22:38:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7H0DrV",
+          "commit": {
+            "abbreviatedOid": "9ce1a70"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-17T22:41:14Z",
+          "updatedAt": "2025-10-17T22:41:15Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "right, fixed.",
+              "createdAt": "2025-10-17T22:41:15Z",
+              "updatedAt": "2025-10-17T22:41:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7H0ELp",
+          "commit": {
+            "abbreviatedOid": "471c9e5"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-17T22:43:23Z",
+          "updatedAt": "2025-10-17T22:43:23Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 579,
+      "id": "PR_kwDOGKuqOc6uZZHl",
+      "title": "Update the Change Log for draft 17",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/579",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-17"
+      ],
+      "body": "",
+      "createdAt": "2025-10-17T22:44:37Z",
+      "updatedAt": "2025-10-17T22:51:40Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "07a79a9af801a2524bd6da544f2ebfcc4aac4938",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft17",
+      "headRefOid": "0f0088f429b77f2b6f630bdab20d3060cb689adc",
+      "closedAt": "2025-10-17T22:51:39Z",
+      "mergedAt": "2025-10-17T22:51:39Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "74c373b21a55df7036edef70e622c36d096ac76c"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7H0Fb8",
+          "commit": {
+            "abbreviatedOid": "0f0088f"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-17T22:48:33Z",
+          "updatedAt": "2025-10-17T22:48:33Z",
+          "comments": []
         }
       ]
     }
