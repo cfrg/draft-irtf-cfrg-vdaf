@@ -43,6 +43,39 @@ class MultiGadget(Valid[int, int, Field64]):
         return output[0].int()
 
 
+class HigherDegree(Valid[int, int, Field64]):
+    """
+    A validity circuit for use in tests that contains a gadget of degree 3.
+    """
+    # Associated parameters
+    field = Field64
+    GADGETS = [PolyEval([0, 2, -3, 1])]  # x * (x - 1) * (x - 2)
+    GADGET_CALLS = [1]
+    MEAS_LEN = 1
+    JOINT_RAND_LEN = 0
+    OUTPUT_LEN = 1
+    EVAL_OUTPUT_LEN = 1
+
+    def eval(
+            self,
+            meas: list[Field64],
+            joint_rand: list[Field64],
+            _num_shares: int) -> list[Field64]:
+        self.check_valid_eval(meas, joint_rand)
+        return [
+            self.GADGETS[0].eval(self.field, [meas[0]]),
+        ]
+
+    def encode(self, measurement: int) -> list[Field64]:
+        return [self.field(measurement)]
+
+    def truncate(self, meas: list[Field64]) -> list[Field64]:
+        return meas
+
+    def decode(self, output: list[Field64], _num_measurements: int) -> int:
+        return output[0].int()
+
+
 class TestAverage(Sum):
     """
     Flp subclass that calculates the average of integers. The result is rounded
@@ -168,6 +201,17 @@ class TestMultiGadget(TestFlpBBCGGI19):
         flp = FlpBBCGGI19(MultiGadget())
         self.run_flp_test(flp, [
             (flp.encode(0), True),
+        ])
+
+
+class TestHigherDegree(TestFlpBBCGGI19):
+    def test(self) -> None:
+        flp = FlpBBCGGI19(HigherDegree())
+        self.run_flp_test(flp, [
+            (flp.encode(0), True),
+            (flp.encode(1), True),
+            (flp.encode(2), True),
+            (flp.encode(3), False),
         ])
 
 
