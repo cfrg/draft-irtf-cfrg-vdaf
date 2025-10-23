@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-19T01:08:20.177323+00:00",
+  "timestamp": "2025-10-23T01:02:06.122732+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7397,7 +7397,7 @@
       ],
       "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
       "createdAt": "2025-09-23T17:16:36Z",
-      "updatedAt": "2025-10-18T00:08:40Z",
+      "updatedAt": "2025-10-22T00:27:28Z",
       "closedAt": null,
       "comments": [
         {
@@ -7469,6 +7469,20 @@
           "body": "Done, but let's wait for @divergentdave to finish reading the paper. We're still trying to decide if we think it's worth blocking RGLC on this.",
           "createdAt": "2025-10-18T00:08:40Z",
           "updatedAt": "2025-10-18T00:08:40Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I was initially worried about whether this would impact the zero knowledge security of the FLP, since the random wire seed values blind various values later in the protocol, and the Lagrange-to-monomial conversion mixes the wire seed into all polynomial coordinates, but I've read through the paper and reviewed BBCGGI '19, and I'm satisfied this wouldn't affect the security analysis. The prover's message is $\\pi=(w, f_1(\\omega_0), ..., f_L(\\omega_0), c_p)$ and this would change the coordinates of the proof polynomial or gadget polynomial, $c_p$, from one basis to another. The HVZK simulator only needs to simulate the verifier's randomness and the response to the verifier's linear query, which evaluates $f'\\_i(r)$, $p'(r)$, and $p'(\\omega\\_{M-1})$. The linear query that the verifier makes would naturally change due to the change in polynomial basis, but the values produced by the query would be the same. Since the polynomial coordinates $c_p$ are not in the verifier's view at all, the joint distributions are unchanged. Since we exclude cases where r is a root of unity, $f'\\_i(r)$ will still be uniformly distributed due to the influence of $f\\_i(0)$, chosen by the honest prover.\n\nI think this change is worth considering, the speedups look promising.",
+          "createdAt": "2025-10-21T23:01:19Z",
+          "updatedAt": "2025-10-21T23:01:19Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "In that case, let's see what it looks like. @armfazh let's put up a PR for the reference code only; if we decide we like this idea, then we could propagate to the doc in a future PR.",
+          "createdAt": "2025-10-22T00:27:28Z",
+          "updatedAt": "2025-10-22T00:27:28Z"
         }
       ]
     }
@@ -46901,10 +46915,13 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "wire change",
+        "pre-RGLC"
+      ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-10-09T23:48:13Z",
+      "updatedAt": "2025-10-22T00:28:04Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
@@ -47179,6 +47196,77 @@
           "createdAt": "2025-10-17T22:48:33Z",
           "updatedAt": "2025-10-17T22:48:33Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 580,
+      "id": "PR_kwDOGKuqOc6u5alW",
+      "title": "Add Prio3 test with a degree 3 gadget",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/580",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "poc"
+      ],
+      "body": "I noticed that while we currently have one gadget test that exercises a gadget of degree greater than two in isolation, we don't have any tests using such gadgets in the FLP. This defines a new validity circuit consisting of a degree three gadget, and adds an FLP test using it.",
+      "createdAt": "2025-10-21T17:45:34Z",
+      "updatedAt": "2025-10-22T21:41:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "74c373b21a55df7036edef70e622c36d096ac76c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/deg-3-gadget-test",
+      "headRefOid": "9db966c7c8f9410d9fe58b7743c2dabdc9d8c98e",
+      "closedAt": "2025-10-22T21:39:21Z",
+      "mergedAt": "2025-10-22T21:39:21Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "c679cc29cc181963e0392d374c376590d7a031e8"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7Iddd6",
+          "commit": {
+            "abbreviatedOid": "c1237e6"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-10-22T00:25:27Z",
+          "updatedAt": "2025-10-22T00:26:12Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Does testing this circuit in Prio3 increase test coverage at all? If not, I would probably not add this code.",
+              "createdAt": "2025-10-22T00:25:27Z",
+              "updatedAt": "2025-10-22T00:26:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7It2ap",
+          "commit": {
+            "abbreviatedOid": "c1237e6"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-10-22T20:35:28Z",
+          "updatedAt": "2025-10-22T20:35:28Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "No, it doesn't. Looking more closely, only the FLP really cares about polynomial degrees, the VDAF layer is just secret sharing a vector of field elements.",
+              "createdAt": "2025-10-22T20:35:28Z",
+              "updatedAt": "2025-10-22T20:35:28Z"
+            }
+          ]
         }
       ]
     }
