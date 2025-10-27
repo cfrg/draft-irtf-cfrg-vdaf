@@ -4409,18 +4409,15 @@ The validity circuit is denoted `MultihotCountVec` and has three parameters:
 number of `True` entries (i.e., the weight must be at most `max_weight`); and
 `chunk_length`, used the same way as in {{prio3sumvec}} and {{prio3histogram}}.
 
-Validation works as follows. Let
-
-* `bits_for_weight = max_weight.bit_length()`
-* `offset = 2 ** bits_for_weight - 1 - max_weight`
-
-The Client reports the weight of the count vector by adding `offset` to it and
-bit-encoding the result. Observe that only a weight of at most `max_weight` can
-be encoded with `bits_for_weight` bits.
+The Client's encoded measurement includes both the count vector and the
+weight of the count vector. The weight is encoded as multiple field
+elements, using the same modified bit decomposition as in the `Sum`
+circuit's encoding procedure.
 
 The verifier checks that each entry of the encoded measurement is a bit (i.e.,
-either one or zero). It then decodes the reported weight and subtracts it from
-`offset + sum(count_vec)`, where `count_vec` is the count vector. The result is
+either one or zero), including both the count vector and the encoding of the
+reported weight. It then decodes the reported weight and subtracts it from
+`sum(count_vec)`, where `count_vec` is the count vector. The result is
 zero if and only if the reported weight is equal to the true weight. The two
 checks constitute the output of the circuit. The complete circuit is defined
 below.
@@ -4449,15 +4446,20 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
-        self.offset = self.field(
-            2**self.bits_for_weight - 1 - max_weight)
+        # Precompute value for range check of claimed weight.
+        self.last_weight = max_weight - (
+            2 ** (self.bits_for_weight - 1) - 1
+        )
 
-        # Make sure `offset + length` doesn't overflow the field
-        # modulus. Otherwise we may not correctly compute the sum
-        # measurement vector entries during circuit evaluation.
-        if self.field.MODULUS - self.offset.int() <= length:
-            raise ValueError('length and max_weight are too large '
-                             'for the current field size')
+        # Make sure `length` and `max_weight` don't overflow the
+        # field modulus. Otherwise we may not correctly compute the
+        # sum of measurement vector entries during circuit evaluation.
+        if self.field.MODULUS <= length:
+            raise ValueError('length is too large for the '
+                             'current field size')
+        if self.field.MODULUS <= max_weight:
+            raise ValueError('max_weight is too large for the '
+                             'current field size')
 
         self.length = length
         self.max_weight = max_weight
@@ -4481,13 +4483,25 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
         count_vec = [self.field(int(x)) for x in measurement]
 
         # The second part is the reported weight.
-        weight_reported = sum(count_vec, self.field(0))
+        weight_reported = sum(measurement)
 
         encoded = []
         encoded += count_vec
-        encoded += self.field.encode_into_bit_vec(
-            (self.offset + weight_reported).int(),
-            self.bits_for_weight)
+        # Implementation note: this conditional should be replaced
+        # with constant time operations in practice in order to
+        # reduce leakage via timing side channels.
+        if weight_reported <= 2 ** (self.bits_for_weight - 1) - 1:
+            encoded += self.field.encode_into_bit_vec(
+                weight_reported,
+                self.bits_for_weight - 1,
+            )
+            encoded += [self.field(0)]
+        else:
+            encoded += self.field.encode_into_bit_vec(
+                weight_reported - self.last_weight,
+                self.bits_for_weight - 1,
+            )
+            encoded += [self.field(1)]
         return encoded
 
     def eval(
@@ -4520,14 +4534,15 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
                 cast(list[F], inputs),
             )
 
-        # Check that the weight `offset` plus the sum of the counters
-        # is equal to the value claimed by the Client.
+        # Check that the sum of the counters is equal to the value
+        # claimed by the Client.
         count_vec = meas[:self.length]
         weight = sum(count_vec, self.field(0))
-        weight_reported = \
-            self.field.decode_from_bit_vec(meas[self.length:])
-        weight_check = self.offset*shares_inv + weight - \
-            weight_reported
+        weight_reported = (
+            self.field.decode_from_bit_vec(meas[self.length:-1])
+            + meas[-1] * self.field(self.last_weight)
+        )
+        weight_check = weight - weight_reported
 
         return [range_check, weight_check]
 

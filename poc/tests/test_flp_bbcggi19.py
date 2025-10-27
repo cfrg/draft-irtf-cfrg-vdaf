@@ -144,8 +144,8 @@ class TestMultihotCountVec(TestFlpBBCGGI19):
             (
                 [flp.field(1)] * i
                 + [flp.field(0)] * (valid.length - i)
-                # Try to lie about the offset weight.
-                + [flp.field(0)] * valid.bits_for_weight,
+                # Try to lie about the weight.
+                + [flp.field(1)] * valid.bits_for_weight,
                 False
             )
             for i in range(valid.max_weight + 1, valid.length + 1)
@@ -163,6 +163,86 @@ class TestMultihotCountVec(TestFlpBBCGGI19):
                 False
             )
         ]
+        self.run_flp_test(flp, cases)
+
+    def test_max_6(self) -> None:
+        # length=8, max_weight=6
+        valid = MultihotCountVec(Field128, 8, 6, 3)
+        flp = FlpBBCGGI19(valid)
+        # Note that the claimed weight is encoded with three elements, weighted
+        # with 1, 2, and 3.
+
+        # Successful cases:
+        cases = [
+            (
+                flp.encode(
+                    [True, True, True, True, True, True, False, False],
+                ),
+                True,
+            ),
+            (
+                flp.encode(
+                    [False, True, False, True, True, True, True, True],
+                ),
+                True,
+            ),
+            (flp.encode([False] * 8), True),
+            (
+                flp.encode(
+                    [True, True, False, False, False, False, False, False],
+                ),
+                True,
+            ),
+            (
+                flp.encode(
+                    [True, True, True, True, True, False, False, False],
+                ),
+                True,
+            ),
+        ]
+
+        # Successful cases: alternate representations of a claimed weight of 3
+        cases += [
+            (
+                [flp.field(x) for x in [1, 1, 1, 0, 0, 0, 0, 0] + [1, 1, 0]],
+                True,
+            ),
+            (
+                [flp.field(x) for x in [1, 1, 1, 0, 0, 0, 0, 0] + [0, 0, 1]],
+                True,
+            ),
+        ]
+
+        # Failure cases: too many 1s, should fail weight check.
+        cases += [
+            (
+                [flp.field(1)] * i
+                + [flp.field(0)] * (valid.length - i)
+                # Try to lie about the weight.
+                + [flp.field(1)] * valid.bits_for_weight,
+                False,
+            )
+            for i in range(valid.max_weight + 1, valid.length + 1)
+        ]
+
+        # Failure case: pass count check but fail bit check.
+        cases += [
+            (
+                [
+                    flp.field(flp.field.MODULUS - 1),
+                    flp.field(1),
+                    flp.field(0),
+                    flp.field(0),
+                    flp.field(0),
+                    flp.field(0),
+                    flp.field(0),
+                    flp.field(0),
+                ]
+                + [flp.field(0)] * valid.bits_for_weight,
+                False,
+            )
+        ]
+
         self.run_flp_test(flp, cases)
 
     def test_small(self) -> None:
