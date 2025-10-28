@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-23T01:02:06.122732+00:00",
+  "timestamp": "2025-10-28T01:01:03.484166+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7041,7 +7041,7 @@
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-10-13T19:15:29Z",
+      "updatedAt": "2025-10-27T16:27:37Z",
       "closedAt": null,
       "comments": [
         {
@@ -7057,6 +7057,27 @@
           "body": "I'm interested in making this change. We can also apply it to Prio3SumVec, and replace the \"bits\" parameter with an upper limit value.",
           "createdAt": "2025-08-07T19:24:52Z",
           "updatedAt": "2025-08-07T19:24:52Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@divergentdave @armfazh does this optimization also apply to the MultihotCountVec circuit? I believe that it does.",
+          "createdAt": "2025-10-27T16:11:52Z",
+          "updatedAt": "2025-10-27T16:11:52Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "While the range check inside MultihotCountVec could be changed to be more like this, it wouldn't improve its efficiency. We currently encode the claimed sum plus an offset as a series of bits. Malicious clients cannot cheat by encoding a number less than the offset, because the weight check compares against the offset plus the sum of the measurement elements, which we already know are zero or one. We could get rid of the offset, and instead encode the claimed sum directly with the different weights, but this would take the same number of field elements. We'd effectively be reshuffling the semantics of the possible field vectors to eliminate the possibility of encoding a negative claimed sum, and introducing a second allowable encoding of some claimed sum values.",
+          "createdAt": "2025-10-27T16:23:30Z",
+          "updatedAt": "2025-10-27T16:23:30Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think we should consider it for consistency's sake: the spec should have as few ways as possible for doing something.",
+          "createdAt": "2025-10-27T16:27:37Z",
+          "updatedAt": "2025-10-27T16:27:37Z"
         }
       ]
     },
@@ -46921,7 +46942,7 @@
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-10-22T00:28:04Z",
+      "updatedAt": "2025-10-27T16:02:16Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
@@ -46932,7 +46953,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@armfazh mind reviewing?",
+          "createdAt": "2025-10-27T16:02:16Z",
+          "updatedAt": "2025-10-27T16:02:16Z"
+        }
+      ],
       "reviews": []
     },
     {
@@ -46949,7 +46978,7 @@
       ],
       "body": "This closes #454.\r\n\r\nI think I'm ahead of the bibxml publication, so the CI might fail for now.",
       "createdAt": "2025-10-13T02:57:53Z",
-      "updatedAt": "2025-10-13T19:14:48Z",
+      "updatedAt": "2025-10-27T20:07:04Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
@@ -47269,6 +47298,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 581,
+      "id": "PR_kwDOGKuqOc6wAbGo",
+      "title": "Use new range check in MultihotCountVec circuit",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/581",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.\r\n\r\nThis PR is stacked on #576 for now.",
+      "createdAt": "2025-10-27T22:36:28Z",
+      "updatedAt": "2025-10-27T22:36:29Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "david/range-proof-optimization",
+      "baseRefOid": "6e82c20a1a4bb47e69b4da0c63fb66be95ecbf42",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/multihotcountvec-no-offset",
+      "headRefOid": "273bbb4b430a6109c7283792541a6fdee8029fd4",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
