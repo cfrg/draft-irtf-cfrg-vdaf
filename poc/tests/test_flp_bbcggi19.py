@@ -165,6 +165,11 @@ class TestMultihotCountVec(TestFlpBBCGGI19):
         ]
         self.run_flp_test(flp, cases)
 
+        self.assertRaises(
+            ValueError,
+            lambda: flp.encode([True, True, True, False])
+        )
+
     def test_max_6(self) -> None:
         # length=8, max_weight=6
         valid = MultihotCountVec(Field128, 8, 6, 3)
