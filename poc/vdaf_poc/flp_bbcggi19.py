@@ -940,6 +940,8 @@ class SumVec(Valid[list[int], list[int], F]):
             raise ValueError('invalid length')
         if chunk_length <= 0:
             raise ValueError('invalid chunk_length')
+        if max_measurement <= 0:
+            raise ValueError('invalid max_measurement')
 
         self.field = field
         self.length = length

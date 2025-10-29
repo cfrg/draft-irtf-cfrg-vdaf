@@ -110,6 +110,8 @@ class TestSum(TestFlpBBCGGI19):
             ([flp.field(2)] * flp.MEAS_LEN, False),
         ])
 
+        self.assertRaises(ValueError, lambda: flp.encode(10001))
+
 
 class TestHistogram(TestFlpBBCGGI19):
     def test(self) -> None:
@@ -215,6 +217,9 @@ class TestSumVec(TestFlpBBCGGI19):
             flp.truncate([flp.field(1)] * 8),
             [flp.field(10)] * 2
         )
+
+        self.assertRaises(ValueError, lambda: flp.encode([0, 11]))
+        self.assertRaises(ValueError, lambda: flp.encode([0, 30]))
 
     def test_flp(self) -> None:
         flp = FlpBBCGGI19(SumVec(Field128, 2, 10, 3))

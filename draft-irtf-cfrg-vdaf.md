@@ -4016,12 +4016,14 @@ range. Each measurement is an integer in the range `[0, max_measurement]`,
 where `max_measurement` defines the largest valid measurement.
 
 The range check is accomplished by encoding the measurement as a vector of field
-elements with value zero or one, such that a weighted sum of the "bits" can only
-be in this range. All but one of the weights are successive powers of two, as in
-a binary bit decomposition, and the last weight is chosen such that the sum of
+elements with value zero or one, such that a weighted sum of these values can only
+be in the range `[0, max_measurement]`.
+All but one of the weights are successive powers of two, as in
+the binary bit decomposition, and the last weight is chosen such that the sum of
 all weights is equal to `max_measurement`. With these weights, valid
-measurements have either one or two possible representations as a vector of 0/1
-field elements, and invalid measurements cannot be represented.
+measurements have either one or two possible representations as vectors of
+field elements with value zero or one, and invalid measurements cannot be
+represented.
 
 The validity circuit checks that each entry of the bit vector has a value of
 zero or one. It uses the polynomial-evaluation gadget `PolyEval` specified in
@@ -4103,10 +4105,13 @@ class Sum(Valid[int, int, F]):
 This instance of Prio3 supports summing vectors of integers. It has three
 parameters: `length`, `max_measurement`, and `chunk_length`. Each measurement is
 a vector of positive integers with length equal to the `length` parameter. Each
-element of the measurement is an integer in the range `[0, max_measurement]`. It
-is RECOMMENDED to set `chunk_length` to an integer near the square root of
-`length * bits`, where `bits` is the number of bits needed to represent
-`max_measurement` (see {{parallel-sum-chunk-length}}).
+element of the measurement is an integer in the range `[0, max_measurement]`.
+
+Let `bits = max_measurement.bit_length()`, the number of bits needed to encode
+the largest valid measurement.
+
+It s RECOMMENDED to set `chunk_length` to an integer near the square root of
+`length * bits`, (see {{parallel-sum-chunk-length}}).
 
 The circuit is denoted `SumVec`. Each measurement is encoded as a vector of
 field elements with a length of `length * bits`. The field elements in the
