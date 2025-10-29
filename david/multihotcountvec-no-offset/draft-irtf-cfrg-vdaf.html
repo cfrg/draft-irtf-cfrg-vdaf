@@ -1057,7 +1057,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 30 April 2026</td>
+<td class="center">Expires 2 May 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-10-27" class="published">27 October 2025</time>
+<time datetime="2025-10-29" class="published">29 October 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-30">30 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-05-02">2 May 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1139,7 +1139,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 30 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 2 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -6841,12 +6841,14 @@ class Count(Valid[int, int, F]):
 range. Each measurement is an integer in the range <code>[0, max_measurement]</code>,
 where <code>max_measurement</code> defines the largest valid measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a vector of field
-elements with value zero or one, such that a weighted sum of the "bits" can only
-be in this range. All but one of the weights are successive powers of two, as in
-a binary bit decomposition, and the last weight is chosen such that the sum of
+elements with value zero or one, such that a weighted sum of these values can only
+be in the range <code>[0, max_measurement]</code>.
+All but one of the weights are successive powers of two, as in
+the binary bit decomposition, and the last weight is chosen such that the sum of
 all weights is equal to <code>max_measurement</code>. With these weights, valid
-measurements have either one or two possible representations as a vector of 0/1
-field elements, and invalid measurements cannot be represented.<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
+measurements have either one or two possible representations as vectors of
+field elements with value zero or one, and invalid measurements cannot be
+represented.<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-4">The validity circuit checks that each entry of the bit vector has a value of
 zero or one. It uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
 <a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x**2 - x</code>, which is equal to <code>0</code>
@@ -6960,27 +6962,28 @@ class Sum(Valid[int, int, F]):
 <p id="section-7.4.3-2">This instance of Prio3 supports summing vectors of integers. It has three
 parameters: <code>length</code>, <code>max_measurement</code>, and <code>chunk_length</code>. Each measurement is
 a vector of positive integers with length equal to the <code>length</code> parameter. Each
-element of the measurement is an integer in the range <code>[0, max_measurement]</code>. It
-is <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code> to an integer near the square root of
-<code>length * bits</code>, where <code>bits</code> is the number of bits needed to represent
-<code>max_measurement</code> (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-3">The circuit is denoted <code>SumVec</code>. Each measurement is encoded as a vector of
+element of the measurement is an integer in the range <code>[0, max_measurement]</code>.<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-3">Let <code>bits = max_measurement.bit_length()</code>, the number of bits needed to encode
+the largest valid measurement.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-4">It s <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code> to an integer near the square root of
+<code>length * bits</code>, (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-5">The circuit is denoted <code>SumVec</code>. Each measurement is encoded as a vector of
 field elements with a length of <code>length * bits</code>. The field elements in the
 encoded vector represent modified bit decompositions of each of the measurement
 vector's elements, following the <code>Sum</code> circuit's encoding procedure,
-concatenated together.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-4">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
+concatenated together.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-6">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
 then sums the results. Along with the subcircuit, the
 parallel-sum gadget is parameterized by an integer, denoted <code>count</code>, specifying
 how many times to call the subcircuit. It takes in a list of inputs and passes
 them through to instances of the subcircuit in the same order. It returns the
-sum of the subcircuit outputs.<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-5">Note that only the <code>ParallelSum</code> gadget itself, and not its subcircuit,
+sum of the subcircuit outputs.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-7">Note that only the <code>ParallelSum</code> gadget itself, and not its subcircuit,
 participates in the FLP's wire recording during evaluation, gadget consistency
 proofs, and proof validation, even though the subcircuit is provided to
-<code>ParallelSum</code> gadget as an implementation of the <code>Gadget</code> interface.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-6">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
+<code>ParallelSum</code> gadget as an implementation of the <code>Gadget</code> interface.<a href="#section-7.4.3-7" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-8">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
 ones and zeros. Rather than use the <code>PolyEval</code> gadget on each element, as in
 the <code>Sum</code> validity circuit, it instead uses <code>Mul</code> subcircuits (<a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>)
 and "free" constant multiplication and addition gates to simultaneously
@@ -6989,9 +6992,9 @@ constant. One of the two <code>Mul</code> subcircuit inputs is equal to a measur
 element multiplied by a power of one of the elements of the joint randomness
 vector, and the other is equal to the same measurement element minus one. These
 <code>Mul</code> subcircuits are evaluated by a <code>ParallelSum</code> gadget, and the results are
-added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-7">The complete circuit is specified below:<a href="#section-7.4.3-7" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-7.4.3-8">
+added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.3-8" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-9">The complete circuit is specified below:<a href="#section-7.4.3-9" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.3-10">
 <pre>
 class SumVec(Valid[list[int], list[int], F]):
     EVAL_OUTPUT_LEN = 1
@@ -7092,7 +7095,7 @@ class SumVec(Valid[list[int], list[int], F]):
             output: list[F],
             _num_measurements: int) -&gt; list[int]:
         return [x.int() for x in output]
-</pre><a href="#section-7.4.3-8" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.3-10" class="pilcrow">¶</a>
 </div>
 <div id="parallel-sum-chunk-length">
 <section id="section-7.4.3.1">
