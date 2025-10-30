@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-28T01:01:03.484166+00:00",
+  "timestamp": "2025-10-30T01:05:05.138002+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7506,6 +7506,22 @@
           "updatedAt": "2025-10-22T00:27:28Z"
         }
       ]
+    },
+    {
+      "number": 582,
+      "id": "I_kwDOGKuqOc7UmrcR",
+      "title": "Add more detail about what parameters must be distributed to parties",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/582",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "> I think that disagreement on the VDAF's parameters should be out of scope of our security model. We currently have a sentence in the security consideration saying that applications are responsible for \"Securely distributing the long-lived parameters, in particular the verification key.\" We may want to list all the parameters that different parties need to agree on, in a separate PR.\n\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/576#pullrequestreview-3394522376_",
+      "createdAt": "2025-10-29T16:34:21Z",
+      "updatedAt": "2025-10-29T16:34:21Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -46942,13 +46958,13 @@
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-10-27T16:02:16Z",
+      "updatedAt": "2025-10-29T16:28:43Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/range-proof-optimization",
-      "headRefOid": "6e82c20a1a4bb47e69b4da0c63fb66be95ecbf42",
+      "headRefOid": "1745250f9d76102f3bf690c1731fa0d700bc9cb3",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -46962,7 +46978,120 @@
           "updatedAt": "2025-10-27T16:02:16Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7KJIRj",
+          "commit": {
+            "abbreviatedOid": "6e82c20"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "Some comments about the changes.\n\nHow to deal with the case of good encodings but bad in a wrong range.\ne.g. \nThe encoding of meas=13 with max_measurement=13 is (1111).\nThe encoding of meas=14 with max_measurement=14 is (1111).\nNow take the latter encoded value and submit it to the former verifier.\n\n\n",
+          "createdAt": "2025-10-29T01:19:37Z",
+          "updatedAt": "2025-10-29T02:41:38Z",
+          "comments": [
+            {
+              "originalPosition": 152,
+              "body": "the description is ok as is, but you may consider to add the formula\n`chunk_length = ceil(sqrt(length*log2(max_measurement)+1))`",
+              "createdAt": "2025-10-29T01:19:37Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 155,
+              "body": "In this paragraph, `bits` is not defined.",
+              "createdAt": "2025-10-29T01:22:28Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 31,
+              "body": "```suggestion\nthe binary bit decomposition, and the last weight is chosen such that the sum of\n```",
+              "createdAt": "2025-10-29T01:24:09Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 29,
+              "body": "suggestion: this is one way to avoid quoting the _bits_ word.\n\n```suggestion\nelements with value zero or one, such that a weighted sum of these values can only\n```",
+              "createdAt": "2025-10-29T01:26:51Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 34,
+              "body": "\"a vector of 0/1 field elements\" can be consufed with vectors of length zero or one.\n\n```suggestion\nmeasurements have either one or two possible representations as vectors of \nfield elements with zero or one values, and invalid measurements cannot be represented.\n```",
+              "createdAt": "2025-10-29T01:30:43Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 214,
+              "body": "do we still need to perfom the range check here?\nor is it enough just checking that the input values are bits?\nRelated, I'm thinking about the case where the code accepts a valid share measurement (just checks the bits and vector length) but the measurement was genereated for a different range.",
+              "createdAt": "2025-10-29T02:16:10Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "does `chunk_length` should be 14 then? I understand this value is not enforced to be exactly that, but it may help people looking at the code.",
+              "createdAt": "2025-10-29T02:22:40Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 28,
+              "body": "\n```suggestion\n            raise ValueError('invalid chunk_length')\n        if max_measurement <= 0:\n            raise ValueError('invalid max_measurement')            \n```",
+              "createdAt": "2025-10-29T02:28:57Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 3,
+              "body": "Consider add some cases out of the range.\n\n```suggestion\n            (flp.encode(10000), True),\n            (flp.encode(10001), False),\n```",
+              "createdAt": "2025-10-29T02:31:44Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            },
+            {
+              "originalPosition": 59,
+              "body": "Consider test cases out of the range.\n\n```suggestion\n            (flp.encode([0, 10]), True),\n            (flp.encode([0, 30]), False),\n```",
+              "createdAt": "2025-10-29T02:34:59Z",
+              "updatedAt": "2025-10-29T02:41:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7KVE0I",
+          "commit": {
+            "abbreviatedOid": "6e82c20"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I think that disagreement on the VDAF's parameters should be out of scope of our security model. We currently have a sentence in the security consideration saying that applications are responsible for \"Securely distributing the long-lived parameters, in particular the verification key.\" We may want to list all the parameters that different parties need to agree on, in a separate PR. Note that Prio3SumVec reports sharded with bits=a and length=b could be successfully verified using parameters bits=b and length=a, etc., and the resulting output would be different, as it would be a re-interpretation of the input bit string.",
+          "createdAt": "2025-10-29T15:56:07Z",
+          "updatedAt": "2025-10-29T16:26:23Z",
+          "comments": [
+            {
+              "originalPosition": 152,
+              "body": "I don't want to add this formula, as the linked subsection notes that it could produce proofs up to 50% larger than the optimal size found through a parameter search. I'll add a definition of `bits` here, which should help clarify the next paragraph as well.",
+              "createdAt": "2025-10-29T15:56:07Z",
+              "updatedAt": "2025-10-29T16:26:23Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "A lot of the chunk lengths in tests are eyeballed or chosen so they do/don't divide the vector length. I think it's fine to leave them as-is.",
+              "createdAt": "2025-10-29T16:07:18Z",
+              "updatedAt": "2025-10-29T16:26:23Z"
+            },
+            {
+              "originalPosition": 3,
+              "body": "This actually raises an exception when encoding. I added a test for that.",
+              "createdAt": "2025-10-29T16:10:03Z",
+              "updatedAt": "2025-10-29T16:26:23Z"
+            },
+            {
+              "originalPosition": 214,
+              "body": "No, we don't need a separate range check value here. Previously we bit-encoded two integers, with a known offset between their values, and checked in the circuit that they were computed and encoded consistently. That let us get a tight bound on the measurement by only allowing the intersection of two 2^bits-length intervals, with one slid to the left. Eliminating the second encoded integer means we don't need this consistency check anymore. Instead, we get our tight bound on the measurement from the customized weights assigned to the vector elements, combined with the above 0/1 range checks.",
+              "createdAt": "2025-10-29T16:19:33Z",
+              "updatedAt": "2025-10-29T16:26:23Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 577,
@@ -47311,13 +47440,13 @@
       "labels": [],
       "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.\r\n\r\nThis PR is stacked on #576 for now.",
       "createdAt": "2025-10-27T22:36:28Z",
-      "updatedAt": "2025-10-27T22:36:29Z",
+      "updatedAt": "2025-10-29T16:31:58Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "david/range-proof-optimization",
-      "baseRefOid": "6e82c20a1a4bb47e69b4da0c63fb66be95ecbf42",
+      "baseRefOid": "1745250f9d76102f3bf690c1731fa0d700bc9cb3",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/multihotcountvec-no-offset",
-      "headRefOid": "273bbb4b430a6109c7283792541a6fdee8029fd4",
+      "headRefOid": "3ec3e9eb1bdfc27cc1a128a2ec742a9ebb05c7c2",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
