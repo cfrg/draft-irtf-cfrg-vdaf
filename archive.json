@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-10-30T01:05:05.138002+00:00",
+  "timestamp": "2025-11-02T01:07:37.150102+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7519,9 +7519,17 @@
       "labels": [],
       "body": "> I think that disagreement on the VDAF's parameters should be out of scope of our security model. We currently have a sentence in the security consideration saying that applications are responsible for \"Securely distributing the long-lived parameters, in particular the verification key.\" We may want to list all the parameters that different parties need to agree on, in a separate PR.\n\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/576#pullrequestreview-3394522376_",
       "createdAt": "2025-10-29T16:34:21Z",
-      "updatedAt": "2025-10-29T16:34:21Z",
+      "updatedAt": "2025-10-31T23:19:23Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think we're pretty clear on this already?",
+          "createdAt": "2025-10-31T23:19:23Z",
+          "updatedAt": "2025-10-31T23:19:23Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -46958,7 +46966,7 @@
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-10-29T16:28:43Z",
+      "updatedAt": "2025-10-30T19:11:39Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
@@ -46976,6 +46984,20 @@
           "body": "@armfazh mind reviewing?",
           "createdAt": "2025-10-27T16:02:16Z",
           "updatedAt": "2025-10-27T16:02:16Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> I think that disagreement on the VDAF's parameters should be out of scope of our security model.\r\n\r\nFor the specific parameter: `max_measurement`, this malicious client can create a valid share from a measurement that is out of the range.\r\n\r\n```rust\r\nuse prio::vdaf::{\r\n    prio3::Prio3Sum, AggregateShare, Aggregator, Client, Collector, PrepareTransition,\r\n};\r\n\r\nfn main() {\r\n    let ctx = vec![0u8; 0];\r\n    let nonce = [0u8; 16];\r\n    let verify_key = [0u8; 32];\r\n\r\n    // Malicious Client\r\n    const MAXAGE: u64 = 18;\r\n    let sum0 = Prio3Sum::new_sum(1, MAXAGE + 1).unwrap();\r\n    let age = MAXAGE + 1;\r\n    let (pub_share, shares) = sum0.shard(&ctx, &age, &nonce).unwrap();\r\n\r\n    // Honest Verifier\r\n    let sum = Prio3Sum::new_sum(1, MAXAGE).unwrap();\r\n    let (prep_state, prep_share) = sum\r\n        .prepare_init(&verify_key, &ctx, 0, &(), &nonce, &pub_share, &shares[0])\r\n        .unwrap();\r\n\r\n    let prep_msg = sum\r\n        .prepare_shares_to_prepare_message(&ctx, &(), [prep_share])\r\n        .unwrap();\r\n    if let PrepareTransition::Finish(out_share) =\r\n        sum.prepare_next(&ctx, prep_state, prep_msg).unwrap()\r\n    {\r\n        let v = sum\r\n            .unshard(&(), [AggregateShare::from(out_share)], 1)\r\n            .unwrap();\r\n        println!(\"sum: {}\", v)\r\n    }\r\n}\r\n\r\n```\r\n\r\nWith the previous code this example fails. So I think the range proof must check something else, or cryptographically checking that the `max_measurement` parameter agrees.",
+          "createdAt": "2025-10-30T05:39:19Z",
+          "updatedAt": "2025-10-30T05:39:19Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Note that with the changes, while proof verification succeeds instead of failing, the sum that is output is 18, which is a valid measurement according to the verifier's parameters, not 19. When looking at our verifiability security goal, the malicious client doesn't gain any advantage in spoiling the result due to this, because they can only add up to 18 to the total for each Sybil client's measurement they submit. Honest clients can have the same magnitude of impact on the total. The malicious client's disagreement on the `max_measurement` parameter means the semantic link between its view of the measurement and the aggregator's view of the measurement is broken, and only the aggregator's view matters to the aggregate result, since it runs the truncation algorithm.\r\n\r\nWhatever we do with regard to agreement on VDAF parameters, whether it be more explicit requirements on the application around the VDAF, like in #582, or committing to the VDAF parameters somewhere in the protocol, I think this PR's changes don't make the situation any worse, since encoded measurements for SumVec are already confusable in the same way. (i.e., decoding $<0, 0, 0, 1>$ as $<0, 2>$ or $<8>$)",
+          "createdAt": "2025-10-30T19:11:39Z",
+          "updatedAt": "2025-10-30T19:11:39Z"
         }
       ],
       "reviews": [
