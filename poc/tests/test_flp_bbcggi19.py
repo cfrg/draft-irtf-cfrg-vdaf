@@ -1,5 +1,6 @@
 from typing import TypeVar
 
+from vdaf_poc.common import next_power_of_2
 from vdaf_poc.field import Field64, Field96, Field128, NttField
 from vdaf_poc.flp_bbcggi19 import (Count, FlpBBCGGI19, Histogram, Mul,
                                    MultihotCountVec, PolyEval, Sum, SumVec,
@@ -49,7 +50,7 @@ class HigherDegree(Valid[int, int, Field64]):
     """
     # Associated parameters
     field = Field64
-    GADGETS = [PolyEval([0, 2, -3, 1])]  # x * (x - 1) * (x - 2)
+    GADGETS = [PolyEval([0, 2, -3, 1], 1)]  # x * (x - 1) * (x - 2)
     GADGET_CALLS = [1]
     MEAS_LEN = 1
     JOINT_RAND_LEN = 0
@@ -217,11 +218,15 @@ class TestHigherDegree(TestFlpBBCGGI19):
 
 class TestGadgets(TestFlpBBCGGI19):
     def test_poly_eval_range2(self) -> None:
-        self.run_gadget_test(PolyEval([0, -1, 1]), Field128, 10)
+        self.run_gadget_test(
+            PolyEval([0, -1, 1], next_power_of_2(10)),
+            Field128,
+            next_power_of_2(10),
+        )
 
     def test_poly_eval(self) -> None:
         self.run_gadget_test(
-            PolyEval([0, -23, 1, 3]),
+            PolyEval([0, -23, 1, 3], next_power_of_2(10)),
             Field128,
-            10,
+            next_power_of_2(10),
         )

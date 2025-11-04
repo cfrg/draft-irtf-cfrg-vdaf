@@ -4,9 +4,8 @@ from abc import ABCMeta, abstractmethod
 from copy import deepcopy
 from typing import Any, Generic, Optional, TypeVar, cast
 
-from vdaf_poc.common import front, next_power_of_2
-from vdaf_poc.field import (NttField, poly_eval, poly_interp, poly_mul,
-                            poly_strip)
+from vdaf_poc.common import assert_power_of_2, front, next_power_of_2
+from vdaf_poc.field import Lagrange, NttField, poly_eval
 from vdaf_poc.flp import Flp
 
 Measurement = TypeVar("Measurement")
@@ -265,7 +264,6 @@ class QueryGadget(Gadget[F]):
         p = next_power_of_2(1 + g_calls)
         assert field.GEN_ORDER % p == 0  # REMOVE ME
         self.alpha = field.gen() ** (field.GEN_ORDER // p)
-        self.poly = gadget_poly
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
         self.wires = []
@@ -275,11 +273,33 @@ class QueryGadget(Gadget[F]):
             wire[0] = s  # set the wire seed
             self.wires.append(wire)
 
+        # Recover gadget_poly sent in the Lagrange basis.
+        l = len(gadget_poly)
+        n = next_power_of_2(l)
+        assert l <= n
+        lag = Lagrange(field)
+        nodes = field.nth_root_powers(n)
+        for _ in range(l, n):
+            # Extending the dimension (one by one) to the closest power of two.
+            # This keeps the degree of polynomial unchanged.
+            next_value = lag.extend_dimension_one(nodes, gadget_poly)
+            gadget_poly += [next_value]
+        # Calculate 'size' evaluations of gadget_poly at the roots of unity.
+        size = next_power_of_2(g.DEGREE*p)
+        while len(gadget_poly) < size:
+            gadget_poly = lag.extend_dimension_double(gadget_poly)
+        self.poly = gadget_poly
+
+        # Calculate the step.
+        log_size = assert_power_of_2(size)
+        log_p = assert_power_of_2(p)
+        self.step = 1 << (log_size-log_p)
+
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.k += 1
         for j in range(len(inp)):
             self.wires[j][self.k] = inp[j]
-        return poly_eval(field, self.poly, self.alpha ** self.k)
+        return self.poly[self.k*self.step]
 
     # REMOVE ME
     def eval_poly(self,
@@ -347,35 +367,38 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
         # Construct the proof, which consists of the wire seeds and
         # gadget polynomial for each gadget.
         proof = []
-        for g in cast(list[ProveGadget[F]], valid.GADGETS):
-            p = len(g.wires[0])
+        for g, g_calls in zip(valid.GADGETS, valid.GADGET_CALLS):
+            g = cast(ProveGadget[F], g)
 
-            # Compute the wire polynomials for this gadget. For each
-            # `j`, find the lowest degree polynomial `wire_poly` for
-            # which `wire_poly(alpha**k) = g.wires[j][k]` for all
-            # `k`. Note that each `g.wires[j][0]` is set to the seed
-            # of wire `j`, which is included in the prove randomness.
-            #
-            # Implementation note: `alpha` is a root of unity, which
-            # means `poly_interp()` can be evaluated using the NTT.
-            # Note that `g.wires[j]` is padded with 0s to a power of
-            # 2.
+            # Define `p` as the smallest power of two accommodating all
+            # gadget calls plus one.
+            p = next_power_of_2(1 + g_calls)
             assert self.field.GEN_ORDER % p == 0  # REMOVE ME
-            alpha = self.field.gen() ** (self.field.GEN_ORDER // p)
-            wire_inp = [alpha ** k for k in range(p)]
-            wire_polys = []
-            for j in range(g.ARITY):
-                wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
-                wire_polys.append(wire_poly)
 
-            # Compute the gadget polynomial by evaluating the gadget on
-            # the wire polynomials. By construction we have that
+            # The validity circuit evaluation defines one polynomial for
+            # each input wire of each gadget.
+            # For each wire `j`, the vector `g.wires[j]` of length `p`
+            # is built as follows:
+            # - `g.wires[j][0]` is set to the seed for wire `j` (from
+            #   the prover's randomness).
+            # - The subsequent entries are the assigned values from each
+            #   gadget call.
+            # - Pad the vector with zeros to reach length `p`.
+            # The wire polynomial is then defined by its evaluations:
+            #   `wire_poly(alpha**k) = g.wires[j][k]`
+            # for all `k`, where `alpha` is a `p`-th root of unity.
+            wire_polys = [g.wires[j] for j in range(g.ARITY)]
+            assert all(len(wp) == p for wp in wire_polys)  # REMOVE ME
+
+            wire_seeds = [g.wires[j][0] for j in range(g.ARITY)]
+            proof += wire_seeds
+
+            # Compute the gadget polynomial by evaluating the gadget
+            # on the wire polynomials. By construction we have that
             # `gadget_poly(alpha**k)` is the `k`-th output.
             gadget_poly = g.eval_poly(self.field, wire_polys)
-
-            for j in range(g.ARITY):
-                proof.append(g.wires[j][0])
-            proof += gadget_poly
+            gadget_poly_len = g.DEGREE * (p - 1) + 1
+            proof += gadget_poly[:gadget_poly_len]
 
         assert len(proof) == self.PROOF_LEN  # REMOVE ME
         return proof
@@ -412,6 +435,7 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
         # Construct the verifier message, which consists of the reduced
         # circuit output and each gadget test.
+        lag = Lagrange(self.field)
         verifier = [v]
         for (g, t) in zip(cast(list[QueryGadget[F]], valid.GADGETS),
                           query_rand):
@@ -428,13 +452,11 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
             # check for consistency with the gadget polynomial provided
             # by the prover. To start, evaluate the gadget polynomial and
             # each of the wire polynomials at the random point `t`.
-            wire_checks = []
-            wire_inp = [g.alpha ** k for k in range(p)]
-            for j in range(g.ARITY):
-                wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
-                wire_checks.append(poly_eval(self.field, wire_poly, t))
+            nodes = self.field.nth_root_powers(p)
+            wire_checks = lag.poly_eval_batched(nodes, g.wires[:g.ARITY], t)
 
-            gadget_check = poly_eval(self.field, g.poly, t)
+            nodes = self.field.nth_root_powers(len(g.poly))
+            gadget_check = lag.poly_eval(nodes, g.poly, t)
 
             verifier += wire_checks
             verifier.append(gadget_check)
@@ -491,7 +513,7 @@ class Mul(Gadget[F]):
                   field: type[F],
                   inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
-        return poly_mul(field, inp_poly[0], inp_poly[1])
+        return Lagrange(field).poly_mul(inp_poly[0], inp_poly[1])
 
 
 # NOTE: This class is excerpted in the document. Its width should be
@@ -501,7 +523,7 @@ class PolyEval(Gadget[F]):
     ARITY = 1
     p: list[int]  # polynomial coefficients
 
-    def __init__(self, p: list[int]):
+    def __init__(self, p: list[int], num_calls: int):
         """
         Instantiate this gadget with the given polynomial.
         """
@@ -515,6 +537,9 @@ class PolyEval(Gadget[F]):
 
         self.p = p
         self.DEGREE = len(p) - 1
+        wire_poly_len = next_power_of_2(1+num_calls)
+        gadget_poly_len = self.DEGREE*(wire_poly_len-1) + 1
+        self.n = next_power_of_2(gadget_poly_len)
 
     def eval(self, field: type[F], inp: list[F]) -> F:
         self.check_gadget_eval(inp)  # REMOVE ME
@@ -525,15 +550,16 @@ class PolyEval(Gadget[F]):
                   field: type[F],
                   inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
-        p = [field(coeff) for coeff in self.p]
-        out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
-        out[0] = p[0]
-        x = inp_poly[0]
-        for i in range(1, len(p)):
-            for j in range(len(x)):
-                out[j] += p[i] * x[j]
-            x = poly_mul(field, x, inp_poly[0])
-        return poly_strip(field, out)
+        l = len(inp_poly[0])
+        assert_power_of_2(l)
+
+        # Convert the input polynomial I from Lagrange to monomial.
+        I_mon_l = field.inv_ntt(inp_poly[0], l)
+        # Obtain n evaluations of the input polynomial I.
+        I_lag_n = field.ntt(I_mon_l, self.n)
+        # Returns the polynomial composition (P*I)
+        P_mon = [field(coeff) for coeff in self.p]
+        return [poly_eval(field, P_mon, x) for x in I_lag_n]
 
 
 # NOTE: This class is excerpted in the document. Its width should be
@@ -584,7 +610,9 @@ class ParallelSum(Gadget[F]):
                   field: type[F],
                   inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
-        output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
+        output_poly_length = next_power_of_2(
+            self.DEGREE * (len(inp_poly[0]) - 1) + 1
+        )
         out_sum = [field(0) for _ in range(output_poly_length)]
         for i in range(self.count):
             start_index = i * self.subcircuit.ARITY
@@ -595,7 +623,7 @@ class ParallelSum(Gadget[F]):
             )
             for j in range(output_poly_length):
                 out_sum[j] += out_current[j]
-        return poly_strip(field, out_sum)
+        return out_sum
 
 
 ##
@@ -1013,7 +1041,6 @@ class SumVec(Valid[list[int], list[int], F]):
 # xml2rfc.
 # ===================================================================
 class Sum(Valid[int, int, F]):
-    GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
     field: type[F]
@@ -1055,6 +1082,7 @@ class Sum(Valid[int, int, F]):
             raise ValueError('bound exceeds field modulus')  # REMOVE ME
 
         self.GADGET_CALLS = [2 * self.bits]
+        self.GADGETS = [PolyEval([0, -1, 1], 2*self.bits)]
         self.MEAS_LEN = 2 * self.bits
         self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
 

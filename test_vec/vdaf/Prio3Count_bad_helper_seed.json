@@ -26,7 +26,7 @@
     "reports": [
         {
             "input_shares": [
-                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b57694d189321ffe06f46b37d26db61d056b17152e3726a2e",
+                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b07660ca467144d293006b65d82690924a82a4da7c3496338",
                 "010102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
             ],
             "measurement": null,
@@ -37,8 +37,8 @@
             "verifier_messages": [],
             "verifier_shares": [
                 [
-                    "5c6a0685bd0f0aa9b19b8c1c4431ec49eca02338e5e05da8fc91575311627200",
-                    "1e3f9484477e86edb9b7c743b75f9b7c81f5ab0d9c1812eac73918b7633ab8ef"
+                    "c6c0473f31a065a2b19b8c1c4431ec49eca02338e5e05da8d05f3149baaf4948",
+                    "64e621d175de1579b9b7c743b75f9b7c81f5ab0d9c1812eadb25ae5768c57233"
                 ]
             ]
         }

@@ -59,6 +59,16 @@ the environment variable `TEST_VECTOR_PATH`:
 TEST_VECTOR_PATH=path/to/test_vec poetry run poe vectors
 ```
 
+## Generating Documentation
+
+Generate HTML documentation by running.
+
+```sh
+poetry run poe docs
+```
+
+The documentation is at the `./html/index.html` file.
+
 ## Formatting Code
 
 Before submitting code, make sure the code is properly formatted.
