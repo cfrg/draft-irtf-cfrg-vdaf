@@ -1,11 +1,39 @@
-requires = ["setuptools >= 61.0.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "vdaf_poc"
 description = "Reference implementation of draft-irtf-cfrg-vdaf"
 readme = "README.md"
 version = "0.0.1"
-dependencies = [
-    "pycryptodomex >= 3.20.0",
+requires-python = ">=3.12"
+dependencies = ["pycryptodomex==3.23.0"]
+
+[project.urls]
+repository = "https://github.com/cfrg/draft-irtf-cfrg-vdaf/"
+
+[dependency-groups]
+dev = [
+    "autopep8==2.3.2",
+    "isort==7.0.0",
+    "mypy==1.18.2",
+    "poethepoet==0.37.0",
+    "pyflakes==3.4.0",
+    "pylint==4.0.2",
 ]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+vectors = "python gen_test_vec.py"
+tests = "python -m unittest -v"
+lint = ["pyflakes", "pylint", "mypy"]
+check = ["autopep8_check", "isort_check"]
+format = ["autopep8_format", "isort_format"]
+
+autopep8_format = "autopep8 --in-place *.py vdaf_poc/*.py tests/*.py"
+isort_format = "isort ."
+autopep8_check = "autopep8 --diff --exit-code *.py vdaf_poc/*.py tests/*.py"
+isort_check = "isort --check ."
+pyflakes = "pyflakes *.py vdaf_poc/*.py tests/*.py"
+pylint = "pylint --disable=all --enable=redefined-outer-name *.py vdaf_poc/*.py tests/*.py"
+mypy = "mypy *.py vdaf_poc/*.py tests/*.py"

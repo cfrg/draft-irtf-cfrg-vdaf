@@ -12,34 +12,38 @@ on:
     - '.github/workflows/lint-python.yml'
     - 'poc/**'
 
+permissions:
+  contents: read
+
 jobs:
   test:
-    name: "Check formatting"
+    name: "Testing PoC Python Code"
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: poc
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.12'
 
-    - name: Install tools
-      run: pip install pyflakes autopep8 isort pylint
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: '2.2.0'
 
-    - name: Run pyflakes
-      working-directory: poc
-      run: pyflakes *.py vdaf_poc/*.py tests/*.py
+    - name: Install dependencies
+      run: poetry install --no-interaction
 
-    - name: Run autopep8
-      working-directory: poc
-      run: autopep8 --diff --exit-code *.py vdaf_poc/*.py tests/*.py
+    - name: Check Format
+      run: poetry run poe check
 
-    - name: Run isort
-      working-directory: poc
-      run: isort --check .
+    - name: Linter
+      run: poetry run poe lint
 
-    - name: Run pylint
-      working-directory: poc
-      run: pylint --disable=all --enable=redefined-outer-name *.py vdaf_poc/*.py tests/*.py
+    - name: Unit Tests
+      run: poetry run poe tests
