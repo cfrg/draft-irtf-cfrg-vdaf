@@ -75,7 +75,7 @@ poetry run poe format
 
 ## Linter
 
-Run some checks to verify code quality and types annotation.
+Run some checks to verify code quality and type annotations.
 
 ```sh
 poetry run poe lint
