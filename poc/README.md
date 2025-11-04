@@ -22,31 +22,61 @@ python -c "from vdaf_poc.field import Field64; print(Field64.MODULUS)"
 
 ## Development
 
-To run unit tests, you'll first need to install
-[PyCryptodome](https://pycryptodome.readthedocs.io/en/latest/index.html) >=
-3.20.0:
+Install poetry following these [instructions](https://python-poetry.org/docs/#installation):
 
-```
-python -m pip install pycryptodomex
+```sh
+export POETRY_HOME=/opt/poetry
+python -m venv $POETRY_HOME
+$POETRY_HOME/bin/pip install poetry==2.2.0
 ```
 
-Now you should be able to run the unit tests:
+Use poetry to install project's dependencies.
 
+```sh
+poetry install
 ```
-python -m unittest
+
+## Testing
+
+Now, we can run the unit tests:
+
+```sh
+poetry run poe tests
 ```
 
 ## Generating test vectors
 
 To generate test vectors, run:
 
-```
-python gen_test_vec.py
+```sh
+poetry run poe vectors
 ```
 
 Users can also specify a custom path to generate the test vectors in
-environment variable `TEST_VECTOR_PATH`:
+the environment variable `TEST_VECTOR_PATH`:
 
+```sh
+TEST_VECTOR_PATH=path/to/test_vec poetry run poe vectors
 ```
-TEST_VECTOR_PATH=path/to/test_vec python gen_test_vec.py
+
+## Formatting Code
+
+Before submitting code, make sure the code is properly formatted.
+
+```sh
+poetry run poe check
+```
+
+Otherwise, let the tools format the code.
+
+```sh
+poetry run poe format
+```
+
+## Linter
+
+Run some checks to verify code quality and type annotations.
+
+```sh
+poetry run poe lint
 ```

@@ -23,6 +23,7 @@ TEST_VECTOR_PATH = os.environ.get('TEST_VECTOR_PATH', '../test_vec/')
 
 def gen_test_vec_for_idpf(idpf: Idpf,
                           alpha: tuple[bool, ...],
+                          ctx: bytes,
                           test_vec_instance: int) -> None:
     beta_inner = []
     for level in range(idpf.BITS - 1):
@@ -102,7 +103,7 @@ def gen_test_vec_for_xof(cls: type[Xof]) -> None:
         f.write('\n')
 
 
-def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
+def gen_prio3_negative_test_vec(test_vec_path: str, ctx: bytes) -> None:
     """
     Generates various negative test vectors for Prio3.
     """
@@ -132,6 +133,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         verify_key,
         nonce,
         rand,
+        ctx,
         public_share,
         bad_input_share_0,
         input_share_1,
@@ -151,6 +153,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         verify_key,
         nonce,
         rand,
+        ctx,
         public_share,
         bad_input_share_0,
         input_share_1,
@@ -171,6 +174,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         verify_key,
         nonce,
         rand,
+        ctx,
         public_share,
         bad_input_share_0,
         input_share_1,
@@ -189,6 +193,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         verify_key,
         nonce,
         rand,
+        ctx,
         public_share,
         input_share_0,
         bad_input_share_1,
@@ -216,6 +221,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         verify_key,
         nonce,
         rand,
+        ctx,
         public_share,
         bad_input_share_0,
         input_share_1,
@@ -234,6 +240,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         verify_key,
         nonce,
         rand,
+        ctx,
         public_share,
         input_share_0,
         bad_input_share_1,
@@ -252,6 +259,7 @@ def gen_prio3_negative_test_vec(test_vec_path: str) -> None:
         verify_key,
         nonce,
         rand,
+        ctx,
         bad_public_share,
         input_share_0,
         input_share_1,
@@ -343,6 +351,7 @@ def _prio3_verifier_shares_to_message_failure(
         verify_key: bytes,
         nonce: bytes,
         rand: bytes,
+        ctx: bytes,
         public_share: list[bytes] | None,
         input_share_0: Prio3InputShare,
         input_share_1: Prio3InputShare,
@@ -438,7 +447,7 @@ def _prio3_verifier_shares_to_message_failure(
     )
 
 
-def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
+def gen_poplar1_negative_test_vec(test_vec_path: str, ctx: bytes) -> None:
     """
     Generates various negative test vectors for Poplar1.
     """
@@ -600,7 +609,7 @@ def gen_poplar1_negative_test_vec(test_vec_path: str) -> None:
     )
 
 
-if __name__ == '__main__':
+def main() -> None:
     from vdaf_poc import idpf_bbcggi21, vdaf_poplar1, vdaf_prio3, xof
 
     ctx = b'some application'
@@ -838,6 +847,7 @@ if __name__ == '__main__':
     gen_test_vec_for_idpf(
         idpf_bbcggi21.IdpfBBCGGI21(2, 10),
         (False, False, False, False, False, False, False, False, False, False),
+        ctx,
         0,
     )
 
@@ -845,6 +855,10 @@ if __name__ == '__main__':
     gen_test_vec_for_xof(xof.XofTurboShake128)
     gen_test_vec_for_xof(xof.XofFixedKeyAes128)
 
-    gen_prio3_negative_test_vec(vdaf_test_vec_path)
+    gen_prio3_negative_test_vec(vdaf_test_vec_path, ctx)
 
-    gen_poplar1_negative_test_vec(vdaf_test_vec_path)
+    gen_poplar1_negative_test_vec(vdaf_test_vec_path, ctx)
+
+
+if __name__ == '__main__':
+    main()
