@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-02T01:07:37.150102+00:00",
+  "timestamp": "2025-11-04T01:03:33.194873+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -122,6 +122,11 @@
       "name": "draft-17",
       "description": "",
       "color": "34db56"
+    },
+    {
+      "name": "draft-18",
+      "description": null,
+      "color": "aaaaaa"
     }
   ],
   "issues": [
@@ -7037,11 +7042,11 @@
       ],
       "labels": [
         "wire change",
-        "pre-RGLC"
+        "draft-18"
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-10-27T16:27:37Z",
+      "updatedAt": "2025-11-03T17:28:07Z",
       "closedAt": null,
       "comments": [
         {
@@ -7078,6 +7083,13 @@
           "body": "I think we should consider it for consistency's sake: the spec should have as few ways as possible for doing something.",
           "createdAt": "2025-10-27T16:27:37Z",
           "updatedAt": "2025-10-27T16:27:37Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We're GO to make this chnage! I'll review the PR this week.",
+          "createdAt": "2025-11-03T17:28:07Z",
+          "updatedAt": "2025-11-03T17:28:07Z"
         }
       ]
     },
@@ -7414,11 +7426,11 @@
       ],
       "labels": [
         "wire change",
-        "pre-RGLC"
+        "draft-18"
       ],
       "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
       "createdAt": "2025-09-23T17:16:36Z",
-      "updatedAt": "2025-10-22T00:27:28Z",
+      "updatedAt": "2025-11-03T17:30:27Z",
       "closedAt": null,
       "comments": [
         {
@@ -7504,6 +7516,13 @@
           "body": "In that case, let's see what it looks like. @armfazh let's put up a PR for the reference code only; if we decide we like this idea, then we could propagate to the doc in a future PR.",
           "createdAt": "2025-10-22T00:27:28Z",
           "updatedAt": "2025-10-22T00:27:28Z"
+        },
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "We're a go to make this change! @armfazh it would be great if you could write the PR.",
+          "createdAt": "2025-11-03T17:30:17Z",
+          "updatedAt": "2025-11-03T17:30:17Z"
         }
       ]
     },
@@ -7516,10 +7535,12 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-18"
+      ],
       "body": "> I think that disagreement on the VDAF's parameters should be out of scope of our security model. We currently have a sentence in the security consideration saying that applications are responsible for \"Securely distributing the long-lived parameters, in particular the verification key.\" We may want to list all the parameters that different parties need to agree on, in a separate PR.\n\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/576#pullrequestreview-3394522376_",
       "createdAt": "2025-10-29T16:34:21Z",
-      "updatedAt": "2025-10-31T23:19:23Z",
+      "updatedAt": "2025-11-03T17:29:52Z",
       "closedAt": null,
       "comments": [
         {
@@ -46962,11 +46983,11 @@
       "assignees": [],
       "labels": [
         "wire change",
-        "pre-RGLC"
+        "draft-18"
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-10-30T19:11:39Z",
+      "updatedAt": "2025-11-03T17:28:29Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
@@ -47459,10 +47480,13 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "wire change",
+        "draft-18"
+      ],
       "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.\r\n\r\nThis PR is stacked on #576 for now.",
       "createdAt": "2025-10-27T22:36:28Z",
-      "updatedAt": "2025-10-29T16:31:58Z",
+      "updatedAt": "2025-11-03T17:29:34Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "david/range-proof-optimization",
       "baseRefOid": "1745250f9d76102f3bf690c1731fa0d700bc9cb3",
