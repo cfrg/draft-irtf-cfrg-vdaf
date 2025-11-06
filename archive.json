@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-04T01:03:33.194873+00:00",
+  "timestamp": "2025-11-06T01:04:13.920800+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7549,6 +7549,30 @@
           "body": "I think we're pretty clear on this already?",
           "createdAt": "2025-10-31T23:19:23Z",
           "updatedAt": "2025-10-31T23:19:23Z"
+        }
+      ]
+    },
+    {
+      "number": 584,
+      "id": "I_kwDOGKuqOc7WHHyB",
+      "title": "Bump to next DAP/VDAF versions",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/584",
+      "state": "CLOSED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The next VDAF draft (> 17) will include some breaking changes:\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/549\nhttps://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/574\n\nThere are no changes to DAP or taskprov beyond bumping the reference.",
+      "createdAt": "2025-11-05T17:53:44Z",
+      "updatedAt": "2025-11-05T17:54:00Z",
+      "closedAt": "2025-11-05T17:53:59Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "whoops, wrong repo.",
+          "createdAt": "2025-11-05T17:53:59Z",
+          "updatedAt": "2025-11-05T17:53:59Z"
         }
       ]
     }
@@ -47499,6 +47523,122 @@
       "mergeCommit": null,
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 583,
+      "id": "PR_kwDOGKuqOc6xZoCa",
+      "title": "poc: Adding poetry tool to manage scripts",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/583",
+      "state": "MERGED",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "It uses poetry for dependency management and running scripts for linter and formating. \r\nIt updates the CI job accordingly.\r\n",
+      "createdAt": "2025-11-04T11:41:04Z",
+      "updatedAt": "2025-11-04T17:52:45Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c679cc29cc181963e0392d374c376590d7a031e8",
+      "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
+      "headRefName": "addPoetry",
+      "headRefOid": "02f90c3c372abc3fddf8257fb5bf1e94c6e1a1c3",
+      "closedAt": "2025-11-04T17:52:45Z",
+      "mergedAt": "2025-11-04T17:52:45Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "c34020410842fe4984436e2891987a072eb278b5"
+      },
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Yeah, I think it's worth it for reproducibility in the future, especially since we'll mostly stop working on the proof of concept once the draft is finalized. I've had too many situations on personal projects where I reinstall using just pip in a new virtualenv and something breaks. We could avoid the Poetry dependency by checking in the result of `pip freeze` as a separate requirements file, but it's probably better to use automated tooling.",
+          "createdAt": "2025-11-04T17:43:19Z",
+          "updatedAt": "2025-11-04T17:43:19Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7LtisN",
+          "commit": {
+            "abbreviatedOid": "19c1edc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "I am not very familiar with Poetry, but I like that it has a lockfile solution.",
+          "createdAt": "2025-11-04T17:14:05Z",
+          "updatedAt": "2025-11-04T17:18:54Z",
+          "comments": [
+            {
+              "originalPosition": 54,
+              "body": "We should remove `test.yml`, since it's now redundant, and maybe rename this file to `python.yml`.\r\n\r\nAlso this is missing a trailing newline.",
+              "createdAt": "2025-11-04T17:14:05Z",
+              "updatedAt": "2025-11-04T17:18:54Z"
+            },
+            {
+              "originalPosition": 68,
+              "body": "nit: typo\r\n```suggestion\r\nRun some checks to verify code quality and type annotations.\r\n```",
+              "createdAt": "2025-11-04T17:16:47Z",
+              "updatedAt": "2025-11-04T17:18:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Lt7WT",
+          "commit": {
+            "abbreviatedOid": "19c1edc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-04T17:31:08Z",
+          "updatedAt": "2025-11-04T17:31:09Z",
+          "comments": [
+            {
+              "originalPosition": 54,
+              "body": "updated.",
+              "createdAt": "2025-11-04T17:31:08Z",
+              "updatedAt": "2025-11-04T17:31:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Lt7bm",
+          "commit": {
+            "abbreviatedOid": "19c1edc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-04T17:31:12Z",
+          "updatedAt": "2025-11-04T17:31:13Z",
+          "comments": [
+            {
+              "originalPosition": 68,
+              "body": "done",
+              "createdAt": "2025-11-04T17:31:12Z",
+              "updatedAt": "2025-11-04T17:31:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Lt-ei",
+          "commit": {
+            "abbreviatedOid": "02f90c3"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I would like to avoid adding the extra dependency, but if you like it @divergentdave, I'm happy to defer to you.",
+          "createdAt": "2025-11-04T17:32:59Z",
+          "updatedAt": "2025-11-04T17:32:59Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
