@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-06T01:04:13.920800+00:00",
+  "timestamp": "2025-11-09T01:06:59.379765+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -47011,7 +47011,7 @@
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-11-03T17:28:29Z",
+      "updatedAt": "2025-11-07T17:21:28Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
@@ -47155,6 +47155,56 @@
               "body": "No, we don't need a separate range check value here. Previously we bit-encoded two integers, with a known offset between their values, and checked in the circuit that they were computed and encoded consistently. That let us get a tight bound on the measurement by only allowing the intersection of two 2^bits-length intervals, with one slid to the left. Eliminating the second encoded integer means we don't need this consistency check anymore. Instead, we get our tight bound on the measurement from the customized weights assigned to the vector elements, combined with the above 0/1 range checks.",
               "createdAt": "2025-10-29T16:19:33Z",
               "updatedAt": "2025-10-29T16:26:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7MwkRS",
+          "commit": {
+            "abbreviatedOid": "1745250"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Looks good, just some suggestions.",
+          "createdAt": "2025-11-07T17:12:46Z",
+          "updatedAt": "2025-11-07T17:21:28Z",
+          "comments": [
+            {
+              "originalPosition": 37,
+              "body": "nit: It might be nice to give this a name since we reuse it. \"mask\" may not be right.\n\n```suggestion\n        self.last_mask = (2 ** (bits - 1) - 1)\n        self.last_weight = max_measurement - self.last_mask\n```",
+              "createdAt": "2025-11-07T17:12:46Z",
+              "updatedAt": "2025-11-07T17:21:28Z"
+            },
+            {
+              "originalPosition": 31,
+              "body": "```suggestion\nAll but the last of the weights are successive powers of two, as in\n```",
+              "createdAt": "2025-11-07T17:13:58Z",
+              "updatedAt": "2025-11-07T17:21:28Z"
+            },
+            {
+              "originalPosition": 30,
+              "body": "```suggestion\nbe in the range `[0, max_measurement]`.\n\n```",
+              "createdAt": "2025-11-07T17:15:15Z",
+              "updatedAt": "2025-11-07T17:21:28Z"
+            },
+            {
+              "originalPosition": 68,
+              "body": "Do we now only use `encode_into_bit_vec` as part of encoding a range checked integer? If so, then we might consider replacing this function with one that encodes the range checked integer.",
+              "createdAt": "2025-11-07T17:18:29Z",
+              "updatedAt": "2025-11-07T17:21:28Z"
+            },
+            {
+              "originalPosition": 148,
+              "body": "```suggestion\n        last of the weights are successive powers of two, as in a\n```",
+              "createdAt": "2025-11-07T17:18:48Z",
+              "updatedAt": "2025-11-07T17:21:28Z"
+            },
+            {
+              "originalPosition": 266,
+              "body": "Not just the sum circuit!\n```suggestion\nThanks to Ian Goldberg for the bit decomposition technique used in the range proofs\nof the Prio3 variants.\n```",
+              "createdAt": "2025-11-07T17:21:04Z",
+              "updatedAt": "2025-11-07T17:21:28Z"
             }
           ]
         }
@@ -47510,7 +47560,7 @@
       ],
       "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.\r\n\r\nThis PR is stacked on #576 for now.",
       "createdAt": "2025-10-27T22:36:28Z",
-      "updatedAt": "2025-11-03T17:29:34Z",
+      "updatedAt": "2025-11-07T17:25:19Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "david/range-proof-optimization",
       "baseRefOid": "1745250f9d76102f3bf690c1731fa0d700bc9cb3",
@@ -47522,7 +47572,28 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7MwxaM",
+          "commit": {
+            "abbreviatedOid": "3ec3e9e"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-11-07T17:24:41Z",
+          "updatedAt": "2025-11-07T17:25:19Z",
+          "comments": [
+            {
+              "originalPosition": 49,
+              "body": "\"last_weight\" is an unfortunate collision with \"weight_reported\". At a minimum, let's disambiguate in the comment here.",
+              "createdAt": "2025-11-07T17:24:41Z",
+              "updatedAt": "2025-11-07T17:25:19Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 583,
@@ -47637,6 +47708,204 @@
           "createdAt": "2025-11-04T17:32:59Z",
           "updatedAt": "2025-11-04T17:32:59Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 585,
+      "id": "PR_kwDOGKuqOc6x3ylW",
+      "title": "prio: Perform polynomial arithmetic in the Lagrange basis.",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-18"
+      ],
+      "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nCloses #574 ",
+      "createdAt": "2025-11-06T11:01:47Z",
+      "updatedAt": "2025-11-07T17:50:29Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
+      "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
+      "headRefName": "prioPolyLagrange_v0",
+      "headRefOid": "11d3fb7772ebde6783860bdf13f28deeb2eb9bfd",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks @armfazh! I'd like a chance to review before merging :)",
+          "createdAt": "2025-11-06T23:09:33Z",
+          "updatedAt": "2025-11-06T23:09:33Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7McVNP",
+          "commit": {
+            "abbreviatedOid": "512b502"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "These changes look good, I just have some small comments. We'll need to reflect these changes in the draft next, and update the description of the FLP. I can help out with that next week I think.",
+          "createdAt": "2025-11-06T18:48:51Z",
+          "updatedAt": "2025-11-06T23:00:05Z",
+          "comments": [
+            {
+              "originalPosition": 61,
+              "body": "This documentation doesn't match up with the implementation, because it doesn't capture the reordering. Maybe we should just stop with saying it's the inverse NTT operation, and transforms polynomials from the Lagrange basis back to the monomial basis.",
+              "createdAt": "2025-11-06T18:48:52Z",
+              "updatedAt": "2025-11-06T23:00:05Z"
+            },
+            {
+              "originalPosition": 36,
+              "body": "I think this is calculating more points than needed in edge cases. Note that the wire polynomials are all polynomials of degree at most (p-1), so the gadget polynomial has a degree of at most g.DEGREE * (p - 1), and therefore the following number of coordinates.\r\n```suggestion\r\n        size = next_power_of_2(g.DEGREE * (p - 1) + 1)\r\n```",
+              "createdAt": "2025-11-06T21:35:36Z",
+              "updatedAt": "2025-11-06T23:00:05Z"
+            },
+            {
+              "originalPosition": 66,
+              "body": "The comments in this loop should be updated to reflect the new algorithm. (in particular, we don't need `poly_interp()` anymore)",
+              "createdAt": "2025-11-06T22:53:06Z",
+              "updatedAt": "2025-11-06T23:00:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Mhdff",
+          "commit": {
+            "abbreviatedOid": "512b502"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-07T02:31:49Z",
+          "updatedAt": "2025-11-07T02:31:50Z",
+          "comments": [
+            {
+              "originalPosition": 61,
+              "body": "changed.",
+              "createdAt": "2025-11-07T02:31:49Z",
+              "updatedAt": "2025-11-07T02:31:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7MhdhZ",
+          "commit": {
+            "abbreviatedOid": "512b502"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-07T02:31:56Z",
+          "updatedAt": "2025-11-07T02:31:56Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "@divergentdave , could you please help me to double check this calculation?\r\nI wrote that based on the libprio-rs code. \r\nhttps://github.com/divviup/libprio-rs/blob/main/src/flp.rs#L731\r\nThere may be a confusion on the `p` variable name.",
+              "createdAt": "2025-11-07T02:31:56Z",
+              "updatedAt": "2025-11-07T02:31:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Mhdp2",
+          "commit": {
+            "abbreviatedOid": "512b502"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-07T02:32:16Z",
+          "updatedAt": "2025-11-07T02:32:16Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "updated.",
+              "createdAt": "2025-11-07T02:32:16Z",
+              "updatedAt": "2025-11-07T02:32:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Mw9Da",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "About a third of the way through.",
+          "createdAt": "2025-11-07T17:33:37Z",
+          "updatedAt": "2025-11-07T17:50:29Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "Let's follow python naming conventions. Here and below:\n```suggestion\n        for log_n in range(1, 8):\n```",
+              "createdAt": "2025-11-07T17:33:37Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 22,
+              "body": "Would you mind adding a comment to explain what's going on in this test? Here and below.",
+              "createdAt": "2025-11-07T17:36:27Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "What does this do?",
+              "createdAt": "2025-11-07T17:38:03Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 13,
+              "body": "python convention\n```suggestion\n    log_n = math.ceil(math.log2(n))\n```",
+              "createdAt": "2025-11-07T17:39:14Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 29,
+              "body": "Shouldn't we pad first, then reverse the bits?",
+              "createdAt": "2025-11-07T17:43:53Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 35,
+              "body": "```suggestion\n        log_n = assert_power_of_2(n)\n```",
+              "createdAt": "2025-11-07T17:44:20Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 41,
+              "body": "What does \"star\" mean in this context?",
+              "createdAt": "2025-11-07T17:46:25Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 44,
+              "body": "Python convention. Here and below.\n```suggestion\n        root_n = cls.nth_root(logN)\n```",
+              "createdAt": "2025-11-07T17:46:44Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            },
+            {
+              "originalPosition": 31,
+              "body": "```suggestion\n        p_mon = cls.rand_vec(N)  # a random polynomial in the monomial basis\n```",
+              "createdAt": "2025-11-07T17:47:37Z",
+              "updatedAt": "2025-11-07T17:50:29Z"
+            }
+          ]
         }
       ]
     }
