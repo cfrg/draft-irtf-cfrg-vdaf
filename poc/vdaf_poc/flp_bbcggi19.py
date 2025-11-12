@@ -948,7 +948,8 @@ class SumVec(Valid[list[int], list[int], F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
@@ -1080,7 +1081,8 @@ class Sum(Valid[int, int, F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
 
         if 2 ** self.bits >= self.field.MODULUS:  # REMOVE ME
             raise ValueError('bound exceeds field modulus')  # REMOVE ME

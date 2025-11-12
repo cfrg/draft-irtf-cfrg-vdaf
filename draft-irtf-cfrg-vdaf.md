@@ -4047,7 +4047,8 @@ class Sum(Valid[int, int, F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
         self.GADGET_CALLS = [self.bits]
         self.GADGETS = [PolyEval([0, -1, 1], self.bits)]
         self.MEAS_LEN = self.bits
@@ -4167,7 +4168,8 @@ class SumVec(Valid[list[int], list[int], F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
