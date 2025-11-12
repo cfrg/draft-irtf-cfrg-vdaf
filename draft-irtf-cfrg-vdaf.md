@@ -4018,7 +4018,8 @@ where `max_measurement` defines the largest valid measurement.
 The range check is accomplished by encoding the measurement as a vector of field
 elements with value zero or one, such that a weighted sum of these values can only
 be in the range `[0, max_measurement]`.
-All but one of the weights are successive powers of two, as in
+
+All but the last of the weights are successive powers of two, as in
 the binary bit decomposition, and the last weight is chosen such that the sum of
 all weights is equal to `max_measurement`. With these weights, valid
 measurements have either one or two possible representations as vectors of
@@ -6611,8 +6612,8 @@ time to developing definitions and security proofs.
 Thanks to Julia Hesse who provided feedback on behalf of the Crypto Review
 Panel.
 
-Thanks to Ian Goldberg for the bit decomposition technique used in the Sum
-circuit.
+Thanks to Ian Goldberg for the bit decomposition technique used in the range
+proofs of the Prio3 variants.
 
 Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,

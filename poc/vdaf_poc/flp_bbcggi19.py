@@ -1067,7 +1067,7 @@ class Sum(Valid[int, int, F]):
         `[0, max_measurement]`. This is accomplished by encoding the
         measurement as a vector of zeroes and ones, such that a
         weighted sum of the "bits" can only be in this range. All but
-        one of the weights are successive powers of two, as in a
+        the last of the weights are successive powers of two, as in a
         binary bit decomposition, and the last weight is chosen such
         that the sum of all weights is equal to `max_measurement`.
         With these weights, valid measurements have either one or two
