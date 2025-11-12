@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 2 May 2026                                                 ISRG
+Expires: 16 May 2026                                                ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         29 October 2025
+                                                        12 November 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 May 2026.
+   This Internet-Draft will expire on 16 May 2026.
 
 Copyright Notice
 
@@ -4143,12 +4143,13 @@ Table of Contents
    The range check is accomplished by encoding the measurement as a
    vector of field elements with value zero or one, such that a weighted
    sum of these values can only be in the range [0, max_measurement].
-   All but one of the weights are successive powers of two, as in the
-   binary bit decomposition, and the last weight is chosen such that the
-   sum of all weights is equal to max_measurement.  With these weights,
-   valid measurements have either one or two possible representations as
-   vectors of field elements with value zero or one, and invalid
-   measurements cannot be represented.
+
+   All but the last of the weights are successive powers of two, as in
+   the binary bit decomposition, and the last weight is chosen such that
+   the sum of all weights is equal to max_measurement.  With these
+   weights, valid measurements have either one or two possible
+   representations as vectors of field elements with value zero or one,
+   and invalid measurements cannot be represented.
 
    The validity circuit checks that each entry of the bit vector has a
    value of zero or one.  It uses the polynomial-evaluation gadget
@@ -4172,7 +4173,8 @@ Table of Contents
            bits = max_measurement.bit_length()
            self.bits = bits
            self.max_measurement = max_measurement
-           self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+           rest_all_ones_value = 2 ** (bits - 1) - 1
+           self.last_weight = max_measurement - rest_all_ones_value
            self.GADGET_CALLS = [self.bits]
            self.MEAS_LEN = self.bits
            self.EVAL_OUTPUT_LEN = self.bits
@@ -4299,7 +4301,8 @@ Table of Contents
            bits = max_measurement.bit_length()
            self.bits = bits
            self.max_measurement = max_measurement
-           self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+           rest_all_ones_value = 2 ** (bits - 1) - 1
+           self.last_weight = max_measurement - rest_all_ones_value
            self.chunk_length = chunk_length
            self.GADGETS = [ParallelSum(Mul(), chunk_length)]
            self.GADGET_CALLS = [
@@ -6978,7 +6981,7 @@ Acknowledgments
    Review Panel.
 
    Thanks to Ian Goldberg for the bit decomposition technique used in
-   the Sum circuit.
+   the range proofs of the Prio3 variants.
 
    Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
    Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
