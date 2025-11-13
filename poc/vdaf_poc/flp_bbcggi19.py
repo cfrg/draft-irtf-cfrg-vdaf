@@ -806,9 +806,8 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
         # Precompute value for range check of claimed weight.
-        self.last_weight = max_weight - (
-            2 ** (self.bits_for_weight - 1) - 1
-        )
+        rest_all_ones_value = 2 ** (self.bits_for_weight - 1) - 1
+        self.last_weight = max_weight - rest_all_ones_value
 
         # Make sure `length` and `max_weight` don't overflow the
         # field modulus. Otherwise we may not correctly compute the
