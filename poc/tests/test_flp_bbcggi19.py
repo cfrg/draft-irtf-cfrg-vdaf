@@ -1,4 +1,4 @@
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from vdaf_poc.common import next_power_of_2
 from vdaf_poc.field import Field64, Field96, Field128, NttField
@@ -91,6 +91,11 @@ class HigherDegree(Valid[list[int], list[int], Field64]):
 
     def decode(self, output: list[Field64], _num_measurements: int) -> list[int]:
         return [x.int() for x in output]
+
+    def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
+        test_vec['degree'] = self.degree
+        test_vec['gadget_calls'] = self.gadget_calls
+        return ['degree', 'gadget_calls']
 
 
 def poly_mul_int(p: list[int], q: list[int]) -> list[int]:

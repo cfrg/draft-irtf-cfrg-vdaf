@@ -4,6 +4,7 @@ import json
 import os
 from typing import Any, cast
 
+from tests.test_vdaf_prio3 import Prio3HigherDegree
 from vdaf_poc.common import print_wrapped_line
 from vdaf_poc.field import Field64, Field128
 from vdaf_poc.idpf import FieldVec, Idpf
@@ -777,6 +778,21 @@ def main() -> None:
         ],
         2,
     )
+
+    for degree in range(1, 11):
+        for gadget_calls in range(1, 11):
+            gen_test_vec_for_vdaf(
+                vdaf_test_vec_path,
+                Prio3HigherDegree(2, degree, gadget_calls),
+                None,
+                ctx,
+                [
+                    [0] * gadget_calls,
+                    [degree - 1] * gadget_calls,
+                    [i % degree for i in range(gadget_calls)],
+                ],
+                (degree - 1) * 10 + (gadget_calls - 1),
+            )
 
     # Poplar1
     poplar1_test_number = 0
