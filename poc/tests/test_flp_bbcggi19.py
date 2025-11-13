@@ -44,18 +44,33 @@ class MultiGadget(Valid[int, int, Field64]):
         return output[0].int()
 
 
-class HigherDegree(Valid[int, int, Field64]):
+class HigherDegree(Valid[list[int], list[int], Field64]):
     """
-    A validity circuit for use in tests that contains a gadget of degree 3.
+    A validity circuit for use in tests that includes a gadget with a
+    configurable degree.
+
+    Measurements are a vector of integers, and the validity circuit performs
+    range checks on each element of the measurement using polynomials of the
+    form x * (x - 1) * (x - 2) * ... * (x - (degree - 1)). The validity
+    circuit outputs the result of all these polynomial evaluations.
     """
     # Associated parameters
     field = Field64
-    GADGETS = [PolyEval([0, 2, -3, 1], 1)]  # x * (x - 1) * (x - 2)
-    GADGET_CALLS = [1]
-    MEAS_LEN = 1
     JOINT_RAND_LEN = 0
-    OUTPUT_LEN = 1
-    EVAL_OUTPUT_LEN = 1
+
+    def __init__(self, degree: int, gadget_calls: int):
+        self.degree = degree
+        self.gadget_calls = gadget_calls
+
+        polynomial = [1]
+        for i in range(degree):
+            polynomial = poly_mul_int(polynomial, [-i, 1])
+
+        self.GADGETS = [PolyEval(polynomial, gadget_calls)]
+        self.GADGET_CALLS = [gadget_calls]
+        self.MEAS_LEN = gadget_calls
+        self.OUTPUT_LEN = gadget_calls
+        self.EVAL_OUTPUT_LEN = gadget_calls
 
     def eval(
             self,
@@ -64,17 +79,30 @@ class HigherDegree(Valid[int, int, Field64]):
             _num_shares: int) -> list[Field64]:
         self.check_valid_eval(meas, joint_rand)
         return [
-            self.GADGETS[0].eval(self.field, [meas[0]]),
+            self.GADGETS[0].eval(self.field, [x])
+            for x in meas
         ]
 
-    def encode(self, measurement: int) -> list[Field64]:
-        return [self.field(measurement)]
+    def encode(self, measurement: list[int]) -> list[Field64]:
+        return [self.field(elem) for elem in measurement]
 
     def truncate(self, meas: list[Field64]) -> list[Field64]:
         return meas
 
-    def decode(self, output: list[Field64], _num_measurements: int) -> int:
-        return output[0].int()
+    def decode(self, output: list[Field64], _num_measurements: int) -> list[int]:
+        return [x.int() for x in output]
+
+
+def poly_mul_int(p: list[int], q: list[int]) -> list[int]:
+    """
+    Computes the product of two polynomials, represented as a list of monomial
+    coefficients. This operates over the integers instead of a finite field.
+    """
+    r = [0] * (len(p) + len(q) - 1)
+    for i in range(len(p)):
+        for j in range(len(q)):
+            r[i + j] += p[i] * q[j]
+    return r
 
 
 class TestAverage(Sum):
@@ -207,12 +235,20 @@ class TestMultiGadget(TestFlpBBCGGI19):
 
 class TestHigherDegree(TestFlpBBCGGI19):
     def test(self) -> None:
-        flp = FlpBBCGGI19(HigherDegree())
+        flp = FlpBBCGGI19(HigherDegree(3, 1))
         self.run_flp_test(flp, [
-            (flp.encode(0), True),
-            (flp.encode(1), True),
-            (flp.encode(2), True),
-            (flp.encode(3), False),
+            (flp.encode([0]), True),
+            (flp.encode([1]), True),
+            (flp.encode([2]), True),
+            (flp.encode([3]), False),
+        ])
+
+        flp = FlpBBCGGI19(HigherDegree(5, 2))
+        self.run_flp_test(flp, [
+            (flp.encode([0, 4]), True),
+            (flp.encode([0, 5]), False),
+            (flp.encode([3, 2]), True),
+            (flp.encode([10, 15]), False),
         ])
 
 
