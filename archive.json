@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-09T01:06:59.379765+00:00",
+  "timestamp": "2025-11-13T01:04:57.816224+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7575,6 +7575,38 @@
           "updatedAt": "2025-11-05T17:53:59Z"
         }
       ]
+    },
+    {
+      "number": 586,
+      "id": "I_kwDOGKuqOc7Xr_l0",
+      "title": "Better testing of different gadget polynomial lengths",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/586",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Based on the discussion in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585#discussion_r2500947483, I think it would be good to have more testing, and perhaps more test vectors, around the edge cases of gadget polynomial length. There is currently a difference in the formulas used when setting up query shim gadgets between the spec and libprio-rs. With the gadget polynomial represented in the monomial basis, internally padding out the gadget polynomial with more zeroes has no impact, because they never get accessed for gadget outputs during circuit evaluation, and they contribute nothing to the evaluation of $g(r)$ to test the validity of the gadget polynomial. With the change from #574, this will matter more, because the gadget polynomial length implicitly tells us what degree root of unity to use to generate our evaluation points.\n\nChanging the number of gadget calls has a limited impact on the gadget polynomial length, because we already round the wire polynomial length up to the next power of two. Thus, to better explore edge cases, I think we need to vary both the gadget degree and the number of gadget calls. Thus far, all our \"real\" validity circuits only use degree two gadgets. PR #580 added one test of a circuit with a degree 3 gadget.\n\nI think we should pick a gadget's degree and number of calls such that $deg*(p-1)+1$ and $deg*p$ produce different results on either side of a power of two, make up a validity circuit using `PolyEval` that meets that, and produce test vector files, without using the circuit in a \"real\" VDAF in the spec. This will give us some more confidence in compatibility of implementations, should a future use case need gadgets with degree higher than two.",
+      "createdAt": "2025-11-12T23:31:53Z",
+      "updatedAt": "2025-11-12T23:31:53Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 587,
+      "id": "I_kwDOGKuqOc7XsP3L",
+      "title": "Replace encode_into_bit_vec() and decode_from_bit_vec() with helpers for range checked integers",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/587",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Following #576 and #581, `encode_into_bit_vec()` and `decode_from_bit_vec()` will only be used with range checked integers, on all but the last field elements for each encoded integer. We could replace these with new helper functions that encapsulate the whole range checked integer encoding/decoding process, simplifying circuit definitions.",
+      "createdAt": "2025-11-12T23:56:09Z",
+      "updatedAt": "2025-11-12T23:56:09Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -47011,13 +47043,13 @@
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-11-07T17:21:28Z",
+      "updatedAt": "2025-11-12T23:57:41Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/range-proof-optimization",
-      "headRefOid": "1745250f9d76102f3bf690c1731fa0d700bc9cb3",
+      "headRefOid": "5433571e7af0c394fd7b4be463a38df07a5ead20",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -47205,6 +47237,26 @@
               "body": "Not just the sum circuit!\n```suggestion\nThanks to Ian Goldberg for the bit decomposition technique used in the range proofs\nof the Prio3 variants.\n```",
               "createdAt": "2025-11-07T17:21:04Z",
               "updatedAt": "2025-11-07T17:21:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7OAJAi",
+          "commit": {
+            "abbreviatedOid": "1745250"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-12T23:56:19Z",
+          "updatedAt": "2025-11-12T23:56:19Z",
+          "comments": [
+            {
+              "originalPosition": 68,
+              "body": "Good idea, though this will need to wait and go in or after #581. I filed #587 for this simplification.",
+              "createdAt": "2025-11-12T23:56:19Z",
+              "updatedAt": "2025-11-12T23:56:20Z"
             }
           ]
         }
@@ -47560,13 +47612,13 @@
       ],
       "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.\r\n\r\nThis PR is stacked on #576 for now.",
       "createdAt": "2025-10-27T22:36:28Z",
-      "updatedAt": "2025-11-07T17:25:19Z",
+      "updatedAt": "2025-11-13T00:02:24Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "david/range-proof-optimization",
-      "baseRefOid": "1745250f9d76102f3bf690c1731fa0d700bc9cb3",
+      "baseRefOid": "5433571e7af0c394fd7b4be463a38df07a5ead20",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/multihotcountvec-no-offset",
-      "headRefOid": "3ec3e9eb1bdfc27cc1a128a2ec742a9ebb05c7c2",
+      "headRefOid": "484228a952ed7729f34f03990fd90cec56f11a1c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -47726,7 +47778,7 @@
       ],
       "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nCloses #574 ",
       "createdAt": "2025-11-06T11:01:47Z",
-      "updatedAt": "2025-11-07T17:50:29Z",
+      "updatedAt": "2025-11-12T23:35:31Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
@@ -47904,6 +47956,66 @@
               "body": "```suggestion\n        p_mon = cls.rand_vec(N)  # a random polynomial in the monomial basis\n```",
               "createdAt": "2025-11-07T17:47:37Z",
               "updatedAt": "2025-11-07T17:50:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7N_FKi",
+          "commit": {
+            "abbreviatedOid": "512b502"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-12T23:00:36Z",
+          "updatedAt": "2025-11-12T23:00:37Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "That still works with the following change. Historically, there were a few places where we had overly conservative formulas for polynomial degrees like this, so I think we've just missed this one.\r\n\r\n```patch\r\ndiff --git a/src/flp.rs b/src/flp.rs\r\nindex 7c85614..1153f76 100644\r\n--- a/src/flp.rs\r\n+++ b/src/flp.rs\r\n@@ -717,7 +717,7 @@ impl<F: NttFriendlyFieldElement> QueryShimGadget<F> {\r\n         let gadget_degree = inner.degree();\r\n         let gadget_arity = inner.arity();\r\n         let m = (1 + inner.calls()).next_power_of_two();\r\n-        let p = m * gadget_degree;\r\n+        let p = (m - 1) * gadget_degree + 1;\r\n \r\n         // Each call to this gadget records the values at which intermediate proof polynomials were\r\n         // interpolated. The first point was a random value chosen by the prover and transmitted in\r\n```\r\n\r\nIn this Python code, `p = next_power_of_2(1 + g_calls)` is the number of coordinates that we use to define the wire polynomials, so the wire polynomials are of degree p-1 or less, and composition means the gadget polynomial will have degree `g.DEGREE * (p - 1)`. Thus, we need at least `g.DEGREE * (p - 1) + 1` coordinates for the gadget polynomial. Note that this also matches the calculation of `gadget_poly_len` in `prove()`. Here we round up to the next power of two, and later rely on that when getting roots of unity, but I'm not sure if that rounding up is strictly necessary.",
+              "createdAt": "2025-11-12T23:00:37Z",
+              "updatedAt": "2025-11-12T23:00:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7N_ovF",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-12T23:34:09Z",
+          "updatedAt": "2025-11-12T23:34:09Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "I think this works out because `bin(n)` trims leading zeros on the left, and we're adding them back on the right after reversing.",
+              "createdAt": "2025-11-12T23:34:09Z",
+              "updatedAt": "2025-11-12T23:34:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7N_qlr",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-12T23:35:31Z",
+          "updatedAt": "2025-11-12T23:35:31Z",
+          "comments": [
+            {
+              "originalPosition": 41,
+              "body": "This is defined in equation 3.3.3 of the Rhizomes paper. We should probably drop a cite in a comment or doc string.",
+              "createdAt": "2025-11-12T23:35:31Z",
+              "updatedAt": "2025-11-12T23:35:31Z"
             }
           ]
         }
