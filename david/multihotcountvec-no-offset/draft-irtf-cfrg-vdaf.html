@@ -1053,11 +1053,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">VDAF</td>
-<td class="right">October 2025</td>
+<td class="right">November 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 2 May 2026</td>
+<td class="center">Expires 17 May 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-10-29" class="published">29 October 2025</time>
+<time datetime="2025-11-13" class="published">13 November 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-05-02">2 May 2026</time></dd>
+<dd class="expires"><time datetime="2026-05-17">17 May 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1139,7 +1139,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 2 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 17 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -6842,23 +6842,23 @@ range. Each measurement is an integer in the range <code>[0, max_measurement]</c
 where <code>max_measurement</code> defines the largest valid measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
 <p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a vector of field
 elements with value zero or one, such that a weighted sum of these values can only
-be in the range <code>[0, max_measurement]</code>.
-All but one of the weights are successive powers of two, as in
+be in the range <code>[0, max_measurement]</code>.<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-4">All but the last of the weights are successive powers of two, as in
 the binary bit decomposition, and the last weight is chosen such that the sum of
 all weights is equal to <code>max_measurement</code>. With these weights, valid
 measurements have either one or two possible representations as vectors of
 field elements with value zero or one, and invalid measurements cannot be
-represented.<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-4">The validity circuit checks that each entry of the bit vector has a value of
+represented.<a href="#section-7.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-5">The validity circuit checks that each entry of the bit vector has a value of
 zero or one. It uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
 <a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x**2 - x</code>, which is equal to <code>0</code>
 if and only if <code>x</code> is in the range <code>[0, 2)</code>. The complete circuit is specified
-below:<a href="#section-7.4.2-4" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-5">Note that decoding a sequence of "bits" into an integer is a linear operation,
+below:<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-6">Note that decoding a sequence of "bits" into an integer is a linear operation,
 specifically, a linear combination with the constant weights. Thus, decoding
 secret shares of a bit-encoded integer will produce secret shares of the
-original integer.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-7.4.2-6">
+original integer.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.2-7">
 <pre>
 class Sum(Valid[int, int, F]):
     GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
@@ -6871,7 +6871,8 @@ class Sum(Valid[int, int, F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
         self.GADGET_CALLS = [self.bits]
         self.MEAS_LEN = self.bits
         self.EVAL_OUTPUT_LEN = self.bits
@@ -6914,7 +6915,7 @@ class Sum(Valid[int, int, F]):
 
     def decode(self, output: list[F], _num_measurements: int) -&gt; int:
         return output[0].int()
-</pre><a href="#section-7.4.2-6" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.2-7" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -7017,7 +7018,8 @@ class SumVec(Valid[list[int], list[int], F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        self.last_weight = max_measurement - (2 ** (bits - 1) - 1)
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
@@ -7363,9 +7365,11 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
         # Precompute value for range check of claimed weight.
-        self.last_weight = max_weight - (
-            2 ** (self.bits_for_weight - 1) - 1
-        )
+        # Note that `last_weight` is the weight of the last digit in
+        # the range-checked form of the claimed weight of the
+        # measurement.
+        rest_all_ones_value = 2 ** (self.bits_for_weight - 1) - 1
+        self.last_weight = max_weight - rest_all_ones_value
 
         # Make sure `length` and `max_weight` don't overflow the
         # field modulus. Otherwise we may not correctly compute the
@@ -10414,8 +10418,8 @@ analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. Thank
 time to developing definitions and security proofs.<a href="#appendix-D-3" class="pilcrow">¶</a></p>
 <p id="appendix-D-4">Thanks to Julia Hesse who provided feedback on behalf of the Crypto Review
 Panel.<a href="#appendix-D-4" class="pilcrow">¶</a></p>
-<p id="appendix-D-5">Thanks to Ian Goldberg for the bit decomposition technique used in the Sum
-circuit.<a href="#appendix-D-5" class="pilcrow">¶</a></p>
+<p id="appendix-D-5">Thanks to Ian Goldberg for the bit decomposition technique used in the range
+proofs of the Prio3 variants.<a href="#appendix-D-5" class="pilcrow">¶</a></p>
 <p id="appendix-D-6">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
 Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
