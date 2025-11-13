@@ -39,6 +39,8 @@ class Prio3HigherDegree(Prio3):
     ID = 0xFFFFFFFF
     VERIFY_KEY_SIZE = xof.SEED_SIZE
 
+    test_vec_name = 'Prio3HigherDegree'
+
     def __init__(self, shares: int, degree: int, gadget_calls: int):
         flp = FlpBBCGGI19(HigherDegree(degree, gadget_calls))
         super().__init__(shares, flp, 1)
