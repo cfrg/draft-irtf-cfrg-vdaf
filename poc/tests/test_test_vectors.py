@@ -3,6 +3,7 @@ import os.path
 import unittest
 from typing import Generic, Optional, TypeVar, cast
 
+from tests.test_vdaf_prio3 import Prio3HigherDegree
 from vdaf_poc.field import Field64, NttField
 from vdaf_poc.test_utils import VdafTestVectorDict
 from vdaf_poc.vdaf import Vdaf
@@ -784,6 +785,21 @@ class TestPrio3MultihotCountVecTestVector(TestVdafTestVector[list[bool], list[in
 
     def test_2(self) -> None:
         self.run_test("Prio3MultihotCountVec_2.json")
+
+
+class TestPrio3HigherDegreeTestVector(TestVdafTestVector[list[int], list[int]]):
+    def run_test(self, filename: str) -> None:
+        test_vector = self.load_test_vector(filename)
+        vdaf = Prio3HigherDegree(
+            cast(dict, test_vector)["shares"],
+            cast(dict, test_vector)["degree"],
+            cast(dict, test_vector)["gadget_calls"],
+        )
+        self.check_test_vector(vdaf, test_vector)
+
+    def test_all(self) -> None:
+        for i in range(100):
+            self.run_test("Prio3HigherDegree_{}.json".format(i))
 
 
 class TestPoplar1TestVector(TestVdafTestVector[tuple[bool, ...], list[int]]):
