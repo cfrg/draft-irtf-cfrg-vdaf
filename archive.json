@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-13T01:04:57.816224+00:00",
+  "timestamp": "2025-11-16T01:08:52.845792+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -47778,7 +47778,7 @@
       ],
       "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nCloses #574 ",
       "createdAt": "2025-11-06T11:01:47Z",
-      "updatedAt": "2025-11-12T23:35:31Z",
+      "updatedAt": "2025-11-14T23:17:08Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
@@ -48018,8 +48018,88 @@
               "updatedAt": "2025-11-12T23:35:31Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7OqMGK",
+          "commit": {
+            "abbreviatedOid": "512b502"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-14T23:17:08Z",
+          "updatedAt": "2025-11-14T23:17:08Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "I did some further testing and experimentation of this in draft PR #589. One thing I discuss there is that the calculation of `step` will compensate for the extra basis extension in cases where `p` is larger than necessary. So, that explains why verification still works either way.",
+              "createdAt": "2025-11-14T23:17:08Z",
+              "updatedAt": "2025-11-14T23:17:08Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "number": 588,
+      "id": "PR_kwDOGKuqOc6zjL2k",
+      "title": "Try producing test vectors using gadgets of different degrees",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/588",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This is a first pass towards #586. I extended the `HigherDegree` circuit to make the gadget degree and number of gadget calls configurable, and produced a pretty exhaustive set of test vectors. I don't want to merge this as-is, since it's clearly overkill, but doing this exercise has increased my confidence in how we handle gadget polynomials, as I didn't find any bugs in the process.\r\n\r\nI think the already-present case of a gadget with degree three and one call already provides a decent baseline of test coverage. For the case of `next_power_of_2(g.DEGREE * p)` versus `next_power_of_2(g.DEGREE * (p - 1) + 1)`, picking a gadget degree of 3 and p=2 (which we get with one gadget call) results in different values for the two formulas, either 8 or 4. Perhaps we should just add the Prio3 instantiation and a single test vector file covering that?",
+      "createdAt": "2025-11-14T22:25:54Z",
+      "updatedAt": "2025-11-15T20:41:46Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/higher-degree-test-vectors",
+      "headRefOid": "9b32c9dfa0e8e323858bc83710661c77d1cf3d91",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "One thing can help implementors is that the reference code must define short functions to calculate quantities such as\r\n> proof_len(), gadget_poly_len(), wire_poly_len(), ...\r\n\r\nand use them consistently across all the code base.\r\n",
+          "createdAt": "2025-11-15T20:41:46Z",
+          "updatedAt": "2025-11-15T20:41:46Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 589,
+      "id": "PR_kwDOGKuqOc6zjc-_",
+      "title": "Experiment: Combine higher degree gadgets with gadget polynomials in the Lagrange basis",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/589",
+      "state": "CLOSED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This rebases #588 on top of #585, and tries out some other changes. The main outcome I found is that everything still works with a wide variety of gadget degrees and number of gadget calls.\r\n\r\nI also tried changing the calculation of `size` in the `QueryGadget` constructor as described in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585#discussion_r2500947483, and verification still worked. If the value of `size` is calculated to be larger than it needs to be, then it will be twice as large as necessary. Later in the constructor, we compute `step` to be the ratio of `size`, the gadget polynomial length, over `p`, the wire polynomial length. If `size` is double what it needs to be, then `step` would correspondingly be doubled. When we extend the gadget polynomial with `extend_dimension_double()`, all the elements of the input become the even-indexed elements of the output. Thus, `QueryGadget.eval()` produces the same values, because the stride of `self.poly[self.k * self.step]` correspondingly doubles, and the same values are returned whether `size` is higher than necessary or not. The later computation of g(r) during the query algorithm trivially produces the same value, since we are dealing with the same polynomial, just basis-extended further.\r\n\r\nI also noticed that verification slowed down significantly when processing gadgets with very high degrees. Most of the time was in `extend_dimension_one()`. This is not of a practical concern, because we only care about gadgets of degree two, in which case we'd only need to call `extend_dimension_one()` once. If, in the future, we want to make higher degree gadgets more performant, I think we could change some implementation choices without making any changes to the protocol. Note that we only extend the basis of the gadget polynomial until its length is the next power of two because our later computation of g(r) uses `poly_eval_batched()`. This requires the basis length to be a power of two. We could probably change either how we extend the basis or how we evaluate the polynomial to use algorithms that are more concretely efficient for such parameter choices. I recently learned about \"bidirectional FFT\" algorithms, which take as input a prefix of the evaluations of a polynomial and a suffix of the monomial coefficients. Future work may be able to apply such algorithms to do basis extension in one O(n log n) step. But again, we only care about degree two gadgets in practice, so our implementation is fine, and the protocol still allows for efficient implementations with any parameter choice.",
+      "createdAt": "2025-11-14T23:06:43Z",
+      "updatedAt": "2025-11-14T23:17:44Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/experiment-rhizomes-higher-degree-gadgets",
+      "headRefOid": "6d258f22a4f5addec0c77ac24041265b35e0d533",
+      "closedAt": "2025-11-14T23:17:44Z",
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
