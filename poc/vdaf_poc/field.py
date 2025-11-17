@@ -176,8 +176,8 @@ class NttField(Field):
     @classmethod
     def nth_root_powers(cls, n: int) -> list[Self]:
         """Returns the powers of the $n$-th root of unity."""
-        logN = assert_power_of_2(n)
-        root = cls.nth_root(logN)
+        log_n = assert_power_of_2(n)
+        root = cls.nth_root(log_n)
         return [root**i for i in range(n)]
 
     @classmethod
@@ -199,8 +199,10 @@ class NttField(Field):
         NTT Star: Given a polynomial P in monomial basis, returns
         $\\{ P(w_{2n} * {w_n}^i) : 0 \leq i < n \\}$
         where $w_n$ is the $n$-th root of unity.
+
+        See Eq. 3.3.3 of [Faz25](https://ia.cr/2025/1727).
         """
-        return cls._ntt_core(p, n, lambda l: cls.nth_root(l+1))
+        return cls._ntt_core(p, n, lambda x: cls.nth_root(x+1))
 
     @classmethod
     def inv_ntt(cls, p: list[Self], n: int) -> list[Self]:
@@ -222,10 +224,10 @@ class NttField(Field):
 
         See Alg. 4 of [Faz25](https://ia.cr/2025/1727).
         """
-        logN = assert_power_of_2(n)
+        log_n = assert_power_of_2(n)
         input += [cls(0)]*(n-len(input))
-        output = [input[bitrev(logN, i)] for i in range(n)]
-        for l in range(1, logN + 1):
+        output = [input[bitrev(log_n, i)] for i in range(n)]
+        for l in range(1, log_n + 1):
             w = init_w(l)
             y = 1 << (l - 1)
             r = cls.nth_root(l)
@@ -426,12 +428,12 @@ class Lagrange:
 
         See Strategy 2 (rhizome) of [Faz25](https://ia.cr/2025/1727).
         """
-        N = len(p)
-        assert_power_of_2(N)
+        n = len(p)
+        assert_power_of_2(n)
         assert len(p) == len(q)
-        p_2N = self.extend_dimension_double(p)
-        q_2N = self.extend_dimension_double(q)
-        return [pi*qi for pi, qi in zip(p_2N, q_2N)]
+        p_2n = self.extend_dimension_double(p)
+        q_2n = self.extend_dimension_double(q)
+        return [pi*qi for pi, qi in zip(p_2n, q_2n)]
 
     def poly_eval(self, nodes: list[F], values: list[F], x: F) -> F:
         """Evaluate a polynomial in the Lagrange basis at x."""
@@ -445,13 +447,13 @@ class Lagrange:
         See Alg. 7 of [Faz25](https://ia.cr/2025/1727).
         """
         field = cast(type[F], self.field)
-        N = len(nodes)
-        assert_power_of_2(N)
+        n = len(nodes)
+        assert_power_of_2(n)
         l = field(1)
         u = [p[0] for p in polynomials]
         d = nodes[0] - x
-        for i in range(1, N):
-            l = l * d
+        for i in range(1, n):
+            l *= d
             d = nodes[i] - x
             t = l * nodes[i]
             for j, (_, p) in enumerate(zip(u, polynomials)):
@@ -459,9 +461,9 @@ class Lagrange:
                 if i < len(p):
                     u[j] += t*p[i]
 
-        invN = field(N).inv()
-        sgn = field(-1)**(N-1)
-        return [sgn*invN*u_j for u_j in u]
+        sgn = field(-1)**(n-1)
+        inv_n = field(n).inv()
+        return [sgn*inv_n*u_j for u_j in u]
 
     def extend_dimension_one(self, nodes: list[F], values: list[F]) -> F:
         """
@@ -471,16 +473,16 @@ class Lagrange:
         """
         field = cast(type[F], self.field)
 
-        def term_W(m: int, i: int) -> F:
+        def term_w(m: int, i: int) -> F:
             return math.prod([
                 nodes[i]-nodes[j] for j in range(m+1) if i != j
             ], start=field(1)).inv()
 
         k = len(values)
         y = sum([
-            values[i]*term_W(k, i) for i in range(k)
+            values[i]*term_w(k, i) for i in range(k)
         ], start=field(0))
-        return -term_W(k, k).inv()*y
+        return -term_w(k, k).inv()*y
 
     def extend_dimension_double(self, p: list[F]) -> list[F]:
         """

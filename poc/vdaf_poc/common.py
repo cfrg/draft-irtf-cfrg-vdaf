@@ -26,9 +26,9 @@ F = TypeVar("F", bound=FieldProtocol)
 
 def assert_power_of_2(n: int) -> int:
     """Assert if n is a positive power of two. If so, returns log2(n)."""
-    logN = math.ceil(math.log2(n))
-    assert 0 < n and n == 1 << logN, "n must be a power of 2."
-    return logN
+    log_n = math.ceil(math.log2(n))
+    assert 0 < n and n == 1 << log_n, "n must be a power of 2."
+    return log_n
 
 
 def next_power_of_2(n: int) -> int:

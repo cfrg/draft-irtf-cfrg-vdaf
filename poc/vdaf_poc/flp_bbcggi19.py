@@ -285,7 +285,7 @@ class QueryGadget(Gadget[F]):
             next_value = lag.extend_dimension_one(nodes, gadget_poly)
             gadget_poly += [next_value]
         # Calculate 'size' evaluations of gadget_poly at the roots of unity.
-        size = next_power_of_2(g.DEGREE*p)
+        size = next_power_of_2(g.DEGREE * (p - 1) + 1)
         while len(gadget_poly) < size:
             gadget_poly = lag.extend_dimension_double(gadget_poly)
         self.poly = gadget_poly
