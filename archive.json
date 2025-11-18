@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-16T01:08:52.845792+00:00",
+  "timestamp": "2025-11-18T01:03:49.711530+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -47778,13 +47778,13 @@
       ],
       "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nCloses #574 ",
       "createdAt": "2025-11-06T11:01:47Z",
-      "updatedAt": "2025-11-14T23:17:08Z",
+      "updatedAt": "2025-11-17T21:29:54Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "prioPolyLagrange_v0",
-      "headRefOid": "11d3fb7772ebde6783860bdf13f28deeb2eb9bfd",
+      "headRefOid": "386eb9b7aa55b4c81e45f657d06e6e0538f5f9b4",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -48038,6 +48038,206 @@
               "updatedAt": "2025-11-14T23:17:08Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PF_D1",
+          "commit": {
+            "abbreviatedOid": "512b502"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T20:29:38Z",
+          "updatedAt": "2025-11-17T20:29:38Z",
+          "comments": [
+            {
+              "originalPosition": 36,
+              "body": "The calculation is correct. As also noted in the [the paper](https://eprint.iacr.org/2019/188.pdf) the degree is at most `M*deg(G)`, where `M=p-1`. So the length of the coordinates vector is `g.degree*(p-1) + 1`.\r\n\r\n<img width=\"987\" height=\"357\" alt=\"image\" src=\"https://github.com/user-attachments/assets/0bb1dbc3-0e73-492f-bad2-f2b5e3e757bb\" />\r\n",
+              "createdAt": "2025-11-17T20:29:38Z",
+              "updatedAt": "2025-11-17T20:29:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpCL",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:28:49Z",
+          "updatedAt": "2025-11-17T21:28:50Z",
+          "comments": [
+            {
+              "originalPosition": 31,
+              "body": "done",
+              "createdAt": "2025-11-17T21:28:49Z",
+              "updatedAt": "2025-11-17T21:28:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpGW",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:28:56Z",
+          "updatedAt": "2025-11-17T21:28:56Z",
+          "comments": [
+            {
+              "originalPosition": 44,
+              "body": "done ",
+              "createdAt": "2025-11-17T21:28:56Z",
+              "updatedAt": "2025-11-17T21:28:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpJ7",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:29:01Z",
+          "updatedAt": "2025-11-17T21:29:01Z",
+          "comments": [
+            {
+              "originalPosition": 41,
+              "body": "done ",
+              "createdAt": "2025-11-17T21:29:01Z",
+              "updatedAt": "2025-11-17T21:29:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpNf",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:29:06Z",
+          "updatedAt": "2025-11-17T21:29:06Z",
+          "comments": [
+            {
+              "originalPosition": 35,
+              "body": "done",
+              "createdAt": "2025-11-17T21:29:06Z",
+              "updatedAt": "2025-11-17T21:29:07Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpSR",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:29:12Z",
+          "updatedAt": "2025-11-17T21:29:12Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "either way works. Here reversing first, then padding. ",
+              "createdAt": "2025-11-17T21:29:12Z",
+              "updatedAt": "2025-11-17T21:29:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpV4",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:29:17Z",
+          "updatedAt": "2025-11-17T21:29:18Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "done",
+              "createdAt": "2025-11-17T21:29:18Z",
+              "updatedAt": "2025-11-17T21:29:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpZ6",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:29:23Z",
+          "updatedAt": "2025-11-17T21:29:24Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "it declares that `vdaf_poc` is a module.\r\nSimilar to `go.mod` in Go.",
+              "createdAt": "2025-11-17T21:29:23Z",
+              "updatedAt": "2025-11-17T21:29:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpe7",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:29:30Z",
+          "updatedAt": "2025-11-17T21:29:30Z",
+          "comments": [
+            {
+              "originalPosition": 22,
+              "body": "done",
+              "createdAt": "2025-11-17T21:29:30Z",
+              "updatedAt": "2025-11-17T21:29:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PGpiL",
+          "commit": {
+            "abbreviatedOid": "11d3fb7"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-17T21:29:34Z",
+          "updatedAt": "2025-11-17T21:29:35Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "done",
+              "createdAt": "2025-11-17T21:29:35Z",
+              "updatedAt": "2025-11-17T21:29:35Z"
+            }
+          ]
         }
       ]
     },
@@ -48087,7 +48287,7 @@
       "labels": [],
       "body": "This rebases #588 on top of #585, and tries out some other changes. The main outcome I found is that everything still works with a wide variety of gadget degrees and number of gadget calls.\r\n\r\nI also tried changing the calculation of `size` in the `QueryGadget` constructor as described in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585#discussion_r2500947483, and verification still worked. If the value of `size` is calculated to be larger than it needs to be, then it will be twice as large as necessary. Later in the constructor, we compute `step` to be the ratio of `size`, the gadget polynomial length, over `p`, the wire polynomial length. If `size` is double what it needs to be, then `step` would correspondingly be doubled. When we extend the gadget polynomial with `extend_dimension_double()`, all the elements of the input become the even-indexed elements of the output. Thus, `QueryGadget.eval()` produces the same values, because the stride of `self.poly[self.k * self.step]` correspondingly doubles, and the same values are returned whether `size` is higher than necessary or not. The later computation of g(r) during the query algorithm trivially produces the same value, since we are dealing with the same polynomial, just basis-extended further.\r\n\r\nI also noticed that verification slowed down significantly when processing gadgets with very high degrees. Most of the time was in `extend_dimension_one()`. This is not of a practical concern, because we only care about gadgets of degree two, in which case we'd only need to call `extend_dimension_one()` once. If, in the future, we want to make higher degree gadgets more performant, I think we could change some implementation choices without making any changes to the protocol. Note that we only extend the basis of the gadget polynomial until its length is the next power of two because our later computation of g(r) uses `poly_eval_batched()`. This requires the basis length to be a power of two. We could probably change either how we extend the basis or how we evaluate the polynomial to use algorithms that are more concretely efficient for such parameter choices. I recently learned about \"bidirectional FFT\" algorithms, which take as input a prefix of the evaluations of a polynomial and a suffix of the monomial coefficients. Future work may be able to apply such algorithms to do basis extension in one O(n log n) step. But again, we only care about degree two gadgets in practice, so our implementation is fine, and the protocol still allows for efficient implementations with any parameter choice.",
       "createdAt": "2025-11-14T23:06:43Z",
-      "updatedAt": "2025-11-14T23:17:44Z",
+      "updatedAt": "2025-11-17T21:55:09Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
@@ -48098,7 +48298,22 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Great analysis! \r\n\r\n> I also noticed that verification slowed down significantly when processing gadgets with very high degrees. Most of the time was in extend_dimension_one(). This is not of a practical concern, because we only care about gadgets of degree two, in which case we'd only need to call extend_dimension_one() once. \r\n\r\nThe `extend_dimension_by_one` method can be greatly improved by working with fractions, so it avoids to perform the multiple field inversions, and compute only one inversion at the end.\r\nAnother to way implement this method is:\r\nGiven $(y_0, ..y_k)$, the $y_{k+1}$ value can be found as $y_{k+1} = P({w_N}^{k+1})$ using the Polya evaluation algorithm.\r\n\r\nMind sharing the reference to the bidirectional FFT.\r\n",
+          "createdAt": "2025-11-17T21:48:36Z",
+          "updatedAt": "2025-11-17T21:48:36Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "This came from https://eprint.iacr.org/2024/2010, drawing on a line of work on \"truncated FFT\". In that setting it's applied to an additive FFT, so it would take some additional work to apply it to fields of characteristic greater than two.",
+          "createdAt": "2025-11-17T21:55:09Z",
+          "updatedAt": "2025-11-17T21:55:09Z"
+        }
+      ],
       "reviews": []
     }
   ]
