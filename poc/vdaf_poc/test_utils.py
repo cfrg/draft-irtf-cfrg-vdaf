@@ -487,16 +487,14 @@ class TestFlpBBCGGI19(unittest.TestCase):
         meas_poly = []
         meas = []
         eval_at = field.rand_vec(1)[0]
-        nodes = field.nth_root_powers(test_length)
         lag = Lagrange(field)
         for _ in range(g.ARITY):
             meas_poly.append(field.rand_vec(test_length))
-            meas.append(lag.poly_eval(nodes, meas_poly[-1], eval_at))
+            meas.append(lag.poly_eval(meas_poly[-1], eval_at))
         out_poly = g.eval_poly(field, meas_poly)
 
         want = g.eval(field, meas)
-        nodes = field.nth_root_powers(len(out_poly))
-        got = lag.poly_eval(nodes, out_poly, eval_at)
+        got = lag.poly_eval(out_poly, eval_at)
         self.assertEqual(got, want)
 
     def run_flp_test(self,

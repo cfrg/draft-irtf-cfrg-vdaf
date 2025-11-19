@@ -52,17 +52,17 @@ class TestFields(unittest.TestCase):
         for log_n in range(8):
             self.run_nth_roots_test(cls, log_n)
             self.run_ntt_test(cls, log_n)
-            self.run_ntt_star_test(cls, log_n)
+            self.run_ntt_set_s_test(cls, log_n)
 
     def run_nth_roots_test(self, cls: type[NttField], log_n: int) -> None:
-        ONE = cls(1)
+        one = cls(1)
         # Tests the first root of unity is one.
-        self.assertEqual(cls.nth_root(0), ONE)
+        self.assertEqual(cls.nth_root(0), one)
         # Tests that the n-th root of unity has the right order.
-        self.assertEqual(cls.nth_root(log_n)**(1 << log_n), ONE)
+        self.assertEqual(cls.nth_root(log_n)**(1 << log_n), one)
         # Tests that the n-th root of unity is not of a lower order.
         for log_k in range(log_n):
-            self.assertNotEqual(cls.nth_root(log_n)**(1 << log_k), ONE)
+            self.assertNotEqual(cls.nth_root(log_n)**(1 << log_k), one)
 
     def run_ntt_test(self, cls: type[NttField], log_n: int) -> None:
         # Tests that NTT(P) is the same as evaluating the polynomial P
@@ -75,9 +75,9 @@ class TestFields(unittest.TestCase):
         want = [poly_eval(cls, p_mon, root**i) for i in range(n)]
         self.assertEqual(got, want, f"log_n: {log_n} p_mon: {p_mon}")
 
-    def run_ntt_star_test(self, cls: type[NttField], log_n: int) -> None:
-        # Tests that NTT*(P) is the same as evaluating the polynomial P
-        # on the powers of an n-th root of unity times an 2n-th root of
+    def run_ntt_set_s_test(self, cls: type[NttField], log_n: int) -> None:
+        # Tests that NTT(set_s=True) is the same as evaluating P on
+        # the powers of an n-th root of unity times a 2n-th root of
         # unity.
         n = 1 << log_n
         p_mon = cls.rand_vec(n)  # a random polynomial in the monomial basis.
@@ -86,7 +86,7 @@ class TestFields(unittest.TestCase):
         want = [
             poly_eval(cls, p_mon, root_2n*(root_n**i)) for i in range(n)
         ]
-        got = cls.ntt_star(p_mon, n)
+        got = cls.ntt(p_mon, n, True)
         self.assertEqual(got, want, f"log_n: {log_n} p_mon: {p_mon}")
 
     def test_field64(self) -> None:
@@ -120,23 +120,23 @@ class TestPolynomials(unittest.TestCase):
     def test_poly_eval_lagrange(self) -> None:
         # Checks that (batched) polynomial evaluation agrees both
         # on the monomial and the Lagrange basis.
-        N = 16
+        n = 16
         p_mon_batch = []
         p_lag_batch = []
         for _ in range(4):
-            p_mon = self.field.rand_vec(N)
-            p_lag = self.field.ntt(p_mon, N)
+            p_mon = self.field.rand_vec(n)
+            p_lag = self.field.ntt(p_mon, n)
             p_mon_batch.append(p_mon)
             p_lag_batch.append(p_lag)
 
         # Evaluating polynomials at the nodes and at random values.
         lag = Lagrange(self.field)
-        nodes = self.field.nth_root_powers(N)
+        nodes = self.field.nth_root_powers(n)
         random_values = self.field.rand_vec(100)
         for points in [nodes, random_values]:
             for x in points:
                 a = [poly_eval(self.field, p, x) for p in p_mon_batch]
-                b = lag.poly_eval_batched(nodes, p_lag_batch, x)
+                b = lag.poly_eval_batched(p_lag_batch, x)
                 self.assertEqual(a, b, f"x: {x}")
 
     def test_poly_change_basis(self) -> None:

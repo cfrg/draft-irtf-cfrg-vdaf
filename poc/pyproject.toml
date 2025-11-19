@@ -17,7 +17,6 @@ dev = [
     "poethepoet==0.37.0",
     "pyflakes==3.4.0",
     "pylint==4.0.2",
-    "pdoc==16.0.0",
 ]
 
 [build-system]
@@ -30,7 +29,6 @@ tests = "python -m unittest -v"
 lint = ["pyflakes", "pylint", "mypy"]
 check = ["autopep8_check", "isort_check"]
 format = ["autopep8_format", "isort_format"]
-docs = "pdoc -o html --math vdaf_poc"
 
 autopep8_format = "autopep8 --in-place *.py vdaf_poc/*.py tests/*.py"
 isort_format = "isort ."

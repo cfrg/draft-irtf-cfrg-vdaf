@@ -1,11 +1,14 @@
 """Definitions of finite fields used in this spec."""
 
+
+from __future__ import annotations
+
 import math
 import random
-from typing import Callable, Self, TypeVar, cast
+from typing import Self, TypeVar, cast
 
 from vdaf_poc.common import (assert_power_of_2, bitrev, from_le_bytes, front,
-                             to_le_bytes)
+                             next_power_of_2, to_le_bytes)
 
 
 class Field:
@@ -170,76 +173,56 @@ class NttField(Field):
 
     @classmethod
     def nth_root(cls, n: int) -> Self:
-        """Returns the $2^n$-th root of unity."""
+        """Returns an 2^n-th root of unity."""
         return cls.gen() ** (cls.GEN_ORDER >> n)
 
     @classmethod
     def nth_root_powers(cls, n: int) -> list[Self]:
-        """Returns the powers of the $n$-th root of unity."""
+        """Returns the first n powers of an n-th root of unity."""
         log_n = assert_power_of_2(n)
         root = cls.nth_root(log_n)
         return [root**i for i in range(n)]
 
     @classmethod
-    def ntt(cls, p: list[Self], n: int) -> list[Self]:
-        r"""
-        Number Theoretic Transform (NTT) over a field.
-
-        Given a polynomial P in monomial basis, returns
-        $\\{ P({w_n}^i) : 0 \\leq i < n \\}$
-        where $w_n$ is the $n$-th root of unity.
-        NTT is used to convert a polynomial in the monomial basis
-        to the Lagrange basis.
-        """
-        return cls._ntt_core(p, n, lambda _: cls(1))
-
-    @classmethod
-    def ntt_star(cls, p: list[Self], n: int) -> list[Self]:
-        r"""
-        NTT Star: Given a polynomial P in monomial basis, returns
-        $\\{ P(w_{2n} * {w_n}^i) : 0 \leq i < n \\}$
-        where $w_n$ is the $n$-th root of unity.
-
-        See Eq. 3.3.3 of [Faz25](https://ia.cr/2025/1727).
-        """
-        return cls._ntt_core(p, n, lambda x: cls.nth_root(x+1))
-
-    @classmethod
     def inv_ntt(cls, p: list[Self], n: int) -> list[Self]:
         """
-        Inverse NTT. It is used to convert a polynomial in the
-        Lagrange basis to the monomial basis.
+        Inverse NTT converts a polynomial P in the Lagrange basis to the
+        monomial basis.
         """
         out = cls.ntt(p, n)
-        out = [out[0]] + out[1:][::-1]
+        out.append(out.pop(0))
+        out.reverse()
         inv_n = cls(n).inv()
-        return [x*inv_n for x in out]
+        for i in range(len(out)):
+            out[i] *= inv_n
+        return out
 
     @classmethod
-    def _ntt_core(
-        cls, input: list[Self], n: int, init_w: Callable[[int], Self]
-    ) -> list[Self]:
+    def ntt(cls, p: list[Self], n: int, set_s: bool = False) -> list[Self]:
         """
-        Implementation of the Number Theoretic Transform (NTT)
+        Number Theoretic Transform (NTT) over a prime field. It converts
+        a polynomial P from the monomial basis to the Lagrange basis.
 
-        See Alg. 4 of [Faz25](https://ia.cr/2025/1727).
+        Returns `[ P(s*w^i) for i in range(n) ]`, where w is an n-th root
+        of unity. When set_s is True, s is a 2n-th root of unity,
+        otherwise s=1. See Alg. 4 of [Faz25](https://ia.cr/2025/1727).
         """
         log_n = assert_power_of_2(n)
-        input += [cls(0)]*(n-len(input))
-        output = [input[bitrev(log_n, i)] for i in range(n)]
-        for l in range(1, log_n + 1):
-            w = init_w(l)
-            y = 1 << (l - 1)
-            r = cls.nth_root(l)
-            for i in range(0, y):
-                for j in range(n >> l):
-                    x = (j << l) + i
-                    u = output[x]
-                    v = w * output[x + y]
-                    output[x] = u + v
-                    output[x + y] = u - v
-                w = w * r
-        return output
+        p += [cls(0)] * (n-len(p))
+        q = [p[bitrev(log_n, i)] for i in range(n)]
+        for k in range(1, log_n + 1):
+            w = cls.nth_root(k+1) if set_s else cls(1)
+            y = 1 << (k - 1)
+            r = cls.nth_root(k)
+            for i in range(y):
+                for j in range(n >> k):
+                    x = (j << k) + i
+                    u = q[x]
+                    v = w * q[x + y]
+                    q[x] = u + v
+                    q[x + y] = u - v
+                w *= r
+        return q
 
 
 class Field64(NttField):
@@ -431,67 +414,88 @@ class Lagrange:
         n = len(p)
         assert_power_of_2(n)
         assert len(p) == len(q)
-        p_2n = self.extend_dimension_double(p)
-        q_2n = self.extend_dimension_double(q)
+        p_2n = self.double_evaluations(p)
+        q_2n = self.double_evaluations(q)
         return [pi*qi for pi, qi in zip(p_2n, q_2n)]
 
-    def poly_eval(self, nodes: list[F], values: list[F], x: F) -> F:
-        """Evaluate a polynomial in the Lagrange basis at x."""
-        return self.poly_eval_batched(nodes, [values], x).pop()
+    def poly_eval(self, p: list[F], x: F) -> F:
+        """Evaluate a polynomial P in the Lagrange basis at x."""
+        return self.poly_eval_batched([p], x).pop()
 
-    def poly_eval_batched(
-            self, nodes: list[F], polynomials: list[list[F]], x: F,
-    ) -> list[F]:
-        """Evaluate polynomials in the Lagrange basis at x.
+    def poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]:
+        """Evaluate a list of polynomials in the Lagrange basis at x.
 
         See Alg. 7 of [Faz25](https://ia.cr/2025/1727).
         """
-        field = cast(type[F], self.field)
-        n = len(nodes)
+        assert len(set(len(p) for p in polys)) == 1
+        n = len(polys[0])
         assert_power_of_2(n)
-        l = field(1)
-        u = [p[0] for p in polynomials]
+
+        nodes = cast(list[F], self.field.nth_root_powers(n))
+        field = cast(type[F], self.field)
+        k = field(1)
+        u = [p[0] for p in polys]
         d = nodes[0] - x
         for i in range(1, n):
-            l *= d
+            k *= d
             d = nodes[i] - x
-            t = l * nodes[i]
-            for j, (_, p) in enumerate(zip(u, polynomials)):
+            t = k * nodes[i]
+            for j, p in enumerate(polys):
                 u[j] *= d
                 if i < len(p):
-                    u[j] += t*p[i]
+                    u[j] += t * p[i]
 
-        sgn = field(-1)**(n-1)
-        inv_n = field(n).inv()
-        return [sgn*inv_n*u_j for u_j in u]
+        factor = field(-1)**(n-1) * field(n).inv()
+        for i in range(len(u)):
+            u[i] *= factor
+        return u
 
-    def extend_dimension_one(self, nodes: list[F], values: list[F]) -> F:
+    def extend_values_to_power_of_2(self, p: list[F]) -> None:
         """
-        Extends the dimension of a polynomial in the Lagrange basis from k to k+1.
+        Appends evaluations to the polynomial P (in-place) until the
+        number of evaluations N is the smallest power of two greater
+        than or equal to the initial length.
 
         See Eq. (3.2.1) of [Faz25](https://ia.cr/2025/1727).
         """
+        n = next_power_of_2(len(p))
+        assert len(p) <= n
         field = cast(type[F], self.field)
+        x = cast(list[F], self.field.nth_root_powers(n))
 
-        def term_w(m: int, i: int) -> F:
-            return math.prod([
-                nodes[i]-nodes[j] for j in range(m+1) if i != j
-            ], start=field(1)).inv()
+        def w_inv(m: int, i: int) -> F:
+            return math.prod(
+                (x[i]-x[j] for j in range(m+1) if i != j),
+                start=field(1))
 
-        k = len(values)
-        y = sum([
-            values[i]*term_w(k, i) for i in range(k)
-        ], start=field(0))
-        return -term_w(k, k).inv()*y
+        for k in range(len(p), n):
+            y = sum(
+                (Fraction(v, w_inv(k, i)) for i, v in enumerate(p)),
+                Fraction(field(0), field(1)))
+            p.append(-w_inv(k, k) * y.num * y.den.inv())
 
-    def extend_dimension_double(self, p: list[F]) -> list[F]:
+    def double_evaluations(self, p: list[F]) -> list[F]:
         """
-        Extends the dimension of a polynomial in the Lagrange basis from n to 2n.
+        Returns 2N evaluations of a polynomial from N Lagrange-basis
+        evaluations, such that N=len(p) is a power of 2.
 
         See Eq. (3.3.4) of [Faz25](https://ia.cr/2025/1727).
         """
         n = len(p)
         assert_power_of_2(n)
-        p_even = cast(list[NttField], p)
-        p_odd = self.field.ntt_star(self.field.inv_ntt(p_even, n), n)
-        return [cast(F, x) for pair in zip(p_even, p_odd) for x in pair]
+        even = cast(list[NttField], p)
+        odd = self.field.ntt(self.field.inv_ntt(even, n), n, True)
+        return [cast(F, i) for pair in zip(even, odd) for i in pair]
+
+
+class Fraction[F: Field]:
+    def __init__(self, num: F, den: F) -> None:
+        self.num = num
+        self.den = den
+
+    def __add__(self, other: Self) -> Fraction[F]:
+        return Fraction(self.num*other.den + self.den*other.num,
+                        self.den*other.den)
+
+    def __mul__(self, other: Self) -> Fraction[F]:
+        return Fraction(self.num*other.num, self.den*other.den)

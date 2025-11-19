@@ -273,24 +273,17 @@ class QueryGadget(Gadget[F]):
             wire[0] = s  # set the wire seed
             self.wires.append(wire)
 
-        # Recover gadget_poly sent in the Lagrange basis.
-        l = len(gadget_poly)
-        n = next_power_of_2(l)
-        assert l <= n
+        # Recover all the values of the gadget_poly.
         lag = Lagrange(field)
-        nodes = field.nth_root_powers(n)
-        for _ in range(l, n):
-            # Extending the dimension (one by one) to the closest power of two.
-            # This keeps the degree of polynomial unchanged.
-            next_value = lag.extend_dimension_one(nodes, gadget_poly)
-            gadget_poly += [next_value]
-        # Calculate 'size' evaluations of gadget_poly at the roots of unity.
+        lag.extend_values_to_power_of_2(gadget_poly)
+
+        # Calculate 'size' evaluations of the gadget_poly.
         size = next_power_of_2(g.DEGREE * (p - 1) + 1)
         while len(gadget_poly) < size:
-            gadget_poly = lag.extend_dimension_double(gadget_poly)
+            gadget_poly = lag.double_evaluations(gadget_poly)
         self.poly = gadget_poly
 
-        # Calculate the step.
+        # Get the step size used to index the gadget evaluations.
         log_size = assert_power_of_2(size)
         log_p = assert_power_of_2(p)
         self.step = 1 << (log_size-log_p)
@@ -450,13 +443,10 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
             # To test the gadget, we re-compute the wire polynomials and
             # check for consistency with the gadget polynomial provided
-            # by the prover. To start, evaluate the gadget polynomial and
-            # each of the wire polynomials at the random point `t`.
-            nodes = self.field.nth_root_powers(p)
-            wire_checks = lag.poly_eval_batched(nodes, g.wires[:g.ARITY], t)
-
-            nodes = self.field.nth_root_powers(len(g.poly))
-            gadget_check = lag.poly_eval(nodes, g.poly, t)
+            # by the prover. To start, evaluate the gadget polynomial
+            # and each of the wire polynomials at the random point `t`.
+            wire_checks = lag.poly_eval_batched(g.wires[:g.ARITY], t)
+            gadget_check = lag.poly_eval(g.poly, t)
 
             verifier += wire_checks
             verifier.append(gadget_check)
@@ -550,16 +540,16 @@ class PolyEval(Gadget[F]):
                   field: type[F],
                   inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
-        l = len(inp_poly[0])
-        assert_power_of_2(l)
+        inp_poly_len = len(inp_poly[0])
+        assert_power_of_2(inp_poly_len)
 
-        # Convert the input polynomial I from Lagrange to monomial.
-        I_mon_l = field.inv_ntt(inp_poly[0], l)
+        # Convert the input polynomial from Lagrange to monomial basis.
+        inp_mon = field.inv_ntt(inp_poly[0], inp_poly_len)
         # Obtain n evaluations of the input polynomial I.
-        I_lag_n = field.ntt(I_mon_l, self.n)
+        inp_lag = field.ntt(inp_mon, self.n)
         # Returns the polynomial composition (P*I)
-        P_mon = [field(coeff) for coeff in self.p]
-        return [poly_eval(field, P_mon, x) for x in I_lag_n]
+        p_mon = [field(coeff) for coeff in self.p]
+        return [poly_eval(field, p_mon, x) for x in inp_lag]
 
 
 # NOTE: This class is excerpted in the document. Its width should be
