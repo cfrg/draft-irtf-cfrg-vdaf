@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-18T01:03:49.711530+00:00",
+  "timestamp": "2025-11-20T01:02:51.910735+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -47778,13 +47778,13 @@
       ],
       "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nCloses #574 ",
       "createdAt": "2025-11-06T11:01:47Z",
-      "updatedAt": "2025-11-17T21:29:54Z",
+      "updatedAt": "2025-11-19T04:03:08Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "prioPolyLagrange_v0",
-      "headRefOid": "386eb9b7aa55b4c81e45f657d06e6e0538f5f9b4",
+      "headRefOid": "c350f9f885f3eff252aafa59e0c60b3ecab223e9",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -48236,6 +48236,182 @@
               "body": "done",
               "createdAt": "2025-11-17T21:29:35Z",
               "updatedAt": "2025-11-17T21:29:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7PJWww",
+          "commit": {
+            "abbreviatedOid": "386eb9b"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Looking good. I'm still looking for some intuition of what `ntt_star` is doing. Plus, we should think of a name for this that reflects its role in the FLP.",
+          "createdAt": "2025-11-18T03:35:47Z",
+          "updatedAt": "2025-11-18T03:51:32Z",
+          "comments": [
+            {
+              "originalPosition": 44,
+              "body": "Thanks for the explanation. Let's try to find a more meaningful name for this algorithm than `ntt_star`. How would you explain the purpose of this function?",
+              "createdAt": "2025-11-18T03:35:48Z",
+              "updatedAt": "2025-11-18T03:51:32Z"
+            },
+            {
+              "originalPosition": 46,
+              "body": "We're going to end up copy-pasting this into the draft. Let's try to make this readable without the latex formatting.",
+              "createdAt": "2025-11-18T03:44:26Z",
+              "updatedAt": "2025-11-18T03:51:32Z"
+            },
+            {
+              "originalPosition": 200,
+              "body": "Define \"nodes\"",
+              "createdAt": "2025-11-18T03:45:57Z",
+              "updatedAt": "2025-11-18T03:51:32Z"
+            },
+            {
+              "originalPosition": 223,
+              "body": "Define \"dimension\"",
+              "createdAt": "2025-11-18T03:46:13Z",
+              "updatedAt": "2025-11-18T03:51:32Z"
+            },
+            {
+              "originalPosition": 41,
+              "body": "What do you mean by \"step\"",
+              "createdAt": "2025-11-18T03:47:51Z",
+              "updatedAt": "2025-11-18T03:51:32Z"
+            },
+            {
+              "originalPosition": 190,
+              "body": "Python convention: Don't mix capital with lower case in variable names",
+              "createdAt": "2025-11-18T03:49:15Z",
+              "updatedAt": "2025-11-18T03:51:32Z"
+            },
+            {
+              "originalPosition": 13,
+              "body": "Is this for rendering latex? Since it's not an option for the draft, I don't think we should add it to the reference implementation. Let's remove this dependency.",
+              "createdAt": "2025-11-18T03:50:17Z",
+              "updatedAt": "2025-11-18T03:51:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Pd2ia",
+          "commit": {
+            "abbreviatedOid": "386eb9b"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-19T03:57:25Z",
+          "updatedAt": "2025-11-19T03:57:25Z",
+          "comments": [
+            {
+              "originalPosition": 44,
+              "body": "removed the function as no need to be explicitly named.",
+              "createdAt": "2025-11-19T03:57:25Z",
+              "updatedAt": "2025-11-19T03:57:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Pd2kK",
+          "commit": {
+            "abbreviatedOid": "386eb9b"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-19T03:57:30Z",
+          "updatedAt": "2025-11-19T03:57:30Z",
+          "comments": [
+            {
+              "originalPosition": 46,
+              "body": "removed latex.",
+              "createdAt": "2025-11-19T03:57:30Z",
+              "updatedAt": "2025-11-19T03:57:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Pd2li",
+          "commit": {
+            "abbreviatedOid": "386eb9b"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-19T03:57:34Z",
+          "updatedAt": "2025-11-19T03:57:35Z",
+          "comments": [
+            {
+              "originalPosition": 200,
+              "body": "refactored.",
+              "createdAt": "2025-11-19T03:57:35Z",
+              "updatedAt": "2025-11-19T03:57:35Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Pd2ms",
+          "commit": {
+            "abbreviatedOid": "386eb9b"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-19T03:57:38Z",
+          "updatedAt": "2025-11-19T03:57:39Z",
+          "comments": [
+            {
+              "originalPosition": 223,
+              "body": "refactored.",
+              "createdAt": "2025-11-19T03:57:39Z",
+              "updatedAt": "2025-11-19T03:57:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Pd2pF",
+          "commit": {
+            "abbreviatedOid": "386eb9b"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-19T03:57:46Z",
+          "updatedAt": "2025-11-19T03:57:46Z",
+          "comments": [
+            {
+              "originalPosition": 190,
+              "body": "fixed.",
+              "createdAt": "2025-11-19T03:57:46Z",
+              "updatedAt": "2025-11-19T03:57:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Pd2tW",
+          "commit": {
+            "abbreviatedOid": "386eb9b"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-11-19T03:57:55Z",
+          "updatedAt": "2025-11-19T03:57:55Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "dropped not needed.",
+              "createdAt": "2025-11-19T03:57:55Z",
+              "updatedAt": "2025-11-19T03:57:55Z"
             }
           ]
         }
