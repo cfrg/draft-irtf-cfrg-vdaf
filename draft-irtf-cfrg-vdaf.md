@@ -3697,8 +3697,8 @@ def proof_len(self) -> int:
     """Length of the proof."""
     length = 0
     for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
-        p = next_power_of_2(1 + g_calls)
-        length += g.ARITY + g.DEGREE * (p - 1) + 1
+        p = wire_poly_len(g_calls)
+        length += g.ARITY + gadget_poly_len(g.DEGREE, p)
     return length
 
 def verifier_len(self) -> int:
@@ -3707,6 +3707,20 @@ def verifier_len(self) -> int:
     for g in self.GADGETS:
         length += g.ARITY + 1
     return length
+
+def wire_poly_len(gadget_calls: int) -> int:
+    """
+    Calculates the number of coordinates in each wire polynomial for
+    a gadget.
+    """
+    return next_power_of_2(1 + gadget_calls)
+
+def gadget_poly_len(gadget_degree: int,
+                    wire_polynomial_len: int) -> int:
+    """
+    Calculates the number of coordinates in a gadget polynomial.
+    """
+    return gadget_degree * (wire_polynomial_len - 1) + 1
 ~~~
 
 ### Generating the Proof {#flp-bbcggi19-construction-prove}
@@ -6281,7 +6295,10 @@ class ParallelSum(Gadget[F]):
     def eval_poly(self,
                   field: type[F],
                   inp_poly: list[list[F]]) -> list[F]:
-        output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
+        output_poly_length = next_power_of_2(gadget_poly_len(
+            self.DEGREE,
+            len(inp_poly[0]),
+        ))
         out_sum = [field(0) for _ in range(output_poly_length)]
         for i in range(self.count):
             start_index = i * self.subcircuit.ARITY
@@ -6312,7 +6329,7 @@ class ProveGadget(Gadget[F]):
                  wire_seeds: list[F],
                  g: Gadget[F],
                  g_calls: int):
-        p = next_power_of_2(1 + g_calls)
+        p = wire_poly_len(g_calls)
         self.inner = g
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
@@ -6367,7 +6384,7 @@ class QueryGadget(Gadget[F]):
             gadget_poly: list[F],
             g: Gadget[F],
             g_calls: int):
-        p = next_power_of_2(1 + g_calls)
+        p = wire_poly_len(g_calls)
         self.alpha = field.gen() ** (field.GEN_ORDER // p)
         self.poly = gadget_poly
         self.ARITY = g.ARITY
@@ -6391,10 +6408,10 @@ class QueryGadget(Gadget[F]):
              proof: list[F]) -> Valid[Measurement, AggResult, F]:
         wrapped_gadgets: list[Gadget[F]] = []
         for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
-            p = next_power_of_2(1 + g_calls)
-            gadget_poly_len = g.DEGREE * (p - 1) + 1
+            p = wire_poly_len(g_calls)
+            g_poly_len = gadget_poly_len(g.DEGREE, p)
             (wire_seeds, proof) = front(g.ARITY, proof)
-            (gadget_poly, proof) = front(gadget_poly_len, proof)
+            (gadget_poly, proof) = front(g_poly_len, proof)
             wrapped = cls(valid.field,
                           wire_seeds,
                           gadget_poly,
