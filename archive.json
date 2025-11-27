@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-20T01:02:51.910735+00:00",
+  "timestamp": "2025-11-27T01:03:43.749512+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -48422,21 +48422,21 @@
       "id": "PR_kwDOGKuqOc6zjL2k",
       "title": "Try producing test vectors using gadgets of different degrees",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/588",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This is a first pass towards #586. I extended the `HigherDegree` circuit to make the gadget degree and number of gadget calls configurable, and produced a pretty exhaustive set of test vectors. I don't want to merge this as-is, since it's clearly overkill, but doing this exercise has increased my confidence in how we handle gadget polynomials, as I didn't find any bugs in the process.\r\n\r\nI think the already-present case of a gadget with degree three and one call already provides a decent baseline of test coverage. For the case of `next_power_of_2(g.DEGREE * p)` versus `next_power_of_2(g.DEGREE * (p - 1) + 1)`, picking a gadget degree of 3 and p=2 (which we get with one gadget call) results in different values for the two formulas, either 8 or 4. Perhaps we should just add the Prio3 instantiation and a single test vector file covering that?",
       "createdAt": "2025-11-14T22:25:54Z",
-      "updatedAt": "2025-11-15T20:41:46Z",
+      "updatedAt": "2025-11-25T18:06:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/higher-degree-test-vectors",
       "headRefOid": "9b32c9dfa0e8e323858bc83710661c77d1cf3d91",
-      "closedAt": null,
+      "closedAt": "2025-11-25T18:06:49Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -48490,6 +48490,32 @@
           "updatedAt": "2025-11-17T21:55:09Z"
         }
       ],
+      "reviews": []
+    },
+    {
+      "number": 590,
+      "id": "PR_kwDOGKuqOc61eG-5",
+      "title": "Add helper functions for polynomial lengths",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/590",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This adds some helpers as suggested in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/588#issuecomment-3536870327. Note that this may need some rebasing with other in-flight PRs.",
+      "createdAt": "2025-11-25T18:06:07Z",
+      "updatedAt": "2025-11-25T18:06:08Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/poly-len-helpers",
+      "headRefOid": "5a480e3f2c31d400db2997abe170b8ea25536eec",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]
