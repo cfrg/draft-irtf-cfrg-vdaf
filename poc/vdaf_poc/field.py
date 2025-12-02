@@ -8,7 +8,7 @@ import random
 from typing import Self, TypeVar, cast
 
 from vdaf_poc.common import (assert_power_of_2, bitrev, from_le_bytes, front,
-                             next_power_of_2, to_le_bytes)
+                             to_le_bytes)
 
 
 class Field:
@@ -450,29 +450,35 @@ class Lagrange:
             u[i] *= factor
         return u
 
-    def extend_values_to_power_of_2(self, p: list[F]) -> None:
+    def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:
         """
         Appends evaluations to the polynomial P (in-place) until the
-        number of evaluations N is the smallest power of two greater
-        than or equal to the initial length.
+        number of evaluations is N, and N must be a power of two.
 
         See Eq. (3.2.1) of [Faz25](https://ia.cr/2025/1727).
         """
-        n = next_power_of_2(len(p))
+        assert_power_of_2(n)
         assert len(p) <= n
         field = cast(type[F], self.field)
         x = cast(list[F], self.field.nth_root_powers(n))
 
-        def w_inv(m: int, i: int) -> F:
-            return math.prod(
-                (x[i]-x[j] for j in range(m+1) if i != j),
-                start=field(1))
+        w = [field(0)]*n
+        for i in range(len(p)):
+            diff = (x[i] - x[j] for j in range(len(p)) if i != j)
+            w[i] = math.prod(diff, start=field(1))
 
         for k in range(len(p), n):
-            y = sum(
-                (Fraction(v, w_inv(k, i)) for i, v in enumerate(p)),
-                Fraction(field(0), field(1)))
-            p.append(-w_inv(k, k) * y.num * y.den.inv())
+            for i in range(k):
+                w[i] *= x[i] - x[k]
+
+            y_num, y_den = field(0), field(1)
+            for i, v in enumerate(p):
+                y_num = y_num * w[i] + y_den * v
+                y_den *= w[i]
+
+            diff = (x[k] - x[j] for j in range(k))
+            w[k] = math.prod(diff, start=field(1))
+            p.append(-w[k] * y_num * y_den.inv())
 
     def double_evaluations(self, p: list[F]) -> list[F]:
         """
@@ -486,16 +492,3 @@ class Lagrange:
         even = cast(list[NttField], p)
         odd = self.field.ntt(self.field.inv_ntt(even, n), n, True)
         return [cast(F, i) for pair in zip(even, odd) for i in pair]
-
-
-class Fraction[F: Field]:
-    def __init__(self, num: F, den: F) -> None:
-        self.num = num
-        self.den = den
-
-    def __add__(self, other: Self) -> Fraction[F]:
-        return Fraction(self.num*other.den + self.den*other.num,
-                        self.den*other.den)
-
-    def __mul__(self, other: Self) -> Fraction[F]:
-        return Fraction(self.num*other.num, self.den*other.den)

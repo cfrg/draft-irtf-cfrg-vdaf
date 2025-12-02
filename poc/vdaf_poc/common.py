@@ -27,7 +27,7 @@ F = TypeVar("F", bound=FieldProtocol)
 def assert_power_of_2(n: int) -> int:
     """Assert if n is a positive power of two. If so, returns log2(n)."""
     log_n = math.ceil(math.log2(n))
-    assert 0 < n and n == 1 << log_n, "n must be a power of 2."
+    assert 0 < n and n == 1 << log_n, f"n={n} must be a power of 2."
     return log_n
 
 
@@ -40,7 +40,7 @@ def next_power_of_2(n: int) -> int:
 def bitrev(k: int, n: int) -> int:
     """Return the integer obtained by reversing the k-bit representation of n."""
     maxnum = 1 << k
-    assert 0 <= n < maxnum, f"{n} out of range [0, {maxnum})."
+    assert 0 <= n < maxnum, f"n={n} out of range [0, {maxnum})."
     rev = bin(n)[2:][::-1]
     padded = rev + '0' * (k-len(rev))
     return int(padded, 2)

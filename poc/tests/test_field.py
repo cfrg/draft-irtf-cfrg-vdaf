@@ -161,3 +161,40 @@ class TestPolynomials(unittest.TestCase):
                 got, want,
                 f"log_n: {log_n} p_mon: {p_mon} q_mon: {q_mon}"
             )
+
+    def test_extend_values_to_power_of_2(self) -> None:
+        # Given k coefficients of a polynomial, the function
+        # must recover all the n Lagrange values, for all 0 ≤ k ≤ n,
+        # where n must be a power of two.
+        lag = Lagrange(self.field)
+        for log_n in range(7):
+            n = 1 << log_n
+            for k in range(n+1):
+                # Generate a random polynomial in monomial basis.
+                p_mon = self.field.rand_vec(k) + [self.field(0)]*(n-k)
+                # Convert polynomial to Lagrange basis.
+                p_lag = self.field.ntt(p_mon, n)
+                # Truncate to k values only.
+                p_lag_truncated = p_lag[:k]
+                # Recover the n original values (in-place).
+                lag.extend_values_to_power_of_2(p_lag_truncated, n)
+                # Verify that values are fully recovered.
+                self.assertEqual(p_lag_truncated, p_lag,
+                                 f"n: {n} k: {k} p_mon: {p_mon}")
+
+    def test_double_evaluations(self) -> None:
+        # Given n values of a polynomial, the function must recover
+        # 2n values, where n must be a power of two.
+        lag = Lagrange(self.field)
+        for log_n in range(8):
+            n = 1 << log_n
+            # Generate a random polynomial in monomial basis.
+            p_mon = self.field.rand_vec(n)
+            # Convert polynomial to Lagrange basis.
+            p_lag_n = self.field.ntt(p_mon, n)
+            # Double the number of evaluations with rhizomes algorithm.
+            got = lag.double_evaluations(p_lag_n)
+            # Double the number of evaluations with NTT.
+            want = self.field.ntt(p_mon, 2*n)
+            # Verify that values are fully recovered.
+            self.assertEqual(got, want, f"n: {n}  p_mon: {p_mon}")
