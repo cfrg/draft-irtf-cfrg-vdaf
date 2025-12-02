@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-11-27T01:03:43.749512+00:00",
+  "timestamp": "2025-12-02T01:05:56.216904+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7605,6 +7605,25 @@
       "body": "Following #576 and #581, `encode_into_bit_vec()` and `decode_from_bit_vec()` will only be used with range checked integers, on all but the last field elements for each encoded integer. We could replace these with new helper functions that encapsulate the whole range checked integer encoding/decoding process, simplifying circuit definitions.",
       "createdAt": "2025-11-12T23:56:09Z",
       "updatedAt": "2025-11-12T23:56:09Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 591,
+      "id": "I_kwDOGKuqOc7bikv4",
+      "title": "Bump VERSION",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/591",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-18"
+      ],
+      "body": "We have wire breaking changes coming in the next version.",
+      "createdAt": "2025-12-01T23:18:03Z",
+      "updatedAt": "2025-12-01T23:18:49Z",
       "closedAt": null,
       "comments": []
     }
@@ -47776,9 +47795,9 @@
         "wire change",
         "draft-18"
       ],
-      "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nCloses #574 ",
+      "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nPartially addresses #574",
       "createdAt": "2025-11-06T11:01:47Z",
-      "updatedAt": "2025-11-19T04:03:08Z",
+      "updatedAt": "2025-12-01T22:00:03Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
@@ -48414,6 +48433,38 @@
               "updatedAt": "2025-11-19T03:57:55Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7SOgm7",
+          "commit": {
+            "abbreviatedOid": "c350f9f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Just a couple small things left. Great work, Armando!!",
+          "createdAt": "2025-12-01T21:09:56Z",
+          "updatedAt": "2025-12-01T21:46:28Z",
+          "comments": [
+            {
+              "originalPosition": 260,
+              "body": "This provides an intermediate representation of an equation we want to compute. It's only used in `extend_values_to_power_of_2` as far as I can tell. I'm wary about adding this, since it's another thing we'll have to define in the draft. Let's just inline the code here.",
+              "createdAt": "2025-12-01T21:09:57Z",
+              "updatedAt": "2025-12-01T21:46:29Z"
+            },
+            {
+              "originalPosition": 225,
+              "body": "What is `w` here refer to?",
+              "createdAt": "2025-12-01T21:21:23Z",
+              "updatedAt": "2025-12-01T21:46:29Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "I'm not exactly sure where this should go, but we need to add an inline `# Implementation note:` comment to warn users about performance issues for gadgets of degree greater than 2. Per @divergentdave's experiment here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/589",
+              "createdAt": "2025-12-01T21:45:45Z",
+              "updatedAt": "2025-12-01T21:46:29Z"
+            }
+          ]
         }
       ]
     },
@@ -48501,10 +48552,12 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-18"
+      ],
       "body": "This adds some helpers as suggested in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/588#issuecomment-3536870327. Note that this may need some rebasing with other in-flight PRs.",
       "createdAt": "2025-11-25T18:06:07Z",
-      "updatedAt": "2025-11-25T18:06:08Z",
+      "updatedAt": "2025-12-01T20:24:36Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
