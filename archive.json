@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-02T01:05:56.216904+00:00",
+  "timestamp": "2025-12-04T01:06:07.770520+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -125,8 +125,8 @@
     },
     {
       "name": "draft-18",
-      "description": null,
-      "color": "aaaaaa"
+      "description": "",
+      "color": "96d5f0"
     }
   ],
   "issues": [
@@ -7601,10 +7601,12 @@
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "draft-18"
+      ],
       "body": "Following #576 and #581, `encode_into_bit_vec()` and `decode_from_bit_vec()` will only be used with range checked integers, on all but the last field elements for each encoded integer. We could replace these with new helper functions that encapsulate the whole range checked integer encoding/decoding process, simplifying circuit definitions.",
       "createdAt": "2025-11-12T23:56:09Z",
-      "updatedAt": "2025-11-12T23:56:09Z",
+      "updatedAt": "2025-12-02T01:18:06Z",
       "closedAt": null,
       "comments": []
     },
@@ -7624,6 +7626,26 @@
       "body": "We have wire breaking changes coming in the next version.",
       "createdAt": "2025-12-01T23:18:03Z",
       "updatedAt": "2025-12-01T23:18:49Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 592,
+      "id": "I_kwDOGKuqOc7bw2ch",
+      "title": "Add implementation note about Rhizomes for higher dimension gadgets",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/592",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "I'm not exactly sure where this should go, but we need to add an inline `# Implementation note:` comment to warn users about performance issues for gadgets of degree greater than 2. Per @divergentdave's experiment here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/589\r\n\r\n_Originally posted by @cjpatton in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585#discussion_r2578832307_\r\n            ",
+      "createdAt": "2025-12-02T18:14:52Z",
+      "updatedAt": "2025-12-02T18:16:39Z",
       "closedAt": null,
       "comments": []
     }
@@ -47797,13 +47819,13 @@
       ],
       "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nPartially addresses #574",
       "createdAt": "2025-11-06T11:01:47Z",
-      "updatedAt": "2025-12-01T22:00:03Z",
+      "updatedAt": "2025-12-02T18:16:16Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "prioPolyLagrange_v0",
-      "headRefOid": "c350f9f885f3eff252aafa59e0c60b3ecab223e9",
+      "headRefOid": "d5fbddb9413cc357651195ffbbd4be3ede0e1a8e",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -48465,6 +48487,99 @@
               "updatedAt": "2025-12-01T21:46:29Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7SfgaW",
+          "commit": {
+            "abbreviatedOid": "c350f9f"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-02T18:03:18Z",
+          "updatedAt": "2025-12-02T18:03:19Z",
+          "comments": [
+            {
+              "originalPosition": 225,
+              "body": "this is the W term from the equation. \nI have refactored this function and added more tests.",
+              "createdAt": "2025-12-02T18:03:18Z",
+              "updatedAt": "2025-12-02T18:03:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Sfgev",
+          "commit": {
+            "abbreviatedOid": "c350f9f"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-02T18:03:24Z",
+          "updatedAt": "2025-12-02T18:03:24Z",
+          "comments": [
+            {
+              "originalPosition": 260,
+              "body": "removed. ",
+              "createdAt": "2025-12-02T18:03:24Z",
+              "updatedAt": "2025-12-02T18:03:25Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Sfha6",
+          "commit": {
+            "abbreviatedOid": "d5fbddb"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-02T18:04:26Z",
+          "updatedAt": "2025-12-02T18:04:26Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "I'd rather defer to @divergentdave to add comments on this.",
+              "createdAt": "2025-12-02T18:04:26Z",
+              "updatedAt": "2025-12-02T18:04:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7SftwA",
+          "commit": {
+            "abbreviatedOid": "c350f9f"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-02T18:15:11Z",
+          "updatedAt": "2025-12-02T18:15:11Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "Raised https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/592.",
+              "createdAt": "2025-12-02T18:15:11Z",
+              "updatedAt": "2025-12-02T18:15:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7Sfu3w",
+          "commit": {
+            "abbreviatedOid": "d5fbddb"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-02T18:16:16Z",
+          "updatedAt": "2025-12-02T18:16:16Z",
+          "comments": []
         }
       ]
     },
@@ -48514,7 +48629,7 @@
       "labels": [],
       "body": "This rebases #588 on top of #585, and tries out some other changes. The main outcome I found is that everything still works with a wide variety of gadget degrees and number of gadget calls.\r\n\r\nI also tried changing the calculation of `size` in the `QueryGadget` constructor as described in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585#discussion_r2500947483, and verification still worked. If the value of `size` is calculated to be larger than it needs to be, then it will be twice as large as necessary. Later in the constructor, we compute `step` to be the ratio of `size`, the gadget polynomial length, over `p`, the wire polynomial length. If `size` is double what it needs to be, then `step` would correspondingly be doubled. When we extend the gadget polynomial with `extend_dimension_double()`, all the elements of the input become the even-indexed elements of the output. Thus, `QueryGadget.eval()` produces the same values, because the stride of `self.poly[self.k * self.step]` correspondingly doubles, and the same values are returned whether `size` is higher than necessary or not. The later computation of g(r) during the query algorithm trivially produces the same value, since we are dealing with the same polynomial, just basis-extended further.\r\n\r\nI also noticed that verification slowed down significantly when processing gadgets with very high degrees. Most of the time was in `extend_dimension_one()`. This is not of a practical concern, because we only care about gadgets of degree two, in which case we'd only need to call `extend_dimension_one()` once. If, in the future, we want to make higher degree gadgets more performant, I think we could change some implementation choices without making any changes to the protocol. Note that we only extend the basis of the gadget polynomial until its length is the next power of two because our later computation of g(r) uses `poly_eval_batched()`. This requires the basis length to be a power of two. We could probably change either how we extend the basis or how we evaluate the polynomial to use algorithms that are more concretely efficient for such parameter choices. I recently learned about \"bidirectional FFT\" algorithms, which take as input a prefix of the evaluations of a polynomial and a suffix of the monomial coefficients. Future work may be able to apply such algorithms to do basis extension in one O(n log n) step. But again, we only care about degree two gadgets in practice, so our implementation is fine, and the protocol still allows for efficient implementations with any parameter choice.",
       "createdAt": "2025-11-14T23:06:43Z",
-      "updatedAt": "2025-11-17T21:55:09Z",
+      "updatedAt": "2025-12-02T18:09:18Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
@@ -48539,6 +48654,13 @@
           "body": "This came from https://eprint.iacr.org/2024/2010, drawing on a line of work on \"truncated FFT\". In that setting it's applied to an additive FFT, so it would take some additional work to apply it to fields of characteristic greater than two.",
           "createdAt": "2025-11-17T21:55:09Z",
           "updatedAt": "2025-11-17T21:55:09Z"
+        },
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "> I also noticed that verification slowed down significantly when processing gadgets with very high degrees. Most of the time was in `extend_dimension_one()`\r\n\r\nI have updated the implementation of `extend_dimension_one` to do several iterations up to the next power of two. The function is called now `extend_values_to_power_of_2` and performs the same computation as Eq. (3.2.1) of [Faz25](https://ia.cr/2025/1727).\r\n\r\n\r\n```python\r\nclass Lagrange:\r\n    def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:\r\n        \"\"\"\r\n        Appends evaluations to the polynomial P (in-place) until the\r\n        number of evaluations is N, and N must be a power of two.\r\n\r\n        See Eq. (3.2.1) of [Faz25](https://ia.cr/2025/1727).\r\n        \"\"\"\r\n        assert_power_of_2(n)\r\n        assert len(p) <= n\r\n        field = cast(type[F], self.field)\r\n        x = cast(list[F], self.field.nth_root_powers(n))\r\n\r\n        w = [field(0)]*n\r\n        for i in range(len(p)):\r\n            diff = (x[i] - x[j] for j in range(len(p)) if i != j)\r\n            w[i] = math.prod(diff, start=field(1))\r\n\r\n        for k in range(len(p), n):\r\n            for i in range(k):\r\n                w[i] *= x[i] - x[k]\r\n\r\n            y_num, y_den = field(0), field(1)\r\n            for i, v in enumerate(p):\r\n                y_num = y_num * w[i] + y_den * v\r\n                y_den *= w[i]\r\n\r\n            diff = (x[k] - x[j] for j in range(k))\r\n            w[k] = math.prod(diff, start=field(1))\r\n            p.append(-w[k] * y_num * y_den.inv())\r\n```\r\n\r\n\r\n",
+          "createdAt": "2025-12-02T18:08:12Z",
+          "updatedAt": "2025-12-02T18:08:12Z"
         }
       ],
       "reviews": []
