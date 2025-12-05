@@ -5,10 +5,10 @@ from itertools import zip_longest
 from typing import (Any, Generic, Literal, NotRequired, Optional, TypedDict,
                     TypeVar, cast)
 
-from vdaf_poc.common import gen_rand, next_power_of_2, print_wrapped_line
+from vdaf_poc.common import gen_rand, print_wrapped_line
 from vdaf_poc.field import Lagrange, NttField
 from vdaf_poc.flp import Flp, run_flp
-from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19, Gadget
+from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19, Gadget, wire_poly_len
 from vdaf_poc.vdaf import Vdaf, run_vdaf
 
 Measurement = TypeVar("Measurement")
@@ -504,7 +504,7 @@ class TestFlpBBCGGI19(unittest.TestCase):
         Run some generic tests on `flp`.
         """
         for (g, g_calls) in zip(flp.valid.GADGETS, flp.valid.GADGET_CALLS):
-            self.run_gadget_test(g, flp.field, next_power_of_2(g_calls + 1))
+            self.run_gadget_test(g, flp.field, wire_poly_len(g_calls))
 
         for (i, (meas, expected_decision)) in enumerate(test_cases):
             self.assertTrue(len(meas) == flp.MEAS_LEN)
