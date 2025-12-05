@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import math
 import random
-from typing import Self, TypeVar, cast
+from typing import Generic, Self, TypeVar, cast
 
 from vdaf_poc.common import (assert_power_of_2, bitrev, from_le_bytes, front,
                              to_le_bytes)
@@ -399,13 +399,16 @@ def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
     return output
 
 
-class Lagrange:
+T = TypeVar("T", bound=NttField)
+
+
+class Lagrange(Generic[T]):
     """Polynomial arithmetic in the Lagrange basis."""
 
-    def __init__(self, field: type[NttField]) -> None:
+    def __init__(self, field: type[T]) -> None:
         self.field = field
 
-    def poly_mul(self, p: list[F], q: list[F]) -> list[F]:
+    def poly_mul(self, p: list[T], q: list[T]) -> list[T]:
         """
         Multiply two polynomials in the Lagrange basis.
 
@@ -418,11 +421,11 @@ class Lagrange:
         q_2n = self.double_evaluations(q)
         return [pi*qi for pi, qi in zip(p_2n, q_2n)]
 
-    def poly_eval(self, p: list[F], x: F) -> F:
+    def poly_eval(self, p: list[T], x: T) -> T:
         """Evaluate a polynomial P in the Lagrange basis at x."""
         return self.poly_eval_batched([p], x).pop()
 
-    def poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]:
+    def poly_eval_batched(self, polys: list[list[T]], x: T) -> list[T]:
         """Evaluate a list of polynomials in the Lagrange basis at x.
 
         See Alg. 7 of [Faz25](https://ia.cr/2025/1727).
@@ -431,9 +434,8 @@ class Lagrange:
         n = len(polys[0])
         assert_power_of_2(n)
 
-        nodes = cast(list[F], self.field.nth_root_powers(n))
-        field = cast(type[F], self.field)
-        k = field(1)
+        nodes = self.field.nth_root_powers(n)
+        k = self.field(1)
         u = [p[0] for p in polys]
         d = nodes[0] - x
         for i in range(1, n):
@@ -445,12 +447,12 @@ class Lagrange:
                 if i < len(p):
                     u[j] += t * p[i]
 
-        factor = field(-1)**(n-1) * field(n).inv()
+        factor = self.field(-1)**(n-1) * self.field(n).inv()
         for i in range(len(u)):
             u[i] *= factor
         return u
 
-    def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:
+    def extend_values_to_power_of_2(self, p: list[T], n: int) -> None:
         """
         Appends evaluations to the polynomial P (in-place) until the
         number of evaluations is N, and N must be a power of two.
@@ -459,28 +461,27 @@ class Lagrange:
         """
         assert_power_of_2(n)
         assert len(p) <= n
-        field = cast(type[F], self.field)
-        x = cast(list[F], self.field.nth_root_powers(n))
+        x = self.field.nth_root_powers(n)
 
-        w = [field(0)]*n
+        w = [self.field(0)]*n
         for i in range(len(p)):
             diff = (x[i] - x[j] for j in range(len(p)) if i != j)
-            w[i] = math.prod(diff, start=field(1))
+            w[i] = math.prod(diff, start=self.field(1))
 
         for k in range(len(p), n):
             for i in range(k):
                 w[i] *= x[i] - x[k]
 
-            y_num, y_den = field(0), field(1)
+            y_num, y_den = self.field(0), self.field(1)
             for i, v in enumerate(p):
                 y_num = y_num * w[i] + y_den * v
                 y_den *= w[i]
 
             diff = (x[k] - x[j] for j in range(k))
-            w[k] = math.prod(diff, start=field(1))
+            w[k] = math.prod(diff, start=self.field(1))
             p.append(-w[k] * y_num * y_den.inv())
 
-    def double_evaluations(self, p: list[F]) -> list[F]:
+    def double_evaluations(self, p: list[T]) -> list[T]:
         """
         Returns 2N evaluations of a polynomial from N Lagrange-basis
         evaluations, such that N=len(p) is a power of 2.
@@ -489,6 +490,6 @@ class Lagrange:
         """
         n = len(p)
         assert_power_of_2(n)
-        even = cast(list[NttField], p)
+        even = p
         odd = self.field.ntt(self.field.inv_ntt(even, n), n, True)
-        return [cast(F, i) for pair in zip(even, odd) for i in pair]
+        return [i for pair in zip(even, odd) for i in pair]
