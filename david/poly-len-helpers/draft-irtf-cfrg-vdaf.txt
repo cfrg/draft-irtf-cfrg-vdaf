@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 29 May 2026                                                ISRG
+Expires: 8 June 2026                                                ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        25 November 2025
+                                                         5 December 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 May 2026.
+   This Internet-Draft will expire on 8 June 2026.
 
 Copyright Notice
 
@@ -6669,10 +6669,10 @@ A.3.  Parallel Sum
        def eval_poly(self,
                      field: type[F],
                      inp_poly: list[list[F]]) -> list[F]:
-           output_poly_length = gadget_poly_len(
+           output_poly_length = next_power_of_2(gadget_poly_len(
                self.DEGREE,
                len(inp_poly[0]),
-           )
+           ))
            out_sum = [field(0) for _ in range(output_poly_length)]
            for i in range(self.count):
                start_index = i * self.subcircuit.ARITY
