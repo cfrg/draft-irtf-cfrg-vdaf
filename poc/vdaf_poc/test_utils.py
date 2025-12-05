@@ -6,7 +6,7 @@ from typing import (Any, Generic, Literal, NotRequired, Optional, TypedDict,
                     TypeVar, cast)
 
 from vdaf_poc.common import gen_rand, next_power_of_2, print_wrapped_line
-from vdaf_poc.field import NttField, poly_eval
+from vdaf_poc.field import Lagrange, NttField
 from vdaf_poc.flp import Flp, run_flp
 from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19, Gadget
 from vdaf_poc.vdaf import Vdaf, run_vdaf
@@ -487,13 +487,14 @@ class TestFlpBBCGGI19(unittest.TestCase):
         meas_poly = []
         meas = []
         eval_at = field.rand_vec(1)[0]
+        lag = Lagrange(field)
         for _ in range(g.ARITY):
             meas_poly.append(field.rand_vec(test_length))
-            meas.append(poly_eval(field, meas_poly[-1], eval_at))
+            meas.append(lag.poly_eval(meas_poly[-1], eval_at))
         out_poly = g.eval_poly(field, meas_poly)
 
         want = g.eval(field, meas)
-        got = poly_eval(field, out_poly, eval_at)
+        got = lag.poly_eval(out_poly, eval_at)
         self.assertEqual(got, want)
 
     def run_flp_test(self,

@@ -210,7 +210,7 @@
     "reports": [
         {
             "input_shares": [
-                "e269056891a9fd95d44e6fadb3b75e6774b666d312bcc59b04b52413d9e5e26d6f46b3fd26db6150a8659ad79dae8621",
+                "e269056891a9fd95d44e6fadb3b75e6774b666d312bcc59b07660ca467144d298c9d64d30c72d1bda72a4da7c3496338",
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
             ],
             "measurement": 0,
@@ -226,14 +226,14 @@
             ],
             "verifier_shares": [
                 [
-                    "5c6a0685bd0f0aa98bb9c0942022d854c6be57b0c1d149b3d5a14867e2750b29",
-                    "a595f97a41f0f5565abc07086ef01d5b3cb2629a3c534bd4dbd8f5187ad75aad"
+                    "c6c0473f31a065a28bb9c0942022d854c6be57b0c1d149b3a96f225d8bc3e270",
+                    "3b3fb8c0cd5f9a5d5abc07086ef01d5b3cb2629a3c534bd4070b1c23d1898365"
                 ]
             ]
         },
         {
             "input_shares": [
-                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b57694d189321ffe06f46b37d26db61d056b17152e3726a2e",
+                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b07660ca467144d293006b65d82690924a82a4da7c3496338",
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
             ],
             "measurement": 1,
@@ -249,14 +249,14 @@
             ],
             "verifier_shares": [
                 [
-                    "5c6a0685bd0f0aa9b19b8c1c4431ec49eca02338e5e05da8fc91575311627200",
-                    "a595f97a41f0f5565abc07086ef01d5b3cb2629a3c534bd4dbd8f5187ad75aad"
+                    "c6c0473f31a065a2b19b8c1c4431ec49eca02338e5e05da8d05f3149baaf4948",
+                    "3b3fb8c0cd5f9a5d5abc07086ef01d5b3cb2629a3c534bd4070b1c23d1898365"
                 ]
             ]
         },
         {
             "input_shares": [
-                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b57694d189321ffe06f46b37d26db61d056b17152e3726a2e",
+                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b07660ca467144d293006b65d82690924a82a4da7c3496338",
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
             ],
             "measurement": 1,
@@ -272,14 +272,14 @@
             ],
             "verifier_shares": [
                 [
-                    "5c6a0685bd0f0aa9b19b8c1c4431ec49eca02338e5e05da8fc91575311627200",
-                    "a595f97a41f0f5565abc07086ef01d5b3cb2629a3c534bd4dbd8f5187ad75aad"
+                    "c6c0473f31a065a2b19b8c1c4431ec49eca02338e5e05da8d05f3149baaf4948",
+                    "3b3fb8c0cd5f9a5d5abc07086ef01d5b3cb2629a3c534bd4070b1c23d1898365"
                 ]
             ]
         },
         {
             "input_shares": [
-                "e269056891a9fd95d44e6fadb3b75e6774b666d312bcc59b04b52413d9e5e26d6f46b3fd26db6150a8659ad79dae8621",
+                "e269056891a9fd95d44e6fadb3b75e6774b666d312bcc59b07660ca467144d298c9d64d30c72d1bda72a4da7c3496338",
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
             ],
             "measurement": 0,
@@ -295,14 +295,14 @@
             ],
             "verifier_shares": [
                 [
-                    "5c6a0685bd0f0aa98bb9c0942022d854c6be57b0c1d149b3d5a14867e2750b29",
-                    "a595f97a41f0f5565abc07086ef01d5b3cb2629a3c534bd4dbd8f5187ad75aad"
+                    "c6c0473f31a065a28bb9c0942022d854c6be57b0c1d149b3a96f225d8bc3e270",
+                    "3b3fb8c0cd5f9a5d5abc07086ef01d5b3cb2629a3c534bd4070b1c23d1898365"
                 ]
             ]
         },
         {
             "input_shares": [
-                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b57694d189321ffe06f46b37d26db61d056b17152e3726a2e",
+                "e369056891a9fd95d44e6fadb3b75e6774b666d312bcc59b07660ca467144d293006b65d82690924a82a4da7c3496338",
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
             ],
             "measurement": 1,
@@ -318,8 +318,8 @@
             ],
             "verifier_shares": [
                 [
-                    "5c6a0685bd0f0aa9b19b8c1c4431ec49eca02338e5e05da8fc91575311627200",
-                    "a595f97a41f0f5565abc07086ef01d5b3cb2629a3c534bd4dbd8f5187ad75aad"
+                    "c6c0473f31a065a2b19b8c1c4431ec49eca02338e5e05da8d05f3149baaf4948",
+                    "3b3fb8c0cd5f9a5d5abc07086ef01d5b3cb2629a3c534bd4070b1c23d1898365"
                 ]
             ]
         }

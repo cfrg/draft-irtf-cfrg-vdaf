@@ -3,7 +3,7 @@ name = "vdaf_poc"
 description = "Reference implementation of draft-irtf-cfrg-vdaf"
 readme = "README.md"
 version = "0.0.1"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4"
 dependencies = ["pycryptodomex==3.23.0"]
 
 [project.urls]

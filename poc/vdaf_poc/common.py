@@ -1,5 +1,6 @@
 """Functionalities used by other modules."""
 
+import math
 import os
 from typing import Protocol, Self, TypeVar, overload
 
@@ -23,10 +24,26 @@ class FieldProtocol(Protocol):
 F = TypeVar("F", bound=FieldProtocol)
 
 
+def assert_power_of_2(n: int) -> int:
+    """Assert if n is a positive power of two. If so, returns log2(n)."""
+    log_n = math.ceil(math.log2(n))
+    assert 0 < n and n == 1 << log_n, f"n={n} must be a power of 2."
+    return log_n
+
+
 def next_power_of_2(n: int) -> int:
     """Return the smallest power of 2 that is larger than or equal to n."""
     assert n > 0
     return 1 << (int(n - 1).bit_length())
+
+
+def bitrev(k: int, n: int) -> int:
+    """Return the integer obtained by reversing the k-bit representation of n."""
+    maxnum = 1 << k
+    assert 0 <= n < maxnum, f"n={n} out of range [0, {maxnum})."
+    rev = bin(n)[2:][::-1]
+    padded = rev + '0' * (k-len(rev))
+    return int(padded, 2)
 
 
 def zeros(length: int) -> bytes:
