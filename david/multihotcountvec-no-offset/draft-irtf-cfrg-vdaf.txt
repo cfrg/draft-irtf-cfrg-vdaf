@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 17 May 2026                                                ISRG
+Expires: 8 June 2026                                                ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        13 November 2025
+                                                         5 December 2025
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 May 2026.
+   This Internet-Draft will expire on 8 June 2026.
 
 Copyright Notice
 
@@ -353,6 +353,14 @@ Table of Contents
 
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
+
+   17:
+
+   *  Rename VDAF preparation to VDAF verification.
+
+   *  Update the reference for TurboSHAKE128 to [RFC9861].
+
+   *  Prio3: Acknowledge an optimization pointed out in [Faz25].
 
    16:
 
@@ -2342,11 +2350,8 @@ Table of Contents
 6.2.1.  XofTurboShake128
 
    This section describes XofTurboShake128, an XOF based on the
-   TurboSHAKE128 function specified in [TurboSHAKE].  This XOF is
+   TurboSHAKE128 function specified in [RFC9861].  This XOF is
    RECOMMENDED for all use cases for DAFs and VDAFs.
-
-      TODO Update the [TurboSHAKE] reference to point to the RFC instead
-      of the draft.
 
    Pre-conditions:
 
@@ -3960,8 +3965,12 @@ Table of Contents
 
    Next, choose a random point t (parsed from the query randomness),
    evaluate each wire polynomial at t, and evaluate the gadget
-   polynomial at t.  The results are recorded in the verifier message
-   passed to the decision algorithm, where the test is finished.
+   polynomial at t.  Note that the wire polynomials are in the value
+   (Lagrange) representation by construction.  Faster polynomial
+   evaluation in this representation is possible by using the algorithm
+   by [Faz25] without resorting to polynomial interpolation.  The
+   results are recorded in the verifier message passed to the decision
+   algorithm, where the test is finished.
 
    The random point t MUST NOT be one of the fixed evaluation points
    used to interpolate the wire polynomials.  Otherwise, the verifier
@@ -4163,7 +4172,6 @@ Table of Contents
    produce secret shares of the original integer.
 
    class Sum(Valid[int, int, F]):
-       GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
        JOINT_RAND_LEN = 0
        OUTPUT_LEN = 1
        field: type[F]
@@ -4176,6 +4184,7 @@ Table of Contents
            rest_all_ones_value = 2 ** (bits - 1) - 1
            self.last_weight = max_measurement - rest_all_ones_value
            self.GADGET_CALLS = [self.bits]
+           self.GADGETS = [PolyEval([0, -1, 1], self.bits)]
            self.MEAS_LEN = self.bits
            self.EVAL_OUTPUT_LEN = self.bits
 
@@ -6443,12 +6452,10 @@ Table of Contents
               Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
               <https://www.rfc-editor.org/rfc/rfc8446>.
 
-   [TurboSHAKE]
-              Viguier, B., Wong, D., Van Assche, G., Dang, Q., and J.
-              Daemen, "KangarooTwelve and TurboSHAKE", Work in Progress,
-              Internet-Draft, draft-irtf-cfrg-kangarootwelve-17, 21
-              February 2025, <https://datatracker.ietf.org/doc/html/
-              draft-irtf-cfrg-kangarootwelve-17>.
+   [RFC9861]  Viguier, B., Wong, D., Ed., Van Assche, G., Ed., Dang, Q.,
+              Ed., and J. Daemen, Ed., "KangarooTwelve and TurboSHAKE",
+              RFC 9861, DOI 10.17487/RFC9861, October 2025,
+              <https://www.rfc-editor.org/rfc/rfc9861>.
 
 11.2.  Informative References
 
@@ -6512,6 +6519,13 @@ Table of Contents
               Response", ACM Conference on Computer and Communications
               Security (CCS), 2014,
               <https://dl.acm.org/doi/10.1145/2660267.2660348>.
+
+   [Faz25]    Faz-Hernandez, A., "Rhizomes and the Roots of
+              Efficiency—Improving Prio", Springer Nature Switzerland,
+              Lecture Notes in Computer Science pp. 425-449,
+              DOI 10.1007/978-3-032-06754-8_16, ISBN ["9783032067531",
+              "9783032067548"], October 2025,
+              <https://doi.org/10.1007/978-3-032-06754-8_16>.
 
    [GI14]     Gilboa, N. and Y. Ishai, "Distributed Point Functions and
               Their Applications", Eurocrypt, 2014,
