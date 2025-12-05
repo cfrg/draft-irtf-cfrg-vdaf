@@ -276,6 +276,7 @@ class QueryGadget(Gadget[F]):
         # Recover all the values of the gadget_poly.
         lag = Lagrange(field)
         n = next_power_of_2(len(gadget_poly))
+        gadget_poly = list(gadget_poly)
         lag.extend_values_to_power_of_2(gadget_poly, n)
 
         # Calculate 'size' evaluations of the gadget_poly.
