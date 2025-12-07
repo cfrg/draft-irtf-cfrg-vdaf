@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-04T01:06:07.770520+00:00",
+  "timestamp": "2025-12-07T01:13:04.753395+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7634,7 +7634,7 @@
       "id": "I_kwDOGKuqOc7bw2ch",
       "title": "Add implementation note about Rhizomes for higher dimension gadgets",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/592",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7645,9 +7645,17 @@
       ],
       "body": "I'm not exactly sure where this should go, but we need to add an inline `# Implementation note:` comment to warn users about performance issues for gadgets of degree greater than 2. Per @divergentdave's experiment here: https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/589\r\n\r\n_Originally posted by @cjpatton in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585#discussion_r2578832307_\r\n            ",
       "createdAt": "2025-12-02T18:14:52Z",
-      "updatedAt": "2025-12-02T18:16:39Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2025-12-05T17:09:12Z",
+      "closedAt": "2025-12-05T17:09:12Z",
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I tried running the same experiment on the latest code, and the performance with high degree gadgets is far better, likely due to the changes to `extend_values_to_power_of_2()`. The overall time fell by about 20x. I don't think we need this implementation note any more.",
+          "createdAt": "2025-12-05T17:09:12Z",
+          "updatedAt": "2025-12-05T17:09:12Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -47084,13 +47092,13 @@
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-11-12T23:57:41Z",
+      "updatedAt": "2025-12-05T17:41:27Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "6e3c9d0c896894316712caca0d58394b183d6e94",
+      "baseRefOid": "2841097ec3daf65b748219088f2e54f5f4161c9e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/range-proof-optimization",
-      "headRefOid": "5433571e7af0c394fd7b4be463a38df07a5ead20",
+      "headRefOid": "beede143331df1f4e58ff3cafc2791adcf573faa",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -47116,6 +47124,13 @@
           "body": "Note that with the changes, while proof verification succeeds instead of failing, the sum that is output is 18, which is a valid measurement according to the verifier's parameters, not 19. When looking at our verifiability security goal, the malicious client doesn't gain any advantage in spoiling the result due to this, because they can only add up to 18 to the total for each Sybil client's measurement they submit. Honest clients can have the same magnitude of impact on the total. The malicious client's disagreement on the `max_measurement` parameter means the semantic link between its view of the measurement and the aggregator's view of the measurement is broken, and only the aggregator's view matters to the aggregate result, since it runs the truncation algorithm.\r\n\r\nWhatever we do with regard to agreement on VDAF parameters, whether it be more explicit requirements on the application around the VDAF, like in #582, or committing to the VDAF parameters somewhere in the protocol, I think this PR's changes don't make the situation any worse, since encoded measurements for SumVec are already confusable in the same way. (i.e., decoding $<0, 0, 0, 1>$ as $<0, 2>$ or $<8>$)",
           "createdAt": "2025-10-30T19:11:39Z",
           "updatedAt": "2025-10-30T19:11:39Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I rebased this on main.",
+          "createdAt": "2025-12-05T17:41:27Z",
+          "updatedAt": "2025-12-05T17:41:27Z"
         }
       ],
       "reviews": [
@@ -47653,13 +47668,13 @@
       ],
       "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.\r\n\r\nThis PR is stacked on #576 for now.",
       "createdAt": "2025-10-27T22:36:28Z",
-      "updatedAt": "2025-11-13T00:02:24Z",
+      "updatedAt": "2025-12-05T17:48:09Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "david/range-proof-optimization",
-      "baseRefOid": "5433571e7af0c394fd7b4be463a38df07a5ead20",
+      "baseRefOid": "beede143331df1f4e58ff3cafc2791adcf573faa",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/multihotcountvec-no-offset",
-      "headRefOid": "484228a952ed7729f34f03990fd90cec56f11a1c",
+      "headRefOid": "722f50d23d691309b1ce1e40512db4aaf5b0f8c5",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -47809,7 +47824,7 @@
       "id": "PR_kwDOGKuqOc6x3ylW",
       "title": "prio: Perform polynomial arithmetic in the Lagrange basis.",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -47819,17 +47834,19 @@
       ],
       "body": "The main change is in the FLP, where the (input/output) wire polynomials must remain in the Lagrange basis. This eliminates conversions to the monomial basis that are performed by NTT invocations.\r\n\r\nThe Prover must send the gadget_poly in the Lagrange basis, so the Verifier can evaluate it directly in this basis. Algorithms are described in [Faz25](https://ia.cr/2025/1727).\r\n\r\nUpdates test vectors. As can be seen, the test vectors only change the last part of each share, because the `gadget_poly` is in a different basis.\r\n\r\nPartially addresses #574",
       "createdAt": "2025-11-06T11:01:47Z",
-      "updatedAt": "2025-12-02T18:16:16Z",
+      "updatedAt": "2025-12-05T15:54:12Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "prioPolyLagrange_v0",
-      "headRefOid": "d5fbddb9413cc357651195ffbbd4be3ede0e1a8e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "65b4fe9e9abef66fe654c2b7d0a2f01f1130f452",
+      "closedAt": "2025-12-05T15:54:11Z",
+      "mergedAt": "2025-12-05T15:54:11Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "27e9310f6167705f00eaf3b9999f61f0668ac923"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -48580,6 +48597,65 @@
           "createdAt": "2025-12-02T18:16:16Z",
           "updatedAt": "2025-12-02T18:16:16Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7TG0Jn",
+          "commit": {
+            "abbreviatedOid": "d5fbddb"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-04T19:39:44Z",
+          "updatedAt": "2025-12-04T20:07:41Z",
+          "comments": [
+            {
+              "originalPosition": 194,
+              "body": "We might be able to clean these casts up by adding `Generic[F]` to the class definition, but I can look into that as a follow-up.",
+              "createdAt": "2025-12-04T19:39:44Z",
+              "updatedAt": "2025-12-04T20:07:41Z"
+            },
+            {
+              "originalPosition": 27,
+              "body": "Since this modifies its argument, I think we ought to copy the constructor's argument before calling it, just in case. I tried making this change, and it didn't have any knock-on effects, but we have run into spooky action at a distance from similar situations before.\r\n```suggestion\r\n        gadget_poly = list(gadget_poly)\r\n        lag.extend_values_to_power_of_2(gadget_poly, n)\r\n```",
+              "createdAt": "2025-12-04T19:55:47Z",
+              "updatedAt": "2025-12-04T20:07:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7TUX82",
+          "commit": {
+            "abbreviatedOid": "d5fbddb"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-05T15:48:11Z",
+          "updatedAt": "2025-12-05T15:48:11Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "resolved.",
+              "createdAt": "2025-12-05T15:48:11Z",
+              "updatedAt": "2025-12-05T15:48:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7TUciE",
+          "commit": {
+            "abbreviatedOid": "65b4fe9"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-05T15:53:30Z",
+          "updatedAt": "2025-12-05T15:53:30Z",
+          "comments": []
         }
       ]
     },
@@ -48677,21 +48753,87 @@
       "labels": [
         "draft-18"
       ],
-      "body": "This adds some helpers as suggested in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/588#issuecomment-3536870327. Note that this may need some rebasing with other in-flight PRs.",
+      "body": "This adds some helpers as suggested in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/588#issuecomment-3536870327.",
       "createdAt": "2025-11-25T18:06:07Z",
-      "updatedAt": "2025-12-01T20:24:36Z",
+      "updatedAt": "2025-12-05T22:35:53Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "c34020410842fe4984436e2891987a072eb278b5",
+      "baseRefOid": "2841097ec3daf65b748219088f2e54f5f4161c9e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/poly-len-helpers",
-      "headRefOid": "5a480e3f2c31d400db2997abe170b8ea25536eec",
+      "headRefOid": "78751f9470173aa00839ebb1e68872ad3564fec0",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
+      "comments": [
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I rebased this and swapped in a few more uses of the new helpers. Note that some diffs in parts of the FLP aren't reflected in the Markdown file yet, as we have yet to update it for the Lagrange basis changes.",
+          "createdAt": "2025-12-05T18:18:09Z",
+          "updatedAt": "2025-12-05T18:18:09Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7TWd2T",
+          "commit": {
+            "abbreviatedOid": "99660c1"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-05T18:22:51Z",
+          "updatedAt": "2025-12-05T18:22:51Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 593,
+      "id": "PR_kwDOGKuqOc63UyG_",
+      "title": "Add generic type parameter to Lagrange class",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/593",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "This is a follow-up to #585. I added `Generic[T]` as a superclass of `Lagrange`. This means that we introduce the type parameter at the class level, instead of in each method definition. Thus, the type checker knows that `self.field` and various arguments should all have the same type, and we can eliminate casts throughout the class. I had to use `T` instead of `F`, since `F` is already used as a type variable with a different bound than what we need, earlier in the file.",
+      "createdAt": "2025-12-05T16:02:53Z",
+      "updatedAt": "2025-12-05T16:58:12Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "27e9310f6167705f00eaf3b9999f61f0668ac923",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/reduce-casts",
+      "headRefOid": "4de4352f9d4c2d1d5b7648342fa5d36fa7af7a43",
+      "closedAt": "2025-12-05T16:58:12Z",
+      "mergedAt": "2025-12-05T16:58:12Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "2841097ec3daf65b748219088f2e54f5f4161c9e"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7TVLF-",
+          "commit": {
+            "abbreviatedOid": "4de4352"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-05T16:43:38Z",
+          "updatedAt": "2025-12-05T16:43:38Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
