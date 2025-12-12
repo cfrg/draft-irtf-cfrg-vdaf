@@ -5857,6 +5857,10 @@ On their own, VDAFs do not provide:
    of messages between honest parties can prevent computation of the aggregate
    result by dropping messages.
 
+1. Security against protocol-confusion attacks. Privacy or verifiability may be
+   compromised if the attacker coerces an honest party into using either an
+   incorrect (V)DAF or incorrect parameters for the correct (V)DAF.
+
 ## The Verification Key
 
 The Aggregators are responsible for exchanging the verification key in advance
