@@ -4,6 +4,7 @@ import json
 import os
 from typing import Any, cast
 
+from tests.test_vdaf_prio3 import Prio3HigherDegree
 from vdaf_poc.common import print_wrapped_line
 from vdaf_poc.field import Field64, Field128
 from vdaf_poc.idpf import FieldVec, Idpf
@@ -776,6 +777,16 @@ def main() -> None:
             [True, True, True, True],
         ],
         2,
+    )
+
+    # Prio3HigherDegree
+    gen_test_vec_for_vdaf(
+        vdaf_test_vec_path,
+        Prio3HigherDegree(2),
+        None,
+        ctx,
+        [2],
+        0,
     )
 
     # Poplar1
