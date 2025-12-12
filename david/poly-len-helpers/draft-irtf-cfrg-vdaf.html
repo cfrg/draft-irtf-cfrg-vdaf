@@ -1057,7 +1057,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 8 June 2026</td>
+<td class="center">Expires 15 June 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1070,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-12-05" class="published">5 December 2025</time>
+<time datetime="2025-12-12" class="published">12 December 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-06-08">8 June 2026</time></dd>
+<dd class="expires"><time datetime="2026-06-15">15 June 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1139,7 +1139,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 June 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 15 June 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -6864,91 +6864,82 @@ class Count(Valid[int, int, F]):
 <p id="section-7.4.2-2">The next variant of Prio3 supports summing of integers in a pre-determined
 range. Each measurement is an integer in the range <code>[0, max_measurement]</code>,
 where <code>max_measurement</code> defines the largest valid measurement.<a href="#section-7.4.2-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a bit vector,
-encoding the measurement plus an offset as a bit vector, then checking that the
-two encoded integers are consistent. Let<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.4.2-4.1">
-              <p id="section-7.4.2-4.1.1"><code>bits = max_measurement.bit_length()</code>, the number of bits needed to encode
-the largest valid measurement<a href="#section-7.4.2-4.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-7.4.2-4.2">
-              <p id="section-7.4.2-4.2.1"><code>offset = 2 ** bits - 1 - max_measurement</code><a href="#section-7.4.2-4.2.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-7.4.2-5">The first bit-encoded integer is the measurement itself. Note that only
-measurements between <code>0</code> and <code>2**bits - 1</code> can be encoded this way with as many
-bits. The second bit-encoded integer is the sum of the measurement and
-<code>offset</code>. Observe that this sum can only be encoded this way if it is between
-<code>0</code> and <code>2**bits - 1</code>, which implies that the measurement is between <code>-offset</code>
-and <code>max_measurement</code>.<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-6">The circuit first checks that each entry of both bit vectors is a one or a
-zero. It then decodes both the measurement and the offset measurement, and
-subtracts the offset from the latter. It then checks if these two values are
-equal. Since both the measurement and the measurement plus <code>offset</code> are in the
-same range of <code>[0, 2**bits)</code>, this means that the measurement itself is between
-<code>0</code> and <code>max_measurement</code>.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-7">The circuit uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
+<p id="section-7.4.2-3">The range check is accomplished by encoding the measurement as a vector of field
+elements with value zero or one, such that a weighted sum of these values can only
+be in the range <code>[0, max_measurement]</code>.<a href="#section-7.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-4">All but the last of the weights are successive powers of two, as in
+the binary bit decomposition, and the last weight is chosen such that the sum of
+all weights is equal to <code>max_measurement</code>. With these weights, valid
+measurements have either one or two possible representations as vectors of
+field elements with value zero or one, and invalid measurements cannot be
+represented.<a href="#section-7.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-5">The validity circuit checks that each entry of the bit vector has a value of
+zero or one. It uses the polynomial-evaluation gadget <code>PolyEval</code> specified in
 <a href="#gadget-poly-eval" class="auto internal xref">Appendix A.2</a>. The polynomial is <code>p(x) = x**2 - x</code>, which is equal to <code>0</code>
 if and only if <code>x</code> is in the range <code>[0, 2)</code>. The complete circuit is specified
-below:<a href="#section-7.4.2-7" class="pilcrow">¶</a></p>
-<p id="section-7.4.2-8">Note that decoding a sequence of bits into an integer is a linear operation,
-specifically, a linear combination with a sequence of powers of two, so it can
-be done within a validity circuit using "free" affine gates. Furthermore,
-decoding secret shares of a bit-encoded integer will produce secret shares of
-the original integer.<a href="#section-7.4.2-8" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-7.4.2-9">
+below:<a href="#section-7.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.2-6">Note that decoding a sequence of "bits" into an integer is a linear operation,
+specifically, a linear combination with the constant weights. Thus, decoding
+secret shares of a bit-encoded integer will produce secret shares of the
+original integer.<a href="#section-7.4.2-6" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.2-7">
 <pre>
 class Sum(Valid[int, int, F]):
-    GADGETS: list[Gadget[F]] = [PolyEval([0, -1, 1])]
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
     field: type[F]
 
     def __init__(self, field: type[F], max_measurement: int):
         self.field = field
-        self.bits = max_measurement.bit_length()
-        self.offset = self.field(2**self.bits - 1 - max_measurement)
+        bits = max_measurement.bit_length()
+        self.bits = bits
         self.max_measurement = max_measurement
-        self.GADGET_CALLS = [2 * self.bits]
-        self.MEAS_LEN = 2 * self.bits
-        self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
+        self.GADGET_CALLS = [self.bits]
+        self.GADGETS = [PolyEval([0, -1, 1], self.bits)]
+        self.MEAS_LEN = self.bits
+        self.EVAL_OUTPUT_LEN = self.bits
 
     def encode(self, measurement: int) -&gt; list[F]:
         encoded = []
-        encoded += self.field.encode_into_bit_vec(
-            measurement,
-            self.bits
-        )
-        encoded += self.field.encode_into_bit_vec(
-            measurement + self.offset.int(),
-            self.bits
-        )
+        # Implementation note: this conditional should be replaced
+        # with constant time operations in practice in order to
+        # reduce leakage via timing side channels.
+        if measurement &lt;= 2 ** (self.bits - 1) - 1:
+            encoded += self.field.encode_into_bit_vec(
+                measurement,
+                self.bits - 1
+            )
+            encoded += [self.field(0)]
+        else:
+            encoded += self.field.encode_into_bit_vec(
+                measurement - self.last_weight,
+                self.bits - 1
+            )
+            encoded += [self.field(1)]
         return encoded
 
     def eval(
             self,
             meas: list[F],
             joint_rand: list[F],
-            num_shares: int) -&gt; list[F]:
-        shares_inv = self.field(num_shares).inv()
-
+            _num_shares: int) -&gt; list[F]:
         out = []
         for b in meas:
             out.append(self.GADGETS[0].eval(self.field, [b]))
 
-        range_check = self.offset * shares_inv + \
-            self.field.decode_from_bit_vec(meas[:self.bits]) - \
-            self.field.decode_from_bit_vec(meas[self.bits:])
-        out.append(range_check)
         return out
 
     def truncate(self, meas: list[F]) -&gt; list[F]:
-        return [self.field.decode_from_bit_vec(meas[:self.bits])]
+        return [
+            self.field.decode_from_bit_vec(meas[:self.bits - 1])
+            + meas[self.bits - 1] * self.field(self.last_weight)
+        ]
 
     def decode(self, output: list[F], _num_measurements: int) -&gt; int:
         return output[0].int()
-</pre><a href="#section-7.4.2-9" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.2-7" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -6981,7 +6972,7 @@ class Sum(Valid[int, int, F]):
                   <code>Valid</code>
 </td>
                 <td class="text-left" rowspan="1" colspan="1">
-                  <code>SumVec(field, length, bits, chunk_length)</code> (this section)</td>
+                  <code>SumVec(field, length, max_measurement, chunk_length)</code> (this section)</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">
@@ -6994,27 +6985,30 @@ class Sum(Valid[int, int, F]):
             </tbody>
           </table>
 <p id="section-7.4.3-2">This instance of Prio3 supports summing vectors of integers. It has three
-parameters: <code>length</code>, <code>bits</code>, and <code>chunk_length</code>. Each measurement is a vector
-of positive integers with length equal to the <code>length</code> parameter. Each element
-of the measurement is an integer in the range <code>[0, 2**bits)</code>. It is <span class="bcp14">RECOMMENDED</span>
-to set <code>chunk_length</code> to an integer near the square root of <code>length * bits</code>
-(see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-3">The circuit is denoted <code>SumVec</code>. Each measurement is encoded as a vector of
+parameters: <code>length</code>, <code>max_measurement</code>, and <code>chunk_length</code>. Each measurement is
+a vector of positive integers with length equal to the <code>length</code> parameter. Each
+element of the measurement is an integer in the range <code>[0, max_measurement]</code>.<a href="#section-7.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-3">Let <code>bits = max_measurement.bit_length()</code>, the number of bits needed to encode
+the largest valid measurement.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-4">It s <span class="bcp14">RECOMMENDED</span> to set <code>chunk_length</code> to an integer near the square root of
+<code>length * bits</code>, (see <a href="#parallel-sum-chunk-length" class="auto internal xref">Section 7.4.3.1</a>).<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-5">The circuit is denoted <code>SumVec</code>. Each measurement is encoded as a vector of
 field elements with a length of <code>length * bits</code>. The field elements in the
-encoded vector represent all the bits of the measurement vector's elements,
-consecutively, in LSB to MSB order.<a href="#section-7.4.3-3" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-4">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
+encoded vector represent modified bit decompositions of each of the measurement
+vector's elements, following the <code>Sum</code> circuit's encoding procedure,
+concatenated together.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-6">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
 then sums the results. Along with the subcircuit, the
 parallel-sum gadget is parameterized by an integer, denoted <code>count</code>, specifying
 how many times to call the subcircuit. It takes in a list of inputs and passes
 them through to instances of the subcircuit in the same order. It returns the
-sum of the subcircuit outputs.<a href="#section-7.4.3-4" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-5">Note that only the <code>ParallelSum</code> gadget itself, and not its subcircuit,
+sum of the subcircuit outputs.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-7">Note that only the <code>ParallelSum</code> gadget itself, and not its subcircuit,
 participates in the FLP's wire recording during evaluation, gadget consistency
 proofs, and proof validation, even though the subcircuit is provided to
-<code>ParallelSum</code> gadget as an implementation of the <code>Gadget</code> interface.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-6">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
+<code>ParallelSum</code> gadget as an implementation of the <code>Gadget</code> interface.<a href="#section-7.4.3-7" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-8">The <code>SumVec</code> validity circuit checks that the encoded measurement consists of
 ones and zeros. Rather than use the <code>PolyEval</code> gadget on each element, as in
 the <code>Sum</code> validity circuit, it instead uses <code>Mul</code> subcircuits (<a href="#gadget-mul" class="auto internal xref">Appendix A.1</a>)
 and "free" constant multiplication and addition gates to simultaneously
@@ -7023,29 +7017,33 @@ constant. One of the two <code>Mul</code> subcircuit inputs is equal to a measur
 element multiplied by a power of one of the elements of the joint randomness
 vector, and the other is equal to the same measurement element minus one. These
 <code>Mul</code> subcircuits are evaluated by a <code>ParallelSum</code> gadget, and the results are
-added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.3-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.3-7">The complete circuit is specified below:<a href="#section-7.4.3-7" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-7.4.3-8">
+added up both within the <code>ParallelSum</code> gadget and after it.<a href="#section-7.4.3-8" class="pilcrow">¶</a></p>
+<p id="section-7.4.3-9">The complete circuit is specified below:<a href="#section-7.4.3-9" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.3-10">
 <pre>
 class SumVec(Valid[list[int], list[int], F]):
     EVAL_OUTPUT_LEN = 1
     length: int
-    bits: int
+    max_measurement: int
     chunk_length: int
     field: type[F]
 
     def __init__(self,
                  field: type[F],
                  length: int,
-                 bits: int,
+                 max_measurement: int,
                  chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with
-        `length` elements, each in the range `[0, 2**bits)`.
+        `length` elements, each in the range `[0, max_measurement]`.
         """
         self.field = field
         self.length = length
+        bits = max_measurement.bit_length()
         self.bits = bits
+        self.max_measurement = max_measurement
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
@@ -7058,8 +7056,21 @@ class SumVec(Valid[list[int], list[int], F]):
     def encode(self, measurement: list[int]) -&gt; list[F]:
         encoded = []
         for val in measurement:
-            encoded += self.field.encode_into_bit_vec(
-                val, self.bits)
+            # Implementation note: this conditional should be
+            # replaced with constant time operations in practice in
+            # order to reduce leakage via timing side channels.
+            if val &lt;= 2 ** (self.bits - 1) - 1:
+                encoded += self.field.encode_into_bit_vec(
+                    val,
+                    self.bits - 1
+                )
+                encoded += [self.field(0)]
+            else:
+                encoded += self.field.encode_into_bit_vec(
+                    val - self.last_weight,
+                    self.bits - 1
+                )
+                encoded += [self.field(1)]
         return encoded
 
     def eval(
@@ -7096,9 +7107,13 @@ class SumVec(Valid[list[int], list[int], F]):
     def truncate(self, meas: list[F]) -&gt; list[F]:
         truncated = []
         for i in range(self.length):
-            truncated.append(self.field.decode_from_bit_vec(
-                meas[i * self.bits: (i + 1) * self.bits]
-            ))
+            truncated.append(
+                self.field.decode_from_bit_vec(
+                    meas[i * self.bits: (i + 1) * self.bits - 1]
+                )
+                + meas[(i + 1) * self.bits - 1]
+                * self.field(self.last_weight)
+            )
         return truncated
 
     def decode(
@@ -7106,7 +7121,7 @@ class SumVec(Valid[list[int], list[int], F]):
             output: list[F],
             _num_measurements: int) -&gt; list[int]:
         return [x.int() for x in output]
-</pre><a href="#section-7.4.3-8" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.3-10" class="pilcrow">¶</a>
 </div>
 <div id="parallel-sum-chunk-length">
 <section id="section-7.4.3.1">
@@ -7337,25 +7352,18 @@ probability.)<a href="#section-7.4.5-2" class="pilcrow">¶</a></p>
 <code>length</code>, the number of entries in the count vector; <code>max_weight</code>, the maximum
 number of <code>True</code> entries (i.e., the weight must be at most <code>max_weight</code>); and
 <code>chunk_length</code>, used the same way as in <a href="#prio3sumvec" class="auto internal xref">Section 7.4.3</a> and <a href="#prio3histogram" class="auto internal xref">Section 7.4.4</a>.<a href="#section-7.4.5-3" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-4">Validation works as follows. Let<a href="#section-7.4.5-4" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-7.4.5-5.1">
-              <p id="section-7.4.5-5.1.1"><code>bits_for_weight = max_weight.bit_length()</code><a href="#section-7.4.5-5.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-7.4.5-5.2">
-              <p id="section-7.4.5-5.2.1"><code>offset = 2 ** bits_for_weight - 1 - max_weight</code><a href="#section-7.4.5-5.2.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-7.4.5-6">The Client reports the weight of the count vector by adding <code>offset</code> to it and
-bit-encoding the result. Observe that only a weight of at most <code>max_weight</code> can
-be encoded with <code>bits_for_weight</code> bits.<a href="#section-7.4.5-6" class="pilcrow">¶</a></p>
-<p id="section-7.4.5-7">The verifier checks that each entry of the encoded measurement is a bit (i.e.,
-either one or zero). It then decodes the reported weight and subtracts it from
-<code>offset + sum(count_vec)</code>, where <code>count_vec</code> is the count vector. The result is
+<p id="section-7.4.5-4">The Client's encoded measurement includes both the count vector and the
+weight of the count vector. The weight is encoded as multiple field
+elements, using the same modified bit decomposition as in the <code>Sum</code>
+circuit's encoding procedure.<a href="#section-7.4.5-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.5-5">The verifier checks that each entry of the encoded measurement is a bit (i.e.,
+either one or zero), including both the count vector and the encoding of the
+reported weight. It then decodes the reported weight and subtracts it from
+<code>sum(count_vec)</code>, where <code>count_vec</code> is the count vector. The result is
 zero if and only if the reported weight is equal to the true weight. The two
 checks constitute the output of the circuit. The complete circuit is defined
-below.<a href="#section-7.4.5-7" class="pilcrow">¶</a></p>
-<div class="breakable lang-python sourcecode" id="section-7.4.5-8">
+below.<a href="#section-7.4.5-5" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-7.4.5-6">
 <pre>
 class MultihotCountVec(Valid[list[bool], list[int], F]):
     EVAL_OUTPUT_LEN = 2
@@ -7380,15 +7388,22 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
-        self.offset = self.field(
-            2**self.bits_for_weight - 1 - max_weight)
+        # Precompute value for range check of claimed weight.
+        # Note that `last_weight` is the weight of the last digit in
+        # the range-checked form of the claimed weight of the
+        # measurement.
+        rest_all_ones_value = 2 ** (self.bits_for_weight - 1) - 1
+        self.last_weight = max_weight - rest_all_ones_value
 
-        # Make sure `offset + length` doesn't overflow the field
-        # modulus. Otherwise we may not correctly compute the sum
-        # measurement vector entries during circuit evaluation.
-        if self.field.MODULUS - self.offset.int() &lt;= length:
-            raise ValueError('length and max_weight are too large '
-                             'for the current field size')
+        # Make sure `length` and `max_weight` don't overflow the
+        # field modulus. Otherwise we may not correctly compute the
+        # sum of measurement vector entries during circuit evaluation.
+        if self.field.MODULUS &lt;= length:
+            raise ValueError('length is too large for the '
+                             'current field size')
+        if self.field.MODULUS &lt;= max_weight:
+            raise ValueError('max_weight is too large for the '
+                             'current field size')
 
         self.length = length
         self.max_weight = max_weight
@@ -7412,13 +7427,25 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
         count_vec = [self.field(int(x)) for x in measurement]
 
         # The second part is the reported weight.
-        weight_reported = sum(count_vec, self.field(0))
+        weight_reported = sum(measurement)
 
         encoded = []
         encoded += count_vec
-        encoded += self.field.encode_into_bit_vec(
-            (self.offset + weight_reported).int(),
-            self.bits_for_weight)
+        # Implementation note: this conditional should be replaced
+        # with constant time operations in practice in order to
+        # reduce leakage via timing side channels.
+        if weight_reported &lt;= 2 ** (self.bits_for_weight - 1) - 1:
+            encoded += self.field.encode_into_bit_vec(
+                weight_reported,
+                self.bits_for_weight - 1,
+            )
+            encoded += [self.field(0)]
+        else:
+            encoded += self.field.encode_into_bit_vec(
+                weight_reported - self.last_weight,
+                self.bits_for_weight - 1,
+            )
+            encoded += [self.field(1)]
         return encoded
 
     def eval(
@@ -7451,14 +7478,15 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
                 cast(list[F], inputs),
             )
 
-        # Check that the weight `offset` plus the sum of the counters
-        # is equal to the value claimed by the Client.
+        # Check that the sum of the counters is equal to the value
+        # claimed by the Client.
         count_vec = meas[:self.length]
         weight = sum(count_vec, self.field(0))
-        weight_reported = \
-            self.field.decode_from_bit_vec(meas[self.length:])
-        weight_check = self.offset*shares_inv + weight - \
-            weight_reported
+        weight_reported = (
+            self.field.decode_from_bit_vec(meas[self.length:-1])
+            + meas[-1] * self.field(self.last_weight)
+        )
+        weight_check = weight - weight_reported
 
         return [range_check, weight_check]
 
@@ -7471,7 +7499,7 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
             _num_measurements: int) -&gt; list[int]:
         return [bucket_count.int() for
                 bucket_count in output]
-</pre><a href="#section-7.4.5-8" class="pilcrow">¶</a>
+</pre><a href="#section-7.4.5-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -9462,7 +9490,7 @@ not useful for other applications that use the same parameters.<a href="#section
 provides domain separation between families of circuits, but does not provide
 domain separation between instances of a circuit. Concretely, it is possible
 for Aggregators to accept a report for Prio3SumVec from a Client who disagrees
-with them on the value of <code>bits</code> and <code>length</code> (so long as the encoded
+with them on the value of <code>max_measurement</code> and <code>length</code> (so long as the encoded
 measurement is the same size). This is because there is no
 binding of the circuit parameters to the computation.<a href="#section-9.9-4" class="pilcrow">¶</a></p>
 </section>
@@ -10311,10 +10339,10 @@ instantiate the VDAF. These are listed in the subsections below.<a href="#append
 </dd>
             <dd class="break"></dd>
 <dt id="appendix-C.1.3-1.7">
-<code>bits</code>:</dt>
+<code>max_measurement</code>:</dt>
             <dd style="margin-left: 1.5em" id="appendix-C.1.3-1.8">
-              <p id="appendix-C.1.3-1.8.1">the bit length of each element of the vector, an integer. Each element is in
-the range <code>[0, 2**bits)</code>.<a href="#appendix-C.1.3-1.8.1" class="pilcrow">¶</a></p>
+              <p id="appendix-C.1.3-1.8.1">The largest allowable value of each element of the vector, an integer. Each
+element is in the range <code>[0, max_measurement]</code>.<a href="#appendix-C.1.3-1.8.1" class="pilcrow">¶</a></p>
 </dd>
           <dd class="break"></dd>
 </dl>
@@ -10421,10 +10449,12 @@ analysis of <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>. Thank
 time to developing definitions and security proofs.<a href="#appendix-D-3" class="pilcrow">¶</a></p>
 <p id="appendix-D-4">Thanks to Julia Hesse who provided feedback on behalf of the Crypto Review
 Panel.<a href="#appendix-D-4" class="pilcrow">¶</a></p>
-<p id="appendix-D-5">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
+<p id="appendix-D-5">Thanks to Ian Goldberg for the bit decomposition technique used in the range
+proofs of the Prio3 variants.<a href="#appendix-D-5" class="pilcrow">¶</a></p>
+<p id="appendix-D-6">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
 Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
-Christopher Wood for useful feedback on and contributions to the spec.<a href="#appendix-D-5" class="pilcrow">¶</a></p>
+Christopher Wood for useful feedback on and contributions to the spec.<a href="#appendix-D-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">
