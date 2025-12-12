@@ -1116,8 +1116,9 @@ def encode_range_checked_int(
         value: int,
         max_measurement: int) -> list[F]:
     """
-    Encode an integer into multiple field elements in a way that
-    allows for efficient range proofs.
+    Encode an integer into multiple field elements, representing a
+    weighted sum of zeros and ones, to allow for efficient range
+    proofs.
 
     Pre-conditions:
 
@@ -1134,9 +1135,9 @@ def encode_range_checked_int(
     rest_all_ones_value = 2 ** (bits - 1) - 1
     last_weight = max_measurement - rest_all_ones_value
 
-    # Implementation note: this conditional should be replaced
-    # with constant time operations in practice in order to
-    # reduce leakage via timing side channels.
+    # Implementation note: this conditional should be replaced with
+    # constant time operations in order to reduce leakage via timing
+    # side channels.
     if value <= rest_all_ones_value:
         rest = value
         last_elem = field(0)

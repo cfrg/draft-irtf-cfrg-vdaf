@@ -4042,8 +4042,9 @@ def encode_range_checked_int(
         value: int,
         max_measurement: int) -> list[F]:
     """
-    Encode an integer into multiple field elements in a way that
-    allows for efficient range proofs.
+    Encode an integer into multiple field elements, representing a
+    weighted sum of zeros and ones, to allow for efficient range
+    proofs.
 
     Pre-conditions:
 
@@ -4060,9 +4061,9 @@ def encode_range_checked_int(
     rest_all_ones_value = 2 ** (bits - 1) - 1
     last_weight = max_measurement - rest_all_ones_value
 
-    # Implementation note: this conditional should be replaced
-    # with constant time operations in practice in order to
-    # reduce leakage via timing side channels.
+    # Implementation note: this conditional should be replaced with
+    # constant time operations in order to reduce leakage via timing
+    # side channels.
     if value <= rest_all_ones_value:
         rest = value
         last_elem = field(0)
@@ -4122,8 +4123,8 @@ It s RECOMMENDED to set `chunk_length` to an integer near the square root of
 The circuit is denoted `SumVec`. Each measurement is encoded as a vector of
 field elements with a length of `length * bits`. The field elements in the
 encoded vector represent modified bit decompositions of each of the measurement
-vector's elements, following the `Sum` circuit's encoding procedure,
-concatenated together.
+vector's elements, following the `Sum` circuit's encoding procedure
+({{prio3sum}}), concatenated together.
 
 The validity circuit uses the `ParallelSum` gadget in {{gadget-parallel-sum}}.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
@@ -4404,7 +4405,7 @@ number of `True` entries (i.e., the weight must be at most `max_weight`); and
 The Client's encoded measurement includes both the count vector and the
 weight of the count vector. The weight is encoded as multiple field
 elements, using the same modified bit decomposition as in the `Sum`
-circuit's encoding procedure.
+circuit's encoding procedure ({{prio3sum}}).
 
 The verifier checks that each entry of the encoded measurement is a bit (i.e.,
 either one or zero), including both the count vector and the encoding of the
