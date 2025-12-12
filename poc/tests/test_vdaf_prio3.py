@@ -77,7 +77,7 @@ class TestPrio3Sum(TestVdaf):
 
 class TestPrio3SumVec(TestVdaf):
     def test(self) -> None:
-        prio3 = Prio3SumVec(2, 10, 8, 9)
+        prio3 = Prio3SumVec(2, 10, 255, 9)
         self.assertEqual(prio3.ID, 0x00000003)
         self.run_vdaf_test(
             prio3,
@@ -97,7 +97,7 @@ class TestPrio3SumVec(TestVdaf):
         )
 
     def test_3_shares(self) -> None:
-        prio3 = Prio3SumVec(3, 3, 16, 7)
+        prio3 = Prio3SumVec(3, 3, 32000, 7)
         self.run_vdaf_test(
             prio3,
             None,
@@ -189,7 +189,7 @@ class TestPrio3SumVecWithMultiproof(TestVdaf):
     def test(self) -> None:
         for num_proofs in range(2, 5):
             multiproof = Prio3SumVecWithMultiproof(
-                2, Field64, num_proofs, 10, 8, 9)
+                2, Field64, num_proofs, 10, 255, 9)
 
             self.assertEqual(multiproof.ID, 0xFFFFFFFF)
             self.assertEqual(multiproof.PROOFS, num_proofs)
@@ -211,7 +211,7 @@ class TestPrio3SumVecWithMultiproof(TestVdaf):
                 list(range(256, 266)),
             )
 
-            prio3 = Prio3SumVec(3, 3, 16, 7)
+            prio3 = Prio3SumVec(3, 3, 65535, 7)
             self.run_vdaf_test(
                 prio3,
                 None,

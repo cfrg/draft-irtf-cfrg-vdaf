@@ -922,32 +922,34 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 class SumVec(Valid[list[int], list[int], F]):
     EVAL_OUTPUT_LEN = 1
     length: int
-    bits: int
+    max_measurement: int
     chunk_length: int
     field: type[F]
 
     def __init__(self,
                  field: type[F],
                  length: int,
-                 bits: int,
+                 max_measurement: int,
                  chunk_length: int):
         """
         Instantiate the `SumVec` circuit for measurements with
-        `length` elements, each in the range `[0, 2**bits)`.
+        `length` elements, each in the range `[0, max_measurement]`.
         """
         # REMOVE ME
-        if 2 ** bits >= field.MODULUS:
-            raise ValueError('bit size exceeds field modulus')
-        if bits <= 0:
-            raise ValueError('invalid bits')
         if length <= 0:
             raise ValueError('invalid length')
         if chunk_length <= 0:
             raise ValueError('invalid chunk_length')
+        if max_measurement <= 0:
+            raise ValueError('invalid max_measurement')
 
         self.field = field
         self.length = length
+        bits = max_measurement.bit_length()
         self.bits = bits
+        self.max_measurement = max_measurement
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
@@ -957,6 +959,10 @@ class SumVec(Valid[list[int], list[int], F]):
         self.OUTPUT_LEN = length
         self.JOINT_RAND_LEN = self.GADGET_CALLS[0]
 
+        # REMOVE ME
+        if 2 ** bits >= field.MODULUS:
+            raise ValueError('bound exceeds field modulus')
+
     def encode(self, measurement: list[int]) -> list[F]:
         # REMOVE ME
         if len(measurement) != self.length:
@@ -965,13 +971,26 @@ class SumVec(Valid[list[int], list[int], F]):
         encoded = []
         for val in measurement:
             # REMOVE ME
-            if val not in range(2**self.bits):
+            if val < 0 or val > self.max_measurement:
                 raise ValueError(
                     'entry of measurement vector is out of range'
                 )
 
-            encoded += self.field.encode_into_bit_vec(
-                val, self.bits)
+            # Implementation note: this conditional should be
+            # replaced with constant time operations in practice in
+            # order to reduce leakage via timing side channels.
+            if val <= 2 ** (self.bits - 1) - 1:
+                encoded += self.field.encode_into_bit_vec(
+                    val,
+                    self.bits - 1
+                )
+                encoded += [self.field(0)]
+            else:
+                encoded += self.field.encode_into_bit_vec(
+                    val - self.last_weight,
+                    self.bits - 1
+                )
+                encoded += [self.field(1)]
         return encoded
 
     def eval(
@@ -1010,9 +1029,13 @@ class SumVec(Valid[list[int], list[int], F]):
     def truncate(self, meas: list[F]) -> list[F]:
         truncated = []
         for i in range(self.length):
-            truncated.append(self.field.decode_from_bit_vec(
-                meas[i * self.bits: (i + 1) * self.bits]
-            ))
+            truncated.append(
+                self.field.decode_from_bit_vec(
+                    meas[i * self.bits: (i + 1) * self.bits - 1]
+                )
+                + meas[(i + 1) * self.bits - 1]
+                * self.field(self.last_weight)
+            )
         return truncated
 
     def decode(
@@ -1023,12 +1046,12 @@ class SumVec(Valid[list[int], list[int], F]):
 
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         test_vec['length'] = self.length
-        test_vec['bits'] = self.bits
+        test_vec['max_measurement'] = self.max_measurement
         test_vec['chunk_length'] = self.chunk_length
-        return ['length', 'bits', 'chunk_length']
+        return ['length', 'max_measurement', 'chunk_length']
 
 
-# NOTE: This class is excerpted in the document, de-indented. Its
+# NOTE: This class is excerpted in the document. Its
 # width should be limited to 69 columns to avoid warnings from
 # xml2rfc.
 # ===================================================================
@@ -1040,76 +1063,73 @@ class Sum(Valid[int, int, F]):
     def __init__(self, field: type[F], max_measurement: int):
         # REMOVE ME
         """
-        A circuit that checks that the measurement is in the range `[0,
-        max_measurement]`. This is accomplished by encoding the
-        measurement as a bit vector, encoding the measurement plus an
-        offset as a bit vector, then checking that the two encoded
-        integers are consistent.
+        A circuit that checks that the measurement is in the range
+        `[0, max_measurement]`. This is accomplished by encoding the
+        measurement as a vector of zeroes and ones, such that a
+        weighted sum of the "bits" can only be in this range. All but
+        the last of the weights are successive powers of two, as in
+        the binary bit decomposition, and the last weight is chosen
+        such that the sum of all weights is equal to
+        `max_measurement`. With these weights, valid measurements
+        have either one or two possible representations as a vector
+        of field elements with value zero or one, and invalid
+        measurements cannot be represented.
 
-        Let
-
-        - `bits = max_measurement.bit_length()`
-        - `offset = 2**bits - 1 - max_measurement`
-
-        The first bit-encoded integer is the measurement itself. Note
-        that only measurements between `0` and `2**bits - 1` can be
-        encoded this way with `bits` bits. The second bit-encoded integer
-        is the sum of the measurement and `offset`. Observe that only
-        measurements between `-offset` and `max_measurement` inclusive
-        can be encoded this way with `bits` bits.
-
-        To do the range check, the circuit first checks that each entry
-        of both bit vectors is a one or a zero. It then decodes both the
-        measurement and the offset measurement, and subtracts `offset`
-        from the latter. It then checks if these two values are equal.
-        Since both the measurement and the measurement plus `offset` are
-        in the same range of `0` to `2**bits - 1`, this means that the
-        measurement itself is between `0` and `max_measurement`.
+        The validity circuit checks that each entry of the bit vector
+        has a value of zero or one.
         """
         self.field = field
-        self.bits = max_measurement.bit_length()
-        self.offset = self.field(2**self.bits - 1 - max_measurement)
+        bits = max_measurement.bit_length()
+        self.bits = bits
         self.max_measurement = max_measurement
+        rest_all_ones_value = 2 ** (bits - 1) - 1
+        self.last_weight = max_measurement - rest_all_ones_value
+
         if 2 ** self.bits >= self.field.MODULUS:  # REMOVE ME
             raise ValueError('bound exceeds field modulus')  # REMOVE ME
 
-        self.GADGET_CALLS = [2 * self.bits]
-        self.GADGETS = [PolyEval([0, -1, 1], 2*self.bits)]
-        self.MEAS_LEN = 2 * self.bits
-        self.EVAL_OUTPUT_LEN = 2 * self.bits + 1
+        self.GADGET_CALLS = [self.bits]
+        self.GADGETS = [PolyEval([0, -1, 1], self.bits)]
+        self.MEAS_LEN = self.bits
+        self.EVAL_OUTPUT_LEN = self.bits
 
     def encode(self, measurement: int) -> list[F]:
         encoded = []
-        encoded += self.field.encode_into_bit_vec(
-            measurement,
-            self.bits
-        )
-        encoded += self.field.encode_into_bit_vec(
-            measurement + self.offset.int(),
-            self.bits
-        )
+        # Implementation note: this conditional should be replaced
+        # with constant time operations in practice in order to
+        # reduce leakage via timing side channels.
+        if measurement <= 2 ** (self.bits - 1) - 1:
+            encoded += self.field.encode_into_bit_vec(
+                measurement,
+                self.bits - 1
+            )
+            encoded += [self.field(0)]
+        else:
+            encoded += self.field.encode_into_bit_vec(
+                measurement - self.last_weight,
+                self.bits - 1
+            )
+            encoded += [self.field(1)]
         return encoded
 
     def eval(
             self,
             meas: list[F],
             joint_rand: list[F],
-            num_shares: int) -> list[F]:
+            _num_shares: int) -> list[F]:
         self.check_valid_eval(meas, joint_rand)  # REMOVE ME
-        shares_inv = self.field(num_shares).inv()
 
         out = []
         for b in meas:
             out.append(self.GADGETS[0].eval(self.field, [b]))
 
-        range_check = self.offset * shares_inv + \
-            self.field.decode_from_bit_vec(meas[:self.bits]) - \
-            self.field.decode_from_bit_vec(meas[self.bits:])
-        out.append(range_check)
         return out
 
     def truncate(self, meas: list[F]) -> list[F]:
-        return [self.field.decode_from_bit_vec(meas[:self.bits])]
+        return [
+            self.field.decode_from_bit_vec(meas[:self.bits - 1])
+            + meas[self.bits - 1] * self.field(self.last_weight)
+        ]
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
         return output[0].int()
