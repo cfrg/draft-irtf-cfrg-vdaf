@@ -1,7 +1,7 @@
 from typing import TypeVar
 
 from tests.test_flp import FlpTest
-from tests.test_flp_bbcggi19 import TestAverage
+from tests.test_flp_bbcggi19 import HigherDegree, TestAverage
 from vdaf_poc.field import Field64, Field128, NttField
 from vdaf_poc.flp_bbcggi19 import FlpBBCGGI19
 from vdaf_poc.test_utils import TestVdaf
@@ -27,6 +27,22 @@ class Prio3Average(Prio3):
 
     def __init__(self, shares: int, bits: int):
         flp = FlpBBCGGI19(TestAverage(Field128, bits))
+        super().__init__(shares, flp, 1)
+
+
+class Prio3HigherDegree(Prio3):
+    """
+    A Prio3 instantiation for use in tests that incorporates a degree three
+    gadget.
+    """
+    xof = XofTurboShake128
+    ID = 0xFFFFFFFF
+    VERIFY_KEY_SIZE = xof.SEED_SIZE
+
+    test_vec_name = 'Prio3HigherDegree'
+
+    def __init__(self, shares: int):
+        flp = FlpBBCGGI19(HigherDegree())
         super().__init__(shares, flp, 1)
 
 
@@ -183,6 +199,12 @@ class TestPrio3Average(TestVdaf):
         # otherwise.
         self.assertTrue(prio3.is_valid(None, list([])))
         self.assertFalse(prio3.is_valid(None, list([None])))
+
+
+class TestPrio3HigherDegree(TestVdaf):
+    def test(self) -> None:
+        prio3 = Prio3HigherDegree(2)
+        self.run_vdaf_test(prio3, None, [0, 1, 2], 3)
 
 
 class TestPrio3SumVecWithMultiproof(TestVdaf):
