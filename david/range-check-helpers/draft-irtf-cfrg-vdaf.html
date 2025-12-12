@@ -6874,8 +6874,9 @@ def encode_range_checked_int(
         value: int,
         max_measurement: int) -&gt; list[F]:
     """
-    Encode an integer into multiple field elements in a way that
-    allows for efficient range proofs.
+    Encode an integer into multiple field elements, representing a
+    weighted sum of zeros and ones, to allow for efficient range
+    proofs.
 
     Pre-conditions:
 
@@ -6892,9 +6893,9 @@ def encode_range_checked_int(
     rest_all_ones_value = 2 ** (bits - 1) - 1
     last_weight = max_measurement - rest_all_ones_value
 
-    # Implementation note: this conditional should be replaced
-    # with constant time operations in practice in order to
-    # reduce leakage via timing side channels.
+    # Implementation note: this conditional should be replaced with
+    # constant time operations in order to reduce leakage via timing
+    # side channels.
     if value &lt;= rest_all_ones_value:
         rest = value
         last_elem = field(0)
@@ -6985,8 +6986,8 @@ the largest valid measurement.<a href="#section-7.4.3-3" class="pilcrow">¶</a><
 <p id="section-7.4.3-5">The circuit is denoted <code>SumVec</code>. Each measurement is encoded as a vector of
 field elements with a length of <code>length * bits</code>. The field elements in the
 encoded vector represent modified bit decompositions of each of the measurement
-vector's elements, following the <code>Sum</code> circuit's encoding procedure,
-concatenated together.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
+vector's elements, following the <code>Sum</code> circuit's encoding procedure
+(<a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>), concatenated together.<a href="#section-7.4.3-5" class="pilcrow">¶</a></p>
 <p id="section-7.4.3-6">The validity circuit uses the <code>ParallelSum</code> gadget in <a href="#gadget-parallel-sum" class="auto internal xref">Appendix A.3</a>.
 This gadget applies an arithmetic subcircuit to multiple inputs in parallel,
 then sums the results. Along with the subcircuit, the
@@ -7333,7 +7334,7 @@ number of <code>True</code> entries (i.e., the weight must be at most <code>max_
 <p id="section-7.4.5-4">The Client's encoded measurement includes both the count vector and the
 weight of the count vector. The weight is encoded as multiple field
 elements, using the same modified bit decomposition as in the <code>Sum</code>
-circuit's encoding procedure.<a href="#section-7.4.5-4" class="pilcrow">¶</a></p>
+circuit's encoding procedure (<a href="#prio3sum" class="auto internal xref">Section 7.4.2</a>).<a href="#section-7.4.5-4" class="pilcrow">¶</a></p>
 <p id="section-7.4.5-5">The verifier checks that each entry of the encoded measurement is a bit (i.e.,
 either one or zero), including both the count vector and the encoding of the
 reported weight. It then decodes the reported weight and subtracts it from
