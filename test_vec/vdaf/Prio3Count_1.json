@@ -2,9 +2,9 @@
     "agg_param": "",
     "agg_result": 1,
     "agg_shares": [
-        "afccf0c22c8901be",
-        "1f96fa976d56026a",
-        "359d14a56320fcd7"
+        "0fda968fcb037ddf",
+        "cda1e92557cd8bb3",
+        "27847f4adb2ef76c"
     ],
     "ctx": "736f6d65206170706c69636174696f6e",
     "operations": [
@@ -81,16 +81,16 @@
     "reports": [
         {
             "input_shares": [
-                "afccf0c22c8901be040bc9d44987fd40085bf595185a3426ef810e187552209c2bd6dea2e3fecd230583e6a891a3feb5",
+                "0fda968fcb037ddfccc5081b305b1778a2bd741c1ae89d95b9ca77abdf92638baf89a9a556d19bc5722fad7d22e35513",
                 "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
                 "202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
             ],
             "measurement": 1,
             "nonce": "000102030405060708090a0b0c0d0e0f",
             "out_shares": [
-                "afccf0c22c8901be",
-                "1f96fa976d56026a",
-                "359d14a56320fcd7"
+                "0fda968fcb037ddf",
+                "cda1e92557cd8bb3",
+                "27847f4adb2ef76c"
             ],
             "public_share": "",
             "rand": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f",
@@ -99,9 +99,9 @@
             ],
             "verifier_shares": [
                 [
-                    "57b6f5e5631afdf766ff1e11a196662b0d268a8dbd2b01484225b32405f3313a",
-                    "3b3fb8c0cd5f9a5d5abc07086ef01d5b3cb2629a3c534bd4070b1c23d1898365",
-                    "700a5259cc8568aa30916e72506a0c5679b07c05a3255a85bf96d4b984f787d2"
+                    "645516ee55dfd833dd4171b2d9938ff5d4d73aa202fdf1673d9d08ae4f63336f",
+                    "3486fa8defe91a26a2eb81c1638c36bcf227593ab1b0e78b0d2775a9788ca884",
+                    "6924ef83b9360ca6c3725f94b8fdf8899ac4004115f9e81f27cc87aa617eac84"
                 ]
             ]
         }
