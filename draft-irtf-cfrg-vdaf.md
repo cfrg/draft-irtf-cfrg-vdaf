@@ -866,7 +866,7 @@ ASCII characters, they are written as Python 3 byte-string literals (e.g.,
 `b'some constant string'`).
 
 A global constant `VERSION` of type `int` is defined, which algorithms are free
-to use as desired. Its value SHALL be `12`.
+to use as desired. Its value SHALL be `18`.
 
 This document describes algorithms for multi-party computations in which the
 parties typically communicate over a network. Wherever a quantity is defined
