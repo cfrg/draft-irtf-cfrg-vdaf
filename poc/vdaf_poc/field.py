@@ -3,9 +3,9 @@
 
 from __future__ import annotations
 
-import math
 import random
-from typing import Generic, Self, TypeVar, cast
+from math import prod
+from typing import Self, TypeVar, cast
 
 from vdaf_poc.common import (assert_power_of_2, bitrev, from_le_bytes, front,
                              to_le_bytes)
@@ -351,16 +351,13 @@ def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
     return output
 
 
-T = TypeVar("T", bound=NttField)
-
-
-class Lagrange(Generic[T]):
+class Lagrange[F: NttField]():
     """Polynomial arithmetic in the Lagrange basis."""
 
-    def __init__(self, field: type[T]) -> None:
+    def __init__(self, field: type[F]) -> None:
         self.field = field
 
-    def poly_mul(self, p: list[T], q: list[T]) -> list[T]:
+    def poly_mul(self, p: list[F], q: list[F]) -> list[F]:
         """
         Multiply two polynomials in the Lagrange basis.
 
@@ -373,16 +370,16 @@ class Lagrange(Generic[T]):
         q_2n = self.double_evaluations(q)
         return [pi*qi for pi, qi in zip(p_2n, q_2n)]
 
-    def poly_eval(self, p: list[T], x: T) -> T:
-        """Evaluate a polynomial P in the Lagrange basis at x."""
+    def poly_eval(self, p: list[F], x: F) -> F:
+        """Evaluate a polynomial p in the Lagrange basis at x."""
         return self.poly_eval_batched([p], x).pop()
 
-    def poly_eval_batched(self, polys: list[list[T]], x: T) -> list[T]:
-        """Evaluate a list of polynomials in the Lagrange basis at x.
+    def poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]:
+        """Evaluate each polynomial in the Lagrange basis at x.
 
         See Alg. 7 of [Faz25](https://ia.cr/2025/1727).
         """
-        assert len(set(len(p) for p in polys)) == 1
+        assert len({len(p) for p in polys}) == 1
         n = len(polys[0])
         assert_power_of_2(n)
 
@@ -404,10 +401,10 @@ class Lagrange(Generic[T]):
             u[i] *= factor
         return u
 
-    def extend_values_to_power_of_2(self, p: list[T], n: int) -> None:
+    def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:
         """
-        Appends evaluations to the polynomial P (in-place) until the
-        number of evaluations is N, and N must be a power of two.
+        Appends evaluations to the polynomial p (in-place) until the
+        number of evaluations is n, and n must be a power of two.
 
         See Eq. (3.2.1) of [Faz25](https://ia.cr/2025/1727).
         """
@@ -418,7 +415,7 @@ class Lagrange(Generic[T]):
         w = [self.field(0)]*n
         for i in range(len(p)):
             diff = (x[i] - x[j] for j in range(len(p)) if i != j)
-            w[i] = math.prod(diff, start=self.field(1))
+            w[i] = prod(diff, start=self.field(1))
 
         for k in range(len(p), n):
             for i in range(k):
@@ -430,13 +427,13 @@ class Lagrange(Generic[T]):
                 y_den *= w[i]
 
             diff = (x[k] - x[j] for j in range(k))
-            w[k] = math.prod(diff, start=self.field(1))
+            w[k] = prod(diff, start=self.field(1))
             p.append(-w[k] * y_num * y_den.inv())
 
-    def double_evaluations(self, p: list[T]) -> list[T]:
+    def double_evaluations(self, p: list[F]) -> list[F]:
         """
-        Returns 2N evaluations of a polynomial from N Lagrange-basis
-        evaluations, such that N=len(p) is a power of 2.
+        Returns 2n evaluations of a polynomial from n Lagrange-basis
+        evaluations, such that n=len(p) is a power of two.
 
         See Eq. (3.3.4) of [Faz25](https://ia.cr/2025/1727).
         """

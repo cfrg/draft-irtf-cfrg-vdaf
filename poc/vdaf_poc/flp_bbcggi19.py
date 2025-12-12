@@ -386,7 +386,8 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
             g = cast(ProveGadget[F], g)
 
             # Define the wire polynomial length `p` as the smallest power
-            # of two accommodating all gadget calls plus one.
+            # of two accommodating all gadget calls plus one constant
+            # term for the seed.
             p = wire_poly_len(g_calls)
             assert self.field.GEN_ORDER % p == 0  # REMOVE ME
 
@@ -524,7 +525,8 @@ class Mul(Gadget[F]):
                   field: type[F],
                   inp_poly: list[list[F]]) -> list[F]:
         self.check_gadget_eval_poly(inp_poly)  # REMOVE ME
-        return Lagrange(field).poly_mul(inp_poly[0], inp_poly[1])
+        lag = Lagrange(field)
+        return lag.poly_mul(inp_poly[0], inp_poly[1])
 
 
 # NOTE: This class is excerpted in the document. Its width should be
@@ -549,7 +551,10 @@ class PolyEval(Gadget[F]):
         self.p = p
         self.DEGREE = len(p) - 1
         wire_poly_length = wire_poly_len(num_calls)
-        gadget_poly_length = gadget_poly_len(self.DEGREE, wire_poly_length)
+        gadget_poly_length = gadget_poly_len(
+            self.DEGREE,
+            wire_poly_length,
+        )
         self.n = next_power_of_2(gadget_poly_length)
 
     def eval(self, field: type[F], inp: list[F]) -> F:
