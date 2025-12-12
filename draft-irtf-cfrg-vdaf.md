@@ -2341,7 +2341,7 @@ class XofTurboShake128(Xof):
         self.l += length
 
         # Function `TurboSHAKE128(M, D, L)` is as defined in
-        # Section 2.2 of [TurboSHAKE].
+        # Section 2.1 of [RFC9861].
         #
         # Implementation note: rather than re-generate the output
         # stream each time `next()` is invoked, most implementations
