@@ -766,24 +766,14 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
     vector with at most `max_weight` number of true values. We call
     the number of true values in the vector the vector's "weight".
 
-    The circuit determines whether the weight of the vector is at most
-    `max_weight` as follows. First, it computes the weight of the
-    vector by summing the entries. Second, it compares the computed
-    weight to the weight reported by the Client and accepts the input
-    only if they are equal. Let
-
-    * `bits_for_weight = max_weight.bit_length()`
-    * `offset = 2**bits_for_weight - 1 - max_weight`
-
-    The reported weight is encoded by adding `offset` to it and
-    bit-encoding the result. Observe that only a value at most
-    `max_weight` can be encoded with `bits_for_weight` bits.
-
-    The verifier checks that each entry of the encoded measurement is
-    a bit (i.e., either one or zero). It then decodes the reported
-    weight and subtracts it from `offset + sum(count_vec)`, where
-    `count_vec` is the count vector. The result is zero if and only if
-    the reported weight is equal to the true weight.
+    The circuit validates the encoded measurement as follows. It first
+    checks that each entry of the encoded measurement is a bit
+    (i.e., either one or zero). Next, it computes the weight of the
+    vector by summing the entries and compares the computed weight to
+    the weight reported by the Client, accepting the input only if they
+    are equal. The reported weight is encoded using the same modified
+    bit decomposition as in the Sum circuit, in order to ensure that it
+    is in the correct range.
     """
     EVAL_OUTPUT_LEN = 2
     field: type[F]
@@ -815,15 +805,22 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
-        self.offset = self.field(
-            2**self.bits_for_weight - 1 - max_weight)
+        # Precompute value for range check of claimed weight.
+        # Note that `last_weight` is the weight of the last digit in
+        # the range-checked form of the claimed weight of the
+        # measurement.
+        rest_all_ones_value = 2 ** (self.bits_for_weight - 1) - 1
+        self.last_weight = max_weight - rest_all_ones_value
 
-        # Make sure `offset + length` doesn't overflow the field
-        # modulus. Otherwise we may not correctly compute the sum
-        # measurement vector entries during circuit evaluation.
-        if self.field.MODULUS - self.offset.int() <= length:
-            raise ValueError('length and max_weight are too large '
-                             'for the current field size')
+        # Make sure `length` and `max_weight` don't overflow the
+        # field modulus. Otherwise we may not correctly compute the
+        # sum of measurement vector entries during circuit evaluation.
+        if self.field.MODULUS <= length:
+            raise ValueError('length is too large for the '
+                             'current field size')
+        if self.field.MODULUS <= max_weight:
+            raise ValueError('max_weight is too large for the '
+                             'current field size')
 
         self.length = length
         self.max_weight = max_weight
@@ -847,13 +844,25 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
         count_vec = [self.field(int(x)) for x in measurement]
 
         # The second part is the reported weight.
-        weight_reported = sum(count_vec, self.field(0))
+        weight_reported = sum(measurement)
 
         encoded = []
         encoded += count_vec
-        encoded += self.field.encode_into_bit_vec(
-            (self.offset + weight_reported).int(),
-            self.bits_for_weight)
+        # Implementation note: this conditional should be replaced
+        # with constant time operations in practice in order to
+        # reduce leakage via timing side channels.
+        if weight_reported <= 2 ** (self.bits_for_weight - 1) - 1:
+            encoded += self.field.encode_into_bit_vec(
+                weight_reported,
+                self.bits_for_weight - 1,
+            )
+            encoded += [self.field(0)]
+        else:
+            encoded += self.field.encode_into_bit_vec(
+                weight_reported - self.last_weight,
+                self.bits_for_weight - 1,
+            )
+            encoded += [self.field(1)]
         return encoded
 
     def eval(
@@ -888,14 +897,15 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
                 cast(list[F], inputs),
             )
 
-        # Check that the weight `offset` plus the sum of the counters
-        # is equal to the value claimed by the Client.
+        # Check that the sum of the counters is equal to the value
+        # claimed by the Client.
         count_vec = meas[:self.length]
         weight = sum(count_vec, self.field(0))
-        weight_reported = \
-            self.field.decode_from_bit_vec(meas[self.length:])
-        weight_check = self.offset*shares_inv + weight - \
-            weight_reported
+        weight_reported = (
+            self.field.decode_from_bit_vec(meas[self.length:-1])
+            + meas[-1] * self.field(self.last_weight)
+        )
+        weight_check = weight - weight_reported
 
         return [range_check, weight_check]
 
