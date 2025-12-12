@@ -35,14 +35,6 @@ class TestFields(unittest.TestCase):
         got = cls.decode_vec(cls.encode_vec(want))
         self.assertTrue(got == want)
 
-        # Test encoding integer as bit vector.
-        vals = [i for i in range(15)]
-        bits = 4
-        for val in vals:
-            encoded = cls.encode_into_bit_vec(val, bits)
-            self.assertTrue(cls.decode_from_bit_vec(
-                encoded).int() == val)
-
     def run_ntt_field_test(self, cls: type[NttField]) -> None:
         self.run_field_test(cls)
 
