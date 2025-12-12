@@ -805,12 +805,6 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
         # Compute the number of bits to represent `max_weight`.
         self.bits_for_weight = max_weight.bit_length()
-        # Precompute value for range check of claimed weight.
-        # Note that `last_weight` is the weight of the last digit in
-        # the range-checked form of the claimed weight of the
-        # measurement.
-        rest_all_ones_value = 2 ** (self.bits_for_weight - 1) - 1
-        self.last_weight = max_weight - rest_all_ones_value
 
         # Make sure `length` and `max_weight` don't overflow the
         # field modulus. Otherwise we may not correctly compute the
@@ -848,21 +842,11 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
         encoded = []
         encoded += count_vec
-        # Implementation note: this conditional should be replaced
-        # with constant time operations in practice in order to
-        # reduce leakage via timing side channels.
-        if weight_reported <= 2 ** (self.bits_for_weight - 1) - 1:
-            encoded += self.field.encode_into_bit_vec(
-                weight_reported,
-                self.bits_for_weight - 1,
-            )
-            encoded += [self.field(0)]
-        else:
-            encoded += self.field.encode_into_bit_vec(
-                weight_reported - self.last_weight,
-                self.bits_for_weight - 1,
-            )
-            encoded += [self.field(1)]
+        encoded += encode_range_checked_int(
+            self.field,
+            weight_reported,
+            self.max_weight,
+        )
         return encoded
 
     def eval(
@@ -901,9 +885,10 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
         # claimed by the Client.
         count_vec = meas[:self.length]
         weight = sum(count_vec, self.field(0))
-        weight_reported = (
-            self.field.decode_from_bit_vec(meas[self.length:-1])
-            + meas[-1] * self.field(self.last_weight)
+        weight_reported = decode_range_checked_int(
+            self.field,
+            meas[self.length:],
+            self.max_weight,
         )
         weight_check = weight - weight_reported
 
@@ -958,8 +943,6 @@ class SumVec(Valid[list[int], list[int], F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        rest_all_ones_value = 2 ** (bits - 1) - 1
-        self.last_weight = max_measurement - rest_all_ones_value
         self.chunk_length = chunk_length
         self.GADGETS = [ParallelSum(Mul(), chunk_length)]
         self.GADGET_CALLS = [
@@ -986,21 +969,11 @@ class SumVec(Valid[list[int], list[int], F]):
                     'entry of measurement vector is out of range'
                 )
 
-            # Implementation note: this conditional should be
-            # replaced with constant time operations in practice in
-            # order to reduce leakage via timing side channels.
-            if val <= 2 ** (self.bits - 1) - 1:
-                encoded += self.field.encode_into_bit_vec(
-                    val,
-                    self.bits - 1
-                )
-                encoded += [self.field(0)]
-            else:
-                encoded += self.field.encode_into_bit_vec(
-                    val - self.last_weight,
-                    self.bits - 1
-                )
-                encoded += [self.field(1)]
+            encoded += encode_range_checked_int(
+                self.field,
+                val,
+                self.max_measurement,
+            )
         return encoded
 
     def eval(
@@ -1040,11 +1013,11 @@ class SumVec(Valid[list[int], list[int], F]):
         truncated = []
         for i in range(self.length):
             truncated.append(
-                self.field.decode_from_bit_vec(
-                    meas[i * self.bits: (i + 1) * self.bits - 1]
+                decode_range_checked_int(
+                    self.field,
+                    meas[i * self.bits:(i + 1) * self.bits],
+                    self.max_measurement,
                 )
-                + meas[(i + 1) * self.bits - 1]
-                * self.field(self.last_weight)
             )
         return truncated
 
@@ -1061,9 +1034,9 @@ class SumVec(Valid[list[int], list[int], F]):
         return ['length', 'max_measurement', 'chunk_length']
 
 
-# NOTE: This class is excerpted in the document. Its
-# width should be limited to 69 columns to avoid warnings from
-# xml2rfc.
+# NOTE: This class and the following two helper functions are
+# excerpted in the document. Their width should be limited to 69
+# columns to avoid warnings from xml2rfc.
 # ===================================================================
 class Sum(Valid[int, int, F]):
     JOINT_RAND_LEN = 0
@@ -1092,8 +1065,6 @@ class Sum(Valid[int, int, F]):
         bits = max_measurement.bit_length()
         self.bits = bits
         self.max_measurement = max_measurement
-        rest_all_ones_value = 2 ** (bits - 1) - 1
-        self.last_weight = max_measurement - rest_all_ones_value
 
         if 2 ** self.bits >= self.field.MODULUS:  # REMOVE ME
             raise ValueError('bound exceeds field modulus')  # REMOVE ME
@@ -1104,23 +1075,11 @@ class Sum(Valid[int, int, F]):
         self.EVAL_OUTPUT_LEN = self.bits
 
     def encode(self, measurement: int) -> list[F]:
-        encoded = []
-        # Implementation note: this conditional should be replaced
-        # with constant time operations in practice in order to
-        # reduce leakage via timing side channels.
-        if measurement <= 2 ** (self.bits - 1) - 1:
-            encoded += self.field.encode_into_bit_vec(
-                measurement,
-                self.bits - 1
-            )
-            encoded += [self.field(0)]
-        else:
-            encoded += self.field.encode_into_bit_vec(
-                measurement - self.last_weight,
-                self.bits - 1
-            )
-            encoded += [self.field(1)]
-        return encoded
+        return encode_range_checked_int(
+            self.field,
+            measurement,
+            self.max_measurement,
+        )
 
     def eval(
             self,
@@ -1137,8 +1096,11 @@ class Sum(Valid[int, int, F]):
 
     def truncate(self, meas: list[F]) -> list[F]:
         return [
-            self.field.decode_from_bit_vec(meas[:self.bits - 1])
-            + meas[self.bits - 1] * self.field(self.last_weight)
+            decode_range_checked_int(
+                self.field,
+                meas,
+                self.max_measurement,
+            )
         ]
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
@@ -1147,3 +1109,65 @@ class Sum(Valid[int, int, F]):
     def test_vec_set_type_param(self, test_vec: dict[str, Any]) -> list[str]:
         test_vec['max_measurement'] = int(self.max_measurement)
         return ['max_measurement']
+
+
+def encode_range_checked_int(
+        field: type[F],
+        value: int,
+        max_measurement: int) -> list[F]:
+    """
+    Encode an integer into multiple field elements in a way that
+    allows for efficient range proofs.
+
+    Pre-conditions:
+
+        - `value >= 0`
+        - `max_measurement > 0`
+        - `value <= max_measurement`
+        - `value < field.MODULUS`
+        - `max_measurement < field.MODULUS`
+    """
+    if value > max_measurement:
+        raise ValueError("measurement is too large")
+
+    bits = max_measurement.bit_length()
+    rest_all_ones_value = 2 ** (bits - 1) - 1
+    last_weight = max_measurement - rest_all_ones_value
+
+    # Implementation note: this conditional should be replaced
+    # with constant time operations in practice in order to
+    # reduce leakage via timing side channels.
+    if value <= rest_all_ones_value:
+        rest = value
+        last_elem = field(0)
+    else:
+        rest = value - last_weight
+        last_elem = field(1)
+
+    encoded = []
+    for l in range(bits - 1):
+        encoded.append(field((rest >> l) & 1))
+    encoded.append(last_elem)
+    return encoded
+
+
+def decode_range_checked_int(
+        field: type[F],
+        encoded: list[F],
+        max_measurement: int) -> F:
+    """
+    Decode a field element from a vector of field elements produced
+    by `encode_range_checked_int()`.
+
+    This may also be applied to secret shares of an encoded integer,
+    since it is a linear function.
+    """
+    bits = max_measurement.bit_length()
+    rest_all_ones_value = 2 ** (bits - 1) - 1
+    last_weight = max_measurement - rest_all_ones_value
+
+    decoded = field(0)
+    for (l, bit) in enumerate(encoded[:bits - 1]):
+        decoded += field(1 << l) * bit
+    decoded += field(last_weight) * encoded[bits - 1]
+    return decoded

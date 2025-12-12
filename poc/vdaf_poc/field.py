@@ -73,54 +73,6 @@ class Field:
             vec.append(cls(x))
         return vec
 
-    # NOTE: The encode_into_bit_vec() and decode_from_bit_vec()
-    # methods are excerpted in the document, de-indented, as the figure
-    # {{field-bit-rep}}. Their width should be limited to 69 columns
-    # after de-indenting, or 73 columns before de-indenting, to avoid
-    # warnings from xml2rfc.
-    # ===================================================================
-    @classmethod
-    def encode_into_bit_vec(
-            cls,
-            val: int,
-            bits: int) -> list[Self]:
-        """
-        Encode the bit representation of `val` with at most `bits` number
-        of bits, as a vector of field elements.
-
-        Pre-conditions:
-
-            - `val >= 0`
-            - `bits >= 0`
-        """
-        if val >= 2 ** bits:
-            # Sanity check we are able to represent `val` with `bits`
-            # number of bits.
-            raise ValueError("Number of bits is not enough to represent "
-                             "the input integer.")
-        encoded = []
-        for l in range(bits):
-            encoded.append(cls((val >> l) & 1))
-        return encoded
-
-    @classmethod
-    def decode_from_bit_vec(cls, vec: list[Self]) -> Self:
-        """
-        Decode the field element from the bit representation, expressed
-        as a vector of field elements `vec`.
-
-        This may also be used with secret shares of a bit representation,
-        since it is linear.
-        """
-        bits = len(vec)
-        if cls.MODULUS >> bits == 0:
-            raise ValueError("Number of bits is too large to be "
-                             "represented by field modulus.")
-        decoded = cls(0)
-        for (l, bit) in enumerate(vec):
-            decoded += cls(1 << l) * bit
-        return decoded
-
     def __add__(self, other: Self) -> Self:
         return self.__class__((self.val + other.val) % self.MODULUS)
 

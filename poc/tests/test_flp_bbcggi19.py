@@ -4,7 +4,8 @@ from vdaf_poc.common import next_power_of_2
 from vdaf_poc.field import Field64, Field96, Field128, NttField
 from vdaf_poc.flp_bbcggi19 import (Count, FlpBBCGGI19, Histogram, Mul,
                                    MultihotCountVec, PolyEval, Sum, SumVec,
-                                   Valid)
+                                   Valid, decode_range_checked_int,
+                                   encode_range_checked_int)
 from vdaf_poc.test_utils import TestFlpBBCGGI19
 
 Measurement = TypeVar("Measurement")
@@ -111,6 +112,24 @@ class TestSum(TestFlpBBCGGI19):
         ])
 
         self.assertRaises(ValueError, lambda: flp.encode(10001))
+
+    def test_range_check_round_trip(self) -> None:
+        # Test encoding integers for range proofs.
+        for max_measurement in range(14, 17):
+            for val in range(max_measurement + 1):
+                encoded = encode_range_checked_int(
+                    Field64,
+                    val,
+                    max_measurement,
+                )
+                self.assertEqual(
+                    decode_range_checked_int(
+                        Field64,
+                        encoded,
+                        max_measurement,
+                    ).int(),
+                    val,
+                )
 
 
 class TestHistogram(TestFlpBBCGGI19):
