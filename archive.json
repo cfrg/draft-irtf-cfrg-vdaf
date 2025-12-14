@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-07T01:13:04.753395+00:00",
+  "timestamp": "2025-12-14T01:13:28.136119+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7034,7 +7034,7 @@
       "id": "I_kwDOGKuqOc6_-pAJ",
       "title": "prio: Improve range proof in Sum",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/549",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -7046,8 +7046,8 @@
       ],
       "body": "Sum gadget requires a range proof that checks that `measurement<MAX_MEAS`, in the [current draft](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-15#name-prio3sum), this is done using two range proofs to the power-two bit decomposition.\n\nNote that this can be done more efficiently as Ian described here: https://mailarchive.ietf.org/arch/msg/privacy-pass/xK8bi2p08w5k3JjXzoQLUn6YXIo/\n\n",
       "createdAt": "2025-07-10T22:25:05Z",
-      "updatedAt": "2025-11-03T17:28:07Z",
-      "closedAt": null,
+      "updatedAt": "2025-12-12T19:19:52Z",
+      "closedAt": "2025-12-12T19:19:52Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -7531,17 +7531,19 @@
       "id": "I_kwDOGKuqOc7UmrcR",
       "title": "Add more detail about what parameters must be distributed to parties",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/582",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "draft-18"
       ],
       "body": "> I think that disagreement on the VDAF's parameters should be out of scope of our security model. We currently have a sentence in the security consideration saying that applications are responsible for \"Securely distributing the long-lived parameters, in particular the verification key.\" We may want to list all the parameters that different parties need to agree on, in a separate PR.\n\n_Originally posted by @divergentdave in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/576#pullrequestreview-3394522376_",
       "createdAt": "2025-10-29T16:34:21Z",
-      "updatedAt": "2025-11-03T17:29:52Z",
-      "closedAt": null,
+      "updatedAt": "2025-12-12T20:27:27Z",
+      "closedAt": "2025-12-12T20:27:27Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -7581,15 +7583,20 @@
       "id": "I_kwDOGKuqOc7Xr_l0",
       "title": "Better testing of different gadget polynomial lengths",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/586",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
-      "labels": [],
+      "assignees": [
+        "divergentdave"
+      ],
+      "labels": [
+        "poc",
+        "draft-18"
+      ],
       "body": "Based on the discussion in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/585#discussion_r2500947483, I think it would be good to have more testing, and perhaps more test vectors, around the edge cases of gadget polynomial length. There is currently a difference in the formulas used when setting up query shim gadgets between the spec and libprio-rs. With the gadget polynomial represented in the monomial basis, internally padding out the gadget polynomial with more zeroes has no impact, because they never get accessed for gadget outputs during circuit evaluation, and they contribute nothing to the evaluation of $g(r)$ to test the validity of the gadget polynomial. With the change from #574, this will matter more, because the gadget polynomial length implicitly tells us what degree root of unity to use to generate our evaluation points.\n\nChanging the number of gadget calls has a limited impact on the gadget polynomial length, because we already round the wire polynomial length up to the next power of two. Thus, to better explore edge cases, I think we need to vary both the gadget degree and the number of gadget calls. Thus far, all our \"real\" validity circuits only use degree two gadgets. PR #580 added one test of a circuit with a degree 3 gadget.\n\nI think we should pick a gadget's degree and number of calls such that $deg*(p-1)+1$ and $deg*p$ produce different results on either side of a power of two, make up a validity circuit using `PolyEval` that meets that, and produce test vector files, without using the circuit in a \"real\" VDAF in the spec. This will give us some more confidence in compatibility of implementations, should a future use case need gadgets with degree higher than two.",
       "createdAt": "2025-11-12T23:31:53Z",
-      "updatedAt": "2025-11-12T23:31:53Z",
-      "closedAt": null,
+      "updatedAt": "2025-12-12T21:35:53Z",
+      "closedAt": "2025-12-12T21:35:53Z",
       "comments": []
     },
     {
@@ -7597,17 +7604,19 @@
       "id": "I_kwDOGKuqOc7XsP3L",
       "title": "Replace encode_into_bit_vec() and decode_from_bit_vec() with helpers for range checked integers",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/587",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "divergentdave"
+      ],
       "labels": [
         "draft-18"
       ],
       "body": "Following #576 and #581, `encode_into_bit_vec()` and `decode_from_bit_vec()` will only be used with range checked integers, on all but the last field elements for each encoded integer. We could replace these with new helper functions that encapsulate the whole range checked integer encoding/decoding process, simplifying circuit definitions.",
       "createdAt": "2025-11-12T23:56:09Z",
-      "updatedAt": "2025-12-02T01:18:06Z",
-      "closedAt": null,
+      "updatedAt": "2025-12-12T22:24:01Z",
+      "closedAt": "2025-12-12T22:24:01Z",
       "comments": []
     },
     {
@@ -7615,18 +7624,20 @@
       "id": "I_kwDOGKuqOc7bikv4",
       "title": "Bump VERSION",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/591",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
-      "assignees": [],
+      "assignees": [
+        "cjpatton"
+      ],
       "labels": [
         "wire change",
         "draft-18"
       ],
       "body": "We have wire breaking changes coming in the next version.",
       "createdAt": "2025-12-01T23:18:03Z",
-      "updatedAt": "2025-12-01T23:18:49Z",
-      "closedAt": null,
+      "updatedAt": "2025-12-12T21:06:27Z",
+      "closedAt": "2025-12-12T21:06:27Z",
       "comments": []
     },
     {
@@ -7656,6 +7667,54 @@
           "updatedAt": "2025-12-05T17:09:12Z"
         }
       ]
+    },
+    {
+      "number": 594,
+      "id": "I_kwDOGKuqOc7dzXzm",
+      "title": "TurboSHAKE reference",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/594",
+      "state": "CLOSED",
+      "author": "martinthomson",
+      "authorAssociation": "NONE",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "In draft -17, a reference to `[TurboSHAKE]` was not updated.  It's in the diagram in [Section 6.2.1](https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-6.2.1):\n\n```\n        # Function `TurboSHAKE128(M, D, L)` is as defined in\n        # Section 2.2 of [TurboSHAKE].\n```\n\nSection 2.2 of the RFC doesn't define the interface.  It's [Section 2.1](https://www.rfc-editor.org/rfc/rfc9861#section-2.1).  Also, the label has changed.  You can avoid this problem by defining this in text, rather than artwork/pseudocode.",
+      "createdAt": "2025-12-11T22:53:19Z",
+      "updatedAt": "2025-12-12T20:06:19Z",
+      "closedAt": "2025-12-12T20:06:19Z",
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Thanks @martinthomson !",
+          "createdAt": "2025-12-12T19:52:53Z",
+          "updatedAt": "2025-12-12T19:52:53Z"
+        }
+      ]
+    },
+    {
+      "number": 598,
+      "id": "I_kwDOGKuqOc7eA1OM",
+      "title": "Update change log for draft 18",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/598",
+      "state": "OPEN",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [
+        "cjpatton"
+      ],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "So far we have:\n\n1. Take Rhizomes optimization (\\*)\n2. Improve range checks (\\*)\n\nAnything else notable?\n",
+      "createdAt": "2025-12-12T20:33:53Z",
+      "updatedAt": "2025-12-12T21:48:25Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -47082,7 +47141,7 @@
       "id": "PR_kwDOGKuqOc6s_PfQ",
       "title": "Apply improved range proof to Sum and SumVec circuits",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/576",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -47092,17 +47151,19 @@
       ],
       "body": "This applies the idea from #549 to Sum and SumVec. In the case of Sum, it simplifies the description and halves the encoded measurement size. In the case of SumVec, there's no performance change, and we get subjectively better utility through more flexibility in parameter choices. Since this is a breaking change to both affine-aggregatable encodings, and the Sum validity circuit, this results in test vector changes.\r\n\r\nCloses #549.",
       "createdAt": "2025-10-09T23:39:53Z",
-      "updatedAt": "2025-12-05T17:41:27Z",
+      "updatedAt": "2025-12-12T19:20:01Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "2841097ec3daf65b748219088f2e54f5f4161c9e",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/range-proof-optimization",
-      "headRefOid": "beede143331df1f4e58ff3cafc2791adcf573faa",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "1511dd41c046cc57dc8001148cce35ab75373a7d",
+      "closedAt": "2025-12-12T19:19:51Z",
+      "mergedAt": "2025-12-12T19:19:51Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "2734c316f96d467c2cc1094a73da582c5c405212"
+      },
       "comments": [
         {
           "author": "cjpatton",
@@ -47658,7 +47719,7 @@
       "id": "PR_kwDOGKuqOc6wAbGo",
       "title": "Use new range check in MultihotCountVec circuit",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/581",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -47666,19 +47727,21 @@
         "wire change",
         "draft-18"
       ],
-      "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.\r\n\r\nThis PR is stacked on #576 for now.",
+      "body": "This applies the range check idea from #549 to MultihotCountVec. This does not improve performance or expressiveness as with the Sum and SumVec circuits, but making this change does simplify the description by removing the need for an offset, and relying on common concepts across different circuits. Note that this is a breaking change as well.",
       "createdAt": "2025-10-27T22:36:28Z",
-      "updatedAt": "2025-12-05T17:48:09Z",
+      "updatedAt": "2025-12-12T19:23:04Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
-      "baseRefName": "david/range-proof-optimization",
-      "baseRefOid": "beede143331df1f4e58ff3cafc2791adcf573faa",
+      "baseRefName": "main",
+      "baseRefOid": "2734c316f96d467c2cc1094a73da582c5c405212",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/multihotcountvec-no-offset",
-      "headRefOid": "722f50d23d691309b1ce1e40512db4aaf5b0f8c5",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "47a8e92e2f9d9b706b21a8eaddbbb11d65819c61",
+      "closedAt": "2025-12-12T19:23:01Z",
+      "mergedAt": "2025-12-12T19:23:00Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "bc67ec26623ac0cacce045ca9af651c6d783fc81"
+      },
       "comments": [],
       "reviews": [
         {
@@ -48746,7 +48809,7 @@
       "id": "PR_kwDOGKuqOc61eG-5",
       "title": "Add helper functions for polynomial lengths",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/590",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -48755,17 +48818,19 @@
       ],
       "body": "This adds some helpers as suggested in https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/588#issuecomment-3536870327.",
       "createdAt": "2025-11-25T18:06:07Z",
-      "updatedAt": "2025-12-05T22:35:53Z",
+      "updatedAt": "2025-12-12T21:35:33Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "2841097ec3daf65b748219088f2e54f5f4161c9e",
+      "baseRefOid": "bc67ec26623ac0cacce045ca9af651c6d783fc81",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/poly-len-helpers",
-      "headRefOid": "78751f9470173aa00839ebb1e68872ad3564fec0",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "9f883b4823fcc90533f8a584b87471cf1a7a4016",
+      "closedAt": "2025-12-12T21:35:29Z",
+      "mergedAt": "2025-12-12T21:35:29Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "bb3fb711b1f9fa57621bb9a90f182b3baf89cb24"
+      },
       "comments": [
         {
           "author": "divergentdave",
@@ -48805,7 +48870,7 @@
       ],
       "body": "This is a follow-up to #585. I added `Generic[T]` as a superclass of `Lagrange`. This means that we introduce the type parameter at the class level, instead of in each method definition. Thus, the type checker knows that `self.field` and various arguments should all have the same type, and we can eliminate casts throughout the class. I had to use `T` instead of `F`, since `F` is already used as a type variable with a different bound than what we need, earlier in the file.",
       "createdAt": "2025-12-05T16:02:53Z",
-      "updatedAt": "2025-12-05T16:58:12Z",
+      "updatedAt": "2025-12-12T21:29:28Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "27e9310f6167705f00eaf3b9999f61f0668ac923",
@@ -48832,6 +48897,473 @@
           "createdAt": "2025-12-05T16:43:38Z",
           "updatedAt": "2025-12-05T16:43:38Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 595,
+      "id": "PR_kwDOGKuqOc64oe4b",
+      "title": "Update stale reference to TurboSHAKE",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/595",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "Resolves #594.",
+      "createdAt": "2025-12-12T19:53:07Z",
+      "updatedAt": "2025-12-12T20:06:18Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "bc67ec26623ac0cacce045ca9af651c6d783fc81",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/594",
+      "headRefOid": "4fb1fe187a6665864f9869f8eae8ece954cbe8db",
+      "closedAt": "2025-12-12T20:06:18Z",
+      "mergedAt": "2025-12-12T20:06:18Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "a7405bae0860bfe0f734cce7d73b5d8398fff4f2"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7U_di1",
+          "commit": {
+            "abbreviatedOid": "4fb1fe1"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-12T19:59:55Z",
+          "updatedAt": "2025-12-12T19:59:55Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 596,
+      "id": "PR_kwDOGKuqOc64osg-",
+      "title": "Warn that protocol-confusion attacks are out of scope",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/596",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "Closes #582. This is also apropos of recent discussion on the [PPM mailing list](https://mailarchive.ietf.org/arch/msg/ppm/ivw19bc22OodH7v7mY1Oa-EG-Ug/).",
+      "createdAt": "2025-12-12T20:15:40Z",
+      "updatedAt": "2025-12-12T20:27:26Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "a7405bae0860bfe0f734cce7d73b5d8398fff4f2",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/582",
+      "headRefOid": "73f2adb5888d7591e961dcf0816e992ed9f2a4b9",
+      "closedAt": "2025-12-12T20:27:26Z",
+      "mergedAt": "2025-12-12T20:27:26Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "b1aa20f05baa6a68baccfb3bb1460d7a2307f547"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7U_rQ-",
+          "commit": {
+            "abbreviatedOid": "73f2adb"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-12T20:19:02Z",
+          "updatedAt": "2025-12-12T20:19:12Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Actually, we do include the VDAF algorithm ID in DSTs, so we have some partial protection.\r\n```suggestion\r\n   compromised if the attacker coerces an honest party into using incorrect\r\n   parameters for a (V)DAF.\r\n```",
+              "createdAt": "2025-12-12T20:19:02Z",
+              "updatedAt": "2025-12-12T20:19:12Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7U_tdx",
+          "commit": {
+            "abbreviatedOid": "73f2adb"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-12T20:22:27Z",
+          "updatedAt": "2025-12-12T20:22:28Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Partial yes, but we can't rule out attacks completely. VDAFs aren't designed to deal with these attacks on their own.\r\n\r\nI'm not super concerned about confusing variants of Prio3, since we have done defense-in-depth work for it. I'm more concerned about future VDAFs that might not take this threat model into account.",
+              "createdAt": "2025-12-12T20:22:28Z",
+              "updatedAt": "2025-12-12T20:22:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7U_vFR",
+          "commit": {
+            "abbreviatedOid": "73f2adb"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-12T20:25:06Z",
+          "updatedAt": "2025-12-12T20:25:06Z",
+          "comments": [
+            {
+              "originalPosition": 6,
+              "body": "Good point, I suppose whether other VDAFs use the XOF at all, let alone whether they use the same DST construction, is a bit out of our hands.",
+              "createdAt": "2025-12-12T20:25:06Z",
+              "updatedAt": "2025-12-12T20:25:06Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 597,
+      "id": "PR_kwDOGKuqOc64o07P",
+      "title": "Bump VERSION to 18",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/597",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "wire change",
+        "draft-18"
+      ],
+      "body": "Closes #591.",
+      "createdAt": "2025-12-12T20:30:05Z",
+      "updatedAt": "2025-12-12T21:06:26Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b1aa20f05baa6a68baccfb3bb1460d7a2307f547",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/591",
+      "headRefOid": "29de1010e83898b43f49cbec425a02e235fad172",
+      "closedAt": "2025-12-12T21:06:26Z",
+      "mergedAt": "2025-12-12T21:06:26Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "469295cc39fae8c883accf644624693aa029a275"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7VAL7Q",
+          "commit": {
+            "abbreviatedOid": "29de101"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-12T21:03:35Z",
+          "updatedAt": "2025-12-12T21:03:35Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 599,
+      "id": "PR_kwDOGKuqOc64pEEB",
+      "title": "Refactor encoding/decoding of range checked ints",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/599",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "This closes #587.",
+      "createdAt": "2025-12-12T21:00:39Z",
+      "updatedAt": "2025-12-12T22:24:04Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "b1aa20f05baa6a68baccfb3bb1460d7a2307f547",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/range-check-helpers",
+      "headRefOid": "3c045bc7ffb11cd4e684e156d299166657a33223",
+      "closedAt": "2025-12-12T22:24:00Z",
+      "mergedAt": "2025-12-12T22:24:00Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "129b1bd595cb63d960e195a818d8ca079901ac1c"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7VAVqF",
+          "commit": {
+            "abbreviatedOid": "d812923"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Nice.",
+          "createdAt": "2025-12-12T21:20:46Z",
+          "updatedAt": "2025-12-12T21:26:03Z",
+          "comments": [
+            {
+              "originalPosition": 183,
+              "body": "I like the way you expressed this elsewhere:\n```suggestion\n    Encode an integer as a weighted sum of zeros and ones to allow\n    for efficient range proofs.\n```",
+              "createdAt": "2025-12-12T21:20:46Z",
+              "updatedAt": "2025-12-12T21:26:04Z"
+            },
+            {
+              "originalPosition": 188,
+              "body": "nit: is `max_measurement == 0` a valid value? It's obviously useless, but I just wanted to check my understanding.",
+              "createdAt": "2025-12-12T21:21:12Z",
+              "updatedAt": "2025-12-12T21:26:04Z"
+            },
+            {
+              "originalPosition": 202,
+              "body": "```suggestion\n    # with constant time operations in order to\n    # reduce leakage via timing side channels.\n```",
+              "createdAt": "2025-12-12T21:22:28Z",
+              "updatedAt": "2025-12-12T21:26:04Z"
+            },
+            {
+              "originalPosition": 1,
+              "body": "We should add a backwards reference to the section that defines `encode_range_checked_int()` and `decode_range_checked_int()`. Here and below.",
+              "createdAt": "2025-12-12T21:25:49Z",
+              "updatedAt": "2025-12-12T21:26:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7VAj2A",
+          "commit": {
+            "abbreviatedOid": "d812923"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-12T21:42:29Z",
+          "updatedAt": "2025-12-12T21:42:29Z",
+          "comments": [
+            {
+              "originalPosition": 188,
+              "body": "The SumVec circuit constructor rejects a `max_measurement` of zero, for example. The construction doesn't make much sense with a maximum measurement of zero, because that can be represented with zero bits, but we want to reserve one of those zero bits for the last weight.",
+              "createdAt": "2025-12-12T21:42:29Z",
+              "updatedAt": "2025-12-12T21:42:29Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7VAlr7",
+          "commit": {
+            "abbreviatedOid": "d812923"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-12T21:45:46Z",
+          "updatedAt": "2025-12-12T21:45:46Z",
+          "comments": [
+            {
+              "originalPosition": 1,
+              "body": "I'll add references a couple paragraphs up, where we're talking about the encoding procedure.",
+              "createdAt": "2025-12-12T21:45:46Z",
+              "updatedAt": "2025-12-12T21:45:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7VAm7Q",
+          "commit": {
+            "abbreviatedOid": "3c045bc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-12T21:48:13Z",
+          "updatedAt": "2025-12-12T21:48:13Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 600,
+      "id": "PR_kwDOGKuqOc64pPB_",
+      "title": "Add test vector for Prio3 with a degree 3 gadget",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/600",
+      "state": "MERGED",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "This adds one Prio3 test vector for a test-only circuit that uses a degree 3 gadget. This will give us better coverage of edge cases, and ensures flexibility for more complicated circuits defined in the future.\r\n\r\nCloses #586.",
+      "createdAt": "2025-12-12T21:22:59Z",
+      "updatedAt": "2025-12-12T21:35:56Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "469295cc39fae8c883accf644624693aa029a275",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/prio3-degree-3-test-vec",
+      "headRefOid": "3acd486565cda07b382c4c01a0ab5057f5932f07",
+      "closedAt": "2025-12-12T21:35:52Z",
+      "mergedAt": "2025-12-12T21:35:52Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "888e4b127b5ba453a010c522c49a178941064919"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7VAaZk",
+          "commit": {
+            "abbreviatedOid": "3acd486"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-12T21:27:53Z",
+          "updatedAt": "2025-12-12T21:27:53Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 601,
+      "id": "PR_kwDOGKuqOc64pdMg",
+      "title": "spec: Move FLP polynomials to Lagrange basis.",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/601",
+      "state": "OPEN",
+      "author": "armfazh",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "Updates main text to use polynomials in the Lagrange basis.\r\n\r\nReviewers:\r\nPlease suggest whether the Lagrange class must be included in the main sections or as an appendix.\r\n",
+      "createdAt": "2025-12-12T21:53:22Z",
+      "updatedAt": "2025-12-12T23:37:04Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "888e4b127b5ba453a010c522c49a178941064919",
+      "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
+      "headRefName": "specFLPLagrange",
+      "headRefOid": "a2d0eaf7dbba49523eb0826d87f321ec459d8610",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7VAvT_",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Thanks Armando, I'll do a proper review on Monday.\n\n> Reviewers: Please suggest whether the Lagrange class must be included in the main sections or as an appendix.\n\nI think it's fine where it is.\n",
+          "createdAt": "2025-12-12T22:05:00Z",
+          "updatedAt": "2025-12-12T22:07:20Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "Why change this reference? SML24 seems like a way more accessible read than the original paper.",
+              "createdAt": "2025-12-12T22:05:00Z",
+              "updatedAt": "2025-12-12T22:07:20Z"
+            },
+            {
+              "originalPosition": 58,
+              "body": "We need to add `ntt()` here don't we?",
+              "createdAt": "2025-12-12T22:06:48Z",
+              "updatedAt": "2025-12-12T22:07:20Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7VA-1O",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Here are some other suggested changes for the FLP overview section:\r\n\r\n* \"... which means the coefficients of the polynomial can be secret shared ...\" => \"... coordinates of the polynomial ...\"\r\n* \"... and shares of the coefficients of `p` to each of the Aggregators.\" => \"... shares of the coordinates of `p` ...\"",
+          "createdAt": "2025-12-12T22:33:29Z",
+          "updatedAt": "2025-12-12T22:51:55Z",
+          "comments": [
+            {
+              "originalPosition": 246,
+              "body": "In the next paragraph, we should probably change \"The random point `t` MUST NOT be one of the fixed evaluation points used to interpolate the wire polynomials.\" to \"... used to define the wire polynomials.\"",
+              "createdAt": "2025-12-12T22:33:29Z",
+              "updatedAt": "2025-12-12T22:51:55Z"
+            },
+            {
+              "originalPosition": 235,
+              "body": "Here's a suggested rephrasing, to reflect that only the wire polynomials are constructed during the query process, while the gadget polynomials are received from the client.\r\n```suggestion\r\nNote that the wire polynomials are in the value (Lagrange) representation\r\nby construction, and the gadget polynomials parsed from the proof share\r\nare similarly transmitted in value (Lagrange) representation.\r\n```",
+              "createdAt": "2025-12-12T22:49:54Z",
+              "updatedAt": "2025-12-12T22:51:55Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7VBZ37",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-12T23:33:32Z",
+          "updatedAt": "2025-12-12T23:33:33Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "This is more about giving proper credit. ",
+              "createdAt": "2025-12-12T23:33:33Z",
+              "updatedAt": "2025-12-12T23:33:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7VBa1j",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-12T23:37:04Z",
+          "updatedAt": "2025-12-12T23:37:04Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "That's less important in my opinion than providing a useful reference. This is a spec afterall :)",
+              "createdAt": "2025-12-12T23:37:04Z",
+              "updatedAt": "2025-12-12T23:37:04Z"
+            }
+          ]
         }
       ]
     }
