@@ -936,7 +936,7 @@ Some common functionalities:
   the implementation to construct field elements. (See {{field}}.)
 
 * `poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]` returns
-  the product of two polynomials.
+  the product of two polynomials given as a list of coefficients.
 
 * `xor(left: bytes, right: bytes) -> bytes` returns the bitwise XOR of `left`
   and `right`. An exception is raised if the inputs are not the same length.
