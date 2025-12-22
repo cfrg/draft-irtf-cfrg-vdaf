@@ -248,6 +248,16 @@ informative:
     date: 2025
     target: https://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/
 
+  SML24:
+    title: "A Complete Beginner Guide to the Number Theoretic Transform (NTT)"
+    author:
+      - name: Ardianto Satriawan
+      - name: Rella Mareta
+      - name: Hanho Lee
+    date: 2024
+    refcontent: "IEEE Access, vol. 11"
+    target: https://eprint.iacr.org/2024/585
+
   Pol71: DOI.10.1090/S0025-5718-1971-0301966-0
 
   TestVectors:
@@ -902,6 +912,9 @@ Some common functionalities:
 
 * `next_power_of_2(x: int) -> int` returns the smallest integer
   greater than or equal to `x` that is also a power of two.
+
+* `assert_power_of_2(x: int) -> int` asserts whether `x` is a positive power
+  of two. If so, returns `math.ceil(math.log2(n))`.
 
 * `range(stop: int)` or `range(start: int, stop: int[, step: int])` is the range
   function from the Python standard library. The one-argument form returns the
@@ -2134,7 +2147,8 @@ def vec_neg(vec: list[F]) -> list[F]:
 
 Some VDAFs, including Prio3, require fields that are suitable for efficient
 computation of the number theoretic transform (NTT) {{Pol71}}, as this allows
-for fast conversion between polynomial representations.
+for fast conversion between polynomial representations. Refer to {{SML24}}
+for an overview regarding NTT.
 Specifically, a field is said to be "NTT-friendly" if, in addition to the
 interface described in {{field}}, it provides the following interface:
 
@@ -2146,14 +2160,46 @@ interface described in {{field}}, it provides the following interface:
   `Field.gen()`. This is the smallest positive integer for which
   `Field.gen() ** Field.GEN_ORDER == Field(1)`.
 
-* `Field.nth_root_powers(n: int) -> list[F]` returns the first n powers of
+* `Field.nth_root_powers(n: int) -> list[F]` returns the first `n` powers of
   an `n`-th root of unity.
+
+* `Field.ntt(p: list[F], n: int) -> list[F]` returns the evaluations of a
+  polynomial `p` at the first `n` powers of an `n`-th root of unity.
+  The polynomial is given as a list of coefficients, and `n` must be a power
+  of two.
+
+* `Field.inv_ntt(v: list[F], n: int) -> list[F]` returns the coefficients of
+  a polynomial `p` such that `v` are the evaluations of `p` at the first `n`
+  powers of an `n`-th root of unity. Note that `n` must be a power of two.
 
 The size of the subgroup dictates how large interpolated polynomials can be. It
 is RECOMMENDED that a generator is chosen with order at least `2**20`.
 
-The `Lagrange` class defines some operations for polynomials represented in
-the Lagrange basis. See {{Faz25}} for the derivation of these algorithms.
+The following functions are used to operate with polynomials (over an
+NTT-friendly field) represented in the Lagrange basis.
+
+- `poly_mul(self, p: list[T], q: list[T]) -> list[T]` multiplies
+  two polynomials such that the input and output are in the Lagrange basis
+  representation.
+
+- `poly_eval(self, p: list[T], x: T) -> T` evaluates a polynomial
+  `p` at `x` such that `p` is in the Lagrange basis representation.
+  Its implementation can be done without interpolating the polynomial.
+
+- `poly_eval_batched(self, polys: list[list[T]], x: T) -> list[T]` similar to
+  `Lagrange.poly_eval`, evaluates a list of polynomials at `x`.
+  Its implementation is faster by sharing intermediate calculations.
+
+- `extend_values_to_power_of_2(self, p: list[T], n: int)` appends evaluations
+  to the polynomial `p` (in-place) until the number of evaluations is `n`,
+  such that `n` must be a power of two.
+
+- `double_evaluations(self, p: list[T]) -> list[T]` returns `2*n` evaluations
+  of a polynomial given `n=len(p)` evaluations.
+
+The `Lagrange` class implements the functions described above.
+An instance of this class is constructed taking an NTT-friendly field.
+Refer to {{Faz25}} for the derivation of these algorithms.
 
 ~~~ python
 import math
