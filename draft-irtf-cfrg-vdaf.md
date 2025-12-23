@@ -2195,7 +2195,7 @@ NTT-friendly field) represented in the Lagrange basis.
   such that `n` must be a power of two.
 
 - `double_evaluations(self, p: list[T]) -> list[T]` returns `2*n` evaluations
-  of a polynomial given `n=len(p)` evaluations.
+  of a polynomial given `n=len(p)` evaluations, and `n` must be a power of two.
 
 The `Lagrange` class implements the functions described above.
 An instance of this class is constructed taking an NTT-friendly field.
@@ -3849,9 +3849,9 @@ def prove(self,
     for g, g_calls in zip(valid.GADGETS, valid.GADGET_CALLS):
         g = cast(ProveGadget[F], g)
 
-        # Define `p` as the smallest power of two accommodating all
-        # gadget calls plus one.
-        p = next_power_of_2(1 + g_calls)
+        # Define the wire polynomial length `p` as the smallest power
+        # of two accommodating all gadget calls plus one.
+        p = wire_poly_len(g_calls)
 
         # The validity circuit evaluation defines one polynomial for
         # each input wire of each gadget.
@@ -3873,8 +3873,7 @@ def prove(self,
         # on the wire polynomials. By construction we have that
         # `gadget_poly(alpha**k)` is the `k`-th output.
         gadget_poly = g.eval_poly(self.field, wire_polys)
-        gadget_poly_len = g.DEGREE * (p - 1) + 1
-        proof += gadget_poly[:gadget_poly_len]
+        proof += gadget_poly[:gadget_poly_len(g.DEGREE, p)]
 
     return proof
 ~~~
@@ -6341,9 +6340,12 @@ class PolyEval(Gadget[F]):
 
         self.p = p
         self.DEGREE = len(p) - 1
-        wire_poly_len = next_power_of_2(1+num_calls)
-        gadget_poly_len = self.DEGREE*(wire_poly_len-1) + 1
-        self.n = next_power_of_2(gadget_poly_len)
+        wire_poly_length = wire_poly_len(num_calls)
+        gadget_poly_length = gadget_poly_len(
+            self.DEGREE,
+            wire_poly_length,
+        )
+        self.n = next_power_of_2(gadget_poly_length)
 
     def eval(self, field: type[F], inp: list[F]) -> F:
         p = [field(coeff) for coeff in self.p]
@@ -6504,7 +6506,7 @@ class QueryGadget(Gadget[F]):
         lag.extend_values_to_power_of_2(gadget_poly, n)
 
         # Calculate 'size' evaluations of the gadget_poly.
-        size = next_power_of_2(g.DEGREE * (p - 1) + 1)
+        size = next_power_of_2(gadget_poly_len(g.DEGREE, p))
         while len(gadget_poly) < size:
             gadget_poly = lag.double_evaluations(gadget_poly)
         self.poly = gadget_poly
@@ -6518,7 +6520,7 @@ class QueryGadget(Gadget[F]):
         self.k += 1
         for j in range(len(inp)):
             self.wires[j][self.k] = inp[j]
-        return poly_eval(field, self.poly, self.alpha ** self.k)
+        return self.poly[self.k*self.step]
 
     @classmethod
     def wrap(cls,

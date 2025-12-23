@@ -549,7 +549,10 @@ class PolyEval(Gadget[F]):
         self.p = p
         self.DEGREE = len(p) - 1
         wire_poly_length = wire_poly_len(num_calls)
-        gadget_poly_length = gadget_poly_len(self.DEGREE, wire_poly_length)
+        gadget_poly_length = gadget_poly_len(
+            self.DEGREE,
+            wire_poly_length,
+        )
         self.n = next_power_of_2(gadget_poly_length)
 
     def eval(self, field: type[F], inp: list[F]) -> F:
