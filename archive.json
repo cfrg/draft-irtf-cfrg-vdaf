@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-14T01:13:28.136119+00:00",
+  "timestamp": "2025-12-23T01:08:38.698626+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -49260,13 +49260,13 @@
       ],
       "body": "Updates main text to use polynomials in the Lagrange basis.\r\n\r\nReviewers:\r\nPlease suggest whether the Lagrange class must be included in the main sections or as an appendix.\r\n",
       "createdAt": "2025-12-12T21:53:22Z",
-      "updatedAt": "2025-12-12T23:37:04Z",
+      "updatedAt": "2025-12-23T00:45:23Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "888e4b127b5ba453a010c522c49a178941064919",
+      "baseRefOid": "129b1bd595cb63d960e195a818d8ca079901ac1c",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "specFLPLagrange",
-      "headRefOid": "a2d0eaf7dbba49523eb0826d87f321ec459d8610",
+      "headRefOid": "1b85cdcce8acc14366ea605b6b6f1ceb11352d01",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -49362,6 +49362,236 @@
               "body": "That's less important in my opinion than providing a useful reference. This is a spec afterall :)",
               "createdAt": "2025-12-12T23:37:04Z",
               "updatedAt": "2025-12-12T23:37:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W6sa3",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-22T20:58:45Z",
+          "updatedAt": "2025-12-22T20:58:45Z",
+          "comments": [
+            {
+              "originalPosition": 58,
+              "body": "added now. Do we also need its implementation in Python?",
+              "createdAt": "2025-12-22T20:58:45Z",
+              "updatedAt": "2025-12-22T20:58:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W6slT",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-22T20:58:57Z",
+          "updatedAt": "2025-12-22T20:58:58Z",
+          "comments": [
+            {
+              "originalPosition": 246,
+              "body": "done.",
+              "createdAt": "2025-12-22T20:58:57Z",
+              "updatedAt": "2025-12-22T20:58:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W6spY",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-22T20:59:04Z",
+          "updatedAt": "2025-12-22T20:59:04Z",
+          "comments": [
+            {
+              "originalPosition": 235,
+              "body": "done.",
+              "createdAt": "2025-12-22T20:59:04Z",
+              "updatedAt": "2025-12-22T20:59:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W6szF",
+          "commit": {
+            "abbreviatedOid": "a2d0eaf"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-22T20:59:18Z",
+          "updatedAt": "2025-12-22T20:59:18Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "updated. I maintain both references.",
+              "createdAt": "2025-12-22T20:59:18Z",
+              "updatedAt": "2025-12-22T21:03:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W7QT3",
+          "commit": {
+            "abbreviatedOid": "ffd4e30"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-22T21:48:16Z",
+          "updatedAt": "2025-12-22T23:35:30Z",
+          "comments": [
+            {
+              "originalPosition": 58,
+              "body": "This signature doesn't match what we use later, because it's missing the `set_s` argument.",
+              "createdAt": "2025-12-22T21:48:16Z",
+              "updatedAt": "2025-12-22T23:35:30Z"
+            },
+            {
+              "originalPosition": 94,
+              "body": "This should mention that n must be a power of two.",
+              "createdAt": "2025-12-22T21:52:42Z",
+              "updatedAt": "2025-12-22T23:35:30Z"
+            },
+            {
+              "originalPosition": 252,
+              "body": "This has since been updated in the Python file.\r\n```suggestion\r\n        # Define the wire polynomial length `p` as the smallest power\r\n        # of two accommodating all gadget calls plus one.\r\n        p = wire_poly_len(g_calls)\r\n```",
+              "createdAt": "2025-12-22T21:57:05Z",
+              "updatedAt": "2025-12-22T23:35:30Z"
+            },
+            {
+              "originalPosition": 279,
+              "body": "This has likewise been updated in the Python file.\r\n```suggestion\r\n        proof += gadget_poly[:gadget_poly_len(g.DEGREE, p)]\r\n```",
+              "createdAt": "2025-12-22T21:58:51Z",
+              "updatedAt": "2025-12-22T23:35:30Z"
+            },
+            {
+              "originalPosition": 360,
+              "body": "More updates from the Python files:\r\n```suggestion\r\n        wire_poly_length = wire_poly_len(num_calls)\r\n        gadget_poly_length = gadget_poly_len(\r\n            self.DEGREE,\r\n            wire_poly_length,\r\n        )\r\n        self.n = next_power_of_2(gadget_poly_length)\r\n```",
+              "createdAt": "2025-12-22T23:34:21Z",
+              "updatedAt": "2025-12-22T23:35:30Z"
+            },
+            {
+              "originalPosition": 418,
+              "body": "```suggestion\r\n        size = next_power_of_2(gadget_poly_len(g.DEGREE, p))\r\n```",
+              "createdAt": "2025-12-22T23:35:20Z",
+              "updatedAt": "2025-12-22T23:35:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W8b0Y",
+          "commit": {
+            "abbreviatedOid": "ffd4e30"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-23T00:41:32Z",
+          "updatedAt": "2025-12-23T00:41:33Z",
+          "comments": [
+            {
+              "originalPosition": 418,
+              "body": "done",
+              "createdAt": "2025-12-23T00:41:32Z",
+              "updatedAt": "2025-12-23T00:41:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W8b18",
+          "commit": {
+            "abbreviatedOid": "ffd4e30"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-23T00:41:36Z",
+          "updatedAt": "2025-12-23T00:41:37Z",
+          "comments": [
+            {
+              "originalPosition": 360,
+              "body": "done",
+              "createdAt": "2025-12-23T00:41:36Z",
+              "updatedAt": "2025-12-23T00:41:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W8b3Y",
+          "commit": {
+            "abbreviatedOid": "ffd4e30"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-23T00:41:41Z",
+          "updatedAt": "2025-12-23T00:41:41Z",
+          "comments": [
+            {
+              "originalPosition": 279,
+              "body": "done.",
+              "createdAt": "2025-12-23T00:41:41Z",
+              "updatedAt": "2025-12-23T00:41:41Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W8b5B",
+          "commit": {
+            "abbreviatedOid": "ffd4e30"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-23T00:41:45Z",
+          "updatedAt": "2025-12-23T00:41:46Z",
+          "comments": [
+            {
+              "originalPosition": 252,
+              "body": "done.",
+              "createdAt": "2025-12-23T00:41:45Z",
+              "updatedAt": "2025-12-23T00:41:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7W8b6N",
+          "commit": {
+            "abbreviatedOid": "ffd4e30"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-12-23T00:41:50Z",
+          "updatedAt": "2025-12-23T00:41:51Z",
+          "comments": [
+            {
+              "originalPosition": 94,
+              "body": "good catch.",
+              "createdAt": "2025-12-23T00:41:50Z",
+              "updatedAt": "2025-12-23T00:41:51Z"
             }
           ]
         }
