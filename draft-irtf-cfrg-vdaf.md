@@ -2173,7 +2173,7 @@ interface described in {{field}}, it provides the following interface:
   a polynomial `p` such that `v` are the evaluations of `p` at the first `n`
   powers of an `n`-th root of unity. Note that `n` must be a power of two.
 
-The size of the subgroup dictates how large interpolated polynomials can be. It
+The size of the subgroup dictates how large the polynomials can be. It
 is RECOMMENDED that a generator is chosen with order at least `2**20`.
 
 The following functions are used to operate with polynomials (over an
@@ -2185,11 +2185,11 @@ NTT-friendly field) represented in the Lagrange basis.
 
 - `poly_eval(self, p: list[T], x: T) -> T` evaluates a polynomial
   `p` at `x` such that `p` is in the Lagrange basis representation.
-  Its implementation can be done without interpolating the polynomial.
+  This evaluation runs in linear time without interpolating the polynomial.
 
 - `poly_eval_batched(self, polys: list[list[T]], x: T) -> list[T]` similar to
   `Lagrange.poly_eval`, evaluates a list of polynomials at `x`.
-  Its implementation is faster by sharing intermediate calculations.
+  These evaluations can be performed faster by sharing intermediate calculations.
 
 - `extend_values_to_power_of_2(self, p: list[T], n: int)` appends evaluations
   to the polynomial `p` (in-place) until the number of evaluations is `n`,
