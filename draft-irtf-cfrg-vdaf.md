@@ -2163,10 +2163,11 @@ interface described in {{field}}, it provides the following interface:
 * `Field.nth_root_powers(n: int) -> list[F]` returns the first `n` powers of
   an `n`-th root of unity.
 
-* `Field.ntt(p: list[F], n: int) -> list[F]` returns the evaluations of a
-  polynomial `p` at the first `n` powers of an `n`-th root of unity.
-  The polynomial is given as a list of coefficients, and `n` must be a power
-  of two.
+* `Field.ntt(p: list[F], n: int, set_s: bool = False) -> list[F]` returns
+  the values `p(w**i)` for `0 ≤ i < n`, where `p` are the coefficients a
+  polynomial, `w` is an `n`-th root of unity, and `n` must be a power of two.
+  By passing `set_s=True`, the function returns `p(s * w**i)` for `0 ≤ i < n`,
+  where `s` is a `2n`-th root of unity.
 
 * `Field.inv_ntt(v: list[F], n: int) -> list[F]` returns the coefficients of
   a polynomial `p` such that `v` are the evaluations of `p` at the first `n`
