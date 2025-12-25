@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-23T01:08:38.698626+00:00",
+  "timestamp": "2025-12-25T01:08:35.351894+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -49260,7 +49260,7 @@
       ],
       "body": "Updates main text to use polynomials in the Lagrange basis.\r\n\r\nReviewers:\r\nPlease suggest whether the Lagrange class must be included in the main sections or as an appendix.\r\n",
       "createdAt": "2025-12-12T21:53:22Z",
-      "updatedAt": "2025-12-23T00:45:23Z",
+      "updatedAt": "2025-12-24T03:20:30Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "129b1bd595cb63d960e195a818d8ca079901ac1c",
@@ -49594,6 +49594,19 @@
               "updatedAt": "2025-12-23T00:41:51Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7XKWoj",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-12-24T03:20:30Z",
+          "updatedAt": "2025-12-24T03:20:30Z",
+          "comments": []
         }
       ]
     }
