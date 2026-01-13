@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-12-25T01:08:35.351894+00:00",
+  "timestamp": "2026-01-13T01:07:32.073025+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7715,6 +7715,30 @@
       "updatedAt": "2025-12-12T21:48:25Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 602,
+      "id": "I_kwDOGKuqOc7i23pm",
+      "title": "num_shares is probably just 2",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/602",
+      "state": "OPEN",
+      "author": "martinthomson",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The value of num_shares is passed as an argument in a lot of places.  Many other parameters are kept instead as attributes.  Consider [Table 5](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-17#flp-param) for example.\n\nCould this value be moved as well?  In many deployments, it will be a constant.  2.  Computing its inverse in the field, which seems to be the most common thing to do with it, would then also be able to be a constant.",
+      "createdAt": "2026-01-12T21:22:56Z",
+      "updatedAt": "2026-01-12T21:36:51Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I think this is too big of a change to make to VDAF at this point.",
+          "createdAt": "2026-01-12T21:36:51Z",
+          "updatedAt": "2026-01-12T21:36:51Z"
+        }
+      ]
     }
   ],
   "pulls": [
