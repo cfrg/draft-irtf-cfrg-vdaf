@@ -3028,7 +3028,7 @@ def verifier_shares_to_message(
     self,
     ctx: bytes,
     _agg_param: None,
-    verifier_shares: list[Prio3VerifierShare[F]]
+    verifier_shares: list[Prio3VerifierShare[F]],
 ) -> Optional[bytes]:
     # Unshard each set of verifier shares into each verifier message.
     verifiers = self.flp.field.zeros(
