@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 15 June 2026                                               ISRG
+Expires: 18 July 2026                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        12 December 2025
+                                                         14 January 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,11 +54,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 June 2026.
+   This Internet-Draft will expire on 18 July 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -801,7 +801,7 @@ Table of Contents
    string literals (e.g., b'some constant string').
 
    A global constant VERSION of type int is defined, which algorithms
-   are free to use as desired.  Its value SHALL be 12.
+   are free to use as desired.  Its value SHALL be 18.
 
    This document describes algorithms for multi-party computations in
    which the parties typically communicate over a network.  Wherever a
@@ -2335,7 +2335,7 @@ Table of Contents
            self.l += length
 
            # Function `TurboSHAKE128(M, D, L)` is as defined in
-           # Section 2.2 of [TurboSHAKE].
+           # Section 2.1 of [RFC9861].
            #
            # Implementation note: rather than re-generate the output
            # stream each time `next()` is invoked, most implementations
@@ -3153,7 +3153,7 @@ Table of Contents
        self,
        ctx: bytes,
        _agg_param: None,
-       verifier_shares: list[Prio3VerifierShare[F]]
+       verifier_shares: list[Prio3VerifierShare[F]],
    ) -> Optional[bytes]:
        # Unshard each set of verifier shares into each verifier message.
        verifiers = self.flp.field.zeros(
@@ -3780,8 +3780,8 @@ Table of Contents
        """Length of the proof."""
        length = 0
        for (g, g_calls) in zip(self.GADGETS, self.GADGET_CALLS):
-           p = next_power_of_2(1 + g_calls)
-           length += g.ARITY + g.DEGREE * (p - 1) + 1
+           p = wire_poly_len(g_calls)
+           length += g.ARITY + gadget_poly_len(g.DEGREE, p)
        return length
 
    def verifier_len(self) -> int:
@@ -3790,6 +3790,20 @@ Table of Contents
        for g in self.GADGETS:
            length += g.ARITY + 1
        return length
+
+   def wire_poly_len(gadget_calls: int) -> int:
+       """
+       Calculates the number of coordinates in each wire polynomial for
+       a gadget.
+       """
+       return next_power_of_2(1 + gadget_calls)
+
+   def gadget_poly_len(gadget_degree: int,
+                       wire_polynomial_len: int) -> int:
+       """
+       Calculates the number of coordinates in a gadget polynomial.
+       """
+       return gadget_degree * (wire_polynomial_len - 1) + 1
 
 7.3.3.  Generating the Proof
 
@@ -6035,6 +6049,11 @@ Table of Contents
        transmission of messages between honest parties can prevent
        computation of the aggregate result by dropping messages.
 
+   5.  Security against protocol-confusion attacks.  Privacy or
+       verifiability may be compromised if the attacker coerces an
+       honest party into using either an incorrect (V)DAF or incorrect
+       parameters for the correct (V)DAF.
+
 9.1.  The Verification Key
 
    The Aggregators are responsible for exchanging the verification key
@@ -6671,7 +6690,10 @@ A.3.  Parallel Sum
        def eval_poly(self,
                      field: type[F],
                      inp_poly: list[list[F]]) -> list[F]:
-           output_poly_length = self.DEGREE * (len(inp_poly[0]) - 1) + 1
+           output_poly_length = next_power_of_2(gadget_poly_len(
+               self.DEGREE,
+               len(inp_poly[0]),
+           ))
            out_sum = [field(0) for _ in range(output_poly_length)]
            for i in range(self.count):
                start_index = i * self.subcircuit.ARITY
@@ -6700,7 +6722,7 @@ A.4.  Shims for Generating and Querying Proofs
                     wire_seeds: list[F],
                     g: Gadget[F],
                     g_calls: int):
-           p = next_power_of_2(1 + g_calls)
+           p = wire_poly_len(g_calls)
            self.inner = g
            self.ARITY = g.ARITY
            self.DEGREE = g.DEGREE
@@ -6755,7 +6777,7 @@ A.4.  Shims for Generating and Querying Proofs
                gadget_poly: list[F],
                g: Gadget[F],
                g_calls: int):
-           p = next_power_of_2(1 + g_calls)
+           p = wire_poly_len(g_calls)
            self.alpha = field.gen() ** (field.GEN_ORDER // p)
            self.poly = gadget_poly
            self.ARITY = g.ARITY
@@ -6779,10 +6801,10 @@ A.4.  Shims for Generating and Querying Proofs
                 proof: list[F]) -> Valid[Measurement, AggResult, F]:
            wrapped_gadgets: list[Gadget[F]] = []
            for (g, g_calls) in zip(valid.GADGETS, valid.GADGET_CALLS):
-               p = next_power_of_2(1 + g_calls)
-               gadget_poly_len = g.DEGREE * (p - 1) + 1
+               p = wire_poly_len(g_calls)
+               g_poly_len = gadget_poly_len(g.DEGREE, p)
                (wire_seeds, proof) = front(g.ARITY, proof)
-               (gadget_poly, proof) = front(gadget_poly_len, proof)
+               (gadget_poly, proof) = front(g_poly_len, proof)
                wrapped = cls(valid.field,
                              wire_seeds,
                              gadget_poly,
