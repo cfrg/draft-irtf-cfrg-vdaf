@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-13T01:07:32.073025+00:00",
+  "timestamp": "2026-01-15T01:09:17.331474+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -49630,6 +49630,48 @@
           "body": "",
           "createdAt": "2025-12-24T03:20:30Z",
           "updatedAt": "2025-12-24T03:20:30Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 603,
+      "id": "PR_kwDOGKuqOc69Otn5",
+      "title": "Add missing comma in excerpt",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/603",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "I went through the document (as of #601) to ensure the code excerpts were up-to-date with the `poc` directory, and I just found this missing comma.",
+      "createdAt": "2026-01-14T19:39:37Z",
+      "updatedAt": "2026-01-14T19:57:53Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "129b1bd595cb63d960e195a818d8ca079901ac1c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/update-excerpt",
+      "headRefOid": "aed501488cdf000f335bc43c20b83cc4f29bb9d5",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7aTbVc",
+          "commit": {
+            "abbreviatedOid": "aed5014"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-14T19:57:39Z",
+          "updatedAt": "2026-01-14T19:57:39Z",
           "comments": []
         }
       ]
