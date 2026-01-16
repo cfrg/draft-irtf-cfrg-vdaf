@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 15 June 2026                                               ISRG
+Expires: 20 July 2026                                               ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        12 December 2025
+                                                         16 January 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,11 +54,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 June 2026.
+   This Internet-Draft will expire on 20 July 2026.
 
 Copyright Notice
 
-   Copyright (c) 2025 IETF Trust and the persons identified as the
+   Copyright (c) 2026 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -3153,7 +3153,7 @@ Table of Contents
        self,
        ctx: bytes,
        _agg_param: None,
-       verifier_shares: list[Prio3VerifierShare[F]]
+       verifier_shares: list[Prio3VerifierShare[F]],
    ) -> Optional[bytes]:
        # Unshard each set of verifier shares into each verifier message.
        verifiers = self.flp.field.zeros(
