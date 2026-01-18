@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-15T01:09:17.331474+00:00",
+  "timestamp": "2026-01-18T01:16:28.099099+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -49639,7 +49639,7 @@
       "id": "PR_kwDOGKuqOc69Otn5",
       "title": "Add missing comma in excerpt",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/603",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -49648,17 +49648,19 @@
       ],
       "body": "I went through the document (as of #601) to ensure the code excerpts were up-to-date with the `poc` directory, and I just found this missing comma.",
       "createdAt": "2026-01-14T19:39:37Z",
-      "updatedAt": "2026-01-14T19:57:53Z",
+      "updatedAt": "2026-01-16T17:08:47Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "129b1bd595cb63d960e195a818d8ca079901ac1c",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/update-excerpt",
       "headRefOid": "aed501488cdf000f335bc43c20b83cc4f29bb9d5",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-01-16T17:08:47Z",
+      "mergedAt": "2026-01-16T17:08:47Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "adf9d3d9ab7a0adc079eb2e34c9208a17078dcc8"
+      },
       "comments": [],
       "reviews": [
         {
