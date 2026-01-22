@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-18T01:16:28.099099+00:00",
+  "timestamp": "2026-01-22T01:12:56.905249+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -49284,7 +49284,7 @@
       ],
       "body": "Updates main text to use polynomials in the Lagrange basis.\r\n\r\nReviewers:\r\nPlease suggest whether the Lagrange class must be included in the main sections or as an appendix.\r\n",
       "createdAt": "2025-12-12T21:53:22Z",
-      "updatedAt": "2025-12-24T03:20:30Z",
+      "updatedAt": "2026-01-21T00:13:15Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "129b1bd595cb63d960e195a818d8ca079901ac1c",
@@ -49631,6 +49631,134 @@
           "createdAt": "2025-12-24T03:20:30Z",
           "updatedAt": "2025-12-24T03:20:30Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7bn9nB",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Looking good! Mostly nit picky comments left for me.",
+          "createdAt": "2026-01-20T23:14:31Z",
+          "updatedAt": "2026-01-21T00:13:15Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "```suggestion\n* `assert_power_of_2(x: int) -> int` returns `math.ceil(math.log2(n))` if `x` is a positive power\n  of two and raises an exception otherwise.\n```",
+              "createdAt": "2026-01-20T23:14:32Z",
+              "updatedAt": "2026-01-21T00:13:15Z"
+            },
+            {
+              "originalPosition": 61,
+              "body": "Which `n`-th root of unity? We need to specify it. I believe this is a power of the multiplicative group generator?",
+              "createdAt": "2026-01-20T23:19:51Z",
+              "updatedAt": "2026-01-21T00:13:15Z"
+            },
+            {
+              "originalPosition": 66,
+              "body": "We've been avoiding using unicode up until now. Let's continue to do so, as it makes it easier to comply with https://www.ietf.org/archive/id/draft-irtf-cfrg-cryptography-specification-02.html#section-3.3.1.6.\n```suggestion\n  the values `p(w**i)` for `0 <= i < n`, where `p` are the coefficients a\n  polynomial, `w` is an `n`-th root of unity, and `n` must be a power of two.\n  By passing `set_s=True`, the function returns `p(s * w**i)` for `0 <= i < n`,\n```",
+              "createdAt": "2026-01-20T23:21:29Z",
+              "updatedAt": "2026-01-21T00:13:15Z"
+            },
+            {
+              "originalPosition": 64,
+              "body": "```suggestion\n  the values `p(w**i)` for `0 \u2264 i < n`, where `p` are the coefficients of a\n```",
+              "createdAt": "2026-01-20T23:21:48Z",
+              "updatedAt": "2026-01-21T00:13:15Z"
+            },
+            {
+              "originalPosition": 64,
+              "body": "```suggestion\n  the values `p(w**i)` for `0 \u2264 i < n`, where `p` are the coefficients of a\n```",
+              "createdAt": "2026-01-20T23:21:59Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 67,
+              "body": "Which root of unity? We need to specify it. (Similar comment above.)",
+              "createdAt": "2026-01-20T23:23:19Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 71,
+              "body": "Which root of unity?",
+              "createdAt": "2026-01-20T23:23:41Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 79,
+              "body": "Use `F` instead of `T` for consistency with the remainder of the document. Likewise for the reference implementation.",
+              "createdAt": "2026-01-20T23:27:59Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 81,
+              "body": "The lengths of the polynomials must be equal and be a power of 2.",
+              "createdAt": "2026-01-20T23:28:40Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 119,
+              "body": "nit: Variables in documentation should match the interface. Likewise below. (Also, let's adjust the reference implementation to match.)\n```suggestion\n        \"\"\"Evaluate a polynomial p in the Lagrange basis at x.\"\"\"\n```",
+              "createdAt": "2026-01-20T23:34:47Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 193,
+              "body": "Why this change?",
+              "createdAt": "2026-01-20T23:37:20Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 202,
+              "body": "Why this change? (Same question as above.)",
+              "createdAt": "2026-01-20T23:37:31Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 218,
+              "body": "There should be one authoritative reference for NTT.\n\n```suggestion\nnumber theoretic transform (NTT) {{SML24}} for efficiency. (Note that the NTT was first described in {{Pol77}}.)\n```",
+              "createdAt": "2026-01-20T23:38:14Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 341,
+              "body": "nit: For visual consitency\n```suggestion\n        lag = Lagrange(field)\n        return lag.poly_mul(inp_poly[0], inp_poly[1])\n```",
+              "createdAt": "2026-01-20T23:41:30Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 50,
+              "body": "I think we need to explain the difference between Lagrange and monomial basis, as these terms are used in the remainder assuming the reader knows what they mean. How about this:\n```suggestion\n\nThe NTT operation above is used to convert a polynomial from its representation in the monomial basis to its representation in the Lagrange basis. The monomial basis is the standard way of representing a polynomial, where each element of the list corresponds to one of the coefficients of the polynomial. In the Lagrange basis, each element corresponds to the evaluation of a polynomial at a special value known as a root of unity. This representation allows for certain computations to be carried out more efficiently than in the monomial basis. See {{Faz25}} for details.\n\nA field is said to be \"NTT-friendly\" if, in addition to the\n```",
+              "createdAt": "2026-01-21T00:01:48Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 252,
+              "body": "Why \"plus one\"? Explain. (Here and in the reference implementation.)",
+              "createdAt": "2026-01-21T00:02:47Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 279,
+              "body": "Why truncate `gadget_poly` here? Isn't it the case that `len(gadget_poly) == gadget_poly_len(g.DEGREE, p)`?",
+              "createdAt": "2026-01-21T00:04:45Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 289,
+              "body": "We might say something here about secret sharing. For someone who is used to thinking in the monomial basis, it might be surprising that we can secret share coordinates in the Lagrange basis just like we would in the monomial basis without impacting security.",
+              "createdAt": "2026-01-21T00:08:01Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            },
+            {
+              "originalPosition": 350,
+              "body": "`PolyEval`'s constructor is invoked elsewhere in the spec, e.g., in [`Sum`](https://cfrg.github.io/draft-irtf-cfrg-vdaf/draft-irtf-cfrg-vdaf.html#section-7.4.2-7), so we need to update those calls accordingly.",
+              "createdAt": "2026-01-21T00:11:49Z",
+              "updatedAt": "2026-01-21T00:13:16Z"
+            }
+          ]
         }
       ]
     },
