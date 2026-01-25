@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-22T01:12:56.905249+00:00",
+  "timestamp": "2026-01-25T01:18:27.078649+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7721,15 +7721,15 @@
       "id": "I_kwDOGKuqOc7i23pm",
       "title": "num_shares is probably just 2",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/602",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "martinthomson",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "The value of num_shares is passed as an argument in a lot of places.  Many other parameters are kept instead as attributes.  Consider [Table 5](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-17#flp-param) for example.\n\nCould this value be moved as well?  In many deployments, it will be a constant.  2.  Computing its inverse in the field, which seems to be the most common thing to do with it, would then also be able to be a constant.",
       "createdAt": "2026-01-12T21:22:56Z",
-      "updatedAt": "2026-01-12T21:36:51Z",
-      "closedAt": null,
+      "updatedAt": "2026-01-22T20:26:21Z",
+      "closedAt": "2026-01-22T20:26:21Z",
       "comments": [
         {
           "author": "cjpatton",
@@ -49284,13 +49284,13 @@
       ],
       "body": "Updates main text to use polynomials in the Lagrange basis.\r\n\r\nReviewers:\r\nPlease suggest whether the Lagrange class must be included in the main sections or as an appendix.\r\n",
       "createdAt": "2025-12-12T21:53:22Z",
-      "updatedAt": "2026-01-21T00:13:15Z",
+      "updatedAt": "2026-01-23T22:59:42Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
-      "baseRefOid": "129b1bd595cb63d960e195a818d8ca079901ac1c",
+      "baseRefOid": "adf9d3d9ab7a0adc079eb2e34c9208a17078dcc8",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "specFLPLagrange",
-      "headRefOid": "1b85cdcce8acc14366ea605b6b6f1ceb11352d01",
+      "headRefOid": "28a90dcbe9fa7b03e0fca0e78e7c8f7e41656840",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -49759,6 +49759,673 @@
               "updatedAt": "2026-01-21T00:13:16Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRZdj",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T03:46:04Z",
+          "updatedAt": "2026-01-23T03:46:04Z",
+          "comments": [
+            {
+              "originalPosition": 279,
+              "body": "It depends on what `g.eval_poly` returns. \r\n\r\nI think it always returns a list of the right length. However, it could return a larger slice, for this reason, we only append a slice of the expected length.\r\n",
+              "createdAt": "2026-01-23T03:46:04Z",
+              "updatedAt": "2026-01-23T03:46:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRhcD",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:07:31Z",
+          "updatedAt": "2026-01-23T04:07:31Z",
+          "comments": [
+            {
+              "originalPosition": 350,
+              "body": "done",
+              "createdAt": "2026-01-23T04:07:31Z",
+              "updatedAt": "2026-01-23T04:07:32Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRhfH",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:07:40Z",
+          "updatedAt": "2026-01-23T04:07:40Z",
+          "comments": [
+            {
+              "originalPosition": 289,
+              "body": "added one line.",
+              "createdAt": "2026-01-23T04:07:40Z",
+              "updatedAt": "2026-01-23T04:07:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRhic",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:07:47Z",
+          "updatedAt": "2026-01-23T04:07:48Z",
+          "comments": [
+            {
+              "originalPosition": 252,
+              "body": "done",
+              "createdAt": "2026-01-23T04:07:48Z",
+              "updatedAt": "2026-01-23T04:07:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRhlr",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:07:56Z",
+          "updatedAt": "2026-01-23T04:07:56Z",
+          "comments": [
+            {
+              "originalPosition": 50,
+              "body": "created Section 6.1.3 describing the two representations.",
+              "createdAt": "2026-01-23T04:07:56Z",
+              "updatedAt": "2026-01-23T04:07:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRhn4",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:01Z",
+          "updatedAt": "2026-01-23T04:08:01Z",
+          "comments": [
+            {
+              "originalPosition": 341,
+              "body": "done",
+              "createdAt": "2026-01-23T04:08:01Z",
+              "updatedAt": "2026-01-23T04:08:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRhsM",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:10Z",
+          "updatedAt": "2026-01-23T04:08:10Z",
+          "comments": [
+            {
+              "originalPosition": 218,
+              "body": "Updated: NTT was already introduced in a previous Section, so no need to redefine it.\r\n",
+              "createdAt": "2026-01-23T04:08:10Z",
+              "updatedAt": "2026-01-23T04:08:11Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRh0T",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:19Z",
+          "updatedAt": "2026-01-23T04:08:19Z",
+          "comments": [
+            {
+              "originalPosition": 202,
+              "body": "updated.",
+              "createdAt": "2026-01-23T04:08:19Z",
+              "updatedAt": "2026-01-23T04:08:19Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRh4I",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:24Z",
+          "updatedAt": "2026-01-23T04:08:24Z",
+          "comments": [
+            {
+              "originalPosition": 193,
+              "body": "I guess the change was due to the polynomial needs to be secret-shared using now the evaluations, instead of the coefficients.\r\n\r\nupdated now to remove the ambiguity.",
+              "createdAt": "2026-01-23T04:08:24Z",
+              "updatedAt": "2026-01-23T04:08:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRh_s",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:32Z",
+          "updatedAt": "2026-01-23T04:08:33Z",
+          "comments": [
+            {
+              "originalPosition": 119,
+              "body": "done",
+              "createdAt": "2026-01-23T04:08:33Z",
+              "updatedAt": "2026-01-23T04:08:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRiC7",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:39Z",
+          "updatedAt": "2026-01-23T04:08:39Z",
+          "comments": [
+            {
+              "originalPosition": 81,
+              "body": "done",
+              "createdAt": "2026-01-23T04:08:39Z",
+              "updatedAt": "2026-01-23T04:08:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRiGm",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:46Z",
+          "updatedAt": "2026-01-23T04:08:46Z",
+          "comments": [
+            {
+              "originalPosition": 79,
+              "body": "done",
+              "createdAt": "2026-01-23T04:08:46Z",
+              "updatedAt": "2026-01-23T04:08:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRiJv",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:08:54Z",
+          "updatedAt": "2026-01-23T04:08:54Z",
+          "comments": [
+            {
+              "originalPosition": 71,
+              "body": "updated",
+              "createdAt": "2026-01-23T04:08:54Z",
+              "updatedAt": "2026-01-23T04:08:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRiMc",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:09:01Z",
+          "updatedAt": "2026-01-23T04:09:01Z",
+          "comments": [
+            {
+              "originalPosition": 67,
+              "body": "updated",
+              "createdAt": "2026-01-23T04:09:01Z",
+              "updatedAt": "2026-01-23T04:09:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRiWA",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:09:26Z",
+          "updatedAt": "2026-01-23T04:09:27Z",
+          "comments": [
+            {
+              "originalPosition": 66,
+              "body": "done, fully ASCII now",
+              "createdAt": "2026-01-23T04:09:27Z",
+              "updatedAt": "2026-01-23T04:09:27Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRiyV",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:10:09Z",
+          "updatedAt": "2026-01-23T04:10:09Z",
+          "comments": [
+            {
+              "originalPosition": 61,
+              "body": "done, great observation",
+              "createdAt": "2026-01-23T04:10:09Z",
+              "updatedAt": "2026-01-23T04:10:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cRi1N",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T04:10:16Z",
+          "updatedAt": "2026-01-23T04:10:16Z",
+          "comments": [
+            {
+              "originalPosition": 14,
+              "body": "done",
+              "createdAt": "2026-01-23T04:10:16Z",
+              "updatedAt": "2026-01-23T04:10:16Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cbPAx",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T15:29:12Z",
+          "updatedAt": "2026-01-23T15:29:12Z",
+          "comments": [
+            {
+              "originalPosition": 279,
+              "body": "But the slice would only be larger if there was a bug, correct?\r\nThis I think is a lot clearer:\r\n```suggestion\r\n        assert len(gadget_poly) == gadget_poly_len(g.DEGREE, p)\r\n        proof += gadget_poly\r\n```",
+              "createdAt": "2026-01-23T15:29:12Z",
+              "updatedAt": "2026-01-23T15:29:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cbSG7",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "Just a few more nits",
+          "createdAt": "2026-01-23T15:31:38Z",
+          "updatedAt": "2026-01-23T19:50:38Z",
+          "comments": [
+            {
+              "originalPosition": 117,
+              "body": "Make this a subsection. This doesn't render the way you want in the *.txt version of the draft.\n```suggestion\n#### Monomial Basis\n```",
+              "createdAt": "2026-01-23T15:31:38Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 131,
+              "body": "```suggestion\n#### Lagrange Basis\n```",
+              "createdAt": "2026-01-23T15:31:59Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 89,
+              "body": "What do you mean by canonical representation? Do you mean to ensure interoperability?",
+              "createdAt": "2026-01-23T19:40:32Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 99,
+              "body": "A forward reference would be useful. (I'm pretty sure this is correct?)\n```suggestion\n  When `set_s=False`, it sets `v[i] = p(Wn ** i)` (this is the Lagrange representation of the polynomial, see {{poly_repr}};\n```",
+              "createdAt": "2026-01-23T19:42:15Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 105,
+              "body": "(This is the \n```suggestion\n  powers of the principal `n`-th root of unity. (This is the monomial representation of the polynomial, see {{poly_repr}}.)\n```",
+              "createdAt": "2026-01-23T19:42:53Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 141,
+              "body": "```suggestion\nThe `Lagrange` class defines operations over polynomials in the\nLagrange basis. It implements the following methods:\n```",
+              "createdAt": "2026-01-23T19:44:44Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 168,
+              "body": "Instead of importing `math`, write the code as if we did `from math import prod`. Then say what `prod` does in the paragraph.\n```suggestion\nFor algorithm derivations, refer to {{Faz25}}. In the following, `prod` computes the product of its inputs.\n\n~~~ python\n```",
+              "createdAt": "2026-01-23T19:46:55Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 355,
+              "body": "```suggestion\nthe monomial and the Lagrange basis ({{poly_repr}}).\n```",
+              "createdAt": "2026-01-23T19:48:07Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 512,
+              "body": "It's fine to use unicode in names, just not math.\n```suggestion\nThanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hern\u00e1ndez, Simon\n```",
+              "createdAt": "2026-01-23T19:49:41Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            },
+            {
+              "originalPosition": 5,
+              "body": "It's fine to use unicode in names, I just think we should avoid it in math. The goal is to be consistent about the way we specify things.",
+              "createdAt": "2026-01-23T19:50:30Z",
+              "updatedAt": "2026-01-23T19:50:38Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chQmP",
+          "commit": {
+            "abbreviatedOid": "1b85cdc"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:06Z",
+          "updatedAt": "2026-01-23T21:16:06Z",
+          "comments": [
+            {
+              "originalPosition": 279,
+              "body": "It's not a bug. \r\n\r\nHere is the case of Count (gadget=Mul).\r\n - `EvalPoly` will multiply polynomials of length `n`, so the result is \r\na polynomial of length 2n. \r\n - In this case `gadget_poly_len(g.DEGREE, p) = 2n-1`.\r\n\r\nWhen monomial basis was used, `EvalPoly` returns a list of 2n-1 elements, (the coefficient of higher-degree is always 0 and removed with the strip function).\r\n\r\nWhen Lagrange basis is used, `EvalPoly` returns a list of 2n elements. The higher value can safely truncated and send only 2n-1 elements in the proof. The truncated element can be safely recovered by a Verifier from the 2n-1 elements.\r\n\r\n",
+              "createdAt": "2026-01-23T21:16:06Z",
+              "updatedAt": "2026-01-23T21:16:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chQu4",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:15Z",
+          "updatedAt": "2026-01-23T21:16:15Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "done",
+              "createdAt": "2026-01-23T21:16:15Z",
+              "updatedAt": "2026-01-23T21:16:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chQ1F",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:22Z",
+          "updatedAt": "2026-01-23T21:16:22Z",
+          "comments": [
+            {
+              "originalPosition": 512,
+              "body": "no change",
+              "createdAt": "2026-01-23T21:16:22Z",
+              "updatedAt": "2026-01-23T21:16:23Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chQ6s",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:27Z",
+          "updatedAt": "2026-01-23T21:16:27Z",
+          "comments": [
+            {
+              "originalPosition": 355,
+              "body": "done",
+              "createdAt": "2026-01-23T21:16:27Z",
+              "updatedAt": "2026-01-23T21:16:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chQ-l",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:32Z",
+          "updatedAt": "2026-01-23T21:16:32Z",
+          "comments": [
+            {
+              "originalPosition": 168,
+              "body": "done",
+              "createdAt": "2026-01-23T21:16:32Z",
+              "updatedAt": "2026-01-23T21:16:33Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chRFu",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:43Z",
+          "updatedAt": "2026-01-23T21:16:43Z",
+          "comments": [
+            {
+              "originalPosition": 141,
+              "body": "done",
+              "createdAt": "2026-01-23T21:16:43Z",
+              "updatedAt": "2026-01-23T21:16:43Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chRL0",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:48Z",
+          "updatedAt": "2026-01-23T21:16:48Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "done",
+              "createdAt": "2026-01-23T21:16:48Z",
+              "updatedAt": "2026-01-23T21:16:48Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chRQm",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:53Z",
+          "updatedAt": "2026-01-23T21:16:53Z",
+          "comments": [
+            {
+              "originalPosition": 99,
+              "body": "done",
+              "createdAt": "2026-01-23T21:16:53Z",
+              "updatedAt": "2026-01-23T21:16:54Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chRXn",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:16:59Z",
+          "updatedAt": "2026-01-23T21:16:59Z",
+          "comments": [
+            {
+              "originalPosition": 89,
+              "body": "yes, changed",
+              "createdAt": "2026-01-23T21:16:59Z",
+              "updatedAt": "2026-01-23T21:16:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chRcG",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:17:05Z",
+          "updatedAt": "2026-01-23T21:17:05Z",
+          "comments": [
+            {
+              "originalPosition": 131,
+              "body": "done",
+              "createdAt": "2026-01-23T21:17:05Z",
+              "updatedAt": "2026-01-23T21:17:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7chRhe",
+          "commit": {
+            "abbreviatedOid": "06a8e50"
+          },
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-01-23T21:17:09Z",
+          "updatedAt": "2026-01-23T21:17:09Z",
+          "comments": [
+            {
+              "originalPosition": 117,
+              "body": "done",
+              "createdAt": "2026-01-23T21:17:09Z",
+              "updatedAt": "2026-01-23T21:17:10Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7cil1r",
+          "commit": {
+            "abbreviatedOid": "28a90dc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-23T22:59:42Z",
+          "updatedAt": "2026-01-23T22:59:42Z",
+          "comments": []
         }
       ]
     },
