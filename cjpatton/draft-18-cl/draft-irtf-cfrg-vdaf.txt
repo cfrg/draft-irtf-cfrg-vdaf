@@ -363,8 +363,8 @@ Table of Contents
 
    *  Prio3Sum, Prio3SumVec, Prio3MultihotCountVec: Unify the bit
       decomposition used in range proofs.  The new technique allows for
-      arbitrary range with only ceil(log2(max_measurement)) field
-      elements; the previous technique required twice as many. (*)
+      arbitrary ranges with only ceil(log2(max_measurement)) field
+      elements.  The previous technique required twice as many. (*)
 
    17:
 
