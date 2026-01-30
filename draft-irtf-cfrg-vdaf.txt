@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 20 July 2026                                               ISRG
+Expires: 3 August 2026                                              ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         16 January 2026
+                                                         30 January 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 July 2026.
+   This Internet-Draft will expire on 3 August 2026.
 
 Copyright Notice
 
@@ -96,7 +96,8 @@ Table of Contents
      6.1.  Finite Fields
        6.1.1.  Auxiliary Functions
        6.1.2.  NTT-Friendly Fields
-       6.1.3.  Parameters
+       6.1.3.  Polynomial Representation
+       6.1.4.  Parameters
      6.2.  Extendable Output Functions (XOFs)
        6.2.1.  XofTurboShake128
        6.2.2.  XofFixedKeyAes128
@@ -276,9 +277,9 @@ Table of Contents
    that DAFs are vulnerable to attacks from malicious clients attempting
    to disrupt the computation by submitting invalid measurements.  VDAFs
    are designed to allow the servers to interact with one another in
-   order to detect and remove these measurements prior to
-   aggregation. This document refers to this property as verifiability.
-   (This is also called robustness in prior work [CGB17], [DPRS23].)
+   order to detect and remove these measurements prior to aggregation.
+   This document refers to this property as verifiability.  (This is
+   also called robustness in prior work [CGB17], [DPRS23].)
 
    Achieving verifiability using the cryptographic techniques described
    in this document requires a significant amount of interaction between
@@ -850,6 +851,9 @@ Table of Contents
    *  next_power_of_2(x: int) -> int returns the smallest integer
       greater than or equal to x that is also a power of two.
 
+   *  assert_power_of_2(x: int) -> int returns math.ceil(math.log2(n))
+      if x is a positive power of two and raises an exception otherwise.
+
    *  range(stop: int) or range(start: int, stop: int[, step: int]) is
       the range function from the Python standard library.  The one-
       argument form returns the integers from zero (inclusive) to stop
@@ -864,27 +868,6 @@ Table of Contents
    *  to_le_bytes(x: int, len: int) -> bytes converts an integer x whose
       value is in the range [0, 2**(8*len)) to a little-endian byte
       string of length len.
-
-   *  poly_eval(field: type[F], p: list[F], x: F) -> F returns the
-      result of evaluating the polynomial, p(x).  The coefficients of
-      polynomials are stored in lists in ascending order of degree,
-      starting with the constant coefficient.  The field parameter is
-      the class object for F and is used by the implementation to
-      construct field elements.  (See Section 6.1.)
-
-   *  poly_interp(field: type[F], inputs: list[F], outputs: list[F]) ->
-      list[F] returns the coefficients of the lowest degree polynomial p
-      for which p(inputs[k]) == outputs[k] for all k.  Normally this
-      will be computed using the Number Theoretic Transform (NTT)
-      [SML24].
-
-   *  poly_mul(field: type[F], p: list[F], q: list[F]) -> list[F]
-      returns the product of two polynomials.
-
-   *  poly_strip(field: type[F], p: list[F]) -> list[F] strips the zeros
-      from the end of the input polynomial's list of coefficients.  That
-      is, it returns p[:i] where i is the index of the highest-degree
-      non-zero coefficient of p.
 
    *  xor(left: bytes, right: bytes) -> bytes returns the bitwise XOR of
       left and right.  An exception is raised if the inputs are not the
@@ -2183,24 +2166,185 @@ Table of Contents
 
    Some VDAFs, including Prio3, require fields that are suitable for
    efficient computation of the number theoretic transform (NTT)
-   [SML24], as this allows for fast polynomial interpolation.
+   [Pol71], as this allows for fast conversion between polynomial
+   representations.  Refer to [SML24] for an overview regarding NTT.
    Specifically, a field is said to be "NTT-friendly" if, in addition to
    the interface described in Section 6.1, it provides the following
    interface:
 
    *  Field.gen() -> Self is a class method that returns the generator
       of a large subgroup of the multiplicative group.  To be NTT-
-      friendly, the order of this subgroup MUST be a power of 2.
+      friendly, the order of this subgroup MUST be a power of two.
 
    *  GEN_ORDER: int is the order of the multiplicative subgroup
       generated by Field.gen().  This is the smallest positive integer
       for which Field.gen() ** Field.GEN_ORDER == Field(1).
 
-   The size of the subgroup dictates how large interpolated polynomials
-   can be.  It is RECOMMENDED that a generator is chosen with order at
-   least 2**20.
+   *  Field.nth_root(n: int) -> F returns the principal n-th root of
+      unity that is uniquely determined as Wn = Field.gen() **
+      (GEN_ORDER // n) to ensure interoperability.  Note that n must be
+      a power of two such that 1 <= n <= GEN_ORDER.
 
-6.1.3.  Parameters
+   *  Field.nth_root_powers(n: int) -> list[F] returns a list v with the
+      first n powers of the principal n-th root of unity.  It sets v[i]
+      = Wn ** i, such that Wn = Field.nth_root(n).
+
+   *  Field.ntt(p: list[F], n: int, set_s: bool = False) -> list[F]
+      returns a list v with the evaluations of a polynomial p (given its
+      coefficients) at n points.  When set_s=False, it sets v[i] = p(Wn
+      ** i) (this is the Lagrange representation of the polynomial, see
+      Section 6.1.3); otherwise, it sets v[i] = p(s * (Wn ** i)), such
+      that Wn = Field.nth_root(n), and s = Field.nth_root(2 * n).
+
+   *  Field.inv_ntt(v: list[F], n: int) -> list[F] returns the
+      coefficients of a polynomial p such that v are the evaluations of
+      p at the first n powers of the principal n-th root of unity.
+      (This is the monomial representation of the polynomial, see
+      Section 6.1.3.)
+
+   The size of the subgroup dictates how large the polynomials can be.
+   It is RECOMMENDED that a generator is chosen with order at least
+   2**20.
+
+6.1.3.  Polynomial Representation
+
+   Two standard representations of polynomials are described.  While it
+   is possible to convert between representations (using the NTT
+   algorithm), polynomials are maintained in the most efficient
+   representation according to the target operation.
+
+6.1.3.1.  Monomial Basis
+
+   The monomial basis is the standard way of representing a polynomial,
+   where each element of the list corresponds to one of their
+   coefficients stored in ascending degree order, that is, starting with
+   the coefficient of the constant term.
+
+   The following function denotes polynomial evaluation in the
+   coefficient representation.
+
+   *  poly_eval(field: type[F], p: list[F], x: F) -> F returns the
+      evaluation of the polynomial p (in the monomial basis) at x.  The
+      field parameter is the class object for F and is used by the
+      implementation to construct field elements.  (See Section 6.1.)
+
+6.1.3.2.  Lagrange Basis
+
+   In the Lagrange basis, polynomials are represented as a list of
+   evaluations over a set of points.  This set is fixed to the first n
+   powers of the principal n-th root of unity.  So any polynomial p of
+   degree lesser than n is represented as a list v of n values such that
+   v[i] = p(Wn ** i), where Wn = Field.nth_root(n).
+
+   The Lagrange class defines operations over polynomials in the
+   Lagrange basis.  It implements the following methods:
+
+   *  poly_mul(self, p: list[F], q: list[F]) -> list[F] multiplies two
+      polynomials, where the input and output polynomials are in the
+      Lagrange basis.  The inputs must have lengths that are equal and a
+      power of two.
+
+   *  poly_eval(self, p: list[F], x: F) -> F evaluates a polynomial p
+      (in the Lagrange basis) at x in linear time.  It avoids conversion
+      to the monomial basis as shown below.
+
+   *  poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]
+      evaluates every polynomial in the input list at x.  This function
+      runs faster than invoking poly_eval multiple times because some
+      intermediate calculations are shared.
+
+   *  extend_values_to_power_of_2(self, p: list[F], n: int) appends
+      evaluations to the polynomial p (in-place) until the number of
+      evaluations is n.  The output length n must be a power of two.
+
+   *  double_evaluations(self, p: list[F]) -> list[F] returns a list of
+      2*n evaluations of a polynomial p given n=len(p) evaluations.  The
+      length of the input must be a power of two.
+
+   An instance of the Lagrange class is initialized with an NTT-friendly
+   field.  For algorithm derivations, refer to [Faz25].  In the
+   following, prod computes the product of its inputs.
+
+   class Lagrange[F: NttField]():
+       def __init__(self, field: type[F]) -> None:
+           self.field = field
+
+       def poly_mul(self, p: list[F], q: list[F]) -> list[F]:
+           """Multiply two polynomials in the Lagrange basis."""
+           n = len(p)
+           assert_power_of_2(n)
+           assert len(p) == len(q)
+           p_2n = self.double_evaluations(p)
+           q_2n = self.double_evaluations(q)
+           return [pi*qi for pi, qi in zip(p_2n, q_2n)]
+
+       def poly_eval(self, p: list[F], x: F) -> F:
+           """Evaluate a polynomial p in the Lagrange basis at x."""
+           return self.poly_eval_batched([p], x).pop()
+
+       def poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]:
+           """Evaluate each polynomial in the Lagrange basis at x."""
+           assert len({len(p) for p in polys}) == 1
+           n = len(polys[0])
+           assert_power_of_2(n)
+
+           nodes = self.field.nth_root_powers(n)
+           k = self.field(1)
+           u = [p[0] for p in polys]
+           d = nodes[0] - x
+           for i in range(1, n):
+               k *= d
+               d = nodes[i] - x
+               t = k * nodes[i]
+               for j, p in enumerate(polys):
+                   u[j] *= d
+                   if i < len(p):
+                       u[j] += t * p[i]
+
+           factor = self.field(-1)**(n-1) * self.field(n).inv()
+           for i in range(len(u)):
+               u[i] *= factor
+           return u
+
+       def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:
+           """
+           Appends evaluations to the polynomial p (in-place) until the
+           number of evaluations is n, and n must be a power of two.
+           """
+           assert_power_of_2(n)
+           assert len(p) <= n
+           x = self.field.nth_root_powers(n)
+
+           w = [self.field(0)]*n
+           for i in range(len(p)):
+               diff = (x[i] - x[j] for j in range(len(p)) if i != j)
+               w[i] = prod(diff, start=self.field(1))
+
+           for k in range(len(p), n):
+               for i in range(k):
+                   w[i] *= x[i] - x[k]
+
+               y_num, y_den = self.field(0), self.field(1)
+               for i, v in enumerate(p):
+                   y_num = y_num * w[i] + y_den * v
+                   y_den *= w[i]
+
+               diff = (x[k] - x[j] for j in range(k))
+               w[k] = prod(diff, start=self.field(1))
+               p.append(-w[k] * y_num * y_den.inv())
+
+       def double_evaluations(self, p: list[F]) -> list[F]:
+           """
+           Returns 2n evaluations of a polynomial from n Lagrange-basis
+           evaluations, such that n=len(p) is a power of two.
+           """
+           n = len(p)
+           assert_power_of_2(n)
+           even = p
+           odd = self.field.ntt(self.field.inv_ntt(even, n), n, True)
+           return [i for pair in zip(even, odd) for i in pair]
+
+6.1.4.  Parameters
 
    Table 4 defines finite fields used in the remainder of this document.
 
@@ -3555,11 +3699,11 @@ Table of Contents
 
    The key idea is to have the prover construct a polynomial p such that
    p(j) is equal to the output of the j-th multiplication gate.
-   Polynomial evaluation is fully linear, which means the coefficients
-   of the polynomial can be secret shared in a way that allows each
-   Aggregator to compute a share of p(j) for any j.  These intermediate
-   results can then be combined with the affine arithmetic operations of
-   the validity circuit to produce the final output.
+   Polynomial evaluation is fully linear, which means the polynomial can
+   be secret shared in a way that allows each Aggregator to compute a
+   share of p(j) for any j.  These intermediate results can then be
+   combined with the affine arithmetic operations of the validity
+   circuit to produce the final output.
 
    Applying this idea to the example circuit C above:
 
@@ -3567,8 +3711,7 @@ Table of Contents
        polynomial p for which p(0) = s and p(1) = x * (x-1), where s is
        a random blinding value generated by the Client.  (The blinding
        value is to protect the privacy of the measurement.)  It then
-       sends shares of x and shares of the coefficients of p to each of
-       the Aggregators.
+       sends shares of x and shares of p to each of the Aggregators.
 
    2.  Each Aggregator locally computes and broadcasts its share of
        p(1), which is equal to its share of C(x).
@@ -3638,12 +3781,11 @@ Table of Contents
    gadget, namely multiplication, but the resulting proof would be
    longer.
 
-   Third, rather than interpolate polynomials at inputs 1, 2, ..., j,
-   where j is the j-th invocation of the gadget, roots of unity for the
-   field are used.  This allows constructing each polynomial via the
-   number theoretic transform [SML24], which is far more efficient than
-   generic formulas.  Note that the roots of unity are powers of the
-   generator for the NTT-friendly field (see Section 6.1.2).
+   Third, rather than defining polynomials at inputs 1, 2, ..., j, where
+   j is the j-th invocation of the gadget, the roots of unity for the
+   field are used.  This allows using the NTT algorithm for efficiency.
+   Note that the roots of unity are powers of the generator for the NTT-
+   friendly field (see Section 6.1.2).
 
    Finally, the validity circuit in the FLP may have any number of
    outputs (at least one).  The input is said to be valid if each of the
@@ -3859,34 +4001,35 @@ Table of Contents
        # Construct the proof, which consists of the wire seeds and
        # gadget polynomial for each gadget.
        proof = []
-       for g in cast(list[ProveGadget[F]], valid.GADGETS):
-           p = len(g.wires[0])
+       for g, g_calls in zip(valid.GADGETS, valid.GADGET_CALLS):
+           g = cast(ProveGadget[F], g)
 
-           # Compute the wire polynomials for this gadget. For each
-           # `j`, find the lowest degree polynomial `wire_poly` for
-           # which `wire_poly(alpha**k) = g.wires[j][k]` for all
-           # `k`. Note that each `g.wires[j][0]` is set to the seed
-           # of wire `j`, which is included in the prove randomness.
-           #
-           # Implementation note: `alpha` is a root of unity, which
-           # means `poly_interp()` can be evaluated using the NTT.
-           # Note that `g.wires[j]` is padded with 0s to a power of
-           # 2.
-           alpha = self.field.gen() ** (self.field.GEN_ORDER // p)
-           wire_inp = [alpha ** k for k in range(p)]
-           wire_polys = []
-           for j in range(g.ARITY):
-               wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
-               wire_polys.append(wire_poly)
+           # Define the wire polynomial length `p` as the smallest power
+           # of two accommodating all gadget calls plus one constant
+           # term for the seed.
+           p = wire_poly_len(g_calls)
 
-           # Compute the gadget polynomial by evaluating the gadget on
-           # the wire polynomials. By construction we have that
+           # The validity circuit evaluation defines one polynomial for
+           # each input wire of each gadget.
+           # For each wire `j`, the vector `g.wires[j]` of length `p`
+           # is built as follows:
+           # - `g.wires[j][0]` is set to the seed for wire `j` (from
+           #   the prover's randomness).
+           # - The subsequent entries are the assigned values from each
+           #   gadget call.
+           # - Pad the vector with zeros to reach length `p`.
+           # The wire polynomial is then defined by its evaluations:
+           #   `wire_poly(alpha**k) = g.wires[j][k]`
+           # for all `k`, where `alpha` is a `p`-th root of unity.
+           wire_polys = [g.wires[j] for j in range(g.ARITY)]
+           wire_seeds = [g.wires[j][0] for j in range(g.ARITY)]
+           proof += wire_seeds
+
+           # Compute the gadget polynomial by evaluating the gadget
+           # on the wire polynomials. By construction we have that
            # `gadget_poly(alpha**k)` is the `k`-th output.
            gadget_poly = g.eval_poly(self.field, wire_polys)
-
-           for j in range(g.ARITY):
-               proof.append(g.wires[j][0])
-           proof += gadget_poly
+           proof += gadget_poly[:gadget_poly_len(g.DEGREE, p)]
 
        return proof
 
@@ -3930,20 +4073,23 @@ Table of Contents
    Again, this is accomplished by a wrapper gadget, QueryGadget, listed
    in Appendix A.4.  This gadget also evaluates the gadget polynomial
    for each gadget invocation in order to produce the gadget's output.
-   Then compute the wire polynomials from the recorded values.
+   Then compute the wire polynomials from the recorded values.  Note
+   that these polynomials are in the Lagrange basis representation by
+   construction, and the gadget polynomials parsed from the proof share
+   are similarly transmitted in the Lagrange basis representation.
+   Generating additive secret shares of a polynomial works equally both
+   in the monomial and the Lagrange basis (Section 6.1.3).
 
    Next, choose a random point t (parsed from the query randomness),
    evaluate each wire polynomial at t, and evaluate the gadget
-   polynomial at t.  Note that the wire polynomials are in the value
-   (Lagrange) representation by construction.  Faster polynomial
-   evaluation in this representation is possible by using the algorithm
-   by [Faz25] without resorting to polynomial interpolation.  The
-   results are recorded in the verifier message passed to the decision
-   algorithm, where the test is finished.
+   polynomial at t.  Polynomial evaluation in the Lagrange basis is
+   faster by using the algorithm by [Faz25] without resorting to
+   polynomial interpolation.  The results are recorded in the verifier
+   message passed to the decision algorithm, where the test is finished.
 
    The random point t MUST NOT be one of the fixed evaluation points
-   used to interpolate the wire polynomials.  Otherwise, the verifier
-   message may partially leak the encoded measurement.
+   used to define the wire polynomials.  Otherwise, the verifier message
+   may partially leak the encoded measurement.
 
    def query(self,
              meas: list[F],
@@ -3971,6 +4117,7 @@ Table of Contents
 
        # Construct the verifier message, which consists of the reduced
        # circuit output and each gadget test.
+       lag = Lagrange(self.field)
        verifier = [v]
        for (g, t) in zip(cast(list[QueryGadget[F]], valid.GADGETS),
                          query_rand):
@@ -3985,15 +4132,10 @@ Table of Contents
 
            # To test the gadget, we re-compute the wire polynomials and
            # check for consistency with the gadget polynomial provided
-           # by the prover. To start, evaluate the gadget polynomial and
-           # each of the wire polynomials at the random point `t`.
-           wire_checks = []
-           wire_inp = [g.alpha ** k for k in range(p)]
-           for j in range(g.ARITY):
-               wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
-               wire_checks.append(poly_eval(self.field, wire_poly, t))
-
-           gadget_check = poly_eval(self.field, g.poly, t)
+           # by the prover. To start, evaluate the gadget polynomial
+           # and each of the wire polynomials at the random point `t`.
+           wire_checks = lag.poly_eval_batched(g.wires[:g.ARITY], t)
+           gadget_check = lag.poly_eval(g.poly, t)
 
            verifier += wire_checks
            verifier.append(gadget_check)
@@ -6583,6 +6725,12 @@ Table of Contents
               <https://mailarchive.ietf.org/arch/msg/cfrg/
               Omdhr4rO1pla_nlju2l7OJEGWPM/>.
 
+   [Pol71]    Pollard, J., "The fast Fourier transform in a finite
+              field", American Mathematical Society (AMS), Mathematics
+              of Computation vol. 25, no. 114, pp. 365-374,
+              DOI 10.1090/s0025-5718-1971-0301966-0, 1971,
+              <https://doi.org/10.1090/s0025-5718-1971-0301966-0>.
+
    [SML24]    Satriawan, A., Mareta, R., and H. Lee, "A Complete
               Beginner Guide to the Number Theoretic Transform (NTT)",
               IEEE Access, vol. 11, 2024,
@@ -6614,7 +6762,8 @@ A.1.  Multiplication
        def eval_poly(self,
                      field: type[F],
                      inp_poly: list[list[F]]) -> list[F]:
-           return poly_mul(field, inp_poly[0], inp_poly[1])
+           lag = Lagrange(field)
+           return lag.poly_mul(inp_poly[0], inp_poly[1])
 
 A.2.  Polynomial Evaluation
 
@@ -6626,7 +6775,7 @@ A.2.  Polynomial Evaluation
        ARITY = 1
        p: list[int]  # polynomial coefficients
 
-       def __init__(self, p: list[int]):
+       def __init__(self, p: list[int], num_calls: int):
            """
            Instantiate this gadget with the given polynomial.
            """
@@ -6640,6 +6789,12 @@ A.2.  Polynomial Evaluation
 
            self.p = p
            self.DEGREE = len(p) - 1
+           wire_poly_length = wire_poly_len(num_calls)
+           gadget_poly_length = gadget_poly_len(
+               self.DEGREE,
+               wire_poly_length,
+           )
+           self.n = next_power_of_2(gadget_poly_length)
 
        def eval(self, field: type[F], inp: list[F]) -> F:
            p = [field(coeff) for coeff in self.p]
@@ -6648,15 +6803,16 @@ A.2.  Polynomial Evaluation
        def eval_poly(self,
                      field: type[F],
                      inp_poly: list[list[F]]) -> list[F]:
-           p = [field(coeff) for coeff in self.p]
-           out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
-           out[0] = p[0]
-           x = inp_poly[0]
-           for i in range(1, len(p)):
-               for j in range(len(x)):
-                   out[j] += p[i] * x[j]
-               x = poly_mul(field, x, inp_poly[0])
-           return poly_strip(field, out)
+           inp_poly_len = len(inp_poly[0])
+           assert_power_of_2(inp_poly_len)
+
+           # Convert the input polynomial from Lagrange to monomial basis.
+           inp_mon = field.inv_ntt(inp_poly[0], inp_poly_len)
+           # Obtain n evaluations of the input polynomial I.
+           inp_lag = field.ntt(inp_mon, self.n)
+           # Returns the polynomial composition (P*I)
+           p_mon = [field(coeff) for coeff in self.p]
+           return [poly_eval(field, p_mon, x) for x in inp_lag]
 
 A.3.  Parallel Sum
 
@@ -6704,7 +6860,7 @@ A.3.  Parallel Sum
                )
                for j in range(output_poly_length):
                    out_sum[j] += out_current[j]
-           return poly_strip(field, out_sum)
+           return out_sum
 
 A.4.  Shims for Generating and Querying Proofs
 
@@ -6779,7 +6935,6 @@ A.4.  Shims for Generating and Querying Proofs
                g_calls: int):
            p = wire_poly_len(g_calls)
            self.alpha = field.gen() ** (field.GEN_ORDER // p)
-           self.poly = gadget_poly
            self.ARITY = g.ARITY
            self.DEGREE = g.DEGREE
            self.wires = []
@@ -6789,11 +6944,28 @@ A.4.  Shims for Generating and Querying Proofs
                wire[0] = s  # set the wire seed
                self.wires.append(wire)
 
+           # Recover all the values of the gadget_poly.
+           lag = Lagrange(field)
+           n = next_power_of_2(len(gadget_poly))
+           gadget_poly = list(gadget_poly)
+           lag.extend_values_to_power_of_2(gadget_poly, n)
+
+           # Calculate 'size' evaluations of the gadget_poly.
+           size = next_power_of_2(gadget_poly_len(g.DEGREE, p))
+           while len(gadget_poly) < size:
+               gadget_poly = lag.double_evaluations(gadget_poly)
+           self.poly = gadget_poly
+
+           # Get the step size used to index the gadget evaluations.
+           log_size = assert_power_of_2(size)
+           log_p = assert_power_of_2(p)
+           self.step = 1 << (log_size-log_p)
+
        def eval(self, field: type[F], inp: list[F]) -> F:
            self.k += 1
            for j in range(len(inp)):
                self.wires[j][self.k] = inp[j]
-           return poly_eval(field, self.poly, self.alpha ** self.k)
+           return self.poly[self.k*self.step]
 
        @classmethod
        def wrap(cls,
@@ -7015,7 +7187,7 @@ Acknowledgments
    Thanks to Ian Goldberg for the bit decomposition technique used in
    the range proofs of the Prio3 variants.
 
-   Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández,
+   Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernandez,
    Simon Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana
    Raykova, Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang,
    Bas Westerbaan, and Christopher Wood for useful feedback on and

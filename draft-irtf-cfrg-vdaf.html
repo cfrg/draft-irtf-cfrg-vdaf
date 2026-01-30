@@ -34,7 +34,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.32.5
-    wcwidth 0.2.14
+    wcwidth 0.3.0
 -->
 <link href="draft-irtf-cfrg-vdaf.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -575,6 +575,7 @@ aside, blockquote {
 }
 blockquote {
   margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
 }
 cite {
   display: block;
@@ -645,7 +646,7 @@ a.pilcrow {
   }
 }
 @media not print {
-  :hover > a.pilcrow {
+  :hover > a.pilcrow, a.pilcrow:focus {
     opacity: 1;
   }
   a.pilcrow[href]:hover {
@@ -1057,7 +1058,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Barnes, et al.</td>
-<td class="center">Expires 20 July 2026</td>
+<td class="center">Expires 3 August 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1070,12 +1071,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-irtf-cfrg-vdaf-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-01-16" class="published">16 January 2026</time>
+<time datetime="2026-01-30" class="published">30 January 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-07-20">20 July 2026</time></dd>
+<dd class="expires"><time datetime="2026-08-03">3 August 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1139,7 +1140,7 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 August 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1259,7 +1260,10 @@ aggregation (Prio3) and another for heavy hitters (Poplar1).<a href="#section-ab
                     <p id="section-toc.1-1.6.2.1.2.2.1"><a href="#section-6.1.2" class="auto internal xref">6.1.2</a>.  <a href="#name-ntt-friendly-fields" class="internal xref">NTT-Friendly Fields</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1.2.3">
-                    <p id="section-toc.1-1.6.2.1.2.3.1"><a href="#section-6.1.3" class="auto internal xref">6.1.3</a>.  <a href="#name-parameters" class="internal xref">Parameters</a></p>
+                    <p id="section-toc.1-1.6.2.1.2.3.1"><a href="#section-6.1.3" class="auto internal xref">6.1.3</a>.  <a href="#name-polynomial-representation" class="internal xref">Polynomial Representation</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1.2.4">
+                    <p id="section-toc.1-1.6.2.1.2.4.1"><a href="#section-6.1.4" class="auto internal xref">6.1.4</a>.  <a href="#name-parameters" class="internal xref">Parameters</a></p>
 </li>
                 </ul>
 </li>
@@ -1613,7 +1617,7 @@ number larger than 10. This means that DAFs are vulnerable to attacks from
 malicious clients attempting to disrupt the computation by submitting invalid
 measurements. VDAFs are designed to allow the servers to interact with one
 another in order to detect and remove these measurements prior to
-aggregation. This document refers to this property as verifiability. (This is
+aggregation. This document refers to this property as verifiability. (This is
 also called robustness in prior work <span>[<a href="#CGB17" class="cite xref">CGB17</a>]</span>, <span>[<a href="#DPRS23" class="cite xref">DPRS23</a>]</span>.)<a href="#section-1-14" class="pilcrow">¶</a></p>
 <p id="section-1-15">Achieving verifiability using the cryptographic techniques described in this
 document requires a significant amount of interaction between the servers. DAFs
@@ -2294,51 +2298,32 @@ function is equivalent to <code>(x[:len], x[len:])</code>.<a href="#section-2-15
 greater than or equal to <code>x</code> that is also a power of two.<a href="#section-2-15.9.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-15.10">
-          <p id="section-2-15.10.1"><code>range(stop: int)</code> or <code>range(start: int, stop: int[, step: int])</code> is the range
+          <p id="section-2-15.10.1"><code>assert_power_of_2(x: int) -&gt; int</code> returns <code>math.ceil(math.log2(n))</code> if <code>x</code>
+is a positive power of two and raises an exception otherwise.<a href="#section-2-15.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-2-15.11">
+          <p id="section-2-15.11.1"><code>range(stop: int)</code> or <code>range(start: int, stop: int[, step: int])</code> is the range
 function from the Python standard library. The one-argument form returns the
 integers from zero (inclusive) to <code>stop</code> (exclusive). The two- and
 three-argument forms allow overriding the start of the range and overriding
-the step between successive output values.<a href="#section-2-15.10.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-15.11">
-          <p id="section-2-15.11.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
-is in the range <code>[0, 2**(8*len))</code> to a big-endian byte string of length <code>len</code>.<a href="#section-2-15.11.1" class="pilcrow">¶</a></p>
+the step between successive output values.<a href="#section-2-15.11.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-15.12">
-          <p id="section-2-15.12.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
-is in the range <code>[0, 2**(8*len))</code> to a little-endian byte string of length
-<code>len</code>.<a href="#section-2-15.12.1" class="pilcrow">¶</a></p>
+          <p id="section-2-15.12.1"><code>to_be_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+is in the range <code>[0, 2**(8*len))</code> to a big-endian byte string of length <code>len</code>.<a href="#section-2-15.12.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-15.13">
-          <p id="section-2-15.13.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the result of
-evaluating the polynomial, <code>p(x)</code>. The coefficients of polynomials are stored
-in lists in ascending order of degree, starting with the constant
-coefficient. The <code>field</code> parameter is the class object for <code>F</code> and is used by
-the implementation to construct field elements. (See <a href="#field" class="auto internal xref">Section 6.1</a>.)<a href="#section-2-15.13.1" class="pilcrow">¶</a></p>
+          <p id="section-2-15.13.1"><code>to_le_bytes(x: int, len: int) -&gt; bytes</code> converts an integer <code>x</code> whose value
+is in the range <code>[0, 2**(8*len))</code> to a little-endian byte string of length
+<code>len</code>.<a href="#section-2-15.13.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-15.14">
-          <p id="section-2-15.14.1"><code>poly_interp(field: type[F], inputs: list[F], outputs: list[F]) -&gt; list[F]</code>
-returns the coefficients of the lowest degree polynomial <code>p</code> for which
-<code>p(inputs[k]) == outputs[k]</code> for all <code>k</code>. Normally this will be computed
-using the Number Theoretic Transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>.<a href="#section-2-15.14.1" class="pilcrow">¶</a></p>
+          <p id="section-2-15.14.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
+and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-15.14.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-2-15.15">
-          <p id="section-2-15.15.1"><code>poly_mul(field: type[F], p: list[F], q: list[F]) -&gt; list[F]</code> returns
-the product of two polynomials.<a href="#section-2-15.15.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-15.16">
-          <p id="section-2-15.16.1"><code>poly_strip(field: type[F], p: list[F]) -&gt; list[F]</code> strips the zeros from the
-end of the input polynomial's list of coefficients. That is, it returns
-<code>p[:i]</code> where <code>i</code> is the index of the highest-degree non-zero coefficient of
-<code>p</code>.<a href="#section-2-15.16.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-15.17">
-          <p id="section-2-15.17.1"><code>xor(left: bytes, right: bytes) -&gt; bytes</code> returns the bitwise XOR of <code>left</code>
-and <code>right</code>. An exception is raised if the inputs are not the same length.<a href="#section-2-15.17.1" class="pilcrow">¶</a></p>
-</li>
-        <li class="normal" id="section-2-15.18">
-          <p id="section-2-15.18.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of bytes of the requested
-length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-15.18.1" class="pilcrow">¶</a></p>
+          <p id="section-2-15.15.1"><code>zeros(len: int) -&gt; bytes</code> returns an array of bytes of the requested
+length (<code>len</code>). Each element of the array is set to zero.<a href="#section-2-15.15.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <div id="mathematical-notation">
@@ -4232,32 +4217,220 @@ def vec_neg(vec: list[F]) -&gt; list[F]:
 <a href="#section-6.1.2" class="section-number selfRef">6.1.2. </a><a href="#name-ntt-friendly-fields" class="section-name selfRef">NTT-Friendly Fields</a>
           </h4>
 <p id="section-6.1.2-1">Some VDAFs, including Prio3, require fields that are suitable for efficient
-computation of the number theoretic transform (NTT) <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>, as this allows
-for fast polynomial interpolation. Specifically, a field is said to be
-"NTT-friendly" if, in addition to the interface described in <a href="#field" class="auto internal xref">Section 6.1</a>, it
-provides the following interface:<a href="#section-6.1.2-1" class="pilcrow">¶</a></p>
+computation of the number theoretic transform (NTT) <span>[<a href="#Pol71" class="cite xref">Pol71</a>]</span>, as this allows
+for fast conversion between polynomial representations. Refer to <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>
+for an overview regarding NTT.
+Specifically, a field is said to be "NTT-friendly" if, in addition to the
+interface described in <a href="#field" class="auto internal xref">Section 6.1</a>, it provides the following interface:<a href="#section-6.1.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-6.1.2-2.1">
               <p id="section-6.1.2-2.1.1"><code>Field.gen() -&gt; Self</code> is a class method that returns the generator of a large
 subgroup of the multiplicative group. To be NTT-friendly, the order of this
-subgroup <span class="bcp14">MUST</span> be a power of 2.<a href="#section-6.1.2-2.1.1" class="pilcrow">¶</a></p>
+subgroup <span class="bcp14">MUST</span> be a power of two.<a href="#section-6.1.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-6.1.2-2.2">
               <p id="section-6.1.2-2.2.1"><code>GEN_ORDER: int</code> is the order of the multiplicative subgroup generated by
 <code>Field.gen()</code>. This is the smallest positive integer for which
 <code>Field.gen() ** Field.GEN_ORDER == Field(1)</code>.<a href="#section-6.1.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
+            <li class="normal" id="section-6.1.2-2.3">
+              <p id="section-6.1.2-2.3.1"><code>Field.nth_root(n: int) -&gt; F</code> returns the principal <code>n</code>-th root of
+unity that is uniquely determined as <code>Wn = Field.gen() ** (GEN_ORDER // n)</code>
+to ensure interoperability.
+Note that <code>n</code> must be a power of two such that <code>1 &lt;= n &lt;= GEN_ORDER</code>.<a href="#section-6.1.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-6.1.2-2.4">
+              <p id="section-6.1.2-2.4.1"><code>Field.nth_root_powers(n: int) -&gt; list[F]</code> returns a list <code>v</code> with
+the first <code>n</code> powers of the principal <code>n</code>-th root of unity.
+It sets <code>v[i] = Wn ** i</code>, such that <code>Wn = Field.nth_root(n)</code>.<a href="#section-6.1.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-6.1.2-2.5">
+              <p id="section-6.1.2-2.5.1"><code>Field.ntt(p: list[F], n: int, set_s: bool = False) -&gt; list[F]</code> returns
+a list <code>v</code> with the evaluations of a polynomial <code>p</code>
+(given its coefficients) at <code>n</code> points.
+When <code>set_s=False</code>, it sets <code>v[i] = p(Wn ** i)</code> (this is the Lagrange
+representation of the polynomial, see <a href="#poly-repr" class="auto internal xref">Section 6.1.3</a>);
+otherwise, it sets <code>v[i] = p(s * (Wn ** i))</code>,
+such that <code>Wn = Field.nth_root(n)</code>, and <code>s = Field.nth_root(2 * n)</code>.<a href="#section-6.1.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-6.1.2-2.6">
+              <p id="section-6.1.2-2.6.1"><code>Field.inv_ntt(v: list[F], n: int) -&gt; list[F]</code> returns the coefficients of
+a polynomial <code>p</code> such that <code>v</code> are the evaluations of <code>p</code> at the first <code>n</code>
+powers of the principal <code>n</code>-th root of unity. (This is the monomial
+representation of the polynomial, see <a href="#poly-repr" class="auto internal xref">Section 6.1.3</a>.)<a href="#section-6.1.2-2.6.1" class="pilcrow">¶</a></p>
+</li>
           </ul>
-<p id="section-6.1.2-3">The size of the subgroup dictates how large interpolated polynomials can be. It
+<p id="section-6.1.2-3">The size of the subgroup dictates how large the polynomials can be. It
 is <span class="bcp14">RECOMMENDED</span> that a generator is chosen with order at least <code>2**20</code>.<a href="#section-6.1.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="parameters">
+<div id="poly-repr">
 <section id="section-6.1.3">
-          <h4 id="name-parameters">
-<a href="#section-6.1.3" class="section-number selfRef">6.1.3. </a><a href="#name-parameters" class="section-name selfRef">Parameters</a>
+          <h4 id="name-polynomial-representation">
+<a href="#section-6.1.3" class="section-number selfRef">6.1.3. </a><a href="#name-polynomial-representation" class="section-name selfRef">Polynomial Representation</a>
           </h4>
-<p id="section-6.1.3-1"><a href="#fields" class="auto internal xref">Table 4</a> defines finite fields used in the remainder of this document.<a href="#section-6.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.3-1">Two standard representations of polynomials are described.
+While it is possible to convert between representations
+(using the NTT algorithm), polynomials are maintained in the most
+efficient representation according to the target operation.<a href="#section-6.1.3-1" class="pilcrow">¶</a></p>
+<div id="monomial-basis">
+<section id="section-6.1.3.1">
+            <h5 id="name-monomial-basis">
+<a href="#section-6.1.3.1" class="section-number selfRef">6.1.3.1. </a><a href="#name-monomial-basis" class="section-name selfRef">Monomial Basis</a>
+            </h5>
+<p id="section-6.1.3.1-1">The monomial basis is the standard way of representing a polynomial,
+where each element of the list corresponds to one of their coefficients
+stored in ascending degree order,
+that is, starting with the coefficient of the constant term.<a href="#section-6.1.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.3.1-2">The following function denotes polynomial evaluation in the
+coefficient representation.<a href="#section-6.1.3.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1.3.1-3.1">
+                <p id="section-6.1.3.1-3.1.1"><code>poly_eval(field: type[F], p: list[F], x: F) -&gt; F</code> returns the
+evaluation of the polynomial <code>p</code> (in the monomial basis) at <code>x</code>.
+The <code>field</code> parameter is the class object for <code>F</code> and is used by
+the implementation to construct field elements. (See <a href="#field" class="auto internal xref">Section 6.1</a>.)<a href="#section-6.1.3.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</section>
+</div>
+<div id="lagrange-basis">
+<section id="section-6.1.3.2">
+            <h5 id="name-lagrange-basis">
+<a href="#section-6.1.3.2" class="section-number selfRef">6.1.3.2. </a><a href="#name-lagrange-basis" class="section-name selfRef">Lagrange Basis</a>
+            </h5>
+<p id="section-6.1.3.2-1">In the Lagrange basis, polynomials are represented as a list of
+evaluations over a set of points.
+This set is fixed to the first <code>n</code> powers of the
+principal <code>n</code>-th root of unity.
+So any polynomial <code>p</code> of degree lesser than <code>n</code> is represented as a
+list <code>v</code> of <code>n</code> values such that <code>v[i] = p(Wn ** i)</code>,
+where <code>Wn = Field.nth_root(n)</code>.<a href="#section-6.1.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.1.3.2-2">The <code>Lagrange</code> class defines operations over polynomials in the
+Lagrange basis. It implements the following methods:<a href="#section-6.1.3.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-6.1.3.2-3.1">
+                <p id="section-6.1.3.2-3.1.1"><code>poly_mul(self, p: list[F], q: list[F]) -&gt; list[F]</code> multiplies two
+polynomials, where the input and output polynomials are in the Lagrange basis.
+The inputs must have lengths that are equal and a power of two.<a href="#section-6.1.3.2-3.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1.3.2-3.2">
+                <p id="section-6.1.3.2-3.2.1"><code>poly_eval(self, p: list[F], x: F) -&gt; F</code> evaluates a polynomial
+<code>p</code> (in the Lagrange basis) at <code>x</code> in linear time.
+It avoids conversion to the monomial basis as shown below.<a href="#section-6.1.3.2-3.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1.3.2-3.3">
+                <p id="section-6.1.3.2-3.3.1"><code>poly_eval_batched(self, polys: list[list[F]], x: F) -&gt; list[F]</code> evaluates
+every polynomial in the input list at <code>x</code>.
+This function runs faster than invoking <code>poly_eval</code> multiple times
+because some intermediate calculations are shared.<a href="#section-6.1.3.2-3.3.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1.3.2-3.4">
+                <p id="section-6.1.3.2-3.4.1"><code>extend_values_to_power_of_2(self, p: list[F], n: int)</code> appends evaluations
+to the polynomial <code>p</code> (in-place) until the number of evaluations is <code>n</code>.
+The output length <code>n</code> must be a power of two.<a href="#section-6.1.3.2-3.4.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-6.1.3.2-3.5">
+                <p id="section-6.1.3.2-3.5.1"><code>double_evaluations(self, p: list[F]) -&gt; list[F]</code> returns a list of
+<code>2*n</code> evaluations of a polynomial <code>p</code> given <code>n=len(p)</code> evaluations.
+The length of the input must be a power of two.<a href="#section-6.1.3.2-3.5.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-6.1.3.2-4">An instance of the <code>Lagrange</code> class is initialized with an NTT-friendly field.
+For algorithm derivations, refer to <span>[<a href="#Faz25" class="cite xref">Faz25</a>]</span>.
+In the following, <code>prod</code> computes the product of its inputs.<a href="#section-6.1.3.2-4" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="section-6.1.3.2-5">
+<pre>
+class Lagrange[F: NttField]():
+    def __init__(self, field: type[F]) -&gt; None:
+        self.field = field
+
+    def poly_mul(self, p: list[F], q: list[F]) -&gt; list[F]:
+        """Multiply two polynomials in the Lagrange basis."""
+        n = len(p)
+        assert_power_of_2(n)
+        assert len(p) == len(q)
+        p_2n = self.double_evaluations(p)
+        q_2n = self.double_evaluations(q)
+        return [pi*qi for pi, qi in zip(p_2n, q_2n)]
+
+    def poly_eval(self, p: list[F], x: F) -&gt; F:
+        """Evaluate a polynomial p in the Lagrange basis at x."""
+        return self.poly_eval_batched([p], x).pop()
+
+    def poly_eval_batched(self, polys: list[list[F]], x: F) -&gt; list[F]:
+        """Evaluate each polynomial in the Lagrange basis at x."""
+        assert len({len(p) for p in polys}) == 1
+        n = len(polys[0])
+        assert_power_of_2(n)
+
+        nodes = self.field.nth_root_powers(n)
+        k = self.field(1)
+        u = [p[0] for p in polys]
+        d = nodes[0] - x
+        for i in range(1, n):
+            k *= d
+            d = nodes[i] - x
+            t = k * nodes[i]
+            for j, p in enumerate(polys):
+                u[j] *= d
+                if i &lt; len(p):
+                    u[j] += t * p[i]
+
+        factor = self.field(-1)**(n-1) * self.field(n).inv()
+        for i in range(len(u)):
+            u[i] *= factor
+        return u
+
+    def extend_values_to_power_of_2(self, p: list[F], n: int) -&gt; None:
+        """
+        Appends evaluations to the polynomial p (in-place) until the
+        number of evaluations is n, and n must be a power of two.
+        """
+        assert_power_of_2(n)
+        assert len(p) &lt;= n
+        x = self.field.nth_root_powers(n)
+
+        w = [self.field(0)]*n
+        for i in range(len(p)):
+            diff = (x[i] - x[j] for j in range(len(p)) if i != j)
+            w[i] = prod(diff, start=self.field(1))
+
+        for k in range(len(p), n):
+            for i in range(k):
+                w[i] *= x[i] - x[k]
+
+            y_num, y_den = self.field(0), self.field(1)
+            for i, v in enumerate(p):
+                y_num = y_num * w[i] + y_den * v
+                y_den *= w[i]
+
+            diff = (x[k] - x[j] for j in range(k))
+            w[k] = prod(diff, start=self.field(1))
+            p.append(-w[k] * y_num * y_den.inv())
+
+    def double_evaluations(self, p: list[F]) -&gt; list[F]:
+        """
+        Returns 2n evaluations of a polynomial from n Lagrange-basis
+        evaluations, such that n=len(p) is a power of two.
+        """
+        n = len(p)
+        assert_power_of_2(n)
+        even = p
+        odd = self.field.ntt(self.field.inv_ntt(even, n), n, True)
+        return [i for pair in zip(even, odd) for i in pair]
+</pre><a href="#section-6.1.3.2-5" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="parameters">
+<section id="section-6.1.4">
+          <h4 id="name-parameters">
+<a href="#section-6.1.4" class="section-number selfRef">6.1.4. </a><a href="#name-parameters" class="section-name selfRef">Parameters</a>
+          </h4>
+<p id="section-6.1.4-1"><a href="#fields" class="auto internal xref">Table 4</a> defines finite fields used in the remainder of this document.<a href="#section-6.1.4-1" class="pilcrow">¶</a></p>
 <span id="name-parameters-for-the-finite-f"></span><div id="fields">
 <table class="center" id="table-4">
             <caption>
@@ -6055,7 +6228,7 @@ transform these multiplication gates into computations on secret shared data
 that each Aggregator can perform locally.<a href="#section-7.3.1-11" class="pilcrow">¶</a></p>
 <p id="section-7.3.1-12">The key idea is to have the prover construct a polynomial <code>p</code> such that <code>p(j)</code>
 is equal to the output of the <code>j</code>-th multiplication gate. Polynomial evaluation
-is fully linear, which means the coefficients of the polynomial can be secret
+is fully linear, which means the polynomial can be secret
 shared in a way that allows each Aggregator to compute a share of <code>p(j)</code> for
 any <code>j</code>. These intermediate results can then be combined with the affine
 arithmetic operations of the validity circuit to produce the final output.<a href="#section-7.3.1-12" class="pilcrow">¶</a></p>
@@ -6066,7 +6239,7 @@ arithmetic operations of the validity circuit to produce the final output.<a hre
 polynomial <code>p</code> for which <code>p(0) = s</code> and <code>p(1) = x * (x-1)</code>, where <code>s</code> is a
 random blinding value generated by the Client. (The blinding value is to
 protect the privacy of the measurement.) It then sends shares of <code>x</code> and
-shares of the coefficients of <code>p</code> to each of the Aggregators.<a href="#section-7.3.1-14.1.1" class="pilcrow">¶</a></p>
+shares of <code>p</code> to each of the Aggregators.<a href="#section-7.3.1-14.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-7.3.1-14.2">
               <p id="section-7.3.1-14.2.1">Each Aggregator locally computes and broadcasts its share of <code>p(1)</code>, which
@@ -6138,11 +6311,10 @@ C(x, r) = r * Range2(x[0]) + ... + r**L * Range2(x[L-1]) + \
 inputs are in the range <code>[0, 2)</code> and the last <code>N-L</code> inputs are in the range
 <code>[0, 3)</code>. The same circuit can be expressed using a simpler gadget, namely
 multiplication, but the resulting proof would be longer.<a href="#section-7.3.1.1-7" class="pilcrow">¶</a></p>
-<p id="section-7.3.1.1-8">Third, rather than interpolate polynomials at inputs <code>1</code>, <code>2</code>, ..., <code>j</code>,
-where <code>j</code> is the <code>j</code>-th invocation of the gadget, roots of unity for
-the field are used. This allows constructing each polynomial via the
-number theoretic transform <span>[<a href="#SML24" class="cite xref">SML24</a>]</span>, which is far more efficient than generic
-formulas. Note that the roots of unity are powers of the generator for the
+<p id="section-7.3.1.1-8">Third, rather than defining polynomials at inputs <code>1</code>, <code>2</code>, ..., <code>j</code>,
+where <code>j</code> is the <code>j</code>-th invocation of the gadget, the roots of unity for
+the field are used. This allows using the NTT algorithm for efficiency.
+Note that the roots of unity are powers of the generator for the
 NTT-friendly field (see <a href="#field-ntt-friendly" class="auto internal xref">Section 6.1.2</a>).<a href="#section-7.3.1.1-8" class="pilcrow">¶</a></p>
 <p id="section-7.3.1.1-9">Finally, the validity circuit in the FLP may have any number of outputs (at
 least one). The input is said to be valid if each of the outputs is zero. To
@@ -6444,34 +6616,35 @@ def prove(self,
     # Construct the proof, which consists of the wire seeds and
     # gadget polynomial for each gadget.
     proof = []
-    for g in cast(list[ProveGadget[F]], valid.GADGETS):
-        p = len(g.wires[0])
+    for g, g_calls in zip(valid.GADGETS, valid.GADGET_CALLS):
+        g = cast(ProveGadget[F], g)
 
-        # Compute the wire polynomials for this gadget. For each
-        # `j`, find the lowest degree polynomial `wire_poly` for
-        # which `wire_poly(alpha**k) = g.wires[j][k]` for all
-        # `k`. Note that each `g.wires[j][0]` is set to the seed
-        # of wire `j`, which is included in the prove randomness.
-        #
-        # Implementation note: `alpha` is a root of unity, which
-        # means `poly_interp()` can be evaluated using the NTT.
-        # Note that `g.wires[j]` is padded with 0s to a power of
-        # 2.
-        alpha = self.field.gen() ** (self.field.GEN_ORDER // p)
-        wire_inp = [alpha ** k for k in range(p)]
-        wire_polys = []
-        for j in range(g.ARITY):
-            wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
-            wire_polys.append(wire_poly)
+        # Define the wire polynomial length `p` as the smallest power
+        # of two accommodating all gadget calls plus one constant
+        # term for the seed.
+        p = wire_poly_len(g_calls)
 
-        # Compute the gadget polynomial by evaluating the gadget on
-        # the wire polynomials. By construction we have that
+        # The validity circuit evaluation defines one polynomial for
+        # each input wire of each gadget.
+        # For each wire `j`, the vector `g.wires[j]` of length `p`
+        # is built as follows:
+        # - `g.wires[j][0]` is set to the seed for wire `j` (from
+        #   the prover's randomness).
+        # - The subsequent entries are the assigned values from each
+        #   gadget call.
+        # - Pad the vector with zeros to reach length `p`.
+        # The wire polynomial is then defined by its evaluations:
+        #   `wire_poly(alpha**k) = g.wires[j][k]`
+        # for all `k`, where `alpha` is a `p`-th root of unity.
+        wire_polys = [g.wires[j] for j in range(g.ARITY)]
+        wire_seeds = [g.wires[j][0] for j in range(g.ARITY)]
+        proof += wire_seeds
+
+        # Compute the gadget polynomial by evaluating the gadget
+        # on the wire polynomials. By construction we have that
         # `gadget_poly(alpha**k)` is the `k`-th output.
         gadget_poly = g.eval_poly(self.field, wire_polys)
-
-        for j in range(g.ARITY):
-            proof.append(g.wires[j][0])
-        proof += gadget_poly
+        proof += gadget_poly[:gadget_poly_len(g.DEGREE, p)]
 
     return proof
 </pre><a href="#section-7.3.3-5" class="pilcrow">¶</a>
@@ -6550,17 +6723,21 @@ just as the prover did. Then record the input (share) of the <code>j</code>-th w
 by a wrapper gadget, <code>QueryGadget</code>, listed in <a href="#gadget-wrappers" class="auto internal xref">Appendix A.4</a>. This gadget
 also evaluates the gadget polynomial for each gadget invocation in order to
 produce the gadget's output. Then compute the wire polynomials from the
-recorded values.<a href="#section-7.3.4-4" class="pilcrow">¶</a></p>
+recorded values.
+Note that these polynomials are in the Lagrange basis representation
+by construction, and the gadget polynomials parsed from the proof share
+are similarly transmitted in the Lagrange basis representation.
+Generating additive secret shares of a polynomial works equally both in
+the monomial and the Lagrange basis (<a href="#poly-repr" class="auto internal xref">Section 6.1.3</a>).<a href="#section-7.3.4-4" class="pilcrow">¶</a></p>
 <p id="section-7.3.4-5">Next, choose a random point <code>t</code> (parsed from the query randomness), evaluate
 each wire polynomial at <code>t</code>, and evaluate the gadget polynomial at <code>t</code>.
-Note that the wire polynomials are in the value (Lagrange) representation
-by construction. Faster polynomial evaluation in this representation is
-possible by using the algorithm by <span>[<a href="#Faz25" class="cite xref">Faz25</a>]</span> without resorting to
+Polynomial evaluation in the Lagrange basis is
+faster by using the algorithm by <span>[<a href="#Faz25" class="cite xref">Faz25</a>]</span> without resorting to
 polynomial interpolation.
 The results are recorded in the verifier message passed to the decision
 algorithm, where the test is finished.<a href="#section-7.3.4-5" class="pilcrow">¶</a></p>
 <p id="section-7.3.4-6">The random point <code>t</code> <span class="bcp14">MUST NOT</span> be one of the fixed evaluation points used to
-interpolate the wire polynomials. Otherwise, the verifier message may partially
+define the wire polynomials. Otherwise, the verifier message may partially
 leak the encoded measurement.<a href="#section-7.3.4-6" class="pilcrow">¶</a></p>
 <div class="breakable lang-python sourcecode" id="section-7.3.4-7">
 <pre>
@@ -6590,6 +6767,7 @@ def query(self,
 
     # Construct the verifier message, which consists of the reduced
     # circuit output and each gadget test.
+    lag = Lagrange(self.field)
     verifier = [v]
     for (g, t) in zip(cast(list[QueryGadget[F]], valid.GADGETS),
                       query_rand):
@@ -6604,15 +6782,10 @@ def query(self,
 
         # To test the gadget, we re-compute the wire polynomials and
         # check for consistency with the gadget polynomial provided
-        # by the prover. To start, evaluate the gadget polynomial and
-        # each of the wire polynomials at the random point `t`.
-        wire_checks = []
-        wire_inp = [g.alpha ** k for k in range(p)]
-        for j in range(g.ARITY):
-            wire_poly = poly_interp(self.field, wire_inp, g.wires[j])
-            wire_checks.append(poly_eval(self.field, wire_poly, t))
-
-        gadget_check = poly_eval(self.field, g.poly, t)
+        # by the prover. To start, evaluate the gadget polynomial
+        # and each of the wire polynomials at the random point `t`.
+        wire_checks = lag.poly_eval_batched(g.wires[:g.ARITY], t)
+        gadget_check = lag.poly_eval(g.poly, t)
 
         verifier += wire_checks
         verifier.append(gadget_check)
@@ -9780,6 +9953,10 @@ collisions.  Applications <span class="bcp14">SHOULD</span> prefer the use of re
         <dd>
 <span class="refAuthor">Hesse, J.</span>, <span class="refTitle">"Review of draft-irtf-cfrg-vdaf-15"</span>, <time datetime="2025" class="refDate">2025</time>, <span>&lt;<a href="https://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/">https://mailarchive.ietf.org/arch/msg/cfrg/Omdhr4rO1pla_nlju2l7OJEGWPM/</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="Pol71">[Pol71]</dt>
+        <dd>
+<span class="refAuthor">Pollard, J.</span>, <span class="refTitle">"The fast Fourier transform in a finite field"</span>, <span class="refContent">American Mathematical Society (AMS)</span>, <span class="seriesInfo">Mathematics of Computation vol. 25, no. 114, pp. 365-374</span>, <span class="seriesInfo">DOI 10.1090/s0025-5718-1971-0301966-0</span>, <time datetime="1971" class="refDate">1971</time>, <span>&lt;<a href="https://doi.org/10.1090/s0025-5718-1971-0301966-0">https://doi.org/10.1090/s0025-5718-1971-0301966-0</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="SML24">[SML24]</dt>
         <dd>
 <span class="refAuthor">Satriawan, A.</span>, <span class="refAuthor">Mareta, R.</span>, and <span class="refAuthor">H. Lee</span>, <span class="refTitle">"A Complete Beginner Guide to the Number Theoretic Transform (NTT)"</span>, <span class="refContent">IEEE Access, vol. 11</span>, <time datetime="2024" class="refDate">2024</time>, <span>&lt;<a href="https://eprint.iacr.org/2024/585">https://eprint.iacr.org/2024/585</a>&gt;</span>. </dd>
@@ -9819,7 +9996,8 @@ class Mul(Gadget[F]):
     def eval_poly(self,
                   field: type[F],
                   inp_poly: list[list[F]]) -&gt; list[F]:
-        return poly_mul(field, inp_poly[0], inp_poly[1])
+        lag = Lagrange(field)
+        return lag.poly_mul(inp_poly[0], inp_poly[1])
 </pre><a href="#appendix-A.1-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -9838,7 +10016,7 @@ class PolyEval(Gadget[F]):
     ARITY = 1
     p: list[int]  # polynomial coefficients
 
-    def __init__(self, p: list[int]):
+    def __init__(self, p: list[int], num_calls: int):
         """
         Instantiate this gadget with the given polynomial.
         """
@@ -9852,6 +10030,12 @@ class PolyEval(Gadget[F]):
 
         self.p = p
         self.DEGREE = len(p) - 1
+        wire_poly_length = wire_poly_len(num_calls)
+        gadget_poly_length = gadget_poly_len(
+            self.DEGREE,
+            wire_poly_length,
+        )
+        self.n = next_power_of_2(gadget_poly_length)
 
     def eval(self, field: type[F], inp: list[F]) -&gt; F:
         p = [field(coeff) for coeff in self.p]
@@ -9860,15 +10044,16 @@ class PolyEval(Gadget[F]):
     def eval_poly(self,
                   field: type[F],
                   inp_poly: list[list[F]]) -&gt; list[F]:
-        p = [field(coeff) for coeff in self.p]
-        out = [field(0)] * (self.DEGREE * len(inp_poly[0]))
-        out[0] = p[0]
-        x = inp_poly[0]
-        for i in range(1, len(p)):
-            for j in range(len(x)):
-                out[j] += p[i] * x[j]
-            x = poly_mul(field, x, inp_poly[0])
-        return poly_strip(field, out)
+        inp_poly_len = len(inp_poly[0])
+        assert_power_of_2(inp_poly_len)
+
+        # Convert the input polynomial from Lagrange to monomial basis.
+        inp_mon = field.inv_ntt(inp_poly[0], inp_poly_len)
+        # Obtain n evaluations of the input polynomial I.
+        inp_lag = field.ntt(inp_mon, self.n)
+        # Returns the polynomial composition (P*I)
+        p_mon = [field(coeff) for coeff in self.p]
+        return [poly_eval(field, p_mon, x) for x in inp_lag]
 </pre><a href="#appendix-A.2-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -9923,7 +10108,7 @@ class ParallelSum(Gadget[F]):
             )
             for j in range(output_poly_length):
                 out_sum[j] += out_current[j]
-        return poly_strip(field, out_sum)
+        return out_sum
 </pre><a href="#appendix-A.3-2" class="pilcrow">¶</a>
 </div>
 </section>
@@ -10005,7 +10190,6 @@ class QueryGadget(Gadget[F]):
             g_calls: int):
         p = wire_poly_len(g_calls)
         self.alpha = field.gen() ** (field.GEN_ORDER // p)
-        self.poly = gadget_poly
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
         self.wires = []
@@ -10015,11 +10199,28 @@ class QueryGadget(Gadget[F]):
             wire[0] = s  # set the wire seed
             self.wires.append(wire)
 
+        # Recover all the values of the gadget_poly.
+        lag = Lagrange(field)
+        n = next_power_of_2(len(gadget_poly))
+        gadget_poly = list(gadget_poly)
+        lag.extend_values_to_power_of_2(gadget_poly, n)
+
+        # Calculate 'size' evaluations of the gadget_poly.
+        size = next_power_of_2(gadget_poly_len(g.DEGREE, p))
+        while len(gadget_poly) &lt; size:
+            gadget_poly = lag.double_evaluations(gadget_poly)
+        self.poly = gadget_poly
+
+        # Get the step size used to index the gadget evaluations.
+        log_size = assert_power_of_2(size)
+        log_p = assert_power_of_2(p)
+        self.step = 1 &lt;&lt; (log_size-log_p)
+
     def eval(self, field: type[F], inp: list[F]) -&gt; F:
         self.k += 1
         for j in range(len(inp)):
             self.wires[j][self.k] = inp[j]
-        return poly_eval(field, self.poly, self.alpha ** self.k)
+        return self.poly[self.k*self.step]
 
     @classmethod
     def wrap(cls,
@@ -10434,7 +10635,7 @@ time to developing definitions and security proofs.<a href="#appendix-D-3" class
 Panel.<a href="#appendix-D-4" class="pilcrow">¶</a></p>
 <p id="appendix-D-5">Thanks to Ian Goldberg for the bit decomposition technique used in the range
 proofs of the Prio3 variants.<a href="#appendix-D-5" class="pilcrow">¶</a></p>
-<p id="appendix-D-6">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernández, Simon
+<p id="appendix-D-6">Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernandez, Simon
 Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
 Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
 Christopher Wood for useful feedback on and contributions to the spec.<a href="#appendix-D-6" class="pilcrow">¶</a></p>
