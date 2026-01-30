@@ -359,7 +359,12 @@ Table of Contents
 
    *  FLP: Represent the gadget polynomials in the Lagrange basis
       instead of the monomial basis.  This allows us to take advantage
-      of all algorithmic improvements described in [Faz25].
+      of additional algorithmic improvements described in [Faz25]. (*)
+
+   *  Prio3Sum, Prio3SumVec, Prio3MultihotCountVec: Unify the bit
+      decomposition used in range proofs.  The new technique allows for
+      arbitrary range with only ceil(log2(max_measurement)) field
+      elements; the previous technique required twice as many. (*)
 
    17:
 
