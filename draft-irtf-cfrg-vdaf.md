@@ -451,6 +451,17 @@ Prio3 and Poplar1 constructions in particular.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+18:
+
+* FLP: Represent the gadget polynomials in the Lagrange basis instead of the
+  monomial basis. This allows us to take advantage of additional algorithmic
+  improvements described in {{Faz25}}. (\*)
+
+* Prio3Sum, Prio3SumVec, Prio3MultihotCountVec: Unify the bit decomposition
+  used in range proofs. The new technique allows for arbitrary ranges with only
+  `ceil(log2(max_measurement))` field elements. The previous technique required
+  twice as many. (\*)
+
 17:
 
 * Rename VDAF preparation to VDAF verification.
@@ -6802,11 +6813,12 @@ time to developing definitions and security proofs.
 Thanks to Julia Hesse who provided feedback on behalf of the Crypto Review
 Panel.
 
-Thanks to Ian Goldberg for the bit decomposition technique used in the range
-proofs of the Prio3 variants.
+Special thanks to Armando Faz-Hernandez who discovered a number of algorithmic
+improvements for FLPs {{Faz25}} that significantly improved the runtime of
+Prio3 and other applications. Also, thanks to Ian Goldberg for pointing out the
+bit decomposition technique used in the range proofs of the Prio3 variants.
 
-Thanks to Junye Chen, Henry Corrigan-Gibbs, Armando Faz-Hernandez, Simon
-Friedberger, Tim Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova,
-Michael Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
-Christopher Wood for useful feedback on and contributions to the spec.
-
+Thanks to Junye Chen, Henry Corrigan-Gibbs, Simon Friedberger, Tim Geoghegan,
+Albert Liu, Brandon Pitman, Mariana Raykova, Michael Rosenberg, Jacob
+Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and Christopher Wood for
+useful feedback on and contributions to the spec.
