@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-01-25T01:18:27.078649+00:00",
+  "timestamp": "2026-02-01T01:45:31.581806+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7418,7 +7418,7 @@
       "id": "I_kwDOGKuqOc7NZv-5",
       "title": "prio: Mantain polynomial always in the Lagrange basis.",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/574",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [
@@ -7430,8 +7430,8 @@
       ],
       "body": "It has been observed in the rhizomes paper, Prio executes faster if the polynomials are kept in the Lagrange basis. For example, the FLP Prover sending the gadget polynomial to the verifier in such a representation. \n\nThe changes needed are minor:\n - In the spec: indicate that all polynomial operations must be performed in Lagrange basis. \n - In the code: implement Lagrange polynomial arithmetic and recalculate test vectors.\n\nA verbose example of the changes needed in librpio-rs is here: https://github.com/armfazh/rhizomes/pull/2\n\n\nReference: \n[link](https://eprint.iacr.org/2025/1727) Rhizomes and the Roots of Efficiency, Latincrypt 2025.\n\n",
       "createdAt": "2025-09-23T17:16:36Z",
-      "updatedAt": "2025-11-03T17:30:27Z",
-      "closedAt": null,
+      "updatedAt": "2026-01-30T15:05:13Z",
+      "closedAt": "2026-01-30T15:05:13Z",
       "comments": [
         {
           "author": "tgeoghegan",
@@ -7701,7 +7701,7 @@
       "id": "I_kwDOGKuqOc7eA1OM",
       "title": "Update change log for draft 18",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/598",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cjpatton",
       "authorAssociation": "COLLABORATOR",
       "assignees": [
@@ -7712,8 +7712,8 @@
       ],
       "body": "So far we have:\n\n1. Take Rhizomes optimization (\\*)\n2. Improve range checks (\\*)\n\nAnything else notable?\n",
       "createdAt": "2025-12-12T20:33:53Z",
-      "updatedAt": "2025-12-12T21:48:25Z",
-      "closedAt": null,
+      "updatedAt": "2026-01-30T16:55:40Z",
+      "closedAt": "2026-01-30T16:55:40Z",
       "comments": []
     },
     {
@@ -49275,27 +49275,38 @@
       "id": "PR_kwDOGKuqOc64pdMg",
       "title": "spec: Move FLP polynomials to Lagrange basis.",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/601",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "armfazh",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
       "labels": [
+        "wire change",
         "draft-18"
       ],
       "body": "Updates main text to use polynomials in the Lagrange basis.\r\n\r\nReviewers:\r\nPlease suggest whether the Lagrange class must be included in the main sections or as an appendix.\r\n",
       "createdAt": "2025-12-12T21:53:22Z",
-      "updatedAt": "2026-01-23T22:59:42Z",
+      "updatedAt": "2026-01-30T15:34:11Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "adf9d3d9ab7a0adc079eb2e34c9208a17078dcc8",
       "headRepository": "armfazh/draft-irtf-cfrg-vdaf",
       "headRefName": "specFLPLagrange",
-      "headRefOid": "28a90dcbe9fa7b03e0fca0e78e7c8f7e41656840",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "1e18b649955cc6bc8f3db1c50abd852b2a6fd73c",
+      "closedAt": "2026-01-30T15:04:57Z",
+      "mergedAt": "2026-01-30T15:04:57Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "32c246b3f1ad2d825b37578e7a5a8de1c41a642c"
+      },
+      "comments": [
+        {
+          "author": "armfazh",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I have resolved all of your comments. Thanks!",
+          "createdAt": "2026-01-30T03:16:11Z",
+          "updatedAt": "2026-01-30T03:16:11Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOGKuqOc7VAvT_",
@@ -50426,6 +50437,50 @@
           "createdAt": "2026-01-23T22:59:42Z",
           "updatedAt": "2026-01-23T22:59:42Z",
           "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7eDAPY",
+          "commit": {
+            "abbreviatedOid": "28a90dc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "LGTM, I've just got a few copyediting suggestions.",
+          "createdAt": "2026-01-29T22:20:17Z",
+          "updatedAt": "2026-01-29T22:51:00Z",
+          "comments": [
+            {
+              "originalPosition": 103,
+              "body": "nit: We use hyphens in anchors elsewhere, so we should probably change this for consistency.\n```suggestion\n### Polynomial Representation {#poly-repr}\n```",
+              "createdAt": "2026-01-29T22:20:17Z",
+              "updatedAt": "2026-01-29T22:51:00Z"
+            },
+            {
+              "originalPosition": 140,
+              "body": "rephrasing:\n```suggestion\n  The inputs must have lengths that are equal and a power of two.\n```",
+              "createdAt": "2026-01-29T22:42:36Z",
+              "updatedAt": "2026-01-29T22:51:00Z"
+            },
+            {
+              "originalPosition": 144,
+              "body": "```suggestion\n  It avoids conversion to the monomial basis as shown below.\n```",
+              "createdAt": "2026-01-29T22:43:04Z",
+              "updatedAt": "2026-01-29T22:51:00Z"
+            },
+            {
+              "originalPosition": 153,
+              "body": "```suggestion\n  to the polynomial `p` (in-place) until the number of evaluations is `n`.\n  The output length `n` must be a power of two.\n```",
+              "createdAt": "2026-01-29T22:44:30Z",
+              "updatedAt": "2026-01-29T22:51:00Z"
+            },
+            {
+              "originalPosition": 157,
+              "body": "```suggestion\n  `2*n` evaluations of a polynomial `p` given `n=len(p)` evaluations.\n  The length of the input must be a power of two.\n```",
+              "createdAt": "2026-01-29T22:44:55Z",
+              "updatedAt": "2026-01-29T22:51:00Z"
+            }
+          ]
         }
       ]
     },
@@ -50443,7 +50498,7 @@
       ],
       "body": "I went through the document (as of #601) to ensure the code excerpts were up-to-date with the `poc` directory, and I just found this missing comma.",
       "createdAt": "2026-01-14T19:39:37Z",
-      "updatedAt": "2026-01-16T17:08:47Z",
+      "updatedAt": "2026-01-29T22:51:56Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "129b1bd595cb63d960e195a818d8ca079901ac1c",
@@ -50469,6 +50524,50 @@
           "body": "",
           "createdAt": "2026-01-14T19:57:39Z",
           "updatedAt": "2026-01-14T19:57:39Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 604,
+      "id": "PR_kwDOGKuqOc7Aa4lM",
+      "title": "Update the change long for draft 18, update acknowledgements",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/604",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-18"
+      ],
+      "body": "In the acknowledgements section, we want to give @armfazh credit for the specific improvements he made.\r\n\r\nCloses #598.",
+      "createdAt": "2026-01-30T15:27:12Z",
+      "updatedAt": "2026-01-30T16:55:39Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "32c246b3f1ad2d825b37578e7a5a8de1c41a642c",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/draft-18-cl",
+      "headRefOid": "0f0fe4583866c45b92df63b9f7025981c54caaa2",
+      "closedAt": "2026-01-30T16:55:39Z",
+      "mergedAt": "2026-01-30T16:55:39Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "acd6786c5755c476fc0b76ca6a9ab89b8277d0c0"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7eSbdU",
+          "commit": {
+            "abbreviatedOid": "0f0fe45"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-01-30T16:47:03Z",
+          "updatedAt": "2026-01-30T16:47:03Z",
           "comments": []
         }
       ]
