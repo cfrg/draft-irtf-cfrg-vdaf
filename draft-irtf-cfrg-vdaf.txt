@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 3 August 2026                                              ISRG
+Expires: 10 August 2026                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         30 January 2026
+                                                         6 February 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 August 2026.
+   This Internet-Draft will expire on 10 August 2026.
 
 Copyright Notice
 
@@ -895,21 +895,21 @@ Table of Contents
     | ASCII    | Description    | Comment                            |
     | glyph(s) |                |                                    |
     +==========+================+====================================+
-    | +, -     | Addition /     | Needs to be constant time.  Used   |
+    | + -      | Addition and   | Needs to be constant time.  Used   |
     |          | subtraction    | for addition and subtraction of    |
     |          |                | field elements as well as numbers. |
     +----------+----------------+------------------------------------+
-    | *        | Addition /     | Needs to be constant time.  Used   |
-    |          | subtraction    | for multiplication of field        |
+    | *        | Multiplication | Needs to be constant time.  Used   |
+    |          |                | for multiplication of field        |
     |          |                | elements as well as numbers.       |
     +----------+----------------+------------------------------------+
     | **       | Exponentiation | Needs to be constant time.  Used   |
     |          |                | for exponentiation of field        |
     |          |                | elements as well as numbers.       |
     +----------+----------------+------------------------------------+
-    | /        | Division       | Needs to be constant time.  Used   |
-    |          |                | for division of field elements     |
-    |          |                | (i.e. multiplication by inverse)   |
+    | / //     | Division and   | Needs to be constant time.  Used   |
+    |          | division with  | for division of field elements     |
+    |          | floor          | (i.e. multiplication by inverse)   |
     |          |                | as well as numbers.                |
     +----------+----------------+------------------------------------+
     | ||       | Concatenation  | Used for concatenation of byte     |
@@ -6643,9 +6643,9 @@ Table of Contents
    [DAP]      Geoghegan, T., Patton, C., Pitman, B., Rescorla, E., and
               C. A. Wood, "Distributed Aggregation Protocol for Privacy
               Preserving Measurement", Work in Progress, Internet-Draft,
-              draft-ietf-ppm-dap-16, 2 September 2025,
+              draft-ietf-ppm-dap-17, 30 January 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-ppm-dap-
-              16>.
+              17>.
 
    [Dou02]    Douceur, J. R., "The Sybil Attack", International Workshop
               on Peer-to-Peer Systems (IPTPS), 2002,
