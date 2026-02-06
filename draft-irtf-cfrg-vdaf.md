@@ -952,10 +952,10 @@ The following symbols are used in mathematical notation.
 
 | ASCII glyph(s) | Description | Comment |
 |:---------------|:------------|:--------|
-| +, - | Addition / subtraction | Needs to be constant time. Used for addition and subtraction of field elements as well as numbers. |
-| * | Addition / subtraction | Needs to be constant time. Used for multiplication of field elements as well as numbers. |
+| + - | Addition and subtraction | Needs to be constant time. Used for addition and subtraction of field elements as well as numbers. |
+| * | Multiplication | Needs to be constant time. Used for multiplication of field elements as well as numbers. |
 | ** | Exponentiation | Needs to be constant time. Used for exponentiation of field elements as well as numbers. |
-| / | Division | Needs to be constant time. Used for division of field elements (i.e. multiplication by inverse) as well as numbers. |
+| / // | Division and division with floor | Needs to be constant time. Used for division of field elements (i.e. multiplication by inverse) as well as numbers. |
 | \|\| | Concatenation | Used for concatenation of byte strings and bit strings. |
 {: #mathematical-operators-and-symbols title="Mathematical Operators and Symbols"}
 
