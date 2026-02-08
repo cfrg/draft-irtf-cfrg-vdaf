@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-01T01:45:31.581806+00:00",
+  "timestamp": "2026-02-08T01:58:07.464406+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -127,6 +127,11 @@
       "name": "draft-18",
       "description": "",
       "color": "96d5f0"
+    },
+    {
+      "name": "draft-19",
+      "description": "",
+      "color": "ebe44c"
     }
   ],
   "issues": [
@@ -50568,6 +50573,79 @@
           "body": "",
           "createdAt": "2026-01-30T16:47:03Z",
           "updatedAt": "2026-01-30T16:47:03Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 605,
+      "id": "PR_kwDOGKuqOc7B6fUA",
+      "title": "Correct the table of operators",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/605",
+      "state": "MERGED",
+      "author": "martinthomson",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-19"
+      ],
+      "body": "Multiplication was wrongly labeled.\r\nRemove \",\" (it's a symbol too).\r\nAdd \"//\" operator.",
+      "createdAt": "2026-02-06T06:25:23Z",
+      "updatedAt": "2026-02-06T16:42:26Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "acd6786c5755c476fc0b76ca6a9ab89b8277d0c0",
+      "headRepository": "martinthomson/vdaf",
+      "headRefName": "multiply",
+      "headRefOid": "7997ecc32d65c4df1289e5d14ceee10367d3674a",
+      "closedAt": "2026-02-06T16:42:26Z",
+      "mergedAt": "2026-02-06T16:42:26Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "f7cc56e58fee53b39411aea124d15fd50125eaa8"
+      },
+      "comments": [
+        {
+          "author": "martinthomson",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I wasn't sure if it made sense to say that division of field elements was always \"//\".  I didn't want to audit them.  So I chickened out.",
+          "createdAt": "2026-02-06T06:26:07Z",
+          "updatedAt": "2026-02-06T06:26:07Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7gVIP_",
+          "commit": {
+            "abbreviatedOid": "7997ecc"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "\ud83d\udc4d ",
+          "createdAt": "2026-02-06T15:07:20Z",
+          "updatedAt": "2026-02-06T15:07:28Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "```suggestion\n| /, // | Division and division with floor | Needs to be constant time. Used for division of field elements (i.e. multiplication by inverse) as well as numbers. |\n```",
+              "createdAt": "2026-02-06T15:07:20Z",
+              "updatedAt": "2026-02-06T15:07:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7gWnml",
+          "commit": {
+            "abbreviatedOid": "7997ecc"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-06T16:35:16Z",
+          "updatedAt": "2026-02-06T16:35:16Z",
           "comments": []
         }
       ]
