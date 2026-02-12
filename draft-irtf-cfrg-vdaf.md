@@ -6820,5 +6820,5 @@ bit decomposition technique used in the range proofs of the Prio3 variants.
 
 Thanks to Junye Chen, Henry Corrigan-Gibbs, Simon Friedberger, Tim Geoghegan,
 Albert Liu, Brandon Pitman, Mariana Raykova, Michael Rosenberg, Jacob
-Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and Christopher Wood for
-useful feedback on and contributions to the spec.
+Rothstein, Martin Thomson, Shan Wang, Xiao Wang, Bas Westerbaan, and
+Christopher Wood for useful feedback on and contributions to the spec.
