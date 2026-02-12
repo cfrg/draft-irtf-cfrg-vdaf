@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 10 August 2026                                             ISRG
+Expires: 16 August 2026                                             ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                         6 February 2026
+                                                        12 February 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 August 2026.
+   This Internet-Draft will expire on 16 August 2026.
 
 Copyright Notice
 
@@ -7203,9 +7203,9 @@ Acknowledgments
 
    Thanks to Junye Chen, Henry Corrigan-Gibbs, Simon Friedberger, Tim
    Geoghegan, Albert Liu, Brandon Pitman, Mariana Raykova, Michael
-   Rosenberg, Jacob Rothstein, Shan Wang, Xiao Wang, Bas Westerbaan, and
-   Christopher Wood for useful feedback on and contributions to the
-   spec.
+   Rosenberg, Jacob Rothstein, Martin Thomson, Shan Wang, Xiao Wang, Bas
+   Westerbaan, and Christopher Wood for useful feedback on and
+   contributions to the spec.
 
 Authors' Addresses
 
