@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-08T01:58:07.464406+00:00",
+  "timestamp": "2026-02-15T01:42:35.385109+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -50646,6 +50646,51 @@
           "body": "",
           "createdAt": "2026-02-06T16:35:16Z",
           "updatedAt": "2026-02-06T16:35:16Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 606,
+      "id": "PR_kwDOGKuqOc7DJ_0P",
+      "title": "Ack MT",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/606",
+      "state": "MERGED",
+      "author": "cjpatton",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-19"
+      ],
+      "body": "Long overdue. Thanks for your help @martinthomson !",
+      "createdAt": "2026-02-12T01:56:34Z",
+      "updatedAt": "2026-02-12T16:24:39Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "f7cc56e58fee53b39411aea124d15fd50125eaa8",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "cjpatton/ack-mt",
+      "headRefOid": "206750c607d194ea1ec399bc3b27f897fb9ac4b1",
+      "closedAt": "2026-02-12T16:24:38Z",
+      "mergedAt": "2026-02-12T16:24:38Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "7572d8d366e5af4d3d5061583ac5193ad1f0738b"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7h0cTz",
+          "commit": {
+            "abbreviatedOid": "206750c"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-02-12T04:02:11Z",
+          "updatedAt": "2026-02-12T04:02:11Z",
           "comments": []
         }
       ]
