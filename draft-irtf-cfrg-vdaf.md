@@ -4292,7 +4292,7 @@ element of the measurement is an integer in the range `[0, max_measurement]`.
 Let `bits = max_measurement.bit_length()`, the number of bits needed to encode
 the largest valid measurement.
 
-It s RECOMMENDED to set `chunk_length` to an integer near the square root of
+It is RECOMMENDED to set `chunk_length` to an integer near the square root of
 `length * bits`, (see {{parallel-sum-chunk-length}}).
 
 The circuit is denoted `SumVec`. Each measurement is encoded as a vector of
