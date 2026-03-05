@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-02-15T01:42:35.385109+00:00",
+  "timestamp": "2026-03-05T01:24:28.471752+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -50691,6 +50691,64 @@
           "body": "",
           "createdAt": "2026-02-12T04:02:11Z",
           "updatedAt": "2026-02-12T04:02:11Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 607,
+      "id": "PR_kwDOGKuqOc7HsVSW",
+      "title": "fix typo in `Prio3SumVec`",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/607",
+      "state": "MERGED",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-19"
+      ],
+      "body": "No functional change.",
+      "createdAt": "2026-03-03T19:25:08Z",
+      "updatedAt": "2026-03-03T19:26:42Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "7572d8d366e5af4d3d5061583ac5193ad1f0738b",
+      "headRepository": "tgeoghegan/vdaf",
+      "headRefName": "prio3sumvec-typo",
+      "headRefOid": "6739f958e8657e5a13ac53def1c62595f992dac7",
+      "closedAt": "2026-03-03T19:26:42Z",
+      "mergedAt": "2026-03-03T19:26:42Z",
+      "mergedBy": "cjpatton",
+      "mergeCommit": {
+        "oid": "cc2f344c28e15f849b888f262b61d304397dd5a0"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7ninds",
+          "commit": {
+            "abbreviatedOid": "6739f95"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-03-03T19:25:53Z",
+          "updatedAt": "2026-03-03T19:25:53Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7nin6S",
+          "commit": {
+            "abbreviatedOid": "6739f95"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-03-03T19:26:20Z",
+          "updatedAt": "2026-03-03T19:26:20Z",
           "comments": []
         }
       ]
