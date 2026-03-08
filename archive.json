@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-05T01:24:28.471752+00:00",
+  "timestamp": "2026-03-08T01:25:57.843695+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7742,6 +7742,37 @@
           "body": "I think this is too big of a change to make to VDAF at this point.",
           "createdAt": "2026-01-12T21:36:51Z",
           "updatedAt": "2026-01-12T21:36:51Z"
+        }
+      ]
+    },
+    {
+      "number": 608,
+      "id": "I_kwDOGKuqOc7wN1o1",
+      "title": "poc: `QueryGadget.__init__` computes `alpha` but never uses it",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/608",
+      "state": "OPEN",
+      "author": "tgeoghegan",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/blob/cc2f344c28e15f849b888f262b61d304397dd5a0/poc/vdaf_poc/flp_bbcggi19.py#L286\n\nI think this is left over from before the Rhizomes work. AFAICT this field is never accessed, and all the tests pass if I delete it.",
+      "createdAt": "2026-03-05T19:29:36Z",
+      "updatedAt": "2026-03-05T20:49:12Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "I don't suppose there's a Python linter for detecting never-used fields?",
+          "createdAt": "2026-03-05T19:29:56Z",
+          "updatedAt": "2026-03-05T19:29:56Z"
+        },
+        {
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I don't suppose there's a Python linter for detecting never-used fields?\n\nI don't think so. Every field is effectively public, (ignoring name mangling) so there's no way to know it's not part of the public interface.",
+          "createdAt": "2026-03-05T20:49:11Z",
+          "updatedAt": "2026-03-05T20:49:11Z"
         }
       ]
     }
@@ -50749,6 +50780,62 @@
           "body": "",
           "createdAt": "2026-03-03T19:26:20Z",
           "updatedAt": "2026-03-03T19:26:20Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 609,
+      "id": "PR_kwDOGKuqOc7IUgLJ",
+      "title": "Remove unused field",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/609",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "editorial",
+        "draft-19"
+      ],
+      "body": "Closes #608.",
+      "createdAt": "2026-03-05T20:51:44Z",
+      "updatedAt": "2026-03-08T01:25:08Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "cc2f344c28e15f849b888f262b61d304397dd5a0",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/alpha-cleanup",
+      "headRefOid": "cafcaed74a9befc1778626fd12f52a701b46c40e",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7ob6r8",
+          "commit": {
+            "abbreviatedOid": "cafcaed"
+          },
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-03-05T20:59:00Z",
+          "updatedAt": "2026-03-05T20:59:00Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7pFYfb",
+          "commit": {
+            "abbreviatedOid": "cafcaed"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2026-03-08T01:24:51Z",
+          "updatedAt": "2026-03-08T01:24:51Z",
           "comments": []
         }
       ]
