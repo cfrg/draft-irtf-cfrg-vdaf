@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 16 August 2026                                             ISRG
+Expires: 10 September 2026                                          ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                        12 February 2026
+                                                            9 March 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 August 2026.
+   This Internet-Draft will expire on 10 September 2026.
 
 Copyright Notice
 
@@ -4425,7 +4425,7 @@ Table of Contents
    Let bits = max_measurement.bit_length(), the number of bits needed to
    encode the largest valid measurement.
 
-   It s RECOMMENDED to set chunk_length to an integer near the square
+   It is RECOMMENDED to set chunk_length to an integer near the square
    root of length * bits, (see Section 7.4.3.1).
 
    The circuit is denoted SumVec.  Each measurement is encoded as a
@@ -6945,7 +6945,6 @@ A.4.  Shims for Generating and Querying Proofs
                g: Gadget[F],
                g_calls: int):
            p = wire_poly_len(g_calls)
-           self.alpha = field.gen() ** (field.GEN_ORDER // p)
            self.ARITY = g.ARITY
            self.DEGREE = g.DEGREE
            self.wires = []
