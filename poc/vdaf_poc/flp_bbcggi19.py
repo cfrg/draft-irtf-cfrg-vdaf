@@ -283,7 +283,6 @@ class QueryGadget(Gadget[F]):
         assert len(wire_seeds) == g.ARITY  # REMOVE ME
         p = wire_poly_len(g_calls)
         assert field.GEN_ORDER % p == 0  # REMOVE ME
-        self.alpha = field.gen() ** (field.GEN_ORDER // p)
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
         self.wires = []

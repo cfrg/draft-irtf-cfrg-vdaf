@@ -6536,7 +6536,6 @@ class QueryGadget(Gadget[F]):
             g: Gadget[F],
             g_calls: int):
         p = wire_poly_len(g_calls)
-        self.alpha = field.gen() ** (field.GEN_ORDER // p)
         self.ARITY = g.ARITY
         self.DEGREE = g.DEGREE
         self.wires = []
