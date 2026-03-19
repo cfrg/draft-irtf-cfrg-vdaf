@@ -464,8 +464,13 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
 
             # To test the gadget, we re-compute the wire polynomials and
             # check for consistency with the gadget polynomial provided
-            # by the prover. To start, evaluate the gadget polynomial
-            # and each of the wire polynomials at the random point `t`.
+            # by the prover. Here, we evaluate secret shares of the
+            # gadget polynomial and secret shares of each of the wire
+            # polynomials at the random point `t`. These secret shares
+            # will be combined into polynomial evaluations at `t` when
+            # verifier shares are combined into a verifier message.
+            # Then, the `decide()` procedure will perform nonlinear
+            # computations and the final consistency checks.
             wire_checks = lag.poly_eval_batched(g.wires[:g.ARITY], t)
             gadget_check = lag.poly_eval(g.poly, t)
 
@@ -482,7 +487,10 @@ class FlpBBCGGI19(Flp[Measurement, AggResult, F]):
         if v != self.field(0):
             return False
 
-        # Complete each gadget test.
+        # Complete each gadget test. Check if the evaluations of gadget
+        # polynomials are consistent with evaluations of wire polynomials
+        # by evaluating the gadgets on the evaluations of the wire
+        # polynomials.
         for g in self.valid.GADGETS:
             (wire_checks, verifier) = front(g.ARITY, verifier)
             ([gadget_check], verifier) = front(1, verifier)
