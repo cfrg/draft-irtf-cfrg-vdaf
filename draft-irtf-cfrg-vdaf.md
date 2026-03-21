@@ -4059,7 +4059,7 @@ To finish each gadget test, evaluate the gadget on the evaluations of the wire
 polynomials parsed from the verifier message: if the
 encoded measurement and joint randomness used to generate the proof are the
 same as the measurement (share) and joint randomness used to verify the proof,
-then the output of the gadget will be equal to the evaluation of the wire
+then the output of the gadget will be equal to the evaluation of the gadget
 polynomial in the verifier message; otherwise, the
 output will not equal the gadget polynomial evaluation with high probability.
 
