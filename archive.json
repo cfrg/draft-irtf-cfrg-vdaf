@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-10T01:20:07.839993+00:00",
+  "timestamp": "2026-03-22T01:41:51.682463+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -50818,7 +50818,7 @@
       ],
       "body": "Closes #608.",
       "createdAt": "2026-03-05T20:51:44Z",
-      "updatedAt": "2026-03-09T15:24:10Z",
+      "updatedAt": "2026-03-19T20:51:38Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "cc2f344c28e15f849b888f262b61d304397dd5a0",
@@ -50858,6 +50858,76 @@
           "createdAt": "2026-03-08T01:24:51Z",
           "updatedAt": "2026-03-08T01:24:51Z",
           "comments": []
+        }
+      ]
+    },
+    {
+      "number": 611,
+      "id": "PR_kwDOGKuqOc7L-gxf",
+      "title": "Clarify description of FLP consistency checks",
+      "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/611",
+      "state": "OPEN",
+      "author": "divergentdave",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [
+        "draft-19"
+      ],
+      "body": "This revises the description of how the `query()` and `decide()` parts of the FLP work together, both in the spec text and in reference implementation comments. This gets rid of the terms \"wire check\" and \"gadget check\", which were only used here and not properly defined.\r\n\r\nCloses #610.",
+      "createdAt": "2026-03-19T21:40:40Z",
+      "updatedAt": "2026-03-21T18:29:15Z",
+      "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "baseRefName": "main",
+      "baseRefOid": "9825c287f1588248539748c9ff434ad966102bb1",
+      "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
+      "headRefName": "david/flp-comments",
+      "headRefOid": "3b1c32593a30434f1125a0e3c05ddf96114ca35f",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "tgeoghegan",
+          "authorAssociation": "CONTRIBUTOR",
+          "body": "Some quality wordsmithing here.",
+          "createdAt": "2026-03-21T16:58:57Z",
+          "updatedAt": "2026-03-21T16:58:57Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOGKuqOc7tJ3cC",
+          "commit": {
+            "abbreviatedOid": "a20db21"
+          },
+          "author": "cjpatton",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Nice!",
+          "createdAt": "2026-03-20T00:53:07Z",
+          "updatedAt": "2026-03-20T00:53:07Z",
+          "comments": []
+        },
+        {
+          "id": "PRR_kwDOGKuqOc7tmuJu",
+          "commit": {
+            "abbreviatedOid": "a20db21"
+          },
+          "author": "divergentdave",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "I spotted one more correction to make",
+          "createdAt": "2026-03-21T18:14:02Z",
+          "updatedAt": "2026-03-21T18:28:36Z",
+          "comments": [
+            {
+              "originalPosition": 27,
+              "body": "```suggestion\nthen the output of the gadget will be equal to the evaluation of the gadget\n```\n",
+              "createdAt": "2026-03-21T18:14:02Z",
+              "updatedAt": "2026-03-21T18:28:36Z"
+            }
+          ]
         }
       ]
     }
