@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 10 September 2026                                          ISRG
+Expires: 26 September 2026                                          ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                            9 March 2026
+                                                           25 March 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 10 September 2026.
+   This Internet-Draft will expire on 26 September 2026.
 
 Copyright Notice
 
@@ -4143,8 +4143,13 @@ Table of Contents
 
            # To test the gadget, we re-compute the wire polynomials and
            # check for consistency with the gadget polynomial provided
-           # by the prover. To start, evaluate the gadget polynomial
-           # and each of the wire polynomials at the random point `t`.
+           # by the prover. Here, we evaluate secret shares of the
+           # gadget polynomial and secret shares of each of the wire
+           # polynomials at the random point `t`. These secret shares
+           # will be combined into polynomial evaluations at `t` when
+           # verifier shares are combined into a verifier message.
+           # Then, the `decide()` procedure will perform nonlinear
+           # computations and the final consistency checks.
            wire_checks = lag.poly_eval_batched(g.wires[:g.ARITY], t)
            gadget_check = lag.poly_eval(g.poly, t)
 
@@ -4170,12 +4175,14 @@ Table of Contents
    the previous step.)  The verifier message consists of the reduced
    circuit output and the gadget tests.
 
-   To finish each gadget test, evaluate the gadget on the wire checks:
-   if the encoded measurement and joint randomness used to generate the
-   proof are the same as the measurement (share) and joint randomness
-   used to verify the proof, then the output of the gadget will be equal
-   to the gadget check; otherwise, the output will not equal the gadget
-   check with high probability.
+   To finish each gadget test, evaluate the gadget on the evaluations of
+   the wire polynomials parsed from the verifier message: if the encoded
+   measurement and joint randomness used to generate the proof are the
+   same as the measurement (share) and joint randomness used to verify
+   the proof, then the output of the gadget will be equal to the
+   evaluation of the gadget polynomial in the verifier message;
+   otherwise, the output will not equal the gadget polynomial evaluation
+   with high probability.
 
    def decide(self, verifier: list[F]) -> bool:
        # Check the output of the validity circuit.
@@ -4183,7 +4190,10 @@ Table of Contents
        if v != self.field(0):
            return False
 
-       # Complete each gadget test.
+       # Complete each gadget test. Check if the evaluations of gadget
+       # polynomials are consistent with evaluations of wire polynomials
+       # by evaluating the gadgets on the evaluations of the wire
+       # polynomials.
        for g in self.valid.GADGETS:
            (wire_checks, verifier) = front(g.ARITY, verifier)
            ([gadget_check], verifier) = front(1, verifier)
