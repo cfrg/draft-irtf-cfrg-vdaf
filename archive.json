@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-03-22T01:41:51.682463+00:00",
+  "timestamp": "2026-03-26T01:46:57.971430+00:00",
   "repo": "cfrg/draft-irtf-cfrg-vdaf",
   "labels": [
     {
@@ -7781,7 +7781,7 @@
       "id": "I_kwDOGKuqOc7xQZ1i",
       "title": "`Flp.query` starts but never finishes",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/issues/610",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "tgeoghegan",
       "authorAssociation": "CONTRIBUTOR",
       "assignees": [],
@@ -7791,8 +7791,8 @@
       ],
       "body": "In [7.3.4](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-18#section-7.3.4) we have the specification of `Flp.query`:\n\n```python\ndef query(self,\n          meas: list[F],\n          proof: list[F],\n          query_rand: list[F],\n          joint_rand: list[F],\n          num_shares: int) -> list[F]:\n    # Evaluate the validity circuit, recording the value of each\n    # input wire for each evaluation of each gadget. Use the gadget\n    # polynomials encoded by `proof` to compute the gadget outputs.\n    valid = QueryGadget.wrap(self.valid, proof)\n    out = valid.eval(meas, joint_rand, num_shares)\n\n    # Reduce the output.\n    if self.valid.EVAL_OUTPUT_LEN > 1:\n        (rand, query_rand) = front(\n            self.valid.EVAL_OUTPUT_LEN,\n            query_rand,\n        )\n        v = self.field(0)\n        for (r, out_elem) in zip(rand, out):\n            v += r * out_elem\n    else:\n        [v] = out\n\n    # Construct the verifier message, which consists of the reduced\n    # circuit output and each gadget test.\n    lag = Lagrange(self.field)\n    verifier = [v]\n    for (g, t) in zip(cast(list[QueryGadget[F]], valid.GADGETS),\n                      query_rand):\n        p = len(g.wires[0])\n\n        # Abort if `t` is one of the inputs used to compute the wire\n        # polynomials so that the verifier message doesn't leak the\n        # gadget output. It suffices to check if `t` is a root of\n        # unity, which implies it is a power of `alpha`.\n        if t ** p == self.field(1):\n            raise ValueError('test point is a root of unity')\n\n        # To test the gadget, we re-compute the wire polynomials and\n        # check for consistency with the gadget polynomial provided\n        # by the prover. To start, evaluate the gadget polynomial          <-- start without a finish?\n        # and each of the wire polynomials at the random point `t`.\n        wire_checks = lag.poly_eval_batched(g.wires[:g.ARITY], t)\n        gadget_check = lag.poly_eval(g.poly, t)\n\n        verifier += wire_checks\n        verifier.append(gadget_check)\n\n    return verifier\n```\n\nThe second to last line in the comment that I marked with `<--` discusses starting a consistency check, but the reader is left hanging. I guess this is finished in [7.3.5](https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-vdaf-18#section-7.3.5) but the connection could be more clear:\n\n> To finish each gadget test, evaluate the gadget on the wire checks: [...]",
       "createdAt": "2026-03-09T19:57:54Z",
-      "updatedAt": "2026-03-09T22:41:41Z",
-      "closedAt": null,
+      "updatedAt": "2026-03-25T15:17:05Z",
+      "closedAt": "2026-03-25T15:17:05Z",
       "comments": []
     }
   ],
@@ -50866,7 +50866,7 @@
       "id": "PR_kwDOGKuqOc7L-gxf",
       "title": "Clarify description of FLP consistency checks",
       "url": "https://github.com/cfrg/draft-irtf-cfrg-vdaf/pull/611",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "divergentdave",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
@@ -50875,17 +50875,19 @@
       ],
       "body": "This revises the description of how the `query()` and `decide()` parts of the FLP work together, both in the spec text and in reference implementation comments. This gets rid of the terms \"wire check\" and \"gadget check\", which were only used here and not properly defined.\r\n\r\nCloses #610.",
       "createdAt": "2026-03-19T21:40:40Z",
-      "updatedAt": "2026-03-21T18:29:15Z",
+      "updatedAt": "2026-03-25T15:17:11Z",
       "baseRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "baseRefName": "main",
       "baseRefOid": "9825c287f1588248539748c9ff434ad966102bb1",
       "headRepository": "cfrg/draft-irtf-cfrg-vdaf",
       "headRefName": "david/flp-comments",
       "headRefOid": "3b1c32593a30434f1125a0e3c05ddf96114ca35f",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-03-25T15:17:03Z",
+      "mergedAt": "2026-03-25T15:17:03Z",
+      "mergedBy": "divergentdave",
+      "mergeCommit": {
+        "oid": "7ef60d31f147d5855eff5cb6e38da8b5f8985a48"
+      },
       "comments": [
         {
           "author": "tgeoghegan",
