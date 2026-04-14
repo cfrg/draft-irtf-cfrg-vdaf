@@ -451,6 +451,10 @@ Prio3 and Poplar1 constructions in particular.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+19:
+
+* Editorial changes only.
+
 18:
 
 * FLP: Represent the gadget polynomials in the Lagrange basis instead of the
