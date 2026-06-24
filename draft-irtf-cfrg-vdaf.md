@@ -6061,11 +6061,11 @@ scheme would not allow key rotation over the lifetime of a task.
 
 The sharding and verification phases of VDAF execution depend on a nonce
 associated with the Client's report. To ensure privacy of the underlying
-measurement, the Client MUST generate this nonce using a CSPRNG. This is
-required in order to leverage security analysis for the privacy definition of
-{{DPRS23}}, which assumes the nonce is chosen at random prior to generating the
-report. Uniqueness of the nonce is not sufficient because the verification key
-is controlled by the attacker.
+measurement, the Client MUST generate this nonce using a CSPRNG. Assuming the
+verification key is fixed ({the-verification-key}), this ensures any malicious
+Aggregators trying to break privacy cannot control the randomness derived for
+the verification process. Uniqueness of the nonce is not sufficient because the
+verification key is controlled by the attacker {{DPRS23}}.
 
 Applications will need to protect against replay attacks to prevent disallowed
 re-use of reports (see {{agg-param-security}}). Furthermore, in applications
