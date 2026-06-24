@@ -451,6 +451,10 @@ Prio3 and Poplar1 constructions in particular.
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+20:
+
+* Take an editorial suggestion from Crypto Review Panel {{PANEL-FEEDBACK}}.
+
 19:
 
 * Editorial changes only.
