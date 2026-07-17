@@ -4816,8 +4816,8 @@ than for inner nodes. This is to ensure the IDPF is "extractable" as defined in
 A concrete IDPF defines the types and parameters enumerated in {{idpf-param}}.
 In the remainder, `Output` is used as shorthand for the type
 `list[list[FieldInner]] | list[list[FieldLeaf]]`. (This type denotes either a
-vector of inner node field elements or leaf node field elements.) The scheme is
-comprised of the following algorithms:
+list of vectors of inner node field elements or leaf node field elements.) The
+scheme is comprised of the following algorithms:
 
 * `idpf.gen(alpha: tuple[bool, ...], beta_inner: list[list[FieldInner]], beta_leaf:
   list[FieldLeaf], ctx: bytes, nonce: bytes, rand: bytes) -> tuple[PublicShare,
