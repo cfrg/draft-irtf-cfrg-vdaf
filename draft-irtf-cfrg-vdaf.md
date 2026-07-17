@@ -2021,10 +2021,7 @@ def ping_pong_helper_continued(
         False, ctx, agg_param, state, inbound)
 ~~~
 
-They continue in this way until processing halts. Note that, depending on the
-number of rounds of verification that are required, when one party reaches the
-`Finished` state, there may be one more message to send before the peer can
-also finish processing (i.e., the outbound message is not `None`).
+They continue in this way until processing halts.
 
 ### The Star Topology (Any Number of Aggregators) {#star-topo}
 
