@@ -1726,11 +1726,11 @@ The state machine of each Aggregator is shown below.
 
 ~~~ aasvg
  +--> Rejected <--+   +--------------+   Finished(out_share)
- |                |   |              |           ^
- |                |   |              v           |
+ |                |   |              |            ^
+ |                |   |              v            |
 Start -----> Continued(verify_state, verify_round, outbound)
- |                                               |
- |                                               v
+ |                                                |
+ |                                                v
  +---------------> FinishedWithOutbound(out_share, outbound)
 ~~~
 {: #vdaf-verification-state-machine title="State machine of VDAF verification."}
