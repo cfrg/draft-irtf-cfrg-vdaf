@@ -263,8 +263,8 @@ informative:
   TestVectors:
     title: "Test vectors for Prio3 and Poplar1"
     target: "https://github.com/cfrg/draft-irtf-cfrg-vdaf"
-    refcontent: "commit hash 5b7df1d"
-    date: December 2024
+    refcontent: "commit hash 888e4b1"
+    date: December 2025
 
 v3xml2rfc:
   silence:
