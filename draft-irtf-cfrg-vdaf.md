@@ -6311,7 +6311,7 @@ This registry should be created under the heading "Verifiable Distributed
 Aggregation Functions (VDAF)", and administered under the Specification Required
 policy {{!RFC8126}}.
 
-The "VDAF Identifiers" registry lists identifiers for Distributed Aggregation
+The "DAF and VDAF Identifiers" registry lists identifiers for Distributed Aggregation
 Functions (DAFs) and Verifiable Distributed Aggregation Functions (VDAFs). These
 identifiers are four-byte values, so the minimum possible value is `0x00000000`
 and the maximum possible value is `0xffffffff`.
