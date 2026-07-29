@@ -281,6 +281,9 @@ servers to detect if a malicious or misconfigured client submitted an invalid
 measurement. Two concrete VDAFs are specified, one for general-purpose
 aggregation (Prio3) and another for heavy hitters (Poplar1).
 
+This document is a product of the Crypto Forum Research Group (CFRG) in the
+IRTF.
+
 --- middle
 
 # Introduction
@@ -444,6 +447,9 @@ functionalities that are common to the constructions defined in this document;
 {{prio3}} specifies Prio3; {{poplar1}} specifies Poplar1; and {{security}}
 enumerates security considerations for DAFs and VDAFs in general and the
 Prio3 and Poplar1 constructions in particular.
+
+This document represents the consensus of the Crypto Forum Research Group
+(CFRG).
 
 ## Change Log
 
