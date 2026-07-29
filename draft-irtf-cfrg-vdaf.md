@@ -448,6 +448,9 @@ functionalities that are common to the constructions defined in this document;
 enumerates security considerations for DAFs and VDAFs in general and the
 Prio3 and Poplar1 constructions in particular.
 
+This document represents the consensus of the Crypto Forum Research Group
+(CFRG).
+
 ## Change Log
 
 (RFC EDITOR: remove this section.)
