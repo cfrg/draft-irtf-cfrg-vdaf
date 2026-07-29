@@ -1797,7 +1797,7 @@ verification is completed. All told there are `ceil((vdaf.ROUNDS+1)/2)`
 requests sent.
 
 Protocol messages are specified in the presentation language of TLS; see
-{{Section 3 of !RFC8446}}. Each message is structured as follows:
+{{Section 3 of !RFC9846}}. Each message is structured as follows:
 
 ~~~ tls-presentation
 <CODE BEGINS>
@@ -3464,7 +3464,7 @@ def joint_rands(self,
 
 This section defines serialization formats for messages exchanged over the
 network while executing Prio3. Messages are defined in the presentation
-language of TLS as defined in {{Section 3 of !RFC8446}}.
+language of TLS as defined in {{Section 3 of !RFC9846}}.
 
 Let `prio3` denote an instance of `Prio3`. In the remainder, let `S` be an
 alias for `prio3.xof.SEED_SIZE` and `F` as an alias for
@@ -5507,7 +5507,7 @@ def unshard(
 
 This section defines serialization formats for messages exchanged over the
 network while executing `Poplar1`. Messages are defined in the presentation
-language of TLS as defined in {{Section 3 of !RFC8446}}.
+language of TLS as defined in {{Section 3 of !RFC9846}}.
 
 Let `poplar1` be an instance of `Poplar1`. In the remainder let `Fi` be an
 alias for `poplar1.idpf.field_inner.ENCODED_SIZE`, `Fl` as an alias for
