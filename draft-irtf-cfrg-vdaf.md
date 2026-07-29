@@ -2276,7 +2276,10 @@ class Lagrange[F: NttField]():
         """Evaluate a polynomial p in the Lagrange basis at x."""
         return self.poly_eval_batched([p], x).pop()
 
-    def poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]:
+    def poly_eval_batched(
+            self,
+            polys: list[list[F]],
+            x: F) -> list[F]:
         """Evaluate each polynomial in the Lagrange basis at x."""
         assert len({len(p) for p in polys}) == 1
         n = len(polys[0])
@@ -2300,7 +2303,10 @@ class Lagrange[F: NttField]():
             u[i] *= factor
         return u
 
-    def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:
+    def extend_values_to_power_of_2(
+            self,
+            p: list[F],
+            n: int) -> None:
         """
         Appends evaluations to the polynomial p (in-place) until the
         number of evaluations is n, and n must be a power of two.

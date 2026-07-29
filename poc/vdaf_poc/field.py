@@ -351,6 +351,9 @@ def poly_interp(field: type[F], xs: list[F], ys: list[F]) -> list[F]:
     return output
 
 
+# NOTE: This class is excerpted in the document. Its width should be
+# limited to 69 columns to avoid warnings from xml2rfc.
+# ===================================================================
 class Lagrange[F: NttField]():
     """Polynomial arithmetic in the Lagrange basis."""
 
@@ -374,7 +377,10 @@ class Lagrange[F: NttField]():
         """Evaluate a polynomial p in the Lagrange basis at x."""
         return self.poly_eval_batched([p], x).pop()
 
-    def poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]:
+    def poly_eval_batched(
+            self,
+            polys: list[list[F]],
+            x: F) -> list[F]:
         """Evaluate each polynomial in the Lagrange basis at x.
 
         See Alg. 7 of [Faz25](https://ia.cr/2025/1727).
@@ -401,7 +407,10 @@ class Lagrange[F: NttField]():
             u[i] *= factor
         return u
 
-    def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:
+    def extend_values_to_power_of_2(
+            self,
+            p: list[F],
+            n: int) -> None:
         """
         Appends evaluations to the polynomial p (in-place) until the
         number of evaluations is n, and n must be a power of two.
