@@ -281,6 +281,9 @@ servers to detect if a malicious or misconfigured client submitted an invalid
 measurement. Two concrete VDAFs are specified, one for general-purpose
 aggregation (Prio3) and another for heavy hitters (Poplar1).
 
+This document is a product of the Crypto Forum Research Group (CFRG) in the
+IRTF.
+
 --- middle
 
 # Introduction
