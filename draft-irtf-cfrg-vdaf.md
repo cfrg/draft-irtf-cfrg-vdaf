@@ -2442,7 +2442,7 @@ for DAFs and VDAFs.
 Pre-conditions:
 
 * The default seed length is `32`. The seed MAY have a different length, but it
-  MUST not exceed 255. Otherwise initialization will raise an exception.
+  MUST NOT exceed 255. Otherwise initialization will raise an exception.
 
 * The length of the domain separation string `dst` passed to XofTurboShake128
   MUST NOT exceed 65535 bytes. Otherwise initialization will raise an
