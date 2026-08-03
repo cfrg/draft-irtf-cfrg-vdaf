@@ -576,7 +576,8 @@ class PolyEval(Gadget[F]):
         inp_poly_len = len(inp_poly[0])
         assert_power_of_2(inp_poly_len)
 
-        # Convert the input polynomial from Lagrange to monomial basis.
+        # Convert the input polynomial from Lagrange to monomial
+        # basis.
         inp_mon = field.inv_ntt(inp_poly[0], inp_poly_len)
         # Obtain n evaluations of the input polynomial I.
         inp_lag = field.ntt(inp_mon, self.n)
@@ -840,7 +841,8 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
         # Make sure `length` and `max_weight` don't overflow the
         # field modulus. Otherwise we may not correctly compute the
-        # sum of measurement vector entries during circuit evaluation.
+        # sum of measurement vector entries during circuit
+        # evaluation.
         if self.field.MODULUS <= length:
             raise ValueError('length is too large for the '
                              'current field size')

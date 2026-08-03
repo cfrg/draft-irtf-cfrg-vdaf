@@ -1354,6 +1354,7 @@ Secure execution of a DAF involves simulating the following procedure over an
 insecure network.
 
 ~~~ python
+<CODE BEGINS>
 def run_daf(
         daf: Daf[
             Measurement,
@@ -1390,6 +1391,7 @@ def run_daf(
     agg_result = daf.unshard(agg_param, agg_shares,
                              num_measurements)
     return agg_result
+<CODE ENDS>
 ~~~
 
 The inputs to this procedure include the parameters of the aggregation function
@@ -1451,6 +1453,7 @@ for each VDAF specified in this document are defined in {{codepoints}}. The
 following method is used by both Prio3 and Poplar1:
 
 ~~~ python
+<CODE BEGINS>
 def domain_separation_tag(self, usage: int, ctx: bytes) -> bytes:
     """
     Format domain separation tag for this VDAF with the given
@@ -1461,6 +1464,7 @@ def domain_separation_tag(self, usage: int, ctx: bytes) -> bytes:
         - `usage` in the range `[0, 2**16)`
     """
     return format_dst(0, self.ID, usage) + ctx
+<CODE ENDS>
 ~~~
 
 The output, called the "domain separation tag", is used in the constructions
@@ -1619,6 +1623,7 @@ The following function describes the sequence of computations that are carried
 out during VDAF execution:
 
 ~~~ python
+<CODE BEGINS>
 def run_vdaf(
         vdaf: Vdaf[
             Measurement,
@@ -1703,6 +1708,7 @@ def run_vdaf(
     agg_result = vdaf.unshard(agg_param, agg_shares,
                               num_measurements)
     return agg_result
+<CODE ENDS>
 ~~~
 
 Depending on the VDAF, verification, aggregation, and collection may be carried
@@ -1794,6 +1800,7 @@ Protocol messages are specified in the presentation language of TLS; see
 {{Section 3 of !RFC8446}}. Each message is structured as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 enum {
   initialize(0),
   continue(1),
@@ -1815,6 +1822,7 @@ struct {
 } Message;
 
 /* note that 4294967295 is 2 ** 32 - 1 */
+<CODE ENDS>
 ~~~
 
 These messages trigger all transitions in the state machine in
@@ -1823,6 +1831,7 @@ transition. The Leader's state is initialized using its local inputs with the
 following method on class `Vdaf`:
 
 ~~~ python
+<CODE BEGINS>
 def ping_pong_leader_init(
         self,
         vdaf_verify_key: bytes,
@@ -1851,6 +1860,7 @@ def ping_pong_leader_init(
         )
     except Exception:
         return Rejected()
+<CODE ENDS>
 ~~~
 
 The output is the `State` to which the Leader has transitioned. If the Leader's
@@ -1865,6 +1875,7 @@ Helper. The Helper's initial transition is computed using the following
 procedure:
 
 ~~~ python
+<CODE BEGINS>
 def ping_pong_helper_init(
     self,
     vdaf_verify_key: bytes,
@@ -1906,6 +1917,7 @@ def ping_pong_helper_init(
             verifier_shares, verify_state, 0)
     except Exception:
         return Rejected()
+<CODE ENDS>
 ~~~
 
 The procedure `decode()` decodes the inbound message and returns the
@@ -1915,6 +1927,7 @@ shares, combines them into the verifier message, and computes the next
 verification state of the caller:
 
 ~~~ python
+<CODE BEGINS>
 def ping_pong_transition(
         self,
         ctx: bytes,
@@ -1938,6 +1951,7 @@ def ping_pong_transition(
         verify_state, verify_round+1,
         encode(1, encoded_verifier_message,
                encoded_verifier_share))  # continue
+<CODE ENDS>
 ~~~
 
 The output is the `State` to which the Helper has transitioned. If the Helper's
@@ -1950,6 +1964,7 @@ The Leader computes its next state transition using the following method on
 class `Vdaf`:
 
 ~~~ python
+<CODE BEGINS>
 def ping_pong_leader_continued(
     self,
     ctx: bytes,
@@ -2007,6 +2022,7 @@ def ping_pong_continued(
             return Rejected()
     except Exception:
         return Rejected()
+<CODE ENDS>
 ~~~
 
 If the Leader's state is `Finished` or `Rejected`, then processing halts.
@@ -2015,6 +2031,7 @@ Leader sends the outbound message to the Helper. The Helper computes its next
 state transition using the following method on class `Vdaf`:
 
 ~~~ python
+<CODE BEGINS>
 def ping_pong_helper_continued(
     self,
     ctx: bytes,
@@ -2025,6 +2042,7 @@ def ping_pong_helper_continued(
     """Called by the Helper to continue ping-ponging."""
     return self.ping_pong_continued(
         False, ctx, agg_param, state, inbound)
+<CODE ENDS>
 ~~~
 
 They continue in this way until processing halts.
@@ -2104,6 +2122,7 @@ The following class methods on `Field` are used to encode and decode vectors of
 field elements as byte strings:
 
 ~~~ python
+<CODE BEGINS>
 def encode_vec(cls, vec: list[Self]) -> bytes:
     """
     Encode a vector of field elements `vec` as a byte string.
@@ -2130,6 +2149,7 @@ def decode_vec(cls, encoded: bytes) -> list[Self]:
             raise ValueError('modulus overflow')
         vec.append(cls(x))
     return vec
+<CODE ENDS>
 ~~~
 
 Finally, the following functions define arithmetic on vectors over a finite
@@ -2137,6 +2157,7 @@ field. Note that an exception is raised by each function if the operands are
 not the same length.
 
 ~~~ python
+<CODE BEGINS>
 def vec_sub(left: list[F], right: list[F]) -> list[F]:
     """
     Subtract the right operand from the left and return the result.
@@ -2154,6 +2175,7 @@ def vec_add(left: list[F], right: list[F]) -> list[F]:
 def vec_neg(vec: list[F]) -> list[F]:
     """Negate the input vector."""
     return list(map(lambda x: -x, vec))
+<CODE ENDS>
 ~~~
 
 ### NTT-Friendly Fields {#field-ntt-friendly}
@@ -2259,6 +2281,7 @@ For algorithm derivations, refer to {{Faz25}}.
 In the following, `prod` computes the product of its inputs.
 
 ~~~ python
+<CODE BEGINS>
 class Lagrange[F: NttField]():
     def __init__(self, field: type[F]) -> None:
         self.field = field
@@ -2276,7 +2299,10 @@ class Lagrange[F: NttField]():
         """Evaluate a polynomial p in the Lagrange basis at x."""
         return self.poly_eval_batched([p], x).pop()
 
-    def poly_eval_batched(self, polys: list[list[F]], x: F) -> list[F]:
+    def poly_eval_batched(
+            self,
+            polys: list[list[F]],
+            x: F) -> list[F]:
         """Evaluate each polynomial in the Lagrange basis at x."""
         assert len({len(p) for p in polys}) == 1
         n = len(polys[0])
@@ -2300,7 +2326,10 @@ class Lagrange[F: NttField]():
             u[i] *= factor
         return u
 
-    def extend_values_to_power_of_2(self, p: list[F], n: int) -> None:
+    def extend_values_to_power_of_2(
+            self,
+            p: list[F],
+            n: int) -> None:
         """
         Appends evaluations to the polynomial p (in-place) until the
         number of evaluations is n, and n must be a power of two.
@@ -2337,6 +2366,7 @@ class Lagrange[F: NttField]():
         even = p
         odd = self.field.ntt(self.field.inv_ntt(even, n), n, True)
         return [i for pair in zip(even, odd) for i in pair]
+<CODE ENDS>
 ~~~
 
 ### Parameters
@@ -2382,6 +2412,7 @@ class method that provides a one-shot interface for expanding a seed into a
 field vector.
 
 ~~~ python
+<CODE BEGINS>
 def derive_seed(cls,
                 seed: bytes,
                 dst: bytes,
@@ -2431,6 +2462,7 @@ def expand_into_vec(cls,
     """
     xof = cls(seed, dst, binder)
     return xof.next_vec(field, length)
+<CODE ENDS>
 ~~~
 
 ### XofTurboShake128 {#xof-turboshake128}
@@ -2442,13 +2474,14 @@ for DAFs and VDAFs.
 Pre-conditions:
 
 * The default seed length is `32`. The seed MAY have a different length, but it
-  MUST not exceed 255. Otherwise initialization will raise an exception.
+  MUST NOT exceed 255. Otherwise initialization will raise an exception.
 
 * The length of the domain separation string `dst` passed to XofTurboShake128
   MUST NOT exceed 65535 bytes. Otherwise initialization will raise an
   exception.
 
 ~~~ python
+<CODE BEGINS>
 class XofTurboShake128(Xof):
     """XOF wrapper for TurboSHAKE128."""
 
@@ -2474,6 +2507,7 @@ class XofTurboShake128(Xof):
         # that allows stateful handling of the stream.
         stream = TurboSHAKE128(self.m, 1, self.l)
         return stream[-length:]
+<CODE ENDS>
 ~~~
 
 ### XofFixedKeyAes128 {#xof-fixed-key-aes128}
@@ -2500,6 +2534,7 @@ Pre-conditions:
   exception.
 
 ~~~ python
+<CODE BEGINS>
 class XofFixedKeyAes128(Xof):
     """
     XOF based on a circular collision-resistant hash function from
@@ -2557,6 +2592,7 @@ class XofFixedKeyAes128(Xof):
         lo, hi = block[:8], block[8:]
         sigma_block = concat([hi, xor(hi, lo)])
         return xor(AES128(self.fixed_key, sigma_block), sigma_block)
+<CODE ENDS>
 ~~~
 
 ### The Domain Separation Tag and Binder String {#dst-binder}
@@ -2577,6 +2613,7 @@ The following algorithm is used in the remainder of this document in order to
 format the domain separation tag:
 
 ~~~ python
+<CODE BEGINS>
 def format_dst(algo_class: int,
                algo: int,
                usage: int) -> bytes:
@@ -2595,6 +2632,7 @@ def format_dst(algo_class: int,
         to_be_bytes(algo, 4),
         to_be_bytes(usage, 2),
     ])
+<CODE ENDS>
 ~~~
 
 It is also sometimes necessary to bind the output to some ephemeral value that
@@ -2698,6 +2736,7 @@ details.
 An FLP is executed by the prover and verifier as follows:
 
 ~~~ python
+<CODE BEGINS>
 def run_flp(
         flp: Flp[Measurement, AggResult, F],
         meas: list[F],
@@ -2742,6 +2781,7 @@ def run_flp(
 
     # Verifier decides if the measurement is valid.
     return flp.decide(verifier)
+<CODE ENDS>
 ~~~
 
 The proof system is designed so that, if `meas` is valid, then `run_flp(flp,
@@ -2921,6 +2961,7 @@ Depending on the FLP, joint randomness may not be required. In particular, when
 The sharding algorithm is specified below:
 
 ~~~ python
+<CODE BEGINS>
 def shard(
         self,
         ctx: bytes,
@@ -2942,6 +2983,7 @@ def shard(
         return self.shard_with_joint_rand(ctx, meas, nonce, seeds)
     else:
         return self.shard_without_joint_rand(ctx, meas, seeds)
+<CODE ENDS>
 ~~~
 
 It starts by splitting the randomness into seeds. It then encodes the
@@ -2965,6 +3007,7 @@ of field elements. The methods on `Prio3` for deriving the prover randomness,
 measurement shares, and proof shares are defined in {{prio3-auxiliary}}.
 
 ~~~ python
+<CODE BEGINS>
 def shard_without_joint_rand(
         self,
         ctx: bytes,
@@ -3014,6 +3057,7 @@ def shard_without_joint_rand(
             None,
         ))
     return (None, input_shares)
+<CODE ENDS>
 ~~~
 
 #### FLPs With Joint Randomness
@@ -3038,6 +3082,7 @@ share. (See {{prio3-verification}} for details.)
 All functions used in the following listing are defined in {{prio3-auxiliary}}:
 
 ~~~ python
+<CODE BEGINS>
 def shard_with_joint_rand(
         self,
         ctx: bytes,
@@ -3112,6 +3157,7 @@ def shard_with_joint_rand(
             helper_blinds[j],
         ))
     return (joint_rand_parts, input_shares)
+<CODE ENDS>
 ~~~
 
 ### Verification {#prio3-verification}
@@ -3143,6 +3189,7 @@ truncate the measurement share to get the output share.
 All functions used in the following listing are defined in {{prio3-auxiliary}}:
 
 ~~~ python
+<CODE BEGINS>
 def verify_init(
         self,
         verify_key: bytes,
@@ -3242,6 +3289,7 @@ def verify_next(
         raise ValueError('joint randomness check failed')
 
     return out_share
+<CODE ENDS>
 ~~~
 
 ### Validity of Aggregation Parameters
@@ -3249,11 +3297,13 @@ def verify_next(
 `Prio3` only permits a report to be aggregated once.
 
 ~~~ python
+<CODE BEGINS>
 def is_valid(
         self,
         _agg_param: None,
         previous_agg_params: list[None]) -> bool:
     return len(previous_agg_params) == 0
+<CODE ENDS>
 ~~~
 
 ### Aggregation
@@ -3262,6 +3312,7 @@ Aggregating a set of output shares is simply a matter of adding up the vectors
 element-wise.
 
 ~~~ python
+<CODE BEGINS>
 def agg_init(self, _agg_param: None) -> list[F]:
     return self.flp.field.zeros(self.flp.OUTPUT_LEN)
 
@@ -3278,6 +3329,7 @@ def merge(self,
     for agg_share in agg_shares:
         agg = vec_add(agg, agg_share)
     return agg
+<CODE ENDS>
 ~~~
 
 ### Unsharding
@@ -3287,6 +3339,7 @@ element-wise, then decodes the aggregate result from the sum according to the
 FLP ({{flp-encode}}).
 
 ~~~ python
+<CODE BEGINS>
 def unshard(
         self,
         _agg_param: None,
@@ -3294,6 +3347,7 @@ def unshard(
         num_measurements: int) -> AggResult:
     agg = self.merge(None, agg_shares)
     return self.flp.decode(agg, num_measurements)
+<CODE ENDS>
 ~~~
 
 ### Auxiliary Functions {#prio3-auxiliary}
@@ -3302,6 +3356,7 @@ This section defines a number of auxiliary functions referenced by the main
 algorithms for Prio3 in the preceding sections.
 
 ~~~ python
+<CODE BEGINS>
 def helper_meas_share(
         self,
         ctx: bytes,
@@ -3402,6 +3457,7 @@ def joint_rands(self,
         byte(self.PROOFS),
         self.flp.JOINT_RAND_LEN * self.PROOFS,
     )
+<CODE ENDS>
 ~~~
 
 ### Message Serialization {#prio3-encode}
@@ -3415,14 +3471,18 @@ alias for `prio3.xof.SEED_SIZE` and `F` as an alias for
 `prio3.field.ENCODED_SIZE`. XOF seeds are represented as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 opaque Prio3Seed[S];
+<CODE ENDS>
 ~~~
 
 Field elements are encoded in little-endian byte order (as defined in
 {{field}}) and represented as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 opaque Prio3Field[F];
+<CODE ENDS>
 ~~~
 
 #### Public Share
@@ -3434,9 +3494,11 @@ Otherwise, if joint randomness is used, then the public share encodes the joint
 randomness parts as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3Seed joint_rand_parts[S * prio3.SHARES];
 } Prio3PublicShareWithJointRand;
+<CODE ENDS>
 ~~~
 
 #### Input Share
@@ -3456,39 +3518,47 @@ In total there are four variants of the input share. When joint randomness is
 not used, the Leader's share is structured as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3Field meas_share[F * prio3.flp.MEAS_LEN];
     Prio3Field proofs_share[F * prio3.flp.PROOF_LEN * prio3.PROOFS];
 } Prio3LeaderShare;
+<CODE ENDS>
 ~~~
 
 When joint randomness is not used, the Helpers' shares are structured
 as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3Seed share;
 } Prio3HelperShare;
+<CODE ENDS>
 ~~~
 
 When joint randomness is used, the Leader's input share is structured as
 follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3LeaderShare inner;
     Prio3Seed blind;
 } Prio3LeaderShareWithJointRand;
+<CODE ENDS>
 ~~~
 
 Finally, when joint randomness is used, the Helpers' shares are structured as
 follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3HelperShare inner;
     Prio3Seed blind;
 } Prio3HelperShareWithJointRand;
+<CODE ENDS>
 ~~~
 
 #### Verifier Share
@@ -3496,9 +3566,11 @@ struct {
 When joint randomness is not used, the verifier share is structured as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3Field verifiers_share[F * V];
 } Prio3VerifierShare;
+<CODE ENDS>
 ~~~
 
 where `V = prio3.flp.VERIFIER_LEN * prio3.PROOFS`. When joint randomness is
@@ -3506,10 +3578,12 @@ used, the verifier share includes the Aggregator's joint randomness part and is
 structured as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3Field verifiers_share[F * V];
     Prio3Seed joint_rand_part;
 } Prio3VerifierhareWithJointRand;
+<CODE ENDS>
 ~~~
 
 #### Verifier Message
@@ -3519,9 +3593,11 @@ Otherwise the verifier message consists of the joint randomness seed computed
 by the Aggregators:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3Seed joint_rand;
 } Prio3VerifierMessageWithJointRand;
+<CODE ENDS>
 ~~~
 
 #### Aggregation
@@ -3529,9 +3605,11 @@ struct {
 Aggregate shares are structured as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Prio3Field agg_share[F * prio3.flp.OUTPUT_LEN];
 } Prio3AggShare;
+<CODE ENDS>
 ~~~
 
 ## FLP Specification {#flp-bbcggi19}
@@ -3807,6 +3885,7 @@ Finally, the following are helper methods used to instantiate parameters of the
 `Flp` interface ({{flp}}):
 
 ~~~ python
+<CODE BEGINS>
 def prove_rand_len(self) -> int:
     """Length of the prover randomness."""
     return sum(g.ARITY for g in self.GADGETS)
@@ -3846,6 +3925,7 @@ def gadget_poly_len(gadget_degree: int,
     Calculates the number of coordinates in a gadget polynomial.
     """
     return gadget_degree * (wire_polynomial_len - 1) + 1
+<CODE ENDS>
 ~~~
 
 ### Generating the Proof {#flp-bbcggi19-construction-prove}
@@ -3889,6 +3969,7 @@ degree polynomial that evaluates to the "wire seed" at one point and
 obtained by evaluating the gadget on the wire polynomials.
 
 ~~~ python
+<CODE BEGINS>
 def prove(self,
           meas: list[F],
           prove_rand: list[F],
@@ -3932,6 +4013,7 @@ def prove(self,
         proof += gadget_poly[:gadget_poly_len(g.DEGREE, p)]
 
     return proof
+<CODE ENDS>
 ~~~
 
 ### Querying the Proof {#flp-bbcggi19-construction-query}
@@ -3993,6 +4075,7 @@ define the wire polynomials. Otherwise, the verifier message may partially
 leak the encoded measurement.
 
 ~~~ python
+<CODE BEGINS>
 def query(self,
           meas: list[F],
           proof: list[F],
@@ -4048,6 +4131,7 @@ def query(self,
         verifier.append(gadget_check)
 
     return verifier
+<CODE ENDS>
 ~~~
 
 ### Deciding Validity {#flp-bbcggi19-construction-decide}
@@ -4076,6 +4160,7 @@ polynomial in the verifier message; otherwise, the
 output will not equal the gadget polynomial evaluation with high probability.
 
 ~~~ python
+<CODE BEGINS>
 def decide(self, verifier: list[F]) -> bool:
     # Check the output of the validity circuit.
     ([v], verifier) = front(1, verifier)
@@ -4093,6 +4178,7 @@ def decide(self, verifier: list[F]) -> bool:
             return False
 
     return True
+<CODE ENDS>
 ~~~
 
 ## Variants {#prio3-instantiations}
@@ -4119,6 +4205,7 @@ validity circuit uses the multiplication gadget `Mul` specified in
 specified below:
 
 ~~~ python
+<CODE BEGINS>
 class Count(Valid[int, int, F]):
     GADGETS: list[Gadget[F]] = [Mul()]
     GADGET_CALLS = [1]
@@ -4150,6 +4237,7 @@ class Count(Valid[int, int, F]):
 
     def decode(self, output: list[F], _num_measurements: int) -> int:
         return output[0].int()
+<CODE ENDS>
 ~~~
 
 ### Prio3Sum
@@ -4188,6 +4276,7 @@ secret shares of a bit-encoded integer will produce secret shares of the
 original integer.
 
 ~~~ python
+<CODE BEGINS>
 class Sum(Valid[int, int, F]):
     JOINT_RAND_LEN = 0
     OUTPUT_LEN = 1
@@ -4295,6 +4384,7 @@ def decode_range_checked_int(
         decoded += field(1 << l) * bit
     decoded += field(last_weight) * encoded[bits - 1]
     return decoded
+<CODE ENDS>
 ~~~
 
 ### Prio3SumVec
@@ -4350,6 +4440,7 @@ added up both within the `ParallelSum` gadget and after it.
 The complete circuit is specified below:
 
 ~~~ python
+<CODE BEGINS>
 class SumVec(Valid[list[int], list[int], F]):
     EVAL_OUTPUT_LEN = 1
     length: int
@@ -4438,6 +4529,7 @@ class SumVec(Valid[list[int], list[int], F]):
             output: list[F],
             _num_measurements: int) -> list[int]:
         return [x.int() for x in output]
+<CODE ENDS>
 ~~~
 
 #### Selection of `ParallelSum` Chunk Length {#parallel-sum-chunk-length}
@@ -4500,6 +4592,7 @@ other is equal to the same measurement element minus one. The results are added
 up both within the `ParallelSum` gadget and after it.
 
 ~~~ python
+<CODE BEGINS>
 class Histogram(Valid[int, list[int], F]):
     EVAL_OUTPUT_LEN = 2
     field: type[F]
@@ -4575,6 +4668,7 @@ class Histogram(Valid[int, list[int], F]):
             _num_measurements: int) -> list[int]:
         return [bucket_count.int()
                 for bucket_count in output]
+<CODE ENDS>
 ~~~
 
 ### Prio3MultihotCountVec
@@ -4613,6 +4707,7 @@ checks constitute the output of the circuit. The complete circuit is defined
 below.
 
 ~~~ python
+<CODE BEGINS>
 class MultihotCountVec(Valid[list[bool], list[int], F]):
     EVAL_OUTPUT_LEN = 2
     field: type[F]
@@ -4639,7 +4734,8 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
 
         # Make sure `length` and `max_weight` don't overflow the
         # field modulus. Otherwise we may not correctly compute the
-        # sum of measurement vector entries during circuit evaluation.
+        # sum of measurement vector entries during circuit
+        # evaluation.
         if self.field.MODULUS <= length:
             raise ValueError('length is too large for the '
                              'current field size')
@@ -4732,6 +4828,7 @@ class MultihotCountVec(Valid[list[bool], list[int], F]):
             _num_measurements: int) -> list[int]:
         return [bucket_count.int() for
                 bucket_count in output]
+<CODE ENDS>
 ~~~
 
 # Poplar1 {#poplar1}
@@ -4880,12 +4977,14 @@ scheme is comprised of the following algorithms:
 In addition, the IDPF provides the following method:
 
 ~~~ python
+<CODE BEGINS>
 def current_field(
         self,
         level: int) -> type[FieldInner] | type[FieldLeaf]:
     if level < self.BITS - 1:
         return self.field_inner
     return self.field_leaf
+<CODE ENDS>
 ~~~
 
 Finally, an implementation note. The interface for IDPFs specified here is
@@ -5009,6 +5108,7 @@ Putting everything together, the sharding algorithm is defined as
 follows.
 
 ~~~ python
+<CODE BEGINS>
 def shard(
     self,
     ctx: bytes,
@@ -5124,6 +5224,7 @@ def shard(
     # and a share of the correlated randomness.
     input_shares = list(zip(keys, corr_seed, corr_inner, corr_leaf))
     return (public_share, input_shares)
+<CODE ENDS>
 ~~~
 
 ### Verification {#poplar1-verification}
@@ -5144,6 +5245,7 @@ that is actually valid. Note that enforcing the order is not strictly necessary,
 but this does allow uniqueness to be determined more efficiently.
 
 ~~~ python
+<CODE BEGINS>
 def verify_init(
         self,
         verify_key: bytes,
@@ -5291,6 +5393,7 @@ def verifier_shares_to_message(
             raise ValueError('sketch verification failed')
     else:
         raise ValueError('incorrect sketch length')
+<CODE ENDS>
 ~~~
 
 ### Validity of Aggregation Parameters
@@ -5304,6 +5407,7 @@ calls, and also enforces that the prefixes at each level are suffixes of the
 previous level's prefixes.
 
 ~~~ python
+<CODE BEGINS>
 def is_valid(
         self,
         agg_param: Poplar1AggParam,
@@ -5348,6 +5452,7 @@ def get_ancestor(
     `level`.
     """
     return index[:level + 1]
+<CODE ENDS>
 ~~~
 
 ### Aggregation
@@ -5355,6 +5460,7 @@ def get_ancestor(
 Aggregation involves simply adding up the output shares.
 
 ~~~ python
+<CODE BEGINS>
 def agg_init(self, agg_param: Poplar1AggParam) -> FieldVec:
     (level, prefixes) = agg_param
     field = self.idpf.current_field(level)
@@ -5377,6 +5483,7 @@ def merge(self,
     for agg_share in agg_shares:
         agg = vec_add(agg, cast(list[Field], agg_share))
     return cast(FieldVec, agg)
+<CODE ENDS>
 ~~~
 
 ### Unsharding
@@ -5385,6 +5492,7 @@ Finally, the Collector unshards the aggregate result by adding up the aggregate
 shares.
 
 ~~~ python
+<CODE BEGINS>
 def unshard(
         self,
         agg_param: Poplar1AggParam,
@@ -5392,6 +5500,7 @@ def unshard(
         _num_measurements: int) -> list[int]:
     agg = self.merge(agg_param, agg_shares)
     return [x.int() for x in agg]
+<CODE ENDS>
 ~~~
 
 ### Message Serialization {#poplar1-encode}
@@ -5409,14 +5518,18 @@ Elements of the inner field are encoded in little-endian byte order (as defined
 in {{field}}) and are represented as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 opaque Poplar1FieldInner[Fi];
+<CODE ENDS>
 ~~~
 
 Likewise, elements of the leaf field are encoded in little-endian byte order
 (as defined in {{field}}) and are represented as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 opaque Poplar1FieldLeaf[Fl];
+<CODE ENDS>
 ~~~
 
 #### Public Share
@@ -5434,22 +5547,26 @@ bits are packed as tightly as possible. The encoded public share is structured
 as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     opaque packed_control_bits[packed_len];
     opaque seed[poplar1.idpf.KEY_SIZE*B];
     Poplar1FieldInner payload_inner[Fi*poplar1.idpf.VALUE_LEN*(B-1)];
     Poplar1FieldLeaf payload_leaf[Fl*poplar1.idpf.VALUE_LEN];
 } Poplar1PublicShare;
+<CODE ENDS>
 ~~~
 
 Here `packed_len = (2*B + 7) // 8` is the length of the packed control bits.
 Field `packed_control_bits` is encoded with the following function:
 
 ~~~ python
+<CODE BEGINS>
 packed_control_buf = [int(0)] * packed_len
 for i, bit in enumerate(control_bits):
     packed_control_buf[i // 8] |= bit << (i % 8)
 packed_control_bits = bytes(packed_control_buf)
+<CODE ENDS>
 ~~~
 
 It encodes each group of eight bits into a byte, in LSB to MSB order, padding the most
@@ -5461,6 +5578,7 @@ of bits. If the byte array has an incorrect length, or if unused bits in the
 last bytes are not zero, it throws an error:
 
 ~~~ python
+<CODE BEGINS>
 control_bits = []
 for i in range(length):
     control_bits.append(bool(
@@ -5472,6 +5590,7 @@ leftover_bits = packed_control_bits[-1] >> (
 if (length + 7) // 8 != len(packed_control_bits) or \
         leftover_bits != 0:
     raise ValueError('trailing bits')
+<CODE ENDS>
 ~~~
 
 #### Input Share
@@ -5479,12 +5598,14 @@ if (length + 7) // 8 != len(packed_control_bits) or \
 Each input share is structured as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     opaque idpf_key[poplar1.idpf.KEY_SIZE];
     opaque corr_seed[poplar1.xof.SEED_SIZE];
     Poplar1FieldInner corr_inner[Fi * 2 * (B- 1)];
     Poplar1FieldLeaf corr_leaf[Fl * 2];
 } Poplar1InputShare;
+<CODE ENDS>
 ~~~
 
 #### Verifier Share
@@ -5498,33 +5619,41 @@ inner field or the leaf field.
 For the first round and inner field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldInner sketch_share[Fi * 3];
 } Poplar1VerifierShareRoundOneInner;
+<CODE ENDS>
 ~~~
 
 For the first round and leaf field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldLeaf sketch_share[Fl * 3];
 } Poplar1VerifierShareRoundOneLeaf;
+<CODE ENDS>
 ~~~
 
 For the second round and inner field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldInner sketch_share;
 } Poplar1VerifierShareRoundTwoInner;
+<CODE ENDS>
 ~~~
 
 For the second round and leaf field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldLeaf sketch_share;
 } Poplar1VerifierShareRoundTwoLeaf;
+<CODE ENDS>
 ~~~
 
 #### Verifier Message
@@ -5533,17 +5662,21 @@ Likewise, the structure of the verifier message for Poplar1 depends on the
 sketching round and field. For the first round and inner field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldInner[Fi * 3];
 } Poplar1VerifierMessageRoundOneInner;
+<CODE ENDS>
 ~~~
 
 For the first round and leaf field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldLeaf sketch[Fl * 3];
 } Poplar1VerifierMessageRoundOneLeaf;
+<CODE ENDS>
 ~~~
 
 Note that these messages have the same structures as the verifier shares for
@@ -5563,17 +5696,21 @@ is used, and the number of candidate prefixes. Both of these are determined by
 Let `prefix_count` denote the number of candidate prefixes. For the inner field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldInner agg_share[Fi * prefix_count];
 } Poplar1AggShareInner;
+<CODE ENDS>
 ~~~
 
 For the leaf field:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     Poplar1FieldLeaf agg_share[Fl * prefix_count];
 } Poplar1AggShareLeaf;
+<CODE ENDS>
 ~~~
 
 #### Aggregation Parameter
@@ -5581,11 +5718,13 @@ struct {
 The aggregation parameter is encoded as follows:
 
 ~~~ tls-presentation
+<CODE BEGINS>
 struct {
     uint16_t level;
     uint32_t num_prefixes;
     opaque encoded_prefixes[prefixes_len];
 } Poplar1AggParam;
+<CODE ENDS>
 ~~~
 
 The fields in this struct are: `level`, the level of the IDPF tree of each
@@ -5596,6 +5735,7 @@ assigned in MSB-to-LSB order, and then the byte strings for each prefix are
 concatenated together. The prefixes are encoded with the following procedure:
 
 ~~~ python
+<CODE BEGINS>
 prefixes_len = ((level + 1) + 7) // 8 * len(prefixes)
 encoded_prefixes = bytearray()
 for prefix in prefixes:
@@ -5604,11 +5744,13 @@ for prefix in prefixes:
         for (bit_position, bit) in enumerate(chunk):
             byte_out |= bit << (7 - bit_position)
         encoded_prefixes.append(byte_out)
+<CODE ENDS>
 ~~~
 
 Decoding involves the following procedure:
 
 ~~~ python
+<CODE BEGINS>
 prefixes = []
 
 last_byte_mask = 0
@@ -5630,6 +5772,7 @@ for chunk in itertools.batched(encoded_prefixes, bytes_per_prefix):
         bit = (chunk[byte_index] >> bit_offset) & 1 != 0
         prefix.append(bit)
     prefixes.append(tuple(prefix))
+<CODE ENDS>
 ~~~
 
 Implementation note: the aggregation parameter includes the level of the IDPF
@@ -5717,6 +5860,7 @@ functions `extend()` and `convert()` defined in
 {{idpf-bbcggi21-helper-functions}}.
 
 ~~~ python
+<CODE BEGINS>
 def gen(
         self,
         alpha: tuple[bool, ...],
@@ -5794,6 +5938,7 @@ def gen(
 
         public_share.append((seed_cw, ctrl_cw, w_cw))
     return (public_share, key)
+<CODE ENDS>
 ~~~
 
 ### Key Evaluation
@@ -5803,6 +5948,7 @@ functions `extend()` and `convert()` defined in
 {{idpf-bbcggi21-helper-functions}}.
 
 ~~~ python
+<CODE BEGINS>
 def eval(
         self,
         agg_id: int,
@@ -5909,11 +6055,13 @@ def eval_next(
             y[i] += w_cw[i]
 
     return (next_seed, next_ctrl, cast(FieldVec, y))
+<CODE ENDS>
 ~~~
 
 ### Auxiliary Functions {#idpf-bbcggi21-helper-functions}
 
 ~~~ python
+<CODE BEGINS>
 def extend(
         self,
         level: int,
@@ -5963,6 +6111,7 @@ def current_xof(self,
     if level < self.BITS-1:
         return XofFixedKeyAes128(seed, dst, nonce)
     return XofTurboShake128(seed, dst, nonce)
+<CODE ENDS>
 ~~~
 
 # Security Considerations {#security}
@@ -6370,6 +6519,7 @@ The multiplication gadget takes in a pair of inputs and multiplies them
 together. The degree of this circuit is `2`.
 
 ~~~ python
+<CODE BEGINS>
 class Mul(Gadget[F]):
     ARITY = 2
     DEGREE = 2
@@ -6382,6 +6532,7 @@ class Mul(Gadget[F]):
                   inp_poly: list[list[F]]) -> list[F]:
         lag = Lagrange(field)
         return lag.poly_mul(inp_poly[0], inp_poly[1])
+<CODE ENDS>
 ~~~
 
 ## Polynomial Evaluation {#gadget-poly-eval}
@@ -6391,6 +6542,7 @@ The polynomial-evaluation gadget takes in a single input `x` and returns
 as `p`.
 
 ~~~ python
+<CODE BEGINS>
 class PolyEval(Gadget[F]):
     ARITY = 1
     p: list[int]  # polynomial coefficients
@@ -6426,13 +6578,15 @@ class PolyEval(Gadget[F]):
         inp_poly_len = len(inp_poly[0])
         assert_power_of_2(inp_poly_len)
 
-        # Convert the input polynomial from Lagrange to monomial basis.
+        # Convert the input polynomial from Lagrange to monomial
+        # basis.
         inp_mon = field.inv_ntt(inp_poly[0], inp_poly_len)
         # Obtain n evaluations of the input polynomial I.
         inp_lag = field.ntt(inp_mon, self.n)
         # Returns the polynomial composition (P*I)
         p_mon = [field(coeff) for coeff in self.p]
         return [poly_eval(field, p_mon, x) for x in inp_lag]
+<CODE ENDS>
 ~~~
 
 ## Parallel Sum {#gadget-parallel-sum}
@@ -6444,6 +6598,7 @@ subcircuit is called. The degree of the gadget is equal to the degree of the
 subcircuit.
 
 ~~~ python
+<CODE BEGINS>
 class ParallelSum(Gadget[F]):
     subcircuit: Gadget[F]
     count: int
@@ -6483,6 +6638,7 @@ class ParallelSum(Gadget[F]):
             for j in range(output_poly_length):
                 out_sum[j] += out_current[j]
         return out_sum
+<CODE ENDS>
 ~~~
 
 ## Shims for Generating and Querying Proofs {#gadget-wrappers}
@@ -6492,6 +6648,7 @@ specified in {{flp-bbcggi19-construction-prove}} and another for querying an FLP
 as specified in {{flp-bbcggi19-construction-query}}.
 
 ~~~ python
+<CODE BEGINS>
 class ProveGadget(Gadget[F]):
     """
     Gadget wrapper that records the input wires for each evaluation.
@@ -6609,6 +6766,7 @@ class QueryGadget(Gadget[F]):
         wrapped_valid = deepcopy(valid)
         wrapped_valid.GADGETS = wrapped_gadgets
         return wrapped_valid
+<CODE ENDS>
 ~~~
 
 # VDAF Verification State {#topo-states}
@@ -6617,6 +6775,7 @@ This section lists the classes used to define each Aggregator's state during
 VDAF verification ({{vdaf-verify-comm}}).
 
 ~~~ python
+<CODE BEGINS>
 class State:
     pass
 
@@ -6658,6 +6817,7 @@ class FinishedWithOutbound(State, Generic[OutShare]):
 
 class Rejected(State):
     pass
+<CODE ENDS>
 ~~~
 
 # Test Vectors {#test-vectors}
