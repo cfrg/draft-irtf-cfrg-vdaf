@@ -457,6 +457,18 @@ This document represents the consensus of the Crypto Forum Research Group
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
 
+21:
+
+* Updated commit referenced for test vectors.
+
+* Added text required of IRTF stream documents.
+
+* Replaced RFC8446 with RFC9846.
+
+* Fixed idnits warnings.
+
+* Editorial changes.
+
 20:
 
 * Take an editorial suggestion from Crypto Review Panel {{PANEL-FEEDBACK}}.
