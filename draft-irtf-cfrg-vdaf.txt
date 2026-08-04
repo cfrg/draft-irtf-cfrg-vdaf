@@ -5,12 +5,12 @@
 CFRG                                                        R. L. Barnes
 Internet-Draft                                                     Cisco
 Intended status: Informational                                   D. Cook
-Expires: 4 February 2027                                            ISRG
+Expires: 5 February 2027                                            ISRG
                                                                C. Patton
                                                               Cloudflare
                                                            P. Schoppmann
                                                                   Google
-                                                           3 August 2026
+                                                           4 August 2026
 
 
               Verifiable Distributed Aggregation Functions
@@ -57,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 4 February 2027.
+   This Internet-Draft will expire on 5 February 2027.
 
 Copyright Notice
 
@@ -360,6 +360,18 @@ Table of Contents
 
    (*) Indicates a change that breaks wire compatibility with the
    previous draft.
+
+   21:
+
+   *  Updated commit referenced for test vectors.
+
+   *  Added text required of IRTF stream documents.
+
+   *  Replaced RFC8446 with RFC9846.
+
+   *  Fixed idnits warnings.
+
+   *  Editorial changes.
 
    20:
 
