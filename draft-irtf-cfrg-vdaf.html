@@ -1556,7 +1556,9 @@ a system means addressing two distinct risks. The first is the risk of exposing
 an individual measurement to the data collector: a client that uploads its
 measurement in the clear must trust the data collector to use it only for the
 intended purpose. The second is the risk of the aggregate result itself
-revealing too much about the clients that contributed to it.<a href="#section-1-5" class="pilcrow">¶</a></p>
+revealing too much about the clients that contributed to it. For example, the
+sum of a batch of measurements containing one measurement reveals the value of
+that measurement completely.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-1-6">The protocols in this document address the first risk using techniques from
 secure multi-party computation (MPC). The goal of such a system is that no
 participant in the protocol should learn anything about an individual
@@ -1571,12 +1573,10 @@ speaking, a data aggregation system that is differentially private ensures that
 the degree to which any individual measurement influences the value of the
 aggregate result can be precisely controlled. This is arranged by adding noise
 sampled from a well-known distribution, either by each client before submitting
-its measurement, as in systems like RAPPOR <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, or once over the course of
-aggregation. Because the distribution from which the noise was sampled is known,
-the true aggregate can still be estimated with reasonable accuracy. The price of
-the guarantee is exactness: the data collector learns an estimate rather than
-the aggregate itself, and the stronger the guarantee, the less accurate that
-estimate.<a href="#section-1-7" class="pilcrow">¶</a></p>
+its measurement, as in systems like RAPPOR <span>[<a href="#EPK14" class="cite xref">EPK14</a>]</span>, or once over the course
+of aggregation. The price of the guarantee is utility: the data collector
+learns an estimate rather than the aggregate itself, and the stronger the
+guarantee, the less accurate that estimate.<a href="#section-1-7" class="pilcrow">¶</a></p>
 <p id="section-1-8">MPC and DP are therefore complementary, and an end-to-end private measurement
 system typically requires both. MPC bounds what the parties carrying out the
 computation learn, but not what the aggregate result reveals; DP bounds what the
@@ -1584,8 +1584,8 @@ aggregate result reveals, but does not by itself prevent the party performing
 the aggregation from seeing each measurement. Indeed, a client that adds noise
 locally must add enough of it to protect itself from the data collector, which
 costs significantly more utility than is needed to protect the aggregate.
-Composing DP with MPC <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span> allows the parties to calibrate the added
-noise more precisely.<a href="#section-1-8" class="pilcrow">¶</a></p>
+Composing DP with MPC <span>[<a href="#MPRV09" class="cite xref">MPRV09</a>]</span> allows the parties to achieve similar privacy
+guarantees with less noise, which improves the utility of the data analysis.<a href="#section-1-8" class="pilcrow">¶</a></p>
 <p id="section-1-9">This document describes two classes of MPC protocols, each aiming for a
 different set of goals.<a href="#section-1-9" class="pilcrow">¶</a></p>
 <p id="section-1-10">In a Distributed Aggregation Function (DAF, <a href="#daf" class="auto internal xref">Section 4</a>), each client splits its

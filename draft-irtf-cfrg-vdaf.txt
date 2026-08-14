@@ -211,7 +211,8 @@ Table of Contents
    measurement in the clear must trust the data collector to use it only
    for the intended purpose.  The second is the risk of the aggregate
    result itself revealing too much about the clients that contributed
-   to it.
+   to it.  For example, the sum of a batch of measurements containing
+   one measurement reveals the value of that measurement completely.
 
    The protocols in this document address the first risk using
    techniques from secure multi-party computation (MPC).  The goal of
@@ -231,9 +232,7 @@ Table of Contents
    controlled.  This is arranged by adding noise sampled from a well-
    known distribution, either by each client before submitting its
    measurement, as in systems like RAPPOR [EPK14], or once over the
-   course of aggregation.  Because the distribution from which the noise
-   was sampled is known, the true aggregate can still be estimated with
-   reasonable accuracy.  The price of the guarantee is exactness: the
+   course of aggregation.  The price of the guarantee is utility: the
    data collector learns an estimate rather than the aggregate itself,
    and the stronger the guarantee, the less accurate that estimate.
 
@@ -246,7 +245,8 @@ Table of Contents
    noise locally must add enough of it to protect itself from the data
    collector, which costs significantly more utility than is needed to
    protect the aggregate.  Composing DP with MPC [MPRV09] allows the
-   parties to calibrate the added noise more precisely.
+   parties to achieve similar privacy guarantees with less noise, which
+   improves the utility of the data analysis.
 
    This document describes two classes of MPC protocols, each aiming for
    a different set of goals.
