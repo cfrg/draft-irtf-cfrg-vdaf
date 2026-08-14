@@ -310,34 +310,46 @@ fraction of people have experienced a given disease. Thus systems that provide
 aggregate statistics while protecting individual measurements can deliver the
 value of the measurements while protecting users' privacy.
 
-This problem is often formulated in terms of differential privacy (DP)
-{{Dwo06}}. Roughly speaking, a data aggregation system that is differentially
-private ensures that the degree to which any individual measurement influences
-the value of the aggregate result can be precisely controlled. For example, in
-systems like RAPPOR {{EPK14}}, each user samples noise from a well-known
-distribution and adds it to their measurement before submitting to the
-aggregation server. The aggregation server then adds up the noisy measurements,
-and because it knows the distribution from which the noise was sampled, it can
-estimate the true sum with reasonable accuracy.
+Concretely, the problem addressed by this document is the following. Each of a
+large number of clients holds a single measurement, and a data collector wants
+to learn some aggregate of those measurements, such as their sum. Building such
+a system means addressing two distinct risks. The first is the risk of exposing
+an individual measurement to the data collector: a client that uploads its
+measurement in the clear must trust the data collector to use it only for the
+intended purpose. The second is the risk of the aggregate result itself
+revealing too much about the clients that contributed to it. For example, the
+sum of a batch of measurements containing one measurement reveals the value of
+that measurement completely.
 
-Even when noise is added to the measurements, collecting them in the clear
-still reveals a significant amount of information to the collector. On the one
-hand, depending on the "amount" of noise a client adds to its measurement, it
-may be possible for a curious collector to make a reasonable guess of the
-measurement's true value. On the other hand, the more noise the clients add,
-the less reliable will be the server's estimate of the aggregate. Thus systems
-relying solely on a DP mechanism must strike a delicate balance between privacy
-and utility.
+The protocols in this document address the first risk using techniques from
+secure multi-party computation (MPC). The goal of such a system is that no
+participant in the protocol should learn anything about an individual
+measurement beyond what it can deduce from the aggregate. To accomplish this,
+the computation of the aggregate is distributed across multiple aggregation
+servers, one of which is presumed to be honest, i.e., not under control of the
+attacker. If this trust model holds, then no server sees ever observes any one
+measurement in the clear, and the exact aggregate result is revealed only to
+the data collector.
 
-Another way of constructing a privacy-preserving measurement system is to use
-multi-party computation (MPC). The goal of such a system is that no participant
-in the protocol should learn anything about an individual measurement beyond
-what it can deduce from the aggregate. MPC achieves this goal by distributing
-the computation of the aggregate across multiple aggregation servers, one of
-which is presumed to be honest, i.e., not under control of the attacker.
-Moreover, MPC can be composed with various DP mechanisms to ensure the
-aggregate itself does not leak too much information about any one of the
-measurements {{MPRV09}}.
+The second risk is the subject of differential privacy (DP) {{Dwo06}}. Roughly
+speaking, a data aggregation system that is differentially private ensures that
+the degree to which any individual measurement influences the value of the
+aggregate result can be precisely controlled. This is arranged by adding noise
+sampled from a well-known distribution, either by each client before submitting
+its measurement, as in systems like RAPPOR {{EPK14}}, or once over the course
+of aggregation. The price of the guarantee is utility: the data collector
+learns an estimate rather than the aggregate itself, and the stronger the
+guarantee, the less accurate that estimate.
+
+MPC and DP are therefore complementary, and an end-to-end private measurement
+system typically requires both. MPC bounds what the parties carrying out the
+computation learn, but not what the aggregate result reveals; DP bounds what the
+aggregate result reveals, but does not by itself prevent the party performing
+the aggregation from seeing each measurement. Indeed, a client that adds noise
+locally must add enough of it to protect itself from the data collector, which
+costs significantly more utility than is needed to protect the aggregate.
+Composing DP with MPC {{MPRV09}} allows the parties to achieve similar privacy
+guarantees with less noise, which improves the utility of the data analysis.
 
 This document describes two classes of MPC protocols, each aiming for a
 different set of goals.
@@ -456,6 +468,14 @@ This document represents the consensus of the Crypto Forum Research Group
 (RFC EDITOR: remove this section.)
 
 (\*) Indicates a change that breaks wire compatibility with the previous draft.
+
+22:
+
+* Shepherd feedback: Avoid framing (V)DAFs as an alternative to DP in the
+  introduction.
+
+* Shepherd feedback: Don't use the normative "NOT RECOMMENDED" to discourage
+  use of DAFs.
 
 21:
 
@@ -1091,7 +1111,7 @@ By way of a gentle introduction to VDAFs, this section describes a simpler class
 of schemes called Distributed Aggregation Functions (DAFs). Unlike VDAFs, DAFs
 do not provide verifiability of the computation. Clients must therefore be
 trusted to compute their input shares correctly. Because of this fact, the use
-of a DAF is NOT RECOMMENDED for most applications. See {{security}} for
+of a DAF is not recommended for most applications. See {{security}} for
 additional discussion.
 
 A DAF scheme is used to compute a particular "aggregation function" over a set
