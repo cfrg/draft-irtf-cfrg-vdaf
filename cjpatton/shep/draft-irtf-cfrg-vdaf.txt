@@ -245,7 +245,8 @@ Table of Contents
    noise locally must add enough of it to protect itself from the data
    collector, which costs significantly more utility than is needed to
    protect the aggregate.  Composing DP with MPC [MPRV09] allows the
-   parties to calibrate the added noise more precisely.
+   parties to achieve similar privacy guarantees with less noise, which
+   improves the utility of the data analysis.
 
    This document describes two classes of MPC protocols, each aiming for
    a different set of goals.
