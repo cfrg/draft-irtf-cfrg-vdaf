@@ -463,8 +463,8 @@ Prio3 and Poplar1 constructions in particular.
 This document represents the consensus of the Crypto Forum Research Group
 (CFRG). It has received review from CFRG participants, including review during
 Research Group Last Call, and an additional review by the CFRG Crypto Review
-Panel. It is also informed by experience from multiple independent
-implementations
+Panel ({{PANEL-FEEDBACK}}). It is also informed by experience from multiple
+independent implementations.
 
 ## Change Log
 
