@@ -327,7 +327,7 @@ participant in the protocol should learn anything about an individual
 measurement beyond what it can deduce from the aggregate. To accomplish this,
 the computation of the aggregate is distributed across multiple aggregation
 servers, one of which is presumed to be honest, i.e., not under control of the
-attacker. If this trust model holds, then no server sees ever observes any one
+attacker. If this trust model holds, then no server ever observes any one
 measurement in the clear, and the exact aggregate result is revealed only to
 the data collector.
 
