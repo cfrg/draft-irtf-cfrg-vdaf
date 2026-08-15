@@ -448,7 +448,7 @@ from the literature.
   allows the servers to privately count how many of the clients' strings begin
   with a given prefix (`agg_param` in the notation above). {{poplar1}}
   specifies a VDAF called Poplar1 that implements this prefix counting
-  functionality and describe how it is used in the heavy hitters protocol.
+  functionality and describes how it is used in the heavy hitters protocol.
 
 The remainder of this document is organized as follows: {{conventions}} lists
 definitions and conventions used in the remainder of the document; {{overview}}
@@ -1121,7 +1121,7 @@ Aggregators. The semantics of this parameter are specific to the aggregation
 function, but in general it is used to represent the set of "queries" that can
 be made by the Collector on the batch of measurements. For example, the
 aggregation parameter is used to represent the prefixes in the prefix-counting
-functionality of of Poplar1 discussed in {{introduction}}.
+functionality of Poplar1 discussed in {{introduction}}.
 
 Execution of a DAF has four distinct stages:
 
